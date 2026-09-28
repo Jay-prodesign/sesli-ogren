@@ -25,23 +25,26 @@ titles and decision identifiers may be referenced.
 | [`CLAUDE.md`](CLAUDE.md) | Primary Engineer (Claude) entry point and mandatory read order |
 | [`TASKS.md`](TASKS.md) | Task map: Milestone → Sprint → Section → Task (`LA-####`) |
 | [`docs/agent/`](docs/agent/) | Live handoff, engineer return, decision requests, execution state |
+| [`docs/agent/commands/`](docs/agent/commands/) · [`docs/agent/returns/`](docs/agent/returns/) | Brain → Engineer command records (`CMD-####`) and Engineer → Brain returns (`RET-####`) |
+| [`.claude/rules/`](.claude/rules/) | Small project rules for Claude Code (no settings/hooks/MCP) |
 | [`docs/exec-plans/`](docs/exec-plans/) | One executable plan per active task |
 | [`docs/architecture/`](docs/architecture/) | Architecture notes (empty until approved) |
 | [`docs/adr/`](docs/adr/) | Architecture Decision Records |
-| [`docs/provenance/`](docs/provenance/) | Origin records for any imported code/assets |
+| [`docs/provenance/`](docs/provenance/) | Origin records; [`OPEN_SOURCE_REUSE_REGISTER.md`](docs/provenance/OPEN_SOURCE_REUSE_REGISTER.md) (D-024) |
 | [`docs/qa/`](docs/qa/) | QA plans and evidence |
 | [`scripts/`](scripts/) | Repository validation scripts |
-| [`.github/workflows/`](.github/workflows/) | CI |
+| [`.github/workflows/`](.github/workflows/) | CI (`bootstrap-validation`) and the inert Claude wake-up bridge (`claude-bridge`) |
 
 ## Validation
 
 Bootstrap validation needs only Python 3 (standard library) and Git:
 
 ```sh
-python3 scripts/validate_bootstrap.py
+python3 scripts/validate_bootstrap.py        # control-plane validation
+python3 scripts/test_validate_bootstrap.py   # validator negative tests
 ```
 
-CI runs the same check on every pull request and on pushes to `main`.
+CI runs both on every pull request and on pushes to `main`.
 
 ## Licensing
 
