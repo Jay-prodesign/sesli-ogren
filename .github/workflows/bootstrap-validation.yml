@@ -28,3 +28,6 @@ jobs:
 
       - name: Run bootstrap validation
         run: python3 scripts/validate_bootstrap.py
+
+      - name: Run validator negative tests
+        run: python3 scripts/test_validate_bootstrap.py
