@@ -5,12 +5,13 @@
 | Field | Value |
 | --- | --- |
 | Handoff | **CLAUDE_HANDOFF_000 — Repository & Agent Bootstrap** |
-| State | **ACTIVE** — bootstrap in progress |
+| State | **ACTIVE** — bootstrap delivered; **AWAITING_BRAIN_REVIEW** |
 | Executor | Claude (Primary Engineer) |
 | Milestone | M0 — Repository & Agent Bootstrap |
 | Tasks | LA-0001 … LA-0007 (see [`TASKS.md`](../../TASKS.md)) |
 | Branch | `chore/repository-bootstrap` |
-| Delivery | Unmerged **draft** PR against `main` |
+| Delivery | Unmerged **draft** PR against `main`: [#1](https://github.com/Jay-prodesign/sesli-ogren/pull/1) |
+| Evidence | [`ENGINEER_RETURN.md`](ENGINEER_RETURN.md) |
 
 ### Mission summary (non-private)
 

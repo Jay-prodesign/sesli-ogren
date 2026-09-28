@@ -14,7 +14,7 @@
     "title": "Repository & Agent Bootstrap",
     "executor": "Claude (Primary Engineer)"
   },
-  "status": "IN_PROGRESS",
+  "status": "AWAITING_BRAIN_REVIEW",
   "active_milestone": "M0",
   "tasks": {
     "LA-0001": "AWAITING_BRAIN_REVIEW",
@@ -23,17 +23,22 @@
     "LA-0004": "AWAITING_BRAIN_REVIEW",
     "LA-0005": "AWAITING_BRAIN_REVIEW",
     "LA-0006": "AWAITING_BRAIN_REVIEW",
-    "LA-0007": "IN_PROGRESS"
+    "LA-0007": "AWAITING_BRAIN_REVIEW"
   },
   "git": {
     "branch": "chore/repository-bootstrap",
     "base_sha": "52616b4b4f018ece72d3ee1de4949875bb144e9a",
-    "head_sha": null,
-    "head_sha_note": "Set during LA-0007 reconciliation.",
-    "pr_number": null,
-    "pr_url": null,
-    "pr_draft": null,
+    "head_sha": "d3977845bab3174ba0c7a04201f99ba83f4b9acf",
+    "head_sha_note": "Last content head before this reconciliation commit (CI green). A commit cannot record its own SHA; the final PR head is the single reconciliation commit on top of this SHA and is reported in the PR and the engineer's final report.",
+    "pr_number": 1,
+    "pr_url": "https://github.com/Jay-prodesign/sesli-ogren/pull/1",
+    "pr_draft": true,
     "merged": false
+  },
+  "ci": {
+    "workflow": "bootstrap-validation",
+    "result_at_head_sha": "success",
+    "run_url": "https://github.com/Jay-prodesign/sesli-ogren/actions/runs/36474930200"
   },
   "next_handoff": {
     "id": "CLAUDE_HANDOFF_001",

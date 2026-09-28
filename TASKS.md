@@ -18,6 +18,7 @@ Next unallocated ID: **LA-0008**.
 - Status: ACTIVE
 - Handoff: CLAUDE_HANDOFF_000 — Repository & Agent Bootstrap
 - Branch: `chore/repository-bootstrap`
+- Draft PR: [#1](https://github.com/Jay-prodesign/sesli-ogren/pull/1) — awaiting Brain review
 - Exit gate: Brain PASS on the bootstrap draft PR.
 
 ### Sprint M0.S1 — Bootstrap
@@ -86,7 +87,7 @@ Next unallocated ID: **LA-0008**.
 
 ##### LA-0007 — Draft PR delivery and state/evidence reconciliation
 
-- Status: IN_PROGRESS
+- Status: AWAITING_BRAIN_REVIEW
 - Depends on: LA-0006
 - Owner: Brain
 - Executor: Claude (Primary Engineer)
