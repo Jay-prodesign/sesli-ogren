@@ -1,0 +1,101 @@
+{
+  "schema_version": 2,
+  "project": "Learning App",
+  "product": "Sesli Öğren",
+  "repository": {
+    "url": "https://github.com/Jay-prodesign/sesli-ogren",
+    "owner": "Jay-prodesign",
+    "name": "sesli-ogren",
+    "visibility": "PUBLIC",
+    "default_branch": "main"
+  },
+  "mission": {
+    "id": "CLAUDE_HANDOFF_000",
+    "title": "Repository & Agent Bootstrap",
+    "executor": "Claude (Primary Engineer)"
+  },
+  "lifecycle_stage": "Lifecycle M3 — Repository & Agent Bootstrap review (TASKS.md milestone M0), pre-Architecture Proof",
+  "status": "AWAITING_BRAIN_REVIEW",
+  "active_milestone": "M0",
+  "brain_review": {
+    "latest": "M3_BOOTSTRAP_BRAIN_REVIEW_001",
+    "disposition": "CHANGES_REQUIRED",
+    "reviewed_head_sha": "97e9040acf6a668f279a4aa1fedcd9bbbce810e2",
+    "corrections_answered_by": "RET-0001"
+  },
+  "tasks": {
+    "LA-0001": "AWAITING_BRAIN_REVIEW",
+    "LA-0002": "AWAITING_BRAIN_REVIEW",
+    "LA-0003": "AWAITING_BRAIN_REVIEW",
+    "LA-0004": "AWAITING_BRAIN_REVIEW",
+    "LA-0005": "AWAITING_BRAIN_REVIEW",
+    "LA-0006": "AWAITING_BRAIN_REVIEW",
+    "LA-0007": "AWAITING_BRAIN_REVIEW",
+    "LA-0008": "AWAITING_BRAIN_REVIEW"
+  },
+  "git": {
+    "branch": "chore/repository-bootstrap",
+    "base_sha": "52616b4b4f018ece72d3ee1de4949875bb144e9a",
+    "head_sha": "1ad2c8a3e4cfc34bf5ea85b3d7cfff7b4d9292e5",
+    "head_sha_note": "Content head of the Brain Review 001 corrections (local validator OK, 35/35 negative tests OK). A commit cannot record its own SHA, so the final PR head is the single reconciliation commit on top of this SHA. It and its CI run are reported in PR #1 and the engineer's final report.",
+    "pr_number": 1,
+    "pr_url": "https://github.com/Jay-prodesign/sesli-ogren/pull/1",
+    "pr_draft": true,
+    "merged": false
+  },
+  "ci": {
+    "workflow": "bootstrap-validation",
+    "job": "Validate repository control plane",
+    "result_at_head_sha": "REPORTED_EXTERNALLY",
+    "note": "Content and reconciliation commits are pushed together, so CI runs on the final head only. The conclusion is reported in PR #1 checks and the engineer's final report. Previous reviewed head 97e9040 was green.",
+    "run_url": null
+  },
+  "last_command_id": "CMD-0001",
+  "last_acknowledged_command_id": "CMD-0001",
+  "last_return_id": "RET-0001",
+  "command_processing_status": "ANSWERED",
+  "command_ledger": {
+    "CMD-0001": {
+      "status": "ANSWERED",
+      "return_id": "RET-0001"
+    }
+  },
+  "auto_agent_bridge": {
+    "status": "AUTO_AGENT_BRIDGE_BLOCKED",
+    "mechanism": "anthropics/claude-code-action@v1 via .github/workflows/claude-bridge.yml (wake-up only)",
+    "configured": [
+      "workflow file on the PR branch: inert, trusted-role guard, least privilege, no secrets in repo"
+    ],
+    "missing_authorizations": [
+      "Founder: install or confirm the Claude GitHub App (github.com/apps/claude) on Jay-prodesign/sesli-ogren",
+      "Founder: create repository secret CLAUDE_CODE_OAUTH_TOKEN (generated interactively with `claude setup-token` on a Claude Pro/Max account)",
+      "Founder: set repository variable CLAUDE_BRIDGE_ENABLED=true",
+      "Founder: merge the workflow to main (protected); issue_comment/issues workflows run only from the default branch",
+      "Founder: grant the Brain (ChatGPT) GitHub connector issue/PR comment write (currently 403), or accept Drive-to-engineer transcription"
+    ]
+  },
+  "next_handoff": {
+    "id": "CLAUDE_HANDOFF_001",
+    "status": "NOT_EXECUTABLE",
+    "gate": "Brain BOOTSTRAP_PASS on the CLAUDE_HANDOFF_000 draft PR and explicit admission"
+  },
+  "blockers": [
+    "AUTO_AGENT_BRIDGE_BLOCKED (Founder authorization gates; not blocking bootstrap review)"
+  ],
+  "protected_gate": "Merge, release, deploy, LICENSE, GitHub App install, secrets/variables, branch protection: Product Owner only",
+  "next_action": "Brain re-reviews draft PR #1 against CLAUDE_HANDOFF_000 and the M3 acceptance checklist and issues BOOTSTRAP_PASS or CHANGES_REQUIRED (preferably as CMD-0002).",
+  "canonical_source_refs": [
+    "CURRENT_EXECUTION_STATE — Learning App",
+    "CLAUDE_HANDOFF_000 — Repository & Agent Bootstrap — Learning App",
+    "M3_BOOTSTRAP_BRAIN_REVIEW_001 — CHANGES_REQUIRED — Learning App",
+    "M3_REPOSITORY_BOOTSTRAP_ACCEPTANCE_CHECKLIST_v0.1 — Learning App",
+    "DECISION_LOG — Learning App (D-019, D-020, D-023, D-024, D-025, D-026)",
+    "PRE_BOOTSTRAP_PRODUCT_READINESS_AND_MASTER_SEQUENCE_v1.0 — Learning App",
+    "ENGINEERING_EXECUTION_PROTOCOL — Learning App"
+  ],
+  "governance_read": {
+    "drive_status": "AVAILABLE",
+    "detail": "All seven required Drive authorities fresh-read by title on 2026-09-28 via the Google Drive connector. No Drive content copied into this repository."
+  },
+  "updated_at": "2026-09-28"
+}

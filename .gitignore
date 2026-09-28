@@ -1,0 +1,57 @@
+# Sesli Öğren (Learning App) — repository ignore rules.
+# Bootstrap stage: no application toolchain exists yet. Toolchain-specific
+# rules are added by the task that introduces that toolchain.
+
+# --- Secrets and local configuration (never commit) ---
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+*.jks
+*.keystore
+id_rsa*
+id_ed25519*
+credentials*.json
+service-account*.json
+client_secret*.json
+*.secrets
+secrets/
+.netrc
+.npmrc
+
+# --- Private governance exports (Drive content stays in Drive) ---
+*.gdoc
+*.gsheet
+*.gslides
+drive-export*/
+private/
+
+# --- Agent / tool local state ---
+.claude/settings.local.json
+.claude/*.local.*
+.codex/
+.mcp.json
+
+# --- OS / editor noise ---
+.DS_Store
+Thumbs.db
+desktop.ini
+*.swp
+*~
+.idea/
+.vscode/*
+!.vscode/extensions.json
+
+# --- Generic build / runtime artefacts ---
+__pycache__/
+*.py[cod]
+node_modules/
+dist/
+build/
+coverage/
+*.log
+tmp/
+.tmp/

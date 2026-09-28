@@ -1,0 +1,33 @@
+name: bootstrap-validation
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: bootstrap-validation-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    name: Validate repository control plane
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+
+      - name: Python version
+        run: python3 --version
+
+      - name: Run bootstrap validation
+        run: python3 scripts/validate_bootstrap.py
+
+      - name: Run validator negative tests
+        run: python3 scripts/test_validate_bootstrap.py
