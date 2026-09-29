@@ -144,9 +144,16 @@ class ValidatorNegativeTests(unittest.TestCase):
         self.assertFailsWith(r"required file missing: docs/provenance/OPEN_SOURCE_REUSE_REGISTER\.md")
 
     def test_register_field_missing(self) -> None:
-        self.edit("docs/provenance/OPEN_SOURCE_REUSE_REGISTER.md",
-                  "| Approving decision / task |", "| Approver |")
+        path = self.root / "docs/provenance/OPEN_SOURCE_REUSE_REGISTER.md"
+        path.write_text(path.read_text(encoding="utf-8").replace("| Approving decision / task |", "| Approver |"),
+                        encoding="utf-8")
         self.assertFailsWith(r"register field missing: Approving decision / task")
+
+    def test_register_entry_value_missing(self) -> None:
+        self.edit("docs/provenance/OPEN_SOURCE_REUSE_REGISTER.md",
+                  "| Exact tag / commit / version | main @ 317e21df9587a2ba6337e9802ae4119ad9b5e2e5 |",
+                  "| Exact tag / commit / version |  |")
+        self.assertFailsWith(r"REUSE-0001 missing value for 'Exact tag / commit / version'")
 
     def test_register_entry_invalid_class(self) -> None:
         entry = (
