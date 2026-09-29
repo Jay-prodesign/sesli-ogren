@@ -62,7 +62,7 @@ custom code, record it here with a concrete reason, as AGENTS.md §12 requires:
   architecture / security / maintenance / privacy / licensing / test-fit / product risk>
 ```
 
-None.
+- 2026-09-29 · LA-0012 · vercel/ai `ai@7.0.118` / `@ai-sdk/*` (Apache-2.0; D-025 refinement 2 preferred DEPENDENCY) · rejected for now because the spike needs one structured-output call. The SDK adds ~94× the bundle (307.7 KB vs 3.3 KB minified), 11 transitive packages versus 0, always pulls in the unused `@ai-sdk/gateway` + `@vercel/oidc` clients, and churns at 35 releases in 30 days against Deno's 24 h minimum dependency age. It is Deno-compatible (evidence: `docs/architecture/spike/LA-0012-provider-seam.md`), so it remains a DEPENDENCY candidate behind the same contract when streaming, tools, or multi-provider routing are admitted.
 
 ## Entries
 

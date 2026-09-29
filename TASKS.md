@@ -161,7 +161,7 @@ Next unallocated ID: **LA-0018**.
 
 ##### LA-0011 — Canonical model mapping and product-shell fit
 
-- Status: IN_PROGRESS
+- Status: AWAITING_BRAIN_REVIEW
 - Depends on: LA-0010
 - Owner: Brain
 - Executor: Claude (Primary Engineer)
@@ -170,7 +170,7 @@ Next unallocated ID: **LA-0018**.
 
 ##### LA-0012 — Provider-neutral generation capability seam
 
-- Status: READY
+- Status: AWAITING_BRAIN_REVIEW
 - Depends on: LA-0011
 - Owner: Brain
 - Executor: Claude (Primary Engineer)
@@ -181,7 +181,7 @@ Next unallocated ID: **LA-0018**.
 
 ##### LA-0013 — Authenticated Material → Artifact bounded proof
 
-- Status: READY
+- Status: IN_PROGRESS
 - Depends on: LA-0011, LA-0012
 - Owner: Brain
 - Executor: Claude (Primary Engineer)
