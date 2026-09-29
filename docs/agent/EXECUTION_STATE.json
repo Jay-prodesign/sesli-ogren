@@ -15,7 +15,7 @@
     "executor": "Claude (Primary Engineer)"
   },
   "lifecycle_stage": "Lifecycle M4 — Architecture Proof (TASKS.md milestone M1), admitted after M3 BOOTSTRAP_PASS",
-  "status": "IN_PROGRESS",
+  "status": "AWAITING_BRAIN_REVIEW",
   "active_milestone": "M1",
   "brain_review": {
     "latest": "M3_BOOTSTRAP_BRAIN_REVIEW_002",
@@ -40,15 +40,15 @@
     "LA-0014": "AWAITING_BRAIN_REVIEW",
     "LA-0015": "AWAITING_BRAIN_REVIEW",
     "LA-0016": "AWAITING_BRAIN_REVIEW",
-    "LA-0017": "IN_PROGRESS"
+    "LA-0017": "AWAITING_BRAIN_REVIEW"
   },
   "git": {
     "branch": "spike/v0-architecture-proof",
     "base_sha": "433c26cf5fa75a37b66b1f74dd6a133ae4d3407a",
     "base_note": "Reviewed bootstrap head (PR #1). main remains 52616b4b4f018ece72d3ee1de4949875bb144e9a; PR #1 is draft/unmerged and untouched.",
     "main_sha": "52616b4b4f018ece72d3ee1de4949875bb144e9a",
-    "head_sha": "963ed85aaed645ffff6df6d22d0c4660f4a8aa44",
-    "head_sha_note": "Last pushed head before this commit (LA-0009, CI green). The live head is reported in PR #2.",
+    "head_sha": "3dc6d1d1063f806784365754a96d0286594fd3e9",
+    "head_sha_note": "Content head of the Architecture Proof (all local gates green). The final PR head is the reconciliation commit on top; it and its CI runs are reported in PR #2.",
     "pr_number": 2,
     "pr_url": "https://github.com/Jay-prodesign/sesli-ogren/pull/2",
     "pr_draft": true,
@@ -60,28 +60,29 @@
     }
   },
   "ci": {
-    "workflow": "bootstrap-validation",
-    "job": "Validate repository control plane",
-    "result_at_head_sha": "success",
-    "note": "CI at 963ed85 (LA-0009). Later heads reported in PR #2.",
-    "run_url": "https://github.com/Jay-prodesign/sesli-ogren/actions/runs/36592755585"
+    "workflows": [
+      "bootstrap-validation",
+      "spike-proof"
+    ],
+    "result_at_head_sha": "REPORTED_EXTERNALLY",
+    "note": "bootstrap-validation green on all heads except 521ec04 (fixed in c894bd8). spike-proof re-runs SQL+Deno proofs; see PR #2 checks for the final head.",
+    "run_url": null
   },
   "last_command_id": "CMD-0003",
   "last_acknowledged_command_id": "CMD-0003",
-  "last_return_id": "RET-0003",
-  "command_processing_status": "ACKNOWLEDGED",
+  "last_return_id": "RET-0004",
+  "command_processing_status": "ANSWERED",
   "command_ledger": {
     "CMD-0001": {
       "status": "ANSWERED",
       "return_id": "RET-0001"
     },
     "CMD-0002": {
-      "status": "ACKNOWLEDGED",
-      "return_id": null,
+      "status": "ANSWERED",
+      "return_id": "RET-0004",
       "partial_return_ids": [
         "RET-0002"
-      ],
-      "note": "Mission-level command; final answer is the Architecture Proof return (LA-0017)."
+      ]
     },
     "CMD-0003": {
       "status": "ANSWERED",
@@ -111,7 +112,7 @@
     "AUTO_AGENT_BRIDGE_BLOCKED (unchanged; Founder gates recorded in RET-0001; non-blocking for the Architecture Proof)"
   ],
   "protected_gate": "Merge, release, deploy, LICENSE, paid provider, credentials, GitHub App install, secrets/variables, branch protection: Product Owner only",
-  "next_action": "Continue CLAUDE_HANDOFF_001 continuous mission LA-0010 → LA-0017 under D-029; return GO_ADAPT or FALLBACK_CLEAN_FLUTTER for Brain review.",
+  "next_action": "Brain reviews PR #2 exact head against M4_ARCHITECTURE_PROOF_BRAIN_REVIEW_CHECKLIST_v0.1 and issues ARCHITECTURE_PROOF_PASS (GO_ADAPT / FALLBACK) or CHANGES_REQUIRED, preferably as CMD-0004.",
   "canonical_source_refs": [
     "CURRENT_EXECUTION_STATE — Learning App",
     "CLAUDE_HANDOFF_001 — V0 Architecture Spike — Learning App",
@@ -128,5 +129,16 @@
     "drive_status": "AVAILABLE",
     "detail": "Fresh-read 2026-09-29: CURRENT_EXECUTION_STATE, CLAUDE_HANDOFF_001, M4 task admission, review checklist, BRAIN_COMMAND_0002/0003, D-024…D-029, quality constitution. No Drive content copied."
   },
-  "updated_at": "2026-09-29"
+  "updated_at": "2026-09-29",
+  "architecture_proof": {
+    "selector": "GO_ADAPT",
+    "conditions": [
+      "Canonical schema is the only data authority; donor tables not migrated in",
+      "First unit re-points donor client material/summary path to canonical tables and removes MockAiService from it",
+      "PDF analysis re-keyed onto canonical job model as its own tranche",
+      "Canonical SQL regression suite extended every tranche"
+    ],
+    "open_final_engineering_test_item": "#4 client re-point measured, not executed",
+    "return": "RET-0004"
+  }
 }

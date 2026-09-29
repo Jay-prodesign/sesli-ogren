@@ -10,12 +10,12 @@ responses go to [`returns/RET-####.md`](returns/) ([`README.md`](README.md)).
 | Field | Value |
 | --- | --- |
 | Handoff | **CLAUDE_HANDOFF_001 — V0 Architecture Spike** |
-| State | **ACTIVE / IN_PROGRESS**. Admitted by [CMD-0002](commands/CMD-0002.md) (`Executability change: CLAUDE_HANDOFF_001 -> READY`, gate evidence M3_BOOTSTRAP_BRAIN_REVIEW_002 BOOTSTRAP_PASS). The D-029 quality overlay comes from [CMD-0003](commands/CMD-0003.md). |
+| State | **ACTIVE / AWAITING_BRAIN_REVIEW**. LA-0009…LA-0017 are complete, and the recommendation is **GO_ADAPT (conditional)** ([RET-0004](returns/RET-0004.md)). The mission was admitted by [CMD-0002](commands/CMD-0002.md) (`Executability change: CLAUDE_HANDOFF_001 -> READY`, gate evidence M3_BOOTSTRAP_BRAIN_REVIEW_002 BOOTSTRAP_PASS), with the D-029 overlay from [CMD-0003](commands/CMD-0003.md). |
 | Executor | Claude (Primary Engineer) |
 | Milestone | M1 — Architecture Proof (Drive lifecycle stage "M4") |
 | Tasks | LA-0009 … LA-0017 (see [`TASKS.md`](../../TASKS.md)). These run as one Continuous Engineering Mission in dependency order. |
 | Branch | `spike/v0-architecture-proof`, derived from reviewed bootstrap head `433c26cf5fa75a37b66b1f74dd6a133ae4d3407a` |
-| Delivery | Draft PR stacked on `chore/repository-bootstrap`. Nothing is merged. PR #1 stays untouched as the reviewed bootstrap evidence. |
+| Delivery | Draft PR [#2](https://github.com/Jay-prodesign/sesli-ogren/pull/2), stacked on `chore/repository-bootstrap`. Nothing is merged. PR #1 stays untouched as the reviewed bootstrap evidence. |
 | Evidence | [`ENGINEER_RETURN.md`](ENGINEER_RETURN.md) (consolidated), [`returns/`](returns/) |
 | Exit gate | Brain review of the Architecture Proof return: `GO_ADAPT` or `FALLBACK_CLEAN_FLUTTER` |
 

@@ -221,7 +221,7 @@ Next unallocated ID: **LA-0018**.
 
 ##### LA-0017 — Architecture Spike integration QA, provenance and return
 
-- Status: IN_PROGRESS
+- Status: AWAITING_BRAIN_REVIEW
 - Depends on: LA-0012, LA-0013, LA-0014, LA-0015, LA-0016
 - Owner: Brain
 - Executor: Claude (Primary Engineer)
