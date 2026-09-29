@@ -39,8 +39,8 @@
     "LA-0013": "AWAITING_BRAIN_REVIEW",
     "LA-0014": "AWAITING_BRAIN_REVIEW",
     "LA-0015": "AWAITING_BRAIN_REVIEW",
-    "LA-0016": "IN_PROGRESS",
-    "LA-0017": "READY"
+    "LA-0016": "AWAITING_BRAIN_REVIEW",
+    "LA-0017": "IN_PROGRESS"
   },
   "git": {
     "branch": "spike/v0-architecture-proof",
