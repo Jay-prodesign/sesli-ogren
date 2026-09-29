@@ -66,9 +66,34 @@ None.
 
 ## Entries
 
-None. The repository bootstrap (CLAUDE_HANDOFF_000, LA-0001 … LA-0008) imports no
-donor code, third-party modules, or dependencies. All files were authored for this
-repository. The CI workflows reference the public GitHub Actions `actions/checkout`
-and `anthropics/claude-code-action` by major-version tag. These are CI tooling used
-by reference, not product code copied into the repository. They are listed in
-[`README.md`](README.md#ci-tooling-referenced-not-vendored) for transparency.
+### REUSE-0001 — `set_updated_at()` trigger function
+
+| Field | Value |
+| --- | --- |
+| Task ID | LA-0011 |
+| Upstream repository | https://github.com/MoonlighC/ai-study-buddy |
+| Exact tag / commit / version | main @ 317e21df9587a2ba6337e9802ae4119ad9b5e2e5 |
+| License | MIT (LICENSE blob 3f057e54c9c63646842b73015685a6a3b4dcbb76; copy at `docs/provenance/licenses/MoonlighC-ai-study-buddy-MIT.txt`) |
+| Reuse class | DIRECT-REUSE |
+| Dependency / files / modules used | `supabase/migrations/001_initial_schema.sql` → `public.set_updated_at()` in `spike/architecture-proof/db/migrations/0001_canonical_core.sql` |
+| Material modifications | none |
+| Copyright / license / NOTICE obligations | Header comment in the migration names the upstream, commit and MIT copyright; licence text kept in `docs/provenance/licenses/` |
+| Audit status | APPROVED |
+| Approving decision / task | D-024, D-025; CLAUDE_HANDOFF_001 / LA-0011 |
+| Recorded | 2026-09-29 by Claude (Primary Engineer) |
+
+### REUSE-0002 — Supabase tenancy, storage ownership and generation-attempt mechanics
+
+| Field | Value |
+| --- | --- |
+| Task ID | LA-0011, LA-0013, LA-0014, LA-0015 |
+| Upstream repository | https://github.com/MoonlighC/ai-study-buddy |
+| Exact tag / commit / version | main @ 317e21df9587a2ba6337e9802ae4119ad9b5e2e5 |
+| License | MIT (LICENSE blob 3f057e54c9c63646842b73015685a6a3b4dcbb76) |
+| Reuse class | ADAPT |
+| Dependency / files / modules used | Patterns and SQL shapes from `supabase/migrations/001_initial_schema.sql` (owner RLS policy form), `004_material_upload_storage.sql` (storage path ownership policies), `008_client_api_privileges.sql` (client privilege narrowing), `010_material_analysis_processing.sql` (attempt dispatch_state / budget_effect / lease-token / no-auto-resend semantics) → `spike/architecture-proof/db/migrations/0001_canonical_core.sql`, `0002_generation_rpcs.sql` |
+| Material modifications | Re-keyed to canonical tables (accounts, materials, source_assets, extracted_contents, generation_jobs/attempts, artifacts); unified the donor's two generation authorities; clients reduced to SELECT-only with all writes via SECURITY DEFINER RPCs; single storage bucket policy set |
+| Copyright / license / NOTICE obligations | Header comments in both migrations cite upstream + commit + MIT copyright; licence text in `docs/provenance/licenses/` |
+| Audit status | APPROVED |
+| Approving decision / task | D-024, D-025; CLAUDE_HANDOFF_001 / LA-0011, LA-0013–LA-0015 |
+| Recorded | 2026-09-29 by Claude (Primary Engineer) |
