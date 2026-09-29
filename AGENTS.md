@@ -111,6 +111,14 @@ Before any material change an agent must:
   setting the enable variable, and merging it to `main`.
 - Creating, rotating, or storing credentials or secrets.
 - Deleting data or history.
+- **D-031:** adding or first using any new external service, SaaS, API, plugin,
+  connector, analytics product, deployment service, AI/automation agent, or other
+  third-party dependency beyond the already approved stack. The approved stack
+  covers Drive, GitHub, the Flutter client, and approved backend/runtime
+  components. Any action that sends, publishes, or submits something to the
+  outside world or changes an external account also needs Founder approval.
+  Evaluating a candidate locally without adopting it is allowed and is reported
+  as evidence.
 
 If a protected action appears necessary: stop, record a Decision Request in
 `docs/agent/DECISION_REQUEST.md`, and set execution state to `BLOCKED`.
