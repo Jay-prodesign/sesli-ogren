@@ -309,9 +309,14 @@ end
 $$;
 
 grant select on public.accounts, public.entitlements, public.feature_configs, public.quota_ledger,
-  public.materials, public.source_assets, public.extracted_contents, public.generation_jobs,
+  public.materials, public.source_assets, public.extracted_contents,
   public.generation_attempts, public.artifacts, public.evidence_refs, public.usage_events
   to authenticated;
+-- Worker lease columns are execution internals: not readable by clients (least privilege).
+grant select (id, account_id, material_id, capability, target_artifact_type, source_asset_id,
+  extracted_content_id, generation_contract, idempotency_key, request_fingerprint, intent, state,
+  failure_class, active_attempt_id, attempt_count, max_attempts, created_at, started_at, completed_at,
+  updated_at) on public.generation_jobs to authenticated;
 grant select on public.library_items to authenticated;
 revoke all on public.library_items from anon;
 grant all on all tables in schema public to service_role;

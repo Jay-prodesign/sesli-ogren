@@ -104,6 +104,7 @@ select pg_temp.ok((select count(*) = 1 from storage.objects where name like :use
 select pg_temp.ok(not exists (select 1 from information_schema.columns where table_schema = 'public'
                    and column_name ~* '(api_key|secret|password|token)$' and column_name <> 'lease_token'), 'no secret columns');
 select pg_temp.ok(not has_column_privilege('authenticated', 'public.generation_jobs', 'lease_token', 'UPDATE'), 'client cannot set lease token');
+select pg_temp.ok(not has_column_privilege('authenticated', 'public.generation_jobs', 'lease_token', 'SELECT'), 'client cannot read lease token');
 
 -- 8. Deletion revokes derived access for the owner too.
 select set_config('request.jwt.claim.sub', :user_a, false);

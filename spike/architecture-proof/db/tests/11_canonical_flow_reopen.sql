@@ -28,7 +28,11 @@ select json_build_object(
   'library_item', (select row_to_json(l) from public.library_items l where l.title = 'Hücre Biyolojisi'),
   'artifact', (select row_to_json(a) from public.artifacts a join public.library_items l
                on l.summary_artifact_id = a.id where l.title = 'Hücre Biyolojisi'),
-  'job', (select row_to_json(j) from public.generation_jobs j join public.materials m on m.id = j.material_id
+  'job', (select json_build_object('id', j.id, 'material_id', j.material_id, 'state', j.state,
+                  'failure_class', j.failure_class, 'attempt_count', j.attempt_count,
+                  'target_artifact_type', j.target_artifact_type, 'created_at', j.created_at,
+                  'completed_at', j.completed_at)
+          from public.generation_jobs j join public.materials m on m.id = j.material_id
           where m.title = 'Hücre Biyolojisi'));
 \o
 reset role;

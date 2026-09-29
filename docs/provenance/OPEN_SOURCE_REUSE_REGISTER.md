@@ -97,3 +97,19 @@ custom code, record it here with a concrete reason, as AGENTS.md §12 requires:
 | Audit status | APPROVED |
 | Approving decision / task | D-024, D-025; CLAUDE_HANDOFF_001 / LA-0011, LA-0013–LA-0015 |
 | Recorded | 2026-09-29 by Claude (Primary Engineer) |
+
+### REUSE-0003 — `flutter_lints` (dev-only lint rules for the proof client)
+
+| Field | Value |
+| --- | --- |
+| Task ID | LA-0013 |
+| Upstream repository | https://github.com/flutter/packages (pub.dev package `flutter_lints`) |
+| Exact tag / commit / version | flutter_lints 6.0.0 (+ transitive `lints` 6.1.0), locked in `spike/architecture-proof/client/pubspec.lock` |
+| License | BSD-3-Clause (© 2013 The Flutter Authors) |
+| Reuse class | DEPENDENCY |
+| Dependency / files / modules used | `dev_dependencies` of `spike/architecture-proof/client` (analysis rules only; not shipped) |
+| Material modifications | none |
+| Copyright / license / NOTICE obligations | None for dev-only use; the package is not redistributed |
+| Audit status | APPROVED |
+| Approving decision / task | D-015 (Flutter client), D-024; LA-0013. Part of the Flutter SDK's standard project template, so no new vendor (D-031) |
+| Recorded | 2026-09-29 by Claude (Primary Engineer) |

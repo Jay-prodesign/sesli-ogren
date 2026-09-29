@@ -181,7 +181,7 @@ Next unallocated ID: **LA-0018**.
 
 ##### LA-0013 — Authenticated Material → Artifact bounded proof
 
-- Status: IN_PROGRESS
+- Status: AWAITING_BRAIN_REVIEW
 - Depends on: LA-0011, LA-0012
 - Owner: Brain
 - Executor: Claude (Primary Engineer)
@@ -190,7 +190,7 @@ Next unallocated ID: **LA-0018**.
 
 ##### LA-0014 — Tenant/RLS and cross-user isolation proof
 
-- Status: READY
+- Status: AWAITING_BRAIN_REVIEW
 - Depends on: LA-0013
 - Owner: Brain
 - Executor: Claude (Primary Engineer)
@@ -199,7 +199,7 @@ Next unallocated ID: **LA-0018**.
 
 ##### LA-0015 — GenerationJob retry, idempotency and lineage proof
 
-- Status: READY
+- Status: AWAITING_BRAIN_REVIEW
 - Depends on: LA-0013
 - Owner: Brain
 - Executor: Claude (Primary Engineer)
@@ -212,7 +212,7 @@ Next unallocated ID: **LA-0018**.
 
 ##### LA-0016 — Layered donor/dependency decision and adaptation-burden measurement
 
-- Status: READY
+- Status: IN_PROGRESS
 - Depends on: LA-0010, LA-0011, LA-0012, LA-0013, LA-0014, LA-0015
 - Owner: Brain
 - Executor: Claude (Primary Engineer)
