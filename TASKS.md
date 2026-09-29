@@ -137,7 +137,7 @@ Next unallocated ID: **LA-0018**.
 
 ##### LA-0009 — Architecture Proof admission reconciliation and preflight
 
-- Status: IN_PROGRESS
+- Status: AWAITING_BRAIN_REVIEW
 - Depends on: none
 - Owner: Brain
 - Executor: Claude (Primary Engineer)
@@ -148,7 +148,7 @@ Next unallocated ID: **LA-0018**.
 
 ##### LA-0010 — Upstream fresh audit and reuse-admission matrix
 
-- Status: READY
+- Status: AWAITING_BRAIN_REVIEW
 - Depends on: LA-0009
 - Owner: Brain
 - Executor: Claude (Primary Engineer)
@@ -161,7 +161,7 @@ Next unallocated ID: **LA-0018**.
 
 ##### LA-0011 — Canonical model mapping and product-shell fit
 
-- Status: READY
+- Status: IN_PROGRESS
 - Depends on: LA-0010
 - Owner: Brain
 - Executor: Claude (Primary Engineer)
