@@ -132,6 +132,7 @@ AGENTS_TOPICS = [
     "Verdict evidence",
     "Open-source reuse",
     "command / return bus",
+    "Engineering quality",
 ]
 
 CLAUDE_READ_ORDER = [
@@ -162,6 +163,9 @@ REGISTER_FIELDS = [
     "Audit status",
     "Approving decision / task",
 ]
+AGENTS_QUALITY_PHRASES = ["D-029", "Final Engineering Test", "D-028", "Quality considerations (D-029)"]
+PLAN_QUALITY_SECTION = "Quality considerations (D-029)"
+
 AGENTS_REUSE_PHRASES = [
     "must not be rewritten merely to make it internally authored",
     "Unapproved dependencies remain prohibited",
@@ -483,7 +487,8 @@ def check_tasks(r: Report) -> dict[str, str]:
             sm = re.search(r"\*\*Status:\*\*\s*([A-Z_]+)", plan_text)
             if r.check(sm is not None, f"{target}: missing **Status:** header"):
                 r.check(sm.group(1) == status, f"{target}: status '{sm.group(1)}' != TASKS.md '{status}'")
-            check_plan_contract(r, target, plan_text, fields.get("Depends on", ""))
+            check_plan_contract(r, target, plan_text, fields.get("Depends on", ""),
+                                require_quality=not ms.get("title", "").startswith("Milestone M0 "))
 
     for t in tasks:
         tid = t["title"].split(" ")[0]
@@ -510,10 +515,10 @@ def section_headings(text: str) -> list[str]:
     return [m.group(1).strip() for m in re.finditer(r"^## (.+)$", text, re.MULTILINE)]
 
 
-def check_plan_contract(r: Report, rel: str, text: str, task_deps: str) -> None:
-    """Every active plan carries the full D-019 / M3-E3 contract."""
+def check_plan_contract(r: Report, rel: str, text: str, task_deps: str, require_quality: bool = False) -> None:
+    """Every active plan carries the full D-019 / M3-E3 contract (+ D-029 section after bootstrap)."""
     heads = section_headings(text)
-    for name in PLAN_SECTIONS:
+    for name in PLAN_SECTIONS + ([PLAN_QUALITY_SECTION] if require_quality else []):
         r.check(name in heads, f"{rel}: missing contract section '## {name}'")
     for label in ["Handoff", "Executor", "Owner / verifier"]:
         r.check(f"**{label}:**" in text, f"{rel}: missing **{label}:** header")
@@ -593,6 +598,8 @@ def check_reuse(r: Report) -> None:
             r.check(f"`{cls}`" in flat, f"AGENTS.md: reuse class {cls} not defined")
         for phrase in AGENTS_REUSE_PHRASES:
             r.check(phrase in flat, f"AGENTS.md: D-024 reuse rule missing: '{phrase}'")
+        for phrase in AGENTS_QUALITY_PHRASES:
+            r.check(phrase in flat, f"AGENTS.md: D-029/D-028 quality projection missing: '{phrase}'")
 
 
 def check_claude_dir(r: Report, files: list[str]) -> None:
@@ -677,7 +684,7 @@ def check_bus(r: Report, files: list[str], state: dict | None) -> None:
                     "(use an explicit 'Executability change' with PASS gate evidence)",
                 )
         else:
-            cm = re.fullmatch(r"(CLAUDE_HANDOFF_\d{3}) -> (READY|EXECUTABLE)", change)
+            cm = re.fullmatch(r"([A-Z][A-Z0-9_-]*) -> (READY|EXECUTABLE)", change)
             if r.check(cm is not None, f"{rel}: executability guard: malformed Executability change '{change}'"):
                 r.check(
                     "PASS" in f.get("Gate evidence", ""),
@@ -690,6 +697,8 @@ def check_bus(r: Report, files: list[str], state: dict | None) -> None:
                 )
 
     answered: dict[str, str] = {}
+    partial: set[str] = set()
+    superseded: set[str] = set()
     for rid, rel in sorted(rets.items()):
         text = read_text(rel)
         title, f, heads = parse_record(text)
@@ -703,11 +712,14 @@ def check_bus(r: Report, files: list[str], state: dict | None) -> None:
         r.check(ans in cmds, f"{rel}: answers unknown command '{ans}'")
         answered[rid] = ans
         r.check(bool(RET_DISPOSITIONS.match(f.get("Disposition", ""))), f"{rel}: invalid Disposition")
+        if f.get("Disposition") == "PARTIAL":
+            partial.add(rid)
         for key in ["Base SHA", "Head SHA"]:
             r.check(bool(sha_re.match(f.get(key, ""))), f"{rel}: {key} must be a 40-hex SHA")
         sup = f.get("Supersedes", "none")
         if sup != "none":
             r.check(sup in rets and record_num(sup) < record_num(rid), f"{rel}: Supersedes unknown/later return {sup}")
+            superseded.add(sup)
 
     if state is None:
         return
@@ -742,22 +754,34 @@ def check_bus(r: Report, files: list[str], state: dict | None) -> None:
             r.check(ret in rets, f"{rel}: command_ledger[{cid}].return_id '{ret}' does not resolve")
             if ret in rets:
                 r.check(answered.get(ret) == cid, f"{rel}: {ret} does not answer {cid}")
+                r.check(ret not in partial, f"{rel}: command_ledger[{cid}].return_id {ret} is a PARTIAL checkpoint, not an answer")
+        for pid in entry.get("partial_return_ids") or []:
+            r.check(pid in partial and answered.get(pid) == cid,
+                    f"{rel}: command_ledger[{cid}].partial_return_ids entry {pid} is not a PARTIAL return for {cid}")
     for n in range(1, record_num(last_ack) + 1):
         cid = f"CMD-{n:04d}"
         r.check(cid in ledger, f"{rel}: acknowledged command {cid} missing from command_ledger (no skipping)")
     for rid, cid in answered.items():
-        r.check(
-            (ledger.get(cid) or {}).get("status") in ("ANSWERED", "BLOCKED"),
-            f"{rel}: {rid} answers {cid} but command_ledger does not record it as answered",
-        )
+        entry = ledger.get(cid) or {}
+        if rid in partial:
+            r.check(rid in (entry.get("partial_return_ids") or []),
+                    f"{rel}: PARTIAL {rid} for {cid} missing from command_ledger partial_return_ids")
+        elif rid not in superseded:
+            r.check(entry.get("status") in ("ANSWERED", "BLOCKED") and entry.get("return_id") == rid,
+                    f"{rel}: {rid} answers {cid} but command_ledger does not record it as answered")
 
     if record_num(last_cmd) > record_num(last_ack):
         expected = {"UNREAD"}
     elif not cmds:
         expected = {"IDLE"}
     else:
-        st = (ledger.get(last_ack) or {}).get("status")
-        expected = {"ACKNOWLEDGED": {"ACKNOWLEDGED"}, "ANSWERED": {"ANSWERED", "IDLE"}, "BLOCKED": {"BLOCKED"}}.get(st, {"?"})
+        sts = {(e or {}).get("status") for e in ledger.values()}
+        if "ACKNOWLEDGED" in sts:
+            expected = {"ACKNOWLEDGED"}
+        elif "BLOCKED" in sts:
+            expected = {"BLOCKED"}
+        else:
+            expected = {"ANSWERED", "IDLE"}
     r.check(proc in expected, f"{rel}: command_processing_status '{proc}' inconsistent with pointers (expected {sorted(expected)})")
 
 

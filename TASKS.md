@@ -21,17 +21,17 @@ Milestone numbering follows the program sequence in
 M1 = Architecture Proof, …). Drive lifecycle-stage labels use a different
 numbering: lifecycle "M3" is this M0, and lifecycle "M4" is this M1.
 
-Next unallocated ID: **LA-0009**.
+Next unallocated ID: **LA-0018**.
 
 ---
 
 ## Milestone M0 — Repository & Agent Bootstrap
 
-- Status: ACTIVE
+- Status: DONE
 - Handoff: CLAUDE_HANDOFF_000 — Repository & Agent Bootstrap
 - Branch: `chore/repository-bootstrap`
-- Draft PR: [#1](https://github.com/Jay-prodesign/sesli-ogren/pull/1): Brain Review 001 = CHANGES_REQUIRED; corrections re-returned for Brain review (CMD-0001 → RET-0001)
-- Exit gate: Brain BOOTSTRAP_PASS on the bootstrap draft PR.
+- Draft PR: [#1](https://github.com/Jay-prodesign/sesli-ogren/pull/1): **BOOTSTRAP_PASS** (M3_BOOTSTRAP_BRAIN_REVIEW_002, reviewed head `433c26c`); draft/unmerged, merge is a Product Owner action
+- Exit gate: Brain BOOTSTRAP_PASS on the bootstrap draft PR — **met** (Brain Review 002).
 
 ### Sprint M0.S1 — Bootstrap
 
@@ -39,7 +39,7 @@ Next unallocated ID: **LA-0009**.
 
 ##### LA-0001 — Pre-flight verification and canonical repository identity
 
-- Status: AWAITING_BRAIN_REVIEW
+- Status: DONE
 - Depends on: none
 - Owner: Brain
 - Executor: Claude (Primary Engineer)
@@ -50,7 +50,7 @@ Next unallocated ID: **LA-0009**.
 
 ##### LA-0002 — Repository hygiene baseline
 
-- Status: AWAITING_BRAIN_REVIEW
+- Status: DONE
 - Depends on: LA-0001
 - Owner: Brain
 - Executor: Claude (Primary Engineer)
@@ -59,7 +59,7 @@ Next unallocated ID: **LA-0009**.
 
 ##### LA-0003 — Agent operating contracts
 
-- Status: AWAITING_BRAIN_REVIEW
+- Status: DONE
 - Depends on: LA-0001
 - Owner: Brain
 - Executor: Claude (Primary Engineer)
@@ -70,7 +70,7 @@ Next unallocated ID: **LA-0009**.
 
 ##### LA-0004 — Task map and execution plans
 
-- Status: AWAITING_BRAIN_REVIEW
+- Status: DONE
 - Depends on: LA-0003
 - Owner: Brain
 - Executor: Claude (Primary Engineer)
@@ -79,7 +79,7 @@ Next unallocated ID: **LA-0009**.
 
 ##### LA-0005 — Agent control files and documentation skeleton
 
-- Status: AWAITING_BRAIN_REVIEW
+- Status: DONE
 - Depends on: LA-0003, LA-0004
 - Owner: Brain
 - Executor: Claude (Primary Engineer)
@@ -90,7 +90,7 @@ Next unallocated ID: **LA-0009**.
 
 ##### LA-0006 — Bootstrap validation script and CI workflow
 
-- Status: AWAITING_BRAIN_REVIEW
+- Status: DONE
 - Depends on: LA-0002, LA-0003, LA-0004, LA-0005
 - Owner: Brain
 - Executor: Claude (Primary Engineer)
@@ -99,7 +99,7 @@ Next unallocated ID: **LA-0009**.
 
 ##### LA-0007 — Draft PR delivery and state/evidence reconciliation
 
-- Status: AWAITING_BRAIN_REVIEW
+- Status: DONE
 - Depends on: LA-0006, LA-0008
 - Owner: Brain
 - Executor: Claude (Primary Engineer)
@@ -112,7 +112,7 @@ Next unallocated ID: **LA-0009**.
 
 ##### LA-0008 — Brain↔Engineer Command Bus & Automated Claude Invocation Bridge
 
-- Status: AWAITING_BRAIN_REVIEW
+- Status: DONE
 - Depends on: LA-0005, LA-0006
 - Owner: Brain
 - Executor: Claude (Primary Engineer)
@@ -123,26 +123,110 @@ Next unallocated ID: **LA-0009**.
 
 ## Milestone M1 — Architecture Proof
 
-- Status: PLANNED / NOT_EXECUTABLE
-- Handoff: CLAUDE_HANDOFF_001 — V0 Architecture Spike (staged, **NOT_EXECUTABLE**)
-- Entry gate: Brain BOOTSTRAP_PASS on M0 and explicit admission of CLAUDE_HANDOFF_001.
-- Source: PRE_BOOTSTRAP_PRODUCT_READINESS_AND_MASTER_SEQUENCE_v1.0 — Learning App (Drive); D-015, D-024, D-025
-- Tasks: none allocated (progressive detail; allocated only on Brain admission)
+- Status: ACTIVE
+- Handoff: CLAUDE_HANDOFF_001 — V0 Architecture Spike (admitted by CMD-0002 after BOOTSTRAP_PASS)
+- Task admission: M4_ARCHITECTURE_PROOF_TASK_ADMISSION_001 (Drive); quality overlay CMD-0003 (D-029)
+- Branch: `spike/v0-architecture-proof` (from reviewed bootstrap head `433c26c`)
+- Entry gate: Brain BOOTSTRAP_PASS and explicit admission — **met**.
+- Exit gate: Brain review of the CLAUDE_HANDOFF_001 return (GO_ADAPT / FALLBACK_CLEAN_FLUTTER). No V0 feature work is admitted by this milestone.
+- Source: PRE_BOOTSTRAP_PRODUCT_READINESS_AND_MASTER_SEQUENCE_v1.0 — Learning App (Drive); D-015, D-024, D-025 (+ refinements), D-029
 
-### Sprint M1.S1 — Donor fresh-audit & layered reuse matrix
+### Sprint M1.S1 — Admission and upstream audit
 
-- Status: PLANNED / NOT_EXECUTABLE
-- Intent: fresh licence/provenance/source audit of approved donors; D-025 capability-by-capability reuse classification.
+#### Section M1.S1.A — Control plane
+
+##### LA-0009 — Architecture Proof admission reconciliation and preflight
+
+- Status: IN_PROGRESS
+- Depends on: none
+- Owner: Brain
+- Executor: Claude (Primary Engineer)
+- Verification: Spike branch from `433c26c`; CMD-0002 + CMD-0003 transcribed and acknowledged; handoff/state/TASKS reconciled; D-029 projected; validator + negative suite green; PR #1 untouched.
+- Exec plan: [docs/exec-plans/LA-0009.md](docs/exec-plans/LA-0009.md)
+
+#### Section M1.S1.B — Upstream audit
+
+##### LA-0010 — Upstream fresh audit and reuse-admission matrix
+
+- Status: READY
+- Depends on: LA-0009
+- Owner: Brain
+- Executor: Claude (Primary Engineer)
+- Verification: Exact refs/licences/dependency and runtime posture recorded for every candidate; scope class + reuse class per capability; no donor code imported before classification.
+- Exec plan: [docs/exec-plans/LA-0010.md](docs/exec-plans/LA-0010.md)
 
 ### Sprint M1.S2 — Bounded proof
 
-- Status: PLANNED / NOT_EXECUTABLE
-- Intent: canonical-model mapping, auth/tenant isolation, one material→artifact path, GenerationJob idempotency, provider-neutral seams, provenance; measured adaptation burden.
+#### Section M1.S2.A — Canonical model and provider seam
 
-### Sprint M1.S3 — Spike return & selector outcome
+##### LA-0011 — Canonical model mapping and product-shell fit
 
-- Status: PLANNED / NOT_EXECUTABLE
-- Intent: evidence return; Brain disposition GO_ADAPT or FALLBACK_CLEAN_FLUTTER.
+- Status: READY
+- Depends on: LA-0010
+- Owner: Brain
+- Executor: Claude (Primary Engineer)
+- Verification: Mapping for all 15 canonical objects; one authority per concept; rejected donor semantics documented.
+- Exec plan: [docs/exec-plans/LA-0011.md](docs/exec-plans/LA-0011.md)
+
+##### LA-0012 — Provider-neutral generation capability seam
+
+- Status: READY
+- Depends on: LA-0011
+- Owner: Brain
+- Executor: Claude (Primary Engineer)
+- Verification: Learning App-owned contract + deterministic fake; adapter contract tests pass; SDK/runtime/bundle evidence captured; no provider type in domain code.
+- Exec plan: [docs/exec-plans/LA-0012.md](docs/exec-plans/LA-0012.md)
+
+#### Section M1.S2.B — End-to-end, isolation and idempotency
+
+##### LA-0013 — Authenticated Material → Artifact bounded proof
+
+- Status: READY
+- Depends on: LA-0011, LA-0012
+- Owner: Brain
+- Executor: Claude (Primary Engineer)
+- Verification: Deterministic end-to-end flow persists a Summary Artifact with lineage and reopens from persistence.
+- Exec plan: [docs/exec-plans/LA-0013.md](docs/exec-plans/LA-0013.md)
+
+##### LA-0014 — Tenant/RLS and cross-user isolation proof
+
+- Status: READY
+- Depends on: LA-0013
+- Owner: Brain
+- Executor: Claude (Primary Engineer)
+- Verification: Negative cross-user and unauthenticated tests pass for every canonical object in the flow; no privileged secret on the client path.
+- Exec plan: [docs/exec-plans/LA-0014.md](docs/exec-plans/LA-0014.md)
+
+##### LA-0015 — GenerationJob retry, idempotency and lineage proof
+
+- Status: READY
+- Depends on: LA-0013
+- Owner: Brain
+- Executor: Claude (Primary Engineer)
+- Verification: Retry/idempotency/lineage tests pass; no ordinary retry duplicates a billable effect.
+- Exec plan: [docs/exec-plans/LA-0015.md](docs/exec-plans/LA-0015.md)
+
+### Sprint M1.S3 — Selector evidence and return
+
+#### Section M1.S3.A — Decision and return
+
+##### LA-0016 — Layered donor/dependency decision and adaptation-burden measurement
+
+- Status: READY
+- Depends on: LA-0010, LA-0011, LA-0012, LA-0013, LA-0014, LA-0015
+- Owner: Brain
+- Executor: Claude (Primary Engineer)
+- Verification: D-025 capability matrix complete with scope class, reuse class, exact upstream, obligations, burden and rationale.
+- Exec plan: [docs/exec-plans/LA-0016.md](docs/exec-plans/LA-0016.md)
+
+##### LA-0017 — Architecture Spike integration QA, provenance and return
+
+- Status: READY
+- Depends on: LA-0012, LA-0013, LA-0014, LA-0015, LA-0016
+- Owner: Brain
+- Executor: Claude (Primary Engineer)
+- Verification: All relevant tests + validator green on the exact head; register updated; return with selector outcome and D-029 disposition.
+- Exec plan: [docs/exec-plans/LA-0017.md](docs/exec-plans/LA-0017.md)
 
 ## Milestone M2 — VS-001 Golden Vertical Slice
 

@@ -1,48 +1,63 @@
 # CURRENT HANDOFF
 
-Mission-level executable contract (Brain-owned, mirrored by the Engineer).
-This file is **not** a message log. Incremental Brain instructions arrive as
-[`commands/CMD-####.md`](commands/), and Engineer responses go to
-[`returns/RET-####.md`](returns/) ([`README.md`](README.md)).
+This file is the mission-level executable contract. Brain owns it and the
+Engineer mirrors it. It is **not** a message log: incremental Brain
+instructions arrive as [`commands/CMD-####.md`](commands/), and Engineer
+responses go to [`returns/RET-####.md`](returns/) ([`README.md`](README.md)).
 
 ## Active
 
 | Field | Value |
 | --- | --- |
-| Handoff | **CLAUDE_HANDOFF_000 — Repository & Agent Bootstrap** |
-| State | **ACTIVE**. Brain Review 001 = CHANGES_REQUIRED. Corrections delivered (CMD-0001 → RET-0001) and **AWAITING_BRAIN_REVIEW** |
+| Handoff | **CLAUDE_HANDOFF_001 — V0 Architecture Spike** |
+| State | **ACTIVE / IN_PROGRESS**. Admitted by [CMD-0002](commands/CMD-0002.md) (`Executability change: CLAUDE_HANDOFF_001 -> READY`, gate evidence M3_BOOTSTRAP_BRAIN_REVIEW_002 BOOTSTRAP_PASS). The D-029 quality overlay comes from [CMD-0003](commands/CMD-0003.md). |
 | Executor | Claude (Primary Engineer) |
-| Milestone | M0 — Repository & Agent Bootstrap (Drive lifecycle stage "M3") |
-| Tasks | LA-0001 … LA-0008 (see [`TASKS.md`](../../TASKS.md)); LA-0008 = Brain↔Engineer Command Bus & Automated Claude Invocation Bridge (D-026) |
-| Branch | `chore/repository-bootstrap` |
-| Delivery | Existing unmerged **draft** PR against `main`: [#1](https://github.com/Jay-prodesign/sesli-ogren/pull/1) |
-| Evidence | [`ENGINEER_RETURN.md`](ENGINEER_RETURN.md) (consolidated) · [`returns/RET-0001.md`](returns/RET-0001.md) |
-| Exit gate | Brain **BOOTSTRAP_PASS** (or CHANGES_REQUIRED / BLOCKED), preferably issued as `CMD-0002` |
+| Milestone | M1 — Architecture Proof (Drive lifecycle stage "M4") |
+| Tasks | LA-0009 … LA-0017 (see [`TASKS.md`](../../TASKS.md)). These run as one Continuous Engineering Mission in dependency order. |
+| Branch | `spike/v0-architecture-proof`, derived from reviewed bootstrap head `433c26cf5fa75a37b66b1f74dd6a133ae4d3407a` |
+| Delivery | Draft PR stacked on `chore/repository-bootstrap`. Nothing is merged. PR #1 stays untouched as the reviewed bootstrap evidence. |
+| Evidence | [`ENGINEER_RETURN.md`](ENGINEER_RETURN.md) (consolidated), [`returns/`](returns/) |
+| Exit gate | Brain review of the Architecture Proof return: `GO_ADAPT` or `FALLBACK_CLEAN_FLUTTER` |
 
 ### Mission summary (non-private)
 
-Bootstrap the repository's engineering governance: hygiene files, agent
-contracts (including the D-024 reuse-first gate and the D-026 command bus), the
-task map with the whole-V0 skeleton, complete execution contracts, agent control
-files, the provenance register template, minimal `.claude/rules/`, lightweight
-validation and CI, and an inert GitHub-triggered Claude wake-up bridge. No
-application or product implementation. No merge, deploy, or release.
+Prove or falsify the V0 implementation path. The path under test is a Flutter
+client, a Supabase/Postgres backend with a MoonlighC-derived product shell,
+layered permissive reuse (D-024/D-025), one authoritative Learning App model,
+and a provider-neutral AI capability seam. The proof covers:
+
+- canonical model mapping;
+- one authenticated material → Summary Artifact flow;
+- tenant/RLS isolation;
+- GenerationJob idempotency and lineage;
+- the reuse/provenance matrix;
+- measured adaptation burden.
+
+Every material decision is held to D-029 (AGENTS.md §14). The following are
+out of scope: full V0, V1 learning semantics, payments, ads, production
+audio/OCR, deployment, and paid providers.
 
 ### Governing references (Drive, by title only)
 
 - CURRENT_EXECUTION_STATE — Learning App
-- CLAUDE_HANDOFF_000 — Repository & Agent Bootstrap — Learning App
-- M3_BOOTSTRAP_BRAIN_REVIEW_001 — CHANGES_REQUIRED — Learning App
-- M3_REPOSITORY_BOOTSTRAP_ACCEPTANCE_CHECKLIST_v0.1 — Learning App
-- DECISION_LOG — Learning App: D-019, D-020, D-023 (PUBLIC repository), D-024 (reuse-first), D-025 (layered donors), D-026 (command bus)
-- PRE_BOOTSTRAP_PRODUCT_READINESS_AND_MASTER_SEQUENCE_v1.0 — Learning App
-- ENGINEERING_EXECUTION_PROTOCOL — Learning App
-- PRODUCT_LIFECYCLE_STAGE_GATES — Learning App; V0_PRODUCT_SCOPE_v1.0 — Learning App (boundary only)
+- CLAUDE_HANDOFF_001 — V0 Architecture Spike — Learning App
+- M4_ARCHITECTURE_PROOF_TASK_ADMISSION_001 — Learning App
+- M4_ARCHITECTURE_PROOF_BRAIN_REVIEW_CHECKLIST_v0.1 — Learning App
+- BRAIN_COMMAND_0002 and BRAIN_COMMAND_0003 — Learning App (transcribed as CMD-0002 and CMD-0003)
+- DECISION_LOG — Learning App: D-015, D-024, D-025 (+ technical refinements 1 and 2), D-026, D-027, D-028, D-029
+- ENGINEERING & PRODUCT QUALITY CONSTITUTION — Learning App (D-029)
+- V0_CANONICAL_DATA_CAPABILITY_CONTRACTS_v0.1; V0_PRODUCT_SCOPE_v1.0; V0_PRIVACY_SECURITY_RIGHTS_CONTRACT_v0.1; V0_ENTITLEMENT_MONETIZATION_CONTRACT_v0.1; VS-001_QA_ACCEPTANCE_MATRIX_v0.1 — Learning App
+
+## Completed
+
+| Handoff | Outcome |
+| --- | --- |
+| CLAUDE_HANDOFF_000 — Repository & Agent Bootstrap | **BOOTSTRAP_PASS** (M3_BOOTSTRAP_BRAIN_REVIEW_002, reviewed head `433c26c`). PR #1 is draft and unmerged; merging it is a Product Owner action. |
 
 ## Staged
 
 | Field | Value |
 | --- | --- |
-| Handoff | **CLAUDE_HANDOFF_001 — V0 Architecture Spike** |
-| State | **NOT_EXECUTABLE**. Staged pending Brain BOOTSTRAP_PASS on the CLAUDE_HANDOFF_000 draft PR |
-| Rule | No agent may start any part of CLAUDE_HANDOFF_001 until Brain issues PASS and marks it executable here. A command must declare `Executability change` with PASS gate evidence and land together with this file and `EXECUTION_STATE.json` (AGENTS.md §13.5). |
+| Handoff | **VS-001_HANDOFF_NOT_ISSUED**: the VS-001 Golden Vertical Slice handoff has not been issued yet |
+| State | **NOT_EXECUTABLE**. It needs Brain acceptance of the Architecture Proof selector outcome and explicit admission. |
+| Rule | No V0 feature implementation may start from this mission. Admission requires an explicit command with `Executability change` and PASS gate evidence (AGENTS.md §13.5). |
