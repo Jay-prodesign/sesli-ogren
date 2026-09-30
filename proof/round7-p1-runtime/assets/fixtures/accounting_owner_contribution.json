@@ -1,0 +1,213 @@
+{
+ "fixture_id": "R7-FIX-PRO",
+ "fixture_version": "1.0",
+ "domain_label": "Professional · Accounting relationships",
+ "source": {
+  "id": "R7-SRC-PRO-001",
+  "version": "1.0",
+  "authority": "Project-authored synthetic QA fixture",
+  "text": "For this proof fixture, when an owner contributes cash to the business as an owner investment, cash increases and owner's equity increases by the same amount. The contribution is treated here as an owner investment rather than revenue.",
+  "provenance": "Created inside Learning App Round 7 QA on 2026-09-30; synthetic test content, not professional advice or credential authority."
+ },
+ "objective": "Classify a simple owner cash contribution and explain its accounting effect.",
+ "orientation": "One event, one classification and two paired effects. Where the event is classified decides what changes.",
+ "teaching": [
+  {
+   "text": "When an owner contributes cash to the business, this source treats it as an owner investment.",
+   "reveal": [
+    "event",
+    "classification",
+    "e_classify"
+   ]
+  },
+  {
+   "text": "Cash, an asset, increases.",
+   "reveal": [
+    "cash",
+    "e_asset"
+   ]
+  },
+  {
+   "text": "Owner's equity increases by the same amount, so both change together. In this case the contribution is not revenue.",
+   "reveal": [
+    "equity",
+    "e_equity",
+    "e_balance",
+    "revenue",
+    "e_not_revenue"
+   ]
+  }
+ ],
+ "challenge": {
+  "prompt": "Classify the owner's cash contribution and explain its effect.",
+  "focus": [
+   "event"
+  ],
+  "visibility": {
+   "classification": "OPEN",
+   "e_classify": "OPEN",
+   "e_asset": "OPEN",
+   "e_equity": "OPEN",
+   "equity": "HIDDEN",
+   "e_balance": "HIDDEN",
+   "revenue": "HIDDEN",
+   "e_not_revenue": "HIDDEN"
+  }
+ },
+ "responses": {
+  "STRONG": "It is an owner investment: cash, an asset, increases, and owner's equity increases by the same amount.",
+  "PARTIAL": "Cash goes up because the business received money.",
+  "MISCONCEPTION": "The business earned revenue from the owner."
+ },
+ "branches": {
+  "STRONG": {
+   "feedback": "You classified the event and traced both paired effects.",
+   "next_action": "Continue: a bounded transfer transaction.",
+   "reason_code": "R_CONTINUE_AFTER_STRONG",
+   "focus": [
+    "e_equity",
+    "e_balance"
+   ],
+   "visibility": {}
+  },
+  "PARTIAL": {
+   "feedback": "The asset effect is right: cash increases. The paired effect is still missing.",
+   "hint": "In this case every change has a paired change of the same amount. What else changes?",
+   "repair_prompt": "Which other element increases by the same amount as cash?",
+   "repair_answer": "Owner's equity.",
+   "next_action": "Targeted retry on the paired effect.",
+   "reason_code": "R_REPAIR_PARTIAL",
+   "focus": [
+    "equity",
+    "e_equity"
+   ],
+   "visibility": {
+    "equity": "OPEN",
+    "e_equity": "OPEN",
+    "e_balance": "OPEN",
+    "revenue": "HIDDEN",
+    "e_not_revenue": "HIDDEN"
+   }
+  },
+  "MISCONCEPTION": {
+   "feedback": "Your answer classifies the contribution as revenue. This source classifies it differently.",
+   "corrective": "In this case the contribution is an owner investment, not revenue: cash increases and owner's equity increases by the same amount.",
+   "repair_prompt": "In this case, is the owner's cash contribution revenue or an owner investment?",
+   "repair_answer": "An owner investment.",
+   "next_action": "Corrective teaching, then a smaller classification check.",
+   "reason_code": "R_REPAIR_MISCONCEPTION",
+   "focus": [
+    "e_classify",
+    "e_not_revenue"
+   ],
+   "visibility": {
+    "e_equity": "DIMMED",
+    "e_balance": "DIMMED"
+   }
+  },
+  "UNKNOWN": {
+   "feedback": "The answer was abandoned before a classification. Nothing about your understanding was recorded.",
+   "next_action": "Resume or retry.",
+   "reason_code": "R_RETRY_UNKNOWN",
+   "focus": [],
+   "visibility": {}
+  }
+ },
+ "completion": {
+  "summary": "You classified an owner cash contribution as an owner investment and traced its paired effect on cash and owner's equity.",
+  "next_continuation": "Continue: one bounded transfer transaction."
+ },
+ "scene": {
+  "source_ref": "R7-SRC-PRO-001",
+  "domain_theme": "accounting_relation",
+  "theme_confidence": 0.9,
+  "nodes": [
+   {
+    "id": "event",
+    "role": "event",
+    "label": "Owner contributes cash",
+    "semantic_ref": "owner contribution"
+   },
+   {
+    "id": "classification",
+    "role": "classification",
+    "label": "Owner investment",
+    "semantic_ref": "owner contribution classification"
+   },
+   {
+    "id": "cash",
+    "role": "effect",
+    "label": "Cash (asset) +",
+    "semantic_ref": "cash/assets increase"
+   },
+   {
+    "id": "equity",
+    "role": "effect",
+    "label": "Owner's equity +",
+    "semantic_ref": "owner's equity increase"
+   },
+   {
+    "id": "revenue",
+    "role": "contrast",
+    "label": "Revenue: not in this case",
+    "semantic_ref": "not revenue in this bounded case"
+   }
+  ],
+  "edges": [
+   {
+    "id": "e_classify",
+    "from": "event",
+    "to": "classification",
+    "relation": "classified as",
+    "direction": "forward",
+    "semantic_ref": "owner contribution classification"
+   },
+   {
+    "id": "e_asset",
+    "from": "classification",
+    "to": "cash",
+    "relation": "increases",
+    "direction": "forward",
+    "semantic_ref": "cash/assets increase"
+   },
+   {
+    "id": "e_equity",
+    "from": "classification",
+    "to": "equity",
+    "relation": "increases",
+    "direction": "forward",
+    "semantic_ref": "owner's equity increase"
+   },
+   {
+    "id": "e_balance",
+    "from": "cash",
+    "to": "equity",
+    "relation": "same amount",
+    "direction": "none",
+    "semantic_ref": "paired accounting-equation effect"
+   },
+   {
+    "id": "e_not_revenue",
+    "from": "classification",
+    "to": "revenue",
+    "relation": "is not",
+    "direction": "forward",
+    "semantic_ref": "not revenue in this bounded case"
+   }
+  ],
+  "primitives": [
+   "NODE",
+   "TRACE",
+   "PAIR",
+   "PATH",
+   "FOCUS_MARK"
+  ],
+  "layout_hint": "TRACE",
+  "decorative_tokens": [
+   "subtle_ledger_rhythm"
+  ],
+  "motion_cue": "effect_trace",
+  "evidence_state": "UNKNOWN",
+  "fallback_level": "FULL"
+ }
+}

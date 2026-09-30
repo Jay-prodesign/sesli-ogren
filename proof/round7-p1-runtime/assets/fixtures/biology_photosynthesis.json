@@ -1,0 +1,213 @@
+{
+ "fixture_id": "R7-FIX-BIO",
+ "fixture_version": "1.0",
+ "domain_label": "Biology · Photosynthesis",
+ "source": {
+  "id": "R7-SRC-BIO-001",
+  "version": "1.0",
+  "authority": "Project-authored synthetic QA fixture",
+  "text": "For this proof fixture, photosynthesis is represented as a process in which light provides energy used by the photosynthetic system to transform water and carbon dioxide into stored chemical energy in sugars, with oxygen released as an output.",
+  "provenance": "Created inside Learning App Round 7 QA on 2026-09-30; synthetic test content, not curriculum authority."
+ },
+ "objective": "Explain the core photosynthesis input → transformation → output relation.",
+ "orientation": "One relation matters here: what goes into the process, what makes it happen, and what comes out.",
+ "teaching": [
+  {
+   "text": "Light provides the energy that the photosynthetic system uses.",
+   "reveal": [
+    "light",
+    "system",
+    "e_light"
+   ]
+  },
+  {
+   "text": "Water and carbon dioxide are the inputs that the system transforms.",
+   "reveal": [
+    "water",
+    "co2",
+    "e_water",
+    "e_co2"
+   ]
+  },
+  {
+   "text": "The result is stored chemical energy in sugars, and oxygen is released as an output.",
+   "reveal": [
+    "sugars",
+    "oxygen",
+    "e_sugars",
+    "e_oxygen"
+   ]
+  }
+ ],
+ "challenge": {
+  "prompt": "Explain how light, water and carbon dioxide relate to stored chemical energy and oxygen.",
+  "focus": [
+   "system"
+  ],
+  "visibility": {
+   "e_light": "OPEN",
+   "e_water": "OPEN",
+   "e_co2": "OPEN",
+   "e_sugars": "OPEN",
+   "e_oxygen": "OPEN"
+  }
+ },
+ "responses": {
+  "STRONG": "Light provides the energy the system uses to transform water and carbon dioxide into stored chemical energy in sugars, and oxygen is released.",
+  "PARTIAL": "Light and water go into the process and oxygen comes out.",
+  "MISCONCEPTION": "Plants get their food and energy directly from the soil."
+ },
+ "branches": {
+  "STRONG": {
+   "feedback": "You connected light, both inputs and both outputs in one relation.",
+   "next_action": "Deepen: explain the same relation starting from the outputs.",
+   "reason_code": "R_DEEPEN_AFTER_STRONG",
+   "focus": [
+    "e_sugars",
+    "e_oxygen"
+   ],
+   "visibility": {}
+  },
+  "PARTIAL": {
+   "feedback": "Light, water and the oxygen output are in place. One required input is still missing.",
+   "hint": "Look at the second input that joins water in the transformation.",
+   "repair_prompt": "Which other input, together with water, is transformed in this process?",
+   "repair_answer": "Carbon dioxide.",
+   "next_action": "Targeted retry on the missing input.",
+   "reason_code": "R_REPAIR_PARTIAL",
+   "focus": [
+    "co2",
+    "e_co2"
+   ],
+   "visibility": {
+    "e_co2": "OPEN",
+    "co2": "SHOWN"
+   }
+  },
+  "MISCONCEPTION": {
+   "feedback": "Your answer places the source of food in the soil. This source describes a different relation.",
+   "corrective": "In this source, the stored chemical energy in sugars is produced by the photosynthetic system: light provides the energy, and water and carbon dioxide are transformed.",
+   "repair_prompt": "In this source, what provides the energy used to make the stored chemical energy?",
+   "repair_answer": "Light.",
+   "next_action": "Corrective teaching, then a smaller check.",
+   "reason_code": "R_REPAIR_MISCONCEPTION",
+   "focus": [
+    "e_light",
+    "e_sugars"
+   ],
+   "visibility": {
+    "e_oxygen": "DIMMED",
+    "oxygen": "DIMMED"
+   }
+  },
+  "UNKNOWN": {
+   "feedback": "Your answer was interrupted before it could be checked. Nothing about your understanding was recorded.",
+   "next_action": "Retry, or answer in text instead.",
+   "reason_code": "R_RETRY_UNKNOWN",
+   "focus": [],
+   "visibility": {}
+  }
+ },
+ "completion": {
+  "summary": "You explained this source's relation: light-enabled transformation of water and carbon dioxide into stored chemical energy and oxygen.",
+  "next_continuation": "Continue: apply the relation from the output side."
+ },
+ "scene": {
+  "source_ref": "R7-SRC-BIO-001",
+  "domain_theme": "biology_process",
+  "theme_confidence": 0.9,
+  "nodes": [
+   {
+    "id": "light",
+    "role": "enabler",
+    "label": "Light (energy)",
+    "semantic_ref": "light enables process"
+   },
+   {
+    "id": "water",
+    "role": "input",
+    "label": "Water",
+    "semantic_ref": "water is an input"
+   },
+   {
+    "id": "co2",
+    "role": "input",
+    "label": "Carbon dioxide",
+    "semantic_ref": "carbon dioxide is an input"
+   },
+   {
+    "id": "system",
+    "role": "process",
+    "label": "Photosynthetic system",
+    "semantic_ref": "transformation"
+   },
+   {
+    "id": "sugars",
+    "role": "output",
+    "label": "Stored chemical energy (sugars)",
+    "semantic_ref": "stored chemical energy/sugars output"
+   },
+   {
+    "id": "oxygen",
+    "role": "output",
+    "label": "Oxygen (released)",
+    "semantic_ref": "oxygen output"
+   }
+  ],
+  "edges": [
+   {
+    "id": "e_light",
+    "from": "light",
+    "to": "system",
+    "relation": "provides energy",
+    "direction": "forward",
+    "semantic_ref": "light enables process"
+   },
+   {
+    "id": "e_water",
+    "from": "water",
+    "to": "system",
+    "relation": "input",
+    "direction": "forward",
+    "semantic_ref": "water is an input"
+   },
+   {
+    "id": "e_co2",
+    "from": "co2",
+    "to": "system",
+    "relation": "input",
+    "direction": "forward",
+    "semantic_ref": "carbon dioxide is an input"
+   },
+   {
+    "id": "e_sugars",
+    "from": "system",
+    "to": "sugars",
+    "relation": "stored as",
+    "direction": "forward",
+    "semantic_ref": "stored chemical energy/sugars output"
+   },
+   {
+    "id": "e_oxygen",
+    "from": "system",
+    "to": "oxygen",
+    "relation": "released",
+    "direction": "forward",
+    "semantic_ref": "oxygen output"
+   }
+  ],
+  "primitives": [
+   "NODE",
+   "PATH",
+   "GROUP",
+   "FOCUS_MARK"
+  ],
+  "layout_hint": "FLOW",
+  "decorative_tokens": [
+   "soft_cellular_texture"
+  ],
+  "motion_cue": "flow_pulse",
+  "evidence_state": "UNKNOWN",
+  "fallback_level": "FULL"
+ }
+}
