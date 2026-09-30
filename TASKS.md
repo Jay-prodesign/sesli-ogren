@@ -126,9 +126,10 @@ Next unallocated ID: **LA-0018**.
 - Status: ACTIVE
 - Handoff: CLAUDE_HANDOFF_001 — V0 Architecture Spike (admitted by CMD-0002 after BOOTSTRAP_PASS)
 - Task admission: M4_ARCHITECTURE_PROOF_TASK_ADMISSION_001 (Drive); quality overlay CMD-0003 (D-029)
+- Review: Brain Review 003 = CHANGES_REQUIRED (GO_ADAPT supported). Correction chain CMD-0004 … CMD-0013, read through HANDOFF_COMMAND_AUTHORITY_AUDIT_001 and D-062, returned in RET-0005. No new task IDs.
 - Branch: `spike/v0-architecture-proof` (from reviewed bootstrap head `433c26c`)
 - Entry gate: Brain BOOTSTRAP_PASS and explicit admission — **met**.
-- Exit gate: Brain review of the CLAUDE_HANDOFF_001 return (GO_ADAPT / FALLBACK_CLEAN_FLUTTER). No V0 feature work is admitted by this milestone.
+- Exit gate: Brain review of the corrected CLAUDE_HANDOFF_001 return (RET-0005) → ARCHITECTURE_PROOF_PASS or CHANGES_REQUIRED. No V0 feature work is admitted by this milestone.
 - Source: PRE_BOOTSTRAP_PRODUCT_READINESS_AND_MASTER_SEQUENCE_v1.0 — Learning App (Drive); D-015, D-024, D-025 (+ refinements), D-029
 
 ### Sprint M1.S1 — Admission and upstream audit
@@ -141,7 +142,7 @@ Next unallocated ID: **LA-0018**.
 - Depends on: none
 - Owner: Brain
 - Executor: Claude (Primary Engineer)
-- Verification: Spike branch from `433c26c`; CMD-0002 + CMD-0003 transcribed and acknowledged; handoff/state/TASKS reconciled; D-029 projected; validator + negative suite green; PR #1 untouched.
+- Verification: Spike branch from `433c26c`; CMD-0002 + CMD-0003 transcribed and acknowledged; handoff/state/TASKS reconciled; D-029 projected; validator + negative suite green; PR #1 untouched. Review 003: CMD-0004 … CMD-0013 transcribed and acknowledged in order; CMD-0009 head binding enforced by the validator with negative tests.
 - Exec plan: [docs/exec-plans/LA-0009.md](docs/exec-plans/LA-0009.md)
 
 #### Section M1.S1.B — Upstream audit
@@ -165,7 +166,7 @@ Next unallocated ID: **LA-0018**.
 - Depends on: LA-0010
 - Owner: Brain
 - Executor: Claude (Primary Engineer)
-- Verification: Mapping for all 15 canonical objects; one authority per concept; rejected donor semantics documented.
+- Verification: Mapping for all 15 canonical objects; one authority per concept; rejected donor semantics documented. Review 003: D-037 compatibility/debt map, and locale/speech/eval disposition (LA-0011 §5–§7).
 - Exec plan: [docs/exec-plans/LA-0011.md](docs/exec-plans/LA-0011.md)
 
 ##### LA-0012 — Provider-neutral generation capability seam
@@ -216,7 +217,7 @@ Next unallocated ID: **LA-0018**.
 - Depends on: LA-0010, LA-0011, LA-0012, LA-0013, LA-0014, LA-0015
 - Owner: Brain
 - Executor: Claude (Primary Engineer)
-- Verification: D-025 capability matrix complete with scope class, reuse class, exact upstream, obligations, burden and rationale.
+- Verification: D-025 capability matrix complete with scope class, reuse class, exact upstream, obligations, burden and rationale. Review 003: D-037 / D-042 / D-062 selector consequences and hardening debt H1–H5 (LA-0016 §5).
 - Exec plan: [docs/exec-plans/LA-0016.md](docs/exec-plans/LA-0016.md)
 
 ##### LA-0017 — Architecture Spike integration QA, provenance and return
@@ -225,7 +226,7 @@ Next unallocated ID: **LA-0018**.
 - Depends on: LA-0012, LA-0013, LA-0014, LA-0015, LA-0016
 - Owner: Brain
 - Executor: Claude (Primary Engineer)
-- Verification: All relevant tests + validator green on the exact head; register updated; return with selector outcome and D-029 disposition.
+- Verification: All relevant tests + validator green on the exact head; register updated; return with selector outcome and D-029 disposition. Review 003: `.flutter-version` + `flutter-proof` CI (CMD-0008); final head bound externally to PR #2 with exact-head CI (CMD-0009).
 - Exec plan: [docs/exec-plans/LA-0017.md](docs/exec-plans/LA-0017.md)
 
 ## Milestone M2 — VS-001 Golden Vertical Slice
@@ -260,12 +261,12 @@ Next unallocated ID: **LA-0018**.
 ### Sprint M3.S1 — Learning artifacts tranche
 
 - Status: PLANNED / NOT_EXECUTABLE
-- Intent: Key Concepts, Flashcards, Quiz as persistent artifacts.
+- Intent: learning artifacts per the admitted V0 scope (pre-D-054 wording "Key Concepts, Flashcards, Quiz" is no longer product authority; CMD-0013).
 
 ### Sprint M3.S2 — Audio & reading tranche
 
 - Status: PLANNED / NOT_EXECUTABLE
-- Intent: Audio/Listen and Reader where required.
+- Intent: Sesli Öğren speech composition and reading, per the admitted V0 scope (speech: D-062).
 
 ### Sprint M3.S3 — Account, entitlements & monetization tranche
 

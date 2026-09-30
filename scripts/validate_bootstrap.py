@@ -219,6 +219,11 @@ LEDGER_STATUSES = {"ACKNOWLEDGED", "ANSWERED", "BLOCKED"}
 STATE_BUS_KEYS = ["last_command_id", "last_acknowledged_command_id", "last_return_id", "command_processing_status"]
 BRIDGE_STATUSES = {"VERIFIED_WORKING", "AUTO_AGENT_BRIDGE_BLOCKED"}
 
+# CMD-0009: a committed file cannot contain the SHA of its own commit. A final-review record may
+# therefore bind its head externally to the GitHub PR head instead of naming a literal SHA.
+REVIEW_HEAD_SENTINEL = "PR_HEAD_AT_REVIEW"
+REVIEW_HEAD_BINDING = "GITHUB_PR_HEAD"
+
 # .claude/ may only carry Markdown rule files (no settings, agents, hooks, MCP).
 CLAUDE_DIR_ALLOWED = re.compile(r"^\.claude/rules/[^/]+\.md$")
 
@@ -342,8 +347,16 @@ def check_state(r: Report, state: dict, task_status: dict[str, str]) -> None:
         r.check(key in git, f"{rel}: git.{key} missing")
     sha_re = re.compile(r"^[0-9a-f]{40}$")
     r.check(bool(sha_re.match(str(git.get("base_sha", "")))), f"{rel}: git.base_sha must be a 40-hex SHA")
-    if git.get("head_sha") is not None:
-        r.check(bool(sha_re.match(str(git["head_sha"]))), f"{rel}: git.head_sha must be a 40-hex SHA")
+    head = git.get("head_sha")
+    if head == REVIEW_HEAD_SENTINEL:
+        r.check(status == "AWAITING_BRAIN_REVIEW",
+                f"{rel}: git.head_sha {REVIEW_HEAD_SENTINEL} is only allowed when AWAITING_BRAIN_REVIEW")
+        r.check(git.get("head_binding") == REVIEW_HEAD_BINDING,
+                f"{rel}: git.head_sha {REVIEW_HEAD_SENTINEL} requires git.head_binding = {REVIEW_HEAD_BINDING}")
+        for key in ["branch", "pr_number", "pr_url"]:
+            r.check(git.get(key) not in (None, ""), f"{rel}: git.head_sha {REVIEW_HEAD_SENTINEL} requires git.{key}")
+    elif head is not None:
+        r.check(bool(sha_re.match(str(head))), f"{rel}: git.head_sha must be a 40-hex SHA")
     if status == "AWAITING_BRAIN_REVIEW":
         for key in ["head_sha", "pr_number", "pr_url"]:
             r.check(git.get(key) not in (None, ""), f"{rel}: git.{key} required when AWAITING_BRAIN_REVIEW")
@@ -697,6 +710,7 @@ def check_bus(r: Report, files: list[str], state: dict | None) -> None:
                 )
 
     answered: dict[str, str] = {}
+    covers: dict[str, set[str]] = {}
     partial: set[str] = set()
     superseded: set[str] = set()
     for rid, rel in sorted(rets.items()):
@@ -711,11 +725,34 @@ def check_bus(r: Report, files: list[str], state: dict | None) -> None:
         ans = f.get("Answers", "")
         r.check(ans in cmds, f"{rel}: answers unknown command '{ans}'")
         answered[rid] = ans
+        # CMD-0009 cumulative return: one final RET may also answer earlier commands it names explicitly.
+        also = [c.strip() for c in f.get("Also answers", "").split(",") if c.strip()]
+        for cid in also:
+            r.check(cid in cmds and record_num(cid) < record_num(ans),
+                    f"{rel}: Also answers '{cid}' must be an existing command earlier than {ans}")
+        if also:
+            r.check(f.get("Disposition") != "PARTIAL", f"{rel}: a PARTIAL checkpoint cannot declare Also answers")
+        covers[rid] = {ans, *also}
         r.check(bool(RET_DISPOSITIONS.match(f.get("Disposition", ""))), f"{rel}: invalid Disposition")
         if f.get("Disposition") == "PARTIAL":
             partial.add(rid)
-        for key in ["Base SHA", "Head SHA"]:
-            r.check(bool(sha_re.match(f.get(key, ""))), f"{rel}: {key} must be a 40-hex SHA")
+        r.check(bool(sha_re.match(f.get("Base SHA", ""))), f"{rel}: Base SHA must be a 40-hex SHA")
+        if f.get("Head SHA") == REVIEW_HEAD_SENTINEL:
+            r.check(f.get("Disposition", "").endswith("READY_FOR_BRAIN_REVIEW"),
+                    f"{rel}: Head SHA {REVIEW_HEAD_SENTINEL} requires a READY_FOR_BRAIN_REVIEW disposition")
+            r.check(f.get("Head binding") == REVIEW_HEAD_BINDING,
+                    f"{rel}: Head SHA {REVIEW_HEAD_SENTINEL} requires 'Head binding: {REVIEW_HEAD_BINDING}'")
+            if state is not None and rid == state.get("last_return_id"):
+                git = state.get("git") or {}
+                r.check(
+                    state.get("status") == "AWAITING_BRAIN_REVIEW"
+                    and git.get("head_sha") == REVIEW_HEAD_SENTINEL
+                    and git.get("head_binding") == REVIEW_HEAD_BINDING,
+                    f"{rel}: Head SHA {REVIEW_HEAD_SENTINEL} requires EXECUTION_STATE AWAITING_BRAIN_REVIEW with the "
+                    f"same {REVIEW_HEAD_BINDING} binding",
+                )
+        else:
+            r.check(bool(sha_re.match(f.get("Head SHA", ""))), f"{rel}: Head SHA must be a 40-hex SHA")
         sup = f.get("Supersedes", "none")
         if sup != "none":
             r.check(sup in rets and record_num(sup) < record_num(rid), f"{rel}: Supersedes unknown/later return {sup}")
@@ -753,7 +790,7 @@ def check_bus(r: Report, files: list[str], state: dict | None) -> None:
         if st in ("ANSWERED", "BLOCKED") or ret:
             r.check(ret in rets, f"{rel}: command_ledger[{cid}].return_id '{ret}' does not resolve")
             if ret in rets:
-                r.check(answered.get(ret) == cid, f"{rel}: {ret} does not answer {cid}")
+                r.check(cid in covers.get(ret, set()), f"{rel}: {ret} does not answer {cid}")
                 r.check(ret not in partial, f"{rel}: command_ledger[{cid}].return_id {ret} is a PARTIAL checkpoint, not an answer")
         for pid in entry.get("partial_return_ids") or []:
             r.check(pid in partial and answered.get(pid) == cid,
@@ -767,8 +804,10 @@ def check_bus(r: Report, files: list[str], state: dict | None) -> None:
             r.check(rid in (entry.get("partial_return_ids") or []),
                     f"{rel}: PARTIAL {rid} for {cid} missing from command_ledger partial_return_ids")
         elif rid not in superseded:
-            r.check(entry.get("status") in ("ANSWERED", "BLOCKED") and entry.get("return_id") == rid,
-                    f"{rel}: {rid} answers {cid} but command_ledger does not record it as answered")
+            for covered in sorted(covers.get(rid, {cid})):
+                e = ledger.get(covered) or {}
+                r.check(e.get("status") in ("ANSWERED", "BLOCKED") and e.get("return_id") == rid,
+                        f"{rel}: {rid} answers {covered} but command_ledger does not record it as answered")
 
     if record_num(last_cmd) > record_num(last_ack):
         expected = {"UNREAD"}

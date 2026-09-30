@@ -2,10 +2,11 @@
 
 Engineering repository for **Sesli Öğren**, internally tracked as the **Learning App** project.
 
-> **Status: repository bootstrap (Milestone 0).** This repository contains only
-> engineering governance, agent contracts, the task map, and lightweight bootstrap
-> validation. **No application code exists yet**, and none may be added until a
-> Brain-approved handoff makes a product task executable.
+> **Status: M4 Architecture Proof (TASKS.md milestone M1).** On the
+> `spike/v0-architecture-proof` branch (draft PR #2, unmerged), proof-only code
+> lives under [`spike/architecture-proof/`](spike/architecture-proof/). It is
+> evidence for an architecture decision, not product code. **Full V0 implementation
+> is not admitted**; product work starts only after Brain admits a later handoff.
 
 ## Where truth lives
 
@@ -28,12 +29,12 @@ titles and decision identifiers may be referenced.
 | [`docs/agent/commands/`](docs/agent/commands/) · [`docs/agent/returns/`](docs/agent/returns/) | Brain → Engineer command records (`CMD-####`) and Engineer → Brain returns (`RET-####`) |
 | [`.claude/rules/`](.claude/rules/) | Small project rules for Claude Code (no settings/hooks/MCP) |
 | [`docs/exec-plans/`](docs/exec-plans/) | One executable plan per active task |
-| [`docs/architecture/`](docs/architecture/) | Architecture notes (empty until approved) |
+| [`docs/architecture/`](docs/architecture/) | Architecture notes, including the Architecture Proof evidence under `spike/` |
 | [`docs/adr/`](docs/adr/) | Architecture Decision Records |
 | [`docs/provenance/`](docs/provenance/) | Origin records; [`OPEN_SOURCE_REUSE_REGISTER.md`](docs/provenance/OPEN_SOURCE_REUSE_REGISTER.md) (D-024) |
 | [`docs/qa/`](docs/qa/) | QA plans and evidence |
 | [`scripts/`](scripts/) | Repository validation scripts |
-| [`.github/workflows/`](.github/workflows/) | CI (`bootstrap-validation`) and the inert Claude wake-up bridge (`claude-bridge`) |
+| [`.github/workflows/`](.github/workflows/) | CI (`bootstrap-validation`, `spike-proof` for SQL + Deno, `flutter-proof` for the proof client) and the inert Claude wake-up bridge (`claude-bridge`) |
 
 ## Validation
 
@@ -45,6 +46,20 @@ python3 scripts/test_validate_bootstrap.py   # validator negative tests
 ```
 
 CI runs both on every pull request and on pushes to `main`.
+
+### Architecture Proof Flutter client
+
+The repository Flutter SDK pin is [`.flutter-version`](.flutter-version) (`3.47.5`, Dart 3.13.4).
+
+```sh
+cd spike/architecture-proof/client
+flutter pub get
+dart format --output=none --set-exit-if-changed .
+flutter analyze
+flutter test
+```
+
+The SQL and Deno proofs are described in [`spike/architecture-proof/README.md`](spike/architecture-proof/README.md).
 
 ## Licensing
 

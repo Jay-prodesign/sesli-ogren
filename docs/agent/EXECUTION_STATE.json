@@ -18,10 +18,11 @@
   "status": "AWAITING_BRAIN_REVIEW",
   "active_milestone": "M1",
   "brain_review": {
-    "latest": "M3_BOOTSTRAP_BRAIN_REVIEW_002",
-    "disposition": "BOOTSTRAP_PASS",
-    "reviewed_head_sha": "433c26cf5fa75a37b66b1f74dd6a133ae4d3407a",
-    "previous": "M3_BOOTSTRAP_BRAIN_REVIEW_001 (CHANGES_REQUIRED, answered by RET-0001)"
+    "latest": "M4_ARCHITECTURE_PROOF_BRAIN_REVIEW_003",
+    "disposition": "CHANGES_REQUIRED",
+    "reviewed_head_sha": "9fb2d9b34c236c3c8196a5b0f411a5c6836179d1",
+    "note": "GO_ADAPT supported; ARCHITECTURE_PROOF_PASS withheld pending the bounded corrections (CMD-0007 … CMD-0013), returned in RET-0005.",
+    "previous": "M3_BOOTSTRAP_BRAIN_REVIEW_002 (BOOTSTRAP_PASS at 433c26cf5fa75a37b66b1f74dd6a133ae4d3407a); M3_BOOTSTRAP_BRAIN_REVIEW_001 (CHANGES_REQUIRED, answered by RET-0001)"
   },
   "tasks": {
     "LA-0001": "DONE",
@@ -47,8 +48,9 @@
     "base_sha": "433c26cf5fa75a37b66b1f74dd6a133ae4d3407a",
     "base_note": "Reviewed bootstrap head (PR #1). main remains 52616b4b4f018ece72d3ee1de4949875bb144e9a; PR #1 is draft/unmerged and untouched.",
     "main_sha": "52616b4b4f018ece72d3ee1de4949875bb144e9a",
-    "head_sha": "3dc6d1d1063f806784365754a96d0286594fd3e9",
-    "head_sha_note": "Content head of the Architecture Proof (all local gates green). The final PR head is the reconciliation commit on top; it and its CI runs are reported in PR #2.",
+    "head_sha": "PR_HEAD_AT_REVIEW",
+    "head_binding": "GITHUB_PR_HEAD",
+    "head_binding_note": "CMD-0009: a committed file cannot contain its own commit SHA. The final head is the current PR #2 head, resolved from GitHub after push; required workflow runs must carry the same head_sha.",
     "pr_number": 2,
     "pr_url": "https://github.com/Jay-prodesign/sesli-ogren/pull/2",
     "pr_draft": true,
@@ -62,15 +64,16 @@
   "ci": {
     "workflows": [
       "bootstrap-validation",
-      "spike-proof"
+      "spike-proof",
+      "flutter-proof"
     ],
     "result_at_head_sha": "REPORTED_EXTERNALLY",
-    "note": "bootstrap-validation green on all heads except 521ec04 (fixed in c894bd8). spike-proof re-runs SQL+Deno proofs; see PR #2 checks for the final head.",
+    "note": "Required on the externally resolved PR #2 head: bootstrap-validation, spike-proof (spike/** changed), flutter-proof (CMD-0008). Previous reviewed head 9fb2d9b: bootstrap-validation run 36597243739 and spike-proof run 36597243597 green.",
     "run_url": null
   },
-  "last_command_id": "CMD-0003",
-  "last_acknowledged_command_id": "CMD-0003",
-  "last_return_id": "RET-0004",
+  "last_command_id": "CMD-0013",
+  "last_acknowledged_command_id": "CMD-0013",
+  "last_return_id": "RET-0005",
   "command_processing_status": "ANSWERED",
   "command_ledger": {
     "CMD-0001": {
@@ -87,6 +90,46 @@
     "CMD-0003": {
       "status": "ANSWERED",
       "return_id": "RET-0003"
+    },
+    "CMD-0004": {
+      "status": "ANSWERED",
+      "return_id": "RET-0005"
+    },
+    "CMD-0005": {
+      "status": "ANSWERED",
+      "return_id": "RET-0005"
+    },
+    "CMD-0006": {
+      "status": "ANSWERED",
+      "return_id": "RET-0005"
+    },
+    "CMD-0007": {
+      "status": "ANSWERED",
+      "return_id": "RET-0005"
+    },
+    "CMD-0008": {
+      "status": "ANSWERED",
+      "return_id": "RET-0005"
+    },
+    "CMD-0009": {
+      "status": "ANSWERED",
+      "return_id": "RET-0005"
+    },
+    "CMD-0010": {
+      "status": "ANSWERED",
+      "return_id": "RET-0005"
+    },
+    "CMD-0011": {
+      "status": "ANSWERED",
+      "return_id": "RET-0005"
+    },
+    "CMD-0012": {
+      "status": "ANSWERED",
+      "return_id": "RET-0005"
+    },
+    "CMD-0013": {
+      "status": "ANSWERED",
+      "return_id": "RET-0005"
     }
   },
   "auto_agent_bridge": {
@@ -112,24 +155,25 @@
     "AUTO_AGENT_BRIDGE_BLOCKED (unchanged; Founder gates recorded in RET-0001; non-blocking for the Architecture Proof)"
   ],
   "protected_gate": "Merge, release, deploy, LICENSE, paid provider, credentials, GitHub App install, secrets/variables, branch protection: Product Owner only",
-  "next_action": "Brain reviews PR #2 exact head against M4_ARCHITECTURE_PROOF_BRAIN_REVIEW_CHECKLIST_v0.1 and issues ARCHITECTURE_PROOF_PASS (GO_ADAPT / FALLBACK) or CHANGES_REQUIRED, preferably as CMD-0004.",
+  "next_action": "Brain resolves the PR #2 head from GitHub, verifies bootstrap-validation, spike-proof and flutter-proof are green on that exact head_sha, and reviews RET-0005 against Review 003 and CMD-0004 … CMD-0013: ARCHITECTURE_PROOF_PASS (GO_ADAPT) or CHANGES_REQUIRED.",
   "canonical_source_refs": [
     "CURRENT_EXECUTION_STATE — Learning App",
-    "CLAUDE_HANDOFF_001 — V0 Architecture Spike — Learning App",
+    "CLAUDE_HANDOFF_001 — V0 Architecture Spike — Learning App (mission container, partially superseded)",
+    "HANDOFF_COMMAND_AUTHORITY_AUDIT_001 — Learning App",
+    "M4_ARCHITECTURE_PROOF_BRAIN_REVIEW_003 — CHANGES_REQUIRED — Learning App",
+    "M4_ARCHITECTURE_PROOF_CORRECTION_MAP_001 — Learning App (supporting, partially superseded)",
     "M4_ARCHITECTURE_PROOF_TASK_ADMISSION_001 — Learning App",
-    "M4_ARCHITECTURE_PROOF_BRAIN_REVIEW_CHECKLIST_v0.1 — Learning App",
-    "M3_BOOTSTRAP_BRAIN_REVIEW_002 — BOOTSTRAP_PASS — Learning App",
-    "BRAIN_COMMAND_0002 / BRAIN_COMMAND_0003 — Learning App",
+    "BRAIN_COMMAND_0002 … BRAIN_COMMAND_0013 — Learning App",
     "ENGINEERING & PRODUCT QUALITY CONSTITUTION — Learning App (D-029)",
-    "DECISION_LOG — Learning App (D-015, D-024, D-025 + refinements, D-026, D-027, D-028, D-029)",
+    "DECISION_LOG — Learning App (D-015, D-024 … D-029, D-031, D-034, D-037, D-042, D-043, D-053, D-054, D-062)",
     "V0_CANONICAL_DATA_CAPABILITY_CONTRACTS_v0.1 — Learning App",
-    "V0_PRODUCT_SCOPE_v1.0 — Learning App"
+    "V0_PRODUCT_SCOPE_v2.0 — Learning App"
   ],
   "governance_read": {
     "drive_status": "AVAILABLE",
-    "detail": "Fresh-read 2026-09-29: CURRENT_EXECUTION_STATE, CLAUDE_HANDOFF_001, M4 task admission, review checklist, BRAIN_COMMAND_0002/0003, D-024…D-029, quality constitution. No Drive content copied."
+    "detail": "Fresh-read 2026-09-30: CURRENT_EXECUTION_STATE, HANDOFF_COMMAND_AUTHORITY_AUDIT_001, Brain Review 003, correction map, BRAIN_COMMAND_0004…0013, D-062. No Drive content copied beyond titles, decision IDs and transcribed instructions."
   },
-  "updated_at": "2026-09-29",
+  "updated_at": "2026-09-30",
   "architecture_proof": {
     "selector": "GO_ADAPT",
     "conditions": [
@@ -139,6 +183,17 @@
       "Canonical SQL regression suite extended every tranche"
     ],
     "open_final_engineering_test_item": "#4 client re-point measured, not executed",
-    "return": "RET-0004"
-  }
+    "return": "RET-0005 (supersedes nothing; RET-0004 remains the CMD-0002 answer)",
+    "d037_disposition": "COMPATIBLE: no destructive replacement or parallel truth; learner-loop authorities are additive MIGRATION_DEBT (LA-0011 §5)",
+    "d042_disposition": "FUTURE_COMPATIBLE (voice-optional core, voice-enabled Sesli Öğren composition)",
+    "speech_disposition": "Implementation N/A_BY_SCOPE; Speech Capability boundary FUTURE_COMPATIBLE with additive debt before provider lock-in (D-062)",
+    "hardening_debt": [
+      "H1 quota concurrency",
+      "H2 relational tenant-owner integrity",
+      "H3 real Supabase surface / storage deletion",
+      "H4 Flutter CI (addressed for proof client by flutter-proof)",
+      "H5 locale persistence on jobs"
+    ]
+  },
+  "command_ledger_note": "RET-0005 is the single cumulative return for the Review 003 correction round (CMD-0009 mechanics): it answers CMD-0013 and names CMD-0004 … CMD-0012 in its 'Also answers' field."
 }

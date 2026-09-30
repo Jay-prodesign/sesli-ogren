@@ -29,7 +29,7 @@ and bounded operators/reviewers (Codex). Governed by [`AGENTS.md`](../../AGENTS.
 | `last_acknowledged_command_id` | Highest command the Engineer has acknowledged, or `null`. Always ≤ `last_command_id`. |
 | `last_return_id` | Highest `RET-####` file present, or `null`. |
 | `command_processing_status` | `IDLE` (no commands, or all answered and nothing new), `UNREAD` (`last_command_id` > `last_acknowledged_command_id`), `ACKNOWLEDGED` (at least one acknowledged command is still open), `ANSWERED` (every acknowledged command has a final return and nothing is unread), `BLOCKED` (an acknowledged command cannot proceed; see its return or Decision Request). |
-| `command_ledger` | `{ "CMD-####": { "status": "ACKNOWLEDGED" \| "ANSWERED" \| "BLOCKED", "return_id": "RET-####" \| null, "partial_return_ids": ["RET-####", …] } }` for every acknowledged command. `partial_return_ids` lists interim `Disposition: PARTIAL` checkpoint returns. |
+| `command_ledger` | `{ "CMD-####": { "status": "ACKNOWLEDGED" \| "ANSWERED" \| "BLOCKED", "return_id": "RET-####" \| null, "partial_return_ids": ["RET-####", …] } }` for every acknowledged command. `partial_return_ids` lists interim `Disposition: PARTIAL` checkpoint returns. A cumulative return (CMD-0009) answers its `Answers` command and every earlier command listed in its optional `Also answers:` field; each of those ledger entries then records that return. |
 
 ### Semantics
 

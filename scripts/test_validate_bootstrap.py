@@ -302,6 +302,71 @@ class ValidatorNegativeTests(unittest.TestCase):
         self.write(STATE, json.dumps(s, indent=2) + "\n")
         self.assertFailsWith(r"RET-0002 is a PARTIAL checkpoint, not an answer")
 
+    # --- CMD-0009 external head binding / cumulative return ---------------
+    RET5 = "docs/agent/returns/RET-0005.md"
+    LITERAL = "0123456789abcdef0123456789abcdef01234567"
+
+    def set_git(self, **changes) -> None:
+        s = self.state()
+        for k, v in changes.items():
+            if v is None:
+                s["git"].pop(k, None)
+            else:
+                s["git"][k] = v
+        self.write(STATE, json.dumps(s, indent=2, ensure_ascii=False) + "\n")
+
+    def test_head_sentinel_outside_review_state(self) -> None:
+        self.set_state(status="IN_PROGRESS")
+        self.assertFailsWith(r"git\.head_sha PR_HEAD_AT_REVIEW is only allowed when AWAITING_BRAIN_REVIEW")
+
+    def test_head_sentinel_missing_binding(self) -> None:
+        self.set_git(head_binding=None)
+        self.assertFailsWith(r"requires git\.head_binding = GITHUB_PR_HEAD")
+
+    def test_head_sentinel_wrong_binding(self) -> None:
+        self.set_git(head_binding="LOCAL_GUESS")
+        self.assertFailsWith(r"requires git\.head_binding = GITHUB_PR_HEAD")
+
+    def test_head_sentinel_missing_pr_metadata(self) -> None:
+        self.set_git(pr_url="")
+        self.assertFailsWith(r"git\.head_sha PR_HEAD_AT_REVIEW requires git\.pr_url")
+
+    def test_head_arbitrary_non_hex(self) -> None:
+        self.set_git(head_sha="PR_HEAD_LATER")
+        self.assertFailsWith(r"git\.head_sha must be a 40-hex SHA")
+
+    def test_ret_sentinel_non_review_disposition(self) -> None:
+        self.edit(self.RET5, "- Disposition: READY_FOR_BRAIN_REVIEW", "- Disposition: BLOCKED")
+        self.assertFailsWith(r"RET-0005\.md: Head SHA PR_HEAD_AT_REVIEW requires a READY_FOR_BRAIN_REVIEW disposition")
+
+    def test_ret_sentinel_missing_binding(self) -> None:
+        self.edit(self.RET5, "- Head binding: GITHUB_PR_HEAD\n", "")
+        self.assertFailsWith(r"RET-0005\.md: Head SHA PR_HEAD_AT_REVIEW requires 'Head binding: GITHUB_PR_HEAD'")
+
+    def test_ret_sentinel_state_literal_head(self) -> None:
+        self.set_git(head_sha=self.LITERAL, head_binding=None)
+        self.assertFailsWith(r"RET-0005\.md: Head SHA PR_HEAD_AT_REVIEW requires EXECUTION_STATE AWAITING_BRAIN_REVIEW")
+
+    def test_literal_heads_still_pass(self) -> None:
+        self.set_git(head_sha=self.LITERAL, head_binding=None)
+        self.edit(self.RET5, "- Head SHA: PR_HEAD_AT_REVIEW", f"- Head SHA: {self.LITERAL}")
+        code, out = self.run_validator()
+        self.assertEqual(code, 0, out)
+
+    def test_also_answers_later_command(self) -> None:
+        self.edit(self.RET5, "- Also answers: CMD-0004,", "- Also answers: CMD-0099, CMD-0004,")
+        self.assertFailsWith(r"Also answers 'CMD-0099' must be an existing command earlier than CMD-0013")
+
+    def test_also_answers_not_in_ledger(self) -> None:
+        s = self.state()
+        s["command_ledger"]["CMD-0004"] = {"status": "ACKNOWLEDGED", "return_id": None}
+        self.write(STATE, json.dumps(s, indent=2, ensure_ascii=False) + "\n")
+        self.assertFailsWith(r"RET-0005 answers CMD-0004 but command_ledger does not record it as answered")
+
+    def test_partial_return_with_also_answers(self) -> None:
+        self.edit("docs/agent/returns/RET-0002.md", "- Supersedes:", "- Also answers: CMD-0001\n- Supersedes:")
+        self.assertFailsWith(r"RET-0002\.md: a PARTIAL checkpoint cannot declare Also answers")
+
     # --- workflows ---------------------------------------------------------
     def test_bridge_non_write_users(self) -> None:
         self.edit(".github/workflows/claude-bridge.yml", "          claude_args: |",

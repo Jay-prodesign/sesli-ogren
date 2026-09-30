@@ -3,7 +3,7 @@ name: spike-proof
 # LA-0017: re-runs the Architecture Proof SQL and Deno evidence in CI so reviewers can verify the
 # exact head independently. Read-only; no secrets; no third-party actions beyond actions/checkout.
 # PostgreSQL 16 is preinstalled on ubuntu-24.04 runners; Deno is fetched from its official release
-# host and checksum-verified. Flutter client tests remain local-only evidence (toolchain size).
+# host and checksum-verified. The Flutter proof client is verified separately by flutter-proof.yml (CMD-0008).
 
 on:
   pull_request:

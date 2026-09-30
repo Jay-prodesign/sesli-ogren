@@ -30,12 +30,24 @@ class JobStatusCard extends StatelessWidget {
           padding: const EdgeInsets.all(16),
           child: Row(
             children: [
-              if (view == ProcessingView.queued || view == ProcessingView.processing || view == ProcessingView.checking)
-                const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2)),
+              if (view == ProcessingView.queued ||
+                  view == ProcessingView.processing ||
+                  view == ProcessingView.checking)
+                const SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                ),
               const SizedBox(width: 12),
-              Expanded(child: Text(_labels[view]!, key: const Key('job-status-label'))),
+              Expanded(
+                child: Text(_labels[view]!, key: const Key('job-status-label')),
+              ),
               if (job.canRetry)
-                TextButton(key: const Key('job-retry'), onPressed: onRetry, child: const Text('Tekrar dene')),
+                TextButton(
+                  key: const Key('job-retry'),
+                  onPressed: onRetry,
+                  child: const Text('Tekrar dene'),
+                ),
             ],
           ),
         ),

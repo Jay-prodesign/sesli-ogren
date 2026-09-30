@@ -14,12 +14,12 @@ class LibraryItem {
   });
 
   factory LibraryItem.fromRow(Map<String, dynamic> row) => LibraryItem(
-        materialId: row['material_id'] as String,
-        title: row['title'] as String,
-        processingState: row['processing_state'] as String,
-        summaryArtifactId: row['summary_artifact_id'] as String?,
-        summaryVersion: row['summary_version'] as int?,
-      );
+    materialId: row['material_id'] as String,
+    title: row['title'] as String,
+    processingState: row['processing_state'] as String,
+    summaryArtifactId: row['summary_artifact_id'] as String?,
+    summaryVersion: row['summary_version'] as int?,
+  );
 
   final String materialId;
   final String title;
@@ -48,7 +48,9 @@ class SummaryArtifact {
       throw FormatException('not a SUMMARY artifact: ${row['artifact_type']}');
     }
     if (row['content_schema_version'] != 1) {
-      throw FormatException('unsupported summary schema ${row['content_schema_version']}');
+      throw FormatException(
+        'unsupported summary schema ${row['content_schema_version']}',
+      );
     }
     final content = row['content'] as Map<String, dynamic>;
     return SummaryArtifact(
@@ -78,12 +80,24 @@ class SummaryArtifact {
 }
 
 /// User-visible processing status derived from the canonical GenerationJob state.
-enum ProcessingView { queued, processing, success, failedRetryable, checking, failedFinal }
+enum ProcessingView {
+  queued,
+  processing,
+  success,
+  failedRetryable,
+  checking,
+  failedFinal,
+}
 
 class GenerationJobView {
-  const GenerationJobView({required this.jobId, required this.state, this.failureClass});
+  const GenerationJobView({
+    required this.jobId,
+    required this.state,
+    this.failureClass,
+  });
 
-  factory GenerationJobView.fromRow(Map<String, dynamic> row) => GenerationJobView(
+  factory GenerationJobView.fromRow(Map<String, dynamic> row) =>
+      GenerationJobView(
         jobId: row['id'] as String,
         state: row['state'] as String,
         failureClass: row['failure_class'] as String?,
@@ -94,14 +108,15 @@ class GenerationJobView {
   final String? failureClass;
 
   ProcessingView get view => switch (state) {
-        'QUEUED' => ProcessingView.queued,
-        'PROCESSING' => ProcessingView.processing,
-        'SUCCEEDED' || 'PARTIAL' => ProcessingView.success,
-        // An ambiguous dispatch is being reconciled server-side; offering "retry" could double-charge.
-        'FAILED_RETRYABLE' when failureClass == 'reconciliation_required' => ProcessingView.checking,
-        'FAILED_RETRYABLE' => ProcessingView.failedRetryable,
-        _ => ProcessingView.failedFinal,
-      };
+    'QUEUED' => ProcessingView.queued,
+    'PROCESSING' => ProcessingView.processing,
+    'SUCCEEDED' || 'PARTIAL' => ProcessingView.success,
+    // An ambiguous dispatch is being reconciled server-side; offering "retry" could double-charge.
+    'FAILED_RETRYABLE' when failureClass == 'reconciliation_required' =>
+      ProcessingView.checking,
+    'FAILED_RETRYABLE' => ProcessingView.failedRetryable,
+    _ => ProcessingView.failedFinal,
+  };
 
   /// Only a plain retryable failure offers a user retry (server enforces the same rule).
   bool get canRetry => view == ProcessingView.failedRetryable;

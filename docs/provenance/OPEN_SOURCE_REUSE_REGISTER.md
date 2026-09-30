@@ -113,3 +113,35 @@ custom code, record it here with a concrete reason, as AGENTS.md §12 requires:
 | Audit status | APPROVED |
 | Approving decision / task | D-015 (Flutter client), D-024; LA-0013. Part of the Flutter SDK's standard project template, so no new vendor (D-031) |
 | Recorded | 2026-09-29 by Claude (Primary Engineer) |
+
+### REUSE-0004 — `subosito/flutter-action` (CI: Flutter SDK setup for the proof client)
+
+| Field | Value |
+| --- | --- |
+| Task ID | LA-0017 (CMD-0008) |
+| Upstream repository | https://github.com/subosito/flutter-action |
+| Exact tag / commit / version | v2.23.0 @ 1a449444c387b1966244ae4d4f8c696479add0b2 (pinned by SHA in `.github/workflows/flutter-proof.yml`) |
+| License | MIT (© 2019 Alif Rachmawadi), `LICENSE` at that commit |
+| Reuse class | DEPENDENCY |
+| Dependency / files / modules used | GitHub Action `uses:` reference only; no source copied. Installs the official Flutter SDK from `storage.googleapis.com/flutter_infra_release` at the `.flutter-version` pin |
+| Material modifications | none. `cache: false` and `pub-cache: false`, so the action's internal mutable-tag `actions/cache@v5` steps do not execute |
+| Copyright / license / NOTICE obligations | None; the action is referenced, not redistributed |
+| Audit status | APPROVED |
+| Approving decision / task | CMD-0008 (Brain-verified SHA); D-024; LA-0017. Read-only workflow, no secrets; runs on GitHub (approved stack) and fetches the official Flutter SDK (approved stack) |
+| Recorded | 2026-09-30 by Claude (Primary Engineer) |
+
+### REUSE-0005 — `actions/checkout` (CI: repository checkout, SHA-pinned in flutter-proof)
+
+| Field | Value |
+| --- | --- |
+| Task ID | LA-0017 (CMD-0008) |
+| Upstream repository | https://github.com/actions/checkout |
+| Exact tag / commit / version | v4.4.0 @ 11d5960a326750d5838078e36cf38b85af677262 in `.github/workflows/flutter-proof.yml`. The existing `bootstrap-validation` and `spike-proof` workflows keep their `@v5` tag reference unchanged (CMD-0008: do not normalize unrelated workflows) |
+| License | MIT (© 2018 GitHub, Inc. and contributors), `LICENSE` at that commit |
+| Reuse class | DEPENDENCY |
+| Dependency / files / modules used | GitHub Action `uses:` reference only; `persist-credentials: false` |
+| Material modifications | none |
+| Copyright / license / NOTICE obligations | None; the action is referenced, not redistributed |
+| Audit status | APPROVED |
+| Approving decision / task | CMD-0008 (Brain-verified SHA); D-024; LA-0017 |
+| Recorded | 2026-09-30 by Claude (Primary Engineer) |

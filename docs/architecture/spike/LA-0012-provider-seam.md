@@ -75,3 +75,16 @@ This is logged in the register's "Rejected approved candidates" section.
 - The cost of a failed-but-executed attempt (for example invalid output) is not recorded as a UsageEvent. Only successful jobs
   produce usage. This needs attempt-level cost events before real providers are used.
 - The adapter targets the common OpenAI-compatible `json_schema` response format. Other vendors need their own adapter file.
+
+## 6. D-034 / speech / evaluation reconciliation (CMD-0004 → CMD-0013, D-062)
+
+No code changed for this section; the seam evidence above still holds.
+
+| Question | Disposition |
+| --- | --- |
+| Structured generation provider-neutral? | **Yes (PASS for M4).** `StructuredGenerationCapability` is Learning App-owned and has no imports. No provider SDK type reaches the domain, the DB rows or the Flutter models. |
+| Distinct language semantics representable? | **Yes.** `outputLocale` carries content/learning locale; uiLocale lives on `accounts.locale`; source and voice locale are additive columns later (LA-0011 §6). |
+| Speech in M4 | **Implementation N/A_BY_SCOPE.** Architecture compatibility is assessed, and nothing is built. The base Learning Engine is voice-optional (D-042). Speech is Sesli Öğren product-local (D-062). No SpeechProvider, shared Speech Service or shared-runtime speech extraction is required, and their absence is **not** debt. |
+| Future Speech Capability boundary | **FUTURE_COMPATIBLE, with additive MIGRATION_DEBT before provider lock-in (D-062).** The same shape as this seam applies: a product-owned contract with no imports, a deterministic fake, one adapter file per provider, a server-side call so no credential reaches the client, and usage/cost recorded per job. It is compatible with voice-profile/language separation and later streaming, chunking and caching. Speech output would be a job-produced artifact, so the job/idempotency/ambiguous-dispatch rules carry over unchanged. |
+| Evaluation readiness | **Attachment point exists; no framework added.** Deterministic fake output, typed validation (`la_valid_summary_content`), `content_schema_version` and `execution_ref` make eval datasets/runners attachable and replaceable later. |
+| Duplicate generic AI/speech/eval control plane? | **None created.** The spike has one narrow generation contract and one adapter. Routing/fallback, telemetry, gateway and eval execution are not built inside Learning, so a later shared runtime can own them. |

@@ -17,17 +17,17 @@ Every MoonlighC reference below is `MoonlighC/ai-study-buddy@317e21df…`, MIT (
 | Parsing / OCR / chunking | V0L | MoonlighC `extract-pdf-text` (unpdf), OCR adapters | ADAPT later | Deno functions → `extracted_contents` | ExtractedContent | Donor Deno tests (20+6+2 green) | Medium: 3 functions write legacy columns | Docling (Python) would add a runtime: PATTERN-ONLY. NotebookLM-Lite `ChunkingService`: PATTERN-ONLY |
 | Retrieval / citations | V0L | CUSTOM behind the EvidenceRef contract | PATTERN-ONLY (Open Notebook, NotebookLM-Lite) | `evidence_refs` (whole-source anchor in spike) | EvidenceRef | Later | — | Python/SurrealDB stacks. The interface ideas are reused, the code is not |
 | Summary / artifact generation | RS | Canonical job + Deno seam; donor summary prompt/validation as reference | ADAPT (mechanics) + CUSTOM (seam) | `generation_jobs/attempts`, `artifacts`, worker | Artifact, GenerationJob/Attempt | 10, 11, 30 + Deno 13 | Done in spike | Donor `openai_adapter.ts` is OpenAI-specific, so it is replaced by the contract |
-| Flashcards / quizzes | V0L | MoonlighC `generate-flashcards/quiz` + tables | ADAPT later | New artifact types on the same job model | FlashcardSet, Quiz | Donor Deno 11+12 green; canonical tests later | Medium: add an artifact parent and stable IDs; SRS fields off cards | OpenTutor learning-science patterns only where the V0 contract requires them |
+| Flashcards / quizzes | V0L, only if admitted (CMD-0013 / D-054) | MoonlighC `generate-flashcards/quiz` + tables | ADAPT later | New artifact types on the same job model | FlashcardSet, Quiz | Donor Deno 11+12 green; canonical tests later | Medium: add an artifact parent and stable IDs; SRS fields off cards | OpenTutor learning-science patterns only where the V0 contract requires them |
 | Job / retry / idempotency | RS | Canonical unified job model adapted from MoonlighC 010 | ADAPT (REUSE-0002) | 5 worker RPCs, lease tokens, dispatch_state | GenerationJob/Attempt, UsageEvent | 30 (33 checks) + Deno integration | Done in spike | — |
 | Provider routing | RS | Learning App contract + fetch adapter | CUSTOM (seam); `vercel/ai` DEPENDENCY candidate, not adopted | `functions/_shared/generation/*` | StructuredGenerationCapability | Deno 8 seam tests | Done in spike | SDK: 94× bundle, 11 packages, Gateway pulled in (LA-0012). Esperanto: Python. LiteLLM: licence scope unreviewed |
-| Audio / TTS / podcast | V0L | Product-local, concrete-first (D-035) | PATTERN-ONLY (Open Notebook) | — | AudioAsset | Later | — | D-035 forbids a speculative shared speech seam |
+| Audio / TTS / speech | V0L (Sesli Öğren composition) | Product-local Speech Capability behind a replaceable boundary (D-062). The core stays voice-optional (D-042) | PATTERN-ONLY (Open Notebook) | Job-produced artifact through the same job model | AudioAsset | Later | Medium: provider benchmark + boundary before lock-in | No shared Speech Service before proven reuse (D-062). Provider choice is measured Turkish-first, not preference |
 | Study-session persistence | V0L | MoonlighC migration 026 | ADAPT later | `study_sessions` → learner evidence (D-037) | LearnerEvidence | Donor SQL test 26 (passes at its own step only) | Medium | — |
 | Spaced repetition | V1 (engine) | `open-spaced-repetition/dart-fsrs` when admitted | DEFERRED | — | FlashcardReviewState | — | — | V0 does not admit SRS; Nibomo `ts-fsrs` and OpenTutor are references |
 | Progress / mastery | V0L (progress) · V1 (mastery) | MoonlighC 027 progress; D-037 rule-based state later | ADAPT later / PATTERN-ONLY (OpenTutor BKT/KG) | — | LearnerState (D-037) | — | Medium | V1 firewall; `weak_topics` must not become mastery truth |
 | Offline / sync | V0L | none in V0 scope | PATTERN-ONLY (Nibomo) | — | — | — | — | Native-only stacks |
 | Analytics / cost / quota | RS (quota/usage seam) · V0L (analytics) | Canonical `usage_events` + `quota_ledger` adapted from donor usage tables | ADAPT | `request_summary` quota check, usage per job | UsageEvent, QuotaLedger, Entitlement | 30 (quota, one usage per job) | Done (seam) | Analytics follows the Learning App event contract; donor analytics code is PATTERN-ONLY |
 | Deletion / export | RS (material revoke) · V0L (account/export) | Canonical `delete_material` + MoonlighC `delete-*` functions later | ADAPT | RPC + later donor functions | Deletion semantics §19 | Test 20 §8; donor Deno 40+13+35 green | Medium: donor functions target legacy tables | Nibomo recovery hardening: PATTERN-ONLY |
-| Test / CI / release | RS | Learning App CI + spike gates; donor Flutter/Deno suites kept | CUSTOM CI; donor tests ADAPT | `bootstrap-validation` + local gates | — | Validator + negative suite (41) | Low | Nibomo release discipline: PATTERN-ONLY |
+| Test / CI / release | RS | Learning App CI + spike gates; donor Flutter/Deno suites kept | CUSTOM CI; donor tests ADAPT; `subosito/flutter-action` DEPENDENCY (REUSE-0004) | `bootstrap-validation`, `spike-proof` (SQL + Deno), `flutter-proof` (client, CMD-0008) | — | Validator + negative suite; SQL 4/4; Deno 13/13; Flutter 5/5 in CI | Low | Nibomo release discipline: PATTERN-ONLY |
 
 ## 2. Quantified adaptation burden
 
@@ -104,6 +104,34 @@ unavoidable dual authority, and the canonical job/artifact model fitted cleanly.
 | 7 | Replaceable/evolvable? | Yes. Provider seam, artifact types as data, no donor authority in the schema. |
 | 8 | Privacy? | Acceptable. Owner-only data, deletion revokes derived rows, minimum provider context. |
 | 9 | Operational cost? | Reasonable. No new runtime or service; the Supabase stack is unchanged. |
-| 10 | Tomorrow? | Yes. D-037 learner evidence and later artifact types attach to stable IDs without reshaping core tables. |
+| 10 | Tomorrow? | Yes. The D-037 learner loop and a Sesli Öğren speech capability attach additively, with no destructive replacement or parallel truth (§5). |
 
 **Open/unclear answer (declared):** #4 depends on executing condition 2. The client re-point is measured, not proven.
+
+## 5. Review 003 corrections: selector consequences (CMD-0007 → CMD-0013)
+
+### D-037 learner loop
+LA-0011 §5 maps every D-037 authority. No row is BLOCKED. Tenancy, provenance, deletion of source-bound data, and
+versioned-config substrate are FUTURE_COMPATIBLE. OutcomeContract, Objective/CompetencyRef, LearnerEvidence,
+LearnerState, LearningMission, LearningAction and NBA policy are additive MIGRATION_DEBT. None needs destructive
+replacement or a parallel truth. **GO_ADAPT is unaffected.** On the FALLBACK path the same learner-loop tables would
+be needed in addition to rebuilding the shell.
+
+### Layered composition and speech (D-042, D-062)
+- **D-042 disposition: FUTURE_COMPATIBLE.** Nothing in the canonical schema, the RPCs or the D-037 attachment points
+  depends on speech, so another Learning App can omit voice. Sesli Öğren composes voice as a product-local
+  capability producing job-driven artifacts. There is no second learning-truth model and no speech leakage into
+  learner-state/NBA.
+- **D-041 speech-compatibility question, read through D-062: FUTURE_COMPATIBLE.** The generation seam pattern proves
+  a replaceable, fakeable, server-side, cost-recording capability boundary. The Speech Capability boundary itself
+  is additive MIGRATION_DEBT before provider lock-in. Companion/product direction is not an M4 matter (CMD-0012/0013).
+
+### Hardening debt carried (not built in M4; not selector blockers)
+
+| ID | Debt | Why it matters | Verification point |
+| --- | --- | --- | --- |
+| H1 | **Quota concurrency.** `request_summary` checks quota server-side, but concurrent requests for *different* materials can both pass the check before either consumes. | Over-admission of billable work. | Before any real billable provider: atomic reservation/consumption (row lock or conditional update on `quota_ledger`) plus a concurrent-request test. |
+| H2 | **Relational tenant-owner integrity.** Related rows each carry `account_id` with ordinary FKs. Client writes are RPC-only and tested, but a privileged/server bug could link rows across owners. | Defence in depth for privileged writes. | Before load-bearing server writes: composite `(id, account_id)` FKs or equivalent invariant checks, with negative tests. |
+| H3 | **Real Supabase surface.** The spike runs on a Postgres shim; PostgREST, GoTrue and Storage HTTP are not exercised. Rows are revoked on deletion, but object cleanup is not proven. | Privacy/retention contract. | Before production-shaped acceptance: real Supabase-compatible run proving auth, storage access, object deletion/revocation. |
+| H4 | **Flutter CI.** Was local-only at the reviewed head. | Exact-head evidence for the client. | **Addressed for the proof client by CMD-0008:** `flutter-proof.yml` runs pub get, format, analyze and test on the `.flutter-version` pin. Extend it to the real client when that becomes load-bearing. |
+| H5 | **Locale persistence.** The harness worker defaults the output locale to `tr-TR` and the job does not store the requested locale. | D-034 explanation-locale fidelity. | With the first real generation path: persist the requested locale on the job (additive column). |

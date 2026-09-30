@@ -15,7 +15,7 @@ is not merged. Evidence documents: [`docs/architecture/spike/`](../../docs/archi
 
 ## Reproduce
 
-Prerequisites: PostgreSQL 16 server + `psql`, Deno ≥ 2.9, Flutter ≥ 3.47.
+Prerequisites: PostgreSQL 16 server + `psql`, Deno ≥ 2.9, Flutter 3.47.5 (`.flutter-version`).
 
 ```sh
 # 1. Local Postgres (any superuser works via PGADMIN); a Supabase-like "postgres" role is created by the shim.
@@ -26,5 +26,5 @@ spike/architecture-proof/db/run_sql_suite.sh la_proof spike/architecture-proof/d
 cd spike/architecture-proof/functions && deno lint . && deno check . && LA_TEST_DB=la_proof deno test -A .
 
 # 3. Flutter client contract
-cd spike/architecture-proof/client && flutter pub get && flutter analyze && flutter test
+cd spike/architecture-proof/client && flutter pub get && dart format --output=none --set-exit-if-changed . && flutter analyze && flutter test
 ```
