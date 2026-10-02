@@ -46,6 +46,25 @@ class Round7CompanionVisualPromptTests(unittest.TestCase):
             for state in self.spec["stages"]["F1"]["states"]:
                 self.assertIn(state, prompt)
 
+    def test_reference_locked_strategy_is_required(self):
+        self.assertEqual(self.spec["production_mode"]["strategy"], "reference_locked_edit")
+        self.assertEqual(self.spec["seed_control"]["variants_per_candidate"], 3)
+
+    def test_f0_requires_attached_seed_and_topology_lock(self):
+        for code in ("D", "E"):
+            prompt = module.build_f0_prompt(self.spec, code)
+            self.assertIn("ATTACHED geometry control seed", prompt)
+            self.assertIn("PRESERVING its outer silhouette", prompt)
+            self.assertIn("do not convert structural apertures into eyes", prompt)
+            self.assertIn("output ONE isolated candidate", prompt)
+
+    def test_f1_requires_approved_f0_reference(self):
+        for code in ("D", "E"):
+            prompt = module.build_f1_prompt(self.spec, code)
+            self.assertIn("ATTACHED approved F0 canonical form", prompt)
+            self.assertIn("Do not redesign the character", prompt)
+
+
 
 if __name__ == "__main__":
     unittest.main()
