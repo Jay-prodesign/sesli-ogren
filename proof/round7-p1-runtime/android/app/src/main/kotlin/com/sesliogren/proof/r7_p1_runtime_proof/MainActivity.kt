@@ -3,7 +3,6 @@ package com.sesliogren.proof.r7_p1_runtime_proof
 import android.content.Context
 import android.media.MediaMetadataRetriever
 import android.net.ConnectivityManager
-import android.net.NetworkCapabilities
 import android.os.Build
 import android.os.Bundle
 import android.os.SystemClock
@@ -107,14 +106,14 @@ class MainActivity : FlutterActivity() {
         val capabilities = active?.let { manager.getNetworkCapabilities(it) }
         val internet = capabilities?.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) == true
         val validated = capabilities?.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED) == true
-        val offline = active == null || (!internet && !validated)
+        val offline = active == null
         return mapOf(
             "offline" to offline,
             "method" to "Android ConnectivityManager active-network capability gate",
             "detail" to if (offline) {
-                "No active validated/internet-capable network reported."
+                "No active network is reported."
             } else {
-                "Active network still reports internet/validated capability."
+                "An active network is still present; disable Wi-Fi/cellular before capture."
             },
         )
     }
