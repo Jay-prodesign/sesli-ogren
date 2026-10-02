@@ -71,6 +71,13 @@ def lint_spec(spec: dict) -> list[str]:
     if not required_fails.issubset(hard_fails):
         errors.append("Shared hard-fail list lost required anti-mascot constraints.")
 
+    production = spec.get("production_mode", {})
+    if production.get("strategy") != "reference_locked_edit":
+        errors.append("Production strategy must be reference_locked_edit.")
+    seed = spec.get("seed_control", {})
+    if seed.get("variants_per_candidate") != 3:
+        errors.append("Exactly three geometry seed variants per candidate are required.")
+
     for code, candidate in candidates.items():
         if not candidate.get("positive_identity"):
             errors.append(f"{code} has no positive identity anchors.")
@@ -96,12 +103,18 @@ If a familiar mascot shorthand would help readability, do NOT use it. Preserve t
 def build_f0_prompt(spec: dict, candidate_code: str) -> str:
     c = spec["candidates"][candidate_code]
     identity = "\n".join(f"- {x}" for x in c["positive_identity"])
-    views = "\n".join(f"- {x}" for x in spec["stages"]["F0"]["views"])
-    return f"""ROUND 7 COMPANION — F0 CANONICAL FORM PROOF
+    production = spec["production_mode"]
+    return f"""ROUND 7 COMPANION — F0 REFERENCE-LOCKED MATERIALIZATION
 Candidate: {c['name']}
 
+INPUT AUTHORITY
+Use the ATTACHED geometry control seed as the sole positive visual reference. Previous mascot/poster renders are rejected history and must not influence the image.
+
 TASK
-Design a production-quality non-human learning Companion character. This is character-form development, not a marketing poster, lifestyle scene, game mascot, toy render, or generic AI assistant.
+Materialize the attached geometry seed into a production-quality non-human learning Companion while PRESERVING its outer silhouette, negative-space topology, part count, and candidate-specific structural identity.
+
+TOPOLOGY LOCK
+{production['topology_lock']}
 
 PRIMARY GEOMETRY
 {c['f0_geometry']}
@@ -109,34 +122,36 @@ PRIMARY GEOMETRY
 IDENTITY ANCHORS
 {identity}
 
-REQUIRED F0 OUTPUTS IN ONE CLEAN DESIGN SHEET
-{views}
+EDIT BOUNDARY
+- keep the same candidate only;
+- do not invent a head, face, eyes, mouth, limbs, hands, feet, ears, tail, hair, clothing, props, UI symbols, badges, speech bubbles, environment, books, desk, phone, classroom, stars or decorative scene;
+- do not add glow, particles, aura, neon rim light or cinematic background;
+- do not convert structural apertures into eyes;
+- do not add text;
+- use restrained matte soft-touch material and neutral studio shading only;
+- improve thickness, edge quality, spatial depth and material finish without changing topology.
 
 {_shared_block(spec)}
 
 QUALITY BAR
-- silhouette must be distinctive before color or lighting;
-- form must feel alive/responsive without eyes, mouth, limbs, face, costume or props;
+- the silhouette must remain recognizable before color;
+- the form must feel responsive/alive through structural tension and orientation, not facial acting;
 - mature enough for teen, adult and professional learning contexts;
-- quiet enough to sit beside dense educational content for long sessions;
-- low-part-count geometry with believable translation to vector/CustomPaint/Rive;
-- no decorative environment; no books, desks, phones, classrooms, stars, particles or scene storytelling;
-- no glow dependency;
-- no candidate-vs-candidate comparison inside this image;
-- do not add extra characters.
+- low-part-count and plausible for vector/CustomPaint/Rive translation;
+- output ONE isolated candidate on the neutral studio field, centered with generous margins.
 
-Render as a restrained industrial/character-design sheet with neutral studio material and clean spacing. The character itself is the subject.
+This is a controlled materialization/edit of the supplied seed, not a new character design and not a poster.
 """
-
 
 def build_f1_prompt(spec: dict, candidate_code: str) -> str:
     c = spec["candidates"][candidate_code]
     states = "\n".join(f"- {s}" for s in spec["stages"]["F1"]["states"])
     identity = "\n".join(f"- {x}" for x in c["positive_identity"])
-    return f"""ROUND 7 COMPANION — F1 SIX-STATE PARITY
+    return f"""ROUND 7 COMPANION — F1 REFERENCE-LOCKED STATE EDIT
 Candidate: {c['name']}
 
-Use the SAME approved canonical geometry for this candidate. Do not redesign the character.
+INPUT AUTHORITY
+Use the ATTACHED approved F0 canonical form as the sole positive visual reference. Do not redesign the character and do not borrow anatomy or styling from previous rejected mascot renders.
 
 IDENTITY ANCHORS
 {identity}
@@ -145,7 +160,7 @@ REQUIRED STATES
 {states}
 
 STATE LANGUAGE
-- LISTENING: attentive, not cute or submissive.
+- LISTENING: attentive through orientation/tension only; not cute or submissive.
 - THINKING: reflective structural tension; never loading/buffering iconography.
 - SPEAKING: subtle form rhythm; no mouth and no lip-sync dependency.
 - SUCCESS: composed positive expansion; no reward/loot/confetti grammar.
@@ -154,9 +169,9 @@ STATE LANGUAGE
 
 {_shared_block(spec)}
 
-Keep framing, scale, material, camera and lighting identical across all six cells. State changes must come from bounded whole-form deformation/orientation/internal structural alignment, not added props, effects, facial features or floating UI symbols.
+STATE-EDIT LOCK
+Keep the approved F0 silhouette family, negative-space topology, material, camera, scale and lighting. State changes may use only bounded whole-form deformation, orientation, compression/expansion, spacing and internal structural alignment. Never add props, particles, facial features, floating UI symbols or new body parts.
 """
-
 
 def main() -> int:
     parser = argparse.ArgumentParser()
