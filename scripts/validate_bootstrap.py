@@ -484,7 +484,12 @@ def check_tasks(r: Report) -> dict[str, str]:
                 status in FUTURE_TASK_STATUSES or ms_status == "DONE",
                 f"TASKS.md: {tid} is executable under non-active milestone",
             )
-            continue
+            # DONE milestones remain auditable history: keep validating their
+            # task-to-plan pointers and plan contracts. Future non-executable
+            # milestones still stop here because they intentionally have no
+            # executable task/plan surface yet.
+            if ms_status != "DONE":
+                continue
 
         plan = fields.get("Exec plan", "")
         pm = re.search(r"\(([^)]+)\)", plan) or re.search(r"`([^`]+)`", plan)

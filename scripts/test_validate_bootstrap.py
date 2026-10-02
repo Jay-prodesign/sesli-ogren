@@ -316,19 +316,23 @@ class ValidatorNegativeTests(unittest.TestCase):
         self.write(STATE, json.dumps(s, indent=2, ensure_ascii=False) + "\n")
 
     def test_head_sentinel_outside_review_state(self) -> None:
+        self.set_git(head_sha="PR_HEAD_AT_REVIEW", head_binding="GITHUB_PR_HEAD")
         self.set_state(status="IN_PROGRESS")
         self.assertFailsWith(r"git\.head_sha PR_HEAD_AT_REVIEW is only allowed when AWAITING_BRAIN_REVIEW")
 
     def test_head_sentinel_missing_binding(self) -> None:
-        self.set_git(head_binding=None)
+        self.set_state(status="AWAITING_BRAIN_REVIEW")
+        self.set_git(head_sha="PR_HEAD_AT_REVIEW", head_binding=None)
         self.assertFailsWith(r"requires git\.head_binding = GITHUB_PR_HEAD")
 
     def test_head_sentinel_wrong_binding(self) -> None:
-        self.set_git(head_binding="LOCAL_GUESS")
+        self.set_state(status="AWAITING_BRAIN_REVIEW")
+        self.set_git(head_sha="PR_HEAD_AT_REVIEW", head_binding="LOCAL_GUESS")
         self.assertFailsWith(r"requires git\.head_binding = GITHUB_PR_HEAD")
 
     def test_head_sentinel_missing_pr_metadata(self) -> None:
-        self.set_git(pr_url="")
+        self.set_state(status="AWAITING_BRAIN_REVIEW")
+        self.set_git(head_sha="PR_HEAD_AT_REVIEW", head_binding="GITHUB_PR_HEAD", pr_url="")
         self.assertFailsWith(r"git\.head_sha PR_HEAD_AT_REVIEW requires git\.pr_url")
 
     def test_head_arbitrary_non_hex(self) -> None:
@@ -344,8 +348,11 @@ class ValidatorNegativeTests(unittest.TestCase):
         self.assertFailsWith(r"RET-0005\.md: Head SHA PR_HEAD_AT_REVIEW requires 'Head binding: GITHUB_PR_HEAD'")
 
     def test_ret_sentinel_state_literal_head(self) -> None:
+        latest = "docs/agent/returns/RET-0006.md"
+        self.edit(latest, "- Head SHA: 0327d2e5b854df1c9923c65ed88f77151cfe9eed",
+                  "- Head SHA: PR_HEAD_AT_REVIEW\n- Head binding: GITHUB_PR_HEAD")
         self.set_git(head_sha=self.LITERAL, head_binding=None)
-        self.assertFailsWith(r"RET-0005\.md: Head SHA PR_HEAD_AT_REVIEW requires EXECUTION_STATE AWAITING_BRAIN_REVIEW")
+        self.assertFailsWith(r"RET-0006\.md: Head SHA PR_HEAD_AT_REVIEW requires EXECUTION_STATE AWAITING_BRAIN_REVIEW")
 
     def test_literal_heads_still_pass(self) -> None:
         self.set_git(head_sha=self.LITERAL, head_binding=None)
