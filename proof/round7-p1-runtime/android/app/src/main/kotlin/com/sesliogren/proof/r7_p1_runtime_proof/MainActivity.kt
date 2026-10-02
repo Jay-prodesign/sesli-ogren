@@ -83,6 +83,7 @@ class MainActivity : FlutterActivity() {
             .map { voice ->
                 mapOf(
                     "platform" to "android",
+                    "physicalDevice" to !isKnownEmulator(),
                     "id" to voice.name,
                     "name" to voice.name,
                     "locale" to voice.locale.toLanguageTag(),
@@ -125,6 +126,14 @@ class MainActivity : FlutterActivity() {
         result: MethodChannel.Result,
     ) {
         val engine = requireReady(result) ?: return
+        if (isKnownEmulator()) {
+            result.error(
+                "PHYSICAL_DEVICE_REQUIRED",
+                "R7-07A native evidence must be captured on a physical Android device.",
+                null,
+            )
+            return
+        }
         val state = networkState()
         if (state["offline"] != true) {
             result.error(
@@ -185,6 +194,7 @@ class MainActivity : FlutterActivity() {
                     val durationMs = audioDurationMs(file)
                     val payload = mapOf(
                         "platform" to "android",
+                        "physicalDevice" to true,
                         "deviceModel" to "${Build.MANUFACTURER} ${Build.MODEL}".trim(),
                         "osVersion" to "Android ${Build.VERSION.RELEASE} (SDK ${Build.VERSION.SDK_INT})",
                         "ttsEngineOrPackage" to (engine.defaultEngine ?: "unknown"),
@@ -239,6 +249,26 @@ class MainActivity : FlutterActivity() {
         if (queued != TextToSpeech.SUCCESS) {
             result.error("SYNTHESIS_QUEUE_FAILED", "Android TTS did not queue synthesis.", null)
         }
+    }
+
+    private fun isKnownEmulator(): Boolean {
+        val fingerprint = Build.FINGERPRINT.lowercase(Locale.ROOT)
+        val model = Build.MODEL.lowercase(Locale.ROOT)
+        val manufacturer = Build.MANUFACTURER.lowercase(Locale.ROOT)
+        val brand = Build.BRAND.lowercase(Locale.ROOT)
+        val device = Build.DEVICE.lowercase(Locale.ROOT)
+        val product = Build.PRODUCT.lowercase(Locale.ROOT)
+
+        return fingerprint.startsWith("generic") ||
+            fingerprint.startsWith("unknown") ||
+            model.contains("google_sdk") ||
+            model.contains("emulator") ||
+            model.contains("android sdk built for") ||
+            manufacturer.contains("genymotion") ||
+            (brand.startsWith("generic") && device.startsWith("generic")) ||
+            product.contains("sdk_gphone") ||
+            product == "google_sdk" ||
+            product == "sdk"
     }
 
     private fun evidenceDirectory(): File {
