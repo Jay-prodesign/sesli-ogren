@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../flow/flow_engine.dart';
+import '../render/companion_renderer.dart';
 import '../render/views.dart';
 import '../render/world_painter.dart';
 import '../scene/scene_schema.dart';
@@ -11,10 +12,16 @@ final worldStats = PaintStats();
 final companionStats = PaintStats();
 
 class ProofScreen extends StatelessWidget {
-  const ProofScreen({super.key, required this.controller, this.onOpenBenchmark});
+  const ProofScreen({
+    super.key,
+    required this.controller,
+    this.onOpenBenchmark,
+    this.companionRenderer = const KnotProxyCompanionRenderer(),
+  });
 
   final ProofController controller;
   final VoidCallback? onOpenBenchmark;
+  final CompanionRenderer companionRenderer;
 
   @override
   Widget build(BuildContext context) {
@@ -60,7 +67,11 @@ class ProofScreen extends StatelessWidget {
                       ),
                       Padding(
                         padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
-                        child: _FlowPanel(controller: controller, reducedMotion: reduced),
+                        child: _FlowPanel(
+                          controller: controller,
+                          reducedMotion: reduced,
+                          companionRenderer: companionRenderer,
+                        ),
                       ),
                     ],
                   ),
@@ -192,10 +203,11 @@ class _SourceBar extends StatelessWidget {
 }
 
 class _FlowPanel extends StatelessWidget {
-  const _FlowPanel({required this.controller, required this.reducedMotion});
+  const _FlowPanel({required this.controller, required this.reducedMotion, required this.companionRenderer});
 
   final ProofController controller;
   final bool reducedMotion;
+  final CompanionRenderer companionRenderer;
 
   @override
   Widget build(BuildContext context) {
@@ -217,6 +229,7 @@ class _FlowPanel extends StatelessWidget {
                 reducedMotion: reducedMotion,
                 assetFailed: controller.companionAssetFailed,
                 stats: companionStats,
+                renderer: companionRenderer,
               ),
             ),
             const SizedBox(width: 12),
