@@ -20,6 +20,8 @@ def candidate(key="candidate-01", start=1):
         r["blind_sample_id"] = f"V{start + offset:02d}"
         r["hidden_provider_model_voice_key"] = key
         r["input_corpus_item"] = item
+        r["input_text_sha256"] = (f"{offset + 1:064x}")[-64:]
+        r["input_character_count"] = 100 + offset
         rows.append(r)
     return rows
 
@@ -50,6 +52,16 @@ class VoiceBenchmarkValidatorTests(unittest.TestCase):
         rows = candidate()
         rows[-1]["synthesis_mode_or_quality_tier"] = "other"
         self.assertTrue(any("consistent synthesis mode" in e for e in validate_benchmark(rows)))
+
+    def test_cross_candidate_text_hash_mismatch_fails(self):
+        rows = candidate("candidate-01", 1) + candidate("candidate-02", 13)
+        rows[12]["input_text_sha256"] = "f" * 64
+        self.assertTrue(any("identical input_text_sha256" in e for e in validate_benchmark(rows)))
+
+    def test_cross_candidate_character_count_mismatch_fails(self):
+        rows = candidate("candidate-01", 1) + candidate("candidate-02", 13)
+        rows[12]["input_character_count"] += 1
+        self.assertTrue(any("identical input_character_count" in e for e in validate_benchmark(rows)))
 
 
 if __name__ == "__main__":
