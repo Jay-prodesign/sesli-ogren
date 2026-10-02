@@ -67,7 +67,19 @@ jobs:
           pub-cache: false
 
       - run: flutter pub get
-      - run: dart format --output=none --set-exit-if-changed .
+      - name: Format preview sources
+        run: dart format .
+
+      - name: Upload formatted capture sources
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: r7-native-tts-formatted-${{ github.sha }}
+          path: |
+            proof/round7-p1-runtime/lib/main.dart
+            proof/round7-p1-runtime/lib/src/native_tts_capture.dart
+          if-no-files-found: error
+          retention-days: 1
+
       - run: flutter analyze
       - run: flutter test
 
