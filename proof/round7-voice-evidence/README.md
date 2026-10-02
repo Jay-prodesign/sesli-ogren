@@ -17,6 +17,18 @@ The check enforces blind sample IDs, hidden provider identity for listeners,
 Turkish locale, corpus item A-L, provenance, ISO-8601 generation time, latency,
 cost/credit recording, raw metadata/audio locations and SHA-256.
 
+After all samples for the candidate set exist, validate cross-candidate
+comparability:
+
+```sh
+python3 validate_voice_benchmark.py samples/*.json
+```
+
+Each candidate key must contain canonical corpus A-L exactly once, with unique
+blind IDs and consistent locale, requested audio format and synthesis
+mode/quality tier. This catches incomplete or non-comparable benchmark sets
+without ranking them.
+
 ## Blind listening panel
 
 Copy `LISTENING_PANEL_TEMPLATE.json`, add the actual blind sample IDs and native
