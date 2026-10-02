@@ -10,14 +10,20 @@
   "build_checksum_sha256": "FILL",
   "flutter_version": "3.47.5",
   "test_mode": "PROFILE",
+  "observed_at": "FILL",
   "raw_timeline_location": "FILL",
   "raw_p1_report_location": "FILL",
-  "cold_start_ms": [0, 0, 0],
+  "cold_start_ms": [
+    0,
+    0,
+    0
+  ],
   "memory_bytes": {
     "baseline": 0,
     "world": 0,
     "post_t11": 0
   },
+  "frame_summary_observation": "FILL",
   "memory_unbounded_growth": null,
   "visible_repeated_jank": null,
   "thermal_blocking_issue": null,
