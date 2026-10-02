@@ -22,7 +22,9 @@ def valid():
         "voice_id_or_name": "voice-01",
         "language_locale": "tr-TR",
         "synthesis_mode_or_quality_tier": "benchmark",
+        "input_corpus_version": "SESLI_OGREN_TURKISH_VOICE_IDENTITY_BENCHMARK_001-KL-FIXED",
         "input_corpus_item": "A",
+        "input_text_sha256": "b" * 64,
         "input_character_count": 120,
         "input_bytes": 134,
         "requested_format": "wav/24000/pcm16",
@@ -70,6 +72,11 @@ class VoiceSampleValidatorTests(unittest.TestCase):
         r = valid()
         r["audio_sha256"] = "abc"
         self.assertTrue(any("audio_sha256" in e for e in validate(r)))
+
+    def test_input_text_hash_required(self):
+        r = valid()
+        r["input_text_sha256"] = "abc"
+        self.assertTrue(any("input_text_sha256" in e for e in validate(r)))
 
 
 if __name__ == "__main__":
