@@ -6,10 +6,7 @@ import 'src/bench/bench_runner.dart';
 import 'src/native_tts_capture.dart';
 import 'src/scene/fixture.dart';
 
-const _nativeTtsCaptureMode = bool.fromEnvironment(
-  'R7_NATIVE_TTS_CAPTURE',
-  defaultValue: false,
-);
+const _nativeTtsCaptureMode = bool.fromEnvironment('R7_NATIVE_TTS_CAPTURE', defaultValue: false);
 
 Future<void> main() async {
   StartupTiming.sinceMain.start();
