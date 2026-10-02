@@ -52,6 +52,20 @@ def validate_benchmark(records: list[dict[str, Any]]) -> list[str]:
         errors.append("benchmark contains no valid candidate keys")
         return errors
 
+    consistent_candidate_fields = (
+        "execution_backend",
+        "platform",
+        "device_model",
+        "os_version",
+        "tts_engine_or_package",
+        "provider_model_version",
+        "voice_id_or_name",
+        "language_locale",
+        "synthesis_mode_or_quality_tier",
+        "voice_network_requirement",
+        "requested_format",
+    )
+
     for candidate, samples in by_candidate.items():
         corpus = [s.get("input_corpus_item") for s in samples]
         if len(samples) != len(CORPUS_ITEMS):
@@ -65,21 +79,29 @@ def validate_benchmark(records: list[dict[str, Any]]) -> list[str]:
         if len(versions) != 1:
             errors.append(f"candidate {candidate!r} must use one corpus version; got {sorted(map(str, versions))}")
 
-        locales = {s.get("language_locale") for s in samples}
-        if len(locales) != 1:
-            errors.append(f"candidate {candidate!r} must use one consistent Turkish locale; got {sorted(map(str, locales))}")
+        for field in consistent_candidate_fields:
+            values = {s.get(field) for s in samples}
+            if len(values) != 1:
+                errors.append(
+                    f"candidate {candidate!r} must use one consistent {field}; got {sorted(map(str, values))}"
+                )
 
-        formats = {s.get("requested_format") for s in samples}
-        if len(formats) != 1:
-            errors.append(
-                f"candidate {candidate!r} must use one consistent requested format for comparability; got {sorted(map(str, formats))}"
-            )
-
-        tiers = {s.get("synthesis_mode_or_quality_tier") for s in samples}
-        if len(tiers) != 1:
-            errors.append(
-                f"candidate {candidate!r} must use one consistent synthesis mode/quality tier; got {sorted(map(str, tiers))}"
-            )
+        native = any(s.get("execution_backend") == "native_os" for s in samples)
+        if native:
+            offline_tested = {s.get("offline_tested") for s in samples}
+            offline_results = {s.get("offline_result") for s in samples}
+            metered = {s.get("metered_external_service_invoked") for s in samples}
+            if offline_tested != {True}:
+                errors.append(f"native candidate {candidate!r} must record offline_tested=true for all A-L samples")
+            if not offline_results.issubset({"pass", "fail"}) or len(offline_results) != 1:
+                errors.append(
+                    f"native candidate {candidate!r} must use one consistent pass/fail offline_result; "
+                    f"got {sorted(map(str, offline_results))}"
+                )
+            if metered != {False}:
+                errors.append(
+                    f"native candidate {candidate!r} must record metered_external_service_invoked=false for all samples"
+                )
 
     # Cross-candidate text identity: for every A-L item, all candidates must
     # use the same canonical input hash and character count without publishing
