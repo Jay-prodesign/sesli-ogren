@@ -20,7 +20,8 @@ BLIND_ID = re.compile(r"^V[0-9]{2,}$")
 SHA256 = re.compile(r"^[0-9a-f]{64}$")
 CORPUS_ITEMS = set("ABCDEFGHIJKL")
 EXECUTION_BACKENDS = {"native_os", "self_hosted", "hosted_cloud"}
-PLATFORMS = {"ios", "android", "server", "desktop", "other"}\nDEVICE_EVIDENCE_CLASSES = {"D1", "D2", "D3", "not_applicable"}
+PLATFORMS = {"ios", "android", "server", "desktop", "other"}
+DEVICE_EVIDENCE_CLASSES = {"D1", "D2", "D3", "not_applicable"}
 OFFLINE_RESULTS = {"pass", "fail", "not_applicable"}
 NETWORK_REQUIREMENTS = {"offline_capable", "network_required", "unknown_not_exposed"}
 
@@ -81,7 +82,8 @@ def validate(record: dict[str, Any]) -> list[str]:
         "provider_model_version",
         "voice_id_or_name",
         "synthesis_mode_or_quality_tier",
-        "audio_capture_or_generation_method",\n        "operational_cost_notes",
+        "audio_capture_or_generation_method",
+        "operational_cost_notes",
         "requested_format",
         "cache_reuse_behavior",
         "raw_provider_metadata_location",
@@ -97,9 +99,28 @@ def validate(record: dict[str, Any]) -> list[str]:
     platform = record.get("platform")
     require(platform in PLATFORMS, f"platform must be one of {sorted(PLATFORMS)}")
 
+    physical_device = record.get("physical_device")
+    require(isinstance(physical_device, bool), "physical_device must be true or false")
+    device_class = record.get("device_evidence_class")
+    require(device_class in DEVICE_EVIDENCE_CLASSES,
+            f"device_evidence_class must be one of {sorted(DEVICE_EVIDENCE_CLASSES)}")
+
     if backend == "native_os":
         require(platform in {"ios", "android"},
                 "native_os samples must use platform ios or android")
+        require(physical_device is True,
+                "native_os samples require physical_device=true")
+        require(device_class in {"D1", "D2", "D3"},
+                "native_os samples must bind to physical device class D1, D2 or D3")
+        if platform == "ios":
+            require(device_class == "D1",
+                    "native iOS evidence must bind to D1")
+        if platform == "android":
+            require(device_class in {"D2", "D3"},
+                    "native Android evidence must bind to D2 or D3")
+    else:
+        require(device_class == "not_applicable" or physical_device is True,
+                "non-native samples must use not_applicable device class unless captured on a physical device")
 
     locale = record.get("language_locale")
     require(isinstance(locale, str) and locale.lower().startswith("tr"),
@@ -117,11 +138,15 @@ def validate(record: dict[str, Any]) -> list[str]:
             f"offline_result must be one of {sorted(OFFLINE_RESULTS)}")
     if backend == "native_os":
         require(offline_tested is True, "native_os samples require a real offline test")
+        require(_nonblank(offline_method),
+                "native_os samples require offline_test_method")
         require(offline_result in {"pass", "fail"},
                 "native_os offline_result must be pass or fail")
     elif offline_tested is False:
         require(offline_result == "not_applicable",
                 "when offline_tested is false, offline_result must be not_applicable")
+        require(offline_method == "not_applicable",
+                "when offline_tested is false, offline_test_method must be not_applicable")
 
     metered = record.get("metered_external_service_invoked")
     require(isinstance(metered, bool),
@@ -165,8 +190,11 @@ def validate(record: dict[str, Any]) -> list[str]:
     require(isinstance(cost, dict), "cost must be an object")
     if isinstance(cost, dict):
         amount = cost.get("amount")
+        require(cost.get("scope") == "metered_external_provider_usage",
+                "cost.scope must be metered_external_provider_usage")
         require(_nonnegative(amount), "cost.amount must be non-negative")
         require(_nonblank(cost.get("unit")), "cost.unit must be recorded")
+        require(_nonblank(cost.get("evidence_basis")), "cost.evidence_basis must be recorded")
         if metered is False:
             require(amount == 0,
                     "cost.amount must be 0 when no metered external service was invoked")
