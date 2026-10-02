@@ -43,7 +43,6 @@ class WorldView extends StatefulWidget {
   final SceneSpec scene;
   final bool reducedMotion;
   final PaintStats stats;
-  final CompanionRenderer renderer;
 
   @override
   State<WorldView> createState() => _WorldViewState();
@@ -148,6 +147,7 @@ class CompanionView extends StatefulWidget {
   final bool reducedMotion;
   final bool assetFailed;
   final PaintStats stats;
+  final CompanionRenderer renderer;
 
   @override
   State<CompanionView> createState() => _CompanionViewState();
