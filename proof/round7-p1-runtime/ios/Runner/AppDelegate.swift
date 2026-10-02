@@ -262,7 +262,7 @@ import UIKit
     return directory
   }
 
-  private func qualityLabel(_ quality: AVSpeechSynthesisVoiceQuality) -> String {
+  private var isPhysicalDevice: Bool {\n#if targetEnvironment(simulator)\n    return false\n#else\n    return true\n#endif\n  }\n\n  private func qualityLabel(_ quality: AVSpeechSynthesisVoiceQuality) -> String {
     switch quality {
     case .premium:
       return "premium"
