@@ -70,3 +70,10 @@ CI (`.github/workflows/round7-p1-proof.yml`) runs:
 | 10 | Tomorrow? | Yes. It does not lock production schema or runtime, and the escalation path to P2/P3 stays open on evidence. |
 
 **Open (declared):** device performance is unproven until D1/D2/D3 evidence exists (R7-06).
+
+
+## R7-07A native TTS capture mode
+
+The chained proof branch `proof/round7-native-tts-capture` adds a non-production capture surface for physical-device native Turkish TTS evidence. It is unreachable in the default P1 runtime and activates only with `--dart-define=R7_NATIVE_TTS_CAPTURE=true`.
+
+The private canonical A-L corpus is supplied at runtime and is not committed. Capture is fail-closed when an active network path remains, records the physical device/OS/engine/voice plus audio/input SHA-256 and generation timing, and writes a schema-v2-compatible manifest for R7-07A evidence packaging. This capture build does not replace the R7-06 bound runtime build `ec84e603a67a8fd286e5c57c2a808d62d5c5cd6d`; R7-06 evidence must continue to use its exact bound build.
