@@ -8,7 +8,7 @@ name: round7-p1-proof
 
 on:
   push:
-    branches: [proof/round7-companion-runtime]
+    branches: [proof/round7-companion-runtime, proof/round7-device-evidence-validator]
     paths:
       - ".flutter-version"
       - "proof/round7-p1-runtime/**"
@@ -38,6 +38,7 @@ jobs:
           persist-credentials: false
       - run: python3 scripts/validate_bootstrap.py
       - run: python3 scripts/test_validate_bootstrap.py
+      - run: python3 proof/round7-p1-runtime/tool/test_validate_device_evidence.py
 
   flutter:
     name: P1 proof — analyze, test, profile APK
