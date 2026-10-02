@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../flow/flow_engine.dart';
 import '../scene/scene_schema.dart';
 import 'companion_painter.dart';
+import 'companion_renderer.dart';
 import 'world_painter.dart';
 
 /// Live animation-controller count, used to detect leaked/duplicated controllers (B13).
@@ -42,6 +43,7 @@ class WorldView extends StatefulWidget {
   final SceneSpec scene;
   final bool reducedMotion;
   final PaintStats stats;
+  final CompanionRenderer renderer;
 
   @override
   State<WorldView> createState() => _WorldViewState();
@@ -137,6 +139,7 @@ class CompanionView extends StatefulWidget {
     required this.reducedMotion,
     required this.assetFailed,
     required this.stats,
+    this.renderer = const KnotProxyCompanionRenderer(),
   });
 
   final CompanionState state;
@@ -218,15 +221,12 @@ class _CompanionViewState extends State<CompanionView> with SingleTickerProvider
           width: 72,
           height: 72,
           child: RepaintBoundary(
-            child: CustomPaint(
-              key: const Key('companion-canvas'),
-              painter: KnotPainter(
-                state: widget.state,
-                tone: widget.tone,
-                motion: _motion,
-                animate: _animate,
-                stats: widget.stats,
-              ),
+            child: widget.renderer.build(
+              state: widget.state,
+              tone: widget.tone,
+              motion: _motion,
+              animate: _animate,
+              stats: widget.stats,
             ),
           ),
         ),
