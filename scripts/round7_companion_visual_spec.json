@@ -1,0 +1,93 @@
+{
+  "task_id": "R7-COMPANION-VISUAL-PRODUCTION-001",
+  "version": "1.0",
+  "authority": "ROUND_7_CURRENT_FINALIST_REBUILD_BRIEF_001",
+  "goal": "Produce two parity-controlled production-quality Companion finalists for R7-01 without drifting into generic mascot, animal, human, robot, orb, or logo-only forms.",
+  "stages": {
+    "F0": {
+      "name": "Canonical form proof",
+      "views": [
+        "canonical three-quarter view",
+        "front/orientation view",
+        "pure filled silhouette",
+        "monochrome form",
+        "minimal-size legibility view",
+        "dense-learning placement",
+        "adult/professional-learning placement"
+      ]
+    },
+    "F1": {
+      "name": "Six-state parity",
+      "states": [
+        "AVAILABLE/IDLE",
+        "LISTENING",
+        "THINKING",
+        "SPEAKING",
+        "SUCCESS",
+        "SUPPORTIVE CORRECTION"
+      ]
+    }
+  },
+  "parity": {
+    "canvas": "same square character-design sheet",
+    "camera": "orthographic-like product character study; no dramatic perspective",
+    "background": "warm neutral off-white studio field",
+    "lighting": "soft neutral studio lighting; no colored rim light",
+    "material": "matte soft-touch synthetic material; no fur, cloth, glass, chrome, or glossy toy finish",
+    "screen_footprint": "same visual scale and margins",
+    "detail_budget": "low part count; mobile-runtime plausible",
+    "effects": "none",
+    "props": "none",
+    "text_policy": "candidate code and tiny view labels only; no marketing copy",
+    "emotion_policy": "emotion must come from whole-form orientation, tension, compression, spacing, or internal structural alignment; not conventional face acting",
+    "runtime_translation": "must be plausible for vector/CustomPaint/Rive-style implementation"
+  },
+  "shared_hard_fails": [
+    "preschool or plush mascot",
+    "recognizable animal or pet",
+    "collectible creature",
+    "generic blob with face",
+    "generic AI orb",
+    "robot assistant",
+    "mini human",
+    "hooded or fantasy NPC",
+    "wizard or adventurer",
+    "school mascot or teacher caricature",
+    "eyes-and-mouth mascot grammar",
+    "arms, hands, legs, feet, ears, tail, hair, clothing, hat, glasses or props",
+    "face screen or visor",
+    "realistic fur or cloth",
+    "complex 3D dependency",
+    "continuous particles, glow, sparks or aura",
+    "domain-specific costume",
+    "obvious existing-IP resemblance"
+  ],
+  "candidates": {
+    "D": {
+      "name": "D/Knot",
+      "positive_identity": [
+        "single living interlaced structure formed from two broad continuous ribbons",
+        "clear over-under knot logic and deliberate negative space",
+        "slightly asymmetric organic tension",
+        "calm, intelligent and observant presence",
+        "attention expressed by two or three body-integrated structural apertures or tension points, never eyes",
+        "recognizable silhouette even as a solid black shape",
+        "not circular overall; avoid flower, petal, cloud and pretzel readings"
+      ],
+      "f0_geometry": "Build the silhouette from one coherent interlaced knot body. The body must read as a responsive presence rather than a logo, but contain no head, torso, limbs or face. Use asymmetry and directional tension to imply attention."
+    },
+    "E": {
+      "name": "E/Tilt",
+      "positive_identity": [
+        "single upright directional body with a clear forward tilt",
+        "one integrated folded facet or structural notch establishes orientation",
+        "composed, intentional, coach-like presence without humanoid posture",
+        "body-integrated directional hierarchy; no floating marker",
+        "strong vertical silhouette materially distinct from D/Knot",
+        "recognizable as a solid black shape at small size",
+        "not loop-based, not orb-based, not a rounded blob"
+      ],
+      "f0_geometry": "Build the silhouette as one upright tilted body with an integrated directional facet. The identity must come from the whole-body orientation. No detached topper, tab, badge, antenna, head, limbs or face."
+    }
+  }
+}
