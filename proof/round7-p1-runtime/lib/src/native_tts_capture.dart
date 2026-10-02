@@ -92,6 +92,10 @@ class _NativeTtsCapturePageState extends State<NativeTtsCapturePage> {
       setState(() => _status = 'Select an offline-capable Turkish voice first.');
       return;
     }
+    if (voice['physicalDevice'] != true) {
+      setState(() => _status = 'Capture target rejected: a hardware device is required.');
+      return;
+    }
 
     Map<String, String> corpus;
     try {
@@ -142,6 +146,12 @@ class _NativeTtsCapturePageState extends State<NativeTtsCapturePage> {
           'voiceId': voice['id'],
         });
         final sample = Map<String, dynamic>.from(raw ?? const {});
+        if (sample['physicalDevice'] != true) {
+          throw PlatformException(
+            code: 'DEVICE_TARGET_INVALID',
+            message: 'Native bridge did not confirm a hardware capture target.',
+          );
+        }
         final blindId = 'V$captureId${index.toString().padLeft(2, '0')}';
         final candidateKey = [
           sample['platform'],
@@ -159,7 +169,7 @@ class _NativeTtsCapturePageState extends State<NativeTtsCapturePage> {
           'hidden_provider_model_voice_key': candidateKey,
           'execution_backend': 'native_os',
           'platform': sample['platform'],
-          'physical_device': true,
+          'physical_device': sample['physicalDevice'],
           'device_evidence_class': deviceClass,
           'device_model': sample['deviceModel'],
           'os_version': sample['osVersion'],
@@ -203,6 +213,11 @@ class _NativeTtsCapturePageState extends State<NativeTtsCapturePage> {
           'known_limitation':
               'Native physical-device baseline only; blind Turkish human quality judgement remains pending.',
         });
+        final sampleRecordPath = '$outputDir/r7-native-tts-sample-$blindId.json';
+        await File(sampleRecordPath).writeAsString(
+          const JsonEncoder.withIndent('  ').convert(records.last),
+          flush: true,
+        );
       }
 
       final manifest = <String, dynamic>{
