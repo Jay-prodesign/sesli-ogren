@@ -1,0 +1,39 @@
+{
+  "schema_version": 1,
+  "requirement": "R7-07A",
+  "panel_id": "FILL",
+  "provider_identity_exposed_to_listeners": false,
+  "playback_order_randomized": true,
+  "blind_sample_ids": ["V01"],
+  "participants": [
+    {
+      "participant_code": "P01",
+      "consent_recorded": false,
+      "turkish_fluency": "native",
+      "listening_device": "FILL",
+      "sample_order": ["V01"],
+      "ratings": {
+        "V01": {
+          "native_turkish_naturalness": 0,
+          "pronunciation_accuracy": 0,
+          "prosody": 0,
+          "sentence_rhythm": 0,
+          "question_intonation": 0,
+          "warmth": 0,
+          "teacher_credibility": 0,
+          "non_robotic_quality": 0,
+          "academic_clarity": 0,
+          "long_form_consistency": 0,
+          "emotion_control": 0,
+          "chunk_boundary_continuity": 0,
+          "rapid_turn_consistency": 0,
+          "companion_personality_fit": 0
+        }
+      },
+      "critical_defects": {
+        "V01": []
+      }
+    }
+  ],
+  "automated_winner_or_ranking": false
+}
