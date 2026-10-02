@@ -82,7 +82,7 @@ import UIKit
       .map { voice in
         [
           "platform": "ios",
-          "physicalDevice": true,
+          "physicalDevice": isPhysicalDevice,
           "id": voice.identifier,
           "name": voice.name,
           "locale": voice.language,
@@ -197,6 +197,7 @@ import UIKit
 
         result([
           "platform": "ios",
+          "physicalDevice": true,
           "deviceModel": hardwareIdentifier(),
           "osVersion": "iOS \(UIDevice.current.systemVersion)",
           "ttsEngineOrPackage": "AVSpeechSynthesizer",
