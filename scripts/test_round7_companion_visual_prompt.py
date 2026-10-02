@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 import importlib.util
-import json
 from pathlib import Path
 import unittest
 
@@ -18,52 +17,40 @@ class Round7CompanionVisualPromptTests(unittest.TestCase):
     def test_locked_spec_lints(self):
         self.assertEqual(module.lint_spec(self.spec), [])
 
-    def test_parity_hash_is_identical_for_both_candidates(self):
+    def test_design_authority_is_locked(self):
+        self.assertEqual(
+            self.spec["production_mode"]["strategy"],
+            "design_plan_locked_generation",
+        )
+        self.assertEqual(
+            self.spec["production_mode"]["design_authority"],
+            "ROUND_7_CURRENT_FINALIST_REBUILD_BRIEF_001",
+        )
+
+    def test_parity_hash_is_stable(self):
         h = module.parity_hash(self.spec)
         self.assertEqual(len(h), 64)
         self.assertEqual(h, module.parity_hash(self.spec))
 
-    def test_f0_prompts_share_locked_parity_and_hard_fails(self):
-        d = module.build_f0_prompt(self.spec, "D")
-        e = module.build_f0_prompt(self.spec, "E")
-        for value in self.spec["parity"].values():
-            self.assertIn(value, d)
-            self.assertIn(value, e)
-        for item in self.spec["shared_hard_fails"]:
-            self.assertIn(item, d)
-            self.assertIn(item, e)
+    def test_f0_preserves_character_identity_and_rejects_tool_driven_redesign(self):
+        for code in ("D", "E"):
+            prompt = module.build_f0_prompt(self.spec, code)
+            self.assertIn("living, responsive learning character", prompt)
+            self.assertIn("Tool limitations are not design input", prompt)
+            self.assertIn("One candidate only", prompt)
 
-    def test_f0_identity_stays_structurally_distinct(self):
+    def test_candidate_directions_remain_distinct(self):
         d = module.build_f0_prompt(self.spec, "D")
         e = module.build_f0_prompt(self.spec, "E")
         self.assertIn("interlaced knot body", d)
         self.assertIn("upright tilted body", e)
         self.assertIn("not loop-based", e)
 
-    def test_f1_contains_exact_locked_states(self):
+    def test_f1_contains_exact_states(self):
         for code in ("D", "E"):
             prompt = module.build_f1_prompt(self.spec, code)
             for state in self.spec["stages"]["F1"]["states"]:
                 self.assertIn(state, prompt)
-
-    def test_reference_locked_strategy_is_required(self):
-        self.assertEqual(self.spec["production_mode"]["strategy"], "reference_locked_edit")
-        self.assertEqual(self.spec["seed_control"]["variants_per_candidate"], 3)
-
-    def test_f0_requires_attached_seed_and_topology_lock(self):
-        for code in ("D", "E"):
-            prompt = module.build_f0_prompt(self.spec, code)
-            self.assertIn("ATTACHED geometry control seed", prompt)
-            self.assertIn("PRESERVING its outer silhouette", prompt)
-            self.assertIn("do not convert structural apertures into eyes", prompt)
-            self.assertIn("output ONE isolated candidate", prompt)
-
-    def test_f1_requires_approved_f0_reference(self):
-        for code in ("D", "E"):
-            prompt = module.build_f1_prompt(self.spec, code)
-            self.assertIn("ATTACHED approved F0 canonical form", prompt)
-            self.assertIn("Do not redesign the character", prompt)
-
 
 
 if __name__ == "__main__":
