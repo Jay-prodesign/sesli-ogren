@@ -61,6 +61,16 @@ class VoiceBenchmarkValidatorTests(unittest.TestCase):
         rows[-1]["device_model"] = "different-device"
         self.assertTrue(any("consistent device_model" in e for e in validate_benchmark(rows)))
 
+    def test_native_device_class_must_be_consistent(self):
+        rows = candidate("ios-native", 1, native=True)
+        rows[-1]["device_evidence_class"] = "D2"
+        self.assertTrue(any("consistent device_evidence_class" in e or "native iOS evidence must bind to D1" in e for e in validate_benchmark(rows)))
+
+    def test_native_offline_method_must_be_consistent(self):
+        rows = candidate("ios-native", 1, native=True)
+        rows[-1]["offline_test_method"] = "different network-disable method"
+        self.assertTrue(any("consistent offline_test_method" in e for e in validate_benchmark(rows)))
+
     def test_native_offline_result_must_be_consistent(self):
         rows = candidate("ios-native", 1, native=True)
         rows[-1]["offline_result"] = "fail"
