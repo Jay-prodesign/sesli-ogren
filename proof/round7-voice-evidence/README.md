@@ -59,7 +59,7 @@ python3 validate_voice_benchmark.py samples/*.json
 
 Each candidate key must contain canonical corpus A-L exactly once, with unique
 blind IDs and consistent corpus version plus runtime provenance: execution
-backend, platform, device, OS, TTS engine/package, model/runtime version, voice,
+backend, platform, physical-device flag/class, device, OS, TTS engine/package, model/runtime version, voice,
 locale, quality tier, network requirement and requested audio format.
 
 For each A-L item, all candidates must also carry the same input-text SHA-256
