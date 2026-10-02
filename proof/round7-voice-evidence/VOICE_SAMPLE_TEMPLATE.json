@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "requirement": "R7-07A",
+  "blind_sample_id": "V01",
+  "provider_identity_hidden_from_listener": true,
+  "hidden_provider_model_voice_key": "FILL",
+  "provider_model_version": "FILL",
+  "voice_id_or_name": "FILL",
+  "language_locale": "tr-TR",
+  "synthesis_mode_or_quality_tier": "FILL",
+  "input_corpus_item": "A",
+  "input_character_count": 0,
+  "input_bytes": null,
+  "requested_format": "FILL",
+  "actual_duration_ms": 0,
+  "generation_started_at": "FILL",
+  "streaming": false,
+  "first_byte_latency_ms": null,
+  "full_completion_latency_ms": 0,
+  "retries_count": 0,
+  "errors": [],
+  "cost": {
+    "amount": 0,
+    "unit": "FILL"
+  },
+  "cache_reuse_behavior": "FILL",
+  "raw_provider_metadata_location": "FILL",
+  "audio_file_location": "FILL",
+  "audio_sha256": "FILL",
+  "known_limitation": "FILL"
+}
