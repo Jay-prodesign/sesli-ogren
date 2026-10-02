@@ -86,8 +86,12 @@ def validate(record: dict[str, Any]) -> list[str]:
     require(isinstance(locale, str) and locale.lower().startswith("tr"),
             "language_locale must be Turkish (for example tr-TR)")
 
+    require(_nonblank(record.get("input_corpus_version")), "input_corpus_version must be recorded")
     corpus_item = record.get("input_corpus_item")
     require(corpus_item in CORPUS_ITEMS, "input_corpus_item must be one of A-L")
+    input_hash = record.get("input_text_sha256")
+    require(isinstance(input_hash, str) and bool(SHA256.fullmatch(input_hash)),
+            "input_text_sha256 must be 64 lowercase hex")
     require(isinstance(record.get("input_character_count"), int) and record["input_character_count"] > 0,
             "input_character_count must be a positive integer")
     require(record.get("input_bytes") is None or
