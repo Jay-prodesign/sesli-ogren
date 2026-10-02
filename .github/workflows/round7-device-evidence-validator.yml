@@ -10,6 +10,8 @@ on:
     paths:
       - "proof/round7-p1-runtime/tool/validate_device_evidence.py"
       - "proof/round7-p1-runtime/tool/test_validate_device_evidence.py"
+      - "proof/round7-p1-runtime/tool/validate_device_matrix.py"
+      - "proof/round7-p1-runtime/tool/test_validate_device_matrix.py"
       - "proof/round7-p1-runtime/DEVICE_EVIDENCE_TEMPLATE.json"
       - "proof/round7-p1-runtime/DEVICE_RUN_PROTOCOL.md"
       - ".github/workflows/round7-device-evidence-validator.yml"
@@ -41,3 +43,4 @@ jobs:
       - run: python3 scripts/validate_bootstrap.py
       - run: python3 scripts/test_validate_bootstrap.py
       - run: python3 proof/round7-p1-runtime/tool/test_validate_device_evidence.py
+      - run: python3 proof/round7-p1-runtime/tool/test_validate_device_matrix.py
