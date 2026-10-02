@@ -1,108 +1,44 @@
 {
   "task_id": "R7-COMPANION-VISUAL-PRODUCTION-001",
-  "version": "1.2",
+  "version": "1.3",
   "authority": "ROUND_7_CURRENT_FINALIST_REBUILD_BRIEF_001",
-  "goal": "Produce two parity-controlled production-quality Companion finalists for R7-01 without drifting into generic mascot, animal, human, robot, orb, or logo-only forms.",
+  "goal": "Produce parity-controlled, animation-first living Companion finalists without changing the approved D/Knot or E/Tilt design directions.",
   "stages": {
     "F0": {
-      "name": "Canonical form proof",
-      "views": [
-        "canonical three-quarter view",
-        "front/orientation view",
-        "pure filled silhouette",
-        "monochrome form",
-        "minimal-size legibility view",
-        "dense-learning placement",
-        "adult/professional-learning placement"
-      ]
+      "name": "Canonical form + motion anatomy proof",
+      "views": ["canonical three-quarter view","front/orientation view","pure filled silhouette","monochrome form","minimal-size legibility view","dense-learning placement","adult/professional-learning placement"],
+      "motion_anatomy": ["attention orientation carrier","idle/breathing deformation","listening deformation","thinking deformation","speaking deformation","success/supportive range","early rig/deformation feasibility"]
     },
-    "F1": {
-      "name": "Six-state parity",
-      "states": [
-        "AVAILABLE/IDLE",
-        "LISTENING",
-        "THINKING",
-        "SPEAKING",
-        "SUCCESS",
-        "SUPPORTIVE CORRECTION"
-      ]
-    }
+    "F1": {"name":"Six-state parity","states":["AVAILABLE/IDLE","LISTENING","THINKING","SPEAKING","SUCCESS","SUPPORTIVE CORRECTION"]}
   },
   "parity": {
-    "canvas": "same square character-design sheet",
-    "camera": "orthographic-like product character study; no dramatic perspective",
-    "background": "warm neutral off-white studio field",
-    "lighting": "soft neutral studio lighting; no colored rim light",
-    "material": "matte soft-touch synthetic material; no fur, cloth, glass, chrome, or glossy toy finish",
-    "screen_footprint": "same visual scale and margins",
-    "detail_budget": "low part count; mobile-runtime plausible",
-    "effects": "none",
-    "props": "none",
-    "text_policy": "candidate code and tiny view labels only; no marketing copy",
-    "emotion_policy": "emotion must come from whole-form orientation, tension, compression, spacing, or internal structural alignment; not conventional face acting",
-    "runtime_translation": "must be plausible for vector/CustomPaint/Rive-style implementation"
+    "canvas":"same square character-design sheet","camera":"orthographic-like character study; no dramatic perspective","background":"warm neutral off-white studio field","lighting":"soft neutral studio lighting; no colored rim light","material":"matte soft-touch synthetic material; no fur, cloth, glass, chrome, or glossy toy finish","screen_footprint":"same visual scale and margins","detail_budget":"low part count; animation/rig plausible","effects":"none","props":"none","text_policy":"candidate code and tiny view labels only; no marketing copy","emotion_policy":"emotion comes from whole-form orientation, tension, compression, spacing, apertures or structural alignment; never conventional face acting","runtime_translation":"tool remains open; design must support rig/deformation + reusable keyframed motion + bounded micro-motion"
   },
-  "shared_hard_fails": [
-    "preschool or plush mascot",
-    "recognizable animal or pet",
-    "collectible creature",
-    "generic blob with face",
-    "generic AI orb",
-    "robot assistant",
-    "mini human",
-    "hooded or fantasy NPC",
-    "wizard or adventurer",
-    "school mascot or teacher caricature",
-    "eyes-and-mouth mascot grammar",
-    "arms, hands, legs, feet, ears, tail, hair, clothing, hat, glasses or props",
-    "face screen or visor",
-    "realistic fur or cloth",
-    "complex 3D dependency",
-    "continuous particles, glow, sparks or aura",
-    "domain-specific costume",
-    "obvious existing-IP resemblance"
-  ],
+  "shared_hard_fails": ["preschool or plush mascot","recognizable animal or pet","collectible creature","generic blob with face","generic AI orb","robot assistant","mini human","hooded or fantasy NPC","wizard or adventurer","school mascot or teacher caricature","eyes-and-mouth mascot grammar","arms, hands, legs, feet, ears, tail, hair, clothing, hat, glasses or props","face screen or visor","realistic fur or cloth","complex 3D dependency","continuous particles, glow, sparks or aura","domain-specific costume","obvious existing-IP resemblance","abstract logo or decorative object with no living character presence","static-only form with no coherent motion anatomy"],
+  "failure_codes": {
+    "ROBOT_FACE_DRIFT":"screen/visor/robot casing or conventional eyes/face makes the character read as an AI device or robot",
+    "ABSTRACT_LOGO_OBJECT_DRIFT":"form reads as logo, sculpture, knot ornament or decorative object rather than a living learning character",
+    "GENERIC_MASCOT_DRIFT":"cute face/body grammar replaces the approved structural character language",
+    "IDENTITY_DRIFT":"approved D/Knot or E/Tilt structural identity is lost or substituted",
+    "WEAK_ATTENTION_SYSTEM":"attention/focus cannot be read through body-integrated structural behavior",
+    "STATIC_ONLY":"form has no credible deformation/rig anatomy for idle/listen/think/speak behavior",
+    "STATE_INCOHERENCE":"states require unrelated redraws instead of one coherent character anatomy",
+    "SILHOUETTE_COLLAPSE":"identity fails in filled silhouette, monochrome or minimal size",
+    "EFFECT_DEPENDENCE":"identity/emotion depends on glow, particles, aura or decorative effects",
+    "PROHIBITED_ARCHETYPE":"any shared hard-fail archetype is present"
+  },
   "candidates": {
-    "D": {
-      "name": "D/Knot",
-      "positive_identity": [
-        "single living interlaced structure formed from two broad continuous ribbons",
-        "clear over-under knot logic and deliberate negative space",
-        "slightly asymmetric organic tension",
-        "calm, intelligent and observant presence",
-        "attention expressed by two or three body-integrated structural apertures or tension points, never eyes",
-        "recognizable silhouette even as a solid black shape",
-        "not circular overall; avoid flower, petal, cloud and pretzel readings"
-      ],
-      "f0_geometry": "Build the silhouette from one coherent interlaced knot body. The body must read as a responsive presence rather than a logo, but contain no head, torso, limbs or face. Use asymmetry and directional tension to imply attention."
-    },
-    "E": {
-      "name": "E/Tilt",
-      "positive_identity": [
-        "single upright directional body with a clear forward tilt",
-        "one integrated folded facet or structural notch establishes orientation",
-        "composed, intentional, coach-like presence without humanoid posture",
-        "body-integrated directional hierarchy; no floating marker",
-        "strong vertical silhouette materially distinct from D/Knot",
-        "recognizable as a solid black shape at small size",
-        "not loop-based, not orb-based, not a rounded blob"
-      ],
-      "f0_geometry": "Build the silhouette as one upright tilted body with an integrated directional facet. The identity must come from the whole-body orientation. No detached topper, tab, badge, antenna, head, limbs or face."
-    }
+    "D":{"name":"D/Knot","positive_identity":["single living interlaced structure formed from two broad continuous ribbons","clear over-under knot logic and deliberate negative space","slightly asymmetric organic tension","calm, intelligent and observant presence","attention expressed by two or three body-integrated structural apertures or tension points, never eyes","recognizable silhouette even as a solid black shape","not circular overall; avoid flower, petal, cloud and pretzel readings"],"f0_geometry":"One coherent interlaced knot body; no head, torso, limbs or face. Asymmetry, apertures, directional tension and controlled deformation must make it read as a living responsive presence rather than a logo."},
+    "E":{"name":"E/Tilt","positive_identity":["single upright directional body with a clear forward tilt","one integrated folded facet or structural notch establishes orientation","composed, intentional, coach-like presence without humanoid posture","body-integrated directional hierarchy; no floating marker","strong vertical silhouette materially distinct from D/Knot","recognizable as a solid black shape at small size","not loop-based, not orb-based, not a rounded blob"],"f0_geometry":"One upright tilted body with an integrated directional facet; no detached topper, tab, badge, antenna, head, limbs or face. Whole-body orientation and deformation must carry living presence."}
   },
   "production_mode": {
-    "strategy": "design_plan_locked_generation",
-    "design_authority": "ROUND_7_CURRENT_FINALIST_REBUILD_BRIEF_001",
-    "rule": "Production limitations must never reinterpret, simplify, replace, or redesign the approved D/Knot and E/Tilt directions.",
-    "failure_handling": "If a generation surface cannot faithfully produce the approved design direction, reject the output or change production surface/workflow. Do not change the character concept to suit the tool.",
-    "iteration_order": [
-      "candidate identity and character presence",
-      "canonical form and silhouette",
-      "attention/expression system",
-      "six-state behavior",
-      "three-domain placement",
-      "motion and fallback translation"
-    ],
-    "implementation_boundary": "Vector, CustomPaint, Rive, procedural geometry, or other runtime techniques may translate an approved character after design acceptance; they must not become a substitute design authority."
+    "strategy":"design_plan_locked_generate_jury_repair_loop",
+    "design_authority":"ROUND_7_CURRENT_FINALIST_REBUILD_BRIEF_001",
+    "rule":"Production limitations never reinterpret, simplify, replace or redesign D/Knot or E/Tilt.",
+    "loop":["lock current stage target","compile generation prompt","generate one candidate","jury against immutable contract","if any hard fail: REJECT","emit failure codes + concrete visual evidence","compile corrective prompt from failure codes while preserving passed traits","regenerate","repeat until PASS or generation surface is judged incapable"],
+    "jury_boundary":"Jury diagnoses against the locked contract; it may not invent a new character direction.",
+    "repair_boundary":"Repair prompt addresses only diagnosed failures and explicitly preserves already-passing traits.",
+    "surface_escape":"Repeated failure of the same class is evidence to change production surface/workflow, not to weaken the design contract.",
+    "implementation_boundary":"Runtime/vector/rig technology may translate an approved character later; it is not design authority."
   }
 }
