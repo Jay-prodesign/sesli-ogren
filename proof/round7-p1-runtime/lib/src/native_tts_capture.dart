@@ -5,9 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 const _channel = MethodChannel('sesliogren/r7_native_tts_capture');
-const _canonicalItems = <String>{
-  'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L',
-};
+const _canonicalItems = <String>{'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L'};
 
 Map<String, String> parseCanonicalCorpus(String raw) {
   final decoded = jsonDecode(raw);
@@ -34,10 +32,7 @@ class NativeTtsCaptureApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: NativeTtsCapturePage(),
-    );
+    return const MaterialApp(debugShowCheckedModeBanner: false, home: NativeTtsCapturePage());
   }
 }
 
@@ -50,9 +45,7 @@ class NativeTtsCapturePage extends StatefulWidget {
 
 class _NativeTtsCapturePageState extends State<NativeTtsCapturePage> {
   final _corpusController = TextEditingController();
-  final _versionController = TextEditingController(
-    text: 'SESLI_OGREN_TURKISH_VOICE_IDENTITY_BENCHMARK_001-KL-FIXED',
-  );
+  final _versionController = TextEditingController(text: 'SESLI_OGREN_TURKISH_VOICE_IDENTITY_BENCHMARK_001-KL-FIXED');
 
   List<Map<String, dynamic>> _voices = const [];
   Map<String, dynamic>? _selectedVoice;
@@ -143,14 +136,11 @@ class _NativeTtsCapturePageState extends State<NativeTtsCapturePage> {
         index += 1;
         setState(() => _status = 'Capturing $item / L…');
 
-        final raw = await _channel.invokeMapMethod<String, dynamic>(
-          'synthesize',
-          <String, dynamic>{
-            'item': item,
-            'text': corpus[item],
-            'voiceId': voice['id'],
-          },
-        );
+        final raw = await _channel.invokeMapMethod<String, dynamic>('synthesize', <String, dynamic>{
+          'item': item,
+          'text': corpus[item],
+          'voiceId': voice['id'],
+        });
         final sample = Map<String, dynamic>.from(raw ?? const {});
         final blindId = 'V$captureId${index.toString().padLeft(2, '0')}';
         final candidateKey = [
@@ -207,8 +197,7 @@ class _NativeTtsCapturePageState extends State<NativeTtsCapturePage> {
           'operational_cost_notes':
               'Provider-usage cost only. Device compute, battery and support costs are evaluated separately.',
           'cache_reuse_behavior': 'none; fresh file per canonical corpus item',
-          'raw_provider_metadata_location':
-              '$outputDir/r7-native-tts-manifest-$captureId.json',
+          'raw_provider_metadata_location': '$outputDir/r7-native-tts-manifest-$captureId.json',
           'audio_file_location': sample['audioPath'],
           'audio_sha256': sample['audioSha256'],
           'known_limitation':
@@ -226,10 +215,7 @@ class _NativeTtsCapturePageState extends State<NativeTtsCapturePage> {
         'samples': records,
       };
       final manifestPath = '$outputDir/r7-native-tts-manifest-$captureId.json';
-      await File(manifestPath).writeAsString(
-        const JsonEncoder.withIndent('  ').convert(manifest),
-        flush: true,
-      );
+      await File(manifestPath).writeAsString(const JsonEncoder.withIndent('  ').convert(manifest), flush: true);
 
       setState(() {
         _status =
