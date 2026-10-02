@@ -4,12 +4,28 @@ import 'package:r7_p1_runtime_proof/src/app/proof_controller.dart';
 import 'package:r7_p1_runtime_proof/src/app/proof_screen.dart';
 import 'package:r7_p1_runtime_proof/src/bench/bench_runner.dart';
 import 'package:r7_p1_runtime_proof/src/flow/flow_engine.dart';
+import 'package:r7_p1_runtime_proof/src/render/companion_renderer.dart';
 import 'package:r7_p1_runtime_proof/src/render/views.dart';
 import 'package:r7_p1_runtime_proof/src/render/world_painter.dart';
 import 'package:r7_p1_runtime_proof/src/scene/fixture.dart';
 import 'package:r7_p1_runtime_proof/src/scene/scene_schema.dart';
 
 import 'helpers.dart';
+
+class _TestCompanionRenderer implements CompanionRenderer {
+  const _TestCompanionRenderer();
+
+  @override
+  Widget build({
+    required CompanionState state,
+    required CompanionTone tone,
+    required Animation<double> motion,
+    required bool animate,
+    required PaintStats stats,
+  }) {
+    return const ColoredBox(key: Key('test-companion-renderer'), color: Colors.transparent);
+  }
+}
 
 void main() {
   late List<ProofFixture> fixtures;
@@ -89,6 +105,27 @@ void main() {
     await tester.pump(const Duration(milliseconds: 500));
     expect(c.companionState, CompanionState.success);
     await finish(tester);
+  });
+
+  testWidgets('Companion renderer seam swaps the visual body without changing fallback semantics', (tester) async {
+    usePhoneSurface(tester);
+    final c = ProofController(fixtures);
+    addTearDown(c.dispose);
+    await tester.pumpWidget(
+      MaterialApp(
+        home: ProofScreen(controller: c, companionRenderer: const _TestCompanionRenderer()),
+      ),
+    );
+    await tester.pump();
+
+    expect(find.byKey(const Key('test-companion-renderer')), findsOneWidget);
+    expect(find.byKey(const Key('companion-label')), findsOneWidget);
+
+    c.setTier(FallbackLevel.neutral);
+    await tester.pump();
+
+    expect(find.byKey(const Key('test-companion-renderer')), findsNothing);
+    expect(find.byKey(const Key('companion-label')), findsOneWidget);
   });
 
   testWidgets('T8: tiers degrade cost; CONTENT has no canvas and keeps the learning loop', (tester) async {
