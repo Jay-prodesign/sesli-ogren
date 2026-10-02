@@ -13,6 +13,7 @@ import argparse
 import json
 import re
 import sys
+from datetime import datetime
 from pathlib import Path
 from typing import Any
 
@@ -58,6 +59,13 @@ def validate(report: dict[str, Any], evidence: dict[str, Any]) -> list[str]:
                 "raw_timeline_location", "raw_p1_report_location", "frame_summary_observation",
                 "thermal_battery_observation", "known_limitation", "reviewer"):
         require(_nonblank(evidence.get(key)), f"evidence.{key} must be recorded")
+
+    observed_at = evidence.get("observed_at")
+    if _nonblank(observed_at):
+        try:
+            datetime.fromisoformat(str(observed_at).replace("Z", "+00:00"))
+        except ValueError:
+            errors.append("observed_at must be an ISO-8601 timestamp with date and time")
 
     build_sha = evidence.get("build_sha")
     checksum = evidence.get("build_checksum_sha256")
@@ -130,6 +138,9 @@ def validate(report: dict[str, Any], evidence: dict[str, Any]) -> list[str]:
 
     if overall == PASS:
         require(report.get("functional_result") == PASS, "PASS evidence requires report.functional_result PASS")
+        if isinstance(accessibility, dict):
+            require(accessibility.get("largest_text") == PASS,
+                    "PASS evidence requires largest-text accessibility smoke PASS on every device")
         require(evidence.get("memory_unbounded_growth") is False, "PASS evidence cannot report unbounded memory growth")
         require(evidence.get("visible_repeated_jank") is False, "PASS evidence cannot report repeated visible jank")
         require(evidence.get("thermal_blocking_issue") is False, "PASS evidence cannot report a thermal blocking issue")
