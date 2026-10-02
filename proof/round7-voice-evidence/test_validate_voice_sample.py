@@ -19,7 +19,9 @@ def valid():
         "provider_identity_hidden_from_listener": True,
         "hidden_provider_model_voice_key": "private-key-01",
         "execution_backend": "hosted_cloud",
-        "platform": "server",\n        "physical_device": False,\n        "device_evidence_class": "not_applicable",
+        "platform": "server",
+        "physical_device": False,
+        "device_evidence_class": "not_applicable",
         "device_model": "provider-managed-runtime",
         "os_version": "provider-managed",
         "tts_engine_or_package": "provider-api",
@@ -29,6 +31,7 @@ def valid():
         "synthesis_mode_or_quality_tier": "benchmark",
         "voice_network_requirement": "network_required",
         "offline_tested": False,
+        "offline_test_method": "not_applicable",
         "offline_result": "not_applicable",
         "audio_capture_or_generation_method": "provider response persisted to benchmark WAV",
         "metered_external_service_invoked": True,
@@ -66,6 +69,8 @@ def valid_native():
         "hidden_provider_model_voice_key": "ios-native-tr-voice-01",
         "execution_backend": "native_os",
         "platform": "ios",
+        "physical_device": True,
+        "device_evidence_class": "D1",
         "device_model": "physical-target-iphone",
         "os_version": "iOS benchmark build",
         "tts_engine_or_package": "AVSpeechSynthesizer",
@@ -73,6 +78,7 @@ def valid_native():
         "voice_id_or_name": "installed-tr-TR-voice",
         "voice_network_requirement": "offline_capable",
         "offline_tested": True,
+        "offline_test_method": "airplane mode with Wi-Fi and cellular disabled",
         "offline_result": "pass",
         "audio_capture_or_generation_method": "native synthesis-to-buffer benchmark capture",
         "metered_external_service_invoked": False,
@@ -144,8 +150,14 @@ class VoiceSampleValidatorTests(unittest.TestCase):
     def test_native_requires_offline_test(self):
         r = valid_native()
         r["offline_tested"] = False
+        r["offline_test_method"] = "not_applicable"
         r["offline_result"] = "not_applicable"
         self.assertTrue(any("real offline test" in e for e in validate(r)))
+
+    def test_native_requires_offline_test_method(self):
+        r = valid_native()
+        r["offline_test_method"] = "FILL"
+        self.assertTrue(any("offline_test_method" in e for e in validate(r)))
 
     def test_native_cannot_invoke_metered_external_service(self):
         r = valid_native()
@@ -163,7 +175,6 @@ class VoiceSampleValidatorTests(unittest.TestCase):
         }
         self.assertTrue(any("cost.amount must be 0" in e for e in validate(r)))
 
-
     def test_cost_scope_is_explicit(self):
         r = valid()
         r["cost"]["scope"] = "total_operational_cost"
@@ -173,6 +184,7 @@ class VoiceSampleValidatorTests(unittest.TestCase):
         r = valid()
         r["cost"]["evidence_basis"] = "FILL"
         self.assertTrue(any("cost.evidence_basis" in e for e in validate(r)))
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
