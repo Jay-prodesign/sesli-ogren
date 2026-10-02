@@ -82,6 +82,7 @@ import UIKit
       .map { voice in
         [
           "platform": "ios",
+          "physicalDevice": true,
           "id": voice.identifier,
           "name": voice.name,
           "locale": voice.language,
