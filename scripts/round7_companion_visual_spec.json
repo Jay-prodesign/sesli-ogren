@@ -1,6 +1,6 @@
 {
   "task_id": "R7-COMPANION-VISUAL-PRODUCTION-001",
-  "version": "1.0",
+  "version": "1.1",
   "authority": "ROUND_7_CURRENT_FINALIST_REBUILD_BRIEF_001",
   "goal": "Produce two parity-controlled production-quality Companion finalists for R7-01 without drifting into generic mascot, animal, human, robot, orb, or logo-only forms.",
   "stages": {
@@ -89,5 +89,47 @@
       ],
       "f0_geometry": "Build the silhouette as one upright tilted body with an integrated directional facet. The identity must come from the whole-body orientation. No detached topper, tab, badge, antenna, head, limbs or face."
     }
+  },
+  "production_mode": {
+    "strategy": "reference_locked_edit",
+    "rationale": "Text-only generation is too free and repeatedly drifts into mascot/poster conventions. Candidate geometry is first constrained by a deterministic control seed, then the image model edits/materializes that seed.",
+    "seed_is_final_art": false,
+    "f0_sequence": [
+      "generate deterministic geometry seed",
+      "materialize/edit the seed without changing topology",
+      "assistant visual form gate",
+      "iterate by editing the same candidate reference",
+      "freeze accepted canonical form",
+      "derive all F1 states by editing the frozen canonical form"
+    ],
+    "context_rule": "For production calls, treat previous rejected mascot/poster renders as negative history only. Never use them as visual references. The active candidate seed or frozen canonical form is the sole positive visual reference.",
+    "topology_lock": "Preserve outer silhouette, negative-space topology, part count and candidate-specific structural identity. Do not introduce anatomy, facial features, props or environment.",
+    "iteration_rule": "Change one structural/material variable per iteration; do not regenerate the candidate from scratch after a viable seed exists."
+  },
+  "seed_control": {
+    "format": "SVG geometry control image; rasterize to PNG for image editing when needed",
+    "canvas": "1024x1024",
+    "background": "#F5F0E8",
+    "palette": [
+      "#161616",
+      "#777777",
+      "#C9C2B8"
+    ],
+    "variants_per_candidate": 3,
+    "allowed_elements": [
+      "path",
+      "polygon",
+      "rect",
+      "metadata/grouping"
+    ],
+    "forbidden_elements": [
+      "text",
+      "image",
+      "filter",
+      "gradient",
+      "circle/ellipse used as attention marks",
+      "decorative scene elements"
+    ],
+    "role": "non-final structural reference only"
   }
 }
