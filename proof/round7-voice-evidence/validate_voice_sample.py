@@ -19,6 +19,10 @@ from typing import Any
 BLIND_ID = re.compile(r"^V[0-9]{2,}$")
 SHA256 = re.compile(r"^[0-9a-f]{64}$")
 CORPUS_ITEMS = set("ABCDEFGHIJKL")
+EXECUTION_BACKENDS = {"native_os", "self_hosted", "hosted_cloud"}
+PLATFORMS = {"ios", "android", "server", "desktop", "other"}
+OFFLINE_RESULTS = {"pass", "fail", "not_applicable"}
+NETWORK_REQUIREMENTS = {"offline_capable", "network_required", "unknown_not_exposed"}
 
 
 def _load(path: str) -> dict[str, Any]:
@@ -60,7 +64,7 @@ def validate(record: dict[str, Any]) -> list[str]:
         if not ok:
             errors.append(message)
 
-    require(record.get("schema_version") == 1, "schema_version must be 1")
+    require(record.get("schema_version") == 2, "schema_version must be 2")
     require(record.get("requirement") == "R7-07A", "requirement must be R7-07A")
 
     blind_id = record.get("blind_sample_id")
@@ -71,9 +75,13 @@ def validate(record: dict[str, Any]) -> list[str]:
 
     for key in (
         "hidden_provider_model_voice_key",
+        "device_model",
+        "os_version",
+        "tts_engine_or_package",
         "provider_model_version",
         "voice_id_or_name",
         "synthesis_mode_or_quality_tier",
+        "audio_capture_or_generation_method",
         "requested_format",
         "cache_reuse_behavior",
         "raw_provider_metadata_location",
@@ -82,9 +90,44 @@ def validate(record: dict[str, Any]) -> list[str]:
     ):
         require(_nonblank(record.get(key)), f"{key} must be recorded")
 
+    backend = record.get("execution_backend")
+    require(backend in EXECUTION_BACKENDS,
+            f"execution_backend must be one of {sorted(EXECUTION_BACKENDS)}")
+
+    platform = record.get("platform")
+    require(platform in PLATFORMS, f"platform must be one of {sorted(PLATFORMS)}")
+
+    if backend == "native_os":
+        require(platform in {"ios", "android"},
+                "native_os samples must use platform ios or android")
+
     locale = record.get("language_locale")
     require(isinstance(locale, str) and locale.lower().startswith("tr"),
             "language_locale must be Turkish (for example tr-TR)")
+
+    network_requirement = record.get("voice_network_requirement")
+    require(network_requirement in NETWORK_REQUIREMENTS,
+            f"voice_network_requirement must be one of {sorted(NETWORK_REQUIREMENTS)}")
+
+    offline_tested = record.get("offline_tested")
+    require(isinstance(offline_tested, bool), "offline_tested must be true or false")
+    offline_result = record.get("offline_result")
+    require(offline_result in OFFLINE_RESULTS,
+            f"offline_result must be one of {sorted(OFFLINE_RESULTS)}")
+    if backend == "native_os":
+        require(offline_tested is True, "native_os samples require a real offline test")
+        require(offline_result in {"pass", "fail"},
+                "native_os offline_result must be pass or fail")
+    elif offline_tested is False:
+        require(offline_result == "not_applicable",
+                "when offline_tested is false, offline_result must be not_applicable")
+
+    metered = record.get("metered_external_service_invoked")
+    require(isinstance(metered, bool),
+            "metered_external_service_invoked must be true or false")
+    if backend == "native_os":
+        require(metered is False,
+                "native_os benchmark samples must not invoke a metered external service")
 
     require(_nonblank(record.get("input_corpus_version")), "input_corpus_version must be recorded")
     corpus_item = record.get("input_corpus_item")
@@ -120,8 +163,12 @@ def validate(record: dict[str, Any]) -> list[str]:
     cost = record.get("cost")
     require(isinstance(cost, dict), "cost must be an object")
     if isinstance(cost, dict):
-        require(_nonnegative(cost.get("amount")), "cost.amount must be non-negative")
+        amount = cost.get("amount")
+        require(_nonnegative(amount), "cost.amount must be non-negative")
         require(_nonblank(cost.get("unit")), "cost.unit must be recorded")
+        if metered is False:
+            require(amount == 0,
+                    "cost.amount must be 0 when no metered external service was invoked")
 
     checksum = record.get("audio_sha256")
     require(isinstance(checksum, str) and bool(SHA256.fullmatch(checksum)),
