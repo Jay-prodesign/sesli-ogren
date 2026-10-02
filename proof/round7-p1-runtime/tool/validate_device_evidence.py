@@ -54,8 +54,9 @@ def validate(report: dict[str, Any], evidence: dict[str, Any]) -> list[str]:
     require(evidence.get("schema_version") == 1, "evidence.schema_version must be 1")
     require(evidence.get("requirement") == "R7-06", "evidence.requirement must be R7-06")
     require(evidence.get("device_class") in {"D1", "D2", "D3"}, "device_class must be D1, D2 or D3")
-    for key in ("evidence_id", "exact_model", "os_version", "flutter_version", "raw_timeline_location",
-                "raw_p1_report_location", "thermal_battery_observation", "reviewer"):
+    for key in ("evidence_id", "exact_model", "os_version", "flutter_version", "observed_at",
+                "raw_timeline_location", "raw_p1_report_location", "frame_summary_observation",
+                "thermal_battery_observation", "known_limitation", "reviewer"):
         require(_nonblank(evidence.get(key)), f"evidence.{key} must be recorded")
 
     build_sha = evidence.get("build_sha")
@@ -111,6 +112,9 @@ def validate(report: dict[str, Any], evidence: dict[str, Any]) -> list[str]:
             "report.proof must be ROUND_7_P1_RUNTIME_PROOF_SPEC_001")
     require(report.get("git_sha") == build_sha, "report.git_sha must equal evidence.build_sha")
     require(report.get("build_mode") in {"profile", "release"}, "report.build_mode must be profile or release")
+    expected_platform = "iOS" if evidence.get("device_class") == "D1" else "android"
+    require(report.get("platform") == expected_platform,
+            f"report.platform must be {expected_platform} for {evidence.get('device_class')}")
     require(report.get("decision_grade") == "ONLY_IF_PHYSICAL_DEVICE",
             "report.decision_grade must be ONLY_IF_PHYSICAL_DEVICE")
 
