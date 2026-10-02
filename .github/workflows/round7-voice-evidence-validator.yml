@@ -34,4 +34,5 @@ jobs:
       - run: python3 scripts/validate_bootstrap.py
       - run: python3 scripts/test_validate_bootstrap.py
       - run: python3 proof/round7-voice-evidence/test_validate_voice_sample.py
+      - run: python3 proof/round7-voice-evidence/test_validate_voice_benchmark.py
       - run: python3 proof/round7-voice-evidence/test_validate_listening_panel.py
