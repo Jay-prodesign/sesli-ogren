@@ -1,0 +1,52 @@
+{
+  "schema_version": 1,
+  "evidence_id": "FILL",
+  "requirement": "R7-06",
+  "device_class": "D1",
+  "exact_model": "FILL",
+  "os_version": "FILL",
+  "refresh_rate_hz": 60,
+  "build_sha": "ec84e603a67a8fd286e5c57c2a808d62d5c5cd6d",
+  "build_checksum_sha256": "FILL",
+  "flutter_version": "3.47.5",
+  "test_mode": "PROFILE",
+  "observed_at": "FILL",
+  "raw_timeline_location": "FILL",
+  "raw_p1_report_location": "FILL",
+  "cold_start_ms": [
+    0,
+    0,
+    0
+  ],
+  "memory_bytes": {
+    "baseline": 0,
+    "world": 0,
+    "post_t11": 0
+  },
+  "frame_summary_observation": "FILL",
+  "memory_unbounded_growth": null,
+  "visible_repeated_jank": null,
+  "thermal_blocking_issue": null,
+  "thermal_battery_observation": "FILL",
+  "pause_resume": {
+    "teach": "NOT_RUN",
+    "challenge": "NOT_RUN"
+  },
+  "fallbacks": {
+    "reduced_motion": "NOT_RUN",
+    "audio_unavailable": "NOT_RUN",
+    "companion_asset_failure": "NOT_RUN",
+    "world_asset_failure": "NOT_RUN",
+    "content_tier": "NOT_RUN"
+  },
+  "accessibility": {
+    "screen_reader": "VoiceOver",
+    "result": "NOT_RUN",
+    "largest_text": "NOT_RUN",
+    "focus_order": "NOT_RUN",
+    "announcements": "NOT_RUN"
+  },
+  "overall_result": "NOT_RUN",
+  "known_limitation": "FILL",
+  "reviewer": "FILL"
+}

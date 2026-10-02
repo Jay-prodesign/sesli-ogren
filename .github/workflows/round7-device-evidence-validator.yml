@@ -1,0 +1,46 @@
+name: round7-device-evidence-validator
+
+# R7-06 physical-device evidence completeness checks only.
+# Read-only, standard-library validation. This workflow does not run the P1
+# Android/iOS profile builds and cannot close R7-06 by itself.
+
+on:
+  push:
+    branches: [proof/round7-device-evidence-validator]
+    paths:
+      - "proof/round7-p1-runtime/tool/validate_device_evidence.py"
+      - "proof/round7-p1-runtime/tool/test_validate_device_evidence.py"
+      - "proof/round7-p1-runtime/tool/validate_device_matrix.py"
+      - "proof/round7-p1-runtime/tool/test_validate_device_matrix.py"
+      - "proof/round7-p1-runtime/DEVICE_EVIDENCE_TEMPLATE.json"
+      - "proof/round7-p1-runtime/DEVICE_RUN_PROTOCOL.md"
+      - ".github/workflows/round7-device-evidence-validator.yml"
+  pull_request:
+    paths:
+      - "proof/round7-p1-runtime/tool/validate_device_evidence.py"
+      - "proof/round7-p1-runtime/tool/test_validate_device_evidence.py"
+      - "proof/round7-p1-runtime/DEVICE_EVIDENCE_TEMPLATE.json"
+      - "proof/round7-p1-runtime/DEVICE_RUN_PROTOCOL.md"
+      - ".github/workflows/round7-device-evidence-validator.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: round7-device-evidence-validator-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    name: Validate R7-06 evidence tooling
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+      - run: python3 scripts/validate_bootstrap.py
+      - run: python3 scripts/test_validate_bootstrap.py
+      - run: python3 proof/round7-p1-runtime/tool/test_validate_device_evidence.py
+      - run: python3 proof/round7-p1-runtime/tool/test_validate_device_matrix.py

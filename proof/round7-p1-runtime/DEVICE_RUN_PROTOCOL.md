@@ -69,6 +69,43 @@ This produces two files:
 - **Accessibility (B15).** Test at the largest system font size with TalkBack / VoiceOver: challenge and actions must be reachable, and the world and Companion must be announced.
 - **Refresh rate.** Record the device refresh rate. On 90/120 Hz devices, record whether the rate is fixed or adaptive.
 
+## Evidence completeness validator
+
+After collecting the raw P1 report and the manual physical-device observations,
+copy `DEVICE_EVIDENCE_TEMPLATE.json` to a per-device evidence JSON and fill every
+field. Then run:
+
+```sh
+python3 tool/validate_device_evidence.py \
+  --report build/p1_report.json \
+  --evidence build/device-evidence-D2.json
+```
+
+The validator fails closed on missing provenance, SHA mismatch, incomplete T1–T11,
+a soak shorter than 30 cycles, controller leaks, missing cold-start/memory
+observations, unresolved fallback checks, and PASS records that still report
+repeated visible jank, unbounded memory growth or thermal blockers. D1 PASS also
+requires VoiceOver evidence.
+
+This is **per-device completeness validation only**. It cannot close R7-06,
+substitute for physical-device execution, or decide whether measured values are
+acceptable.
+
+After D1, D2 and D3 each have a completed device evidence JSON, validate the
+cross-device matrix:
+
+```sh
+python3 tool/validate_device_matrix.py \
+  build/device-evidence-D1.json \
+  build/device-evidence-D2.json \
+  build/device-evidence-D3.json
+```
+
+The matrix validator requires exactly one D1/D2/D3 record, one common build SHA,
+PROFILE mode, all three device rows PASS, D1 VoiceOver PASS, and TalkBack PASS on
+at least one Android device. It still cannot decide whether a model truly
+represents the intended mid/lower-end class or grant R7-06 / Technical PASS.
+
 ## Evidence record per device
 
 For each run, fill a row in [EVIDENCE_MANIFEST.md](EVIDENCE_MANIFEST.md) with:
