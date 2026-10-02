@@ -19,7 +19,7 @@ def valid():
         "provider_identity_hidden_from_listener": True,
         "hidden_provider_model_voice_key": "private-key-01",
         "execution_backend": "hosted_cloud",
-        "platform": "server",
+        "platform": "server",\n        "physical_device": False,\n        "device_evidence_class": "not_applicable",
         "device_model": "provider-managed-runtime",
         "os_version": "provider-managed",
         "tts_engine_or_package": "provider-api",
@@ -45,7 +45,13 @@ def valid():
         "full_completion_latency_ms": 900,
         "retries_count": 0,
         "errors": [],
-        "cost": {"amount": 0.01, "unit": "USD"},
+        "cost": {
+            "scope": "metered_external_provider_usage",
+            "amount": 0.01,
+            "unit": "USD",
+            "evidence_basis": "provider usage export",
+        },
+        "operational_cost_notes": "Hosted benchmark; provider usage cost recorded separately from client/network overhead.",
         "cache_reuse_behavior": "disabled for benchmark",
         "raw_provider_metadata_location": "drive://metadata",
         "audio_file_location": "drive://audio/V01.wav",
@@ -72,7 +78,13 @@ def valid_native():
         "metered_external_service_invoked": False,
         "streaming": False,
         "first_byte_latency_ms": None,
-        "cost": {"amount": 0.0, "unit": "USD-provider-usage"},
+        "cost": {
+            "scope": "metered_external_provider_usage",
+            "amount": 0.0,
+            "unit": "USD-provider-usage",
+            "evidence_basis": "native OS synthesis with network-disabled pass and no external developer API call",
+        },
+        "operational_cost_notes": "Provider usage cost only; device compute/battery is evaluated separately.",
     })
     return r
 
@@ -119,6 +131,16 @@ class VoiceSampleValidatorTests(unittest.TestCase):
         r["platform"] = "server"
         self.assertTrue(any("native_os samples" in e for e in validate(r)))
 
+    def test_native_requires_physical_device_flag(self):
+        r = valid_native()
+        r["physical_device"] = False
+        self.assertTrue(any("physical_device=true" in e for e in validate(r)))
+
+    def test_native_requires_matching_device_class(self):
+        r = valid_native()
+        r["device_evidence_class"] = "D2"
+        self.assertTrue(any("native iOS evidence must bind to D1" in e for e in validate(r)))
+
     def test_native_requires_offline_test(self):
         r = valid_native()
         r["offline_tested"] = False
@@ -133,9 +155,24 @@ class VoiceSampleValidatorTests(unittest.TestCase):
     def test_zero_cost_claim_requires_no_metered_external_service(self):
         r = valid()
         r["metered_external_service_invoked"] = False
-        r["cost"] = {"amount": 1.0, "unit": "USD"}
+        r["cost"] = {
+            "scope": "metered_external_provider_usage",
+            "amount": 1.0,
+            "unit": "USD",
+            "evidence_basis": "test",
+        }
         self.assertTrue(any("cost.amount must be 0" in e for e in validate(r)))
 
+
+    def test_cost_scope_is_explicit(self):
+        r = valid()
+        r["cost"]["scope"] = "total_operational_cost"
+        self.assertTrue(any("cost.scope" in e for e in validate(r)))
+
+    def test_cost_evidence_basis_required(self):
+        r = valid()
+        r["cost"]["evidence_basis"] = "FILL"
+        self.assertTrue(any("cost.evidence_basis" in e for e in validate(r)))
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
