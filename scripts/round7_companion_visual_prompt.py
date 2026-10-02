@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build parity-locked prompts for Round 7 Companion visual production."""
+"""Build design-plan-locked prompts for Round 7 Companion visual production."""
 
 from __future__ import annotations
 
@@ -23,11 +23,10 @@ def parity_hash(spec: dict) -> str:
 
 def lint_spec(spec: dict) -> list[str]:
     errors: list[str] = []
-    candidates = spec.get("candidates", {})
-    if set(candidates) != {"D", "E"}:
+    if set(spec.get("candidates", {})) != {"D", "E"}:
         errors.append("Exactly candidates D and E are required.")
-    states = spec.get("stages", {}).get("F1", {}).get("states", [])
-    expected = [
+
+    expected_states = [
         "AVAILABLE/IDLE",
         "LISTENING",
         "THINKING",
@@ -35,123 +34,94 @@ def lint_spec(spec: dict) -> list[str]:
         "SUCCESS",
         "SUPPORTIVE CORRECTION",
     ]
-    if states != expected:
-        errors.append("F1 state list or ordering drifted from the locked six-state contract.")
+    if spec.get("stages", {}).get("F1", {}).get("states") != expected_states:
+        errors.append("F1 state contract drifted.")
 
-    parity = spec.get("parity", {})
-    required_parity = {
-        "canvas",
-        "camera",
-        "background",
-        "lighting",
-        "material",
-        "screen_footprint",
-        "detail_budget",
-        "effects",
-        "props",
-        "text_policy",
-        "emotion_policy",
-        "runtime_translation",
-    }
-    missing = sorted(required_parity - set(parity))
-    if missing:
-        errors.append(f"Missing parity fields: {', '.join(missing)}")
+    production = spec.get("production_mode", {})
+    if production.get("strategy") != "design_plan_locked_generation":
+        errors.append("Production strategy must be design_plan_locked_generation.")
+    if production.get("design_authority") != "ROUND_7_CURRENT_FINALIST_REBUILD_BRIEF_001":
+        errors.append("Canonical design authority drifted.")
 
     hard_fails = set(spec.get("shared_hard_fails", []))
-    required_fails = {
+    required = {
         "recognizable animal or pet",
         "generic blob with face",
         "generic AI orb",
         "robot assistant",
         "mini human",
         "eyes-and-mouth mascot grammar",
-        "arms, hands, legs, feet, ears, tail, hair, clothing, hat, glasses or props",
         "face screen or visor",
     }
-    if not required_fails.issubset(hard_fails):
-        errors.append("Shared hard-fail list lost required anti-mascot constraints.")
+    if not required.issubset(hard_fails):
+        errors.append("Required anti-archetype constraints are missing.")
 
-    production = spec.get("production_mode", {})
-    if production.get("strategy") != "reference_locked_edit":
-        errors.append("Production strategy must be reference_locked_edit.")
-    seed = spec.get("seed_control", {})
-    if seed.get("variants_per_candidate") != 3:
-        errors.append("Exactly three geometry seed variants per candidate are required.")
-
-    for code, candidate in candidates.items():
+    for code, candidate in spec.get("candidates", {}).items():
         if not candidate.get("positive_identity"):
-            errors.append(f"{code} has no positive identity anchors.")
+            errors.append(f"{code} has no identity anchors.")
         if not candidate.get("f0_geometry"):
-            errors.append(f"{code} has no F0 geometry instruction.")
+            errors.append(f"{code} has no canonical-form instruction.")
 
     return errors
 
 
-def _shared_block(spec: dict) -> str:
-    parity = spec["parity"]
-    hard_fails = "; ".join(spec["shared_hard_fails"])
-    parity_lines = "\n".join(f"- {k.replace('_', ' ')}: {v}" for k, v in parity.items())
+def shared_block(spec: dict) -> str:
+    parity = "\n".join(
+        f"- {key.replace('_', ' ')}: {value}" for key, value in spec["parity"].items()
+    )
+    fails = "; ".join(spec["shared_hard_fails"])
     return f"""LOCKED PARITY CONDITIONS
-{parity_lines}
+{parity}
 
-ABSOLUTE HARD FAILS
-Do not generate any of the following: {hard_fails}.
-If a familiar mascot shorthand would help readability, do NOT use it. Preserve the abstract-living structural identity instead.
+SHARED HARD FAILS
+Reject rather than reinterpret the design if the result becomes any of these:
+{fails}
+
+PRODUCTION AUTHORITY
+The canonical design brief is authoritative. Tool limitations are not design input.
+Do not simplify, replace, proceduralize, logo-ize, humanize, animalize, robotize, or otherwise change the candidate concept to make generation easier.
 """
 
 
 def build_f0_prompt(spec: dict, candidate_code: str) -> str:
     c = spec["candidates"][candidate_code]
-    identity = "\n".join(f"- {x}" for x in c["positive_identity"])
-    production = spec["production_mode"]
-    return f"""ROUND 7 COMPANION — F0 REFERENCE-LOCKED MATERIALIZATION
+    identity = "\n".join(f"- {item}" for item in c["positive_identity"])
+    views = "\n".join(f"- {item}" for item in spec["stages"]["F0"]["views"])
+    return f"""ROUND 7 COMPANION — F0 CANONICAL CHARACTER FORM
 Candidate: {c['name']}
 
-INPUT AUTHORITY
-Use the ATTACHED geometry control seed as the sole positive visual reference. Previous mascot/poster renders are rejected history and must not influence the image.
+GOAL
+Create the actual Companion character direction defined below. This is not a substitute geometry exercise and not a generic mascot brief.
 
-TASK
-Materialize the attached geometry seed into a production-quality non-human learning Companion while PRESERVING its outer silhouette, negative-space topology, part count, and candidate-specific structural identity.
-
-TOPOLOGY LOCK
-{production['topology_lock']}
-
-PRIMARY GEOMETRY
+CANONICAL CHARACTER DIRECTION
 {c['f0_geometry']}
 
 IDENTITY ANCHORS
 {identity}
 
-EDIT BOUNDARY
-- keep the same candidate only;
-- do not invent a head, face, eyes, mouth, limbs, hands, feet, ears, tail, hair, clothing, props, UI symbols, badges, speech bubbles, environment, books, desk, phone, classroom, stars or decorative scene;
-- do not add glow, particles, aura, neon rim light or cinematic background;
-- do not convert structural apertures into eyes;
-- do not add text;
-- use restrained matte soft-touch material and neutral studio shading only;
-- improve thickness, edge quality, spatial depth and material finish without changing topology.
+REQUIRED F0 PROOF
+{views}
 
-{_shared_block(spec)}
+CHARACTER REQUIREMENT
+The result must feel like a living, responsive learning character rather than a logo or decorative object.
+Character presence must come from the approved body grammar, attention system, orientation, asymmetry, tension and structural response.
+Do not solve character presence with conventional cute eyes-and-mouth mascot grammar, human anatomy, animal anatomy, robot casing, props or costumes.
 
-QUALITY BAR
-- the silhouette must remain recognizable before color;
-- the form must feel responsive/alive through structural tension and orientation, not facial acting;
-- mature enough for teen, adult and professional learning contexts;
-- low-part-count and plausible for vector/CustomPaint/Rive translation;
-- output ONE isolated candidate on the neutral studio field, centered with generous margins.
+{shared_block(spec)}
 
-This is a controlled materialization/edit of the supplied seed, not a new character design and not a poster.
+Do not add marketing poster composition, lifestyle scene dressing, books, desk, classroom narrative or unrelated UI.
+One candidate only. Preserve the approved candidate identity even if the generation tool would prefer a more familiar mascot form.
 """
+
 
 def build_f1_prompt(spec: dict, candidate_code: str) -> str:
     c = spec["candidates"][candidate_code]
-    states = "\n".join(f"- {s}" for s in spec["stages"]["F1"]["states"])
-    identity = "\n".join(f"- {x}" for x in c["positive_identity"])
-    return f"""ROUND 7 COMPANION — F1 REFERENCE-LOCKED STATE EDIT
+    identity = "\n".join(f"- {item}" for item in c["positive_identity"])
+    states = "\n".join(f"- {state}" for state in spec["stages"]["F1"]["states"])
+    return f"""ROUND 7 COMPANION — F1 SIX-STATE CHARACTER PARITY
 Candidate: {c['name']}
 
-INPUT AUTHORITY
-Use the ATTACHED approved F0 canonical form as the sole positive visual reference. Do not redesign the character and do not borrow anatomy or styling from previous rejected mascot renders.
+Use the approved F0 character identity. Do not redesign the candidate.
 
 IDENTITY ANCHORS
 {identity}
@@ -160,37 +130,37 @@ REQUIRED STATES
 {states}
 
 STATE LANGUAGE
-- LISTENING: attentive through orientation/tension only; not cute or submissive.
-- THINKING: reflective structural tension; never loading/buffering iconography.
-- SPEAKING: subtle form rhythm; no mouth and no lip-sync dependency.
-- SUCCESS: composed positive expansion; no reward/loot/confetti grammar.
-- SUPPORTIVE CORRECTION: directional help and guidance; never disappointment, shame or punishment.
-- AVAILABLE/IDLE: calm, present and low-attention.
+- LISTENING: attentive, not submissive/cute.
+- THINKING: reflective, not loading/buffering.
+- SPEAKING: readable without perfect lip-sync.
+- SUCCESS: positive without loot/reward-economy grammar.
+- SUPPORTIVE CORRECTION: helpful direction, never disappointment or punishment.
+- AVAILABLE/IDLE: calm and present.
 
-{_shared_block(spec)}
+{shared_block(spec)}
 
-STATE-EDIT LOCK
-Keep the approved F0 silhouette family, negative-space topology, material, camera, scale and lighting. State changes may use only bounded whole-form deformation, orientation, compression/expansion, spacing and internal structural alignment. Never add props, particles, facial features, floating UI symbols or new body parts.
+State differences must preserve the same character identity and body grammar.
 """
+
 
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--candidate", choices=["D", "E"])
     parser.add_argument("--stage", choices=["F0", "F1"], default="F0")
     parser.add_argument("--lint", action="store_true")
-    parser.add_argument("--json", action="store_true", help="Emit machine-readable output.")
+    parser.add_argument("--json", action="store_true")
     args = parser.parse_args()
 
     spec = load_spec()
     errors = lint_spec(spec)
     if args.lint:
-        payload = {
+        print(json.dumps({
             "ok": not errors,
             "errors": errors,
             "task_id": spec["task_id"],
+            "design_authority": spec["production_mode"]["design_authority"],
             "parity_sha256": parity_hash(spec),
-        }
-        print(json.dumps(payload, ensure_ascii=False, indent=2))
+        }, ensure_ascii=False, indent=2))
         return 0 if not errors else 1
 
     if errors:
@@ -204,6 +174,7 @@ def main() -> int:
             "task_id": spec["task_id"],
             "candidate": args.candidate,
             "stage": args.stage,
+            "design_authority": spec["production_mode"]["design_authority"],
             "parity_sha256": parity_hash(spec),
             "prompt": prompt,
         }, ensure_ascii=False, indent=2))
