@@ -55,6 +55,8 @@ def validate_benchmark(records: list[dict[str, Any]]) -> list[str]:
     consistent_candidate_fields = (
         "execution_backend",
         "platform",
+        "physical_device",
+        "device_evidence_class",
         "device_model",
         "os_version",
         "tts_engine_or_package",
@@ -77,7 +79,9 @@ def validate_benchmark(records: list[dict[str, Any]]) -> list[str]:
 
         versions = {s.get("input_corpus_version") for s in samples}
         if len(versions) != 1:
-            errors.append(f"candidate {candidate!r} must use one corpus version; got {sorted(map(str, versions))}")
+            errors.append(
+                f"candidate {candidate!r} must use one corpus version; got {sorted(map(str, versions))}"
+            )
 
         for field in consistent_candidate_fields:
             values = {s.get(field) for s in samples}
@@ -89,10 +93,14 @@ def validate_benchmark(records: list[dict[str, Any]]) -> list[str]:
         native = any(s.get("execution_backend") == "native_os" for s in samples)
         if native:
             offline_tested = {s.get("offline_tested") for s in samples}
-            offline_methods = {s.get("offline_test_method") for s in samples}\n            offline_results = {s.get("offline_result") for s in samples}
+            offline_methods = {s.get("offline_test_method") for s in samples}
+            offline_results = {s.get("offline_result") for s in samples}
             metered = {s.get("metered_external_service_invoked") for s in samples}
+
             if offline_tested != {True}:
-                errors.append(f"native candidate {candidate!r} must record offline_tested=true for all A-L samples")
+                errors.append(
+                    f"native candidate {candidate!r} must record offline_tested=true for all A-L samples"
+                )
             if len(offline_methods) != 1:
                 errors.append(
                     f"native candidate {candidate!r} must use one consistent offline_test_method; "
@@ -105,7 +113,8 @@ def validate_benchmark(records: list[dict[str, Any]]) -> list[str]:
                 )
             if metered != {False}:
                 errors.append(
-                    f"native candidate {candidate!r} must record metered_external_service_invoked=false for all samples"
+                    f"native candidate {candidate!r} must record "
+                    "metered_external_service_invoked=false for all samples"
                 )
 
     # Cross-candidate text identity: for every A-L item, all candidates must
@@ -117,11 +126,17 @@ def validate_benchmark(records: list[dict[str, Any]]) -> list[str]:
         counts = {r.get("input_character_count") for r in rows}
         versions = {r.get("input_corpus_version") for r in rows}
         if len(hashes) != 1:
-            errors.append(f"corpus item {item} must use one identical input_text_sha256 across candidates")
+            errors.append(
+                f"corpus item {item} must use one identical input_text_sha256 across candidates"
+            )
         if len(counts) != 1:
-            errors.append(f"corpus item {item} must use one identical input_character_count across candidates")
+            errors.append(
+                f"corpus item {item} must use one identical input_character_count across candidates"
+            )
         if len(versions) != 1:
-            errors.append(f"corpus item {item} must use one identical input_corpus_version across candidates")
+            errors.append(
+                f"corpus item {item} must use one identical input_corpus_version across candidates"
+            )
 
     return errors
 
