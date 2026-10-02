@@ -1,0 +1,49 @@
+{
+    "library_item": {
+        "material_id": "f64bfe69-4379-46e1-9a23-2bea548fc453",
+        "account_id": "a1000000-0000-4000-8000-000000000001",
+        "title": "H\u00fccre Biyolojisi",
+        "material_type": "text",
+        "processing_state": "ready",
+        "updated_at": "2026-09-29T16:14:14.662896+00:00",
+        "summary_artifact_id": "7e5ee138-ec70-40f0-b431-e7dcbdd448b2",
+        "summary_version": 1,
+        "summary_created_at": "2026-09-29T16:14:14.662896+00:00"
+    },
+    "artifact": {
+        "id": "7e5ee138-ec70-40f0-b431-e7dcbdd448b2",
+        "account_id": "a1000000-0000-4000-8000-000000000001",
+        "material_id": "f64bfe69-4379-46e1-9a23-2bea548fc453",
+        "artifact_type": "SUMMARY",
+        "version": 1,
+        "generation_job_id": "d155585c-2315-4cfd-a351-baf0fa0dcc12",
+        "generation_attempt_id": "c98db5a6-caaa-4b16-b1e1-33a0ab5b6b4c",
+        "content": {
+            "summary": "H\u00fccre en k\u00fc\u00e7\u00fck birimdir; mitokondri enerji \u00fcretir.",
+            "language": "tr-TR",
+            "key_points": [
+                "h\u00fccre",
+                "mitokondri"
+            ]
+        },
+        "content_schema_version": 1,
+        "generation_settings": {
+            "adapter": "fake:deterministic-v1",
+            "contract": "summary.v1"
+        },
+        "trust_class": "AI_GENERATED",
+        "status": "available",
+        "supersedes_artifact_id": null,
+        "created_at": "2026-09-29T16:14:14.662896+00:00"
+    },
+    "job": {
+        "id": "d155585c-2315-4cfd-a351-baf0fa0dcc12",
+        "material_id": "f64bfe69-4379-46e1-9a23-2bea548fc453",
+        "state": "SUCCEEDED",
+        "failure_class": null,
+        "attempt_count": 1,
+        "target_artifact_type": "SUMMARY",
+        "created_at": "2026-09-29T16:14:14.639727+00:00",
+        "completed_at": "2026-09-29T16:14:14.662896+00:00"
+    }
+}

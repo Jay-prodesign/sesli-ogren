@@ -111,6 +111,14 @@ Before any material change an agent must:
   setting the enable variable, and merging it to `main`.
 - Creating, rotating, or storing credentials or secrets.
 - Deleting data or history.
+- **D-031:** adding or first using any new external service, SaaS, API, plugin,
+  connector, analytics product, deployment service, AI/automation agent, or other
+  third-party dependency beyond the already approved stack. The approved stack
+  covers Drive, GitHub, the Flutter client, and approved backend/runtime
+  components. Any action that sends, publishes, or submits something to the
+  outside world or changes an external account also needs Founder approval.
+  Evaluating a candidate locally without adopting it is allowed and is reported
+  as evidence.
 
 If a protected action appears necessary: stop, record a Decision Request in
 `docs/agent/DECISION_REQUEST.md`, and set execution state to `BLOCKED`.
@@ -250,3 +258,66 @@ The Product Owner is **not** the routine message courier. Full protocol:
    `CLAUDE.md`, `CURRENT_HANDOFF.md`, `EXECUTION_STATE.json`, `TASKS.md`, the
    relevant exec plan, and every unread `CMD` before acting. The text of a comment
    that triggers the run is not itself a command until it is recorded as a `CMD`.
+7. **Checkpoint returns.** A long-running command, such as a whole mission, may
+   receive interim `RET` records with `Disposition: PARTIAL`. The command stays
+   `ACKNOWLEDGED` until a non-PARTIAL return answers it.
+
+## 14. Engineering quality (D-029) and experience governance (D-028)
+
+**D-029 — Engineering & Product Quality Constitution** (canonical Drive document
+"ENGINEERING & PRODUCT QUALITY CONSTITUTION — Learning App") binds every
+engineering agent. This section is the operational projection. The Drive document
+is the full authority and is not copied here.
+
+1. **Quality bar.** simple + secure + maintainable + observable + testable +
+   performant + cost-conscious + evolvable. Build the smallest credible system
+   that solves the current validated problem. New complexity, services,
+   abstractions, or dependencies need a stated, concrete reason.
+2. **Operational rules.**
+   - Reuse proven platform or library capability before writing custom code (§12).
+   - Keep code clear and boundaries narrow and real. Put provider, database, or
+     vendor specifics behind adapters only where replacement matters.
+   - Design security and privacy in from the start: deny by default, enforce
+     server-side, isolate secrets, collect only minimum data, and keep sensitive
+     data out of logs, analytics, and prompts.
+   - Never treat AI output as trusted system truth by default. Each important
+     fact has one canonical owner.
+   - Measure before optimizing performance. Design accessibility from the start
+     for user-facing work.
+   - Test according to risk (authn/authz, user data, migrations, AI boundaries,
+     critical workflows), not coverage percentages.
+   - Make failures observable without leaking sensitive data, and degrade
+     gracefully.
+   - Treat cost (tokens, inference, storage, jobs) as an architectural constraint.
+   - Record material technical debt with its reason, scope, risk, and
+     remediation. It must never pass as final architecture.
+   - Prefer small, reversible changes with an explicit rollback.
+   - Back completion claims with repository, test, or runtime evidence, never
+     with documentation alone.
+3. **Final Engineering Test.** Before accepting a major implementation decision,
+   answer these ten questions:
+   1. Is it necessary now?
+   2. Is it the simplest credible option?
+   3. Is it secure by default?
+   4. Can another engineer understand and modify it?
+   5. Is it testable?
+   6. Is it observable on failure?
+   7. Is it replaceable or evolvable?
+   8. Are the privacy implications acceptable?
+   9. Is the operational cost reasonable?
+   10. Does it solve today's problem without unnecessarily constraining tomorrow?
+
+   If a material answer is unclear, the decision is unfinished. Mark an
+   irrelevant dimension N/A with a short reason. Apply the test in proportion to
+   risk: no checklist theatre and no compliance infrastructure.
+4. **Where it appears.** Exec plans for tasks under the active, non-bootstrap
+   milestone carry a `## Quality considerations (D-029)` section (template in
+   [`docs/exec-plans/README.md`](docs/exec-plans/README.md)). Mission returns state
+   where D-029 was applied, the Final Engineering Test disposition for major
+   decisions, and any quality debt.
+5. **D-028 — Creative & Product Experience governance.** Engineering may
+   prototype user-facing ideas. It must not silently turn prototype UI,
+   component-library defaults, or implementation convenience into canonical
+   product design. Report unresolved user-facing choices to Brain as
+   `OPEN DESIGN DECISION` / `EXPERIMENT`. Label proof-only UI as such, and never
+   present it as production-complete UX.

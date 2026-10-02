@@ -10,54 +10,142 @@
     "default_branch": "main"
   },
   "mission": {
-    "id": "CLAUDE_HANDOFF_000",
-    "title": "Repository & Agent Bootstrap",
-    "executor": "Claude (Primary Engineer)"
+    "id": "CLAUDE_HANDOFF_001",
+    "title": "V0 Architecture Spike / Architecture Proof — COMPLETED",
+    "executor": "ChatGPT (Founder-authorized temporary bounded engineering delegate for CMD-0014 closure; Claude remains designated Primary Engineer when available)"
   },
-  "lifecycle_stage": "Lifecycle M3 — Repository & Agent Bootstrap review (TASKS.md milestone M0), pre-Architecture Proof",
-  "status": "AWAITING_BRAIN_REVIEW",
-  "active_milestone": "M0",
+  "lifecycle_stage": "Lifecycle M4 — Architecture Proof — ARCHITECTURE_PROOF_PASS / GO_ADAPT; repo closure projection completed under CMD-0014",
+  "status": "PASS",
+  "active_milestone": "M1 — DONE",
   "brain_review": {
-    "latest": "M3_BOOTSTRAP_BRAIN_REVIEW_001",
-    "disposition": "CHANGES_REQUIRED",
-    "reviewed_head_sha": "97e9040acf6a668f279a4aa1fedcd9bbbce810e2",
-    "corrections_answered_by": "RET-0001"
+    "latest": "M4_ARCHITECTURE_PROOF_BRAIN_REVIEW_004",
+    "disposition": "ARCHITECTURE_PROOF_PASS / GO_ADAPT",
+    "reviewed_head_sha": "0327d2e5b854df1c9923c65ed88f77151cfe9eed",
+    "note": "Architecture acceptance is immutable at the reviewed head. CMD-0014 projects that decision into repo-local control files only; later closure commits are not architecture review heads.",
+    "previous": "M4_ARCHITECTURE_PROOF_BRAIN_REVIEW_003 (historical CHANGES_REQUIRED at 9fb2d9b34c236c3c8196a5b0f411a5c6836179d1); M3_BOOTSTRAP_BRAIN_REVIEW_002 (BOOTSTRAP_PASS at 433c26cf5fa75a37b66b1f74dd6a133ae4d3407a)"
   },
   "tasks": {
-    "LA-0001": "AWAITING_BRAIN_REVIEW",
-    "LA-0002": "AWAITING_BRAIN_REVIEW",
-    "LA-0003": "AWAITING_BRAIN_REVIEW",
-    "LA-0004": "AWAITING_BRAIN_REVIEW",
-    "LA-0005": "AWAITING_BRAIN_REVIEW",
-    "LA-0006": "AWAITING_BRAIN_REVIEW",
-    "LA-0007": "AWAITING_BRAIN_REVIEW",
-    "LA-0008": "AWAITING_BRAIN_REVIEW"
+    "LA-0001": "DONE",
+    "LA-0002": "DONE",
+    "LA-0003": "DONE",
+    "LA-0004": "DONE",
+    "LA-0005": "DONE",
+    "LA-0006": "DONE",
+    "LA-0007": "DONE",
+    "LA-0008": "DONE",
+    "LA-0009": "DONE",
+    "LA-0010": "DONE",
+    "LA-0011": "DONE",
+    "LA-0012": "DONE",
+    "LA-0013": "DONE",
+    "LA-0014": "DONE",
+    "LA-0015": "DONE",
+    "LA-0016": "DONE",
+    "LA-0017": "DONE"
   },
   "git": {
-    "branch": "chore/repository-bootstrap",
-    "base_sha": "52616b4b4f018ece72d3ee1de4949875bb144e9a",
-    "head_sha": "1ad2c8a3e4cfc34bf5ea85b3d7cfff7b4d9292e5",
-    "head_sha_note": "Content head of the Brain Review 001 corrections (local validator OK, 35/35 negative tests OK). A commit cannot record its own SHA, so the final PR head is the single reconciliation commit on top of this SHA. It and its CI run are reported in PR #1 and the engineer's final report.",
-    "pr_number": 1,
-    "pr_url": "https://github.com/Jay-prodesign/sesli-ogren/pull/1",
+    "branch": "spike/v0-architecture-proof",
+    "base_sha": "433c26cf5fa75a37b66b1f74dd6a133ae4d3407a",
+    "base_note": "Reviewed bootstrap head (PR #1). main remains 52616b4b4f018ece72d3ee1de4949875bb144e9a; PR #1 is draft/unmerged and untouched.",
+    "main_sha": "52616b4b4f018ece72d3ee1de4949875bb144e9a",
+    "head_sha": "0327d2e5b854df1c9923c65ed88f77151cfe9eed",
+    "pr_number": 2,
+    "pr_url": "https://github.com/Jay-prodesign/sesli-ogren/pull/2",
     "pr_draft": true,
-    "merged": false
+    "merged": false,
+    "bootstrap_pr": {
+      "number": 1,
+      "url": "https://github.com/Jay-prodesign/sesli-ogren/pull/1",
+      "state": "draft, open, unmerged (BOOTSTRAP_PASS)"
+    },
+    "reviewed_architecture_head": "0327d2e5b854df1c9923c65ed88f77151cfe9eed",
+    "closure_projection_head": "18748f9d34cbdd07d69368fe95e36ff1e0bf3e09",
+    "closure_projection_head_binding": "LITERAL_VERIFIED_CLOSURE_HEAD"
   },
   "ci": {
-    "workflow": "bootstrap-validation",
-    "job": "Validate repository control plane",
-    "result_at_head_sha": "REPORTED_EXTERNALLY",
-    "note": "Content and reconciliation commits are pushed together, so CI runs on the final head only. The conclusion is reported in PR #1 checks and the engineer's final report. Previous reviewed head 97e9040 was green.",
-    "run_url": null
+    "workflows": [
+      "bootstrap-validation",
+      "spike-proof",
+      "flutter-proof"
+    ],
+    "architecture_review_result": "PASS at reviewed architecture head 0327d2e5b854df1c9923c65ed88f77151cfe9eed",
+    "architecture_review_runs": {
+      "bootstrap-validation": 36697639438,
+      "spike-proof": 36697639721,
+      "flutter-proof": 36697639922
+    },
+    "closure_projection_validation": "SUCCESS",
+    "note": "Architecture CI remains immutable evidence at reviewed head 0327d2e5… . CMD-0014 closure/control-plane projection is independently verified green at 18748f9d…; later evidence-annotation commits do not change the reviewed architecture or closure projection heads.",
+    "closure_projection_head": "18748f9d34cbdd07d69368fe95e36ff1e0bf3e09",
+    "closure_projection_runs": {
+      "bootstrap-validation": 37008135797,
+      "spike-proof": 37008135777,
+      "flutter-proof": 37008135827
+    }
   },
-  "last_command_id": "CMD-0001",
-  "last_acknowledged_command_id": "CMD-0001",
-  "last_return_id": "RET-0001",
+  "last_command_id": "CMD-0014",
+  "last_acknowledged_command_id": "CMD-0014",
+  "last_return_id": "RET-0006",
   "command_processing_status": "ANSWERED",
   "command_ledger": {
     "CMD-0001": {
       "status": "ANSWERED",
       "return_id": "RET-0001"
+    },
+    "CMD-0002": {
+      "status": "ANSWERED",
+      "return_id": "RET-0004",
+      "partial_return_ids": [
+        "RET-0002"
+      ]
+    },
+    "CMD-0003": {
+      "status": "ANSWERED",
+      "return_id": "RET-0003"
+    },
+    "CMD-0004": {
+      "status": "ANSWERED",
+      "return_id": "RET-0005"
+    },
+    "CMD-0005": {
+      "status": "ANSWERED",
+      "return_id": "RET-0005"
+    },
+    "CMD-0006": {
+      "status": "ANSWERED",
+      "return_id": "RET-0005"
+    },
+    "CMD-0007": {
+      "status": "ANSWERED",
+      "return_id": "RET-0005"
+    },
+    "CMD-0008": {
+      "status": "ANSWERED",
+      "return_id": "RET-0005"
+    },
+    "CMD-0009": {
+      "status": "ANSWERED",
+      "return_id": "RET-0005"
+    },
+    "CMD-0010": {
+      "status": "ANSWERED",
+      "return_id": "RET-0005"
+    },
+    "CMD-0011": {
+      "status": "ANSWERED",
+      "return_id": "RET-0005"
+    },
+    "CMD-0012": {
+      "status": "ANSWERED",
+      "return_id": "RET-0005"
+    },
+    "CMD-0013": {
+      "status": "ANSWERED",
+      "return_id": "RET-0005"
+    },
+    "CMD-0014": {
+      "status": "ANSWERED",
+      "return_id": "RET-0006"
     }
   },
   "auto_agent_bridge": {
@@ -75,27 +163,74 @@
     ]
   },
   "next_handoff": {
-    "id": "CLAUDE_HANDOFF_001",
+    "id": "M5_GOLDEN_LEARNING_SLICE_HANDOFF_NOT_ISSUED",
     "status": "NOT_EXECUTABLE",
-    "gate": "Brain BOOTSTRAP_PASS on the CLAUDE_HANDOFF_000 draft PR and explicit admission"
+    "gate": "Founder Product/Visual PASS + applicable Round 7 technical/device/voice/accessibility evidence + canonical fresh-read + explicit Brain M5 admission/handoff"
   },
   "blockers": [
-    "AUTO_AGENT_BRIDGE_BLOCKED (Founder authorization gates; not blocking bootstrap review)"
+    "M5 admission gates remain open: R7-01 Product/Visual PASS, R7-06 physical devices, R7-07 real Turkish voice evidence, R7-08 physical accessibility, and any other controlling Round 7 acceptance items.",
+    "AUTO_AGENT_BRIDGE_BLOCKED remains optional/non-blocking while Claude transport is unavailable."
   ],
-  "protected_gate": "Merge, release, deploy, LICENSE, GitHub App install, secrets/variables, branch protection: Product Owner only",
-  "next_action": "Brain re-reviews draft PR #1 against CLAUDE_HANDOFF_000 and the M3 acceptance checklist and issues BOOTSTRAP_PASS or CHANGES_REQUIRED (preferably as CMD-0002).",
+  "protected_gate": "Merge, release, deploy, LICENSE, paid provider, credentials, GitHub App install, secrets/variables, branch protection: Product Owner only",
+  "next_action": "M4 repo-local closure is verified. Keep M5 NOT_EXECUTABLE. Continue only the already-admitted Round 7 evidence program and bounded roadmap/control-plane hygiene until the controlling Product/Visual, physical-device, Turkish-voice and physical-accessibility gates are closed; then Brain must fresh-read and explicitly admit M5.",
   "canonical_source_refs": [
     "CURRENT_EXECUTION_STATE — Learning App",
-    "CLAUDE_HANDOFF_000 — Repository & Agent Bootstrap — Learning App",
-    "M3_BOOTSTRAP_BRAIN_REVIEW_001 — CHANGES_REQUIRED — Learning App",
-    "M3_REPOSITORY_BOOTSTRAP_ACCEPTANCE_CHECKLIST_v0.1 — Learning App",
-    "DECISION_LOG — Learning App (D-019, D-020, D-023, D-024, D-025, D-026)",
-    "PRE_BOOTSTRAP_PRODUCT_READINESS_AND_MASTER_SEQUENCE_v1.0 — Learning App",
-    "ENGINEERING_EXECUTION_PROTOCOL — Learning App"
+    "CLAUDE_HANDOFF_001 — V0 Architecture Spike — Learning App (mission container, partially superseded)",
+    "HANDOFF_COMMAND_AUTHORITY_AUDIT_001 — Learning App",
+    "M4_ARCHITECTURE_PROOF_BRAIN_REVIEW_003 — CHANGES_REQUIRED — Learning App",
+    "M4_ARCHITECTURE_PROOF_CORRECTION_MAP_001 — Learning App (supporting, partially superseded)",
+    "M4_ARCHITECTURE_PROOF_TASK_ADMISSION_001 — Learning App",
+    "BRAIN_COMMAND_0002 … BRAIN_COMMAND_0013 — Learning App",
+    "ENGINEERING & PRODUCT QUALITY CONSTITUTION — Learning App (D-029)",
+    "DECISION_LOG — Learning App (D-015, D-024 … D-029, D-031, D-034, D-037, D-042, D-043, D-053, D-054, D-062)",
+    "V0_CANONICAL_DATA_CAPABILITY_CONTRACTS_v0.1 — Learning App",
+    "V0_PRODUCT_SCOPE_v2.0 — Learning App",
+    "M4_ARCHITECTURE_PROOF_BRAIN_REVIEW_004 — ARCHITECTURE_PROOF_PASS — Learning App",
+    "BRAIN_COMMAND_0014 — M4 Review 004 Repo Projection & Closure — Learning App",
+    "M5_GOLDEN_LEARNING_SLICE_ACCEPTANCE_CONTRACT_v0.1 — Learning App"
   ],
   "governance_read": {
     "drive_status": "AVAILABLE",
-    "detail": "All seven required Drive authorities fresh-read by title on 2026-09-28 via the Google Drive connector. No Drive content copied into this repository."
+    "detail": "Fresh-read 2026-09-30: CURRENT_EXECUTION_STATE, HANDOFF_COMMAND_AUTHORITY_AUDIT_001, Brain Review 003, correction map, BRAIN_COMMAND_0004…0013, D-062. No Drive content copied beyond titles, decision IDs and transcribed instructions."
   },
-  "updated_at": "2026-09-28"
+  "updated_at": "2026-10-02",
+  "architecture_proof": {
+    "selector": "GO_ADAPT",
+    "conditions": [
+      "Canonical schema is the only data authority; donor tables not migrated in",
+      "First unit re-points donor client material/summary path to canonical tables and removes MockAiService from it",
+      "PDF analysis re-keyed onto canonical job model as its own tranche",
+      "Canonical SQL regression suite extended every tranche"
+    ],
+    "open_final_engineering_test_item": "#4 client re-point measured, not executed",
+    "return": "RET-0005 (supersedes nothing; RET-0004 remains the CMD-0002 answer)",
+    "d037_disposition": "COMPATIBLE: no destructive replacement or parallel truth; learner-loop authorities are additive MIGRATION_DEBT (LA-0011 §5)",
+    "d042_disposition": "FUTURE_COMPATIBLE (voice-optional core, voice-enabled Sesli Öğren composition)",
+    "speech_disposition": "Implementation N/A_BY_SCOPE; Speech Capability boundary FUTURE_COMPATIBLE with additive debt before provider lock-in (D-062)",
+    "hardening_debt": [
+      "H1 quota concurrency",
+      "H2 relational tenant-owner integrity",
+      "H3 real Supabase surface / storage deletion",
+      "H4 Flutter CI (addressed for proof client by flutter-proof)",
+      "H5 locale persistence on jobs"
+    ]
+  },
+  "command_ledger_note": "RET-0005 remains the accepted Review 003 correction evidence. RET-0006 answers CMD-0014. The CMD-0014 closure projection is verified green at 18748f9d34cbdd07d69368fe95e36ff1e0bf3e09 (bootstrap-validation 37008135797; spike-proof 37008135777; flutter-proof 37008135827).",
+  "temporary_execution_override": {
+    "status": "ACTIVE",
+    "authority": "Founder explicit instruction in chat on 2026-10-02",
+    "executor": "ChatGPT",
+    "scope": "Temporarily perform dependency-safe, reversible Learning App engineering while Claude usage limit is exhausted. Current bounded action: CMD-0014 M4 closure projection and authorized control-plane/roadmap hygiene.",
+    "exclusions": [
+      "merge",
+      "deploy",
+      "release",
+      "paid-provider spend",
+      "credentials/secrets",
+      "production mutation",
+      "M5 implementation without explicit admission",
+      "cross-project mutation"
+    ],
+    "resume_rule": "Claude remains the designated Primary Engineer and may resume after fresh-reading canonical/current state when available."
+  }
 }

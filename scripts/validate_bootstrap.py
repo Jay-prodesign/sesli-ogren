@@ -132,6 +132,7 @@ AGENTS_TOPICS = [
     "Verdict evidence",
     "Open-source reuse",
     "command / return bus",
+    "Engineering quality",
 ]
 
 CLAUDE_READ_ORDER = [
@@ -162,6 +163,9 @@ REGISTER_FIELDS = [
     "Audit status",
     "Approving decision / task",
 ]
+AGENTS_QUALITY_PHRASES = ["D-029", "Final Engineering Test", "D-028", "Quality considerations (D-029)"]
+PLAN_QUALITY_SECTION = "Quality considerations (D-029)"
+
 AGENTS_REUSE_PHRASES = [
     "must not be rewritten merely to make it internally authored",
     "Unapproved dependencies remain prohibited",
@@ -214,6 +218,11 @@ CMD_PROCESSING_STATUSES = {"IDLE", "UNREAD", "ACKNOWLEDGED", "ANSWERED", "BLOCKE
 LEDGER_STATUSES = {"ACKNOWLEDGED", "ANSWERED", "BLOCKED"}
 STATE_BUS_KEYS = ["last_command_id", "last_acknowledged_command_id", "last_return_id", "command_processing_status"]
 BRIDGE_STATUSES = {"VERIFIED_WORKING", "AUTO_AGENT_BRIDGE_BLOCKED"}
+
+# CMD-0009: a committed file cannot contain the SHA of its own commit. A final-review record may
+# therefore bind its head externally to the GitHub PR head instead of naming a literal SHA.
+REVIEW_HEAD_SENTINEL = "PR_HEAD_AT_REVIEW"
+REVIEW_HEAD_BINDING = "GITHUB_PR_HEAD"
 
 # .claude/ may only carry Markdown rule files (no settings, agents, hooks, MCP).
 CLAUDE_DIR_ALLOWED = re.compile(r"^\.claude/rules/[^/]+\.md$")
@@ -338,8 +347,16 @@ def check_state(r: Report, state: dict, task_status: dict[str, str]) -> None:
         r.check(key in git, f"{rel}: git.{key} missing")
     sha_re = re.compile(r"^[0-9a-f]{40}$")
     r.check(bool(sha_re.match(str(git.get("base_sha", "")))), f"{rel}: git.base_sha must be a 40-hex SHA")
-    if git.get("head_sha") is not None:
-        r.check(bool(sha_re.match(str(git["head_sha"]))), f"{rel}: git.head_sha must be a 40-hex SHA")
+    head = git.get("head_sha")
+    if head == REVIEW_HEAD_SENTINEL:
+        r.check(status == "AWAITING_BRAIN_REVIEW",
+                f"{rel}: git.head_sha {REVIEW_HEAD_SENTINEL} is only allowed when AWAITING_BRAIN_REVIEW")
+        r.check(git.get("head_binding") == REVIEW_HEAD_BINDING,
+                f"{rel}: git.head_sha {REVIEW_HEAD_SENTINEL} requires git.head_binding = {REVIEW_HEAD_BINDING}")
+        for key in ["branch", "pr_number", "pr_url"]:
+            r.check(git.get(key) not in (None, ""), f"{rel}: git.head_sha {REVIEW_HEAD_SENTINEL} requires git.{key}")
+    elif head is not None:
+        r.check(bool(sha_re.match(str(head))), f"{rel}: git.head_sha must be a 40-hex SHA")
     if status == "AWAITING_BRAIN_REVIEW":
         for key in ["head_sha", "pr_number", "pr_url"]:
             r.check(git.get(key) not in (None, ""), f"{rel}: git.{key} required when AWAITING_BRAIN_REVIEW")
@@ -467,7 +484,12 @@ def check_tasks(r: Report) -> dict[str, str]:
                 status in FUTURE_TASK_STATUSES or ms_status == "DONE",
                 f"TASKS.md: {tid} is executable under non-active milestone",
             )
-            continue
+            # DONE milestones remain auditable history: keep validating their
+            # task-to-plan pointers and plan contracts. Future non-executable
+            # milestones still stop here because they intentionally have no
+            # executable task/plan surface yet.
+            if ms_status != "DONE":
+                continue
 
         plan = fields.get("Exec plan", "")
         pm = re.search(r"\(([^)]+)\)", plan) or re.search(r"`([^`]+)`", plan)
@@ -483,7 +505,8 @@ def check_tasks(r: Report) -> dict[str, str]:
             sm = re.search(r"\*\*Status:\*\*\s*([A-Z_]+)", plan_text)
             if r.check(sm is not None, f"{target}: missing **Status:** header"):
                 r.check(sm.group(1) == status, f"{target}: status '{sm.group(1)}' != TASKS.md '{status}'")
-            check_plan_contract(r, target, plan_text, fields.get("Depends on", ""))
+            check_plan_contract(r, target, plan_text, fields.get("Depends on", ""),
+                                require_quality=not ms.get("title", "").startswith("Milestone M0 "))
 
     for t in tasks:
         tid = t["title"].split(" ")[0]
@@ -510,10 +533,10 @@ def section_headings(text: str) -> list[str]:
     return [m.group(1).strip() for m in re.finditer(r"^## (.+)$", text, re.MULTILINE)]
 
 
-def check_plan_contract(r: Report, rel: str, text: str, task_deps: str) -> None:
-    """Every active plan carries the full D-019 / M3-E3 contract."""
+def check_plan_contract(r: Report, rel: str, text: str, task_deps: str, require_quality: bool = False) -> None:
+    """Every active plan carries the full D-019 / M3-E3 contract (+ D-029 section after bootstrap)."""
     heads = section_headings(text)
-    for name in PLAN_SECTIONS:
+    for name in PLAN_SECTIONS + ([PLAN_QUALITY_SECTION] if require_quality else []):
         r.check(name in heads, f"{rel}: missing contract section '## {name}'")
     for label in ["Handoff", "Executor", "Owner / verifier"]:
         r.check(f"**{label}:**" in text, f"{rel}: missing **{label}:** header")
@@ -593,6 +616,8 @@ def check_reuse(r: Report) -> None:
             r.check(f"`{cls}`" in flat, f"AGENTS.md: reuse class {cls} not defined")
         for phrase in AGENTS_REUSE_PHRASES:
             r.check(phrase in flat, f"AGENTS.md: D-024 reuse rule missing: '{phrase}'")
+        for phrase in AGENTS_QUALITY_PHRASES:
+            r.check(phrase in flat, f"AGENTS.md: D-029/D-028 quality projection missing: '{phrase}'")
 
 
 def check_claude_dir(r: Report, files: list[str]) -> None:
@@ -677,7 +702,7 @@ def check_bus(r: Report, files: list[str], state: dict | None) -> None:
                     "(use an explicit 'Executability change' with PASS gate evidence)",
                 )
         else:
-            cm = re.fullmatch(r"(CLAUDE_HANDOFF_\d{3}) -> (READY|EXECUTABLE)", change)
+            cm = re.fullmatch(r"([A-Z][A-Z0-9_-]*) -> (READY|EXECUTABLE)", change)
             if r.check(cm is not None, f"{rel}: executability guard: malformed Executability change '{change}'"):
                 r.check(
                     "PASS" in f.get("Gate evidence", ""),
@@ -690,6 +715,9 @@ def check_bus(r: Report, files: list[str], state: dict | None) -> None:
                 )
 
     answered: dict[str, str] = {}
+    covers: dict[str, set[str]] = {}
+    partial: set[str] = set()
+    superseded: set[str] = set()
     for rid, rel in sorted(rets.items()):
         text = read_text(rel)
         title, f, heads = parse_record(text)
@@ -702,12 +730,38 @@ def check_bus(r: Report, files: list[str], state: dict | None) -> None:
         ans = f.get("Answers", "")
         r.check(ans in cmds, f"{rel}: answers unknown command '{ans}'")
         answered[rid] = ans
+        # CMD-0009 cumulative return: one final RET may also answer earlier commands it names explicitly.
+        also = [c.strip() for c in f.get("Also answers", "").split(",") if c.strip()]
+        for cid in also:
+            r.check(cid in cmds and record_num(cid) < record_num(ans),
+                    f"{rel}: Also answers '{cid}' must be an existing command earlier than {ans}")
+        if also:
+            r.check(f.get("Disposition") != "PARTIAL", f"{rel}: a PARTIAL checkpoint cannot declare Also answers")
+        covers[rid] = {ans, *also}
         r.check(bool(RET_DISPOSITIONS.match(f.get("Disposition", ""))), f"{rel}: invalid Disposition")
-        for key in ["Base SHA", "Head SHA"]:
-            r.check(bool(sha_re.match(f.get(key, ""))), f"{rel}: {key} must be a 40-hex SHA")
+        if f.get("Disposition") == "PARTIAL":
+            partial.add(rid)
+        r.check(bool(sha_re.match(f.get("Base SHA", ""))), f"{rel}: Base SHA must be a 40-hex SHA")
+        if f.get("Head SHA") == REVIEW_HEAD_SENTINEL:
+            r.check(f.get("Disposition", "").endswith("READY_FOR_BRAIN_REVIEW"),
+                    f"{rel}: Head SHA {REVIEW_HEAD_SENTINEL} requires a READY_FOR_BRAIN_REVIEW disposition")
+            r.check(f.get("Head binding") == REVIEW_HEAD_BINDING,
+                    f"{rel}: Head SHA {REVIEW_HEAD_SENTINEL} requires 'Head binding: {REVIEW_HEAD_BINDING}'")
+            if state is not None and rid == state.get("last_return_id"):
+                git = state.get("git") or {}
+                r.check(
+                    state.get("status") == "AWAITING_BRAIN_REVIEW"
+                    and git.get("head_sha") == REVIEW_HEAD_SENTINEL
+                    and git.get("head_binding") == REVIEW_HEAD_BINDING,
+                    f"{rel}: Head SHA {REVIEW_HEAD_SENTINEL} requires EXECUTION_STATE AWAITING_BRAIN_REVIEW with the "
+                    f"same {REVIEW_HEAD_BINDING} binding",
+                )
+        else:
+            r.check(bool(sha_re.match(f.get("Head SHA", ""))), f"{rel}: Head SHA must be a 40-hex SHA")
         sup = f.get("Supersedes", "none")
         if sup != "none":
             r.check(sup in rets and record_num(sup) < record_num(rid), f"{rel}: Supersedes unknown/later return {sup}")
+            superseded.add(sup)
 
     if state is None:
         return
@@ -741,23 +795,37 @@ def check_bus(r: Report, files: list[str], state: dict | None) -> None:
         if st in ("ANSWERED", "BLOCKED") or ret:
             r.check(ret in rets, f"{rel}: command_ledger[{cid}].return_id '{ret}' does not resolve")
             if ret in rets:
-                r.check(answered.get(ret) == cid, f"{rel}: {ret} does not answer {cid}")
+                r.check(cid in covers.get(ret, set()), f"{rel}: {ret} does not answer {cid}")
+                r.check(ret not in partial, f"{rel}: command_ledger[{cid}].return_id {ret} is a PARTIAL checkpoint, not an answer")
+        for pid in entry.get("partial_return_ids") or []:
+            r.check(pid in partial and answered.get(pid) == cid,
+                    f"{rel}: command_ledger[{cid}].partial_return_ids entry {pid} is not a PARTIAL return for {cid}")
     for n in range(1, record_num(last_ack) + 1):
         cid = f"CMD-{n:04d}"
         r.check(cid in ledger, f"{rel}: acknowledged command {cid} missing from command_ledger (no skipping)")
     for rid, cid in answered.items():
-        r.check(
-            (ledger.get(cid) or {}).get("status") in ("ANSWERED", "BLOCKED"),
-            f"{rel}: {rid} answers {cid} but command_ledger does not record it as answered",
-        )
+        entry = ledger.get(cid) or {}
+        if rid in partial:
+            r.check(rid in (entry.get("partial_return_ids") or []),
+                    f"{rel}: PARTIAL {rid} for {cid} missing from command_ledger partial_return_ids")
+        elif rid not in superseded:
+            for covered in sorted(covers.get(rid, {cid})):
+                e = ledger.get(covered) or {}
+                r.check(e.get("status") in ("ANSWERED", "BLOCKED") and e.get("return_id") == rid,
+                        f"{rel}: {rid} answers {covered} but command_ledger does not record it as answered")
 
     if record_num(last_cmd) > record_num(last_ack):
         expected = {"UNREAD"}
     elif not cmds:
         expected = {"IDLE"}
     else:
-        st = (ledger.get(last_ack) or {}).get("status")
-        expected = {"ACKNOWLEDGED": {"ACKNOWLEDGED"}, "ANSWERED": {"ANSWERED", "IDLE"}, "BLOCKED": {"BLOCKED"}}.get(st, {"?"})
+        sts = {(e or {}).get("status") for e in ledger.values()}
+        if "ACKNOWLEDGED" in sts:
+            expected = {"ACKNOWLEDGED"}
+        elif "BLOCKED" in sts:
+            expected = {"BLOCKED"}
+        else:
+            expected = {"ANSWERED", "IDLE"}
     r.check(proc in expected, f"{rel}: command_processing_status '{proc}' inconsistent with pointers (expected {sorted(expected)})")
 
 

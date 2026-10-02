@@ -62,13 +62,86 @@ custom code, record it here with a concrete reason, as AGENTS.md §12 requires:
   architecture / security / maintenance / privacy / licensing / test-fit / product risk>
 ```
 
-None.
+- 2026-09-29 · LA-0012 · vercel/ai `ai@7.0.118` / `@ai-sdk/*` (Apache-2.0; D-025 refinement 2 preferred DEPENDENCY) · rejected for now because the spike needs one structured-output call. The SDK adds ~94× the bundle (307.7 KB vs 3.3 KB minified), 11 transitive packages versus 0, always pulls in the unused `@ai-sdk/gateway` + `@vercel/oidc` clients, and churns at 35 releases in 30 days against Deno's 24 h minimum dependency age. It is Deno-compatible (evidence: `docs/architecture/spike/LA-0012-provider-seam.md`), so it remains a DEPENDENCY candidate behind the same contract when streaming, tools, or multi-provider routing are admitted.
 
 ## Entries
 
-None. The repository bootstrap (CLAUDE_HANDOFF_000, LA-0001 … LA-0008) imports no
-donor code, third-party modules, or dependencies. All files were authored for this
-repository. The CI workflows reference the public GitHub Actions `actions/checkout`
-and `anthropics/claude-code-action` by major-version tag. These are CI tooling used
-by reference, not product code copied into the repository. They are listed in
-[`README.md`](README.md#ci-tooling-referenced-not-vendored) for transparency.
+### REUSE-0001 — `set_updated_at()` trigger function
+
+| Field | Value |
+| --- | --- |
+| Task ID | LA-0011 |
+| Upstream repository | https://github.com/MoonlighC/ai-study-buddy |
+| Exact tag / commit / version | main @ 317e21df9587a2ba6337e9802ae4119ad9b5e2e5 |
+| License | MIT (LICENSE blob 3f057e54c9c63646842b73015685a6a3b4dcbb76; copy at `docs/provenance/licenses/MoonlighC-ai-study-buddy-MIT.txt`) |
+| Reuse class | DIRECT-REUSE |
+| Dependency / files / modules used | `supabase/migrations/001_initial_schema.sql` → `public.set_updated_at()` in `spike/architecture-proof/db/migrations/0001_canonical_core.sql` |
+| Material modifications | none |
+| Copyright / license / NOTICE obligations | Header comment in the migration names the upstream, commit and MIT copyright; licence text kept in `docs/provenance/licenses/` |
+| Audit status | APPROVED |
+| Approving decision / task | D-024, D-025; CLAUDE_HANDOFF_001 / LA-0011 |
+| Recorded | 2026-09-29 by Claude (Primary Engineer) |
+
+### REUSE-0002 — Supabase tenancy, storage ownership and generation-attempt mechanics
+
+| Field | Value |
+| --- | --- |
+| Task ID | LA-0011, LA-0013, LA-0014, LA-0015 |
+| Upstream repository | https://github.com/MoonlighC/ai-study-buddy |
+| Exact tag / commit / version | main @ 317e21df9587a2ba6337e9802ae4119ad9b5e2e5 |
+| License | MIT (LICENSE blob 3f057e54c9c63646842b73015685a6a3b4dcbb76) |
+| Reuse class | ADAPT |
+| Dependency / files / modules used | Patterns and SQL shapes from `supabase/migrations/001_initial_schema.sql` (owner RLS policy form), `004_material_upload_storage.sql` (storage path ownership policies), `008_client_api_privileges.sql` (client privilege narrowing), `010_material_analysis_processing.sql` (attempt dispatch_state / budget_effect / lease-token / no-auto-resend semantics) → `spike/architecture-proof/db/migrations/0001_canonical_core.sql`, `0002_generation_rpcs.sql` |
+| Material modifications | Re-keyed to canonical tables (accounts, materials, source_assets, extracted_contents, generation_jobs/attempts, artifacts); unified the donor's two generation authorities; clients reduced to SELECT-only with all writes via SECURITY DEFINER RPCs; single storage bucket policy set |
+| Copyright / license / NOTICE obligations | Header comments in both migrations cite upstream + commit + MIT copyright; licence text in `docs/provenance/licenses/` |
+| Audit status | APPROVED |
+| Approving decision / task | D-024, D-025; CLAUDE_HANDOFF_001 / LA-0011, LA-0013–LA-0015 |
+| Recorded | 2026-09-29 by Claude (Primary Engineer) |
+
+### REUSE-0003 — `flutter_lints` (dev-only lint rules for the proof client)
+
+| Field | Value |
+| --- | --- |
+| Task ID | LA-0013 |
+| Upstream repository | https://github.com/flutter/packages (pub.dev package `flutter_lints`) |
+| Exact tag / commit / version | flutter_lints 6.0.0 (+ transitive `lints` 6.1.0), locked in `spike/architecture-proof/client/pubspec.lock` |
+| License | BSD-3-Clause (© 2013 The Flutter Authors) |
+| Reuse class | DEPENDENCY |
+| Dependency / files / modules used | `dev_dependencies` of `spike/architecture-proof/client` (analysis rules only; not shipped) |
+| Material modifications | none |
+| Copyright / license / NOTICE obligations | None for dev-only use; the package is not redistributed |
+| Audit status | APPROVED |
+| Approving decision / task | D-015 (Flutter client), D-024; LA-0013. Part of the Flutter SDK's standard project template, so no new vendor (D-031) |
+| Recorded | 2026-09-29 by Claude (Primary Engineer) |
+
+### REUSE-0004 — `subosito/flutter-action` (CI: Flutter SDK setup for the proof client)
+
+| Field | Value |
+| --- | --- |
+| Task ID | LA-0017 (CMD-0008) |
+| Upstream repository | https://github.com/subosito/flutter-action |
+| Exact tag / commit / version | v2.23.0 @ 1a449444c387b1966244ae4d4f8c696479add0b2 (pinned by SHA in `.github/workflows/flutter-proof.yml`) |
+| License | MIT (© 2019 Alif Rachmawadi), `LICENSE` at that commit |
+| Reuse class | DEPENDENCY |
+| Dependency / files / modules used | GitHub Action `uses:` reference only; no source copied. Installs the official Flutter SDK from `storage.googleapis.com/flutter_infra_release` at the `.flutter-version` pin |
+| Material modifications | none. `cache: false` and `pub-cache: false`, so the action's internal mutable-tag `actions/cache@v5` steps do not execute |
+| Copyright / license / NOTICE obligations | None; the action is referenced, not redistributed |
+| Audit status | APPROVED |
+| Approving decision / task | CMD-0008 (Brain-verified SHA); D-024; LA-0017. Read-only workflow, no secrets; runs on GitHub (approved stack) and fetches the official Flutter SDK (approved stack) |
+| Recorded | 2026-09-30 by Claude (Primary Engineer) |
+
+### REUSE-0005 — `actions/checkout` (CI: repository checkout, SHA-pinned in flutter-proof)
+
+| Field | Value |
+| --- | --- |
+| Task ID | LA-0017 (CMD-0008) |
+| Upstream repository | https://github.com/actions/checkout |
+| Exact tag / commit / version | v4.4.0 @ 11d5960a326750d5838078e36cf38b85af677262 in `.github/workflows/flutter-proof.yml`. The existing `bootstrap-validation` and `spike-proof` workflows keep their `@v5` tag reference unchanged (CMD-0008: do not normalize unrelated workflows) |
+| License | MIT (© 2018 GitHub, Inc. and contributors), `LICENSE` at that commit |
+| Reuse class | DEPENDENCY |
+| Dependency / files / modules used | GitHub Action `uses:` reference only; `persist-credentials: false` |
+| Material modifications | none |
+| Copyright / license / NOTICE obligations | None; the action is referenced, not redistributed |
+| Audit status | APPROVED |
+| Approving decision / task | CMD-0008 (Brain-verified SHA); D-024; LA-0017 |
+| Recorded | 2026-09-30 by Claude (Primary Engineer) |

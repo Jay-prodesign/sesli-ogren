@@ -93,6 +93,9 @@ class ValidatorNegativeTests(unittest.TestCase):
         s.update(changes)
         self.write(STATE, json.dumps(s, indent=2, ensure_ascii=False) + "\n")
 
+    def staged(self) -> str:
+        return self.state()["next_handoff"]["id"]
+
     def next_cmd_num(self) -> int:
         return max(int(p.stem[4:]) for p in (self.root / "docs/agent/commands").glob("CMD-*.md")) + 1
 
@@ -141,9 +144,16 @@ class ValidatorNegativeTests(unittest.TestCase):
         self.assertFailsWith(r"required file missing: docs/provenance/OPEN_SOURCE_REUSE_REGISTER\.md")
 
     def test_register_field_missing(self) -> None:
-        self.edit("docs/provenance/OPEN_SOURCE_REUSE_REGISTER.md",
-                  "| Approving decision / task |", "| Approver |")
+        path = self.root / "docs/provenance/OPEN_SOURCE_REUSE_REGISTER.md"
+        path.write_text(path.read_text(encoding="utf-8").replace("| Approving decision / task |", "| Approver |"),
+                        encoding="utf-8")
         self.assertFailsWith(r"register field missing: Approving decision / task")
+
+    def test_register_entry_value_missing(self) -> None:
+        self.edit("docs/provenance/OPEN_SOURCE_REUSE_REGISTER.md",
+                  "| Exact tag / commit / version | main @ 317e21df9587a2ba6337e9802ae4119ad9b5e2e5 |",
+                  "| Exact tag / commit / version |  |")
+        self.assertFailsWith(r"REUSE-0001 missing value for 'Exact tag / commit / version'")
 
     def test_register_entry_invalid_class(self) -> None:
         entry = (
@@ -181,16 +191,25 @@ class ValidatorNegativeTests(unittest.TestCase):
         self.assertFailsWith(r"hierarchy break")
 
     def test_plan_contract_section_missing(self) -> None:
-        self.edit("docs/exec-plans/LA-0005.md", "## Escalation conditions", "## Notes")
-        self.assertFailsWith(r"LA-0005\.md: missing contract section '## Escalation conditions'")
+        self.edit("docs/exec-plans/LA-0010.md", "## Escalation conditions", "## Notes")
+        self.assertFailsWith(r"LA-0010\.md: missing contract section '## Escalation conditions'")
+
+    def test_plan_quality_section_missing(self) -> None:
+        self.edit("docs/exec-plans/LA-0013.md", "## Quality considerations (D-029)", "## Notes")
+        self.assertFailsWith(r"LA-0013\.md: missing contract section '## Quality considerations \(D-029\)'")
+
+    def test_agents_quality_projection_missing(self) -> None:
+        path = self.root / "AGENTS.md"
+        path.write_text(path.read_text(encoding="utf-8").replace("Final Engineering Test", "final check"), encoding="utf-8")
+        self.assertFailsWith(r"AGENTS\.md: D-029/D-028 quality projection missing: 'Final Engineering Test'")
 
     def test_plan_dependency_mismatch(self) -> None:
-        self.edit("docs/exec-plans/LA-0008.md", "## Dependencies\n- LA-0005\n", "## Dependencies\n- LA-0001\n")
-        self.assertFailsWith(r"LA-0008\.md: Dependencies .* != TASKS\.md Depends on")
+        self.edit("docs/exec-plans/LA-0012.md", "## Dependencies\n- LA-0011\n", "## Dependencies\n- LA-0001\n")
+        self.assertFailsWith(r"LA-0012\.md: Dependencies .* != TASKS\.md Depends on")
 
     def test_broken_plan_pointer(self) -> None:
-        self.edit("TASKS.md", "(docs/exec-plans/LA-0003.md)", "(docs/exec-plans/LA-0099.md)")
-        self.assertFailsWith(r"LA-0003 exec plan pointer")
+        self.edit("TASKS.md", "(docs/exec-plans/LA-0011.md)", "(docs/exec-plans/LA-0099.md)")
+        self.assertFailsWith(r"LA-0011 exec plan pointer")
 
     def test_v0_skeleton_milestone_missing(self) -> None:
         self.edit("TASKS.md", "## Milestone M6 — Controlled Public V0 Release", "## Milestone M6 — Something Else")
@@ -199,10 +218,10 @@ class ValidatorNegativeTests(unittest.TestCase):
     def test_future_task_executable(self) -> None:
         self.edit("TASKS.md", "### Sprint M2.S1 — Slice foundation\n",
                   "### Sprint M2.S1 — Slice foundation\n\n#### Section M2.S1.A — X\n\n"
-                  "##### LA-0009 — Premature task\n\n- Status: READY\n- Depends on: none\n"
+                  "##### LA-0018 — Premature task\n\n- Status: READY\n- Depends on: none\n"
                   "- Owner: Brain\n- Executor: Claude\n- Verification: x\n- Exec plan: none\n")
-        self.edit("TASKS.md", "**LA-0009**", "**LA-0010**")
-        self.assertFailsWith(r"LA-0009 is executable under non-active milestone")
+        self.edit("TASKS.md", "**LA-0018**", "**LA-0019**")
+        self.assertFailsWith(r"LA-0018 is executable under non-active milestone")
 
     def test_la0008_missing(self) -> None:
         self.edit("TASKS.md", "##### LA-0008 — ", "##### LA-0009 — ")
@@ -214,8 +233,9 @@ class ValidatorNegativeTests(unittest.TestCase):
         self.assertFailsWith(r"invalid command file name 'cmd-2\.md'")
 
     def test_command_id_gap(self) -> None:
-        self.write("docs/agent/commands/CMD-0003.md", valid_cmd(3))
-        self.set_state(last_command_id="CMD-0003", command_processing_status="UNREAD")
+        n = self.next_cmd_num() + 1  # skip one number
+        self.write(f"docs/agent/commands/CMD-{n:04d}.md", valid_cmd(n))
+        self.set_state(last_command_id=f"CMD-{n:04d}", command_processing_status="UNREAD")
         self.assertFailsWith(r"CMD IDs must be contiguous")
 
     def test_command_pointer_drift(self) -> None:
@@ -260,12 +280,99 @@ class ValidatorNegativeTests(unittest.TestCase):
         self.assertFailsWith(r"executability guard: change to CLAUDE_HANDOFF_001 lacks Brain PASS")
 
     def test_guard_explicit_change_without_reconciled_state(self) -> None:
-        self.add_unread_cmd(change="CLAUDE_HANDOFF_001 -> READY", gate="Brain review 002 BOOTSTRAP_PASS")
-        self.assertFailsWith(r"executability guard: CLAUDE_HANDOFF_001 still NOT_EXECUTABLE")
+        staged = self.staged()
+        self.add_unread_cmd(change=f"{staged} -> READY", gate="Brain review BOOTSTRAP_PASS")
+        self.assertFailsWith(rf"executability guard: {staged} still NOT_EXECUTABLE")
 
     def test_guard_silent_admission(self) -> None:
-        self.add_unread_cmd(body="Begin CLAUDE_HANDOFF_001 now.")
-        self.assertFailsWith(r"executability guard: mentions staged CLAUDE_HANDOFF_001")
+        staged = self.staged()
+        self.add_unread_cmd(body=f"Begin {staged} now.")
+        self.assertFailsWith(rf"executability guard: mentions staged {staged}")
+
+    def test_partial_return_not_in_ledger(self) -> None:
+        s = self.state()
+        s["command_ledger"]["CMD-0002"]["partial_return_ids"] = []
+        self.write(STATE, json.dumps(s, indent=2) + "\n")
+        self.assertFailsWith(r"PARTIAL RET-0002 for CMD-0002 missing from command_ledger partial_return_ids")
+
+    def test_partial_return_used_as_answer(self) -> None:
+        s = self.state()
+        s["command_ledger"]["CMD-0002"].update(status="ANSWERED", return_id="RET-0002")
+        s["command_processing_status"] = "ANSWERED"
+        self.write(STATE, json.dumps(s, indent=2) + "\n")
+        self.assertFailsWith(r"RET-0002 is a PARTIAL checkpoint, not an answer")
+
+    # --- CMD-0009 external head binding / cumulative return ---------------
+    RET5 = "docs/agent/returns/RET-0005.md"
+    LITERAL = "0123456789abcdef0123456789abcdef01234567"
+
+    def set_git(self, **changes) -> None:
+        s = self.state()
+        for k, v in changes.items():
+            if v is None:
+                s["git"].pop(k, None)
+            else:
+                s["git"][k] = v
+        self.write(STATE, json.dumps(s, indent=2, ensure_ascii=False) + "\n")
+
+    def test_head_sentinel_outside_review_state(self) -> None:
+        self.set_git(head_sha="PR_HEAD_AT_REVIEW", head_binding="GITHUB_PR_HEAD")
+        self.set_state(status="IN_PROGRESS")
+        self.assertFailsWith(r"git\.head_sha PR_HEAD_AT_REVIEW is only allowed when AWAITING_BRAIN_REVIEW")
+
+    def test_head_sentinel_missing_binding(self) -> None:
+        self.set_state(status="AWAITING_BRAIN_REVIEW")
+        self.set_git(head_sha="PR_HEAD_AT_REVIEW", head_binding=None)
+        self.assertFailsWith(r"requires git\.head_binding = GITHUB_PR_HEAD")
+
+    def test_head_sentinel_wrong_binding(self) -> None:
+        self.set_state(status="AWAITING_BRAIN_REVIEW")
+        self.set_git(head_sha="PR_HEAD_AT_REVIEW", head_binding="LOCAL_GUESS")
+        self.assertFailsWith(r"requires git\.head_binding = GITHUB_PR_HEAD")
+
+    def test_head_sentinel_missing_pr_metadata(self) -> None:
+        self.set_state(status="AWAITING_BRAIN_REVIEW")
+        self.set_git(head_sha="PR_HEAD_AT_REVIEW", head_binding="GITHUB_PR_HEAD", pr_url="")
+        self.assertFailsWith(r"git\.head_sha PR_HEAD_AT_REVIEW requires git\.pr_url")
+
+    def test_head_arbitrary_non_hex(self) -> None:
+        self.set_git(head_sha="PR_HEAD_LATER")
+        self.assertFailsWith(r"git\.head_sha must be a 40-hex SHA")
+
+    def test_ret_sentinel_non_review_disposition(self) -> None:
+        self.edit(self.RET5, "- Disposition: READY_FOR_BRAIN_REVIEW", "- Disposition: BLOCKED")
+        self.assertFailsWith(r"RET-0005\.md: Head SHA PR_HEAD_AT_REVIEW requires a READY_FOR_BRAIN_REVIEW disposition")
+
+    def test_ret_sentinel_missing_binding(self) -> None:
+        self.edit(self.RET5, "- Head binding: GITHUB_PR_HEAD\n", "")
+        self.assertFailsWith(r"RET-0005\.md: Head SHA PR_HEAD_AT_REVIEW requires 'Head binding: GITHUB_PR_HEAD'")
+
+    def test_ret_sentinel_state_literal_head(self) -> None:
+        latest = "docs/agent/returns/RET-0006.md"
+        self.edit(latest, "- Head SHA: 0327d2e5b854df1c9923c65ed88f77151cfe9eed",
+                  "- Head SHA: PR_HEAD_AT_REVIEW\n- Head binding: GITHUB_PR_HEAD")
+        self.set_git(head_sha=self.LITERAL, head_binding=None)
+        self.assertFailsWith(r"RET-0006\.md: Head SHA PR_HEAD_AT_REVIEW requires EXECUTION_STATE AWAITING_BRAIN_REVIEW")
+
+    def test_literal_heads_still_pass(self) -> None:
+        self.set_git(head_sha=self.LITERAL, head_binding=None)
+        self.edit(self.RET5, "- Head SHA: PR_HEAD_AT_REVIEW", f"- Head SHA: {self.LITERAL}")
+        code, out = self.run_validator()
+        self.assertEqual(code, 0, out)
+
+    def test_also_answers_later_command(self) -> None:
+        self.edit(self.RET5, "- Also answers: CMD-0004,", "- Also answers: CMD-0099, CMD-0004,")
+        self.assertFailsWith(r"Also answers 'CMD-0099' must be an existing command earlier than CMD-0013")
+
+    def test_also_answers_not_in_ledger(self) -> None:
+        s = self.state()
+        s["command_ledger"]["CMD-0004"] = {"status": "ACKNOWLEDGED", "return_id": None}
+        self.write(STATE, json.dumps(s, indent=2, ensure_ascii=False) + "\n")
+        self.assertFailsWith(r"RET-0005 answers CMD-0004 but command_ledger does not record it as answered")
+
+    def test_partial_return_with_also_answers(self) -> None:
+        self.edit("docs/agent/returns/RET-0002.md", "- Supersedes:", "- Also answers: CMD-0001\n- Supersedes:")
+        self.assertFailsWith(r"RET-0002\.md: a PARTIAL checkpoint cannot declare Also answers")
 
     # --- workflows ---------------------------------------------------------
     def test_bridge_non_write_users(self) -> None:

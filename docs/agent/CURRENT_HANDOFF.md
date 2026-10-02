@@ -1,48 +1,72 @@
 # CURRENT HANDOFF
 
-Mission-level executable contract (Brain-owned, mirrored by the Engineer).
-This file is **not** a message log. Incremental Brain instructions arrive as
-[`commands/CMD-####.md`](commands/), and Engineer responses go to
-[`returns/RET-####.md`](returns/) ([`README.md`](README.md)).
+This file is the mission-level executable contract. Brain owns it and the
+Engineer mirrors it. It is **not** a message log: incremental Brain
+instructions arrive as [`commands/CMD-####.md`](commands/), and Engineer
+responses go to [`returns/RET-####.md`](returns/) ([`README.md`](README.md)).
 
 ## Active
 
+No executable engineering handoff is currently issued. The Founder has temporarily delegated bounded, dependency-safe engineering to ChatGPT while Claude usage is unavailable; this does not admit M5 or protected actions.
+
 | Field | Value |
 | --- | --- |
-| Handoff | **CLAUDE_HANDOFF_000 — Repository & Agent Bootstrap** |
-| State | **ACTIVE**. Brain Review 001 = CHANGES_REQUIRED. Corrections delivered (CMD-0001 → RET-0001) and **AWAITING_BRAIN_REVIEW** |
-| Executor | Claude (Primary Engineer) |
-| Milestone | M0 — Repository & Agent Bootstrap (Drive lifecycle stage "M3") |
-| Tasks | LA-0001 … LA-0008 (see [`TASKS.md`](../../TASKS.md)); LA-0008 = Brain↔Engineer Command Bus & Automated Claude Invocation Bridge (D-026) |
-| Branch | `chore/repository-bootstrap` |
-| Delivery | Existing unmerged **draft** PR against `main`: [#1](https://github.com/Jay-prodesign/sesli-ogren/pull/1) |
-| Evidence | [`ENGINEER_RETURN.md`](ENGINEER_RETURN.md) (consolidated) · [`returns/RET-0001.md`](returns/RET-0001.md) |
-| Exit gate | Brain **BOOTSTRAP_PASS** (or CHANGES_REQUIRED / BLOCKED), preferably issued as `CMD-0002` |
+| Handoff | **CLAUDE_HANDOFF_001 — V0 Architecture Spike — COMPLETED** |
+| State | **M4 CLOSED / ARCHITECTURE_PROOF_PASS / GO_ADAPT**. Brain Review 004 accepted immutable architecture head `0327d2e5b854df1c9923c65ed88f77151cfe9eed`. [RET-0005](returns/RET-0005.md) remains the accepted architecture evidence. [CMD-0014](commands/CMD-0014.md) is answered by [RET-0006](returns/RET-0006.md) as repo-local closure projection only. M5 remains NOT_EXECUTABLE. |
+| Authority reading | CLAUDE_HANDOFF_001 is the M4 mission container but is **partially superseded** and now accepted by Review 004. Read order for closure: CURRENT_EXECUTION_STATE → CLAUDE_HANDOFF_001 → HANDOFF_COMMAND_AUTHORITY_AUDIT_001 → CMD-0004 … CMD-0014 → D-062 compatibility overlay. D-061 remains PROPOSED and non-executable. |
+| Executor | Claude remains designated Primary Engineer; ChatGPT is Founder-authorized temporary bounded engineering delegate while Claude usage is unavailable. |
+| Milestone | M1 — Architecture Proof (Drive lifecycle stage "M4") |
+| Tasks | LA-0009 … LA-0017 are **DONE** under Brain Review 004 (see [`TASKS.md`](../../TASKS.md)). No M5 implementation tasks are admitted. |
+| Branch | `spike/v0-architecture-proof`, derived from reviewed bootstrap head `433c26cf5fa75a37b66b1f74dd6a133ae4d3407a` |
+| Delivery | Draft PR [#2](https://github.com/Jay-prodesign/sesli-ogren/pull/2), stacked on `chore/repository-bootstrap`; nothing is merged. Review 004 accepted architecture at `0327d2e5…`. Later Brain/closure commits (including the CMD-0014 command commit) are control-plane projection only and must be reported separately from the reviewed architecture head. |
+| Evidence | [`ENGINEER_RETURN.md`](ENGINEER_RETURN.md) (consolidated), [`returns/`](returns/) |
+| Exit gate | **MET and projected:** Brain Review 004 = ARCHITECTURE_PROOF_PASS / GO_ADAPT on `0327d2e5…`; CMD-0014 closure projection is answered by RET-0006. M5 remains NOT_EXECUTABLE. |
 
 ### Mission summary (non-private)
 
-Bootstrap the repository's engineering governance: hygiene files, agent
-contracts (including the D-024 reuse-first gate and the D-026 command bus), the
-task map with the whole-V0 skeleton, complete execution contracts, agent control
-files, the provenance register template, minimal `.claude/rules/`, lightweight
-validation and CI, and an inert GitHub-triggered Claude wake-up bridge. No
-application or product implementation. No merge, deploy, or release.
+Prove or falsify the V0 implementation path. The path under test is a Flutter
+client, a Supabase/Postgres backend with a MoonlighC-derived product shell,
+layered permissive reuse (D-024/D-025), one authoritative Learning App model,
+and a provider-neutral AI capability seam. The proof covers:
+
+- canonical model mapping;
+- one authenticated material → Summary Artifact flow;
+- tenant/RLS isolation;
+- GenerationJob idempotency and lineage;
+- the reuse/provenance matrix;
+- measured adaptation burden.
+
+Every material decision is held to D-029 (AGENTS.md §14). The following are
+out of scope: full V0 or M5, V1 learning semantics, payments/billing, ads,
+an operator console, TTS or any speech implementation, companion/map/product UI,
+production OCR, deployment, and paid providers. The base Learning Engine stays
+voice-optional (D-042). Sesli Öğren speech is product-local behind a replaceable
+boundary (D-062); M4 assesses compatibility only.
 
 ### Governing references (Drive, by title only)
 
 - CURRENT_EXECUTION_STATE — Learning App
-- CLAUDE_HANDOFF_000 — Repository & Agent Bootstrap — Learning App
-- M3_BOOTSTRAP_BRAIN_REVIEW_001 — CHANGES_REQUIRED — Learning App
-- M3_REPOSITORY_BOOTSTRAP_ACCEPTANCE_CHECKLIST_v0.1 — Learning App
-- DECISION_LOG — Learning App: D-019, D-020, D-023 (PUBLIC repository), D-024 (reuse-first), D-025 (layered donors), D-026 (command bus)
-- PRE_BOOTSTRAP_PRODUCT_READINESS_AND_MASTER_SEQUENCE_v1.0 — Learning App
-- ENGINEERING_EXECUTION_PROTOCOL — Learning App
-- PRODUCT_LIFECYCLE_STAGE_GATES — Learning App; V0_PRODUCT_SCOPE_v1.0 — Learning App (boundary only)
+- CLAUDE_HANDOFF_001 — V0 Architecture Spike — Learning App
+- M4_ARCHITECTURE_PROOF_TASK_ADMISSION_001 — Learning App
+- M4_ARCHITECTURE_PROOF_BRAIN_REVIEW_CHECKLIST_v0.1 — Learning App
+- BRAIN_COMMAND_0002 … BRAIN_COMMAND_0014 — Learning App (transcribed as CMD-0002 … CMD-0014)
+- HANDOFF_COMMAND_AUTHORITY_AUDIT_001 — Learning App (per-command classification)
+- M4_ARCHITECTURE_PROOF_BRAIN_REVIEW_004 — ARCHITECTURE_PROOF_PASS; M4_ARCHITECTURE_PROOF_BRAIN_REVIEW_003 — historical CHANGES_REQUIRED; M4_ARCHITECTURE_PROOF_CORRECTION_MAP_001 (supporting, partially superseded) — Learning App
+- DECISION_LOG — Learning App: D-015, D-024, D-025 (+ technical refinements 1 and 2), D-026 … D-029, D-031, D-034, D-037, D-042, D-043, D-053, D-054, D-062
+- ENGINEERING & PRODUCT QUALITY CONSTITUTION — Learning App (D-029)
+- V0_CANONICAL_DATA_CAPABILITY_CONTRACTS_v0.1; V0_PRODUCT_SCOPE_v2.0 (current; v1.0 is no longer product authority); V0_PRIVACY_SECURITY_RIGHTS_CONTRACT_v0.1; V0_ENTITLEMENT_MONETIZATION_CONTRACT_v0.1 — Learning App
+
+## Completed
+
+| Handoff | Outcome |
+| --- | --- |
+| CLAUDE_HANDOFF_001 — V0 Architecture Spike / Architecture Proof | **ARCHITECTURE_PROOF_PASS / GO_ADAPT** under Brain Review 004 at `0327d2e5b854df1c9923c65ed88f77151cfe9eed`; repo-local closure projected by CMD-0014 / RET-0006. PR #2 remains draft/open/unmerged. |
+| CLAUDE_HANDOFF_000 — Repository & Agent Bootstrap | **BOOTSTRAP_PASS** (M3_BOOTSTRAP_BRAIN_REVIEW_002, reviewed head `433c26c`). PR #1 is draft and unmerged; merging it is a Product Owner action. |
 
 ## Staged
 
 | Field | Value |
 | --- | --- |
-| Handoff | **CLAUDE_HANDOFF_001 — V0 Architecture Spike** |
-| State | **NOT_EXECUTABLE**. Staged pending Brain BOOTSTRAP_PASS on the CLAUDE_HANDOFF_000 draft PR |
-| Rule | No agent may start any part of CLAUDE_HANDOFF_001 until Brain issues PASS and marks it executable here. A command must declare `Executability change` with PASS gate evidence and land together with this file and `EXECUTION_STATE.json` (AGENTS.md §13.5). |
+| Handoff | **M5_GOLDEN_LEARNING_SLICE_HANDOFF_NOT_ISSUED**: no current-shape M5 handoff has been issued |
+| State | **NOT_EXECUTABLE**. M4 Architecture Proof PASS is met, but M5 remains closed pending the controlling Product/Visual PASS, applicable Round 7/runtime/device evidence, fresh-read reconciliation, and a new explicit Brain M5 admission/handoff. The prepared Golden Learning Slice acceptance contract does not itself grant executability. |
+| Rule | No V0 feature implementation may start from this closure command. Admission requires a new explicit M5 command/handoff with `Executability change` and all controlling gate evidence (AGENTS.md §13.5). |

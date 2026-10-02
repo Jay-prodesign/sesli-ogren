@@ -45,6 +45,9 @@ of guessing.
 - Work only on the branch named by the handoff; never commit to `main`.
 - Reuse-first (AGENTS.md §12): check approved candidates before custom-building
   a non-differentiating capability, and record provenance.
+- Quality bar (AGENTS.md §14, D-029): choose the smallest credible, secure,
+  testable solution, and run the Final Engineering Test on major decisions.
+  Record debt explicitly. Back every claim with evidence.
 - Run `python3 scripts/validate_bootstrap.py` and
   `python3 scripts/test_validate_bootstrap.py` before every push.
 - Open PRs as **draft**; never merge, close, release, or deploy.

@@ -28,6 +28,7 @@ order:
 | `Rollback / migration notes` | How to undo safely; migration impact or "none". |
 | `Escalation conditions` | When to stop and file a Decision Request. |
 | `Expected return` | What the engineer reports and where. |
+| `Quality considerations (D-029)` | **Required for tasks under the active non-bootstrap milestone.** Cover only the concerns relevant to this task: security/privacy, AI boundaries, canonical data ownership, performance/accessibility, meaningful tests, observability, cost, dependencies/provenance, rollback/safe change, technical debt, evidence. Use N/A with a reason rather than an empty checklist. For major decisions, include the Final Engineering Test answers ([`AGENTS.md` §14](../../AGENTS.md#14-engineering-quality-d-029-and-experience-governance-d-028)). |
 
 For tasks that implement a non-differentiating capability, `In scope` must also
 name the approved reuse candidate(s) with their D-024 class, or state

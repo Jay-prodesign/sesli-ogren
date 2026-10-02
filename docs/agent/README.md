@@ -28,8 +28,8 @@ and bounded operators/reviewers (Codex). Governed by [`AGENTS.md`](../../AGENTS.
 | `last_command_id` | Highest `CMD-####` file present. It is updated in the same change that adds the command file. |
 | `last_acknowledged_command_id` | Highest command the Engineer has acknowledged, or `null`. Always ≤ `last_command_id`. |
 | `last_return_id` | Highest `RET-####` file present, or `null`. |
-| `command_processing_status` | `IDLE` (no commands, or all answered and nothing new), `UNREAD` (`last_command_id` > `last_acknowledged_command_id`), `ACKNOWLEDGED` (latest acknowledged command is being worked on), `ANSWERED` (latest acknowledged command has a return and nothing is unread), `BLOCKED` (latest acknowledged command cannot proceed; see its return / Decision Request). |
-| `command_ledger` | `{ "CMD-####": { "status": "ACKNOWLEDGED" \| "ANSWERED" \| "BLOCKED", "return_id": "RET-####" \| null } }` for every acknowledged command. |
+| `command_processing_status` | `IDLE` (no commands, or all answered and nothing new), `UNREAD` (`last_command_id` > `last_acknowledged_command_id`), `ACKNOWLEDGED` (at least one acknowledged command is still open), `ANSWERED` (every acknowledged command has a final return and nothing is unread), `BLOCKED` (an acknowledged command cannot proceed; see its return or Decision Request). |
+| `command_ledger` | `{ "CMD-####": { "status": "ACKNOWLEDGED" \| "ANSWERED" \| "BLOCKED", "return_id": "RET-####" \| null, "partial_return_ids": ["RET-####", …] } }` for every acknowledged command. `partial_return_ids` lists interim `Disposition: PARTIAL` checkpoint returns. A cumulative return (CMD-0009) answers its `Answers` command and every earlier command listed in its optional `Also answers:` field; each of those ledger entries then records that return. |
 
 ### Semantics
 
@@ -49,13 +49,18 @@ and bounded operators/reviewers (Codex). Governed by [`AGENTS.md`](../../AGENTS.
    return_id: RET-m}`, `last_return_id = RET-m`, and
    `command_processing_status = ANSWERED` (or `UNREAD` if newer commands exist),
    and refreshes `ENGINEER_RETURN.md`.
-4. **Refuse / block.** If a command is out of scope, requires a protected
+4. **Checkpoint (PARTIAL) returns.** For a long-running command, such as a
+   whole mission, the Engineer may issue interim `RET` records with
+   `Disposition: PARTIAL`. They are listed in `partial_return_ids`. The command
+   stays `ACKNOWLEDGED`, and `command_processing_status` stays `ACKNOWLEDGED`,
+   until a non-PARTIAL return answers it.
+5. **Refuse / block.** If a command is out of scope, requires a protected
    action, or conflicts with canonical authority, the Engineer still answers it
    with a `RET` whose disposition is `BLOCKED` or `REJECTED_COMMAND`, with the
    reason and a Decision Request where one is needed. Ledger status is `BLOCKED`.
-5. **Immutability.** Pushed `CMD` / `RET` files are never edited in meaning or
+6. **Immutability.** Pushed `CMD` / `RET` files are never edited in meaning or
    renumbered. A correction is a new record with `Supersedes:`.
-6. **Executability guard.** No command makes a `NOT_EXECUTABLE` handoff
+7. **Executability guard.** No command makes a `NOT_EXECUTABLE` handoff
    executable implicitly (see [`commands/README.md`](commands/README.md#executability-guard)).
 
 ### Transport and wake-up

@@ -21,17 +21,17 @@ Milestone numbering follows the program sequence in
 M1 = Architecture Proof, …). Drive lifecycle-stage labels use a different
 numbering: lifecycle "M3" is this M0, and lifecycle "M4" is this M1.
 
-Next unallocated ID: **LA-0009**.
+Next unallocated ID: **LA-0018**.
 
 ---
 
 ## Milestone M0 — Repository & Agent Bootstrap
 
-- Status: ACTIVE
+- Status: DONE
 - Handoff: CLAUDE_HANDOFF_000 — Repository & Agent Bootstrap
 - Branch: `chore/repository-bootstrap`
-- Draft PR: [#1](https://github.com/Jay-prodesign/sesli-ogren/pull/1): Brain Review 001 = CHANGES_REQUIRED; corrections re-returned for Brain review (CMD-0001 → RET-0001)
-- Exit gate: Brain BOOTSTRAP_PASS on the bootstrap draft PR.
+- Draft PR: [#1](https://github.com/Jay-prodesign/sesli-ogren/pull/1): **BOOTSTRAP_PASS** (M3_BOOTSTRAP_BRAIN_REVIEW_002, reviewed head `433c26c`); draft/unmerged, merge is a Product Owner action
+- Exit gate: Brain BOOTSTRAP_PASS on the bootstrap draft PR — **met** (Brain Review 002).
 
 ### Sprint M0.S1 — Bootstrap
 
@@ -39,7 +39,7 @@ Next unallocated ID: **LA-0009**.
 
 ##### LA-0001 — Pre-flight verification and canonical repository identity
 
-- Status: AWAITING_BRAIN_REVIEW
+- Status: DONE
 - Depends on: none
 - Owner: Brain
 - Executor: Claude (Primary Engineer)
@@ -50,7 +50,7 @@ Next unallocated ID: **LA-0009**.
 
 ##### LA-0002 — Repository hygiene baseline
 
-- Status: AWAITING_BRAIN_REVIEW
+- Status: DONE
 - Depends on: LA-0001
 - Owner: Brain
 - Executor: Claude (Primary Engineer)
@@ -59,7 +59,7 @@ Next unallocated ID: **LA-0009**.
 
 ##### LA-0003 — Agent operating contracts
 
-- Status: AWAITING_BRAIN_REVIEW
+- Status: DONE
 - Depends on: LA-0001
 - Owner: Brain
 - Executor: Claude (Primary Engineer)
@@ -70,7 +70,7 @@ Next unallocated ID: **LA-0009**.
 
 ##### LA-0004 — Task map and execution plans
 
-- Status: AWAITING_BRAIN_REVIEW
+- Status: DONE
 - Depends on: LA-0003
 - Owner: Brain
 - Executor: Claude (Primary Engineer)
@@ -79,7 +79,7 @@ Next unallocated ID: **LA-0009**.
 
 ##### LA-0005 — Agent control files and documentation skeleton
 
-- Status: AWAITING_BRAIN_REVIEW
+- Status: DONE
 - Depends on: LA-0003, LA-0004
 - Owner: Brain
 - Executor: Claude (Primary Engineer)
@@ -90,7 +90,7 @@ Next unallocated ID: **LA-0009**.
 
 ##### LA-0006 — Bootstrap validation script and CI workflow
 
-- Status: AWAITING_BRAIN_REVIEW
+- Status: DONE
 - Depends on: LA-0002, LA-0003, LA-0004, LA-0005
 - Owner: Brain
 - Executor: Claude (Primary Engineer)
@@ -99,7 +99,7 @@ Next unallocated ID: **LA-0009**.
 
 ##### LA-0007 — Draft PR delivery and state/evidence reconciliation
 
-- Status: AWAITING_BRAIN_REVIEW
+- Status: DONE
 - Depends on: LA-0006, LA-0008
 - Owner: Brain
 - Executor: Claude (Primary Engineer)
@@ -112,7 +112,7 @@ Next unallocated ID: **LA-0009**.
 
 ##### LA-0008 — Brain↔Engineer Command Bus & Automated Claude Invocation Bridge
 
-- Status: AWAITING_BRAIN_REVIEW
+- Status: DONE
 - Depends on: LA-0005, LA-0006
 - Owner: Brain
 - Executor: Claude (Primary Engineer)
@@ -123,32 +123,118 @@ Next unallocated ID: **LA-0009**.
 
 ## Milestone M1 — Architecture Proof
 
-- Status: PLANNED / NOT_EXECUTABLE
-- Handoff: CLAUDE_HANDOFF_001 — V0 Architecture Spike (staged, **NOT_EXECUTABLE**)
-- Entry gate: Brain BOOTSTRAP_PASS on M0 and explicit admission of CLAUDE_HANDOFF_001.
-- Source: PRE_BOOTSTRAP_PRODUCT_READINESS_AND_MASTER_SEQUENCE_v1.0 — Learning App (Drive); D-015, D-024, D-025
-- Tasks: none allocated (progressive detail; allocated only on Brain admission)
+- Status: DONE
+- Handoff: CLAUDE_HANDOFF_001 — V0 Architecture Spike (admitted by CMD-0002 after BOOTSTRAP_PASS)
+- Task admission: M4_ARCHITECTURE_PROOF_TASK_ADMISSION_001 (Drive); quality overlay CMD-0003 (D-029)
+- Review: Brain Review 004 = ARCHITECTURE_PROOF_PASS / GO_ADAPT at immutable reviewed architecture head `0327d2e5b854df1c9923c65ed88f77151cfe9eed`. RET-0005 is the accepted engineering evidence; CMD-0014 / RET-0006 project closure only. No new task IDs.
+- Branch: `spike/v0-architecture-proof` (from reviewed bootstrap head `433c26c`)
+- Entry gate: Brain BOOTSTRAP_PASS and explicit admission — **met**.
+- Exit gate: **MET.** Brain Review 004 accepted the Architecture Proof at `0327d2e5b854df1c9923c65ed88f77151cfe9eed`. No V0 feature work is admitted by this closure.
+- Source: PRE_BOOTSTRAP_PRODUCT_READINESS_AND_MASTER_SEQUENCE_v1.0 — Learning App (Drive); D-015, D-024, D-025 (+ refinements), D-029
 
-### Sprint M1.S1 — Donor fresh-audit & layered reuse matrix
+### Sprint M1.S1 — Admission and upstream audit
 
-- Status: PLANNED / NOT_EXECUTABLE
-- Intent: fresh licence/provenance/source audit of approved donors; D-025 capability-by-capability reuse classification.
+#### Section M1.S1.A — Control plane
+
+##### LA-0009 — Architecture Proof admission reconciliation and preflight
+
+- Status: DONE
+- Depends on: none
+- Owner: Brain
+- Executor: Claude (Primary Engineer)
+- Verification: Spike branch from `433c26c`; CMD-0002 + CMD-0003 transcribed and acknowledged; handoff/state/TASKS reconciled; D-029 projected; validator + negative suite green; PR #1 untouched. Review 003: CMD-0004 … CMD-0013 transcribed and acknowledged in order; CMD-0009 head binding enforced by the validator with negative tests.
+- Exec plan: [docs/exec-plans/LA-0009.md](docs/exec-plans/LA-0009.md)
+
+#### Section M1.S1.B — Upstream audit
+
+##### LA-0010 — Upstream fresh audit and reuse-admission matrix
+
+- Status: DONE
+- Depends on: LA-0009
+- Owner: Brain
+- Executor: Claude (Primary Engineer)
+- Verification: Exact refs/licences/dependency and runtime posture recorded for every candidate; scope class + reuse class per capability; no donor code imported before classification.
+- Exec plan: [docs/exec-plans/LA-0010.md](docs/exec-plans/LA-0010.md)
 
 ### Sprint M1.S2 — Bounded proof
 
+#### Section M1.S2.A — Canonical model and provider seam
+
+##### LA-0011 — Canonical model mapping and product-shell fit
+
+- Status: DONE
+- Depends on: LA-0010
+- Owner: Brain
+- Executor: Claude (Primary Engineer)
+- Verification: Mapping for all 15 canonical objects; one authority per concept; rejected donor semantics documented. Review 003: D-037 compatibility/debt map, and locale/speech/eval disposition (LA-0011 §5–§7).
+- Exec plan: [docs/exec-plans/LA-0011.md](docs/exec-plans/LA-0011.md)
+
+##### LA-0012 — Provider-neutral generation capability seam
+
+- Status: DONE
+- Depends on: LA-0011
+- Owner: Brain
+- Executor: Claude (Primary Engineer)
+- Verification: Learning App-owned contract + deterministic fake; adapter contract tests pass; SDK/runtime/bundle evidence captured; no provider type in domain code.
+- Exec plan: [docs/exec-plans/LA-0012.md](docs/exec-plans/LA-0012.md)
+
+#### Section M1.S2.B — End-to-end, isolation and idempotency
+
+##### LA-0013 — Authenticated Material → Artifact bounded proof
+
+- Status: DONE
+- Depends on: LA-0011, LA-0012
+- Owner: Brain
+- Executor: Claude (Primary Engineer)
+- Verification: Deterministic end-to-end flow persists a Summary Artifact with lineage and reopens from persistence.
+- Exec plan: [docs/exec-plans/LA-0013.md](docs/exec-plans/LA-0013.md)
+
+##### LA-0014 — Tenant/RLS and cross-user isolation proof
+
+- Status: DONE
+- Depends on: LA-0013
+- Owner: Brain
+- Executor: Claude (Primary Engineer)
+- Verification: Negative cross-user and unauthenticated tests pass for every canonical object in the flow; no privileged secret on the client path.
+- Exec plan: [docs/exec-plans/LA-0014.md](docs/exec-plans/LA-0014.md)
+
+##### LA-0015 — GenerationJob retry, idempotency and lineage proof
+
+- Status: DONE
+- Depends on: LA-0013
+- Owner: Brain
+- Executor: Claude (Primary Engineer)
+- Verification: Retry/idempotency/lineage tests pass; no ordinary retry duplicates a billable effect.
+- Exec plan: [docs/exec-plans/LA-0015.md](docs/exec-plans/LA-0015.md)
+
+### Sprint M1.S3 — Selector evidence and return
+
+#### Section M1.S3.A — Decision and return
+
+##### LA-0016 — Layered donor/dependency decision and adaptation-burden measurement
+
+- Status: DONE
+- Depends on: LA-0010, LA-0011, LA-0012, LA-0013, LA-0014, LA-0015
+- Owner: Brain
+- Executor: Claude (Primary Engineer)
+- Verification: D-025 capability matrix complete with scope class, reuse class, exact upstream, obligations, burden and rationale. Review 003: D-037 / D-042 / D-062 selector consequences and hardening debt H1–H5 (LA-0016 §5).
+- Exec plan: [docs/exec-plans/LA-0016.md](docs/exec-plans/LA-0016.md)
+
+##### LA-0017 — Architecture Spike integration QA, provenance and return
+
+- Status: DONE
+- Depends on: LA-0012, LA-0013, LA-0014, LA-0015, LA-0016
+- Owner: Brain
+- Executor: Claude (Primary Engineer)
+- Verification: All relevant tests + validator green on the exact head; register updated; return with selector outcome and D-029 disposition. Review 003: `.flutter-version` + `flutter-proof` CI (CMD-0008); final head bound externally to PR #2 with exact-head CI (CMD-0009).
+- Exec plan: [docs/exec-plans/LA-0017.md](docs/exec-plans/LA-0017.md)
+
+## Milestone M2 — VS-001 / M5 Golden Learning Slice
+
 - Status: PLANNED / NOT_EXECUTABLE
-- Intent: canonical-model mapping, auth/tenant isolation, one material→artifact path, GenerationJob idempotency, provider-neutral seams, provenance; measured adaptation burden.
-
-### Sprint M1.S3 — Spike return & selector outcome
-
-- Status: PLANNED / NOT_EXECUTABLE
-- Intent: evidence return; Brain disposition GO_ADAPT or FALLBACK_CLEAN_FLUTTER.
-
-## Milestone M2 — VS-001 Golden Vertical Slice
-
-- Status: PLANNED / NOT_EXECUTABLE
-- Entry gate: Brain accepts the M1 selector outcome and admits VS-001.
-- Source: PRE_BOOTSTRAP_PRODUCT_READINESS_AND_MASTER_SEQUENCE_v1.0 — Learning App (Drive)
+- Entry gate: M4 Architecture Proof PASS is met; execution still requires Founder Product/Visual PASS, applicable Round 7 technical/device/voice/accessibility evidence, canonical fresh-read reconciliation, and an explicit Brain M5 admission/handoff.
+- Current product authority: D-053/D-054 + V0_PRODUCT_SCOPE_v2.0 + M5_GOLDEN_LEARNING_SLICE_ACCEPTANCE_CONTRACT_v0.1. Historical Summary-centric VS-001 wording below is non-executable planning history until this milestone is explicitly admitted.
+- Source: CURRENT_EXECUTION_STATE + MASTER_ROADMAP + M5_GOLDEN_LEARNING_SLICE_ACCEPTANCE_CONTRACT_v0.1 (Drive)
 - Tasks: none allocated (progressive detail; allocated only on Brain admission)
 
 ### Sprint M2.S1 — Slice foundation
@@ -159,29 +245,29 @@ Next unallocated ID: **LA-0009**.
 ### Sprint M2.S2 — Core material journey
 
 - Status: PLANNED / NOT_EXECUTABLE
-- Intent: Auth → PDF/Text → Processing → Material Workspace → Summary.
+- Intent: real PDF/text source → grounded/versioned processing → at least one meaningful active learning action → durable canonical LearnerEvidence → truthful minimal LearnerState → explainable next action; passive consumption alone cannot create mastery/readiness.
 
 ### Sprint M2.S3 — Library, reopen & slice hardening
 
 - Status: PLANNED / NOT_EXECUTABLE
-- Intent: Library → Reopen with persistence, retry, analytics and security boundaries; slice-level QA.
+- Intent: close/reopen continuity, retry/idempotency, tenant isolation, degraded behavior, privacy-safe analytics/cost observability, accessibility/device evidence and slice-level Product/Learning/Creative review.
 
 ## Milestone M3 — V0 Implementation Tranches
 
 - Status: PLANNED / NOT_EXECUTABLE
-- Entry gate: Brain accepts VS-001 and admits each tranche separately.
+- Entry gate: Brain accepts the current Golden Learning Slice and admits each V0 tranche separately.
 - Source: PRE_BOOTSTRAP_PRODUCT_READINESS_AND_MASTER_SEQUENCE_v1.0 — Learning App (Drive)
 - Tasks: none allocated (progressive detail; allocated only on Brain admission)
 
-### Sprint M3.S1 — Learning artifacts tranche
+### Sprint M3.S1 — Context-adaptive learning tranche
 
 - Status: PLANNED / NOT_EXECUTABLE
-- Intent: Key Concepts, Flashcards, Quiz as persistent artifacts.
+- Intent: expand the admitted Listen/Recall/Explain/Focus continuity model and evidence-driven next-action behavior without reverting to a standalone artifact-grid product.
 
 ### Sprint M3.S2 — Audio & reading tranche
 
 - Status: PLANNED / NOT_EXECUTABLE
-- Intent: Audio/Listen and Reader where required.
+- Intent: Sesli Öğren speech composition and reading, per the admitted V0 scope (speech: D-062).
 
 ### Sprint M3.S3 — Account, entitlements & monetization tranche
 
