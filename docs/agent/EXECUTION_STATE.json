@@ -59,8 +59,8 @@
       "state": "draft, open, unmerged (BOOTSTRAP_PASS)"
     },
     "reviewed_architecture_head": "0327d2e5b854df1c9923c65ed88f77151cfe9eed",
-    "closure_projection_head": "EXTERNAL_GITHUB_PR_HEAD_AFTER_CMD_0014",
-    "closure_projection_head_binding": "GITHUB_PR_HEAD_AFTER_CMD_0014"
+    "closure_projection_head": "18748f9d34cbdd07d69368fe95e36ff1e0bf3e09",
+    "closure_projection_head_binding": "LITERAL_VERIFIED_CLOSURE_HEAD"
   },
   "ci": {
     "workflows": [
@@ -74,8 +74,14 @@
       "spike-proof": 36697639721,
       "flutter-proof": 36697639922
     },
-    "closure_projection_validation": "PENDING_EXTERNAL_GITHUB_CI_AFTER_CMD_0014_COMMIT",
-    "note": "Architecture CI is immutable evidence at the reviewed head. CMD-0014 changes control-plane files only; closure bootstrap-validation is resolved externally after push."
+    "closure_projection_validation": "SUCCESS",
+    "note": "Architecture CI remains immutable evidence at reviewed head 0327d2e5… . CMD-0014 closure/control-plane projection is independently verified green at 18748f9d…; later evidence-annotation commits do not change the reviewed architecture or closure projection heads.",
+    "closure_projection_head": "18748f9d34cbdd07d69368fe95e36ff1e0bf3e09",
+    "closure_projection_runs": {
+      "bootstrap-validation": 37008135797,
+      "spike-proof": 37008135777,
+      "flutter-proof": 37008135827
+    }
   },
   "last_command_id": "CMD-0014",
   "last_acknowledged_command_id": "CMD-0014",
@@ -166,7 +172,7 @@
     "AUTO_AGENT_BRIDGE_BLOCKED remains optional/non-blocking while Claude transport is unavailable."
   ],
   "protected_gate": "Merge, release, deploy, LICENSE, paid provider, credentials, GitHub App install, secrets/variables, branch protection: Product Owner only",
-  "next_action": "Verify the CMD-0014 closure projection with bootstrap-validation/negative-suite CI. Keep M5 NOT_EXECUTABLE. In parallel, continue only already-admitted Round 7 evidence preparation/execution that does not require protected actions.",
+  "next_action": "M4 repo-local closure is verified. Keep M5 NOT_EXECUTABLE. Continue only the already-admitted Round 7 evidence program and bounded roadmap/control-plane hygiene until the controlling Product/Visual, physical-device, Turkish-voice and physical-accessibility gates are closed; then Brain must fresh-read and explicitly admit M5.",
   "canonical_source_refs": [
     "CURRENT_EXECUTION_STATE — Learning App",
     "CLAUDE_HANDOFF_001 — V0 Architecture Spike — Learning App (mission container, partially superseded)",
@@ -209,7 +215,7 @@
       "H5 locale persistence on jobs"
     ]
   },
-  "command_ledger_note": "RET-0005 is the single cumulative return for the Review 003 correction round (CMD-0009 mechanics): it answers CMD-0013 and names CMD-0004 … CMD-0012 in its 'Also answers' field.",
+  "command_ledger_note": "RET-0005 remains the accepted Review 003 correction evidence. RET-0006 answers CMD-0014. The CMD-0014 closure projection is verified green at 18748f9d34cbdd07d69368fe95e36ff1e0bf3e09 (bootstrap-validation 37008135797; spike-proof 37008135777; flutter-proof 37008135827).",
   "temporary_execution_override": {
     "status": "ACTIVE",
     "authority": "Founder explicit instruction in chat on 2026-10-02",
