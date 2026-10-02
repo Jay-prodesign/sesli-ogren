@@ -266,7 +266,8 @@ class _NativeTtsCapturePageState extends State<NativeTtsCapturePage> {
             ),
             const SizedBox(height: 12),
             DropdownButtonFormField<Map<String, dynamic>>(
-              value: _selectedVoice,
+              key: ValueKey(_selectedVoice?['id']),
+              initialValue: _selectedVoice,
               items: _voices
                   .map(
                     (voice) => DropdownMenuItem(
@@ -284,7 +285,8 @@ class _NativeTtsCapturePageState extends State<NativeTtsCapturePage> {
             if (platform == 'android') ...[
               const SizedBox(height: 12),
               DropdownButtonFormField<String>(
-                value: _androidDeviceClass,
+                key: ValueKey(_androidDeviceClass),
+                initialValue: _androidDeviceClass,
                 items: const [
                   DropdownMenuItem(value: 'D2', child: Text('D2 — representative mid-range Android')),
                   DropdownMenuItem(value: 'D3', child: Text('D3 — lower-end supported Android')),
