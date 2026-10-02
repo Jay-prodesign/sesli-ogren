@@ -87,10 +87,24 @@ observations, unresolved fallback checks, and PASS records that still report
 repeated visible jank, unbounded memory growth or thermal blockers. D1 PASS also
 requires VoiceOver evidence.
 
-This is **completeness validation only**. It cannot close R7-06, substitute for
-physical-device execution, decide whether measured values are acceptable, or
-replace the D1/D2/D3 final review. TalkBack coverage across Android devices remains
-a matrix-level review requirement.
+This is **per-device completeness validation only**. It cannot close R7-06,
+substitute for physical-device execution, or decide whether measured values are
+acceptable.
+
+After D1, D2 and D3 each have a completed device evidence JSON, validate the
+cross-device matrix:
+
+```sh
+python3 tool/validate_device_matrix.py \
+  build/device-evidence-D1.json \
+  build/device-evidence-D2.json \
+  build/device-evidence-D3.json
+```
+
+The matrix validator requires exactly one D1/D2/D3 record, one common build SHA,
+PROFILE mode, all three device rows PASS, D1 VoiceOver PASS, and TalkBack PASS on
+at least one Android device. It still cannot decide whether a model truly
+represents the intended mid/lower-end class or grant R7-06 / Technical PASS.
 
 ## Evidence record per device
 
