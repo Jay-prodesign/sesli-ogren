@@ -14,8 +14,10 @@ python3 validate_voice_sample.py sample-V01.json
 ```
 
 The check enforces blind sample IDs, hidden provider identity for listeners,
-Turkish locale, corpus item A-L, provenance, ISO-8601 generation time, latency,
-cost/credit recording, raw metadata/audio locations and SHA-256.
+Turkish locale, corpus version/item A-L, input-text SHA-256, provenance,
+ISO-8601 generation time, latency, cost/credit recording, raw metadata/audio
+locations and audio SHA-256. The private canonical corpus text stays in Drive;
+the public repository stores only generic validators/templates.
 
 After all samples for the candidate set exist, validate cross-candidate
 comparability:
@@ -25,9 +27,11 @@ python3 validate_voice_benchmark.py samples/*.json
 ```
 
 Each candidate key must contain canonical corpus A-L exactly once, with unique
-blind IDs and consistent locale, requested audio format and synthesis
-mode/quality tier. This catches incomplete or non-comparable benchmark sets
-without ranking them.
+blind IDs and consistent corpus version, locale, requested audio format and
+synthesis mode/quality tier. For each A-L item, all candidates must also carry
+the same input-text SHA-256 and character count. This catches private-corpus
+mutation or non-comparable benchmark sets without publishing corpus text or
+ranking candidates.
 
 ## Blind listening panel
 
