@@ -34,13 +34,7 @@ final class KnotProxyCompanionRenderer implements CompanionRenderer {
   }) {
     return CustomPaint(
       key: const Key('companion-canvas'),
-      painter: KnotPainter(
-        state: state,
-        tone: tone,
-        motion: motion,
-        animate: animate,
-        stats: stats,
-      ),
+      painter: KnotPainter(state: state, tone: tone, motion: motion, animate: animate, stats: stats),
     );
   }
 }
