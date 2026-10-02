@@ -110,6 +110,16 @@ class DeviceEvidenceValidatorTests(unittest.TestCase):
         evidence["accessibility"]["screen_reader"] = "TalkBack"
         self.assertTrue(any("D1 must record VoiceOver" in e for e in validate(valid_report(), evidence)))
 
+    def test_invalid_observed_at_fails(self):
+        evidence = valid_evidence()
+        evidence["observed_at"] = "sometime"
+        self.assertTrue(any("ISO-8601" in e for e in validate(valid_report(), evidence)))
+
+    def test_pass_requires_largest_text_on_device(self):
+        evidence = valid_evidence()
+        evidence["accessibility"]["largest_text"] = "NOT_RUN"
+        self.assertTrue(any("largest-text" in e for e in validate(valid_report(), evidence)))
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
