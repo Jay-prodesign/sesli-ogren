@@ -123,13 +123,13 @@ Next unallocated ID: **LA-0018**.
 
 ## Milestone M1 — Architecture Proof
 
-- Status: ACTIVE
+- Status: DONE
 - Handoff: CLAUDE_HANDOFF_001 — V0 Architecture Spike (admitted by CMD-0002 after BOOTSTRAP_PASS)
 - Task admission: M4_ARCHITECTURE_PROOF_TASK_ADMISSION_001 (Drive); quality overlay CMD-0003 (D-029)
-- Review: Brain Review 003 = CHANGES_REQUIRED (GO_ADAPT supported). Correction chain CMD-0004 … CMD-0013, read through HANDOFF_COMMAND_AUTHORITY_AUDIT_001 and D-062, returned in RET-0005. No new task IDs.
+- Review: Brain Review 004 = ARCHITECTURE_PROOF_PASS / GO_ADAPT at immutable reviewed architecture head `0327d2e5b854df1c9923c65ed88f77151cfe9eed`. RET-0005 is the accepted engineering evidence; CMD-0014 / RET-0006 project closure only. No new task IDs.
 - Branch: `spike/v0-architecture-proof` (from reviewed bootstrap head `433c26c`)
 - Entry gate: Brain BOOTSTRAP_PASS and explicit admission — **met**.
-- Exit gate: Brain review of the corrected CLAUDE_HANDOFF_001 return (RET-0005) → ARCHITECTURE_PROOF_PASS or CHANGES_REQUIRED. No V0 feature work is admitted by this milestone.
+- Exit gate: **MET.** Brain Review 004 accepted the Architecture Proof at `0327d2e5b854df1c9923c65ed88f77151cfe9eed`. No V0 feature work is admitted by this closure.
 - Source: PRE_BOOTSTRAP_PRODUCT_READINESS_AND_MASTER_SEQUENCE_v1.0 — Learning App (Drive); D-015, D-024, D-025 (+ refinements), D-029
 
 ### Sprint M1.S1 — Admission and upstream audit
@@ -138,7 +138,7 @@ Next unallocated ID: **LA-0018**.
 
 ##### LA-0009 — Architecture Proof admission reconciliation and preflight
 
-- Status: AWAITING_BRAIN_REVIEW
+- Status: DONE
 - Depends on: none
 - Owner: Brain
 - Executor: Claude (Primary Engineer)
@@ -149,7 +149,7 @@ Next unallocated ID: **LA-0018**.
 
 ##### LA-0010 — Upstream fresh audit and reuse-admission matrix
 
-- Status: AWAITING_BRAIN_REVIEW
+- Status: DONE
 - Depends on: LA-0009
 - Owner: Brain
 - Executor: Claude (Primary Engineer)
@@ -162,7 +162,7 @@ Next unallocated ID: **LA-0018**.
 
 ##### LA-0011 — Canonical model mapping and product-shell fit
 
-- Status: AWAITING_BRAIN_REVIEW
+- Status: DONE
 - Depends on: LA-0010
 - Owner: Brain
 - Executor: Claude (Primary Engineer)
@@ -171,7 +171,7 @@ Next unallocated ID: **LA-0018**.
 
 ##### LA-0012 — Provider-neutral generation capability seam
 
-- Status: AWAITING_BRAIN_REVIEW
+- Status: DONE
 - Depends on: LA-0011
 - Owner: Brain
 - Executor: Claude (Primary Engineer)
@@ -182,7 +182,7 @@ Next unallocated ID: **LA-0018**.
 
 ##### LA-0013 — Authenticated Material → Artifact bounded proof
 
-- Status: AWAITING_BRAIN_REVIEW
+- Status: DONE
 - Depends on: LA-0011, LA-0012
 - Owner: Brain
 - Executor: Claude (Primary Engineer)
@@ -191,7 +191,7 @@ Next unallocated ID: **LA-0018**.
 
 ##### LA-0014 — Tenant/RLS and cross-user isolation proof
 
-- Status: AWAITING_BRAIN_REVIEW
+- Status: DONE
 - Depends on: LA-0013
 - Owner: Brain
 - Executor: Claude (Primary Engineer)
@@ -200,7 +200,7 @@ Next unallocated ID: **LA-0018**.
 
 ##### LA-0015 — GenerationJob retry, idempotency and lineage proof
 
-- Status: AWAITING_BRAIN_REVIEW
+- Status: DONE
 - Depends on: LA-0013
 - Owner: Brain
 - Executor: Claude (Primary Engineer)
@@ -213,7 +213,7 @@ Next unallocated ID: **LA-0018**.
 
 ##### LA-0016 — Layered donor/dependency decision and adaptation-burden measurement
 
-- Status: AWAITING_BRAIN_REVIEW
+- Status: DONE
 - Depends on: LA-0010, LA-0011, LA-0012, LA-0013, LA-0014, LA-0015
 - Owner: Brain
 - Executor: Claude (Primary Engineer)
@@ -222,18 +222,19 @@ Next unallocated ID: **LA-0018**.
 
 ##### LA-0017 — Architecture Spike integration QA, provenance and return
 
-- Status: AWAITING_BRAIN_REVIEW
+- Status: DONE
 - Depends on: LA-0012, LA-0013, LA-0014, LA-0015, LA-0016
 - Owner: Brain
 - Executor: Claude (Primary Engineer)
 - Verification: All relevant tests + validator green on the exact head; register updated; return with selector outcome and D-029 disposition. Review 003: `.flutter-version` + `flutter-proof` CI (CMD-0008); final head bound externally to PR #2 with exact-head CI (CMD-0009).
 - Exec plan: [docs/exec-plans/LA-0017.md](docs/exec-plans/LA-0017.md)
 
-## Milestone M2 — VS-001 Golden Vertical Slice
+## Milestone M2 — VS-001 / M5 Golden Learning Slice
 
 - Status: PLANNED / NOT_EXECUTABLE
-- Entry gate: Brain accepts the M1 selector outcome and admits VS-001.
-- Source: PRE_BOOTSTRAP_PRODUCT_READINESS_AND_MASTER_SEQUENCE_v1.0 — Learning App (Drive)
+- Entry gate: M4 Architecture Proof PASS is met; execution still requires Founder Product/Visual PASS, applicable Round 7 technical/device/voice/accessibility evidence, canonical fresh-read reconciliation, and an explicit Brain M5 admission/handoff.
+- Current product authority: D-053/D-054 + V0_PRODUCT_SCOPE_v2.0 + M5_GOLDEN_LEARNING_SLICE_ACCEPTANCE_CONTRACT_v0.1. Historical Summary-centric VS-001 wording below is non-executable planning history until this milestone is explicitly admitted.
+- Source: CURRENT_EXECUTION_STATE + MASTER_ROADMAP + M5_GOLDEN_LEARNING_SLICE_ACCEPTANCE_CONTRACT_v0.1 (Drive)
 - Tasks: none allocated (progressive detail; allocated only on Brain admission)
 
 ### Sprint M2.S1 — Slice foundation

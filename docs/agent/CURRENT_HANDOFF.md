@@ -7,18 +7,20 @@ responses go to [`returns/RET-####.md`](returns/) ([`README.md`](README.md)).
 
 ## Active
 
+No executable engineering handoff is currently issued. The Founder has temporarily delegated bounded, dependency-safe engineering to ChatGPT while Claude usage is unavailable; this does not admit M5 or protected actions.
+
 | Field | Value |
 | --- | --- |
-| Handoff | **CLAUDE_HANDOFF_001 — V0 Architecture Spike** |
-| State | **M4 ACCEPTED / REPO CLOSURE PROJECTION PENDING**. Brain Review 004 issued **ARCHITECTURE_PROOF_PASS / GO_ADAPT** for immutable reviewed architecture head `0327d2e5b854df1c9923c65ed88f77151cfe9eed`. [RET-0005](returns/RET-0005.md) remains the accepted engineering evidence. [CMD-0014](commands/CMD-0014.md) is the current unread closure/projection command. It must reconcile repo-local state without reopening architecture or admitting M5. |
+| Handoff | **CLAUDE_HANDOFF_001 — V0 Architecture Spike — COMPLETED** |
+| State | **M4 CLOSED / ARCHITECTURE_PROOF_PASS / GO_ADAPT**. Brain Review 004 accepted immutable architecture head `0327d2e5b854df1c9923c65ed88f77151cfe9eed`. [RET-0005](returns/RET-0005.md) remains the accepted architecture evidence. [CMD-0014](commands/CMD-0014.md) is answered by [RET-0006](returns/RET-0006.md) as repo-local closure projection only. M5 remains NOT_EXECUTABLE. |
 | Authority reading | CLAUDE_HANDOFF_001 is the M4 mission container but is **partially superseded** and now accepted by Review 004. Read order for closure: CURRENT_EXECUTION_STATE → CLAUDE_HANDOFF_001 → HANDOFF_COMMAND_AUTHORITY_AUDIT_001 → CMD-0004 … CMD-0014 → D-062 compatibility overlay. D-061 remains PROPOSED and non-executable. |
-| Executor | Claude (Primary Engineer) |
+| Executor | Claude remains designated Primary Engineer; ChatGPT is Founder-authorized temporary bounded engineering delegate while Claude usage is unavailable. |
 | Milestone | M1 — Architecture Proof (Drive lifecycle stage "M4") |
-| Tasks | LA-0009 … LA-0017 (see [`TASKS.md`](../../TASKS.md)). These run as one Continuous Engineering Mission in dependency order. |
+| Tasks | LA-0009 … LA-0017 are **DONE** under Brain Review 004 (see [`TASKS.md`](../../TASKS.md)). No M5 implementation tasks are admitted. |
 | Branch | `spike/v0-architecture-proof`, derived from reviewed bootstrap head `433c26cf5fa75a37b66b1f74dd6a133ae4d3407a` |
 | Delivery | Draft PR [#2](https://github.com/Jay-prodesign/sesli-ogren/pull/2), stacked on `chore/repository-bootstrap`; nothing is merged. Review 004 accepted architecture at `0327d2e5…`. Later Brain/closure commits (including the CMD-0014 command commit) are control-plane projection only and must be reported separately from the reviewed architecture head. |
 | Evidence | [`ENGINEER_RETURN.md`](ENGINEER_RETURN.md) (consolidated), [`returns/`](returns/) |
-| Exit gate | **MET at architecture level:** Brain Review 004 = ARCHITECTURE_PROOF_PASS / GO_ADAPT on `0327d2e5…`. Remaining work in this handoff is repo-local closure projection under CMD-0014 only. It must end with M5 still NOT_EXECUTABLE. |
+| Exit gate | **MET and projected:** Brain Review 004 = ARCHITECTURE_PROOF_PASS / GO_ADAPT on `0327d2e5…`; CMD-0014 closure projection is answered by RET-0006. M5 remains NOT_EXECUTABLE. |
 
 ### Mission summary (non-private)
 
@@ -58,6 +60,7 @@ boundary (D-062); M4 assesses compatibility only.
 
 | Handoff | Outcome |
 | --- | --- |
+| CLAUDE_HANDOFF_001 — V0 Architecture Spike / Architecture Proof | **ARCHITECTURE_PROOF_PASS / GO_ADAPT** under Brain Review 004 at `0327d2e5b854df1c9923c65ed88f77151cfe9eed`; repo-local closure projected by CMD-0014 / RET-0006. PR #2 remains draft/open/unmerged. |
 | CLAUDE_HANDOFF_000 — Repository & Agent Bootstrap | **BOOTSTRAP_PASS** (M3_BOOTSTRAP_BRAIN_REVIEW_002, reviewed head `433c26c`). PR #1 is draft and unmerged; merging it is a Product Owner action. |
 
 ## Staged

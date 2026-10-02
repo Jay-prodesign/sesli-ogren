@@ -2,7 +2,7 @@
 
 ## Verdict
 
-**GO_ADAPT (conditional). The Brain Review 003 correction round is complete and AWAITING_BRAIN_REVIEW.**
+**ARCHITECTURE_PROOF_PASS / GO_ADAPT. Brain Review 004 accepted the Architecture Proof at immutable reviewed head `0327d2e5b854df1c9923c65ed88f77151cfe9eed`. CMD-0014 / RET-0006 are closure projection only.**
 
 - Review 003 (reviewed head `9fb2d9b`) was CHANGES_REQUIRED.
 - The corrections, CMD-0004 … CMD-0013, are answered cumulatively by [RET-0005](returns/RET-0005.md).
@@ -272,3 +272,14 @@ The Founder is not used as a routine command courier. Local Windows desktop buil
   `test/contract_test.dart`) received layout-only `dart format` changes. Analyze and tests are unchanged and green.
 - The stale "Flutter local-only" comment in `spike-proof.yml` and the bootstrap-only README status were corrected minimally.
 - The optional PowerShell helper was omitted.
+
+
+## 23. Brain Review 004 closure projection (CMD-0014 / RET-0006)
+
+- Brain Review 004 accepted the architecture at `0327d2e5b854df1c9923c65ed88f77151cfe9eed`; that SHA remains the immutable reviewed architecture head.
+- Founder explicitly authorized ChatGPT on 2026-10-02 to act as a temporary bounded engineering delegate while Claude usage is unavailable.
+- This closure changes only repository control-plane/evidence files. No architecture/product code, schema, provider, UI, speech implementation or release behavior is changed.
+- M1 and LA-0009 … LA-0017 are projected DONE. The future M5 Golden Learning Slice remains NOT_EXECUTABLE and has no implementation task allocation.
+- Any later PR #2 commit is a closure/control-plane projection and must not be represented as the Review 004 architecture head.
+- Protected actions remain untouched: no merge, deploy, release, paid-provider spend, credentials/secrets, production mutation, destructive migration, licensing-posture change or cross-project mutation.
+- Closure validation is resolved from GitHub CI after the projection commit; RET-0006 records the external-binding limitation rather than inventing a self-referential commit SHA.
