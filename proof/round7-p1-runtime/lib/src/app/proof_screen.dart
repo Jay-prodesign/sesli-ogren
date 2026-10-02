@@ -203,11 +203,7 @@ class _SourceBar extends StatelessWidget {
 }
 
 class _FlowPanel extends StatelessWidget {
-  const _FlowPanel({
-    required this.controller,
-    required this.reducedMotion,
-    required this.companionRenderer,
-  });
+  const _FlowPanel({required this.controller, required this.reducedMotion, required this.companionRenderer});
 
   final ProofController controller;
   final bool reducedMotion;
