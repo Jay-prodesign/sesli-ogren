@@ -61,6 +61,10 @@ def validate_benchmark(records: list[dict[str, Any]]) -> list[str]:
         if set(corpus) != CORPUS_ITEMS or len(corpus) != len(set(corpus)):
             errors.append(f"candidate {candidate!r} must cover corpus A-L exactly once; got {corpus}")
 
+        versions = {s.get("input_corpus_version") for s in samples}
+        if len(versions) != 1:
+            errors.append(f"candidate {candidate!r} must use one corpus version; got {sorted(map(str, versions))}")
+
         locales = {s.get("language_locale") for s in samples}
         if len(locales) != 1:
             errors.append(f"candidate {candidate!r} must use one consistent Turkish locale; got {sorted(map(str, locales))}")
@@ -76,6 +80,21 @@ def validate_benchmark(records: list[dict[str, Any]]) -> list[str]:
             errors.append(
                 f"candidate {candidate!r} must use one consistent synthesis mode/quality tier; got {sorted(map(str, tiers))}"
             )
+
+    # Cross-candidate text identity: for every A-L item, all candidates must
+    # use the same canonical input hash and character count without publishing
+    # the private corpus text into the public repository.
+    for item in sorted(CORPUS_ITEMS):
+        rows = [r for r in records if r.get("input_corpus_item") == item]
+        hashes = {r.get("input_text_sha256") for r in rows}
+        counts = {r.get("input_character_count") for r in rows}
+        versions = {r.get("input_corpus_version") for r in rows}
+        if len(hashes) != 1:
+            errors.append(f"corpus item {item} must use one identical input_text_sha256 across candidates")
+        if len(counts) != 1:
+            errors.append(f"corpus item {item} must use one identical input_character_count across candidates")
+        if len(versions) != 1:
+            errors.append(f"corpus item {item} must use one identical input_corpus_version across candidates")
 
     return errors
 
