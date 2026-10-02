@@ -121,6 +121,17 @@ import UIKit
     voiceId: String,
     result: @escaping FlutterResult
   ) {
+    guard isPhysicalDevice else {
+      result(
+        FlutterError(
+          code: "DEVICE_TARGET_INVALID",
+          message: "Capture target must be a hardware iOS device.",
+          details: nil
+        )
+      )
+      return
+    }
+
     guard networkSatisfied == false else {
       result(
         FlutterError(
