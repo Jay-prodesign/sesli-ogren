@@ -245,24 +245,24 @@ Next unallocated ID: **LA-0018**.
 ### Sprint M2.S2 — Core material journey
 
 - Status: PLANNED / NOT_EXECUTABLE
-- Intent: Auth → PDF/Text → Processing → Material Workspace → Summary.
+- Intent: real PDF/text source → grounded/versioned processing → at least one meaningful active learning action → durable canonical LearnerEvidence → truthful minimal LearnerState → explainable next action; passive consumption alone cannot create mastery/readiness.
 
 ### Sprint M2.S3 — Library, reopen & slice hardening
 
 - Status: PLANNED / NOT_EXECUTABLE
-- Intent: Library → Reopen with persistence, retry, analytics and security boundaries; slice-level QA.
+- Intent: close/reopen continuity, retry/idempotency, tenant isolation, degraded behavior, privacy-safe analytics/cost observability, accessibility/device evidence and slice-level Product/Learning/Creative review.
 
 ## Milestone M3 — V0 Implementation Tranches
 
 - Status: PLANNED / NOT_EXECUTABLE
-- Entry gate: Brain accepts VS-001 and admits each tranche separately.
+- Entry gate: Brain accepts the current Golden Learning Slice and admits each V0 tranche separately.
 - Source: PRE_BOOTSTRAP_PRODUCT_READINESS_AND_MASTER_SEQUENCE_v1.0 — Learning App (Drive)
 - Tasks: none allocated (progressive detail; allocated only on Brain admission)
 
-### Sprint M3.S1 — Learning artifacts tranche
+### Sprint M3.S1 — Context-adaptive learning tranche
 
 - Status: PLANNED / NOT_EXECUTABLE
-- Intent: learning artifacts per the admitted V0 scope (pre-D-054 wording "Key Concepts, Flashcards, Quiz" is no longer product authority; CMD-0013).
+- Intent: expand the admitted Listen/Recall/Explain/Focus continuity model and evidence-driven next-action behavior without reverting to a standalone artifact-grid product.
 
 ### Sprint M3.S2 — Audio & reading tranche
 
