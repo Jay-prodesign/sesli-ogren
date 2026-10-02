@@ -13,15 +13,25 @@ from validate_voice_sample import validate  # noqa: E402
 
 def valid():
     return {
-        "schema_version": 1,
+        "schema_version": 2,
         "requirement": "R7-07A",
         "blind_sample_id": "V01",
         "provider_identity_hidden_from_listener": True,
         "hidden_provider_model_voice_key": "private-key-01",
+        "execution_backend": "hosted_cloud",
+        "platform": "server",
+        "device_model": "provider-managed-runtime",
+        "os_version": "provider-managed",
+        "tts_engine_or_package": "provider-api",
         "provider_model_version": "provider/model/version",
         "voice_id_or_name": "voice-01",
         "language_locale": "tr-TR",
         "synthesis_mode_or_quality_tier": "benchmark",
+        "voice_network_requirement": "network_required",
+        "offline_tested": False,
+        "offline_result": "not_applicable",
+        "audio_capture_or_generation_method": "provider response persisted to benchmark WAV",
+        "metered_external_service_invoked": True,
         "input_corpus_version": "SESLI_OGREN_TURKISH_VOICE_IDENTITY_BENCHMARK_001-KL-FIXED",
         "input_corpus_item": "A",
         "input_text_sha256": "b" * 64,
@@ -35,7 +45,7 @@ def valid():
         "full_completion_latency_ms": 900,
         "retries_count": 0,
         "errors": [],
-        "cost": {"amount": 0.0, "unit": "credits"},
+        "cost": {"amount": 0.01, "unit": "USD"},
         "cache_reuse_behavior": "disabled for benchmark",
         "raw_provider_metadata_location": "drive://metadata",
         "audio_file_location": "drive://audio/V01.wav",
@@ -44,9 +54,35 @@ def valid():
     }
 
 
+def valid_native():
+    r = valid()
+    r.update({
+        "hidden_provider_model_voice_key": "ios-native-tr-voice-01",
+        "execution_backend": "native_os",
+        "platform": "ios",
+        "device_model": "physical-target-iphone",
+        "os_version": "iOS benchmark build",
+        "tts_engine_or_package": "AVSpeechSynthesizer",
+        "provider_model_version": "system-voice-runtime",
+        "voice_id_or_name": "installed-tr-TR-voice",
+        "voice_network_requirement": "offline_capable",
+        "offline_tested": True,
+        "offline_result": "pass",
+        "audio_capture_or_generation_method": "native synthesis-to-buffer benchmark capture",
+        "metered_external_service_invoked": False,
+        "streaming": False,
+        "first_byte_latency_ms": None,
+        "cost": {"amount": 0.0, "unit": "USD-provider-usage"},
+    })
+    return r
+
+
 class VoiceSampleValidatorTests(unittest.TestCase):
     def test_valid_sample_passes(self):
         self.assertEqual(validate(valid()), [])
+
+    def test_valid_native_sample_passes(self):
+        self.assertEqual(validate(valid_native()), [])
 
     def test_blind_identity_must_be_hidden(self):
         r = valid()
@@ -77,6 +113,28 @@ class VoiceSampleValidatorTests(unittest.TestCase):
         r = valid()
         r["input_text_sha256"] = "abc"
         self.assertTrue(any("input_text_sha256" in e for e in validate(r)))
+
+    def test_native_requires_physical_mobile_platform(self):
+        r = valid_native()
+        r["platform"] = "server"
+        self.assertTrue(any("native_os samples" in e for e in validate(r)))
+
+    def test_native_requires_offline_test(self):
+        r = valid_native()
+        r["offline_tested"] = False
+        r["offline_result"] = "not_applicable"
+        self.assertTrue(any("real offline test" in e for e in validate(r)))
+
+    def test_native_cannot_invoke_metered_external_service(self):
+        r = valid_native()
+        r["metered_external_service_invoked"] = True
+        self.assertTrue(any("metered external service" in e for e in validate(r)))
+
+    def test_zero_cost_claim_requires_no_metered_external_service(self):
+        r = valid()
+        r["metered_external_service_invoked"] = False
+        r["cost"] = {"amount": 1.0, "unit": "USD"}
+        self.assertTrue(any("cost.amount must be 0" in e for e in validate(r)))
 
 
 if __name__ == "__main__":
