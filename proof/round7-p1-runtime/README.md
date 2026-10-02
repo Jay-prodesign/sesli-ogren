@@ -74,6 +74,6 @@ CI (`.github/workflows/round7-p1-proof.yml`) runs:
 
 ## R7-07A native TTS capture mode
 
-The chained proof branch `proof/round7-native-tts-capture` adds a non-production capture surface for physical-device native Turkish TTS evidence. It is unreachable in the default P1 runtime and activates only with `--dart-define=R7_NATIVE_TTS_CAPTURE=true`.
+The chained proof branch `proof/round7-native-tts-capture` adds a non-production capture surface for physical-device native Turkish TTS evidence. The capture UI activates only with `--dart-define=R7_NATIVE_TTS_CAPTURE=true`; this branch is a separate R7-07A evidence build and must not be used as the R7-06 bound runtime build.
 
-The private canonical A-L corpus is supplied at runtime and is not committed. Capture is fail-closed when an active network path remains, records the physical device/OS/engine/voice plus audio/input SHA-256 and generation timing, and writes a schema-v2-compatible manifest for R7-07A evidence packaging. This capture build does not replace the R7-06 bound runtime build `ec84e603a67a8fd286e5c57c2a808d62d5c5cd6d`; R7-06 evidence must continue to use its exact bound build.
+The private canonical A-L corpus is supplied at runtime and is not committed. Capture is fail-closed for a detected simulator/emulator or an active network path, records device/OS/engine/voice plus audio/input SHA-256 and generation timing, writes one schema-v2 sample JSON per A-L item plus a capture manifest, and keeps provider-usage cost separate from device/operational cost. This capture build does not replace the R7-06 bound runtime build `ec84e603a67a8fd286e5c57c2a808d62d5c5cd6d`; R7-06 evidence must continue to use its exact bound build.
