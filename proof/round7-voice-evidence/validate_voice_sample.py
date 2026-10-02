@@ -20,7 +20,7 @@ BLIND_ID = re.compile(r"^V[0-9]{2,}$")
 SHA256 = re.compile(r"^[0-9a-f]{64}$")
 CORPUS_ITEMS = set("ABCDEFGHIJKL")
 EXECUTION_BACKENDS = {"native_os", "self_hosted", "hosted_cloud"}
-PLATFORMS = {"ios", "android", "server", "desktop", "other"}
+PLATFORMS = {"ios", "android", "server", "desktop", "other"}\nDEVICE_EVIDENCE_CLASSES = {"D1", "D2", "D3", "not_applicable"}
 OFFLINE_RESULTS = {"pass", "fail", "not_applicable"}
 NETWORK_REQUIREMENTS = {"offline_capable", "network_required", "unknown_not_exposed"}
 
@@ -81,7 +81,7 @@ def validate(record: dict[str, Any]) -> list[str]:
         "provider_model_version",
         "voice_id_or_name",
         "synthesis_mode_or_quality_tier",
-        "audio_capture_or_generation_method",
+        "audio_capture_or_generation_method",\n        "operational_cost_notes",
         "requested_format",
         "cache_reuse_behavior",
         "raw_provider_metadata_location",
@@ -111,6 +111,7 @@ def validate(record: dict[str, Any]) -> list[str]:
 
     offline_tested = record.get("offline_tested")
     require(isinstance(offline_tested, bool), "offline_tested must be true or false")
+    offline_method = record.get("offline_test_method")
     offline_result = record.get("offline_result")
     require(offline_result in OFFLINE_RESULTS,
             f"offline_result must be one of {sorted(OFFLINE_RESULTS)}")
