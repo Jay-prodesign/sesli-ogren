@@ -89,7 +89,7 @@ def validate_benchmark(records: list[dict[str, Any]]) -> list[str]:
         native = any(s.get("execution_backend") == "native_os" for s in samples)
         if native:
             offline_tested = {s.get("offline_tested") for s in samples}
-            offline_results = {s.get("offline_result") for s in samples}
+            offline_methods = {s.get("offline_test_method") for s in samples}\n            offline_results = {s.get("offline_result") for s in samples}
             metered = {s.get("metered_external_service_invoked") for s in samples}
             if offline_tested != {True}:
                 errors.append(f"native candidate {candidate!r} must record offline_tested=true for all A-L samples")
