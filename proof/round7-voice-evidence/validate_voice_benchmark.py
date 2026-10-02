@@ -93,6 +93,11 @@ def validate_benchmark(records: list[dict[str, Any]]) -> list[str]:
             metered = {s.get("metered_external_service_invoked") for s in samples}
             if offline_tested != {True}:
                 errors.append(f"native candidate {candidate!r} must record offline_tested=true for all A-L samples")
+            if len(offline_methods) != 1:
+                errors.append(
+                    f"native candidate {candidate!r} must use one consistent offline_test_method; "
+                    f"got {sorted(map(str, offline_methods))}"
+                )
             if not offline_results.issubset({"pass", "fail"}) or len(offline_results) != 1:
                 errors.append(
                     f"native candidate {candidate!r} must use one consistent pass/fail offline_result; "
