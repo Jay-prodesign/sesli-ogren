@@ -83,8 +83,8 @@
     "real_DE_renderer": "IMPLEMENTED_CI_PASS",
     "blink_gaze_controls": "BLINK_OVERLAY_REJECTED_BY_VISUAL_GEOMETRY_QA__DISABLED_V1; GAZE_LAYER_DEFERRED",
     "mouth_controls": "PASS_CLEAN_SUBTLE_SYNTHETIC_VISUAL_QA",
-    "real_tts_playback": "IMPLEMENTED_CI_PASS__DEVICE_RUNTIME_QA_PENDING",
-    "audio_visual_synchronization": "IMPLEMENTED_CI_PASS__SPEAK_FOLLOWS_REAL_TTS_START_DONE_STOP_ERROR_CALLBACKS",
+    "real_tts_playback": "IMPLEMENTED_CI_PASS__IOS_NATIVE_SIMULATOR_LIFECYCLE_PASS__PHYSICAL_AUDIO_QA_PENDING",
+    "audio_visual_synchronization": "IMPLEMENTED_CI_PASS__ONE_TAP_NATIVE_SPEECH_QA_AVAILABLE__PHYSICAL_CONFIRMATION_PENDING",
     "real_phone_QA": "ONLY_PHYSICAL_NATIVE_TTS_SMOOTHNESS_SAFE_AREA_REMAINS",
     "body_state_motion": "PASS_SYNTHETIC_MULTI_FRAME_VISUAL_QA",
     "v1_visual_strategy": "canonical flattened D/E + semantic whole-character motion",
@@ -171,26 +171,29 @@
     }
   ],
   "latest_code": {
-    "head_commit": "11c8c9741ba682f15e917ef997daab44fd3757ea",
+    "verified_application_head": "eb9c07285bf3ed201556cb7e60b8de9e561e22b5",
     "pr": 8,
+    "workflow_run": 37140739027,
+    "ci_checkout_sha": "54a96e776fda7252cb578ec2c2d58ff4cdf5aabd",
     "bootstrap_validation": "PASS",
     "dart_format": "PASS",
     "flutter_analyze": "PASS",
     "flutter_tests": "PASS",
     "p9_visual_capture": "PASS",
     "p9_motion_sequence": "PASS_D_AND_E_ALL_6_STATES_X_4_PHASES",
+    "ios_native_flutter_tts_simulator_lifecycle": "PASS_START_COMPLETION_STOP",
     "android_profile_apk": "PASS_ARTIFACT_UPLOADED",
-    "ios_profile_compile_no_codesign": "PASS",
-    "workflow_run": 37134312547
+    "android_profile_apk_sha256": "20b4d1d7d5f30252b7510fccd827d3fcad657bc08abad4d1331acf1a60d8f40d",
+    "ios_profile_compile_no_codesign": "PASS"
   },
   "p9_gate": {
     "status": "PHYSICAL_NATIVE_ONLY_REMAINS",
-    "non_device_evidence": "PASS_INCLUDING_IPHONE_PORTRAIT_LANDSCAPE_D_E_MATRIX",
+    "non_device_evidence": "PASS_INCLUDING_NATIVE_IOS_SIMULATOR_TTS_CALLBACK_LIFECYCLE_AND_IPHONE_PORTRAIT_LANDSCAPE_D_E_MATRIX",
     "required_physical_checks": [
-      "actual device TTS audibility and locale",
-      "SPEAK starts on real playback start and stops on completion/interruption/error",
-      "real-device frame smoothness and input responsiveness",
-      "native safe-area/platform behavior on the target physical device"
+      "actual device TTS audibility and expected Turkish locale/voice behavior",
+      "Native Speech QA self-check reaches CALLBACK_LIFECYCLE_PASS on physical hardware",
+      "real-device frame smoothness and tap/scroll responsiveness",
+      "native safe-area/platform orientation behavior on the target physical device"
     ],
     "ios_note": "CI compile is no-codesign; installable iOS device validation still needs a signed physical-device path.",
     "synthetic_phone_matrix": {
@@ -244,6 +247,23 @@
       "speak": "PASS_BODY_PULSE_PLUS_CLEAN_SUBTLE_MOUTH_WARP",
       "success": "PASS_CLEAR_WITHOUT_EXCESSIVE_BOUNCE",
       "identity_drift": "NONE_OBSERVED"
+    },
+    "native_speech_qa": {
+      "screen": "lib/src/qa/native_speech_qa_screen.dart",
+      "access": "voice icon in the proof app bar",
+      "automatic_checks": [
+        "playback onStart drives Companion SPEAK",
+        "completion settles SPEAK",
+        "explicit stop settles SPEAK",
+        "stale callback cannot re-enter SPEAK",
+        "no audio_unavailable event during successful callback checks"
+      ],
+      "physical_observation_still_required": [
+        "sound is actually audible",
+        "voice/locale behavior is acceptable Turkish",
+        "motion/input is smooth",
+        "portrait/landscape safe areas are correct"
+      ]
     }
   }
 }

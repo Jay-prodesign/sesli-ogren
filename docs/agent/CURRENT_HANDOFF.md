@@ -11,8 +11,8 @@
 | Branch | `feat/round7-companion-production-sequence-v2` |
 | Delivery | Draft PR #8, stacked and unmerged |
 | Purpose | Close the already-admitted Round 7 companion/runtime evidence without admitting M2/Golden Learning Slice implementation |
-| Current result | Synthetic visual/layout/motion QA PASS; Android profile build PASS; iOS no-codesign compile PASS; blink rejected/removed; mouth warp PASS |
-| Remaining gate | Physical native TTS/audio lifecycle + real-device smoothness/input + native safe-area/orientation |
+| Current result | Synthetic visual/layout/motion QA PASS; Android profile build PASS; iOS no-codesign compile PASS; iOS native flutter_tts simulator lifecycle PASS; one-tap Native Speech QA ready; blink rejected/removed; mouth warp PASS |
+| Remaining gate | Physical audibility/Turkish voice behavior + physical Native Speech QA callback PASS + real-device smoothness/input + native safe-area/orientation |
 | Companion cursor | `docs/agent/ROUND7_COMPANION_CURRENT_CURSOR.json` |
 | Companion status | `docs/agent/ROUND7_COMPANION_ASSET_STATUS.json` |
 

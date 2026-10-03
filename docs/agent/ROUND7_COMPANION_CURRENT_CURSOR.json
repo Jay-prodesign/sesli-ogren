@@ -6,15 +6,18 @@
   "active_phase": "P9_REAL_PHONE_QA",
   "active_task": "PHYSICAL_NATIVE_TTS_AUDIO_AND_DEVICE_SMOOTHNESS_QA",
   "verified_ci": {
-    "workflow_run": 37134312547,
-    "source_head": "11c8c9741ba682f15e917ef997daab44fd3757ea",
+    "workflow_run": 37140739027,
+    "source_head": "eb9c07285bf3ed201556cb7e60b8de9e561e22b5",
+    "ci_checkout_sha": "54a96e776fda7252cb578ec2c2d58ff4cdf5aabd",
     "format": "PASS",
     "analyze": "PASS",
     "flutter_tests": "PASS",
     "p9_visual_capture": "PASS",
     "p9_motion_sequence": "PASS_D_AND_E_6_STATES_X_4_PHASES",
-    "android_profile_apk": "PASS",
-    "ios_profile_compile_no_codesign": "PASS"
+    "android_profile_apk": "PASS_ARTIFACT_UPLOADED",
+    "android_profile_apk_sha256": "20b4d1d7d5f30252b7510fccd827d3fcad657bc08abad4d1331acf1a60d8f40d",
+    "ios_profile_compile_no_codesign": "PASS",
+    "ios_native_flutter_tts_simulator_lifecycle": "PASS_START_COMPLETION_STOP"
   },
   "authority": {
     "D": "assets/companions/D_KNOT_128.webp",
@@ -36,24 +39,20 @@
     "speaking_rule": "SPEAK begins on real playback start and settles on completion/stop/error",
     "mouth": "PASS_CLEAN_SUBTLE_SYNTHETIC_VISUAL_QA",
     "blink": "DISABLED_AFTER_VISUAL_QA_FAIL",
-    "layered_rig": "DEFERRED_UNLESS_DEVICE_QA_PROVES_NEEDED"
+    "layered_rig": "DEFERRED_UNLESS_DEVICE_QA_PROVES_NEEDED",
+    "native_speech_qa": "ONE_TAP_SCREEN_IMPLEMENTED__CALLBACK_LIFECYCLE_SELF_CHECK"
   },
   "device_qa": [
-    "D and E identity fidelity at actual companion size",
-    "no clipping or blur in portrait/landscape and compact contexts",
-    "IDLE/LISTEN/THINK/SPEAK/CORRECT/SUCCESS are distinguishable but restrained",
-    "no arms/hands/legs/feet appear in any state",
-    "SPEAK begins only on actual device TTS playback start",
-    "SPEAK ends on completion, stop, interruption or TTS error",
-    "transcript and learning loop remain usable when audio fails",
-    "D/E selection changes identity only, not learning state",
-    "Reduced Motion removes continuous/local animation as intended",
-    "mouth warp synthetic visual QA passed; physical device only checks perceived naturalness during real TTS",
-    "frame smoothness and input responsiveness are acceptable"
+    "Open Native Speech QA from the microphone/voice icon.",
+    "Run Native Speech QA and require CALLBACK_LIFECYCLE_PASS.",
+    "Confirm the spoken output is actually audible and Turkish/expected for the fixture.",
+    "Rotate portrait ↔ landscape and confirm no clipping/safe-area defect.",
+    "Interact/scroll during the learning flow and confirm motion/input remain smooth.",
+    "D/E identity must remain correct; no limbs may appear; Reduced Motion must remain restrained."
   ],
   "next_after_pass": "P10_MINIMUM_COMPANION_LOOP_PASS; secondary assets remain optional/backlog",
   "next_if_mouth_or_blink_visual_fail": "repair or disable only failing local effect; open layered rig only if a real learning/visual need remains",
-  "stop_condition": "Only physical native-device TTS/audio lifecycle, real-device smoothness/input responsiveness and native safe-area/orientation remain.",
+  "stop_condition": "Only physical native-device audibility/voice behavior, one-tap callback confirmation, smoothness/input responsiveness and native safe-area/orientation remain.",
   "preview": {
     "policy": "GAME_ENGINE_PARITY__FREE_TEMPORARY_PHONE_HTTPS_PREVIEW",
     "method": "Flutter Web build -> local python3 HTTP server -> Cloudflare cloudflared Quick Tunnel",
@@ -118,10 +117,15 @@
   },
   "remaining_gate": {
     "type": "PHYSICAL_DEVICE_ONLY",
+    "already_verified_non_physical": [
+      "real flutter_tts plugin lifecycle integration path is covered by widget/integration tests",
+      "iOS simulator native flutter_tts start/completion/stop lifecycle PASS",
+      "Android profile APK builds with flutter_tts and is available as CI artifact",
+      "portrait/compact-landscape D/E synthetic visual and motion QA PASS"
+    ],
     "required": [
-      "actual native TTS audibility and expected locale/voice behavior",
-      "SPEAK starts from real playback start callback",
-      "SPEAK settles on completion, stop, interruption and TTS error",
+      "actual native TTS audibility and expected Turkish locale/voice behavior on physical hardware",
+      "one-tap Native Speech QA reaches CALLBACK_LIFECYCLE_PASS on physical hardware",
       "real-device animation smoothness and tap/scroll responsiveness",
       "native safe-area/orientation behavior"
     ],
