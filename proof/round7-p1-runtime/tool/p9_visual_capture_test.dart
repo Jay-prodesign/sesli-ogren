@@ -33,11 +33,7 @@ Future<void> _toChallenge(WidgetTester tester, ProofController controller) async
   }
 }
 
-Future<void> _driveState(
-  WidgetTester tester,
-  ProofController controller,
-  CompanionState state,
-) async {
+Future<void> _driveState(WidgetTester tester, ProofController controller, CompanionState state) async {
   switch (state) {
     case CompanionState.idle:
       break;
@@ -78,20 +74,14 @@ Future<void> _captureFullScreen(
   tester.view.physicalSize = Size(logicalSize.width * dpr, logicalSize.height * dpr);
   tester.view.devicePixelRatio = dpr;
 
-  final controller = ProofController(
-    fixtures,
-    evaluationDelay: const Duration(minutes: 10),
-  )..setCompanionIdentity(identity);
+  final controller = ProofController(fixtures, evaluationDelay: const Duration(minutes: 10))
+    ..setCompanionIdentity(identity);
 
   await tester.pumpWidget(
     RepaintBoundary(
       key: const Key('capture-root'),
       child: MediaQuery(
-        data: MediaQueryData(
-          size: logicalSize,
-          devicePixelRatio: dpr,
-          disableAnimations: false,
-        ),
+        data: MediaQueryData(size: logicalSize, devicePixelRatio: dpr, disableAnimations: false),
         child: MaterialApp(home: ProofScreen(controller: controller)),
       ),
     ),
@@ -103,8 +93,7 @@ Future<void> _captureFullScreen(
   await tester.pump();
   expect(tester.takeException(), isNull);
 
-  final name =
-      'p9_captures/full_${orientation}_${_identityName(identity)}_${state.name.toUpperCase()}.png';
+  final name = 'p9_captures/full_${orientation}_${_identityName(identity)}_${state.name.toUpperCase()}.png';
   await expectLater(find.byKey(const Key('capture-root')), matchesGoldenFile(name));
 
   controller.dispose();
@@ -135,9 +124,7 @@ Future<void> _captureCloseup(
               height: 240,
               child: _renderer(identity).build(
                 state: state,
-                tone: state == CompanionState.correct
-                    ? CompanionTone.attention
-                    : CompanionTone.neutral,
+                tone: state == CompanionState.correct ? CompanionTone.attention : CompanionTone.neutral,
                 motion: AlwaysStoppedAnimation<double>(motion),
                 animate: true,
                 stats: stats,
@@ -150,8 +137,7 @@ Future<void> _captureCloseup(
   );
   await tester.pump();
 
-  final name =
-      'p9_captures/closeup_${_identityName(identity)}_${state.name.toUpperCase()}_$suffix.png';
+  final name = 'p9_captures/closeup_${_identityName(identity)}_${state.name.toUpperCase()}_$suffix.png';
   await expectLater(find.byKey(const Key('closeup-root')), matchesGoldenFile(name));
 }
 
@@ -167,10 +153,7 @@ void main() {
   });
 
   testWidgets('capture full P9 portrait and landscape state matrix', (tester) async {
-    final surfaces = <(Size, String)>[
-      (const Size(430, 932), 'portrait'),
-      (const Size(932, 430), 'landscape'),
-    ];
+    final surfaces = <(Size, String)>[(const Size(430, 932), 'portrait'), (const Size(932, 430), 'landscape')];
 
     for (final (size, orientation) in surfaces) {
       for (final identity in CompanionIdentity.values) {
