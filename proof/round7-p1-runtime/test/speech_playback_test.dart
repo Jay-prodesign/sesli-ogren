@@ -75,6 +75,23 @@ void main() {
     expect(controller.companionState, CompanionState.idle);
   });
 
+  test('restart resets the speech transition cursor and can speak the same step again', () async {
+    final speech = _FakeSpeechOutput();
+    final controller = ProofController(fixtures, speechOutput: speech);
+    addTearDown(controller.dispose);
+
+    controller.orient();
+    await Future<void>.delayed(Duration.zero);
+    expect(speech.speakCalls, 1);
+
+    controller.restart();
+    controller.orient();
+    await Future<void>.delayed(Duration.zero);
+
+    expect(controller.engine.step, FlowStep.orient);
+    expect(speech.speakCalls, 2);
+  });
+
   test('speech error falls back to text without breaking the learning flow', () async {
     final speech = _FakeSpeechOutput();
     final controller = ProofController(fixtures, speechOutput: speech);
