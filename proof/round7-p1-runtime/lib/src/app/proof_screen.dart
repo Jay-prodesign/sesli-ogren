@@ -234,6 +234,10 @@ class _FlowPanel extends StatelessWidget {
     final e = controller.engine;
     final theme = Theme.of(context);
     final b = e.branch;
+    final viewport = MediaQuery.sizeOf(context);
+    final compactLandscape = viewport.width > viewport.height && viewport.height < 600;
+    final companionExtent = compactLandscape ? 104.0 : 124.0;
+    final companionColumnWidth = companionExtent + 12;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -241,7 +245,7 @@ class _FlowPanel extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             SizedBox(
-              width: 104,
+              width: companionColumnWidth,
               child: CompanionView(
                 state: controller.companionState,
                 tone: e.companionTone,
@@ -249,6 +253,7 @@ class _FlowPanel extends StatelessWidget {
                 reducedMotion: reducedMotion,
                 assetFailed: controller.companionAssetFailed,
                 stats: companionStats,
+                visualExtent: companionExtent,
                 renderer: companionRenderer,
               ),
             ),
