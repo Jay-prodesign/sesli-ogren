@@ -19,12 +19,12 @@
       "E": "E_MASTER_LOCKED.png"
     }
   },
-  "current_cursor": "P3_D_LAYERED_SOURCE",
+  "current_cursor": "P3A_D_SINGLE_MASTER_DEFORMATION_PROBE",
   "phases": {
     "P0_AUTHORITY_AND_INVENTORY": "PASS",
     "P1_NEUTRAL_MASTERS": "PASS_CORE_IDENTITY",
     "P2_MINIMAL_SIZE_GATE": "PASS_CORE_IDENTITY_STATIC",
-    "P3_RIG_DECOMPOSITION": "IN_PROGRESS",
+    "P3_RIG_DECOMPOSITION": "SUPERSEDED_BY_P3A_GATE",
     "P4_NEUTRAL_RECOMPOSITION_PARITY": "BLOCKED_BY_P3",
     "P5_SEMANTIC_MOTION_CLIPS": "BLOCKED_BY_P4",
     "P6_SPEECH_CONTROLS": "BLOCKED_BY_P3_P4",
@@ -32,7 +32,9 @@
     "P8_REAL_TTS_LINKAGE": "BLOCKED_BY_P7",
     "P9_REAL_PHONE_QA": "BLOCKED_BY_P7_P8",
     "P10_SECONDARY_ASSETS": "LATER",
-    "P2_5_ANATOMY_NORMALIZATION": "PASS_NO_EXTRA_ASSET_REQUIRED"
+    "P2_5_ANATOMY_NORMALIZATION": "PASS_NO_EXTRA_ASSET_REQUIRED",
+    "P3A_SINGLE_MASTER_DEFORMATION_PROBE": "IN_PROGRESS",
+    "P3B_LAYERED_RIG_FALLBACK": "NOT_ADMITTED_UNLESS_P3A_FAILS"
   },
   "assets": {
     "D_MASTER_NEUTRAL": {
@@ -56,33 +58,20 @@
     "SECONDARY_POSES": "LATER_AFTER_DEVICE_PASS"
   },
   "rig_contract": {
-    "strategy": "MINIMUM_LIMBLESS_V1_RIG",
-    "required_layers": [
-      "base_character_clean",
-      "iris_pupil_L",
-      "iris_pupil_R",
-      "brow_L",
-      "brow_R",
-      "mouth_neutral",
-      "mouth_speak_A",
-      "mouth_speak_B",
-      "blink_overlay_L",
-      "blink_overlay_R"
+    "strategy": "SINGLE_MASTER_DEFORMATION_FIRST",
+    "canonical_input": [
+      "D_MASTER_LOCKED.png",
+      "E_MASTER_LOCKED.png"
     ],
-    "deferred_layers": [
-      "rear_form",
-      "front_form",
-      "separate_face_base",
-      "occlusion_fill"
+    "runtime_controls": [
+      "whole_character_translate_scale_rotate",
+      "bounded_squash_stretch",
+      "local_eye_blink_warp",
+      "local_mouth_speech_warp",
+      "state_specific_tilt_compress_expand"
     ],
-    "escalation_rule": "split body/ribbon only if P5 state motion cannot meet visual QA with bounded deformation",
-    "acceptance": [
-      "true_alpha",
-      "clean_control_edges",
-      "stable_pivots",
-      "neutral_recomposite_parity",
-      "no_identity_drift"
-    ]
+    "identity_rule": "Never redraw the character to express a state.",
+    "fallback_if_failed": "Layered face-control authoring only if visual/device QA proves single-master deformation insufficient."
   },
   "runtime": {
     "companion_renderer_seam": "READY",
