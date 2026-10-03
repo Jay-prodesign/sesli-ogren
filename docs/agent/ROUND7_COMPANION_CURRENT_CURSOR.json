@@ -33,7 +33,7 @@
     "speech": "product-local device TTS",
     "speaking_rule": "SPEAK begins on real playback start and settles on completion/stop/error",
     "mouth": "local same-raster mouth warp; visual QA pending",
-    "blink": "procedural overlay candidate; visual QA pending",
+    "blink": "DISABLED_AFTER_VISUAL_QA_FAIL",
     "layered_rig": "DEFERRED_UNLESS_DEVICE_QA_PROVES_NEEDED"
   },
   "device_qa": [
@@ -103,10 +103,16 @@
       "portrait and landscape have no unacceptable clipping/layout issue",
       "idle/listen/think/speak/correct/success motion feels natural rather than mechanical",
       "mouth warp looks natural during speech",
-      "blink overlay looks natural; if not, disable it instead of expanding rig scope",
       "scroll/tap interaction feels responsive",
       "native TTS/audio lifecycle must still be checked in native build because browser preview cannot prove native platform playback"
     ],
     "synthetic_work_remaining": "NONE"
-  }
+  },
+  "qa_findings": [
+    {
+      "item": "blink_overlay",
+      "result": "FAIL_AND_REMOVED",
+      "decision": "V1 stays blink-free; keep limbless single-master renderer"
+    }
+  ]
 }
