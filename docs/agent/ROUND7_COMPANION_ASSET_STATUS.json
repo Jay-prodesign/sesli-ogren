@@ -19,18 +19,18 @@
       "E": "E_MASTER_LOCKED.png"
     }
   },
-  "current_cursor": "VERIFY_D_E_RENDERER_CI",
+  "current_cursor": "P9_REAL_PHONE_QA",
   "phases": {
     "P0_AUTHORITY_AND_INVENTORY": "PASS",
     "P1_NEUTRAL_MASTERS": "PASS_CORE_IDENTITY",
     "P2_MINIMAL_SIZE_GATE": "PASS_CORE_IDENTITY_STATIC",
     "P3_RIG_DECOMPOSITION": "DEFERRED_AFTER_QA_FAIL__NOT_V1_BLOCKER",
     "P4_NEUTRAL_RECOMPOSITION_PARITY": "DEFERRED_WITH_P3",
-    "P5_SEMANTIC_MOTION_CLIPS": "IN_PROGRESS_ON_FLATTENED_CANONICAL_ASSETS",
-    "P6_SPEECH_CONTROLS": "V1_BODY_MOTION_FIRST__FACE_CONTROLS_LATER_IF_NEEDED",
-    "P7_REAL_FLUTTER_INTEGRATION": "IN_PROGRESS",
-    "P8_REAL_TTS_LINKAGE": "NEXT_AFTER_RENDERER",
-    "P9_REAL_PHONE_QA": "BLOCKED_BY_P7_P8",
+    "P5_SEMANTIC_MOTION_CLIPS": "IMPLEMENTED_CI_PASS__DEVICE_VISUAL_QA_PENDING",
+    "P6_SPEECH_CONTROLS": "IMPLEMENTED_CI_PASS__DEVICE_VISUAL_QA_PENDING",
+    "P7_REAL_FLUTTER_INTEGRATION": "PASS_CI",
+    "P8_REAL_TTS_LINKAGE": "PASS_CI__PHYSICAL_AUDIO_QA_PENDING",
+    "P9_REAL_PHONE_QA": "ACTIVE_PHYSICAL_DEVICE_GATE",
     "P10_SECONDARY_ASSETS": "LATER",
     "P2_5_ANATOMY_NORMALIZATION": "PASS_NO_EXTRA_ASSET_REQUIRED",
     "P3A_SINGLE_MASTER_DEFORMATION_PROBE": "IN_PROGRESS_BLINK_ONLY",
@@ -80,18 +80,18 @@
     "flow_to_state_mapping": "READY",
     "reduced_motion_and_fallback": "READY",
     "proxy_motion_language": "READY_AS_REFERENCE",
-    "real_DE_renderer": "IMPLEMENTED_CI_PENDING",
-    "blink_gaze_controls": "BACKLOG_AFTER_DEVICE_NEED_VALIDATION",
-    "mouth_controls": "BACKLOG_AFTER_DEVICE_NEED_VALIDATION",
-    "real_tts_playback": "NEXT",
-    "audio_visual_synchronization": "NEXT_WITH_TTS",
-    "real_phone_QA": "MISSING",
-    "body_state_motion": "READY_TO_IMPLEMENT",
+    "real_DE_renderer": "PASS_CI",
+    "blink_gaze_controls": "BLINK_IMPLEMENTED__DEVICE_VISUAL_QA_PENDING",
+    "mouth_controls": "MOUTH_WARP_IMPLEMENTED__DEVICE_VISUAL_QA_PENDING",
+    "real_tts_playback": "PASS_CI_LIFECYCLE__PHYSICAL_AUDIO_QA_PENDING",
+    "audio_visual_synchronization": "PASS_CI_WITH_FAKE_SPEECH_LIFECYCLE__PHYSICAL_AUDIO_QA_PENDING",
+    "real_phone_QA": "ACTIVE",
+    "body_state_motion": "PASS_CI__VISUAL_DEVICE_QA_PENDING",
     "v1_visual_strategy": "canonical flattened D/E + semantic whole-character motion",
     "face_layer_rig": "LATER_IF_DEVICE_QA_PROVES_NEEDED",
     "speaking_v1": "real audio playback drives SPEAK body/ribbon motion; phoneme lip-sync not V1 blocker",
-    "identity_selector": "IMPLEMENTED_CI_PENDING",
-    "semantic_state_mapping_to_raster_motion": "IMPLEMENTED_CI_PENDING"
+    "identity_selector": "PASS_CI",
+    "semantic_state_mapping_to_raster_motion": "PASS_CI"
   },
   "semantic_states": [
     "IDLE",
@@ -171,9 +171,34 @@
     }
   ],
   "latest_code": {
-    "D_E_selector_commit": "cac99e01dd4696afdcf79b3297d2a6b4ab1dd45c",
+    "branch_head": "4ef069a93d3025236d751e2147c70e290ac3aa94",
     "pr": 8,
+    "workflow_run": 37114564676,
     "bootstrap_validation": "PASS",
-    "round7_p1_proof": "IN_PROGRESS"
+    "dart_format": "PASS",
+    "flutter_analyze": "PASS",
+    "flutter_tests": "PASS",
+    "android_profile_apk": "PASS",
+    "ios_profile_compile_no_codesign": "PASS",
+    "android_artifact_id": 11271108477,
+    "android_artifact_sha256": "508470da4d7c7cea0f22ff607274a91367a4723e6d2311dc7946926b5bb249eb",
+    "android_profile_apk_bytes": 68072526
+  },
+  "p9_gate": {
+    "status": "ACTIVE",
+    "non_device_evidence": "PASS",
+    "required_physical_checks": [
+      "D and E identity/readability at target phone scale",
+      "IDLE/LISTEN/THINK/SPEAK/CORRECT/SUCCESS motion clarity",
+      "blink overlay visual naturalness",
+      "mouth warp visual naturalness while speaking",
+      "actual device TTS audibility and locale",
+      "SPEAK starts on playback start and stops on completion/interruption",
+      "reduced motion",
+      "audio unavailable fallback keeps text/learning loop",
+      "safe-area/clipping/orientation",
+      "no unacceptable frame stutter"
+    ],
+    "ios_note": "CI compile is no-codesign; installable iOS device validation still needs a signed physical-device path."
   }
 }
