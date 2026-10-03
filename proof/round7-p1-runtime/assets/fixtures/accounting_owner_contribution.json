@@ -2,6 +2,7 @@
  "fixture_id": "R7-FIX-PRO",
  "fixture_version": "1.0",
  "domain_label": "Professional · Accounting relationships",
+ "voice_locale": "en-US",
  "source": {
   "id": "R7-SRC-PRO-001",
   "version": "1.0",

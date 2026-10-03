@@ -2,6 +2,7 @@
  "fixture_id": "R7-FIX-BIO",
  "fixture_version": "1.0",
  "domain_label": "Biology · Photosynthesis",
+ "voice_locale": "en-US",
  "source": {
   "id": "R7-SRC-BIO-001",
   "version": "1.0",
