@@ -104,8 +104,16 @@ void main() {
 
     expect(controller.companionState, CompanionState.idle);
     expect(controller.engine.step, FlowStep.orient);
-    expect(controller.engine.events.where((e) => e.name == 'audio_unavailable'), isNotEmpty);
+    expect(controller.audioAvailable, isFalse);
+    expect(controller.engine.events.where((e) => e.name == 'audio_unavailable'), hasLength(1));
     expect(controller.engine.spokenText, isNotEmpty);
+
+    controller.advance();
+    await Future<void>.delayed(Duration.zero);
+
+    expect(controller.engine.step, FlowStep.teach);
+    expect(speech.speakCalls, 1, reason: 'failed TTS must stay text-only until explicitly re-enabled');
+    expect(controller.companionState, CompanionState.idle);
   });
 
   test('stop immediately clears SPEAK and forwards stop to the device output', () async {
