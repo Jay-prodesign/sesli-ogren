@@ -169,7 +169,7 @@ class _ProofBanner extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
       child: const Text(
         'Proof only, not production UI. Evidence classes are simulated fixture responses; the '
-        'Companion uses the Founder-selected D/Knot or E/Tilt raster identity; voice is still simulated (no TTS).',
+        'Companion uses the Founder-selected D/Knot or E/Tilt raster identity; interactive mode uses device TTS.',
         style: TextStyle(fontSize: 12),
       ),
     );
@@ -283,10 +283,11 @@ class _FlowPanel extends StatelessWidget {
     if (!controller.audioAvailable) {
       return Text('Audio unavailable: text shown instead', key: const Key('audio-status'), style: style);
     }
+    final voiceLabel = controller.usingRealSpeech ? 'Device voice' : 'Voice (simulated)';
     return Wrap(
       crossAxisAlignment: WrapCrossAlignment.center,
       children: [
-        Text(controller.speaking ? 'Voice (simulated) speaking' : 'Voice (simulated) idle', style: style),
+        Text('$voiceLabel ${controller.speaking ? 'speaking' : 'idle'}', style: style),
         if (controller.speaking)
           TextButton(onPressed: controller.stopSpeaking, child: const Text('Stop'))
         else if (const {FlowStep.orient, FlowStep.teach, FlowStep.repairTeach}.contains(controller.engine.step))
@@ -353,10 +354,7 @@ class _FlowPanel extends StatelessWidget {
         ];
       case FlowStep.complete:
         return [
-          Text(
-            'Session milestone, not permanent mastery. '
-            'Next: ${e.fixture.nextContinuation}',
-          ),
+          Text('Session milestone, not permanent mastery. Next: ${e.fixture.nextContinuation}'),
           primary('Restart this fixture', controller.restart, key: const Key('act-primary')),
         ];
     }
