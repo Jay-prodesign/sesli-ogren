@@ -72,14 +72,16 @@ Requirements: single character only, transparent alpha, no UI/text/environment, 
 
 ### P3 — Rig/deformation source
 10. Decompose D and E only as far as actual motion requires.
-11. Minimum controls:
+11. Apply the shared anatomy contract: both D and E have 2 arms + 2 hands; V1 has 0 legs/feet. Limbs may be occluded, never invented per state.
+12. Use `docs/agent/ROUND7_COMPANION_STATE_POSE_SPEC.json` as the state pose/visibility authority.
+13. Minimum controls:
    - body/ribbon structural deformation
    - face base where required
    - eyelid/blink
    - iris/pupil/gaze
    - neutral/closed mouth
    - small speaking mouth set
-12. Avoid unnecessary arm/hand parts unless the accepted character anatomy actually uses them.
+14. Arm/hand layers are required for both characters because Founder references use gestures. Keep left/right identity stable across every state. Do not add feet/legs in V1.
 
 **Exit:** every required animated component has an isolated source and no identity-changing redraw.
 
