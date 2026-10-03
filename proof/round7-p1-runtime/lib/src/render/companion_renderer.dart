@@ -55,16 +55,12 @@ final class RasterCompanionRenderer implements CompanionRenderer {
   const RasterCompanionRenderer.knot()
     : assetPath = 'assets/companions/D_KNOT_128.webp',
       motionGain = 0.85,
-      _profile = const _RasterProfile(
-        mouthRect: Rect.fromLTRB(0.523, 0.447, 0.657, 0.560),
-      );
+      _profile = const _RasterProfile(mouthRect: Rect.fromLTRB(0.523, 0.447, 0.657, 0.560));
 
   const RasterCompanionRenderer.tilt()
     : assetPath = 'assets/companions/E_TILT_128.webp',
       motionGain = 1.0,
-      _profile = const _RasterProfile(
-        mouthRect: Rect.fromLTRB(0.507, 0.398, 0.630, 0.507),
-      );
+      _profile = const _RasterProfile(mouthRect: Rect.fromLTRB(0.507, 0.398, 0.630, 0.507));
 
   final String assetPath;
   final double motionGain;
