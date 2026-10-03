@@ -81,12 +81,14 @@ final class RasterCompanionRenderer implements CompanionRenderer {
                 fit: BoxFit.contain,
                 filterQuality: FilterQuality.high,
                 gaplessPlayback: true,
-                errorBuilder: (context, error, stackTrace) => const KnotProxyCompanionRenderer().build(
-                  state: state,
-                  tone: tone,
-                  motion: motion,
-                  animate: animate,
-                  stats: stats,
+                errorBuilder: (context, error, stackTrace) => CustomPaint(
+                  painter: KnotPainter(
+                    state: state,
+                    tone: tone,
+                    motion: motion,
+                    animate: animate,
+                    stats: stats,
+                  ),
                 ),
               ),
             ),
