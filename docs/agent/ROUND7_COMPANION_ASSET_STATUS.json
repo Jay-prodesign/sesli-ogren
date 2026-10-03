@@ -56,27 +56,32 @@
     "SECONDARY_POSES": "LATER_AFTER_DEVICE_PASS"
   },
   "rig_contract": {
-    "provider_neutral_contract": "EXISTS",
-    "D_blueprint": "PASS_NOT_LAYERED_ASSET",
-    "E_blueprint": "PASS_NOT_LAYERED_ASSET",
+    "strategy": "MINIMUM_LIMBLESS_V1_RIG",
     "required_layers": [
-      "rear_form",
-      "front_form",
-      "face_base",
-      "eye_L_white",
-      "eye_R_white",
+      "base_character_clean",
       "iris_pupil_L",
       "iris_pupil_R",
       "brow_L",
       "brow_R",
-      "mouth",
+      "mouth_neutral",
+      "mouth_speak_A",
+      "mouth_speak_B",
+      "blink_overlay_L",
+      "blink_overlay_R"
+    ],
+    "deferred_layers": [
+      "rear_form",
+      "front_form",
+      "separate_face_base",
       "occlusion_fill"
     ],
-    "required_acceptance": [
+    "escalation_rule": "split body/ribbon only if P5 state motion cannot meet visual QA with bounded deformation",
+    "acceptance": [
       "true_alpha",
-      "clean_overlap",
-      "pivot_assigned",
-      "neutral_recomposite_parity"
+      "clean_control_edges",
+      "stable_pivots",
+      "neutral_recomposite_parity",
+      "no_identity_drift"
     ]
   },
   "runtime": {
