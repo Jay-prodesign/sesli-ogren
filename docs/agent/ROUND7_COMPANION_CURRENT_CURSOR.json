@@ -3,45 +3,33 @@
   "cursor_id": "R7-COMPANION-PRODUCTION-V2",
   "updated_at": "2026-10-03",
   "active_branch": "feat/round7-companion-production-sequence-v2",
-  "active_phase": "P3_RIG_DECOMPOSITION",
-  "active_task": "D_LAYERED_SOURCE",
+  "active_phase": "P3A_SINGLE_MASTER_DEFORMATION_PROBE",
+  "active_task": "D_SINGLE_MASTER_MOTION_PROBE",
   "authority": {
-    "identity_source": "D_MASTER_LOCKED.png",
-    "rig_base": "D_RIG_SOURCE_BASE_LOCKED.png",
-    "blueprint": "D_LAYER_RECONSTRUCTION_BLUEPRINT.json",
+    "source": "D_MASTER_LOCKED.png",
     "anatomy_contract": "docs/agent/ROUND7_COMPANION_ANATOMY_CONTRACT.json",
     "motion_spec": "docs/agent/ROUND7_COMPANION_STATE_POSE_SPEC.json"
   },
   "task_contract": {
-    "output": "minimum limbless D/Knot rig: clean base + independent face controls",
-    "layers": [
-      "base_character_clean",
-      "iris_pupil_L",
-      "iris_pupil_R",
-      "brow_L",
-      "brow_R",
-      "mouth_neutral",
-      "mouth_speak_A",
-      "mouth_speak_B",
-      "blink_overlay_L",
-      "blink_overlay_R"
-    ],
-    "preserve": [
-      "locked D face/ribbon identity",
-      "blue knot silhouette",
-      "palette/material",
-      "neutral proportions"
+    "output": "D/Knot motion probe using only canonical raster master; no redrawing and no limb creation",
+    "probes": [
+      "IDLE float/breathe",
+      "LISTEN orient/lean",
+      "THINK tilt/compress",
+      "SPEAK local mouth warp + small body pulse",
+      "CORRECT softened tilt/compress",
+      "SUCCESS short expand/lift/bounce",
+      "blink local eye warp"
     ],
     "acceptance": [
-      "true alpha",
-      "clean control edges",
-      "stable pivots",
-      "neutral recomposite parity",
-      "0 limbs",
-      "no identity drift"
-    ],
-    "escalation": "Do not split ribbon/body further unless P5 motion QA proves it necessary."
+      "identity visually unchanged",
+      "no visible tearing at app scale",
+      "state meanings readable",
+      "speech motion looks alive without separate mouth asset",
+      "reduced-motion path can disable large deformation",
+      "no new PNG state explosion"
+    ]
   },
-  "next_after_pass": "P3_E_LAYERED_SOURCE",
-  "next_after_both_pass": "P4_NEUTRAL_RECOMPOSITION_PARITY"
+  "next_after_pass": "Repeat probe on E, then integrate same deformation renderer into Flutter",
+  "next_after_fail": "Admit minimal layered face-control rig only for failed controls"
 }
