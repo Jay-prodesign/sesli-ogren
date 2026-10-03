@@ -121,14 +121,8 @@ class ProofScreen extends StatelessWidget {
               onChanged: (v) => controller.setCompanionIdentity(v!),
               child: const Column(
                 children: [
-                  RadioListTile<CompanionIdentity>(
-                    value: CompanionIdentity.knot,
-                    title: Text('D · Knot'),
-                  ),
-                  RadioListTile<CompanionIdentity>(
-                    value: CompanionIdentity.tilt,
-                    title: Text('E · Tilt'),
-                  ),
+                  RadioListTile<CompanionIdentity>(value: CompanionIdentity.knot, title: Text('D · Knot')),
+                  RadioListTile<CompanionIdentity>(value: CompanionIdentity.tilt, title: Text('E · Tilt')),
                 ],
               ),
             ),
