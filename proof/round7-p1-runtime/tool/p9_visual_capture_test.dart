@@ -190,4 +190,24 @@ void main() {
 
     tester.view.reset();
   });
+
+  testWidgets('capture D/E semantic motion sequence frames', (tester) async {
+    const phases = <(double, String)>[(0.0, 'T00'), (0.25, 'T25'), (0.50, 'T50'), (0.75, 'T75')];
+
+    for (final identity in CompanionIdentity.values) {
+      for (final state in CompanionState.values) {
+        for (final (motion, suffix) in phases) {
+          await _captureCloseup(
+            tester,
+            identity: identity,
+            state: state,
+            motion: motion,
+            suffix: suffix,
+          );
+        }
+      }
+    }
+
+    tester.view.reset();
+  });
 }
