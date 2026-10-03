@@ -22,7 +22,7 @@ class _ProofAppState extends State<ProofApp> {
   static final bool _autoBench = _query['bench'] == '1';
   static final int _cycles = int.tryParse(_query['cycles'] ?? '') ?? 30;
 
-  late final SpeechOutput? _speechOutput = _autoBench ? null : DeviceSpeechOutput(locale: 'en-US');
+  late final SpeechOutput? _speechOutput = _autoBench ? null : DeviceSpeechOutput();
   late final ProofController _controller = ProofController(widget.fixtures, speechOutput: _speechOutput);
   final _navigator = GlobalKey<NavigatorState>();
 

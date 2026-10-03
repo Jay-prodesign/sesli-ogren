@@ -180,6 +180,7 @@ class ProofController extends ChangeNotifier {
       unawaited(
         output.speak(
           _engine.spokenText,
+          locale: fixture.voiceLocale,
           onStart: () {
             if (generation != _speechGeneration) return;
             _speaking = true;
