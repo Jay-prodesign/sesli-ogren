@@ -3,33 +3,37 @@
   "cursor_id": "R7-COMPANION-PRODUCTION-V2",
   "updated_at": "2026-10-03",
   "active_branch": "feat/round7-companion-production-sequence-v2",
-  "active_phase": "P3A_SINGLE_MASTER_DEFORMATION_PROBE",
-  "active_task": "D_SINGLE_MASTER_MOTION_PROBE",
-  "authority": {
-    "source": "D_MASTER_LOCKED.png",
-    "anatomy_contract": "docs/agent/ROUND7_COMPANION_ANATOMY_CONTRACT.json",
-    "motion_spec": "docs/agent/ROUND7_COMPANION_STATE_POSE_SPEC.json"
-  },
-  "task_contract": {
-    "output": "D/Knot motion probe using only canonical raster master; no redrawing and no limb creation",
-    "probes": [
-      "IDLE float/breathe",
-      "LISTEN orient/lean",
-      "THINK tilt/compress",
-      "SPEAK local mouth warp + small body pulse",
-      "CORRECT softened tilt/compress",
-      "SUCCESS short expand/lift/bounce",
-      "blink local eye warp"
-    ],
-    "acceptance": [
-      "identity visually unchanged",
-      "no visible tearing at app scale",
-      "state meanings readable",
-      "speech motion looks alive without separate mouth asset",
-      "reduced-motion path can disable large deformation",
-      "no new PNG state explosion"
+  "active_phase": "P7_REAL_FLUTTER_INTEGRATION",
+  "active_task": "CANONICAL_RASTER_RENDERER",
+  "inputs": {
+    "D": "D_STATIC_FALLBACK_512.png",
+    "E": "E_STATIC_FALLBACK_512.png",
+    "renderer_seam": "proof/round7-p1-runtime/lib/src/render/companion_renderer.dart",
+    "semantic_states": [
+      "IDLE",
+      "LISTEN",
+      "THINK",
+      "SPEAK",
+      "CORRECT",
+      "SUCCESS"
     ]
   },
-  "next_after_pass": "Repeat probe on E, then integrate same deformation renderer into Flutter",
-  "next_after_fail": "Admit minimal layered face-control rig only for failed controls"
+  "implementation": {
+    "strategy": "render canonical raster identity and animate whole character by semantic state",
+    "no_fake_face_layers": true,
+    "D_default_for_current_proof": true,
+    "E_supported_by_renderer_constructor": true,
+    "motion": {
+      "IDLE": "subtle float/breathe",
+      "LISTEN": "small orient/lean",
+      "THINK": "small counter-tilt/compress",
+      "SPEAK": "bounded pulse while speaking state is active",
+      "CORRECT": "calm supportive lean",
+      "SUCCESS": "short lift/expand"
+    },
+    "reduced_motion": "static state pose only",
+    "fallback": "existing semantic label/proxy behavior remains available"
+  },
+  "next_after_pass": "P8_REAL_TTS_LINKAGE",
+  "face_rig_reentry_gate": "Only if real-phone QA shows whole-character motion + real audio is insufficient."
 }
