@@ -196,9 +196,9 @@ class ProofController extends ChangeNotifier {
           onError: (error) {
             if (generation != _speechGeneration) return;
             _speaking = false;
-            _engine.events.add(
-              ProofEvent('audio_unavailable', fixture.id, fixture.version, detail: error.runtimeType.toString()),
-            );
+            _audioAvailable = false;
+            _speechGeneration++;
+            _engine.setAudioAvailable(false);
             notifyListeners();
           },
         ),
