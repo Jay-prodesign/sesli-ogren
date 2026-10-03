@@ -1,0 +1,80 @@
+name: round7-web-preview
+
+on:
+  push:
+    branches:
+      - feat/round7-companion-production-sequence-v2
+    paths:
+      - ".flutter-version"
+      - "proof/round7-p1-runtime/**"
+      - ".github/workflows/round7-web-preview.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: round7-web-preview
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build Flutter web preview
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    defaults:
+      run:
+        working-directory: proof/round7-p1-runtime
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+
+      - name: Read Flutter pin
+        id: pin
+        working-directory: .
+        run: |
+          version="$(tr -d '[:space:]' < .flutter-version)"
+          test -n "$version"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
+        with:
+          channel: stable
+          flutter-version: ${{ steps.pin.outputs.version }}
+          cache: false
+          pub-cache: false
+
+      - run: flutter pub get
+
+      - name: Configure Pages metadata
+        id: pages
+        uses: actions/configure-pages@983d7736d9b0ae728b81ab479565c72886d7745b # v5
+
+      - name: Build web
+        run: |
+          flutter build web \
+            --release \
+            --base-href "${{ steps.pages.outputs.base_path }}/" \
+            --dart-define=GIT_SHA=${{ github.sha }}
+          touch build/web/.nojekyll
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@56afc609e74202658d3ffba0e8f6dda462b719fa # v3
+        with:
+          path: proof/round7-p1-runtime/build/web
+
+  deploy:
+    name: Deploy phone preview
+    needs: build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e # v4
