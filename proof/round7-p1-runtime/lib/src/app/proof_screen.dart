@@ -12,7 +12,12 @@ final worldStats = PaintStats();
 final companionStats = PaintStats();
 
 class ProofScreen extends StatelessWidget {
-  const ProofScreen({super.key, required this.controller, this.onOpenBenchmark, this.companionRenderer});
+  const ProofScreen({
+    super.key,
+    required this.controller,
+    this.onOpenBenchmark,
+    this.companionRenderer,
+  });
 
   final ProofController controller;
   final VoidCallback? onOpenBenchmark;
@@ -27,8 +32,11 @@ class ProofScreen extends StatelessWidget {
       listenable: controller,
       builder: (context, _) {
         final e = controller.engine;
-        final reduced = controller.reducedMotion || MediaQuery.disableAnimationsOf(context);
-        final activeCompanionRenderer = companionRenderer ?? _rendererFor(controller.companionIdentity);
+        final reduced =
+            controller.reducedMotion ||
+            MediaQuery.disableAnimationsOf(context);
+        final activeCompanionRenderer =
+            companionRenderer ?? _rendererFor(controller.companionIdentity);
         return Scaffold(
           appBar: AppBar(
             title: const Text('Round 7 · P1 runtime proof'),
@@ -39,7 +47,11 @@ class ProofScreen extends StatelessWidget {
                 onPressed: () => _conditions(context),
               ),
               if (onOpenBenchmark != null)
-                IconButton(tooltip: 'Benchmark', icon: const Icon(Icons.speed), onPressed: onOpenBenchmark),
+                IconButton(
+                  tooltip: 'Benchmark',
+                  icon: const Icon(Icons.speed),
+                  onPressed: onOpenBenchmark,
+                ),
             ],
           ),
           body: SafeArea(
@@ -60,7 +72,11 @@ class ProofScreen extends StatelessWidget {
                           height: worldHeight,
                           child: ClipRRect(
                             borderRadius: BorderRadius.circular(16),
-                            child: WorldView(scene: e.scene, reducedMotion: reduced, stats: worldStats),
+                            child: WorldView(
+                              scene: e.scene,
+                              reducedMotion: reduced,
+                              stats: worldStats,
+                            ),
                           ),
                         ),
                       ),
@@ -106,7 +122,10 @@ class ProofScreen extends StatelessWidget {
               child: Column(
                 children: [
                   for (var i = 0; i < controller.fixtures.length; i++)
-                    RadioListTile<int>(value: i, title: Text(controller.fixtures[i].domainLabel)),
+                    RadioListTile<int>(
+                      value: i,
+                      title: Text(controller.fixtures[i].domainLabel),
+                    ),
                 ],
               ),
             ),
@@ -116,8 +135,14 @@ class ProofScreen extends StatelessWidget {
               onChanged: (v) => controller.setCompanionIdentity(v!),
               child: const Column(
                 children: [
-                  RadioListTile<CompanionIdentity>(value: CompanionIdentity.knot, title: Text('D · Knot')),
-                  RadioListTile<CompanionIdentity>(value: CompanionIdentity.tilt, title: Text('E · Tilt')),
+                  RadioListTile<CompanionIdentity>(
+                    value: CompanionIdentity.knot,
+                    title: Text('D · Knot'),
+                  ),
+                  RadioListTile<CompanionIdentity>(
+                    value: CompanionIdentity.tilt,
+                    title: Text('E · Tilt'),
+                  ),
                 ],
               ),
             ),
@@ -128,7 +153,10 @@ class ProofScreen extends StatelessWidget {
               child: Column(
                 children: [
                   for (final t in FallbackLevel.values)
-                    RadioListTile<FallbackLevel>(value: t, title: Text(wireName(t))),
+                    RadioListTile<FallbackLevel>(
+                      value: t,
+                      title: Text(wireName(t)),
+                    ),
                 ],
               ),
             ),
