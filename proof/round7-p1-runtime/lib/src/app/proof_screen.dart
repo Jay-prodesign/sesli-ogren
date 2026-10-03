@@ -16,12 +16,14 @@ class ProofScreen extends StatelessWidget {
     super.key,
     required this.controller,
     this.onOpenBenchmark,
-    this.companionRenderer = const RasterCompanionRenderer.knot(),
+    this.companionRenderer,
   });
 
   final ProofController controller;
   final VoidCallback? onOpenBenchmark;
-  final CompanionRenderer companionRenderer;
+  /// Optional test/host override. When null the selected Founder companion
+  /// (D/Knot or E/Tilt) is resolved from the controller.
+  final CompanionRenderer? companionRenderer;
 
   @override
   Widget build(BuildContext context) {
@@ -30,6 +32,10 @@ class ProofScreen extends StatelessWidget {
       builder: (context, _) {
         final e = controller.engine;
         final reduced = controller.reducedMotion || MediaQuery.disableAnimationsOf(context);
+        final activeCompanionRenderer = companionRenderer ??
+            (controller.companionIdentity == CompanionIdentity.knot
+                ? const RasterCompanionRenderer.knot()
+                : const RasterCompanionRenderer.tilt());
         return Scaffold(
           appBar: AppBar(
             title: const Text('Round 7 · P1 runtime proof'),
@@ -70,7 +76,7 @@ class ProofScreen extends StatelessWidget {
                         child: _FlowPanel(
                           controller: controller,
                           reducedMotion: reduced,
-                          companionRenderer: companionRenderer,
+                          companionRenderer: activeCompanionRenderer,
                         ),
                       ),
                     ],
@@ -101,6 +107,17 @@ class ProofScreen extends StatelessWidget {
                 children: [
                   for (var i = 0; i < controller.fixtures.length; i++)
                     RadioListTile<int>(value: i, title: Text(controller.fixtures[i].domainLabel)),
+                ],
+              ),
+            ),
+            const ListTile(title: Text('Companion identity')),
+            RadioGroup<CompanionIdentity>(
+              groupValue: controller.companionIdentity,
+              onChanged: (v) => controller.setCompanionIdentity(v!),
+              child: const Column(
+                children: [
+                  RadioListTile<CompanionIdentity>(value: CompanionIdentity.knot, title: Text('D · Knot')),
+                  RadioListTile<CompanionIdentity>(value: CompanionIdentity.tilt, title: Text('E · Tilt')),
                 ],
               ),
             ),
@@ -152,7 +169,7 @@ class _ProofBanner extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
       child: const Text(
         'Proof only, not production UI. Evidence classes are simulated fixture responses; the '
-        'Companion is a provisional D/Knot proxy; voice is simulated (no TTS).',
+        'Companion uses the Founder-selected D/Knot or E/Tilt raster identity; voice is still simulated (no TTS).',
         style: TextStyle(fontSize: 12),
       ),
     );
