@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 import '../flow/flow_engine.dart';
 import '../scene/fixture.dart';
 import '../scene/scene_schema.dart';
+import '../speech_playback.dart';
 
 enum CompanionIdentity { knot, tilt }
 
@@ -12,12 +13,18 @@ enum CompanionIdentity { knot, tilt }
 /// accessibility/audio conditions and simulated capability failures. The benchmark
 /// runner drives the same controller as the UI.
 class ProofController extends ChangeNotifier {
-  ProofController(this.fixtures, {this.evaluationDelay = const Duration(milliseconds: 450)})
-    : assert(fixtures.isNotEmpty) {
+  ProofController(
+    this.fixtures, {
+    this.evaluationDelay = const Duration(milliseconds: 450),
+    SpeechPlayback? speechPlayback,
+  }) : _speechPlayback = speechPlayback,
+       assert(fixtures.isNotEmpty) {
+    _speechPlayback?.onSpeakingChanged = _onSpeakingChanged;
     _engine = _newEngine(0);
   }
 
   final List<ProofFixture> fixtures;
+  final SpeechPlayback? _speechPlayback;
 
   /// How long THINK is shown while the deterministic evaluation runs.
   final Duration evaluationDelay;
@@ -45,8 +52,10 @@ class ProofController extends ChangeNotifier {
   bool get companionAssetFailed => _companionAssetFailed;
   bool get worldAssetFailed => _worldAssetFailed;
 
-  /// True only while simulated voice output is active (no TTS in this proof).
+  /// True only while speech output is actually active. Mobile uses native OS
+  /// callbacks; tests/non-mobile proof runs keep the deterministic timer fallback.
   bool get speaking => _speaking;
+  bool get usesNativeSpeech => _speechPlayback != null;
 
   /// SPEAK is shown only while voice is actually active; otherwise the Companion is available.
   CompanionState get companionState {
@@ -157,9 +166,19 @@ class ProofController extends ChangeNotifier {
     _speechTimer?.cancel();
     final voiceStep = const {FlowStep.orient, FlowStep.teach, FlowStep.repairTeach}.contains(_engine.step);
     if (!_audioAvailable || !(voiceStep || force)) {
+      final speechPlayback = _speechPlayback;
+      if (speechPlayback != null) unawaited(speechPlayback.stop());
       _speaking = false;
       return;
     }
+
+    final speechPlayback = _speechPlayback;
+    if (speechPlayback != null) {
+      unawaited(_speakNative(speechPlayback, _engine.spokenText));
+      return;
+    }
+
+    // Deterministic non-mobile/test fallback.
     _speaking = true;
     final words = _engine.spokenText.split(' ').length;
     final ms = (words * 260).clamp(900, 4000);
@@ -169,8 +188,28 @@ class ProofController extends ChangeNotifier {
     });
   }
 
+  Future<void> _speakNative(SpeechPlayback speechPlayback, String text) async {
+    try {
+      await speechPlayback.speak(text);
+    } on Object {
+      if (!_audioAvailable) return;
+      _audioAvailable = false;
+      _engine.setAudioAvailable(false);
+      _speaking = false;
+      notifyListeners();
+    }
+  }
+
+  void _onSpeakingChanged(bool speaking) {
+    if (_speaking == speaking) return;
+    _speaking = speaking;
+    notifyListeners();
+  }
+
   void _stopSpeaking() {
     _speechTimer?.cancel();
+    final speechPlayback = _speechPlayback;
+    if (speechPlayback != null) unawaited(speechPlayback.stop());
     if (_speaking) {
       _speaking = false;
       _engine.events.add(ProofEvent('teaching_completed_or_stopped', fixture.id, fixture.version, detail: 'stopped'));
@@ -181,12 +220,19 @@ class ProofController extends ChangeNotifier {
   void _cancelTimers() {
     _speechTimer?.cancel();
     _evalTimer?.cancel();
+    final speechPlayback = _speechPlayback;
+    if (speechPlayback != null) unawaited(speechPlayback.stop());
     _speaking = false;
   }
 
   @override
   void dispose() {
     _cancelTimers();
+    final speechPlayback = _speechPlayback;
+    if (speechPlayback != null) {
+      speechPlayback.onSpeakingChanged = null;
+      unawaited(speechPlayback.dispose());
+    }
     _engine.removeListener(_onEngine);
     _engine.dispose();
     super.dispose();
