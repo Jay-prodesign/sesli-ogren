@@ -35,10 +35,18 @@ final class _RasterProfile {
   final Color skin;
   final Color lash;
 
-  Alignment get mouthAlignment => Alignment(
-        mouthRect.center.dx * 2 - 1,
-        mouthRect.center.dy * 2 - 1,
-      );
+  Alignment get mouthAlignment {
+    return Alignment(mouthRect.center.dx * 2 - 1, mouthRect.center.dy * 2 - 1);
+  }
+}
+
+final class _MotionPose {
+  const _MotionPose(this.angle, this.dx, this.dy, this.scale);
+
+  final double angle;
+  final double dx;
+  final double dy;
+  final double scale;
 }
 
 /// Founder-selected raster identity rendered with bounded, deterministic motion.
@@ -107,67 +115,40 @@ final class RasterCompanionRenderer implements CompanionRenderer {
         final wave = math.sin(t * math.pi * 2);
         final pulse = wave.abs();
 
-        final (angle, dx, dy, scale) = switch (state) {
-          CompanionState.idle => (
-              0.0,
-              0.0,
-              -1.2 * wave * motionGain,
-              1.0 + 0.012 * wave * motionGain,
-            ),
-          CompanionState.listen => (
-              0.035 * motionGain,
-              1.0 * motionGain,
-              -0.4 * wave,
-              1.005,
-            ),
-          CompanionState.think => (
-              -0.035 * motionGain + 0.012 * wave,
-              0.0,
-              0.5 * wave,
-              0.995,
-            ),
-          CompanionState.speak => (
-              0.012 * motionGain,
-              0.0,
-              -0.5 * pulse,
-              1.0 + 0.025 * pulse * motionGain,
-            ),
-          CompanionState.correct => (
-              -0.022 * motionGain,
-              -0.5 * motionGain,
-              0.0,
-              0.995,
-            ),
-          CompanionState.success => (
-              0.0,
-              0.0,
-              -2.2 * pulse * motionGain,
-              1.025 + 0.018 * pulse * motionGain,
-            ),
+        final gain = motionGain;
+        final pose = switch (state) {
+          CompanionState.idle => _MotionPose(0.0, 0.0, -1.2 * wave * gain, 1.0 + 0.012 * wave * gain),
+          CompanionState.listen => _MotionPose(0.035 * gain, 1.0 * gain, -0.4 * wave, 1.005),
+          CompanionState.think => _MotionPose(-0.035 * gain + 0.012 * wave, 0.0, 0.5 * wave, 0.995),
+          CompanionState.speak => _MotionPose(0.012 * gain, 0.0, -0.5 * pulse, 1.0 + 0.025 * pulse * gain),
+          CompanionState.correct => _MotionPose(-0.022 * gain, -0.5 * gain, 0.0, 0.995),
+          CompanionState.success => _MotionPose(0.0, 0.0, -2.2 * pulse * gain, 1.025 + 0.018 * pulse * gain),
         };
 
         final mouthScaleY =
             state == CompanionState.speak && animate ? 0.86 + 0.24 * pulse : 1.0;
         final blinkClosed = animate && _blinkClosed(t);
 
-        Widget raster({Key? key}) => Image.asset(
-              assetPath,
-              key: key,
-              fit: BoxFit.contain,
-              filterQuality: FilterQuality.high,
-              gaplessPlayback: true,
-              errorBuilder: (context, error, stackTrace) => key == null
-                  ? const SizedBox.shrink()
-                  : CustomPaint(
-                      painter: KnotPainter(
-                        state: state,
-                        tone: tone,
-                        motion: motion,
-                        animate: animate,
-                        stats: stats,
-                      ),
+        Widget raster({Key? key}) {
+          return Image.asset(
+            assetPath,
+            key: key,
+            fit: BoxFit.contain,
+            filterQuality: FilterQuality.high,
+            gaplessPlayback: true,
+            errorBuilder: (context, error, stackTrace) => key == null
+                ? const SizedBox.shrink()
+                : CustomPaint(
+                    painter: KnotPainter(
+                      state: state,
+                      tone: tone,
+                      motion: motion,
+                      animate: animate,
+                      stats: stats,
                     ),
-            );
+                  ),
+          );
+        }
 
         final body = Stack(
           fit: StackFit.expand,
@@ -193,10 +174,10 @@ final class RasterCompanionRenderer implements CompanionRenderer {
         );
 
         return Transform.translate(
-          offset: Offset(dx, dy),
+          offset: Offset(pose.dx, pose.dy),
           child: Transform.rotate(
-            angle: angle,
-            child: Transform.scale(scale: scale, child: body),
+            angle: pose.angle,
+            child: Transform.scale(scale: pose.scale, child: body),
           ),
         );
       },
@@ -227,8 +208,7 @@ final class _NormalizedOvalClipper extends CustomClipper<Path> {
   }
 
   @override
-  bool shouldReclip(_NormalizedOvalClipper oldClipper) =>
-      oldClipper.normalizedRect != normalizedRect;
+  bool shouldReclip(_NormalizedOvalClipper oldClipper) => oldClipper.normalizedRect != normalizedRect;
 }
 
 final class _BlinkPainter extends CustomPainter {
