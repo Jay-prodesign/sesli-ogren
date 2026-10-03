@@ -5,11 +5,15 @@ import 'package:flutter/foundation.dart';
 import '../flow/flow_engine.dart';
 import '../scene/fixture.dart';
 import '../scene/scene_schema.dart';
+import '../speech/device_speech_output.dart';
 
-/// Holds the proof session: fixture choice, render tier, accessibility/audio conditions and
-/// simulated capability failures. The benchmark runner drives the same controller as the UI.
+enum CompanionIdentity { knot, tilt }
+
+/// Holds the proof session: fixture choice, companion identity, render tier,
+/// accessibility/audio conditions and simulated capability failures. The benchmark
+/// runner drives the same controller as the UI.
 class ProofController extends ChangeNotifier {
-  ProofController(this.fixtures, {this.evaluationDelay = const Duration(milliseconds: 450)})
+  ProofController(this.fixtures, {this.evaluationDelay = const Duration(milliseconds: 450), this.speechOutput})
     : assert(fixtures.isNotEmpty) {
     _engine = _newEngine(0);
   }
@@ -19,8 +23,13 @@ class ProofController extends ChangeNotifier {
   /// How long THINK is shown while the deterministic evaluation runs.
   final Duration evaluationDelay;
 
+  /// Real device speech for the app. Null keeps the deterministic timer used by
+  /// tests/benchmarks so plugin availability never blocks proof automation.
+  final SpeechOutput? speechOutput;
+
   late FlowEngine _engine;
   int _fixtureIndex = 0;
+  CompanionIdentity _companionIdentity = CompanionIdentity.knot;
   FallbackLevel _tier = FallbackLevel.full;
   FallbackLevel? _tierBeforeWorldFailure;
   bool _reducedMotion = false;
@@ -28,19 +37,23 @@ class ProofController extends ChangeNotifier {
   bool _companionAssetFailed = false;
   bool _worldAssetFailed = false;
   bool _speaking = false;
+  int _speechGeneration = 0;
   Timer? _speechTimer;
   Timer? _evalTimer;
 
   FlowEngine get engine => _engine;
   int get fixtureIndex => _fixtureIndex;
+  CompanionIdentity get companionIdentity => _companionIdentity;
   ProofFixture get fixture => fixtures[_fixtureIndex];
   FallbackLevel get tier => _tier;
   bool get reducedMotion => _reducedMotion;
   bool get audioAvailable => _audioAvailable;
   bool get companionAssetFailed => _companionAssetFailed;
   bool get worldAssetFailed => _worldAssetFailed;
+  bool get usingRealSpeech => speechOutput != null;
 
-  /// True only while simulated voice output is active (no TTS in this proof).
+  /// True only while actual device playback is active, or while the deterministic
+  /// test/benchmark timer is active when no device speech output is injected.
   bool get speaking => _speaking;
 
   /// SPEAK is shown only while voice is actually active; otherwise the Companion is available.
@@ -63,11 +76,20 @@ class ProofController extends ChangeNotifier {
       ..removeListener(_onEngine)
       ..dispose();
     _fixtureIndex = index;
+    _lastStep = null;
+    _lastTeach = -2;
     _engine = _newEngine(index);
     notifyListeners();
   }
 
   void restart() => selectFixture(_fixtureIndex);
+
+  void setCompanionIdentity(CompanionIdentity identity) {
+    if (identity == _companionIdentity) return;
+    _companionIdentity = identity;
+    _engine.events.add(ProofEvent('companion_identity_selected', fixture.id, fixture.version, detail: identity.name));
+    notifyListeners();
+  }
 
   void setTier(FallbackLevel t, {bool capabilityFailure = false}) {
     _tier = t;
@@ -144,10 +166,47 @@ class ProofController extends ChangeNotifier {
   void _startSpeakingIfNeeded({bool force = false}) {
     _speechTimer?.cancel();
     final voiceStep = const {FlowStep.orient, FlowStep.teach, FlowStep.repairTeach}.contains(_engine.step);
+
     if (!_audioAvailable || !(voiceStep || force)) {
+      _speechGeneration++;
+      final output = speechOutput;
+      if (output != null) unawaited(output.stop());
       _speaking = false;
       return;
     }
+
+    final output = speechOutput;
+    if (output != null) {
+      final generation = ++_speechGeneration;
+      _speaking = false;
+      unawaited(
+        output.speak(
+          _engine.spokenText,
+          locale: fixture.voiceLocale,
+          onStart: () {
+            if (generation != _speechGeneration) return;
+            _speaking = true;
+            notifyListeners();
+          },
+          onDone: () {
+            if (generation != _speechGeneration) return;
+            _speaking = false;
+            notifyListeners();
+          },
+          onError: (error) {
+            if (generation != _speechGeneration) return;
+            _speaking = false;
+            _audioAvailable = false;
+            _speechGeneration++;
+            _engine.setAudioAvailable(false);
+            notifyListeners();
+          },
+        ),
+      );
+      return;
+    }
+
+    // Deterministic fallback retained for tests/benchmarks only.
     _speaking = true;
     final words = _engine.spokenText.split(' ').length;
     final ms = (words * 260).clamp(900, 4000);
@@ -158,7 +217,10 @@ class ProofController extends ChangeNotifier {
   }
 
   void _stopSpeaking() {
+    _speechGeneration++;
     _speechTimer?.cancel();
+    final output = speechOutput;
+    if (output != null) unawaited(output.stop());
     if (_speaking) {
       _speaking = false;
       _engine.events.add(ProofEvent('teaching_completed_or_stopped', fixture.id, fixture.version, detail: 'stopped'));
@@ -167,14 +229,19 @@ class ProofController extends ChangeNotifier {
   }
 
   void _cancelTimers() {
+    _speechGeneration++;
     _speechTimer?.cancel();
     _evalTimer?.cancel();
+    final output = speechOutput;
+    if (output != null) unawaited(output.stop());
     _speaking = false;
   }
 
   @override
   void dispose() {
     _cancelTimers();
+    final output = speechOutput;
+    if (output != null) unawaited(output.dispose());
     _engine.removeListener(_onEngine);
     _engine.dispose();
     super.dispose();

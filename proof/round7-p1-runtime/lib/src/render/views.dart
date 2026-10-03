@@ -138,6 +138,7 @@ class CompanionView extends StatefulWidget {
     required this.reducedMotion,
     required this.assetFailed,
     required this.stats,
+    this.visualExtent = 72,
     this.renderer = const KnotProxyCompanionRenderer(),
   });
 
@@ -147,6 +148,7 @@ class CompanionView extends StatefulWidget {
   final bool reducedMotion;
   final bool assetFailed;
   final PaintStats stats;
+  final double visualExtent;
   final CompanionRenderer renderer;
 
   @override
@@ -218,8 +220,9 @@ class _CompanionViewState extends State<CompanionView> with SingleTickerProvider
       mainAxisSize: MainAxisSize.min,
       children: [
         SizedBox(
-          width: 72,
-          height: 72,
+          key: const Key('companion-visual-box'),
+          width: widget.visualExtent,
+          height: widget.visualExtent,
           child: RepaintBoundary(
             child: widget.renderer.build(
               state: widget.state,

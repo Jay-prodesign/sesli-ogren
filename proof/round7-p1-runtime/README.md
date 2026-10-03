@@ -1,72 +1,74 @@
-# Round 7 · P1 runtime proof (Flutter Widgets + CustomPaint)
+# Round 7 · P1 runtime proof
 
-**Proof only; not product code.** This isolated proof answers one question from
-ROUND_7_P1_RUNTIME_PROOF_SPEC_001: can the cheapest credible runtime composition carry the Round 7
-Companion and source-derived learning world? That composition is standard Flutter Widgets plus
-CustomPaint, with no Rive, Lottie, Flame, network or generative dependency.
+**Proof only; not production product code.** This Flutter proof validates the cheapest credible
+Learning App runtime composition for the source-derived learning world, D/Knot + E/Tilt companions,
+semantic companion motion and product-local device speech.
 
-## Authority and isolation
+## Current implementation
 
-| Item | Value |
+| Area | Current proof |
 | --- | --- |
-| Spec | ROUND_7_P1_RUNTIME_PROOF_SPEC_001 (Drive, by title) |
-| Supporting authority | ROUND_7_PROOF_FIXTURES_AND_SCENE_PROTOCOL_v0.1<br>ROUND_7_EXECUTABLE_PROOF_MATRIX_001 (bounded source fixtures, renderer-neutral scene schema, concrete fixtures, cross-domain jury)<br>ROUND_7_ONE_FLOW_INTERACTION_CONTRACT_001<br>ROUND_7_RUNTIME_BENCHMARK_AND_EVIDENCE_MATRIX_v0.1<br>ROUND_7_EVIDENCE_MANIFEST_TEMPLATE_001 |
-| Direction | Founder instruction, 2026-09-30: execute P1 on `proof/round7-companion-runtime` |
-| Branch / base | `proof/round7-companion-runtime`, created by Brain from `chore/repository-bootstrap` at `433c26c` |
-| Firewall | M4 / PR #2 (`spike/v0-architecture-proof`) is untouched. Excluded: M5 admission, merge, deploy, release, TTS, paid provider, billing, admin |
-| Task / register IDs | **None allocated here.** This branch forks from the bootstrap line, so `LA-####`, `CMD`/`RET` and `REUSE-####` numbers allocated here would collide with M4's. Brain allocates canonical IDs on integration. Provenance is recorded locally in [PROVENANCE.md](PROVENANCE.md) |
+| Learning world | One renderer consuming the renderer-neutral scene schema; three bounded fixtures |
+| Companions | Canonical raster D/Knot + E/Tilt assets selected through one renderer seam |
+| Companion states | IDLE, LISTEN, THINK, SPEAK, CORRECT, SUCCESS |
+| Motion | Bounded whole-character translate/scale/tilt/squash-stretch; D calm, E slightly more energetic |
+| Speech | Product-local `flutter_tts` device speech; no shared Speech Service |
+| SPEAK truth | Starts from real playback start callback; settles on completion / stop / error |
+| Mouth | Subtle local speech warp; synthetic visual QA PASS |
+| Blink | Rejected by visual QA and disabled for V1 |
+| Reduced motion | Removes continuous/local animation while preserving the learning loop |
+| Fallback | Transcript and content-first learning path remain usable when audio/visual capability fails |
+| Native Speech QA | One-tap QA screen checks start → SPEAK → completion and start → stop → stale-callback guard |
+| Network | App code makes no content/network request in this proof; TTS is delegated to the installed OS/device engine |
 
-## What is implemented
+The learning evidence in this proof is deterministic fixture input. There is no production learner
+mastery model or speech recognition here.
 
-| Spec item | Implementation |
-| --- | --- |
-| One reusable renderer consuming the renderer-neutral scene schema | `lib/src/scene/scene_schema.dart` (schema and validation)<br>`lib/src/render/world_painter.dart` (one `CustomPainter`, primitives NODE/PATH/GROUP/PARTITION/PAIR/TRACE/FOCUS_MARK, layout grammars FLOW/PARTITION/TRACE chosen by `layout_hint`) |
-| Three bounded fixtures | `assets/fixtures/*.json`: R7-SRC-BIO-001, R7-SRC-FRA-001, R7-SRC-PRO-001, all v1.0. Copy is derived only from the bounded source text |
-| Companion D/Knot (provisional) | `lib/src/render/companion_painter.dart`: two interlaced loops and two offset attention marks. This is a **runtime proxy** for measuring state-rendering cost and legibility, not the Founder-selected identity or final art |
-| Six states | IDLE, LISTEN, THINK, SPEAK, CORRECT, SUCCESS. A text state label is always shown. CORRECT has two tones (supportive attention for PARTIAL, supportive correction for MISCONCEPTION) |
-| Evidence branches | STRONG, PARTIAL, MISCONCEPTION, UNKNOWN. Each has a different reason code, world stage, Companion state and next action (`lib/src/flow/flow_engine.dart`) |
-| Degradation | FULL, REDUCED, SIMPLE, NEUTRAL, CONTENT (text-only relations, no canvas). World or Companion asset failure is simulated and records `R_FALLBACK_CAPABILITY` |
-| Reduced motion / muted audio | The OS "disable animations" setting and an in-app switch stop all continuous animation. Without audio, SPEAK is never shown and a transcript is always visible. Voice is **simulated** (timed transcript, no TTS) |
-| No network | Fixtures are bundled assets. Nothing is fetched at runtime |
-| Instrumentation | In-app T1–T11 runner (`lib/src/bench/`) records: build mode, commit SHA (`--dart-define=GIT_SHA`), Flutter/Dart version, platform/OS, refresh rate, DPR, Dart-main-to-first-frame, fixture asset bytes, per-scenario frame build/raster p50/p90/p99/max, frames over the frame budget, RSS memory samples, and live animation-controller counts. `integration_test/` + `test_driver/` add Flutter's timeline summary on a device |
+## Verified evidence
 
-Deterministic proof logic only. Evidence classes come from simulated learner responses, labelled
-as such in the UI. There is no learner model, no mastery store and no speech recognition. Nothing
-here is a production learner-state authority (one-flow contract §0/§19).
+Application/evidence head: `eb9c07285bf3ed201556cb7e60b8de9e561e22b5`.
 
-## How to run
+GitHub Actions run **37140739027** passed:
+
+- repository/bootstrap validation;
+- Dart format;
+- Flutter analyze;
+- Flutter tests;
+- P9 visual and motion capture;
+- Android profile APK build with `flutter_tts`;
+- iOS profile compile without codesigning;
+- iOS simulator native `flutter_tts` start/completion/stop integration test using an explicit `tr-TR` probe. The bounded proof fixtures themselves currently own `en-US` voice locale.
+
+The PR workflow checkout SHA for that run is `54a96e776fda7252cb578ec2c2d58ff4cdf5aabd`.
+The Android profile APK SHA-256 is `20b4d1d7d5f30252b7510fccd827d3fcad657bc08abad4d1331acf1a60d8f40d`.
+
+Simulator and CI evidence do **not** close the final native-device gate. Physical hardware still has
+to confirm actual audibility/fixture-locale voice behavior, the one-tap callback QA result, smooth interaction and
+native safe-area/orientation behavior.
+
+## Run
 
 ```sh
 cd proof/round7-p1-runtime
 flutter pub get
 dart format --output=none --set-exit-if-changed .
 flutter analyze
-flutter test                      # unit/widget tests, incl. the T1–T11 functional runner
-flutter run --profile --dart-define=GIT_SHA=$(git rev-parse HEAD)   # interactive proof on a device
+flutter test
+flutter run --profile --dart-define=GIT_SHA=$(git rev-parse HEAD)
 ```
 
-For physical-device benchmark evidence (R7-06), see [DEVICE_RUN_PROTOCOL.md](DEVICE_RUN_PROTOCOL.md).
-For the recorded evidence and open items, see [EVIDENCE_MANIFEST.md](EVIDENCE_MANIFEST.md).
+In the running app, use the **voice icon** to open **Native Speech QA**. The screen must report
+`CALLBACK_LIFECYCLE_PASS`; then confirm on the physical device that speech is actually audible in
+the fixture-owned expected voice/locale and that portrait/landscape interaction is smooth and unclipped.
 
-CI (`.github/workflows/round7-p1-proof.yml`) runs:
-- the checks above;
-- a profile APK build stamped with the commit SHA, uploaded as an artifact for D2/D3;
-- an empty-app baseline APK, for the package delta;
-- an iOS profile compile without codesigning.
+For the full physical-device evidence protocol, see [DEVICE_RUN_PROTOCOL.md](DEVICE_RUN_PROTOCOL.md).
 
-## Final Engineering Test (D-029): P1 composition
+## Current design boundary
 
-| # | Question | Answer |
-| --- | --- | --- |
-| 1 | Necessary now? | Yes. R7-06 needs a real runtime slice before any runtime lock. |
-| 2 | Simplest credible? | Yes. It uses Flutter SDK widgets and CustomPaint only, with zero runtime dependencies beyond the SDK. |
-| 3 | Secure by default? | Yes. There is no network, no credentials and no generated content. |
-| 4 | Understandable? | Yes. There is one world painter, one Companion painter, a schema and a small state machine. |
-| 5 | Testable? | Yes. Tests cover the schema, jury rules, branches, tiers, accessibility guidelines and the T1–T11 runner. |
-| 6 | Observable? | Yes. Frame timings, RSS, reason codes and events are recorded per scenario. |
-| 7 | Replaceable? | Yes. The scene schema is renderer-neutral. A P2 Rive/Lottie Companion would replace only `KnotPainter`. |
-| 8 | Privacy? | N/A. There is no learner data; responses are simulated. |
-| 9 | Operational cost? | Minimal. Fixture assets are 17.9 KB. The measured APK delta is recorded by CI. |
-| 10 | Tomorrow? | Yes. It does not lock production schema or runtime, and the escalation path to P2/P3 stays open on evidence. |
+No layered face rig, extra state PNG family, blink system or secondary poses are admitted while the
+current canonical D/E assets and single-master semantic motion satisfy the app. Reopen those only if
+physical device evidence identifies a concrete user-visible defect.
 
-**Open (declared):** device performance is unproven until D1/D2/D3 evidence exists (R7-06).
+`flutter_tts` currently builds and tests successfully on the pinned Flutter toolchain. CI emits
+upstream migration warnings about future Kotlin built-in and Swift Package Manager support; those
+are compatibility backlog signals, not a current V1 blocker.

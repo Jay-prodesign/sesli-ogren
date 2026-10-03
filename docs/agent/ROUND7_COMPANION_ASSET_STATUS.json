@@ -1,0 +1,271 @@
+{
+  "schema_version": 2,
+  "project": "Learning App",
+  "workstream": "Round 7 Companion Production",
+  "updated_at": "2026-10-03",
+  "active_branch": "feat/round7-companion-production-sequence-v2",
+  "execution_mode": "LEAN_APP_FIRST",
+  "visual_authority": {
+    "status": "FOUNDER_REFERENCE_SET_FROZEN",
+    "library_path": "/Learning App/Founder References/2026-10-03",
+    "refs": [
+      "DE_IDENTITY_SYSTEM_FOUNDER_REF_01.jpeg",
+      "DE_COMPANION_SYSTEM_FOUNDER_REF_02.jpeg",
+      "DE_HOME_CONTEXT_FOUNDER_REF_03.jpeg",
+      "DE_SCALE_CONTEXT_FOUNDER_REF_04.jpeg"
+    ],
+    "canonical_neutral_sources": {
+      "D": "D_MASTER_LOCKED.png",
+      "E": "E_MASTER_LOCKED.png"
+    }
+  },
+  "current_cursor": "P9_PHYSICAL_NATIVE_DEVICE_QA",
+  "phases": {
+    "P0_AUTHORITY_AND_INVENTORY": "PASS",
+    "P1_NEUTRAL_MASTERS": "PASS_CORE_IDENTITY",
+    "P2_MINIMAL_SIZE_GATE": "PASS_CORE_IDENTITY_STATIC",
+    "P3_RIG_DECOMPOSITION": "DEFERRED_UNLESS_DEVICE_QA_REQUIRES",
+    "P4_NEUTRAL_RECOMPOSITION_PARITY": "DEFERRED_WITH_LAYERED_RIG",
+    "P5_SEMANTIC_MOTION_CLIPS": "PASS_CI_AND_SYNTHETIC_VISUAL_QA",
+    "P6_SPEECH_CONTROLS": "PASS_MOUTH_WARP__BLINK_REJECTED_DISABLED",
+    "P7_REAL_FLUTTER_INTEGRATION": "PASS_CI",
+    "P8_REAL_TTS_LINKAGE": "PASS_CI__PHYSICAL_AUDIO_QA_PENDING",
+    "P9_REAL_PHONE_QA": "PHYSICAL_NATIVE_ONLY_REMAINS",
+    "P10_SECONDARY_ASSETS": "LATER",
+    "P2_5_ANATOMY_NORMALIZATION": "PASS_NO_EXTRA_ASSET_REQUIRED",
+    "P3A_SINGLE_MASTER_DEFORMATION_PROBE": "PASS_SYNTHETIC_VISUAL_AND_MOTION_QA__PHYSICAL_NATIVE_GATE_REMAINS",
+    "P3B_LAYERED_RIG_FALLBACK": "NOT_ADMITTED_UNLESS_P9_VISUAL_QA_FAILS"
+  },
+  "assets": {
+    "D_MASTER_NEUTRAL": {
+      "status": "PASS_CANONICAL_SOURCE",
+      "source": "D_MASTER_LOCKED.png",
+      "technical": "RGBA; true alpha; safe margins; copied to /Learning App Runtime Assets/D_MASTER_NEUTRAL_CANONICAL.png"
+    },
+    "E_MASTER_NEUTRAL": {
+      "status": "PASS_CANONICAL_SOURCE",
+      "source": "E_MASTER_LOCKED.png",
+      "technical": "RGBA; true alpha; safe margins; copied to /Learning App Runtime Assets/E_MASTER_NEUTRAL_CANONICAL.png"
+    },
+    "D_STATIC_FALLBACK_512_256_128": "PASS_STATIC_FALLBACK",
+    "E_STATIC_FALLBACK_512_256_128": "PASS_STATIC_FALLBACK",
+    "D_RIG_BASE": "PASS",
+    "E_RIG_BASE": "PASS",
+    "D_LAYERED_SOURCE": "REJECTED_TECHNICAL_EXTRACTION_V0_V2__DEFERRED",
+    "E_LAYERED_SOURCE": "NOT_STARTED__DEFERRED_UNLESS_DEVICE_QA_REQUIRES",
+    "D_FACE_CONTROLS": "MISSING",
+    "E_FACE_CONTROLS": "MISSING",
+    "SECONDARY_POSES": "LATER_AFTER_DEVICE_PASS"
+  },
+  "rig_contract": {
+    "strategy": "SINGLE_MASTER_DEFORMATION_FIRST",
+    "canonical_input": [
+      "D_MASTER_LOCKED.png",
+      "E_MASTER_LOCKED.png"
+    ],
+    "runtime_controls": [
+      "whole_character_translate_scale_rotate",
+      "bounded_squash_stretch",
+      "local_mouth_speech_warp",
+      "state_specific_tilt_compress_expand",
+      "blink_disabled_v1_after_visual_qa_fail"
+    ],
+    "identity_rule": "Never redraw the character to express a state.",
+    "fallback_if_failed": "Layered face-control authoring only if visual/device QA proves single-master deformation insufficient.",
+    "escalation_rule": "Do not admit layered rig for body/speech; only add tiny face-control overlays if blink/gaze cannot be expressed cleanly from the master."
+  },
+  "runtime": {
+    "companion_renderer_seam": "READY",
+    "semantic_states": "READY",
+    "flow_to_state_mapping": "READY",
+    "reduced_motion_and_fallback": "READY",
+    "proxy_motion_language": "READY_AS_REFERENCE",
+    "real_DE_renderer": "IMPLEMENTED_CI_PASS",
+    "blink_gaze_controls": "BLINK_OVERLAY_REJECTED_BY_VISUAL_GEOMETRY_QA__DISABLED_V1; GAZE_LAYER_DEFERRED",
+    "mouth_controls": "PASS_CLEAN_SUBTLE_SYNTHETIC_VISUAL_QA",
+    "real_tts_playback": "IMPLEMENTED_CI_PASS__IOS_NATIVE_SIMULATOR_LIFECYCLE_PASS__PHYSICAL_AUDIO_QA_PENDING",
+    "audio_visual_synchronization": "IMPLEMENTED_CI_PASS__ONE_TAP_NATIVE_SPEECH_QA_AVAILABLE__PHYSICAL_CONFIRMATION_PENDING",
+    "real_phone_QA": "ONLY_PHYSICAL_NATIVE_TTS_SMOOTHNESS_SAFE_AREA_REMAINS",
+    "body_state_motion": "PASS_SYNTHETIC_MULTI_FRAME_VISUAL_QA",
+    "v1_visual_strategy": "canonical flattened D/E + semantic whole-character motion",
+    "face_layer_rig": "LATER_IF_DEVICE_QA_PROVES_NEEDED",
+    "speaking_v1": "real audio playback drives SPEAK body/ribbon motion; phoneme lip-sync not V1 blocker",
+    "identity_selector": "IMPLEMENTED_CI_PASS",
+    "semantic_state_mapping_to_raster_motion": "IMPLEMENTED_CI_PASS"
+  },
+  "semantic_states": [
+    "IDLE",
+    "LISTEN",
+    "THINK",
+    "SPEAK",
+    "CORRECT",
+    "SUCCESS"
+  ],
+  "ordered_phases": [
+    "P0_AUTHORITY_AND_INVENTORY",
+    "P1_NEUTRAL_MASTERS",
+    "P2_MINIMAL_SIZE_GATE",
+    "P3_RIG_DECOMPOSITION",
+    "P4_NEUTRAL_RECOMPOSITION_PARITY",
+    "P5_SEMANTIC_MOTION_CLIPS",
+    "P6_SPEECH_CONTROLS",
+    "P7_REAL_FLUTTER_INTEGRATION",
+    "P8_REAL_TTS_LINKAGE",
+    "P9_REAL_PHONE_QA",
+    "P10_SECONDARY_ASSETS"
+  ],
+  "prohibited_shortcuts": [
+    "ASSET_SHEET_INSTEAD_OF_ISOLATED_SOURCE",
+    "BULK_STATE_PNG_MULTIPLICATION_BEFORE_RIG_PARITY",
+    "SECONDARY_POSES_BEFORE_MINIMUM_RUNTIME_PASS",
+    "VISUAL_LAYER_OWNS_LEARNING_TRUTH",
+    "CLAIM_DONE_BEFORE_DEVICE_QA"
+  ],
+  "anatomy": {
+    "contract": "docs/agent/ROUND7_COMPANION_ANATOMY_CONTRACT.json",
+    "status": "ACTIVE_AUTHORITY_CONFIRMED_BY_FOUNDER",
+    "shared_base": "0 arms + 0 hands + 0 legs + 0 feet",
+    "expression_language": "ribbon/body deformation + orientation + eyes + brows + mouth",
+    "old_limb_models": "SUPERSEDED"
+  },
+  "latest_rejection": {
+    "artifact": "wide_infographic_character_design_specification_po.png",
+    "status": "REJECT_NOT_RUNTIME_ASSET",
+    "reasons": [
+      "asset board instead of isolated source",
+      "introduced limbs inconsistent with current limbless V1 anatomy",
+      "not usable for rig decomposition"
+    ],
+    "decision": "reference discarded for production"
+  },
+  "rig_extraction_attempts": {
+    "D_V0": "REJECT_INPAINT_ARTIFACTS",
+    "D_V1": "REJECT_CLEAN_BASE_ARTIFACTS_DESPITE_EXACT_NEUTRAL_RECOMPOSE",
+    "D_V2": "REJECT_CLEAN_BASE_NOT_GOOD_ENOUGH_FOR_MOVABLE_CONTROLS",
+    "decision": "Do not continue destructive layer extraction from flattened raster. Use canonical raster + whole-character semantic motion now; reopen proper layered authoring only if runtime/device evidence requires facial controls."
+  },
+  "probes": {
+    "D_single_master": {
+      "status": "CONDITIONAL_PASS_BODY_AND_SPEECH",
+      "body_states": "PASS_TECHNICAL_PROBE",
+      "mouth_speech_warp": "PASS_TECHNICAL_PROBE",
+      "blink": "REJECTED_DISABLE_V1",
+      "stored_at": "/Learning App Runtime Assets/Probes/2026-10-03/D_KNOT_SINGLE_MASTER_PROBE.zip"
+    },
+    "E_single_master": {
+      "status": "CONDITIONAL_PASS_BODY_AND_SPEECH",
+      "body_states": "PASS_TECHNICAL_PROBE",
+      "mouth_speech_warp": "PASS_TECHNICAL_PROBE",
+      "blink": "REJECTED_DISABLE_V1",
+      "stored_at": "/Learning App Runtime Assets/Probes/2026-10-03/E_TILT_SINGLE_MASTER_PROBE.zip"
+    }
+  },
+  "extraction_rejections": [
+    {
+      "version": "D_KNOT_RIG_V0",
+      "reason": "mask/inpaint artifacts"
+    },
+    {
+      "version": "D_KNOT_RIG_V2",
+      "reason": "clean base exposes artificial eye/mouth patches; numeric parity hides visual defect"
+    }
+  ],
+  "latest_code": {
+    "verified_application_head": "eb9c07285bf3ed201556cb7e60b8de9e561e22b5",
+    "pr": 8,
+    "workflow_run": 37140739027,
+    "ci_checkout_sha": "54a96e776fda7252cb578ec2c2d58ff4cdf5aabd",
+    "bootstrap_validation": "PASS",
+    "dart_format": "PASS",
+    "flutter_analyze": "PASS",
+    "flutter_tests": "PASS",
+    "p9_visual_capture": "PASS",
+    "p9_motion_sequence": "PASS_D_AND_E_ALL_6_STATES_X_4_PHASES",
+    "ios_native_flutter_tts_simulator_lifecycle": "PASS_START_COMPLETION_STOP",
+    "android_profile_apk": "PASS_ARTIFACT_UPLOADED",
+    "android_profile_apk_sha256": "20b4d1d7d5f30252b7510fccd827d3fcad657bc08abad4d1331acf1a60d8f40d",
+    "ios_profile_compile_no_codesign": "PASS",
+    "tts_error_fallback_unit_test": "PASS_TEXT_AND_LEARNING_LOOP_PRESERVED"
+  },
+  "p9_gate": {
+    "status": "PHYSICAL_NATIVE_ONLY_REMAINS",
+    "non_device_evidence": "PASS_INCLUDING_NATIVE_IOS_SIMULATOR_TTS_CALLBACK_LIFECYCLE_AND_IPHONE_PORTRAIT_LANDSCAPE_D_E_MATRIX",
+    "required_physical_checks": [
+      "actual device TTS audibility and expected fixture-owned locale/voice behavior",
+      "Native Speech QA self-check reaches CALLBACK_LIFECYCLE_PASS on physical hardware",
+      "real-device frame smoothness and tap/scroll responsiveness",
+      "native safe-area/platform orientation behavior on the target physical device"
+    ],
+    "ios_note": "CI compile is no-codesign; installable iOS device validation still needs a signed physical-device path.",
+    "synthetic_phone_matrix": {
+      "status": "PASS",
+      "viewports": [
+        "430x932",
+        "932x430"
+      ],
+      "companions": [
+        "D_Knot",
+        "E_Tilt"
+      ],
+      "workflow_run": 37120853017,
+      "source_head": "30a3c2f241fce0d55b582f4ce95ebc3281f27c2f"
+    },
+    "visual_qa_findings": [
+      {
+        "item": "procedural_blink_overlay",
+        "result": "FAIL_REMOVED_FROM_V1",
+        "reason": "normalized eye regions painted over flattened facial art can cover brow/skin and create artificial face patches",
+        "action": "disable blink overlay; do not open layered rig unless a later real product need proves blink necessary"
+      }
+    ],
+    "synthetic_visual_qa": {
+      "status": "PASS_WITH_BLINK_REMOVED",
+      "workflow_run": 37133064076,
+      "source_head": "943b6f832e04540ecb30ac41af3a1d3269e94eaa",
+      "companion_scale": {
+        "portrait_logical_px": 124,
+        "compact_landscape_logical_px": 104,
+        "result": "PASS_READABILITY"
+      },
+      "identity": [
+        "D_Knot PASS",
+        "E_Tilt PASS"
+      ],
+      "mouth_warp": "PASS_CLEAN_SUBTLE",
+      "blink": "FAIL_REMOVED",
+      "layout": [
+        "portrait PASS",
+        "compact landscape PASS"
+      ]
+    },
+    "synthetic_motion_qa": {
+      "status": "PASS",
+      "workflow_run": 37134312547,
+      "source_head": "11c8c9741ba682f15e917ef997daab44fd3757ea",
+      "matrix": "D/E x IDLE/LISTEN/THINK/SPEAK/CORRECT/SUCCESS x T00/T25/T50/T75",
+      "D": "PASS_CALM_BOUNDED",
+      "E": "PASS_SLIGHTLY_MORE_ENERGETIC_BOUNDED",
+      "speak": "PASS_BODY_PULSE_PLUS_CLEAN_SUBTLE_MOUTH_WARP",
+      "success": "PASS_CLEAR_WITHOUT_EXCESSIVE_BOUNCE",
+      "identity_drift": "NONE_OBSERVED"
+    },
+    "native_speech_qa": {
+      "screen": "lib/src/qa/native_speech_qa_screen.dart",
+      "access": "voice icon in the proof app bar",
+      "automatic_checks": [
+        "playback onStart drives Companion SPEAK",
+        "completion settles SPEAK",
+        "explicit stop settles SPEAK",
+        "stale callback cannot re-enter SPEAK",
+        "no audio_unavailable event during successful callback checks"
+      ],
+      "physical_observation_still_required": [
+        "sound is actually audible",
+        "voice behavior matches the fixture-owned locale",
+        "motion/input is smooth",
+        "portrait/landscape safe areas are correct"
+      ],
+      "separate_native_capability_evidence": "Standalone integration probe sets tr-TR explicitly and passes native start/completion/stop callbacks on iOS simulator; current bounded proof fixtures remain en-US by design."
+    }
+  }
+}

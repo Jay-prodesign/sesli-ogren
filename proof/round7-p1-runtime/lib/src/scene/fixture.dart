@@ -74,6 +74,7 @@ class ProofFixture {
     required this.id,
     required this.version,
     required this.domainLabel,
+    required this.voiceLocale,
     required this.source,
     required this.objective,
     required this.orientation,
@@ -100,6 +101,7 @@ class ProofFixture {
       id: j['fixture_id'] as String,
       version: j['fixture_version'] as String,
       domainLabel: j['domain_label'] as String,
+      voiceLocale: j['voice_locale'] as String,
       source: BoundedSource(
         id: src['id'] as String,
         version: src['version'] as String,
@@ -146,6 +148,7 @@ class ProofFixture {
   final String id;
   final String version;
   final String domainLabel;
+  final String voiceLocale;
   final BoundedSource source;
   final String objective;
   final String orientation;
@@ -160,6 +163,9 @@ class ProofFixture {
   final SceneSpec scene;
 
   void validate() {
+    if (voiceLocale.trim().isEmpty) {
+      throw FormatException('$id: voice_locale is required');
+    }
     if (scene.sourceRef != source.id) {
       throw FormatException('$id: scene source_ref ${scene.sourceRef} != source ${source.id}');
     }

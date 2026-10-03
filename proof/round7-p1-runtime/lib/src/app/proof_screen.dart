@@ -15,13 +15,18 @@ class ProofScreen extends StatelessWidget {
   const ProofScreen({
     super.key,
     required this.controller,
+    this.onOpenNativeSpeechQa,
     this.onOpenBenchmark,
-    this.companionRenderer = const KnotProxyCompanionRenderer(),
+    this.companionRenderer,
   });
 
   final ProofController controller;
+  final VoidCallback? onOpenNativeSpeechQa;
   final VoidCallback? onOpenBenchmark;
-  final CompanionRenderer companionRenderer;
+
+  /// Optional test/host override. When null the selected Founder companion
+  /// (D/Knot or E/Tilt) is resolved from the controller.
+  final CompanionRenderer? companionRenderer;
 
   @override
   Widget build(BuildContext context) {
@@ -30,6 +35,7 @@ class ProofScreen extends StatelessWidget {
       builder: (context, _) {
         final e = controller.engine;
         final reduced = controller.reducedMotion || MediaQuery.disableAnimationsOf(context);
+        final activeCompanionRenderer = companionRenderer ?? _rendererFor(controller.companionIdentity);
         return Scaffold(
           appBar: AppBar(
             title: const Text('Round 7 · P1 runtime proof'),
@@ -39,6 +45,12 @@ class ProofScreen extends StatelessWidget {
                 icon: const Icon(Icons.tune),
                 onPressed: () => _conditions(context),
               ),
+              if (onOpenNativeSpeechQa != null)
+                IconButton(
+                  tooltip: 'Native Speech QA',
+                  icon: const Icon(Icons.record_voice_over),
+                  onPressed: onOpenNativeSpeechQa,
+                ),
               if (onOpenBenchmark != null)
                 IconButton(tooltip: 'Benchmark', icon: const Icon(Icons.speed), onPressed: onOpenBenchmark),
             ],
@@ -47,7 +59,10 @@ class ProofScreen extends StatelessWidget {
             child: LayoutBuilder(
               builder: (context, box) {
                 // One scrollable page: large text or small screens never push actions off-screen.
-                final worldHeight = (box.maxHeight * 0.4).clamp(200.0, 360.0);
+                final compactLandscape = box.maxWidth > box.maxHeight && box.maxHeight < 600;
+                final worldHeight = compactLandscape
+                    ? (box.maxHeight * 0.34).clamp(120.0, 150.0)
+                    : (box.maxHeight * 0.4).clamp(200.0, 360.0);
                 return SingleChildScrollView(
                   key: const Key('proof-scroll'),
                   child: Column(
@@ -70,7 +85,7 @@ class ProofScreen extends StatelessWidget {
                         child: _FlowPanel(
                           controller: controller,
                           reducedMotion: reduced,
-                          companionRenderer: companionRenderer,
+                          companionRenderer: activeCompanionRenderer,
                         ),
                       ),
                     ],
@@ -82,6 +97,13 @@ class ProofScreen extends StatelessWidget {
         );
       },
     );
+  }
+
+  static CompanionRenderer _rendererFor(CompanionIdentity identity) {
+    return switch (identity) {
+      CompanionIdentity.knot => const RasterCompanionRenderer.knot(),
+      CompanionIdentity.tilt => const RasterCompanionRenderer.tilt(),
+    };
   }
 
   void _conditions(BuildContext context) {
@@ -101,6 +123,17 @@ class ProofScreen extends StatelessWidget {
                 children: [
                   for (var i = 0; i < controller.fixtures.length; i++)
                     RadioListTile<int>(value: i, title: Text(controller.fixtures[i].domainLabel)),
+                ],
+              ),
+            ),
+            const ListTile(title: Text('Companion identity')),
+            RadioGroup<CompanionIdentity>(
+              groupValue: controller.companionIdentity,
+              onChanged: (v) => controller.setCompanionIdentity(v!),
+              child: const Column(
+                children: [
+                  RadioListTile<CompanionIdentity>(value: CompanionIdentity.knot, title: Text('D · Knot')),
+                  RadioListTile<CompanionIdentity>(value: CompanionIdentity.tilt, title: Text('E · Tilt')),
                 ],
               ),
             ),
@@ -152,7 +185,7 @@ class _ProofBanner extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
       child: const Text(
         'Proof only, not production UI. Evidence classes are simulated fixture responses; the '
-        'Companion is a provisional D/Knot proxy; voice is simulated (no TTS).',
+        'Companion uses the Founder-selected D/Knot or E/Tilt raster identity; interactive mode uses device TTS.',
         style: TextStyle(fontSize: 12),
       ),
     );
@@ -214,6 +247,10 @@ class _FlowPanel extends StatelessWidget {
     final e = controller.engine;
     final theme = Theme.of(context);
     final b = e.branch;
+    final viewport = MediaQuery.sizeOf(context);
+    final compactLandscape = viewport.width > viewport.height && viewport.height < 600;
+    final companionExtent = compactLandscape ? 104.0 : 124.0;
+    final companionColumnWidth = companionExtent + 12;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -221,7 +258,7 @@ class _FlowPanel extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             SizedBox(
-              width: 104,
+              width: companionColumnWidth,
               child: CompanionView(
                 state: controller.companionState,
                 tone: e.companionTone,
@@ -229,6 +266,7 @@ class _FlowPanel extends StatelessWidget {
                 reducedMotion: reducedMotion,
                 assetFailed: controller.companionAssetFailed,
                 stats: companionStats,
+                visualExtent: companionExtent,
                 renderer: companionRenderer,
               ),
             ),
@@ -266,10 +304,11 @@ class _FlowPanel extends StatelessWidget {
     if (!controller.audioAvailable) {
       return Text('Audio unavailable: text shown instead', key: const Key('audio-status'), style: style);
     }
+    final voiceLabel = controller.usingRealSpeech ? 'Device voice' : 'Voice (simulated)';
     return Wrap(
       crossAxisAlignment: WrapCrossAlignment.center,
       children: [
-        Text(controller.speaking ? 'Voice (simulated) speaking' : 'Voice (simulated) idle', style: style),
+        Text('$voiceLabel ${controller.speaking ? 'speaking' : 'idle'}', style: style),
         if (controller.speaking)
           TextButton(onPressed: controller.stopSpeaking, child: const Text('Stop'))
         else if (const {FlowStep.orient, FlowStep.teach, FlowStep.repairTeach}.contains(controller.engine.step))

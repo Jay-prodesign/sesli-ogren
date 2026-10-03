@@ -66,9 +66,13 @@ None.
 
 ## Entries
 
-None. The repository bootstrap (CLAUDE_HANDOFF_000, LA-0001 … LA-0008) imports no
-donor code, third-party modules, or dependencies. All files were authored for this
-repository. The CI workflows reference the public GitHub Actions `actions/checkout`
-and `anthropics/claude-code-action` by major-version tag. These are CI tooling used
-by reference, not product code copied into the repository. They are listed in
-[`README.md`](README.md#ci-tooling-referenced-not-vendored) for transparency.
+No canonical `REUSE-####` entry is allocated on this isolated stacked Round 7 evidence branch.
+The bootstrap task line LA-0001…LA-0008 itself imported no product dependency.
+
+Round 7 now contains one product-relevant runtime package, `flutter_tts@4.2.5` (MIT), recorded
+truthfully in `proof/round7-p1-runtime/PROVENANCE.md`. This branch deliberately does not invent a
+canonical task ID / REUSE ID that could collide with the accepted architecture/integration line.
+When this evidence line is formally integrated/admitted, Brain must allocate the canonical
+`REUSE-####` record and preserve the MIT notice obligation.
+
+CI actions remain tooling dependencies recorded in their local provenance/workflow pins.

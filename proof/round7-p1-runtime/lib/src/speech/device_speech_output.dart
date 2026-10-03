@@ -1,0 +1,95 @@
+import 'package:flutter/foundation.dart';
+import 'package:flutter_tts/flutter_tts.dart';
+
+abstract interface class SpeechOutput {
+  Future<void> speak(
+    String text, {
+    required String locale,
+    required VoidCallback onStart,
+    required VoidCallback onDone,
+    required ValueChanged<Object> onError,
+  });
+
+  Future<void> stop();
+
+  Future<void> dispose();
+}
+
+/// Concrete, product-local device speech for the Round 7 proof.
+///
+/// This is intentionally not a shared/provider-neutral speech service. It uses
+/// the platform TTS available on the device so the real-phone learning loop can
+/// drive Companion SPEAK from actual playback lifecycle callbacks.
+final class DeviceSpeechOutput implements SpeechOutput {
+  DeviceSpeechOutput({FlutterTts? tts}) : _tts = tts ?? FlutterTts();
+
+  final FlutterTts _tts;
+
+  String? _configuredLocale;
+  int _generation = 0;
+
+  Future<void> _configure(String locale) async {
+    if (_configuredLocale == locale) return;
+
+    final available = await _tts.isLanguageAvailable(locale);
+    if (available != true && available != 1) {
+      throw StateError('device_tts_language_unavailable:$locale');
+    }
+
+    final languageResult = await _tts.setLanguage(locale);
+    if (languageResult != true && languageResult != 1) {
+      throw StateError('device_tts_language_set_failed:$locale:$languageResult');
+    }
+
+    await _tts.setSpeechRate(0.46);
+    await _tts.setPitch(1.0);
+    await _tts.setVolume(1.0);
+    await _tts.awaitSpeakCompletion(true);
+    _configuredLocale = locale;
+  }
+
+  @override
+  Future<void> speak(
+    String text, {
+    required String locale,
+    required VoidCallback onStart,
+    required VoidCallback onDone,
+    required ValueChanged<Object> onError,
+  }) async {
+    final generation = ++_generation;
+
+    _tts.setStartHandler(() {
+      if (generation == _generation) onStart();
+    });
+    _tts.setCompletionHandler(() {
+      if (generation == _generation) onDone();
+    });
+    _tts.setErrorHandler((message) {
+      if (generation == _generation) onError(StateError('device_tts:$message'));
+    });
+
+    try {
+      await _tts.stop();
+      await _configure(locale);
+      final result = await _tts.speak(text);
+      if (result != 1 && generation == _generation) {
+        onError(StateError('device_tts_speak_failed:$result'));
+      }
+    } catch (error) {
+      if (generation == _generation) onError(error);
+    }
+  }
+
+  @override
+  Future<void> stop() async {
+    _generation++;
+    try {
+      await _tts.stop();
+    } catch (_) {
+      // Stopping speech is best-effort; the learning loop must remain usable.
+    }
+  }
+
+  @override
+  Future<void> dispose() => stop();
+}

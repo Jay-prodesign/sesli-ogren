@@ -1,0 +1,44 @@
+{
+  "schema_version": 2,
+  "project": "Learning App",
+  "authority": "Round 7 Companion State Motion Spec",
+  "effective_date": "2026-10-03",
+  "anatomy_contract": "docs/agent/ROUND7_COMPANION_ANATOMY_CONTRACT.json",
+  "common_rules": {
+    "anatomy": "0 arms / 0 hands / 0 legs / 0 feet",
+    "same_rig_all_states": true,
+    "no_state_specific_anatomy_spawn": true,
+    "pose_reference_is_not_a_separate_final_character_png": true,
+    "runtime_goal": "same rig, different deformation/orientation/face controls"
+  },
+  "states": {
+    "IDLE": {
+      "D": "slow restrained float + subtle breathe; calm neutral gaze",
+      "E": "slightly more buoyant float + small directional sway; neutral-curious gaze"
+    },
+    "LISTEN": {
+      "D": "small forward/orient lean + gaze hold toward learner",
+      "E": "small directional tilt toward learner + gaze hold"
+    },
+    "THINK": {
+      "D": "slight inward compression + counter-tilt + gaze offset + slower blink",
+      "E": "small counter-tilt + reduced buoyancy + gaze offset + slower blink"
+    },
+    "SPEAK": {
+      "D": "stable explain orientation + small ribbon pulse + audio-driven mouth",
+      "E": "slightly more directional explain tilt + bounded pulse + audio-driven mouth"
+    },
+    "CORRECT": {
+      "D": "calm supportive orientation + soft brow + small mouth + reduced motion",
+      "E": "energy damped + gentle tilt + soft brow + small mouth"
+    },
+    "SUCCESS": {
+      "D": "short expand/lift + settle",
+      "E": "slightly quicker lift/tilt + settle"
+    }
+  },
+  "later_states": {
+    "GREETING": "use orientation/body flourish only; no waving hand",
+    "POINTING": "use ribbon tip/orientation or UI highlight; no finger/hand"
+  }
+}
