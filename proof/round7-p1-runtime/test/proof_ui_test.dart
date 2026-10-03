@@ -303,6 +303,13 @@ void main() {
       expect(tester.takeException(), isNull, reason: '${identity.name} @ $size initial');
       expect(find.byKey(const Key('companion-raster')), findsOneWidget);
       expect(find.byKey(const Key('proof-scroll')), findsOneWidget);
+      final initialCompanionRect = tester.getRect(find.byKey(const Key('companion-raster')));
+      expect(initialCompanionRect.top, greaterThanOrEqualTo(0));
+      expect(
+        initialCompanionRect.bottom,
+        lessThanOrEqualTo(size.height),
+        reason: '${identity.name} @ $size companion must be visible without scrolling',
+      );
 
       await toChallenge(tester, c);
       expect(tester.takeException(), isNull, reason: '${identity.name} @ $size challenge');
