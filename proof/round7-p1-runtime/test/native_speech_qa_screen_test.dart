@@ -9,7 +9,6 @@ import 'package:r7_p1_runtime_proof/src/speech/device_speech_output.dart';
 import 'helpers.dart';
 
 class _LifecycleSpeechOutput implements SpeechOutput {
-  Timer? _completion;
   int _generation = 0;
   int speakCalls = 0;
   int stopCalls = 0;
@@ -25,17 +24,20 @@ class _LifecycleSpeechOutput implements SpeechOutput {
     final generation = ++_generation;
     speakCalls++;
     onStart();
-    _completion?.cancel();
-    _completion = Timer(const Duration(milliseconds: 80), () {
-      if (generation == _generation) onDone();
-    });
+
+    // First call proves natural completion. The second deliberately stays open
+    // until stop() so the QA surface can verify interruption/stale-callback guards.
+    if (speakCalls == 1) {
+      scheduleMicrotask(() {
+        if (generation == _generation) onDone();
+      });
+    }
   }
 
   @override
   Future<void> stop() async {
     stopCalls++;
     _generation++;
-    _completion?.cancel();
   }
 
   @override
@@ -56,17 +58,17 @@ void main() {
           controller: controller,
           startTimeout: const Duration(seconds: 1),
           completionTimeout: const Duration(seconds: 1),
-          interruptAfter: const Duration(milliseconds: 20),
-          staleCallbackGuard: const Duration(milliseconds: 40),
+          interruptAfter: Duration.zero,
+          staleCallbackGuard: Duration.zero,
         ),
       ),
     );
 
     await tester.tap(find.byKey(const Key('run-native-speech-qa')));
     await tester.pump();
-    await tester.pump(const Duration(milliseconds: 100));
-    await tester.pump(const Duration(milliseconds: 100));
-    await tester.pump(const Duration(milliseconds: 100));
+    await tester.pump();
+    await tester.pump();
+    await tester.pump();
 
     expect(find.text('CALLBACK_LIFECYCLE_PASS'), findsOneWidget);
     expect(find.textContaining('onStart observed'), findsWidgets);
