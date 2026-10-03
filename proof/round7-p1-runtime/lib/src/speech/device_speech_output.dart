@@ -30,7 +30,17 @@ final class DeviceSpeechOutput implements SpeechOutput {
 
   Future<void> _configure(String locale) async {
     if (_configuredLocale == locale) return;
-    await _tts.setLanguage(locale);
+
+    final available = await _tts.isLanguageAvailable(locale);
+    if (available != true && available != 1) {
+      throw StateError('device_tts_language_unavailable:$locale');
+    }
+
+    final languageResult = await _tts.setLanguage(locale);
+    if (languageResult != true && languageResult != 1) {
+      throw StateError('device_tts_language_set_failed:$locale:$languageResult');
+    }
+
     await _tts.setSpeechRate(0.46);
     await _tts.setPitch(1.0);
     await _tts.setVolume(1.0);
