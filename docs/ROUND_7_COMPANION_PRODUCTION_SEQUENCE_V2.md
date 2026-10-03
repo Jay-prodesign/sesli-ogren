@@ -71,16 +71,15 @@ Requirements: single character only, transparent alpha, no UI/text/environment, 
 **Exit:** identity survives target runtime scale. Do not rig a source that fails here.
 
 ### P2.5 — Anatomy normalization gate
-10. Treat existing locked D/E masters as core face/ribbon identity authority, not as complete anatomy authority.
-11. Author one rig-neutral source per character with the shared anatomy explicitly accounted for: 2 arms + 2 hands; 0 legs/feet.
-12. Neutral arms/hands stay close/tucked and must not turn into a greeting pose.
-13. Core face, ribbon geometry family, palette/material and proportions must remain consistent with the locked master and Founder references.
+10. Shared V1 anatomy is intentionally limbless: 0 arms, 0 hands, 0 legs, 0 feet for both D and E.
+11. Existing locked masters already satisfy this anatomy, so no extra anatomy-normalization source is required.
+12. Expression/action language comes from ribbon/body deformation, orientation, gaze, brows and mouth.
 
-**Exit:** D and E each have an isolated anatomy-normalized rig-neutral source suitable for decomposition without inventing hidden limbs.
+**Exit:** PASS — no additional anatomy source required.
 
 ### P3 — Rig/deformation source
 10. Decompose D and E only as far as actual motion requires.
-11. Apply the shared anatomy contract: both D and E have 2 arms + 2 hands; V1 has 0 legs/feet. Limbs may be occluded, never invented per state.
+11. Apply the shared anatomy contract: both D and E are fully limbless in V1 (0 arms, 0 hands, 0 legs, 0 feet).
 12. Use `docs/agent/ROUND7_COMPANION_STATE_POSE_SPEC.json` as the state pose/visibility authority.
 13. Minimum controls:
    - body/ribbon structural deformation
@@ -89,7 +88,7 @@ Requirements: single character only, transparent alpha, no UI/text/environment, 
    - iris/pupil/gaze
    - neutral/closed mouth
    - small speaking mouth set
-14. Arm/hand layers are required for both characters because Founder references use gestures. Keep left/right identity stable across every state. Do not add feet/legs in V1.
+14. Do not author limb layers. Gestures use ribbon orientation/deformation or UI emphasis.
 
 **Exit:** every required animated component has an isolated source and no identity-changing redraw.
 
@@ -163,9 +162,9 @@ Verified current state:
 - **P0 Authority freeze/inventory: PASS**
 - **P1 Core identity masters: PASS** — existing D/E locked masters remain face/ribbon identity authority.
 - **P2 Minimal/static size gate: PASS** — 512/256/128 static fallbacks already pass alpha/bounds QA.
-- **P2.5 Anatomy normalization: IN PROGRESS** — explicit shared 2-arm/2-hand, 0-leg/0-foot rig-neutral sources are still required.
-- **P3 Rig/deformation source: BLOCKED by P2.5**
+- **P2.5 Anatomy normalization: PASS** — both V1 companions are limbless; existing locked masters already satisfy the shared anatomy.
+- **P3 Rig/deformation source: IN PROGRESS**
 
-Current cursor: **P2.5 — create and source-jury D rig-neutral anatomy source, then E.**
+Current cursor: **P3 — reconstruct D/Knot layered source, then E/Tilt, with no limb layers.**
 
 Do not regenerate the character identity. Do not multiply state PNGs. The next accepted output must be a real independent layer/control source that participates in neutral recomposition parity.
