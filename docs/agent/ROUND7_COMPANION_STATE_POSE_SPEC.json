@@ -1,122 +1,44 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "project": "Learning App",
-  "authority": "Round 7 Companion State Pose Spec",
+  "authority": "Round 7 Companion State Motion Spec",
   "effective_date": "2026-10-03",
   "anatomy_contract": "docs/agent/ROUND7_COMPANION_ANATOMY_CONTRACT.json",
   "common_rules": {
-    "limb_count": "2 arms + 2 hands for both D and E",
-    "feet_legs": "none in V1",
-    "hidden_is_not_missing": true,
+    "anatomy": "0 arms / 0 hands / 0 legs / 0 feet",
+    "same_rig_all_states": true,
     "no_state_specific_anatomy_spawn": true,
     "pose_reference_is_not_a_separate_final_character_png": true,
-    "runtime_goal": "same rig, different state parameters/clips"
+    "runtime_goal": "same rig, different deformation/orientation/face controls"
   },
   "states": {
     "IDLE": {
-      "D": {
-        "body": "soft grounded knot; subtle breathe/float",
-        "arms": "both tucked close into lower/front ribbon; hands may be partly visible",
-        "hands": "relaxed/open",
-        "face": "calm neutral-friendly"
-      },
-      "E": {
-        "body": "upright tilted triangular ribbon; slightly more buoyant than D",
-        "arms": "both tucked close to side/lower ribbon; hands may be partly visible",
-        "hands": "relaxed/open",
-        "face": "neutral-curious"
-      }
+      "D": "slow restrained float + subtle breathe; calm neutral gaze",
+      "E": "slightly more buoyant float + small directional sway; neutral-curious gaze"
     },
     "LISTEN": {
-      "D": {
-        "body": "small forward/orient lean",
-        "arms": "both retained; one may lightly brace/support front form, other tucked",
-        "hands": "soft, no pointing",
-        "face": "eyes focus toward learner"
-      },
-      "E": {
-        "body": "small directional tilt toward learner",
-        "arms": "both retained; one opens slightly, other tucked",
-        "hands": "soft/open",
-        "face": "focused curious"
-      }
+      "D": "small forward/orient lean + gaze hold toward learner",
+      "E": "small directional tilt toward learner + gaze hold"
     },
     "THINK": {
-      "D": {
-        "body": "slight inward compression/tilt",
-        "arms": "one hand can support cheek/chin; other remains visible or occluded but accounted for",
-        "hands": "supportive/thought pose",
-        "face": "gaze offset + slower blink"
-      },
-      "E": {
-        "body": "smaller counter-tilt; energy reduced",
-        "arms": "one hand may touch side/chin region; other tucked",
-        "hands": "small thoughtful pose",
-        "face": "gaze offset + slower blink"
-      }
+      "D": "slight inward compression + counter-tilt + gaze offset + slower blink",
+      "E": "small counter-tilt + reduced buoyancy + gaze offset + slower blink"
     },
     "SPEAK": {
-      "D": {
-        "body": "stable explain orientation; small rhythmic response only",
-        "arms": "one low-amplitude explanatory gesture, one tucked",
-        "hands": "open palm / small present gesture",
-        "face": "mouth driven by real audio activity"
-      },
-      "E": {
-        "body": "more directional explain tilt than D but same amplitude ceiling",
-        "arms": "one outward explanatory gesture, one tucked",
-        "hands": "open palm / small present gesture",
-        "face": "mouth driven by real audio activity"
-      }
+      "D": "stable explain orientation + small ribbon pulse + audio-driven mouth",
+      "E": "slightly more directional explain tilt + bounded pulse + audio-driven mouth"
     },
     "CORRECT": {
-      "D": {
-        "body": "calm supportive orientation",
-        "arms": "two-arm anatomy preserved; one soft open support gesture, one close",
-        "hands": "no wagging finger / no scolding",
-        "face": "soft brow, small mouth"
-      },
-      "E": {
-        "body": "energy damped; less bounce than normal",
-        "arms": "one soft open support gesture, one close",
-        "hands": "no wagging finger / no scolding",
-        "face": "soft brow, small mouth"
-      }
+      "D": "calm supportive orientation + soft brow + small mouth + reduced motion",
+      "E": "energy damped + gentle tilt + soft brow + small mouth"
     },
     "SUCCESS": {
-      "D": {
-        "body": "short expand/bounce then settle",
-        "arms": "both may open wider but stay compact",
-        "hands": "open celebratory, symmetric/asymmetric allowed",
-        "face": "smile"
-      },
-      "E": {
-        "body": "slightly quicker positive lift/tilt then settle",
-        "arms": "both may open wider; same two-hand anatomy",
-        "hands": "open celebratory",
-        "face": "smile"
-      }
+      "D": "short expand/lift + settle",
+      "E": "slightly quicker lift/tilt + settle"
     }
   },
   "later_states": {
-    "GREETING_WAVE": {
-      "status": "POST_P9_LATER",
-      "rule": "one hand waves; opposite arm/hand remains present and anatomically accounted for"
-    },
-    "POINTING": {
-      "status": "POST_P9_LATER",
-      "rule": "use one existing hand/arm; never spawn a new limb"
-    }
-  },
-  "authoring_order": [
-    "D neutral rig anatomy",
-    "D neutral recomposition parity",
-    "E neutral rig anatomy",
-    "E neutral recomposition parity",
-    "shared face controls",
-    "state clips from same rigs",
-    "real runtime integration",
-    "phone QA",
-    "later greeting/pointing only after P9"
-  ]
+    "GREETING": "use orientation/body flourish only; no waving hand",
+    "POINTING": "use ribbon tip/orientation or UI highlight; no finger/hand"
+  }
 }
