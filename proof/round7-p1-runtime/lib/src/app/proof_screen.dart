@@ -12,12 +12,7 @@ final worldStats = PaintStats();
 final companionStats = PaintStats();
 
 class ProofScreen extends StatelessWidget {
-  const ProofScreen({
-    super.key,
-    required this.controller,
-    this.onOpenBenchmark,
-    this.companionRenderer,
-  });
+  const ProofScreen({super.key, required this.controller, this.onOpenBenchmark, this.companionRenderer});
 
   final ProofController controller;
   final VoidCallback? onOpenBenchmark;
@@ -32,11 +27,8 @@ class ProofScreen extends StatelessWidget {
       listenable: controller,
       builder: (context, _) {
         final e = controller.engine;
-        final reduced =
-            controller.reducedMotion ||
-            MediaQuery.disableAnimationsOf(context);
-        final activeCompanionRenderer =
-            companionRenderer ?? _rendererFor(controller.companionIdentity);
+        final reduced = controller.reducedMotion || MediaQuery.disableAnimationsOf(context);
+        final activeCompanionRenderer = companionRenderer ?? _rendererFor(controller.companionIdentity);
         return Scaffold(
           appBar: AppBar(
             title: const Text('Round 7 · P1 runtime proof'),
@@ -47,11 +39,7 @@ class ProofScreen extends StatelessWidget {
                 onPressed: () => _conditions(context),
               ),
               if (onOpenBenchmark != null)
-                IconButton(
-                  tooltip: 'Benchmark',
-                  icon: const Icon(Icons.speed),
-                  onPressed: onOpenBenchmark,
-                ),
+                IconButton(tooltip: 'Benchmark', icon: const Icon(Icons.speed), onPressed: onOpenBenchmark),
             ],
           ),
           body: SafeArea(
@@ -72,11 +60,7 @@ class ProofScreen extends StatelessWidget {
                           height: worldHeight,
                           child: ClipRRect(
                             borderRadius: BorderRadius.circular(16),
-                            child: WorldView(
-                              scene: e.scene,
-                              reducedMotion: reduced,
-                              stats: worldStats,
-                            ),
+                            child: WorldView(scene: e.scene, reducedMotion: reduced, stats: worldStats),
                           ),
                         ),
                       ),
@@ -122,10 +106,7 @@ class ProofScreen extends StatelessWidget {
               child: Column(
                 children: [
                   for (var i = 0; i < controller.fixtures.length; i++)
-                    RadioListTile<int>(
-                      value: i,
-                      title: Text(controller.fixtures[i].domainLabel),
-                    ),
+                    RadioListTile<int>(value: i, title: Text(controller.fixtures[i].domainLabel)),
                 ],
               ),
             ),
@@ -135,14 +116,8 @@ class ProofScreen extends StatelessWidget {
               onChanged: (v) => controller.setCompanionIdentity(v!),
               child: const Column(
                 children: [
-                  RadioListTile<CompanionIdentity>(
-                    value: CompanionIdentity.knot,
-                    title: Text('D · Knot'),
-                  ),
-                  RadioListTile<CompanionIdentity>(
-                    value: CompanionIdentity.tilt,
-                    title: Text('E · Tilt'),
-                  ),
+                  RadioListTile<CompanionIdentity>(value: CompanionIdentity.knot, title: Text('D · Knot')),
+                  RadioListTile<CompanionIdentity>(value: CompanionIdentity.tilt, title: Text('E · Tilt')),
                 ],
               ),
             ),
@@ -153,10 +128,7 @@ class ProofScreen extends StatelessWidget {
               child: Column(
                 children: [
                   for (final t in FallbackLevel.values)
-                    RadioListTile<FallbackLevel>(
-                      value: t,
-                      title: Text(wireName(t)),
-                    ),
+                    RadioListTile<FallbackLevel>(value: t, title: Text(wireName(t))),
                 ],
               ),
             ),
@@ -216,12 +188,7 @@ class _SourceBar extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(16, 8, 8, 8),
       child: Row(
         children: [
-          Expanded(
-            child: Text(
-              '${f.domainLabel}\n${f.objective}',
-              style: Theme.of(context).textTheme.bodyMedium,
-            ),
-          ),
+          Expanded(child: Text('${f.domainLabel}\n${f.objective}', style: Theme.of(context).textTheme.bodyMedium)),
           TextButton(
             onPressed: () => showModalBottomSheet<void>(
               context: context,
@@ -239,10 +206,7 @@ class _SourceBar extends StatelessWidget {
                     const SizedBox(height: 8),
                     Text(f.source.text),
                     const SizedBox(height: 8),
-                    Text(
-                      '${f.source.authority}. ${f.source.provenance}',
-                      style: Theme.of(context).textTheme.bodySmall,
-                    ),
+                    Text('${f.source.authority}. ${f.source.provenance}', style: Theme.of(context).textTheme.bodySmall),
                   ],
                 ),
               ),
@@ -256,11 +220,7 @@ class _SourceBar extends StatelessWidget {
 }
 
 class _FlowPanel extends StatelessWidget {
-  const _FlowPanel({
-    required this.controller,
-    required this.reducedMotion,
-    required this.companionRenderer,
-  });
+  const _FlowPanel({required this.controller, required this.reducedMotion, required this.companionRenderer});
 
   final ProofController controller;
   final bool reducedMotion;
@@ -296,11 +256,7 @@ class _FlowPanel extends StatelessWidget {
                 children: [
                   Text(_stepTitle(e.step), style: theme.textTheme.labelLarge),
                   const SizedBox(height: 4),
-                  Text(
-                    e.spokenText,
-                    key: const Key('transcript'),
-                    style: theme.textTheme.bodyLarge,
-                  ),
+                  Text(e.spokenText, key: const Key('transcript'), style: theme.textTheme.bodyLarge),
                   const SizedBox(height: 4),
                   _voiceStatus(context),
                 ],
@@ -310,23 +266,13 @@ class _FlowPanel extends StatelessWidget {
         ),
         const SizedBox(height: 12),
         if (e.step == FlowStep.feedback && b != null) ...[
-          if (b.hint != null && e.evidence == EvidenceState.partial)
-            Text('Hint: ${b.hint}'),
-          Text(
-            'Next: ${b.nextAction}',
-            key: const Key('next-action'),
-            style: theme.textTheme.titleSmall,
-          ),
+          if (b.hint != null && e.evidence == EvidenceState.partial) Text('Hint: ${b.hint}'),
+          Text('Next: ${b.nextAction}', key: const Key('next-action'), style: theme.textTheme.titleSmall),
           Text('reason ${e.reasonCode}', style: theme.textTheme.bodySmall),
           const SizedBox(height: 8),
         ],
-        if (e.step == FlowStep.repairCheck &&
-            b?.hint != null &&
-            e.evidence == EvidenceState.partial)
-          Padding(
-            padding: const EdgeInsets.only(bottom: 8),
-            child: Text('Hint: ${b!.hint}'),
-          ),
+        if (e.step == FlowStep.repairCheck && b?.hint != null && e.evidence == EvidenceState.partial)
+          Padding(padding: const EdgeInsets.only(bottom: 8), child: Text('Hint: ${b!.hint}')),
         ..._actions(context),
       ],
     );
@@ -335,28 +281,15 @@ class _FlowPanel extends StatelessWidget {
   Widget _voiceStatus(BuildContext context) {
     final style = Theme.of(context).textTheme.bodySmall;
     if (!controller.audioAvailable) {
-      return Text(
-        'Audio unavailable: text shown instead',
-        key: const Key('audio-status'),
-        style: style,
-      );
+      return Text('Audio unavailable: text shown instead', key: const Key('audio-status'), style: style);
     }
     return Wrap(
       crossAxisAlignment: WrapCrossAlignment.center,
       children: [
-        Text(
-          controller.speaking
-              ? 'Voice (simulated) speaking'
-              : 'Voice (simulated) idle',
-          style: style,
-        ),
+        Text(controller.speaking ? 'Voice (simulated) speaking' : 'Voice (simulated) idle', style: style),
         if (controller.speaking)
           TextButton(onPressed: controller.stopSpeaking, child: const Text('Stop'))
-        else if (const {
-          FlowStep.orient,
-          FlowStep.teach,
-          FlowStep.repairTeach,
-        }.contains(controller.engine.step))
+        else if (const {FlowStep.orient, FlowStep.teach, FlowStep.repairTeach}.contains(controller.engine.step))
           TextButton(onPressed: controller.replaySpeech, child: const Text('Replay')),
       ],
     );
@@ -390,64 +323,33 @@ class _FlowPanel extends StatelessWidget {
     );
     switch (e.step) {
       case FlowStep.context:
-        return [
-          primary('Continue', controller.orient, key: const Key('act-primary')),
-        ];
+        return [primary('Continue', controller.orient, key: const Key('act-primary'))];
       case FlowStep.orient || FlowStep.teach || FlowStep.repairTeach:
-        return [
-          primary('Continue', controller.advance, key: const Key('act-primary')),
-        ];
+        return [primary('Continue', controller.advance, key: const Key('act-primary'))];
       case FlowStep.challenge:
         return [
           Text(
             'Simulated learner responses (deterministic fixture evidence):',
             style: Theme.of(context).textTheme.bodySmall,
           ),
-          for (final s in [
-            EvidenceState.strong,
-            EvidenceState.partial,
-            EvidenceState.misconception,
-          ])
-            secondary(
-              '"${e.fixture.responses[s]}"',
-              () => controller.submit(s),
-              key: Key('respond-${wireName(s)}'),
-            ),
-          secondary(
-            'Input interrupted',
-            controller.interrupt,
-            key: const Key('respond-UNKNOWN'),
-          ),
+          for (final s in [EvidenceState.strong, EvidenceState.partial, EvidenceState.misconception])
+            secondary('"${e.fixture.responses[s]}"', () => controller.submit(s), key: Key('respond-${wireName(s)}')),
+          secondary('Input interrupted', controller.interrupt, key: const Key('respond-UNKNOWN')),
         ];
       case FlowStep.evaluating:
-        return const [
-          Padding(
-            padding: EdgeInsets.only(top: 8),
-            child: LinearProgressIndicator(),
-          ),
-        ];
+        return const [Padding(padding: EdgeInsets.only(top: 8), child: LinearProgressIndicator())];
       case FlowStep.feedback:
-        return [
-          primary('Continue', controller.follow, key: const Key('act-primary')),
-        ];
+        return [primary('Continue', controller.follow, key: const Key('act-primary'))];
       case FlowStep.repairCheck:
         final answer = e.branch?.repairAnswer ?? 'Answer';
         return [
-          secondary(
-            '"$answer"',
-            () => controller.submitRepair(correct: true),
-            key: const Key('repair-correct'),
-          ),
+          secondary('"$answer"', () => controller.submitRepair(correct: true), key: const Key('repair-correct')),
           secondary(
             'A different answer',
             () => controller.submitRepair(correct: false),
             key: const Key('repair-incorrect'),
           ),
-          secondary(
-            'Input interrupted',
-            controller.interrupt,
-            key: const Key('repair-interrupt'),
-          ),
+          secondary('Input interrupted', controller.interrupt, key: const Key('repair-interrupt')),
         ];
       case FlowStep.complete:
         return [
