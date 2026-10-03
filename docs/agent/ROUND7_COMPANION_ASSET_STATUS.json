@@ -134,9 +134,19 @@
   ],
   "anatomy": {
     "contract": "docs/agent/ROUND7_COMPANION_ANATOMY_CONTRACT.json",
-    "status": "ACTIVE_AUTHORITY",
+    "status": "ACTIVE_AUTHORITY_CONFIRMED_BY_FOUNDER",
     "shared_base": "2 arms + 2 hands; 0 legs + 0 feet",
     "per_state_rule": "limbs may hide/occlude but may not be invented",
     "old_single_gesture_foreground_model": "SUPERSEDED_FOR_FINAL_RIG"
+  },
+  "latest_rejection": {
+    "artifact": "wide_infographic_character_design_specification_po.png",
+    "status": "REJECT_NOT_RUNTIME_ASSET",
+    "reasons": [
+      "asset board instead of isolated production source",
+      "introduced legs/feet, violating active V1 anatomy contract",
+      "cannot be used for rig decomposition"
+    ],
+    "decision": "do not reuse as production authority"
   }
 }
