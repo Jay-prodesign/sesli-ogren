@@ -89,25 +89,10 @@ final class RasterCompanionRenderer implements CompanionRenderer {
         final pose = switch (state) {
           CompanionState.idle => _MotionPose(0.0, 0.0, -2.0 * wave * gain, 1.0 + 0.016 * wave * gain),
           CompanionState.listen => _MotionPose(0.055 * gain, 1.6 * gain, -0.65 * wave * gain, 1.012),
-          CompanionState.think => _MotionPose(
-            -0.060 * gain + 0.020 * wave * gain,
-            0.0,
-            0.8 * wave * gain,
-            0.988,
-          ),
-          CompanionState.speak => _MotionPose(
-            0.020 * gain,
-            0.0,
-            -1.2 * pulse * gain,
-            1.0 + 0.035 * pulse * gain,
-          ),
+          CompanionState.think => _MotionPose(-0.060 * gain + 0.020 * wave * gain, 0.0, 0.8 * wave * gain, 0.988),
+          CompanionState.speak => _MotionPose(0.020 * gain, 0.0, -1.2 * pulse * gain, 1.0 + 0.035 * pulse * gain),
           CompanionState.correct => _MotionPose(-0.045 * gain, -1.2 * gain, 0.0, 0.988),
-          CompanionState.success => _MotionPose(
-            0.0,
-            0.0,
-            -4.0 * pulse * gain,
-            1.030 + 0.030 * pulse * gain,
-          ),
+          CompanionState.success => _MotionPose(0.0, 0.0, -4.0 * pulse * gain, 1.030 + 0.030 * pulse * gain),
         };
 
         final mouthScaleY = state == CompanionState.speak && animate ? 0.86 + 0.24 * pulse : 1.0;

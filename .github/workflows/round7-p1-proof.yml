@@ -67,12 +67,7 @@ jobs:
           pub-cache: false
 
       - run: flutter pub get
-      - name: Dart format check with exact diff
-        run: |
-          dart format .
-          git diff -- proof/round7-p1-runtime/lib/src/render/companion_renderer.dart
-          git diff -- proof/round7-p1-runtime/tool/p9_visual_capture_test.dart
-          git diff --exit-code
+      - run: dart format --output=none --set-exit-if-changed .
       - run: flutter analyze
       - run: flutter test
 
