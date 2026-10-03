@@ -55,12 +55,13 @@ final class _MotionPose {
 /// A heavier layered rig is admitted only if device QA proves this path
 /// insufficient.
 final class RasterCompanionRenderer implements CompanionRenderer {
-  const RasterCompanionRenderer({required this.assetPath, required this.profile, this.motionGain = 1.0});
+  const RasterCompanionRenderer._({required this.assetPath, required _RasterProfile profile, this.motionGain = 1.0})
+    : _profile = profile;
 
   const RasterCompanionRenderer.knot()
     : assetPath = 'assets/companions/D_KNOT_128.webp',
       motionGain = 0.85,
-      profile = const _RasterProfile(
+      _profile = const _RasterProfile(
         mouthRect: Rect.fromLTRB(0.523, 0.447, 0.657, 0.560),
         eyeRects: [Rect.fromLTRB(0.416, 0.420, 0.558, 0.531), Rect.fromLTRB(0.557, 0.345, 0.691, 0.448)],
         skin: Color(0xFFF3E2DE),
@@ -79,7 +80,7 @@ final class RasterCompanionRenderer implements CompanionRenderer {
 
   final String assetPath;
   final double motionGain;
-  final _RasterProfile profile;
+  final _RasterProfile _profile;
 
   @override
   Widget build({
@@ -136,14 +137,14 @@ final class RasterCompanionRenderer implements CompanionRenderer {
             if (state == CompanionState.speak && animate)
               ClipPath(
                 key: const Key('companion-mouth-warp'),
-                clipper: _NormalizedOvalClipper(profile.mouthRect),
+                clipper: _NormalizedOvalClipper(_profile.mouthRect),
                 child: Transform(
-                  alignment: profile.mouthAlignment,
+                  alignment: _profile.mouthAlignment,
                   transform: Matrix4.diagonal3Values(1.0, mouthScaleY, 1.0),
                   child: raster(),
                 ),
               ),
-            if (blinkClosed) CustomPaint(key: const Key('companion-blink-overlay'), painter: _BlinkPainter(profile)),
+            if (blinkClosed) CustomPaint(key: const Key('companion-blink-overlay'), painter: _BlinkPainter(_profile)),
           ],
         );
 
