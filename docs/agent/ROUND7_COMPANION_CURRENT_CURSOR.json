@@ -3,12 +3,18 @@
   "cursor_id": "R7-COMPANION-PRODUCTION-V2",
   "updated_at": "2026-10-03",
   "active_branch": "feat/round7-companion-production-sequence-v2",
-  "active_phase": "P7_REAL_FLUTTER_INTEGRATION",
-  "active_task": "WIRE_CANONICAL_D_E_TO_COMPANION_RENDERER",
+  "active_phase": "P9_REAL_PHONE_QA",
+  "active_task": "VALIDATE_D_E_COMPANION_AND_DEVICE_TTS_ON_REAL_PHONE",
+  "completed_before_gate": {
+    "P7_REAL_FLUTTER_INTEGRATION": "PASS_CI",
+    "P8_REAL_TTS_LINKAGE": "PASS_CI",
+    "workflow_run": 37114564676,
+    "android_profile_artifact": 11271108477,
+    "ios_profile_compile": "PASS_NO_CODESIGN"
+  },
   "authority": {
-    "D": "D_STATIC_FALLBACK_512.png",
-    "E": "E_STATIC_FALLBACK_512.png",
-    "anatomy": "0 arms / 0 hands / 0 legs / 0 feet",
+    "anatomy": "D/E fully limbless V1: 0 arms, 0 hands, 0 legs, 0 feet",
+    "visual_identity": "locked D/E canonical rasters",
     "semantic_states": [
       "IDLE",
       "LISTEN",
@@ -16,23 +22,23 @@
       "SPEAK",
       "CORRECT",
       "SUCCESS"
-    ]
+    ],
+    "speech": "product-local DeviceSpeechOutput / flutter_tts; fixture-owned voice_locale"
   },
-  "v1_motion_contract": {
-    "IDLE": "subtle float/breathe",
-    "LISTEN": "small orient/lean + reduced float",
-    "THINK": "slow tilt/compress",
-    "SPEAK": "bounded rhythmic scale/tilt only while actual audio is active",
-    "CORRECT": "calm small lean + lower amplitude",
-    "SUCCESS": "short lift/expand/bounce then settle"
-  },
-  "acceptance": [
-    "real D/E art replaces proxy through existing renderer seam",
-    "no identity drift",
-    "semantic state remains owned by learning flow",
-    "reduced motion uses static/minimal transform",
-    "asset failure falls back without breaking learning loop",
-    "device QA decides whether deeper facial rig is actually required"
+  "physical_device_acceptance": [
+    "D and E remain visually coherent at real phone size",
+    "motion reads correctly for all six semantic states",
+    "blink overlay does not look like a painted patch",
+    "mouth warp looks acceptable during real speech",
+    "real TTS is audible with intended locale",
+    "SPEAK follows actual playback lifecycle",
+    "stop/interruption returns companion out of SPEAK immediately",
+    "reduced motion removes continuous motion without changing identity",
+    "audio failure falls back to transcript and learning remains usable",
+    "no clipping/safe-area/orientation defect",
+    "no unacceptable stutter"
   ],
-  "layered_face_controls": "BACKLOG_UNLESS_DEVICE_QA_FAILS"
+  "fail_policy": "Repair only the failing visual/audio behavior. Do not reopen bulk asset generation or layered rig unless device evidence proves it necessary.",
+  "after_pass": "P10_SECONDARY_ASSETS_ADMISSION_REVIEW",
+  "blocker": "Physical-device validation. iOS install requires a signed device build; CI currently proves only no-codesign iOS compilation."
 }
