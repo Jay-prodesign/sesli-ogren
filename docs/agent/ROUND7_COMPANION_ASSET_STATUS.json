@@ -27,7 +27,7 @@
     "P3_RIG_DECOMPOSITION": "DEFERRED_UNLESS_DEVICE_QA_REQUIRES",
     "P4_NEUTRAL_RECOMPOSITION_PARITY": "DEFERRED_WITH_LAYERED_RIG",
     "P5_SEMANTIC_MOTION_CLIPS": "IMPLEMENTED_CI_PASS_SINGLE_MASTER",
-    "P6_SPEECH_CONTROLS": "IMPLEMENTED_V1_LOCAL_MOUTH_WARP_BLINK_CANDIDATE__DEVICE_VISUAL_QA_PENDING",
+    "P6_SPEECH_CONTROLS": "MOUTH_WARP_QA_IN_PROGRESS__BLINK_REJECTED_DEFERRED",
     "P7_REAL_FLUTTER_INTEGRATION": "PASS_CI",
     "P8_REAL_TTS_LINKAGE": "PASS_CI__REAL_DEVICE_RUNTIME_QA_PENDING",
     "P9_REAL_PHONE_QA": "ACTIVE_NEXT_GATE",
@@ -81,7 +81,7 @@
     "reduced_motion_and_fallback": "READY",
     "proxy_motion_language": "READY_AS_REFERENCE",
     "real_DE_renderer": "IMPLEMENTED_CI_PASS",
-    "blink_gaze_controls": "BLINK_OVERLAY_IMPLEMENTED_CI_PASS__DEVICE_VISUAL_QA_PENDING; GAZE_LAYER_DEFERRED",
+    "blink_gaze_controls": "BLINK_OVERLAY_REJECTED_BY_VISUAL_GEOMETRY_QA__DISABLED_V1; GAZE_LAYER_DEFERRED",
     "mouth_controls": "LOCAL_RASTER_MOUTH_WARP_IMPLEMENTED_CI_PASS__DEVICE_VISUAL_QA_PENDING",
     "real_tts_playback": "IMPLEMENTED_CI_PASS__DEVICE_RUNTIME_QA_PENDING",
     "audio_visual_synchronization": "IMPLEMENTED_CI_PASS__SPEAK_FOLLOWS_REAL_TTS_START_DONE_STOP_ERROR_CALLBACKS",
@@ -149,14 +149,14 @@
       "status": "CONDITIONAL_PASS_BODY_AND_SPEECH",
       "body_states": "PASS_TECHNICAL_PROBE",
       "mouth_speech_warp": "PASS_TECHNICAL_PROBE",
-      "blink": "CHANGES_REQUIRED",
+      "blink": "REJECTED_DISABLE_V1",
       "stored_at": "/Learning App Runtime Assets/Probes/2026-10-03/D_KNOT_SINGLE_MASTER_PROBE.zip"
     },
     "E_single_master": {
       "status": "CONDITIONAL_PASS_BODY_AND_SPEECH",
       "body_states": "PASS_TECHNICAL_PROBE",
       "mouth_speech_warp": "PASS_TECHNICAL_PROBE",
-      "blink": "CHANGES_REQUIRED",
+      "blink": "REJECTED_DISABLE_V1",
       "stored_at": "/Learning App Runtime Assets/Probes/2026-10-03/E_TILT_SINGLE_MASTER_PROBE.zip"
     }
   },
@@ -187,7 +187,6 @@
     "required_physical_checks": [
       "D and E identity/readability at target phone scale",
       "IDLE/LISTEN/THINK/SPEAK/CORRECT/SUCCESS motion clarity",
-      "blink overlay visual naturalness",
       "mouth warp visual naturalness while speaking",
       "actual device TTS audibility and locale",
       "SPEAK starts on playback start and stops on completion/interruption",
@@ -209,6 +208,14 @@
       ],
       "workflow_run": 37120853017,
       "source_head": "30a3c2f241fce0d55b582f4ce95ebc3281f27c2f"
-    }
+    },
+    "visual_qa_findings": [
+      {
+        "item": "procedural_blink_overlay",
+        "result": "FAIL_REMOVED_FROM_V1",
+        "reason": "normalized eye regions painted over flattened facial art can cover brow/skin and create artificial face patches",
+        "action": "disable blink overlay; do not open layered rig unless a later real product need proves blink necessary"
+      }
+    ]
   }
 }
