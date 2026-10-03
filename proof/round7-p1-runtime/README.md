@@ -37,13 +37,13 @@ GitHub Actions run **37140739027** passed:
 - P9 visual and motion capture;
 - Android profile APK build with `flutter_tts`;
 - iOS profile compile without codesigning;
-- iOS simulator native `flutter_tts` start/completion/stop integration test.
+- iOS simulator native `flutter_tts` start/completion/stop integration test using an explicit `tr-TR` probe. The bounded proof fixtures themselves currently own `en-US` voice locale.
 
 The PR workflow checkout SHA for that run is `54a96e776fda7252cb578ec2c2d58ff4cdf5aabd`.
 The Android profile APK SHA-256 is `20b4d1d7d5f30252b7510fccd827d3fcad657bc08abad4d1331acf1a60d8f40d`.
 
 Simulator and CI evidence do **not** close the final native-device gate. Physical hardware still has
-to confirm actual audibility/voice behavior, the one-tap callback QA result, smooth interaction and
+to confirm actual audibility/fixture-locale voice behavior, the one-tap callback QA result, smooth interaction and
 native safe-area/orientation behavior.
 
 ## Run
@@ -59,7 +59,7 @@ flutter run --profile --dart-define=GIT_SHA=$(git rev-parse HEAD)
 
 In the running app, use the **voice icon** to open **Native Speech QA**. The screen must report
 `CALLBACK_LIFECYCLE_PASS`; then confirm on the physical device that speech is actually audible in
-the expected Turkish voice/locale and that portrait/landscape interaction is smooth and unclipped.
+the fixture-owned expected voice/locale and that portrait/landscape interaction is smooth and unclipped.
 
 For the full physical-device evidence protocol, see [DEVICE_RUN_PROTOCOL.md](DEVICE_RUN_PROTOCOL.md).
 

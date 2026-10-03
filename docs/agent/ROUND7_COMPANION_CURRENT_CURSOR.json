@@ -17,7 +17,8 @@
     "android_profile_apk": "PASS_ARTIFACT_UPLOADED",
     "android_profile_apk_sha256": "20b4d1d7d5f30252b7510fccd827d3fcad657bc08abad4d1331acf1a60d8f40d",
     "ios_profile_compile_no_codesign": "PASS",
-    "ios_native_flutter_tts_simulator_lifecycle": "PASS_START_COMPLETION_STOP"
+    "ios_native_flutter_tts_simulator_lifecycle": "PASS_START_COMPLETION_STOP",
+    "tts_error_fallback_unit_test": "PASS_TEXT_AND_LEARNING_LOOP_PRESERVED"
   },
   "authority": {
     "D": "assets/companions/D_KNOT_128.webp",
@@ -45,14 +46,14 @@
   "device_qa": [
     "Open Native Speech QA from the microphone/voice icon.",
     "Run Native Speech QA and require CALLBACK_LIFECYCLE_PASS.",
-    "Confirm the spoken output is actually audible and Turkish/expected for the fixture.",
+    "Confirm the spoken output is actually audible and matches the fixture-owned locale/expected voice behavior.",
     "Rotate portrait ↔ landscape and confirm no clipping/safe-area defect.",
     "Interact/scroll during the learning flow and confirm motion/input remain smooth.",
     "D/E identity must remain correct; no limbs may appear; Reduced Motion must remain restrained."
   ],
   "next_after_pass": "P10_MINIMUM_COMPANION_LOOP_PASS; secondary assets remain optional/backlog",
   "next_if_mouth_or_blink_visual_fail": "repair or disable only failing local effect; open layered rig only if a real learning/visual need remains",
-  "stop_condition": "Only physical native-device audibility/voice behavior, one-tap callback confirmation, smoothness/input responsiveness and native safe-area/orientation remain.",
+  "stop_condition": "Only physical native-device audibility/fixture-locale voice behavior, one-tap callback confirmation, smoothness/input responsiveness and native safe-area/orientation remain.",
   "preview": {
     "policy": "GAME_ENGINE_PARITY__FREE_TEMPORARY_PHONE_HTTPS_PREVIEW",
     "method": "Flutter Web build -> local python3 HTTP server -> Cloudflare cloudflared Quick Tunnel",
@@ -124,7 +125,7 @@
       "portrait/compact-landscape D/E synthetic visual and motion QA PASS"
     ],
     "required": [
-      "actual native TTS audibility and expected Turkish locale/voice behavior on physical hardware",
+      "actual native TTS audibility and expected fixture-owned locale/voice behavior on physical hardware",
       "one-tap Native Speech QA reaches CALLBACK_LIFECYCLE_PASS on physical hardware",
       "real-device animation smoothness and tap/scroll responsiveness",
       "native safe-area/orientation behavior"

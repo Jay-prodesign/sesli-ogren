@@ -184,13 +184,14 @@
     "ios_native_flutter_tts_simulator_lifecycle": "PASS_START_COMPLETION_STOP",
     "android_profile_apk": "PASS_ARTIFACT_UPLOADED",
     "android_profile_apk_sha256": "20b4d1d7d5f30252b7510fccd827d3fcad657bc08abad4d1331acf1a60d8f40d",
-    "ios_profile_compile_no_codesign": "PASS"
+    "ios_profile_compile_no_codesign": "PASS",
+    "tts_error_fallback_unit_test": "PASS_TEXT_AND_LEARNING_LOOP_PRESERVED"
   },
   "p9_gate": {
     "status": "PHYSICAL_NATIVE_ONLY_REMAINS",
     "non_device_evidence": "PASS_INCLUDING_NATIVE_IOS_SIMULATOR_TTS_CALLBACK_LIFECYCLE_AND_IPHONE_PORTRAIT_LANDSCAPE_D_E_MATRIX",
     "required_physical_checks": [
-      "actual device TTS audibility and expected Turkish locale/voice behavior",
+      "actual device TTS audibility and expected fixture-owned locale/voice behavior",
       "Native Speech QA self-check reaches CALLBACK_LIFECYCLE_PASS on physical hardware",
       "real-device frame smoothness and tap/scroll responsiveness",
       "native safe-area/platform orientation behavior on the target physical device"
@@ -260,10 +261,11 @@
       ],
       "physical_observation_still_required": [
         "sound is actually audible",
-        "voice/locale behavior is acceptable Turkish",
+        "voice behavior matches the fixture-owned locale",
         "motion/input is smooth",
         "portrait/landscape safe areas are correct"
-      ]
+      ],
+      "separate_native_capability_evidence": "Standalone integration probe sets tr-TR explicitly and passes native start/completion/stop callbacks on iOS simulator; current bounded proof fixtures remain en-US by design."
     }
   }
 }

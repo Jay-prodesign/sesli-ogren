@@ -12,13 +12,13 @@ full R7-06 benchmark matrix, use the in-app **Native Speech QA** screen:
 2. Tap the voice icon in the app bar and run **Native Speech QA**.
 3. Require `CALLBACK_LIFECYCLE_PASS`. This automatically checks playback start → SPEAK,
    completion → settle, explicit stop → settle, and stale-callback suppression.
-4. Confirm by ear that speech is actually audible and uses the expected Turkish locale/voice.
+4. Confirm by ear that speech is actually audible and matches the fixture-owned expected locale/voice behavior.
 5. Return to the learning flow, rotate portrait ↔ landscape, scroll/tap through the flow and check
    that D/E remain unclipped and interaction/motion is smooth.
 6. If these checks pass, record them with the exact build SHA. If any fail, reopen only the failing
    subsystem; do not regenerate assets or introduce a layered rig by default.
 
-CI run 37140739027 already proved the same native `flutter_tts` start/completion/stop callback path on
+CI run 37140739027 already proved the same native `flutter_tts` start/completion/stop callback path with an explicit `tr-TR` probe on
 an iOS simulator and built the Android profile APK. That is supporting evidence only and cannot
 substitute for physical hardware.
 
