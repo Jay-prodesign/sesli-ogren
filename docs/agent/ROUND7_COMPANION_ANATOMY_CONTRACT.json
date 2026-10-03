@@ -1,0 +1,93 @@
+{
+  "schema_version": 1,
+  "project": "Learning App",
+  "scope": "Round 7 D/Knot + E/Tilt companion anatomy",
+  "effective_date": "2026-10-03",
+  "status": "ACTIVE_AUTHORITY",
+  "principle": "D and E may differ in silhouette, energy and ribbon geometry, but they must obey one shared anatomical grammar. A state may hide or reveal an existing limb; it must not invent a limb.",
+  "shared_base_anatomy": {
+    "face": "1 shared face/head region integrated into abstract ribbon body",
+    "arms": 2,
+    "hands": 2,
+    "legs": 0,
+    "feet": 0,
+    "note": "Arms/hands may be fully or partly occluded behind ribbon/body forms in neutral and low-energy states."
+  },
+  "character_specific_structure": {
+    "D_Knot": {
+      "core_form": "soft interlaced knot/ribbon mass",
+      "motion_bias": "calm, grounded, inward, supportive",
+      "limb_style": "short soft arms/hands; gestures stay close to body"
+    },
+    "E_Tilt": {
+      "core_form": "tilted triangular/ribbon mass",
+      "motion_bias": "energetic, directional, outward, curious",
+      "limb_style": "same two-arm/two-hand grammar; gestures can open farther from body"
+    }
+  },
+  "invariants": [
+    "Both characters possess the same limb count in the rig.",
+    "No state may add legs or feet in V1.",
+    "No state may add a third arm/hand or remove an anatomical side; occlusion is allowed.",
+    "A hand may be hidden behind the body/ribbon, but its rig slot still exists.",
+    "Left/right naming and pivots must be stable across every state.",
+    "Character-specific silhouette differences come from ribbon geometry and motion language, not incompatible anatomy."
+  ],
+  "v1_state_visibility_matrix": {
+    "IDLE": {
+      "arms_hands": "both present; relaxed/tucked; partial occlusion allowed",
+      "legs_feet": "absent"
+    },
+    "LISTEN": {
+      "arms_hands": "both present; low-motion attentive pose; partial occlusion allowed",
+      "legs_feet": "absent"
+    },
+    "THINK": {
+      "arms_hands": "both present; one or both may support face/body; never newly spawned",
+      "legs_feet": "absent"
+    },
+    "SPEAK": {
+      "arms_hands": "both present; one may gesture while the other remains tucked",
+      "legs_feet": "absent"
+    },
+    "CORRECT": {
+      "arms_hands": "both present; open/supportive low-amplitude gesture",
+      "legs_feet": "absent"
+    },
+    "SUCCESS": {
+      "arms_hands": "both present; wider positive gesture allowed",
+      "legs_feet": "absent"
+    },
+    "GREETING_LATER": {
+      "arms_hands": "both present; one-hand wave allowed, other hand remains anatomically accounted for",
+      "legs_feet": "absent",
+      "status": "POST_P9_LATER"
+    }
+  },
+  "rig_layer_requirement": {
+    "common_required": [
+      "rear_form",
+      "front_form",
+      "face_base",
+      "eye_L_white",
+      "eye_R_white",
+      "iris_pupil_L",
+      "iris_pupil_R",
+      "brow_L",
+      "brow_R",
+      "mouth",
+      "arm_L",
+      "hand_L",
+      "arm_R",
+      "hand_R",
+      "occlusion_fill"
+    ],
+    "note": "A generic single gesture_foreground layer is insufficient as final anatomy because it cannot guarantee stable two-arm/two-hand continuity."
+  },
+  "neutral_master_policy": {
+    "core_identity_authority": "existing D/E locked masters + Founder reference set",
+    "anatomy_note": "Existing flattened masters remain core face/ribbon identity authority. Rig authoring may introduce hidden/tucked two-arm anatomy where founder references demonstrate limbs, provided neutral recomposition preserves the visible master silhouette at app size.",
+    "no_redesign": true
+  },
+  "future_upgrade_rule": "If legs/feet become a real product need, open a versioned anatomy change for BOTH D and E, update both rigs, state matrix, fallback assets and device QA together."
+}
