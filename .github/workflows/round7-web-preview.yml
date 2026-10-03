@@ -12,8 +12,6 @@ on:
 
 permissions:
   contents: read
-  pull-requests: read
-  issues: write
 
 concurrency:
   group: round7-phone-preview
@@ -118,18 +116,16 @@ jobs:
           echo "Source commit: \`${GITHUB_SHA}\`" >> "$GITHUB_STEP_SUMMARY"
           echo "Free temporary Cloudflare Quick Tunnel. No account or paid service required." >> "$GITHUB_STEP_SUMMARY"
 
-          PR_NUMBER="$(gh pr list --repo "$GITHUB_REPOSITORY" --head "$GITHUB_REF_NAME" --state open --json number --jq '.[0].number // empty')"
-          if [ -n "$PR_NUMBER" ]; then
-            BODY="$(printf 'PHONE_PREVIEW_URL: %s\n\nSource commit: %s\nFree temporary Cloudflare Quick Tunnel for Learning App phone QA.\nThis URL remains available while this workflow job is alive.' "$URL" "$GITHUB_SHA")"
-            gh api \
-              --method POST \
-              -H "Accept: application/vnd.github+json" \
-              -H "X-GitHub-Api-Version: 2022-11-28" \
-              "repos/${GITHUB_REPOSITORY}/issues/${PR_NUMBER}/comments" \
-              -f body="$BODY"
-          fi
-        env:
-          GH_TOKEN: ${{ github.token }}
+          echo "PHONE_PREVIEW_URL: $URL"
+          printf '%s\n' "$URL" > "$RUNNER_TEMP/learning-app-phone-preview-url.txt"
+
+      - name: Upload live phone preview URL
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: learning-app-phone-preview-url
+          path: ${{ runner.temp }}/learning-app-phone-preview-url.txt
+          if-no-files-found: error
+          retention-days: 1
 
       - name: Keep phone preview alive
         run: |
