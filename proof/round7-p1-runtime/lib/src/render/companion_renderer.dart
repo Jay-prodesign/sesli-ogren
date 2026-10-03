@@ -59,7 +59,7 @@ final class RasterCompanionRenderer implements CompanionRenderer {
 
   const RasterCompanionRenderer.tilt()
     : assetPath = 'assets/companions/E_TILT_128.webp',
-      motionGain = 1.0,
+      motionGain = 1.1,
       _profile = const _RasterProfile(mouthRect: Rect.fromLTRB(0.507, 0.398, 0.630, 0.507));
 
   final String assetPath;
@@ -87,12 +87,27 @@ final class RasterCompanionRenderer implements CompanionRenderer {
 
         final gain = motionGain;
         final pose = switch (state) {
-          CompanionState.idle => _MotionPose(0.0, 0.0, -1.2 * wave * gain, 1.0 + 0.012 * wave * gain),
-          CompanionState.listen => _MotionPose(0.035 * gain, 1.0 * gain, -0.4 * wave, 1.005),
-          CompanionState.think => _MotionPose(-0.035 * gain + 0.012 * wave, 0.0, 0.5 * wave, 0.995),
-          CompanionState.speak => _MotionPose(0.012 * gain, 0.0, -0.5 * pulse, 1.0 + 0.025 * pulse * gain),
-          CompanionState.correct => _MotionPose(-0.022 * gain, -0.5 * gain, 0.0, 0.995),
-          CompanionState.success => _MotionPose(0.0, 0.0, -2.2 * pulse * gain, 1.025 + 0.018 * pulse * gain),
+          CompanionState.idle => _MotionPose(0.0, 0.0, -2.0 * wave * gain, 1.0 + 0.016 * wave * gain),
+          CompanionState.listen => _MotionPose(0.055 * gain, 1.6 * gain, -0.65 * wave * gain, 1.012),
+          CompanionState.think => _MotionPose(
+            -0.060 * gain + 0.020 * wave * gain,
+            0.0,
+            0.8 * wave * gain,
+            0.988,
+          ),
+          CompanionState.speak => _MotionPose(
+            0.020 * gain,
+            0.0,
+            -1.2 * pulse * gain,
+            1.0 + 0.035 * pulse * gain,
+          ),
+          CompanionState.correct => _MotionPose(-0.045 * gain, -1.2 * gain, 0.0, 0.988),
+          CompanionState.success => _MotionPose(
+            0.0,
+            0.0,
+            -4.0 * pulse * gain,
+            1.030 + 0.030 * pulse * gain,
+          ),
         };
 
         final mouthScaleY = state == CompanionState.speak && animate ? 0.86 + 0.24 * pulse : 1.0;
