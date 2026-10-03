@@ -22,13 +22,10 @@ abstract interface class CompanionRenderer {
 }
 
 final class _RasterProfile {
-  const _RasterProfile({required this.mouthRect, required this.eyeRects, required this.skin, required this.lash});
+  const _RasterProfile({required this.mouthRect});
 
   /// Normalized to the source image canvas.
   final Rect mouthRect;
-  final List<Rect> eyeRects;
-  final Color skin;
-  final Color lash;
 
   Alignment get mouthAlignment {
     return Alignment(mouthRect.center.dx * 2 - 1, mouthRect.center.dy * 2 - 1);
@@ -49,7 +46,7 @@ final class _MotionPose {
 /// V1 is intentionally limbless. The canonical raster remains intact:
 /// - body/state language uses whole-character transform/squash-style motion;
 /// - SPEAK adds a local mouth-region warp from the same raster;
-/// - blink is a tiny procedural eyelid overlay.
+/// - blink is intentionally deferred: painting eyelids over flattened art failed visual QA.
 ///
 /// This avoids regenerating state PNGs and avoids inventing hidden limb anatomy.
 /// A heavier layered rig is admitted only if device QA proves this path
@@ -60,9 +57,6 @@ final class RasterCompanionRenderer implements CompanionRenderer {
       motionGain = 0.85,
       _profile = const _RasterProfile(
         mouthRect: Rect.fromLTRB(0.523, 0.447, 0.657, 0.560),
-        eyeRects: [Rect.fromLTRB(0.416, 0.420, 0.558, 0.531), Rect.fromLTRB(0.557, 0.345, 0.691, 0.448)],
-        skin: Color(0xFFF3E2DE),
-        lash: Color(0xFF171C4A),
       );
 
   const RasterCompanionRenderer.tilt()
@@ -70,9 +64,6 @@ final class RasterCompanionRenderer implements CompanionRenderer {
       motionGain = 1.0,
       _profile = const _RasterProfile(
         mouthRect: Rect.fromLTRB(0.507, 0.398, 0.630, 0.507),
-        eyeRects: [Rect.fromLTRB(0.374, 0.361, 0.512, 0.466), Rect.fromLTRB(0.541, 0.318, 0.670, 0.419)],
-        skin: Color(0xFFF6E2E4),
-        lash: Color(0xFF4B1E62),
       );
 
   final String assetPath;
@@ -109,8 +100,6 @@ final class RasterCompanionRenderer implements CompanionRenderer {
         };
 
         final mouthScaleY = state == CompanionState.speak && animate ? 0.86 + 0.24 * pulse : 1.0;
-        final blinkClosed = animate && _blinkClosed(t);
-
         Widget raster({Key? key}) {
           return Image.asset(
             assetPath,
@@ -141,7 +130,6 @@ final class RasterCompanionRenderer implements CompanionRenderer {
                   child: raster(),
                 ),
               ),
-            if (blinkClosed) CustomPaint(key: const Key('companion-blink-overlay'), painter: _BlinkPainter(_profile)),
           ],
         );
 
