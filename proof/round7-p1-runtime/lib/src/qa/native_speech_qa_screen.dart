@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../app/proof_controller.dart';
 import '../bench/bench_runner.dart';
+import '../flow/flow_engine.dart';
 import '../render/companion_renderer.dart';
 import '../render/views.dart';
 import '../render/world_painter.dart';
