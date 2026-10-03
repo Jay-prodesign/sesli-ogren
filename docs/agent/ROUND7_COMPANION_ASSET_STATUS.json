@@ -19,17 +19,17 @@
       "E": "E_MASTER_LOCKED.png"
     }
   },
-  "current_cursor": "P3A_D_SINGLE_MASTER_DEFORMATION_PROBE",
+  "current_cursor": "P7A_CANONICAL_RASTER_RENDERER",
   "phases": {
     "P0_AUTHORITY_AND_INVENTORY": "PASS",
     "P1_NEUTRAL_MASTERS": "PASS_CORE_IDENTITY",
     "P2_MINIMAL_SIZE_GATE": "PASS_CORE_IDENTITY_STATIC",
-    "P3_RIG_DECOMPOSITION": "SUPERSEDED_BY_P3A_GATE",
-    "P4_NEUTRAL_RECOMPOSITION_PARITY": "BLOCKED_BY_P3",
-    "P5_SEMANTIC_MOTION_CLIPS": "BLOCKED_BY_P4",
-    "P6_SPEECH_CONTROLS": "BLOCKED_BY_P3_P4",
-    "P7_REAL_FLUTTER_INTEGRATION": "BLOCKED_BY_P4_P5",
-    "P8_REAL_TTS_LINKAGE": "BLOCKED_BY_P7",
+    "P3_RIG_DECOMPOSITION": "BACKLOG_AFTER_RUNTIME_NEED_VALIDATION",
+    "P4_NEUTRAL_RECOMPOSITION_PARITY": "BACKLOG_WITH_LAYERED_RIG",
+    "P5_SEMANTIC_MOTION_CLIPS": "IN_PROGRESS_WHOLE_CHARACTER",
+    "P6_SPEECH_CONTROLS": "DEFER_FACE_RIG__BODY_SPEAK_MOTION_NOW",
+    "P7_REAL_FLUTTER_INTEGRATION": "IN_PROGRESS",
+    "P8_REAL_TTS_LINKAGE": "NEXT_AFTER_RENDERER",
     "P9_REAL_PHONE_QA": "BLOCKED_BY_P7_P8",
     "P10_SECONDARY_ASSETS": "LATER",
     "P2_5_ANATOMY_NORMALIZATION": "PASS_NO_EXTRA_ASSET_REQUIRED",
@@ -79,12 +79,13 @@
     "flow_to_state_mapping": "READY",
     "reduced_motion_and_fallback": "READY",
     "proxy_motion_language": "READY_AS_REFERENCE",
-    "real_DE_renderer": "MISSING",
-    "blink_gaze_controls": "MISSING",
-    "mouth_controls": "MISSING",
-    "real_tts_playback": "MISSING",
-    "audio_visual_synchronization": "MISSING",
-    "real_phone_QA": "MISSING"
+    "real_DE_renderer": "IN_PROGRESS_CANONICAL_RASTER",
+    "blink_gaze_controls": "BACKLOG_AFTER_DEVICE_NEED_VALIDATION",
+    "mouth_controls": "BACKLOG_AFTER_DEVICE_NEED_VALIDATION",
+    "real_tts_playback": "NEXT",
+    "audio_visual_synchronization": "NEXT_WITH_TTS",
+    "real_phone_QA": "MISSING",
+    "body_state_motion": "READY_TO_IMPLEMENT"
   },
   "semantic_states": [
     "IDLE",
@@ -130,5 +131,11 @@
       "not usable for rig decomposition"
     ],
     "decision": "reference discarded for production"
+  },
+  "rig_extraction_attempts": {
+    "D_V0": "REJECT_INPAINT_ARTIFACTS",
+    "D_V1": "REJECT_CLEAN_BASE_ARTIFACTS_DESPITE_EXACT_NEUTRAL_RECOMPOSE",
+    "D_V2": "REJECT_CLEAN_BASE_NOT_GOOD_ENOUGH_FOR_MOVABLE_CONTROLS",
+    "decision": "Do not continue destructive layer extraction from flattened raster. Use canonical raster + whole-character semantic motion now; reopen proper layered authoring only if runtime/device evidence requires facial controls."
   }
 }
