@@ -13,11 +13,8 @@ enum CompanionIdentity { knot, tilt }
 /// accessibility/audio conditions and simulated capability failures. The benchmark
 /// runner drives the same controller as the UI.
 class ProofController extends ChangeNotifier {
-  ProofController(
-    this.fixtures, {
-    this.evaluationDelay = const Duration(milliseconds: 450),
-    this.speechOutput,
-  }) : assert(fixtures.isNotEmpty) {
+  ProofController(this.fixtures, {this.evaluationDelay = const Duration(milliseconds: 450), this.speechOutput})
+    : assert(fixtures.isNotEmpty) {
     _engine = _newEngine(0);
   }
 
