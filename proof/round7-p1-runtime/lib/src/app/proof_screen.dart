@@ -16,7 +16,7 @@ class ProofScreen extends StatelessWidget {
     super.key,
     required this.controller,
     this.onOpenBenchmark,
-    this.companionRenderer = const KnotProxyCompanionRenderer(),
+    this.companionRenderer = const RasterCompanionRenderer.knot(),
   });
 
   final ProofController controller;
