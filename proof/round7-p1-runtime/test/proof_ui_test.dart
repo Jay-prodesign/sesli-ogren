@@ -107,6 +107,28 @@ void main() {
     await finish(tester);
   });
 
+  testWidgets('D/E identity selection swaps the canonical raster without changing the learning state', (tester) async {
+    final c = await pumpProof(tester);
+
+    Image raster() => tester.widget<Image>(find.byType(Image).first);
+
+    expect((raster().image as AssetImage).assetName, 'assets/companions/D_KNOT_128.webp');
+    final before = c.companionState;
+
+    c.setCompanionIdentity(CompanionIdentity.tilt);
+    await tester.pump();
+
+    expect(c.companionState, before);
+    expect((raster().image as AssetImage).assetName, 'assets/companions/E_TILT_128.webp');
+
+    c.setCompanionIdentity(CompanionIdentity.knot);
+    await tester.pump();
+
+    expect(c.companionState, before);
+    expect((raster().image as AssetImage).assetName, 'assets/companions/D_KNOT_128.webp');
+    await finish(tester);
+  });
+
   testWidgets('Companion renderer seam swaps the visual body without changing fallback semantics', (tester) async {
     usePhoneSurface(tester);
     final c = ProofController(fixtures);
