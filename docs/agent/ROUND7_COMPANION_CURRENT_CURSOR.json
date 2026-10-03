@@ -4,7 +4,7 @@
   "updated_at": "2026-10-03",
   "active_branch": "feat/round7-companion-production-sequence-v2",
   "active_phase": "P9_REAL_PHONE_QA",
-  "active_task": "PHYSICAL_NATIVE_TTS_AUDIO_AND_DEVICE_SMOOTHNESS_QA",
+  "active_task": "D1_IOS_PHYSICAL_NATIVE_TTS_AUDIO_AND_DEVICE_SMOOTHNESS_QA",
   "verified_ci": {
     "workflow_run": 37140739027,
     "source_head": "eb9c07285bf3ed201556cb7e60b8de9e561e22b5",
@@ -44,16 +44,18 @@
     "native_speech_qa": "ONE_TAP_SCREEN_IMPLEMENTED__CALLBACK_LIFECYCLE_SELF_CHECK"
   },
   "device_qa": [
-    "Open Native Speech QA from the microphone/voice icon.",
+    "D1 iPhone is the active physical QA target.",
+    "Open Native Speech QA from the voice icon.",
     "Run Native Speech QA and require CALLBACK_LIFECYCLE_PASS.",
-    "Confirm the spoken output is actually audible and matches the fixture-owned locale/expected voice behavior.",
+    "Confirm spoken output is actually audible and matches the fixture-owned locale/expected voice behavior.",
     "Rotate portrait ↔ landscape and confirm no clipping/safe-area defect.",
     "Interact/scroll during the learning flow and confirm motion/input remain smooth.",
-    "D/E identity must remain correct; no limbs may appear; Reduced Motion must remain restrained."
+    "D/E identity must remain correct; no limbs may appear; Reduced Motion must remain restrained.",
+    "D2/D3 Android physical checks are deferred until suitable devices are available."
   ],
   "next_after_pass": "P10_MINIMUM_COMPANION_LOOP_PASS; secondary assets remain optional/backlog",
   "next_if_mouth_or_blink_visual_fail": "repair or disable only failing local effect; open layered rig only if a real learning/visual need remains",
-  "stop_condition": "Only physical native-device audibility/fixture-locale voice behavior, one-tap callback confirmation, smoothness/input responsiveness and native safe-area/orientation remain.",
+  "stop_condition": "Current immediate stop condition: D1 physical iPhone audibility/fixture-locale behavior, one-tap callback PASS, smoothness/input responsiveness and native safe-area/orientation. D2/D3 Android remain deferred for later full cross-device closure.",
   "preview": {
     "policy": "GAME_ENGINE_PARITY__FREE_TEMPORARY_PHONE_HTTPS_PREVIEW",
     "method": "Flutter Web build -> local python3 HTTP server -> Cloudflare cloudflared Quick Tunnel",
@@ -130,7 +132,13 @@
       "real-device animation smoothness and tap/scroll responsiveness",
       "native safe-area/orientation behavior"
     ],
-    "synthetic_work_remaining": "NONE"
+    "synthetic_work_remaining": "NONE",
+    "current_priority": "D1_IOS_PHYSICAL_ONLY",
+    "deferred": [
+      "D2 mid-range Android physical QA",
+      "D3 lower-end Android physical QA"
+    ],
+    "full_matrix_status": "OPEN_UNTIL_D1_D2_D3"
   },
   "qa_findings": [
     {
@@ -138,5 +146,12 @@
       "result": "FAIL_AND_REMOVED",
       "decision": "V1 stays blink-free; keep limbless single-master renderer"
     }
-  ]
+  ],
+  "device_execution_priority": {
+    "mode": "IOS_FIRST",
+    "D1": "ACTIVE__PHYSICAL_IPHONE_AVAILABLE",
+    "D2": "DEFERRED_UNTIL_ANDROID_DEVICE_AVAILABLE",
+    "D3": "DEFERRED_UNTIL_ANDROID_DEVICE_AVAILABLE",
+    "rule": "Do not block today's D1 companion QA on unavailable Android hardware. Full R7-06 cross-device closure still requires D1+D2+D3 later."
+  }
 }
