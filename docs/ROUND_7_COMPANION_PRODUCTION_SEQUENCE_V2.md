@@ -149,7 +149,12 @@ Requirements: single character only, transparent alpha, no UI/text/environment, 
 
 ## Current executable cursor
 
-**P0 is complete enough to proceed.**
-Current cursor: **P1.4 — produce and source-jury `D_MASTER_NEUTRAL`.**
+Verified current state:
+- **P0 Authority freeze/inventory: PASS**
+- **P1 Canonical neutral masters: PASS** — existing D/E locked masters match the Founder reference identity and are clean isolated RGBA sources.
+- **P2 Minimal/static size gate: PASS** — 512/256/128 static fallbacks already pass alpha/bounds QA.
+- **P3 Rig/deformation source: IN PROGRESS**
 
-Do not start E state multiplication, mouth atlases, secondary poses, or greeting assets before D neutral passes; then produce E neutral and close P1.
+Current cursor: **P3 — reconstruct the minimum real layered source for D/Knot, then E/Tilt.**
+
+Do not regenerate the character identity. Do not multiply state PNGs. The next accepted output must be a real independent layer/control source that participates in neutral recomposition parity.
