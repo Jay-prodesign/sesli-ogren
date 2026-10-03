@@ -4,13 +4,14 @@
   "updated_at": "2026-10-03",
   "active_branch": "feat/round7-companion-production-sequence-v2",
   "active_phase": "P9_REAL_PHONE_QA",
-  "active_task": "FOUNDER_REAL_PHONE_VISUAL_AND_RUNTIME_QA",
+  "active_task": "P9_SYNTHETIC_MOTION_SEQUENCE_QA",
   "verified_ci": {
-    "workflow_run": 37120853017,
-    "source_head": "30a3c2f241fce0d55b582f4ce95ebc3281f27c2f",
+    "workflow_run": 37133064076,
+    "source_head": "943b6f832e04540ecb30ac41af3a1d3269e94eaa",
     "format": "PASS",
     "analyze": "PASS",
-    "flutter_tests": "PASS_INCLUDING_P9_IPHONE_PORTRAIT_LANDSCAPE_D_E_MATRIX",
+    "flutter_tests": "PASS_INCLUDING_RESPONSIVE_P9_PHONE_MATRIX",
+    "p9_visual_capture": "PASS_ARTIFACT_UPLOADED",
     "android_profile_apk": "PASS",
     "ios_profile_compile_no_codesign": "PASS"
   },
@@ -94,19 +95,28 @@
       "companion raster remains present"
     ],
     "evidence_run": 37120853017,
-    "evidence_commit": "30a3c2f241fce0d55b582f4ce95ebc3281f27c2f"
+    "evidence_commit": "30a3c2f241fce0d55b582f4ce95ebc3281f27c2f",
+    "visual_qa": {
+      "status": "PASS",
+      "portrait_companion_extent": 124,
+      "compact_landscape_companion_extent": 104,
+      "identity_fidelity": "PASS_D_AND_E",
+      "mouth_warp": "PASS_CLEAN_SUBTLE",
+      "blink": "REMOVED_AFTER_FAIL",
+      "clipping": "PASS",
+      "readability": "PASS"
+    }
   },
   "remaining_gate": {
-    "type": "PHYSICAL_DEVICE_ONLY",
-    "required": [
-      "D/Knot and E/Tilt look correct at actual phone scale",
-      "portrait and landscape have no unacceptable clipping/layout issue",
-      "idle/listen/think/speak/correct/success motion feels natural rather than mechanical",
-      "mouth warp looks natural during speech",
-      "scroll/tap interaction feels responsive",
-      "native TTS/audio lifecycle must still be checked in native build because browser preview cannot prove native platform playback"
+    "type": "MOTION_SEQUENCE_THEN_PHYSICAL_NATIVE_AUDIO",
+    "synthetic_remaining": [
+      "multi-frame semantic motion visual QA for D/E"
     ],
-    "synthetic_work_remaining": "NONE"
+    "physical_only": [
+      "actual device TTS audibility and locale",
+      "SPEAK starts/stops on real device playback lifecycle",
+      "real-device animation smoothness/input responsiveness"
+    ]
   },
   "qa_findings": [
     {
