@@ -201,14 +201,6 @@ void main() {
           suffix: state == CompanionState.speak ? 'MOUTH_MAX' : 'BASE',
         );
       }
-
-      await _captureCloseup(
-        tester,
-        identity: identity,
-        state: CompanionState.idle,
-        motion: 0.16,
-        suffix: 'BLINK_CLOSED',
-      );
     }
 
     tester.view.reset();
