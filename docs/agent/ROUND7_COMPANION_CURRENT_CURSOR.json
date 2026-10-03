@@ -4,7 +4,7 @@
   "updated_at": "2026-10-03",
   "active_branch": "feat/round7-companion-production-sequence-v2",
   "active_phase": "P9_REAL_PHONE_QA",
-  "active_task": "VALIDATE_D_E_REAL_DEVICE_LEARNING_LOOP",
+  "active_task": "FOUNDER_REAL_PHONE_VISUAL_AND_RUNTIME_QA",
   "verified_ci": {
     "workflow_run": 37120853017,
     "source_head": "30a3c2f241fce0d55b582f4ce95ebc3281f27c2f",
@@ -63,14 +63,16 @@
     "trigger": "workflow_dispatch only; open a tunnel only when phone QA is actually requested",
     "url_delivery": "workflow creates learning-app-phone-preview-url artifact before entering keep-alive",
     "lifetime": "approximately 110 minutes while the GitHub Actions keep-alive job remains running",
-    "current_verified_run": 37117483272,
-    "current_source_commit": "ad129831421d44a5e45c678b47e11dad83271960",
+    "current_verified_run": 37120849702,
+    "current_source_commit": "30a3c2f241fce0d55b582f4ce95ebc3281f27c2f",
     "obsolete_methods": [
       "GitHub Pages attempt",
       "Statically/jsDelivr/rawgit-style CDN preview"
     ],
     "native_boundary": "Web preview is the default visual/flow QA surface. Native builds remain required for platform-only TTS/audio lifecycle, signing, native performance and final production-device validation.",
-    "behavior": "On-demand workflow builds the exact Flutter Web proof, opens a free Cloudflare Quick Tunnel, uploads the live URL artifact, then keeps the tunnel alive for about 110 minutes."
+    "behavior": "On-demand workflow builds the exact Flutter Web proof, opens a free Cloudflare Quick Tunnel, uploads the live URL artifact, then keeps the tunnel alive for about 110 minutes.",
+    "current_status": "LIVE_KEEPALIVE",
+    "note": "The current live preview source contains the P9 synthetic phone matrix PASS app code. Later branch changes are workflow/docs-only and do not alter the rendered app."
   },
   "synthetic_p9": {
     "status": "PASS",
@@ -93,5 +95,18 @@
     ],
     "evidence_run": 37120853017,
     "evidence_commit": "30a3c2f241fce0d55b582f4ce95ebc3281f27c2f"
+  },
+  "remaining_gate": {
+    "type": "PHYSICAL_DEVICE_ONLY",
+    "required": [
+      "D/Knot and E/Tilt look correct at actual phone scale",
+      "portrait and landscape have no unacceptable clipping/layout issue",
+      "idle/listen/think/speak/correct/success motion feels natural rather than mechanical",
+      "mouth warp looks natural during speech",
+      "blink overlay looks natural; if not, disable it instead of expanding rig scope",
+      "scroll/tap interaction feels responsive",
+      "native TTS/audio lifecycle must still be checked in native build because browser preview cannot prove native platform playback"
+    ],
+    "synthetic_work_remaining": "NONE"
   }
 }
