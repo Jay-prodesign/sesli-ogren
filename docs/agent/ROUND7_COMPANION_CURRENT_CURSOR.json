@@ -3,23 +3,36 @@
   "cursor_id": "R7-COMPANION-PRODUCTION-V2",
   "updated_at": "2026-10-03",
   "active_branch": "feat/round7-companion-production-sequence-v2",
-  "active_phase": "P3A_SINGLE_MASTER_DEFORMATION_PROBE",
-  "active_task": "BLINK_CONTROL_OVERLAY",
-  "task_contract": {
-    "goal": "close blink without introducing a full layered rig",
-    "characters": [
-      "D_Knot",
-      "E_Tilt"
-    ],
-    "output": "small transparent eyelid overlays or equivalent local control; no redraw of whole character",
-    "acceptance": [
-      "eyes can close/reopen without identity drift",
-      "no visible rectangular/elliptical patch at app scale",
-      "works for both D and E with the same control model",
-      "reduced motion can keep blink or slow it",
-      "no limbs or new anatomy"
+  "active_phase": "P7_REAL_FLUTTER_INTEGRATION",
+  "active_task": "WIRE_CANONICAL_D_E_TO_COMPANION_RENDERER",
+  "authority": {
+    "D": "D_STATIC_FALLBACK_512.png",
+    "E": "E_STATIC_FALLBACK_512.png",
+    "anatomy": "0 arms / 0 hands / 0 legs / 0 feet",
+    "semantic_states": [
+      "IDLE",
+      "LISTEN",
+      "THINK",
+      "SPEAK",
+      "CORRECT",
+      "SUCCESS"
     ]
   },
-  "next_after_pass": "P4_REAL_FLUTTER_DEFORMATION_RENDERER",
-  "next_after_fail": "admit only minimal eye-layer authoring, not a full body rig"
+  "v1_motion_contract": {
+    "IDLE": "subtle float/breathe",
+    "LISTEN": "small orient/lean + reduced float",
+    "THINK": "slow tilt/compress",
+    "SPEAK": "bounded rhythmic scale/tilt only while actual audio is active",
+    "CORRECT": "calm small lean + lower amplitude",
+    "SUCCESS": "short lift/expand/bounce then settle"
+  },
+  "acceptance": [
+    "real D/E art replaces proxy through existing renderer seam",
+    "no identity drift",
+    "semantic state remains owned by learning flow",
+    "reduced motion uses static/minimal transform",
+    "asset failure falls back without breaking learning loop",
+    "device QA decides whether deeper facial rig is actually required"
+  ],
+  "layered_face_controls": "BACKLOG_UNLESS_DEVICE_QA_FAILS"
 }
