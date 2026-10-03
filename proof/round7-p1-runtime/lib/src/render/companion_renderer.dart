@@ -29,7 +29,10 @@ abstract interface class CompanionRenderer {
 /// from a flattened PNG is intentionally not faked; blink/lip-sync can be added
 /// later from a properly authored layered source if device evidence justifies it.
 final class RasterCompanionRenderer implements CompanionRenderer {
-  const RasterCompanionRenderer({required this.assetPath, this.motionGain = 1.0});
+  const RasterCompanionRenderer({
+    required this.assetPath,
+    this.motionGain = 1.0,
+  });
 
   const RasterCompanionRenderer.knot()
       : assetPath = 'assets/companions/D_KNOT_128.webp',
@@ -143,7 +146,13 @@ final class KnotProxyCompanionRenderer implements CompanionRenderer {
   }) {
     return CustomPaint(
       key: const Key('companion-canvas'),
-      painter: KnotPainter(state: state, tone: tone, motion: motion, animate: animate, stats: stats),
+      painter: KnotPainter(
+        state: state,
+        tone: tone,
+        motion: motion,
+        animate: animate,
+        stats: stats,
+      ),
     );
   }
 }
