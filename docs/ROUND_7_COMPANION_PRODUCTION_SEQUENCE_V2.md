@@ -70,6 +70,14 @@ Requirements: single character only, transparent alpha, no UI/text/environment, 
 
 **Exit:** identity survives target runtime scale. Do not rig a source that fails here.
 
+### P2.5 — Anatomy normalization gate
+10. Treat existing locked D/E masters as core face/ribbon identity authority, not as complete anatomy authority.
+11. Author one rig-neutral source per character with the shared anatomy explicitly accounted for: 2 arms + 2 hands; 0 legs/feet.
+12. Neutral arms/hands stay close/tucked and must not turn into a greeting pose.
+13. Core face, ribbon geometry family, palette/material and proportions must remain consistent with the locked master and Founder references.
+
+**Exit:** D and E each have an isolated anatomy-normalized rig-neutral source suitable for decomposition without inventing hidden limbs.
+
 ### P3 — Rig/deformation source
 10. Decompose D and E only as far as actual motion requires.
 11. Apply the shared anatomy contract: both D and E have 2 arms + 2 hands; V1 has 0 legs/feet. Limbs may be occluded, never invented per state.
@@ -153,10 +161,11 @@ Requirements: single character only, transparent alpha, no UI/text/environment, 
 
 Verified current state:
 - **P0 Authority freeze/inventory: PASS**
-- **P1 Canonical neutral masters: PASS** — existing D/E locked masters match the Founder reference identity and are clean isolated RGBA sources.
+- **P1 Core identity masters: PASS** — existing D/E locked masters remain face/ribbon identity authority.
 - **P2 Minimal/static size gate: PASS** — 512/256/128 static fallbacks already pass alpha/bounds QA.
-- **P3 Rig/deformation source: IN PROGRESS**
+- **P2.5 Anatomy normalization: IN PROGRESS** — explicit shared 2-arm/2-hand, 0-leg/0-foot rig-neutral sources are still required.
+- **P3 Rig/deformation source: BLOCKED by P2.5**
 
-Current cursor: **P3 — reconstruct the minimum real layered source for D/Knot, then E/Tilt.**
+Current cursor: **P2.5 — create and source-jury D rig-neutral anatomy source, then E.**
 
 Do not regenerate the character identity. Do not multiply state PNGs. The next accepted output must be a real independent layer/control source that participates in neutral recomposition parity.
