@@ -216,7 +216,12 @@ class _SourceBar extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(16, 8, 8, 8),
       child: Row(
         children: [
-          Expanded(child: Text('${f.domainLabel}\n${f.objective}', style: Theme.of(context).textTheme.bodyMedium)),
+          Expanded(
+            child: Text(
+              '${f.domainLabel}\n${f.objective}',
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
+          ),
           TextButton(
             onPressed: () => showModalBottomSheet<void>(
               context: context,
@@ -234,7 +239,10 @@ class _SourceBar extends StatelessWidget {
                     const SizedBox(height: 8),
                     Text(f.source.text),
                     const SizedBox(height: 8),
-                    Text('${f.source.authority}. ${f.source.provenance}', style: Theme.of(context).textTheme.bodySmall),
+                    Text(
+                      '${f.source.authority}. ${f.source.provenance}',
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
                   ],
                 ),
               ),
@@ -248,7 +256,11 @@ class _SourceBar extends StatelessWidget {
 }
 
 class _FlowPanel extends StatelessWidget {
-  const _FlowPanel({required this.controller, required this.reducedMotion, required this.companionRenderer});
+  const _FlowPanel({
+    required this.controller,
+    required this.reducedMotion,
+    required this.companionRenderer,
+  });
 
   final ProofController controller;
   final bool reducedMotion;
@@ -284,7 +296,11 @@ class _FlowPanel extends StatelessWidget {
                 children: [
                   Text(_stepTitle(e.step), style: theme.textTheme.labelLarge),
                   const SizedBox(height: 4),
-                  Text(e.spokenText, key: const Key('transcript'), style: theme.textTheme.bodyLarge),
+                  Text(
+                    e.spokenText,
+                    key: const Key('transcript'),
+                    style: theme.textTheme.bodyLarge,
+                  ),
                   const SizedBox(height: 4),
                   _voiceStatus(context),
                 ],
@@ -294,13 +310,23 @@ class _FlowPanel extends StatelessWidget {
         ),
         const SizedBox(height: 12),
         if (e.step == FlowStep.feedback && b != null) ...[
-          if (b.hint != null && e.evidence == EvidenceState.partial) Text('Hint: ${b.hint}'),
-          Text('Next: ${b.nextAction}', key: const Key('next-action'), style: theme.textTheme.titleSmall),
+          if (b.hint != null && e.evidence == EvidenceState.partial)
+            Text('Hint: ${b.hint}'),
+          Text(
+            'Next: ${b.nextAction}',
+            key: const Key('next-action'),
+            style: theme.textTheme.titleSmall,
+          ),
           Text('reason ${e.reasonCode}', style: theme.textTheme.bodySmall),
           const SizedBox(height: 8),
         ],
-        if (e.step == FlowStep.repairCheck && b?.hint != null && e.evidence == EvidenceState.partial)
-          Padding(padding: const EdgeInsets.only(bottom: 8), child: Text('Hint: ${b!.hint}')),
+        if (e.step == FlowStep.repairCheck &&
+            b?.hint != null &&
+            e.evidence == EvidenceState.partial)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 8),
+            child: Text('Hint: ${b!.hint}'),
+          ),
         ..._actions(context),
       ],
     );
@@ -309,15 +335,28 @@ class _FlowPanel extends StatelessWidget {
   Widget _voiceStatus(BuildContext context) {
     final style = Theme.of(context).textTheme.bodySmall;
     if (!controller.audioAvailable) {
-      return Text('Audio unavailable: text shown instead', key: const Key('audio-status'), style: style);
+      return Text(
+        'Audio unavailable: text shown instead',
+        key: const Key('audio-status'),
+        style: style,
+      );
     }
     return Wrap(
       crossAxisAlignment: WrapCrossAlignment.center,
       children: [
-        Text(controller.speaking ? 'Voice (simulated) speaking' : 'Voice (simulated) idle', style: style),
+        Text(
+          controller.speaking
+              ? 'Voice (simulated) speaking'
+              : 'Voice (simulated) idle',
+          style: style,
+        ),
         if (controller.speaking)
           TextButton(onPressed: controller.stopSpeaking, child: const Text('Stop'))
-        else if (const {FlowStep.orient, FlowStep.teach, FlowStep.repairTeach}.contains(controller.engine.step))
+        else if (const {
+          FlowStep.orient,
+          FlowStep.teach,
+          FlowStep.repairTeach,
+        }.contains(controller.engine.step))
           TextButton(onPressed: controller.replaySpeech, child: const Text('Replay')),
       ],
     );
