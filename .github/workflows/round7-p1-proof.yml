@@ -191,7 +191,8 @@ jobs:
             exit 1
           fi
 
-          flutter devices --device-timeout 60
+          echo "Booted simulator confirmed: $UDID"
+          xcrun simctl list devices | grep "$UDID" || true
 
       - name: Run native flutter_tts lifecycle probe
         run: flutter test integration_test/native_speech_plugin_test.dart -d "${{ steps.sim.outputs.udid }}"
