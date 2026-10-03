@@ -67,11 +67,7 @@ jobs:
           pub-cache: false
 
       - run: flutter pub get
-      - name: Dart format check with diff
-        run: |
-          dart format .
-          git diff -- proof/round7-p1-runtime/test/proof_ui_test.dart
-          git diff --exit-code
+      - run: dart format --output=none --set-exit-if-changed .
       - run: flutter analyze
       - run: flutter test
 

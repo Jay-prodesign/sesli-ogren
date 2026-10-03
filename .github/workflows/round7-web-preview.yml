@@ -1,13 +1,6 @@
 name: round7-phone-preview
 
 on:
-  push:
-    branches:
-      - feat/round7-companion-production-sequence-v2
-    paths:
-      - ".flutter-version"
-      - "proof/round7-p1-runtime/**"
-      - ".github/workflows/round7-web-preview.yml"
   workflow_dispatch:
 
 permissions:

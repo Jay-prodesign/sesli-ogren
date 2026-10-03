@@ -171,19 +171,19 @@
     }
   ],
   "latest_code": {
-    "head_commit": "4ef069a93d3025236d751e2147c70e290ac3aa94",
+    "head_commit": "30a3c2f241fce0d55b582f4ce95ebc3281f27c2f",
     "pr": 8,
     "bootstrap_validation": "PASS",
     "dart_format": "PASS",
     "flutter_analyze": "PASS",
-    "flutter_tests": "PASS",
+    "flutter_tests": "PASS_INCLUDING_P9_PHONE_MATRIX",
     "android_profile_apk": "PASS_ARTIFACT_UPLOADED",
     "ios_profile_compile_no_codesign": "PASS",
-    "workflow_run": 37114564676
+    "workflow_run": 37120853017
   },
   "p9_gate": {
     "status": "ACTIVE",
-    "non_device_evidence": "PASS",
+    "non_device_evidence": "PASS_INCLUDING_IPHONE_PORTRAIT_LANDSCAPE_D_E_MATRIX",
     "required_physical_checks": [
       "D and E identity/readability at target phone scale",
       "IDLE/LISTEN/THINK/SPEAK/CORRECT/SUCCESS motion clarity",
@@ -196,6 +196,19 @@
       "safe-area/clipping/orientation",
       "no unacceptable frame stutter"
     ],
-    "ios_note": "CI compile is no-codesign; installable iOS device validation still needs a signed physical-device path."
+    "ios_note": "CI compile is no-codesign; installable iOS device validation still needs a signed physical-device path.",
+    "synthetic_phone_matrix": {
+      "status": "PASS",
+      "viewports": [
+        "430x932",
+        "932x430"
+      ],
+      "companions": [
+        "D_Knot",
+        "E_Tilt"
+      ],
+      "workflow_run": 37120853017,
+      "source_head": "30a3c2f241fce0d55b582f4ce95ebc3281f27c2f"
+    }
   }
 }

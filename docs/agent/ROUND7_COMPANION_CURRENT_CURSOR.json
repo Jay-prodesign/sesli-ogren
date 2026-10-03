@@ -6,11 +6,11 @@
   "active_phase": "P9_REAL_PHONE_QA",
   "active_task": "VALIDATE_D_E_REAL_DEVICE_LEARNING_LOOP",
   "verified_ci": {
-    "workflow_run": 37114564676,
-    "source_head": "4ef069a93d3025236d751e2147c70e290ac3aa94",
+    "workflow_run": 37120853017,
+    "source_head": "30a3c2f241fce0d55b582f4ce95ebc3281f27c2f",
     "format": "PASS",
     "analyze": "PASS",
-    "flutter_tests": "PASS",
+    "flutter_tests": "PASS_INCLUDING_P9_IPHONE_PORTRAIT_LANDSCAPE_D_E_MATRIX",
     "android_profile_apk": "PASS",
     "ios_profile_compile_no_codesign": "PASS"
   },
@@ -60,7 +60,7 @@
     "public_url_pattern": "https://<random>.trycloudflare.com",
     "cost": "FREE_NO_ACCOUNT_NO_PAID_SERVICE",
     "workflow": ".github/workflows/round7-web-preview.yml",
-    "trigger": "workflow_dispatch or relevant branch push",
+    "trigger": "workflow_dispatch only; open a tunnel only when phone QA is actually requested",
     "url_delivery": "workflow creates learning-app-phone-preview-url artifact before entering keep-alive",
     "lifetime": "approximately 110 minutes while the GitHub Actions keep-alive job remains running",
     "current_verified_run": 37117483272,
@@ -69,6 +69,29 @@
       "GitHub Pages attempt",
       "Statically/jsDelivr/rawgit-style CDN preview"
     ],
-    "native_boundary": "Web preview is the default visual/flow QA surface. Native builds remain required for platform-only TTS/audio lifecycle, signing, native performance and final production-device validation."
+    "native_boundary": "Web preview is the default visual/flow QA surface. Native builds remain required for platform-only TTS/audio lifecycle, signing, native performance and final production-device validation.",
+    "behavior": "On-demand workflow builds the exact Flutter Web proof, opens a free Cloudflare Quick Tunnel, uploads the live URL artifact, then keeps the tunnel alive for about 110 minutes."
+  },
+  "synthetic_p9": {
+    "status": "PASS",
+    "viewport_matrix": [
+      "430x932 portrait",
+      "932x430 landscape"
+    ],
+    "companions": [
+      "D_Knot",
+      "E_Tilt"
+    ],
+    "checks": [
+      "initial render no exception",
+      "canonical companion raster present",
+      "scroll surface present",
+      "challenge reachable",
+      "feedback reachable",
+      "reduced motion settles without running animations",
+      "companion raster remains present"
+    ],
+    "evidence_run": 37120853017,
+    "evidence_commit": "30a3c2f241fce0d55b582f4ce95ebc3281f27c2f"
   }
 }
