@@ -54,12 +54,21 @@
   "next_if_mouth_or_blink_visual_fail": "repair or disable only failing local effect; open layered rig only if a real learning/visual need remains",
   "stop_condition": "physical device validation is required before claiming production asset DONE",
   "preview": {
-    "policy": "WEB_PREVIEW_FIRST_FOR_VISUAL_FLOW_QA_WHEN_WEB_CAN_REPRESENT_THE_BEHAVIOR",
-    "stable_phone_url": "https://cdn.statically.io/gh/Jay-prodesign/sesli-ogren@web-preview/index.html",
-    "source_branch": "feat/round7-companion-production-sequence-v2",
-    "publish_branch": "web-preview",
+    "policy": "GAME_ENGINE_PARITY__FREE_TEMPORARY_PHONE_HTTPS_PREVIEW",
+    "method": "Flutter Web build -> local python3 HTTP server -> Cloudflare cloudflared Quick Tunnel",
+    "provider": "Cloudflare Quick Tunnel",
+    "public_url_pattern": "https://<random>.trycloudflare.com",
+    "cost": "FREE_NO_ACCOUNT_NO_PAID_SERVICE",
     "workflow": ".github/workflows/round7-web-preview.yml",
-    "behavior": "Relevant app/proof changes rebuild and force-publish the same web-preview branch, so the phone URL stays stable.",
-    "native_boundary": "Use Android/iOS native builds in addition to the web preview for platform-only behavior such as native TTS/audio lifecycle, signing, device performance, safe-area/platform differences, and final production-device validation."
+    "trigger": "workflow_dispatch or relevant branch push",
+    "url_delivery": "workflow creates learning-app-phone-preview-url artifact before entering keep-alive",
+    "lifetime": "approximately 110 minutes while the GitHub Actions keep-alive job remains running",
+    "current_verified_run": 37117483272,
+    "current_source_commit": "ad129831421d44a5e45c678b47e11dad83271960",
+    "obsolete_methods": [
+      "GitHub Pages attempt",
+      "Statically/jsDelivr/rawgit-style CDN preview"
+    ],
+    "native_boundary": "Web preview is the default visual/flow QA surface. Native builds remain required for platform-only TTS/audio lifecycle, signing, native performance and final production-device validation."
   }
 }
