@@ -18,13 +18,13 @@ void main() {
     unawaited(
       output.speak(
         'Merhaba. Bu, Sesli Öğren için yerel konuşma yaşam döngüsü testidir.',
-      locale: 'tr-TR',
-      onStart: () {
-        if (!started.isCompleted) started.complete();
-      },
-      onDone: () {
-        if (!completed.isCompleted) completed.complete();
-      },
+        locale: 'tr-TR',
+        onStart: () {
+          if (!started.isCompleted) started.complete();
+        },
+        onDone: () {
+          if (!completed.isCompleted) completed.complete();
+        },
         onError: errors.add,
       ),
     );
@@ -39,11 +39,11 @@ void main() {
     unawaited(
       output.speak(
         'Bu ikinci konuşma, durdurma davranışını doğrulamak için biraz daha uzun tutulmaktadır.',
-      locale: 'tr-TR',
-      onStart: () {
-        if (!interruptedStarted.isCompleted) interruptedStarted.complete();
-      },
-      onDone: () => interruptedDone = true,
+        locale: 'tr-TR',
+        onStart: () {
+          if (!interruptedStarted.isCompleted) interruptedStarted.complete();
+        },
+        onDone: () => interruptedDone = true,
         onError: errors.add,
       ),
     );
