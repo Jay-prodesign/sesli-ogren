@@ -390,37 +390,71 @@ class _FlowPanel extends StatelessWidget {
     );
     switch (e.step) {
       case FlowStep.context:
-        return [primary('Continue', controller.orient, key: const Key('act-primary'))];
+        return [
+          primary('Continue', controller.orient, key: const Key('act-primary')),
+        ];
       case FlowStep.orient || FlowStep.teach || FlowStep.repairTeach:
-        return [primary('Continue', controller.advance, key: const Key('act-primary'))];
+        return [
+          primary('Continue', controller.advance, key: const Key('act-primary')),
+        ];
       case FlowStep.challenge:
         return [
           Text(
             'Simulated learner responses (deterministic fixture evidence):',
             style: Theme.of(context).textTheme.bodySmall,
           ),
-          for (final s in [EvidenceState.strong, EvidenceState.partial, EvidenceState.misconception])
-            secondary('"${e.fixture.responses[s]}"', () => controller.submit(s), key: Key('respond-${wireName(s)}')),
-          secondary('Input interrupted', controller.interrupt, key: const Key('respond-UNKNOWN')),
+          for (final s in [
+            EvidenceState.strong,
+            EvidenceState.partial,
+            EvidenceState.misconception,
+          ])
+            secondary(
+              '"${e.fixture.responses[s]}"',
+              () => controller.submit(s),
+              key: Key('respond-${wireName(s)}'),
+            ),
+          secondary(
+            'Input interrupted',
+            controller.interrupt,
+            key: const Key('respond-UNKNOWN'),
+          ),
         ];
       case FlowStep.evaluating:
-        return const [Padding(padding: EdgeInsets.only(top: 8), child: LinearProgressIndicator())];
+        return const [
+          Padding(
+            padding: EdgeInsets.only(top: 8),
+            child: LinearProgressIndicator(),
+          ),
+        ];
       case FlowStep.feedback:
-        return [primary('Continue', controller.follow, key: const Key('act-primary'))];
+        return [
+          primary('Continue', controller.follow, key: const Key('act-primary')),
+        ];
       case FlowStep.repairCheck:
         final answer = e.branch?.repairAnswer ?? 'Answer';
         return [
-          secondary('"$answer"', () => controller.submitRepair(correct: true), key: const Key('repair-correct')),
+          secondary(
+            '"$answer"',
+            () => controller.submitRepair(correct: true),
+            key: const Key('repair-correct'),
+          ),
           secondary(
             'A different answer',
             () => controller.submitRepair(correct: false),
             key: const Key('repair-incorrect'),
           ),
-          secondary('Input interrupted', controller.interrupt, key: const Key('repair-interrupt')),
+          secondary(
+            'Input interrupted',
+            controller.interrupt,
+            key: const Key('repair-interrupt'),
+          ),
         ];
       case FlowStep.complete:
         return [
-          Text('Session milestone, not permanent mastery. Next: ${e.fixture.nextContinuation}'),
+          Text(
+            'Session milestone, not permanent mastery. '
+            'Next: ${e.fixture.nextContinuation}',
+          ),
           primary('Restart this fixture', controller.restart, key: const Key('act-primary')),
         ];
     }
