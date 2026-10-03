@@ -13,19 +13,18 @@
     "motion_spec": "docs/agent/ROUND7_COMPANION_STATE_POSE_SPEC.json"
   },
   "task_contract": {
-    "output": "minimum limbless D/Knot layered source for real runtime motion",
+    "output": "minimum limbless D/Knot rig: clean base + independent face controls",
     "layers": [
-      "rear_form",
-      "front_form",
-      "face_base",
-      "eye_L_white",
-      "eye_R_white",
+      "base_character_clean",
       "iris_pupil_L",
       "iris_pupil_R",
       "brow_L",
       "brow_R",
-      "mouth",
-      "occlusion_fill"
+      "mouth_neutral",
+      "mouth_speak_A",
+      "mouth_speak_B",
+      "blink_overlay_L",
+      "blink_overlay_R"
     ],
     "preserve": [
       "locked D face/ribbon identity",
@@ -35,12 +34,13 @@
     ],
     "acceptance": [
       "true alpha",
-      "clean overlap",
+      "clean control edges",
       "stable pivots",
       "neutral recomposite parity",
       "0 limbs",
       "no identity drift"
-    ]
+    ],
+    "escalation": "Do not split ribbon/body further unless P5 motion QA proves it necessary."
   },
   "next_after_pass": "P3_E_LAYERED_SOURCE",
   "next_after_both_pass": "P4_NEUTRAL_RECOMPOSITION_PARITY"
