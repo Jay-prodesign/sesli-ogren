@@ -6,8 +6,11 @@ import '../flow/flow_engine.dart';
 import '../scene/fixture.dart';
 import '../scene/scene_schema.dart';
 
-/// Holds the proof session: fixture choice, render tier, accessibility/audio conditions and
-/// simulated capability failures. The benchmark runner drives the same controller as the UI.
+enum CompanionIdentity { knot, tilt }
+
+/// Holds the proof session: fixture choice, companion identity, render tier,
+/// accessibility/audio conditions and simulated capability failures. The benchmark
+/// runner drives the same controller as the UI.
 class ProofController extends ChangeNotifier {
   ProofController(this.fixtures, {this.evaluationDelay = const Duration(milliseconds: 450)})
     : assert(fixtures.isNotEmpty) {
@@ -21,6 +24,7 @@ class ProofController extends ChangeNotifier {
 
   late FlowEngine _engine;
   int _fixtureIndex = 0;
+  CompanionIdentity _companionIdentity = CompanionIdentity.knot;
   FallbackLevel _tier = FallbackLevel.full;
   FallbackLevel? _tierBeforeWorldFailure;
   bool _reducedMotion = false;
@@ -33,6 +37,7 @@ class ProofController extends ChangeNotifier {
 
   FlowEngine get engine => _engine;
   int get fixtureIndex => _fixtureIndex;
+  CompanionIdentity get companionIdentity => _companionIdentity;
   ProofFixture get fixture => fixtures[_fixtureIndex];
   FallbackLevel get tier => _tier;
   bool get reducedMotion => _reducedMotion;
@@ -68,6 +73,13 @@ class ProofController extends ChangeNotifier {
   }
 
   void restart() => selectFixture(_fixtureIndex);
+
+  void setCompanionIdentity(CompanionIdentity identity) {
+    if (identity == _companionIdentity) return;
+    _companionIdentity = identity;
+    _engine.events.add(ProofEvent('companion_identity_selected', fixture.id, fixture.version, detail: identity.name));
+    notifyListeners();
+  }
 
   void setTier(FallbackLevel t, {bool capabilityFailure = false}) {
     _tier = t;
