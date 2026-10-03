@@ -77,26 +77,19 @@ Requirements: single character only, transparent alpha, no UI/text/environment, 
 
 **Exit:** PASS — no additional anatomy source required.
 
-### P3 — Rig/deformation source
-10. Decompose D and E only as far as actual motion requires.
+### P3 — Single-master deformation first; layered rig only on evidence
+10. Start from the canonical flattened D/E masters; do not redraw identities or multiply state PNGs.
 11. Apply the shared anatomy contract: both D and E are fully limbless in V1 (0 arms, 0 hands, 0 legs, 0 feet).
-12. Use `docs/agent/ROUND7_COMPANION_STATE_POSE_SPEC.json` as the state pose/visibility authority.
-13. Minimum controls:
-   - body/ribbon structural deformation
-   - face base where required
-   - eyelid/blink
-   - iris/pupil/gaze
-   - neutral/closed mouth
-   - small speaking mouth set
-14. Do not author limb layers. Gestures use ribbon orientation/deformation or UI emphasis.
+12. Express body states with bounded whole-character translate/rotate/scale/squash-style motion.
+13. A local same-raster mouth warp and a tiny blink overlay may be used as V1 candidates, but device visual QA decides whether either remains.
+14. Destructive layer extraction from flattened art is rejected. A true layered rig is **not a V1 prerequisite** and may be admitted only if real-device QA proves the single-master path cannot satisfy a concrete need.
 
-**Exit:** every required animated component has an isolated source and no identity-changing redraw.
+**Exit:** semantic motion works from canonical art without identity drift. Layered rig stays deferred unless P9 provides evidence for it.
 
-### P4 — Neutral recomposition parity
-13. Recompose each character from the rig layers at neutral.
-14. Compare against its canonical neutral master.
+### P4 — Conditional layered-rig parity gate
+P4 is inactive in the current V1 path. If P9 later requires a layered rig, any authored layers must recompose to the canonical neutral master at app size before they can replace the single-master renderer.
 
-**Exit:** neutral rig reconstruction is visually equivalent at app size. If it drifts, repair the rig/source; do not compensate with runtime effects.
+**Exit when opened:** neutral layered reconstruction is visually equivalent to the canonical master.
 
 ### P5 — Six semantic motion clips
 15. Implement motion from the same rig:
@@ -110,12 +103,13 @@ Requirements: single character only, transparent alpha, no UI/text/environment, 
 
 **Exit:** state changes are readable without separate full-character redraws.
 
-### P6 — Speech controls
-17. Add blink/gaze micro-motion.
-18. Add minimum mouth shapes for speech. V0 does not require phoneme-perfect facial animation.
-19. Mouth state must be driven by actual audio playback state, never by a visual timer alone.
+### P6 — Lean speech controls
+17. Use the canonical raster first: bounded body response plus a local same-raster mouth warp while real playback is active.
+18. A small procedural blink overlay is a device-QA candidate, not a mandatory production feature. Disable it if it looks artificial rather than opening a heavy rig immediately.
+19. V1 does not require phoneme-perfect lip sync, separate viseme sprites, or independent gaze layers.
+20. SPEAK state must be driven by actual audio playback lifecycle callbacks, never by a visual duration guess in the interactive app.
 
-**Exit:** character visibly speaks only while actual audio is active.
+**Exit:** character visibly speaks only while actual audio is active; local visual effects remain only if device QA passes.
 
 ### P7 — Real Flutter integration
 20. Replace the proxy body through the existing `CompanionRenderer` seam.
@@ -160,11 +154,17 @@ Requirements: single character only, transparent alpha, no UI/text/environment, 
 
 Verified current state:
 - **P0 Authority freeze/inventory: PASS**
-- **P1 Core identity masters: PASS** — existing D/E locked masters remain face/ribbon identity authority.
-- **P2 Minimal/static size gate: PASS** — 512/256/128 static fallbacks already pass alpha/bounds QA.
-- **P2.5 Anatomy normalization: PASS** — both V1 companions are limbless; existing locked masters already satisfy the shared anatomy.
-- **P3 Rig/deformation source: IN PROGRESS**
+- **P1 Core identity masters: PASS**
+- **P2 Minimal/static size gate: PASS**
+- **P2.5 Limbless anatomy normalization: PASS**
+- **P3/P4 destructive layered extraction: REJECTED / DEFERRED** — not a V1 blocker.
+- **P5 semantic whole-character motion: IMPLEMENTED / CI PASS**
+- **P6 V1 local mouth warp + blink candidate: IMPLEMENTED / CI PASS; device visual QA pending**
+- **P7 real D/E Flutter integration + identity selector: CI PASS**
+- **P8 product-local device TTS + playback-driven SPEAK lifecycle: CI PASS; real-device runtime QA pending**
+- **Android profile APK build/artifact: PASS**
+- **iOS profile compile without codesign: PASS**
 
-Current cursor: **P3 — reconstruct D/Knot layered source, then E/Tilt, with no limb layers.**
+Current cursor: **P9 — real-phone QA of the actual D/E learning loop.**
 
-Do not regenerate the character identity. Do not multiply state PNGs. The next accepted output must be a real independent layer/control source that participates in neutral recomposition parity.
+Do not regenerate identities, reopen bulk state assets, or build a heavy layered rig unless real-device QA identifies a concrete failure that the lean renderer cannot fix locally.
