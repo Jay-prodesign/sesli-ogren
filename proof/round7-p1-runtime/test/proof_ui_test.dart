@@ -280,65 +280,54 @@ void main() {
     await finish(tester);
   });
 
-  testWidgets(
-    'P9 synthetic phone matrix keeps D/E usable in iPhone portrait and landscape',
-    (tester) async {
-      Future<void> runViewport(Size size, CompanionIdentity identity) async {
-        tester.view.physicalSize = size;
-        tester.view.devicePixelRatio = 1;
-        addTearDown(() {
-          tester.view.resetPhysicalSize();
-          tester.view.resetDevicePixelRatio();
-        });
+  testWidgets('P9 synthetic phone matrix keeps D/E usable in iPhone portrait and landscape', (tester) async {
+    Future<void> runViewport(Size size, CompanionIdentity identity) async {
+      tester.view.physicalSize = size;
+      tester.view.devicePixelRatio = 1;
+      addTearDown(() {
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+      });
 
-        final c = ProofController(fixtures);
-        addTearDown(c.dispose);
-        c.setCompanionIdentity(identity);
-        await tester.pumpWidget(
-          MediaQuery(
-            data: MediaQueryData(
-              size: size,
-              devicePixelRatio: 3,
-              disableAnimations: false,
-            ),
-            child: MaterialApp(home: ProofScreen(controller: c)),
-          ),
-        );
-        await tester.pump();
+      final c = ProofController(fixtures);
+      addTearDown(c.dispose);
+      c.setCompanionIdentity(identity);
+      await tester.pumpWidget(
+        MediaQuery(
+          data: MediaQueryData(size: size, devicePixelRatio: 3, disableAnimations: false),
+          child: MaterialApp(home: ProofScreen(controller: c)),
+        ),
+      );
+      await tester.pump();
 
-        expect(tester.takeException(), isNull, reason: '${identity.name} @ $size initial');
-        expect(find.byKey(const Key('companion-raster')), findsOneWidget);
-        expect(find.byKey(const Key('proof-scroll')), findsOneWidget);
+      expect(tester.takeException(), isNull, reason: '${identity.name} @ $size initial');
+      expect(find.byKey(const Key('companion-raster')), findsOneWidget);
+      expect(find.byKey(const Key('proof-scroll')), findsOneWidget);
 
-        await toChallenge(tester, c);
-        expect(tester.takeException(), isNull, reason: '${identity.name} @ $size challenge');
-        expect(find.byKey(const Key('respond-STRONG')), findsOneWidget);
+      await toChallenge(tester, c);
+      expect(tester.takeException(), isNull, reason: '${identity.name} @ $size challenge');
+      expect(find.byKey(const Key('respond-STRONG')), findsOneWidget);
 
-        await tapKey(tester, 'respond-PARTIAL');
-        expect(c.engine.step, FlowStep.feedback);
-        expect(tester.takeException(), isNull, reason: '${identity.name} @ $size feedback');
+      await tapKey(tester, 'respond-PARTIAL');
+      expect(c.engine.step, FlowStep.feedback);
+      expect(tester.takeException(), isNull, reason: '${identity.name} @ $size feedback');
 
-        c.setReducedMotion(true);
-        await tester.pump();
-        await tester.pumpAndSettle();
-        expect(tester.hasRunningAnimations, isFalse);
-        expect(find.byKey(const Key('companion-raster')), findsOneWidget);
-        expect(
-          tester.takeException(),
-          isNull,
-          reason: '${identity.name} @ $size reduced motion',
-        );
+      c.setReducedMotion(true);
+      await tester.pump();
+      await tester.pumpAndSettle();
+      expect(tester.hasRunningAnimations, isFalse);
+      expect(find.byKey(const Key('companion-raster')), findsOneWidget);
+      expect(tester.takeException(), isNull, reason: '${identity.name} @ $size reduced motion');
 
-        await finish(tester);
+      await finish(tester);
+    }
+
+    for (final size in const [Size(430, 932), Size(932, 430)]) {
+      for (final identity in CompanionIdentity.values) {
+        await runViewport(size, identity);
       }
-
-      for (final size in const [Size(430, 932), Size(932, 430)]) {
-        for (final identity in CompanionIdentity.values) {
-          await runViewport(size, identity);
-        }
-      }
-    },
-  );
+    }
+  });
 
   testWidgets('B13: switching fixtures repeatedly does not leak animation controllers', (tester) async {
     final c = await pumpProof(tester);
