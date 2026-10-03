@@ -42,8 +42,7 @@ class _NativeSpeechQaScreenState extends State<NativeSpeechQaScreen> {
     setState(() => _timeline.add(value));
   }
 
-  int get _audioErrorCount =>
-      controller.engine.events.where((event) => event.name == 'audio_unavailable').length;
+  int get _audioErrorCount => controller.engine.events.where((event) => event.name == 'audio_unavailable').length;
 
   Future<void> _run() async {
     if (_running) return;

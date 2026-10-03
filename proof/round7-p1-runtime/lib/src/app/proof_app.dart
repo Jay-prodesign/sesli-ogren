@@ -45,9 +45,7 @@ class _ProofAppState extends State<ProofApp> {
           : ProofScreen(
               controller: _controller,
               onOpenNativeSpeechQa: () => _navigator.currentState!.push(
-                MaterialPageRoute<void>(
-                  builder: (_) => NativeSpeechQaScreen(controller: _controller),
-                ),
+                MaterialPageRoute<void>(builder: (_) => NativeSpeechQaScreen(controller: _controller)),
               ),
               onOpenBenchmark: () => _navigator.currentState!.push(
                 MaterialPageRoute<void>(
