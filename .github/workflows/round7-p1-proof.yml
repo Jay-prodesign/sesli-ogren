@@ -67,7 +67,12 @@ jobs:
           pub-cache: false
 
       - run: flutter pub get
-      - run: dart format --output=none --set-exit-if-changed .
+      - name: Dart format check with native QA diff
+        run: |
+          dart format .
+          git diff -- proof/round7-p1-runtime/lib/src/app/proof_app.dart
+          git diff -- proof/round7-p1-runtime/lib/src/qa/native_speech_qa_screen.dart
+          git diff --exit-code
       - run: flutter analyze
       - run: flutter test
 
