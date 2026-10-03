@@ -22,12 +22,7 @@ abstract interface class CompanionRenderer {
 }
 
 final class _RasterProfile {
-  const _RasterProfile({
-    required this.mouthRect,
-    required this.eyeRects,
-    required this.skin,
-    required this.lash,
-  });
+  const _RasterProfile({required this.mouthRect, required this.eyeRects, required this.skin, required this.lash});
 
   /// Normalized to the source image canvas.
   final Rect mouthRect;
@@ -60,37 +55,27 @@ final class _MotionPose {
 /// A heavier layered rig is admitted only if device QA proves this path
 /// insufficient.
 final class RasterCompanionRenderer implements CompanionRenderer {
-  const RasterCompanionRenderer({
-    required this.assetPath,
-    required this.profile,
-    this.motionGain = 1.0,
-  });
+  const RasterCompanionRenderer({required this.assetPath, required this.profile, this.motionGain = 1.0});
 
   const RasterCompanionRenderer.knot()
-      : assetPath = 'assets/companions/D_KNOT_128.webp',
-        motionGain = 0.85,
-        profile = const _RasterProfile(
-          mouthRect: Rect.fromLTRB(0.523, 0.447, 0.657, 0.560),
-          eyeRects: [
-            Rect.fromLTRB(0.416, 0.420, 0.558, 0.531),
-            Rect.fromLTRB(0.557, 0.345, 0.691, 0.448),
-          ],
-          skin: Color(0xFFF3E2DE),
-          lash: Color(0xFF171C4A),
-        );
+    : assetPath = 'assets/companions/D_KNOT_128.webp',
+      motionGain = 0.85,
+      profile = const _RasterProfile(
+        mouthRect: Rect.fromLTRB(0.523, 0.447, 0.657, 0.560),
+        eyeRects: [Rect.fromLTRB(0.416, 0.420, 0.558, 0.531), Rect.fromLTRB(0.557, 0.345, 0.691, 0.448)],
+        skin: Color(0xFFF3E2DE),
+        lash: Color(0xFF171C4A),
+      );
 
   const RasterCompanionRenderer.tilt()
-      : assetPath = 'assets/companions/E_TILT_128.webp',
-        motionGain = 1.0,
-        profile = const _RasterProfile(
-          mouthRect: Rect.fromLTRB(0.507, 0.398, 0.630, 0.507),
-          eyeRects: [
-            Rect.fromLTRB(0.374, 0.361, 0.512, 0.466),
-            Rect.fromLTRB(0.541, 0.318, 0.670, 0.419),
-          ],
-          skin: Color(0xFFF6E2E4),
-          lash: Color(0xFF4B1E62),
-        );
+    : assetPath = 'assets/companions/E_TILT_128.webp',
+      motionGain = 1.0,
+      profile = const _RasterProfile(
+        mouthRect: Rect.fromLTRB(0.507, 0.398, 0.630, 0.507),
+        eyeRects: [Rect.fromLTRB(0.374, 0.361, 0.512, 0.466), Rect.fromLTRB(0.541, 0.318, 0.670, 0.419)],
+        skin: Color(0xFFF6E2E4),
+        lash: Color(0xFF4B1E62),
+      );
 
   final String assetPath;
   final double motionGain;
@@ -125,8 +110,7 @@ final class RasterCompanionRenderer implements CompanionRenderer {
           CompanionState.success => _MotionPose(0.0, 0.0, -2.2 * pulse * gain, 1.025 + 0.018 * pulse * gain),
         };
 
-        final mouthScaleY =
-            state == CompanionState.speak && animate ? 0.86 + 0.24 * pulse : 1.0;
+        final mouthScaleY = state == CompanionState.speak && animate ? 0.86 + 0.24 * pulse : 1.0;
         final blinkClosed = animate && _blinkClosed(t);
 
         Widget raster({Key? key}) {
@@ -165,11 +149,7 @@ final class RasterCompanionRenderer implements CompanionRenderer {
                   child: raster(),
                 ),
               ),
-            if (blinkClosed)
-              CustomPaint(
-                key: const Key('companion-blink-overlay'),
-                painter: _BlinkPainter(profile),
-              ),
+            if (blinkClosed) CustomPaint(key: const Key('companion-blink-overlay'), painter: _BlinkPainter(profile)),
           ],
         );
 
@@ -228,23 +208,13 @@ final class _BlinkPainter extends CustomPainter {
       ..color = profile.lash;
 
     for (final n in profile.eyeRects) {
-      final r = Rect.fromLTRB(
-        n.left * size.width,
-        n.top * size.height,
-        n.right * size.width,
-        n.bottom * size.height,
-      );
+      final r = Rect.fromLTRB(n.left * size.width, n.top * size.height, n.right * size.width, n.bottom * size.height);
       canvas.drawOval(r, skin);
 
       final y = r.center.dy + r.height * 0.03;
       final p = Path()
         ..moveTo(r.left + r.width * 0.18, y)
-        ..quadraticBezierTo(
-          r.center.dx,
-          y + r.height * 0.22,
-          r.right - r.width * 0.18,
-          y,
-        );
+        ..quadraticBezierTo(r.center.dx, y + r.height * 0.22, r.right - r.width * 0.18, y);
       canvas.drawPath(p, lash);
     }
   }
@@ -267,13 +237,7 @@ final class KnotProxyCompanionRenderer implements CompanionRenderer {
   }) {
     return CustomPaint(
       key: const Key('companion-canvas'),
-      painter: KnotPainter(
-        state: state,
-        tone: tone,
-        motion: motion,
-        animate: animate,
-        stats: stats,
-      ),
+      painter: KnotPainter(state: state, tone: tone, motion: motion, animate: animate, stats: stats),
     );
   }
 }
