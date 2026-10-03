@@ -33,7 +33,7 @@
     "P9_REAL_PHONE_QA": "PHYSICAL_NATIVE_ONLY_REMAINS",
     "P10_SECONDARY_ASSETS": "LATER",
     "P2_5_ANATOMY_NORMALIZATION": "PASS_NO_EXTRA_ASSET_REQUIRED",
-    "P3A_SINGLE_MASTER_DEFORMATION_PROBE": "IMPLEMENTED_CI_PASS__DEVICE_VISUAL_QA_PENDING",
+    "P3A_SINGLE_MASTER_DEFORMATION_PROBE": "PASS_SYNTHETIC_VISUAL_AND_MOTION_QA__PHYSICAL_NATIVE_GATE_REMAINS",
     "P3B_LAYERED_RIG_FALLBACK": "NOT_ADMITTED_UNLESS_P9_VISUAL_QA_FAILS"
   },
   "assets": {
@@ -66,9 +66,9 @@
     "runtime_controls": [
       "whole_character_translate_scale_rotate",
       "bounded_squash_stretch",
-      "local_eye_blink_warp",
       "local_mouth_speech_warp",
-      "state_specific_tilt_compress_expand"
+      "state_specific_tilt_compress_expand",
+      "blink_disabled_v1_after_visual_qa_fail"
     ],
     "identity_rule": "Never redraw the character to express a state.",
     "fallback_if_failed": "Layered face-control authoring only if visual/device QA proves single-master deformation insufficient.",
@@ -85,7 +85,7 @@
     "mouth_controls": "PASS_CLEAN_SUBTLE_SYNTHETIC_VISUAL_QA",
     "real_tts_playback": "IMPLEMENTED_CI_PASS__DEVICE_RUNTIME_QA_PENDING",
     "audio_visual_synchronization": "IMPLEMENTED_CI_PASS__SPEAK_FOLLOWS_REAL_TTS_START_DONE_STOP_ERROR_CALLBACKS",
-    "real_phone_QA": "PHYSICAL_NATIVE_TTS_AUDIO_AND_REAL_DEVICE_SMOOTHNESS_ONLY",
+    "real_phone_QA": "ONLY_PHYSICAL_NATIVE_TTS_SMOOTHNESS_SAFE_AREA_REMAINS",
     "body_state_motion": "PASS_SYNTHETIC_MULTI_FRAME_VISUAL_QA",
     "v1_visual_strategy": "canonical flattened D/E + semantic whole-character motion",
     "face_layer_rig": "LATER_IF_DEVICE_QA_PROVES_NEEDED",
