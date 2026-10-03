@@ -169,7 +169,7 @@ class _ProofBanner extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
       child: const Text(
         'Proof only, not production UI. Evidence classes are simulated fixture responses; the '
-        'Companion uses the Founder-selected D/Knot or E/Tilt raster identity; voice is still simulated (no TTS).',
+        'Companion uses the Founder-selected D/Knot or E/Tilt raster identity; mobile uses native Turkish OS speech.',
         style: TextStyle(fontSize: 12),
       ),
     );
@@ -286,7 +286,12 @@ class _FlowPanel extends StatelessWidget {
     return Wrap(
       crossAxisAlignment: WrapCrossAlignment.center,
       children: [
-        Text(controller.speaking ? 'Voice (simulated) speaking' : 'Voice (simulated) idle', style: style),
+        Text(
+          controller.speaking
+              ? '${controller.usesNativeSpeech ? 'Native Turkish voice' : 'Voice (simulated)'} speaking'
+              : '${controller.usesNativeSpeech ? 'Native Turkish voice' : 'Voice (simulated)'} idle',
+          style: style,
+        ),
         if (controller.speaking)
           TextButton(onPressed: controller.stopSpeaking, child: const Text('Stop'))
         else if (const {FlowStep.orient, FlowStep.teach, FlowStep.repairTeach}.contains(controller.engine.step))
