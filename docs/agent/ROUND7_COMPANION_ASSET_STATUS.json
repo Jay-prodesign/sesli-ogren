@@ -1,0 +1,87 @@
+{
+  "schema_version": 1,
+  "project": "Learning App",
+  "workstream": "Round 7 Companion Production",
+  "updated_at": "2026-10-03",
+  "active_branch": "feat/round7-companion-production-sequence-v2",
+  "visual_authority": {
+    "status": "FOUNDER_REFERENCE_SET_FROZEN",
+    "library_path": "/Learning App/Founder References/2026-10-03",
+    "refs": [
+      "DE_IDENTITY_SYSTEM_FOUNDER_REF_01.jpeg",
+      "DE_COMPANION_SYSTEM_FOUNDER_REF_02.jpeg",
+      "DE_HOME_CONTEXT_FOUNDER_REF_03.jpeg",
+      "DE_SCALE_CONTEXT_FOUNDER_REF_04.jpeg"
+    ]
+  },
+  "execution_mode": "LEAN_APP_FIRST",
+  "current_cursor": "P1_D_MASTER_NEUTRAL",
+  "assets": {
+    "D_MASTER_NEUTRAL": {
+      "status": "MISSING_CURRENT_AUTHORITY_SOURCE",
+      "next": true
+    },
+    "E_MASTER_NEUTRAL": {
+      "status": "MISSING_CURRENT_AUTHORITY_SOURCE"
+    },
+    "E_GREETING_WAVE": {
+      "status": "CANDIDATE_ONLY_NOT_PRODUCTION_PASS"
+    },
+    "D_RIG_SOURCE": {
+      "status": "BLOCKED_BY_NEUTRAL_MASTER"
+    },
+    "E_RIG_SOURCE": {
+      "status": "BLOCKED_BY_NEUTRAL_MASTER"
+    },
+    "D_STATIC_DERIVATIVES": {
+      "status": "BLOCKED_BY_CURRENT_NEUTRAL_MASTER"
+    },
+    "E_STATIC_DERIVATIVES": {
+      "status": "BLOCKED_BY_CURRENT_NEUTRAL_MASTER"
+    },
+    "SECONDARY_POSES": {
+      "status": "LATER_AFTER_DEVICE_PASS"
+    }
+  },
+  "runtime": {
+    "companion_renderer_seam": "READY",
+    "semantic_states": "READY",
+    "flow_to_state_mapping": "READY",
+    "reduced_motion_and_fallback": "READY",
+    "proxy_motion_language": "READY_AS_REFERENCE",
+    "real_DE_renderer": "MISSING",
+    "blink_gaze_controls": "MISSING",
+    "mouth_controls": "MISSING",
+    "real_tts_playback": "MISSING",
+    "audio_visual_synchronization": "MISSING",
+    "real_phone_QA": "MISSING"
+  },
+  "semantic_states": [
+    "IDLE",
+    "LISTEN",
+    "THINK",
+    "SPEAK",
+    "CORRECT",
+    "SUCCESS"
+  ],
+  "ordered_phases": [
+    "P0_AUTHORITY_AND_INVENTORY",
+    "P1_NEUTRAL_MASTERS",
+    "P2_MINIMAL_SIZE_GATE",
+    "P3_RIG_DECOMPOSITION",
+    "P4_NEUTRAL_RECOMPOSITION_PARITY",
+    "P5_SEMANTIC_MOTION_CLIPS",
+    "P6_SPEECH_CONTROLS",
+    "P7_REAL_FLUTTER_INTEGRATION",
+    "P8_REAL_TTS_LINKAGE",
+    "P9_REAL_PHONE_QA",
+    "P10_SECONDARY_ASSETS"
+  ],
+  "prohibited_shortcuts": [
+    "ASSET_SHEET_INSTEAD_OF_ISOLATED_SOURCE",
+    "BULK_STATE_PNG_MULTIPLICATION_BEFORE_RIG_PARITY",
+    "SECONDARY_POSES_BEFORE_MINIMUM_RUNTIME_PASS",
+    "VISUAL_LAYER_OWNS_LEARNING_TRUTH",
+    "CLAIM_DONE_BEFORE_DEVICE_QA"
+  ]
+}
