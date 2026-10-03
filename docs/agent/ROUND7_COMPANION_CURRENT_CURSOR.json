@@ -52,5 +52,14 @@
   ],
   "next_after_pass": "P10_MINIMUM_COMPANION_LOOP_PASS; secondary assets remain optional/backlog",
   "next_if_mouth_or_blink_visual_fail": "repair or disable only failing local effect; open layered rig only if a real learning/visual need remains",
-  "stop_condition": "physical device validation is required before claiming production asset DONE"
+  "stop_condition": "physical device validation is required before claiming production asset DONE",
+  "preview": {
+    "policy": "WEB_PREVIEW_FIRST_FOR_VISUAL_FLOW_QA_WHEN_WEB_CAN_REPRESENT_THE_BEHAVIOR",
+    "stable_phone_url": "https://cdn.statically.io/gh/Jay-prodesign/sesli-ogren@web-preview/index.html",
+    "source_branch": "feat/round7-companion-production-sequence-v2",
+    "publish_branch": "web-preview",
+    "workflow": ".github/workflows/round7-web-preview.yml",
+    "behavior": "Relevant app/proof changes rebuild and force-publish the same web-preview branch, so the phone URL stays stable.",
+    "native_boundary": "Use Android/iOS native builds in addition to the web preview for platform-only behavior such as native TTS/audio lifecycle, signing, device performance, safe-area/platform differences, and final production-device validation."
+  }
 }
