@@ -19,7 +19,7 @@
       "E": "E_MASTER_LOCKED.png"
     }
   },
-  "current_cursor": "P7_REAL_FLUTTER_INTEGRATION_STATIC_MOTION",
+  "current_cursor": "VERIFY_D_E_RENDERER_CI",
   "phases": {
     "P0_AUTHORITY_AND_INVENTORY": "PASS",
     "P1_NEUTRAL_MASTERS": "PASS_CORE_IDENTITY",
@@ -80,7 +80,7 @@
     "flow_to_state_mapping": "READY",
     "reduced_motion_and_fallback": "READY",
     "proxy_motion_language": "READY_AS_REFERENCE",
-    "real_DE_renderer": "IN_PROGRESS_CANONICAL_RASTER",
+    "real_DE_renderer": "IMPLEMENTED_CI_PENDING",
     "blink_gaze_controls": "BACKLOG_AFTER_DEVICE_NEED_VALIDATION",
     "mouth_controls": "BACKLOG_AFTER_DEVICE_NEED_VALIDATION",
     "real_tts_playback": "NEXT",
@@ -89,7 +89,9 @@
     "body_state_motion": "READY_TO_IMPLEMENT",
     "v1_visual_strategy": "canonical flattened D/E + semantic whole-character motion",
     "face_layer_rig": "LATER_IF_DEVICE_QA_PROVES_NEEDED",
-    "speaking_v1": "real audio playback drives SPEAK body/ribbon motion; phoneme lip-sync not V1 blocker"
+    "speaking_v1": "real audio playback drives SPEAK body/ribbon motion; phoneme lip-sync not V1 blocker",
+    "identity_selector": "IMPLEMENTED_CI_PENDING",
+    "semantic_state_mapping_to_raster_motion": "IMPLEMENTED_CI_PENDING"
   },
   "semantic_states": [
     "IDLE",
@@ -167,5 +169,11 @@
       "version": "D_KNOT_RIG_V2",
       "reason": "clean base exposes artificial eye/mouth patches; numeric parity hides visual defect"
     }
-  ]
+  ],
+  "latest_code": {
+    "D_E_selector_commit": "cac99e01dd4696afdcf79b3297d2a6b4ab1dd45c",
+    "pr": 8,
+    "bootstrap_validation": "PASS",
+    "round7_p1_proof": "IN_PROGRESS"
+  }
 }
