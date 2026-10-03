@@ -19,15 +19,15 @@
       "E": "E_MASTER_LOCKED.png"
     }
   },
-  "current_cursor": "P3A_BLINK_CONTROL",
+  "current_cursor": "P7_REAL_FLUTTER_INTEGRATION_STATIC_MOTION",
   "phases": {
     "P0_AUTHORITY_AND_INVENTORY": "PASS",
     "P1_NEUTRAL_MASTERS": "PASS_CORE_IDENTITY",
     "P2_MINIMAL_SIZE_GATE": "PASS_CORE_IDENTITY_STATIC",
-    "P3_RIG_DECOMPOSITION": "BACKLOG_AFTER_RUNTIME_NEED_VALIDATION",
-    "P4_NEUTRAL_RECOMPOSITION_PARITY": "BACKLOG_WITH_LAYERED_RIG",
-    "P5_SEMANTIC_MOTION_CLIPS": "IN_PROGRESS_WHOLE_CHARACTER",
-    "P6_SPEECH_CONTROLS": "DEFER_FACE_RIG__BODY_SPEAK_MOTION_NOW",
+    "P3_RIG_DECOMPOSITION": "DEFERRED_AFTER_QA_FAIL__NOT_V1_BLOCKER",
+    "P4_NEUTRAL_RECOMPOSITION_PARITY": "DEFERRED_WITH_P3",
+    "P5_SEMANTIC_MOTION_CLIPS": "IN_PROGRESS_ON_FLATTENED_CANONICAL_ASSETS",
+    "P6_SPEECH_CONTROLS": "V1_BODY_MOTION_FIRST__FACE_CONTROLS_LATER_IF_NEEDED",
     "P7_REAL_FLUTTER_INTEGRATION": "IN_PROGRESS",
     "P8_REAL_TTS_LINKAGE": "NEXT_AFTER_RENDERER",
     "P9_REAL_PHONE_QA": "BLOCKED_BY_P7_P8",
@@ -51,8 +51,8 @@
     "E_STATIC_FALLBACK_512_256_128": "PASS_STATIC_FALLBACK",
     "D_RIG_BASE": "PASS",
     "E_RIG_BASE": "PASS",
-    "D_LAYERED_SOURCE": "MISSING_RECONSTRUCTION",
-    "E_LAYERED_SOURCE": "MISSING_RECONSTRUCTION",
+    "D_LAYERED_SOURCE": "REJECTED_TECHNICAL_EXTRACTION_V0_V2__DEFERRED",
+    "E_LAYERED_SOURCE": "NOT_STARTED__DEFERRED_UNLESS_DEVICE_QA_REQUIRES",
     "D_FACE_CONTROLS": "MISSING",
     "E_FACE_CONTROLS": "MISSING",
     "SECONDARY_POSES": "LATER_AFTER_DEVICE_PASS"
@@ -86,7 +86,10 @@
     "real_tts_playback": "NEXT",
     "audio_visual_synchronization": "NEXT_WITH_TTS",
     "real_phone_QA": "MISSING",
-    "body_state_motion": "READY_TO_IMPLEMENT"
+    "body_state_motion": "READY_TO_IMPLEMENT",
+    "v1_visual_strategy": "canonical flattened D/E + semantic whole-character motion",
+    "face_layer_rig": "LATER_IF_DEVICE_QA_PROVES_NEEDED",
+    "speaking_v1": "real audio playback drives SPEAK body/ribbon motion; phoneme lip-sync not V1 blocker"
   },
   "semantic_states": [
     "IDLE",
@@ -154,5 +157,15 @@
       "blink": "CHANGES_REQUIRED",
       "stored_at": "/Learning App Runtime Assets/Probes/2026-10-03/E_TILT_SINGLE_MASTER_PROBE.zip"
     }
-  }
+  },
+  "extraction_rejections": [
+    {
+      "version": "D_KNOT_RIG_V0",
+      "reason": "mask/inpaint artifacts"
+    },
+    {
+      "version": "D_KNOT_RIG_V2",
+      "reason": "clean base exposes artificial eye/mouth patches; numeric parity hides visual defect"
+    }
+  ]
 }
