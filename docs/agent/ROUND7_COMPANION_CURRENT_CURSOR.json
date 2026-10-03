@@ -10,24 +10,29 @@
     "rig_base": "D_RIG_SOURCE_BASE_LOCKED.png",
     "blueprint": "D_LAYER_RECONSTRUCTION_BLUEPRINT.json",
     "workspace_manifest": "D_LAYER_WORKSPACE_MANIFEST.json",
-    "runtime_contract": "COMPANION_RIG_RUNTIME_CONTRACT.json"
+    "runtime_contract": "COMPANION_RIG_RUNTIME_CONTRACT.json",
+    "anatomy_contract": "docs/agent/ROUND7_COMPANION_ANATOMY_CONTRACT.json"
   },
   "task_contract": {
-    "output": "minimum D layered source required for real motion; no redesign",
+    "output": "minimum D layered source with stable shared two-arm/two-hand anatomy; no redesign",
     "reconstruction_order": [
-      "preserve locked silhouette and neutral master",
-      "face base + removable eye/brow/mouth controls",
-      "only body/foreground regions that must deform independently",
-      "hidden overlap/occlusion fill under moving regions",
-      "assign pivots and overlap margins",
-      "neutral recomposite parity"
+      "preserve locked core face/ribbon identity and silhouette",
+      "author stable hidden/tucked arm_L+hand_L and arm_R+hand_R anatomy",
+      "rebuild clean face base + removable eye/brow/mouth controls",
+      "separate only ribbon/body regions that actually need deformation",
+      "paint hidden overlap/occlusion fill beneath moving regions",
+      "assign stable left/right pivots and overlap margins",
+      "neutral recomposite against locked master at app scale",
+      "reject any anatomy or identity drift"
     ],
     "acceptance": [
       "true alpha",
       "clean overlap",
       "pivot assigned",
       "neutral recomposite parity",
-      "no identity drift"
+      "no identity drift",
+      "2 arms + 2 hands accounted for even when occluded",
+      "0 legs/feet in every V1 state"
     ]
   },
   "next_after_pass": "P3_E_LAYERED_SOURCE",
