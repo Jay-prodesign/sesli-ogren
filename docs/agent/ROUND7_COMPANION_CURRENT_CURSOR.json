@@ -3,38 +3,49 @@
   "cursor_id": "R7-COMPANION-PRODUCTION-V2",
   "updated_at": "2026-10-03",
   "active_branch": "feat/round7-companion-production-sequence-v2",
-  "active_phase": "P3_RIG_DECOMPOSITION",
-  "active_task": "D_LAYERED_SOURCE",
-  "known_inputs": {
-    "identity_source": "D_MASTER_LOCKED.png",
-    "rig_base": "D_RIG_SOURCE_BASE_LOCKED.png",
-    "blueprint": "D_LAYER_RECONSTRUCTION_BLUEPRINT.json",
-    "workspace_manifest": "D_LAYER_WORKSPACE_MANIFEST.json",
-    "runtime_contract": "COMPANION_RIG_RUNTIME_CONTRACT.json",
-    "anatomy_contract": "docs/agent/ROUND7_COMPANION_ANATOMY_CONTRACT.json"
+  "active_phase": "P2_5_ANATOMY_NORMALIZATION",
+  "active_task": "D_RIG_NEUTRAL_SOURCE",
+  "authority": {
+    "core_identity_D": "D_MASTER_LOCKED.png",
+    "core_identity_E": "E_MASTER_LOCKED.png",
+    "founder_refs": "/Learning App/Founder References/2026-10-03",
+    "anatomy_contract": "docs/agent/ROUND7_COMPANION_ANATOMY_CONTRACT.json",
+    "pose_spec": "docs/agent/ROUND7_COMPANION_STATE_POSE_SPEC.json"
   },
   "task_contract": {
-    "output": "minimum D layered source with stable shared two-arm/two-hand anatomy; no redesign",
-    "reconstruction_order": [
-      "preserve locked core face/ribbon identity and silhouette",
-      "author stable hidden/tucked arm_L+hand_L and arm_R+hand_R anatomy",
-      "rebuild clean face base + removable eye/brow/mouth controls",
-      "separate only ribbon/body regions that actually need deformation",
-      "paint hidden overlap/occlusion fill beneath moving regions",
-      "assign stable left/right pivots and overlap margins",
-      "neutral recomposite against locked master at app scale",
-      "reject any anatomy or identity drift"
+    "output": "one isolated D/Knot rig-neutral source with explicit stable anatomy",
+    "preserve": [
+      "D face identity",
+      "blue knot/ribbon geometry family",
+      "palette/material",
+      "overall proportion",
+      "neutral friendly personality"
     ],
+    "add_or_normalize": [
+      "arm_L",
+      "hand_L",
+      "arm_R",
+      "hand_R"
+    ],
+    "forbid": [
+      "legs",
+      "feet",
+      "extra limbs",
+      "UI",
+      "text",
+      "environment",
+      "baked feedback effects"
+    ],
+    "pose": "both arms/hands relaxed and tucked close to body; no greeting/wave",
     "acceptance": [
-      "true alpha",
-      "clean overlap",
-      "pivot assigned",
-      "neutral recomposite parity",
-      "no identity drift",
-      "2 arms + 2 hands accounted for even when occluded",
-      "0 legs/feet in every V1 state"
+      "2 arms + 2 hands anatomically accounted for",
+      "0 legs/feet",
+      "core identity parity against D_MASTER_LOCKED",
+      "matches Founder reference anatomy language",
+      "single isolated source with transparent alpha",
+      "usable for layer decomposition without inventing hidden anatomy"
     ]
   },
-  "next_after_pass": "P3_E_LAYERED_SOURCE",
-  "next_after_fail": "repair only failing D layer; do not regenerate identity"
+  "next_after_pass": "E_RIG_NEUTRAL_SOURCE",
+  "next_after_both_pass": "P3_D_LAYERED_SOURCE"
 }
