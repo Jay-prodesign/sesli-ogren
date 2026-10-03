@@ -34,7 +34,7 @@
     "renderer": "canonical raster + bounded whole-character semantic motion",
     "speech": "product-local device TTS",
     "speaking_rule": "SPEAK begins on real playback start and settles on completion/stop/error",
-    "mouth": "local same-raster mouth warp; visual QA pending",
+    "mouth": "PASS_CLEAN_SUBTLE_SYNTHETIC_VISUAL_QA",
     "blink": "DISABLED_AFTER_VISUAL_QA_FAIL",
     "layered_rig": "DEFERRED_UNLESS_DEVICE_QA_PROVES_NEEDED"
   },
@@ -48,13 +48,12 @@
     "transcript and learning loop remain usable when audio fails",
     "D/E selection changes identity only, not learning state",
     "Reduced Motion removes continuous/local animation as intended",
-    "mouth warp looks natural on both D and E",
-    "blink overlay looks natural on both D and E; otherwise disable/defer rather than open a heavy rig",
+    "mouth warp synthetic visual QA passed; physical device only checks perceived naturalness during real TTS",
     "frame smoothness and input responsiveness are acceptable"
   ],
   "next_after_pass": "P10_MINIMUM_COMPANION_LOOP_PASS; secondary assets remain optional/backlog",
   "next_if_mouth_or_blink_visual_fail": "repair or disable only failing local effect; open layered rig only if a real learning/visual need remains",
-  "stop_condition": "Physical native-device validation is the only remaining companion-production gate.",
+  "stop_condition": "Only physical native-device TTS/audio lifecycle, real-device smoothness/input responsiveness and native safe-area/orientation remain.",
   "preview": {
     "policy": "GAME_ENGINE_PARITY__FREE_TEMPORARY_PHONE_HTTPS_PREVIEW",
     "method": "Flutter Web build -> local python3 HTTP server -> Cloudflare cloudflared Quick Tunnel",
@@ -73,8 +72,8 @@
     ],
     "native_boundary": "Web preview is the default visual/flow QA surface. Native builds remain required for platform-only TTS/audio lifecycle, signing, native performance and final production-device validation.",
     "behavior": "On-demand workflow builds the exact Flutter Web proof, opens a free Cloudflare Quick Tunnel, uploads the live URL artifact, then keeps the tunnel alive for about 110 minutes.",
-    "current_status": "LIVE_KEEPALIVE",
-    "note": "The current live preview source contains the P9 synthetic phone matrix PASS app code. Later branch changes are workflow/docs-only and do not alter the rendered app."
+    "current_status": "ON_DEMAND_NOT_ASSUMED_LIVE",
+    "note": "Preview is manual/on-demand. Do not treat an old trycloudflare URL as live authority; launch a fresh workflow when a phone visual check is needed."
   },
   "synthetic_p9": {
     "status": "PASS",
