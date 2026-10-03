@@ -143,7 +143,6 @@ final class RasterCompanionRenderer implements CompanionRenderer {
       },
     );
   }
-
 }
 
 final class _NormalizedOvalClipper extends CustomClipper<Path> {
