@@ -123,13 +123,7 @@ final class RasterCompanionRenderer implements CompanionRenderer {
             errorBuilder: (context, error, stackTrace) => key == null
                 ? const SizedBox.shrink()
                 : CustomPaint(
-                    painter: KnotPainter(
-                      state: state,
-                      tone: tone,
-                      motion: motion,
-                      animate: animate,
-                      stats: stats,
-                    ),
+                    painter: KnotPainter(state: state, tone: tone, motion: motion, animate: animate, stats: stats),
                   ),
           );
         }
