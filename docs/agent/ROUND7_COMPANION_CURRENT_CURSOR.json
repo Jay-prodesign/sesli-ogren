@@ -1,0 +1,30 @@
+{
+  "project": "Learning App",
+  "cursor_id": "R7-COMPANION-PRODUCTION-V2",
+  "updated_at": "2026-10-03",
+  "active_branch": "feat/round7-companion-production-sequence-v2",
+  "active_phase": "P1_NEUTRAL_MASTERS",
+  "active_task": "D_MASTER_NEUTRAL",
+  "task_contract": {
+    "input_authority": "Founder reference set 2026-10-03",
+    "output": "one isolated D/Knot neutral master",
+    "requirements": [
+      "single D/Knot only",
+      "transparent background",
+      "no text/UI/environment",
+      "neutral calm expression",
+      "preserve current blue knot/ribbon identity and face proportions",
+      "safe margins",
+      "no baked feedback particles/effects"
+    ],
+    "acceptance": [
+      "identity parity against founder reference",
+      "clean isolation",
+      "no anatomy drift",
+      "no extra elements",
+      "usable as canonical source for derived sizes and rig"
+    ]
+  },
+  "next_after_pass": "E_MASTER_NEUTRAL",
+  "next_after_fail": "repair D only; preserve traits that pass"
+}
