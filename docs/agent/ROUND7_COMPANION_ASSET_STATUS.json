@@ -24,17 +24,17 @@
     "P0_AUTHORITY_AND_INVENTORY": "PASS",
     "P1_NEUTRAL_MASTERS": "PASS_CORE_IDENTITY",
     "P2_MINIMAL_SIZE_GATE": "PASS_CORE_IDENTITY_STATIC",
-    "P3_RIG_DECOMPOSITION": "DEFERRED_AFTER_QA_FAIL__NOT_V1_BLOCKER",
-    "P4_NEUTRAL_RECOMPOSITION_PARITY": "DEFERRED_WITH_P3",
-    "P5_SEMANTIC_MOTION_CLIPS": "IMPLEMENTED_CI_PASS__DEVICE_VISUAL_QA_PENDING",
-    "P6_SPEECH_CONTROLS": "IMPLEMENTED_CI_PASS__DEVICE_VISUAL_QA_PENDING",
+    "P3_RIG_DECOMPOSITION": "DEFERRED_UNLESS_DEVICE_QA_REQUIRES",
+    "P4_NEUTRAL_RECOMPOSITION_PARITY": "DEFERRED_WITH_LAYERED_RIG",
+    "P5_SEMANTIC_MOTION_CLIPS": "IMPLEMENTED_CI_PASS_SINGLE_MASTER",
+    "P6_SPEECH_CONTROLS": "IMPLEMENTED_V1_LOCAL_MOUTH_WARP_BLINK_CANDIDATE__DEVICE_VISUAL_QA_PENDING",
     "P7_REAL_FLUTTER_INTEGRATION": "PASS_CI",
-    "P8_REAL_TTS_LINKAGE": "PASS_CI__PHYSICAL_AUDIO_QA_PENDING",
-    "P9_REAL_PHONE_QA": "ACTIVE_PHYSICAL_DEVICE_GATE",
+    "P8_REAL_TTS_LINKAGE": "PASS_CI__REAL_DEVICE_RUNTIME_QA_PENDING",
+    "P9_REAL_PHONE_QA": "ACTIVE_NEXT_GATE",
     "P10_SECONDARY_ASSETS": "LATER",
     "P2_5_ANATOMY_NORMALIZATION": "PASS_NO_EXTRA_ASSET_REQUIRED",
-    "P3A_SINGLE_MASTER_DEFORMATION_PROBE": "IN_PROGRESS_BLINK_ONLY",
-    "P3B_LAYERED_RIG_FALLBACK": "NOT_ADMITTED_UNLESS_P3A_FAILS"
+    "P3A_SINGLE_MASTER_DEFORMATION_PROBE": "IMPLEMENTED_CI_PASS__DEVICE_VISUAL_QA_PENDING",
+    "P3B_LAYERED_RIG_FALLBACK": "NOT_ADMITTED_UNLESS_P9_VISUAL_QA_FAILS"
   },
   "assets": {
     "D_MASTER_NEUTRAL": {
@@ -80,18 +80,18 @@
     "flow_to_state_mapping": "READY",
     "reduced_motion_and_fallback": "READY",
     "proxy_motion_language": "READY_AS_REFERENCE",
-    "real_DE_renderer": "PASS_CI",
-    "blink_gaze_controls": "BLINK_IMPLEMENTED__DEVICE_VISUAL_QA_PENDING",
-    "mouth_controls": "MOUTH_WARP_IMPLEMENTED__DEVICE_VISUAL_QA_PENDING",
-    "real_tts_playback": "PASS_CI_LIFECYCLE__PHYSICAL_AUDIO_QA_PENDING",
-    "audio_visual_synchronization": "PASS_CI_WITH_FAKE_SPEECH_LIFECYCLE__PHYSICAL_AUDIO_QA_PENDING",
-    "real_phone_QA": "ACTIVE",
-    "body_state_motion": "PASS_CI__VISUAL_DEVICE_QA_PENDING",
+    "real_DE_renderer": "IMPLEMENTED_CI_PASS",
+    "blink_gaze_controls": "BLINK_OVERLAY_IMPLEMENTED_CI_PASS__DEVICE_VISUAL_QA_PENDING; GAZE_LAYER_DEFERRED",
+    "mouth_controls": "LOCAL_RASTER_MOUTH_WARP_IMPLEMENTED_CI_PASS__DEVICE_VISUAL_QA_PENDING",
+    "real_tts_playback": "IMPLEMENTED_CI_PASS__DEVICE_RUNTIME_QA_PENDING",
+    "audio_visual_synchronization": "IMPLEMENTED_CI_PASS__SPEAK_FOLLOWS_REAL_TTS_START_DONE_STOP_ERROR_CALLBACKS",
+    "real_phone_QA": "ACTIVE_NEXT_GATE",
+    "body_state_motion": "IMPLEMENTED_CI_PASS",
     "v1_visual_strategy": "canonical flattened D/E + semantic whole-character motion",
     "face_layer_rig": "LATER_IF_DEVICE_QA_PROVES_NEEDED",
     "speaking_v1": "real audio playback drives SPEAK body/ribbon motion; phoneme lip-sync not V1 blocker",
-    "identity_selector": "PASS_CI",
-    "semantic_state_mapping_to_raster_motion": "PASS_CI"
+    "identity_selector": "IMPLEMENTED_CI_PASS",
+    "semantic_state_mapping_to_raster_motion": "IMPLEMENTED_CI_PASS"
   },
   "semantic_states": [
     "IDLE",
@@ -171,18 +171,15 @@
     }
   ],
   "latest_code": {
-    "branch_head": "4ef069a93d3025236d751e2147c70e290ac3aa94",
+    "head_commit": "4ef069a93d3025236d751e2147c70e290ac3aa94",
     "pr": 8,
-    "workflow_run": 37114564676,
     "bootstrap_validation": "PASS",
     "dart_format": "PASS",
     "flutter_analyze": "PASS",
     "flutter_tests": "PASS",
-    "android_profile_apk": "PASS",
+    "android_profile_apk": "PASS_ARTIFACT_UPLOADED",
     "ios_profile_compile_no_codesign": "PASS",
-    "android_artifact_id": 11271108477,
-    "android_artifact_sha256": "508470da4d7c7cea0f22ff607274a91367a4723e6d2311dc7946926b5bb249eb",
-    "android_profile_apk_bytes": 68072526
+    "workflow_run": 37114564676
   },
   "p9_gate": {
     "status": "ACTIVE",
