@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../bench/bench_screen.dart';
+import '../qa/native_speech_qa_screen.dart';
 import '../scene/fixture.dart';
 import '../speech/device_speech_output.dart';
 import 'proof_controller.dart';
@@ -43,6 +44,11 @@ class _ProofAppState extends State<ProofApp> {
           ? BenchScreen(controller: _controller, assetBytes: widget.assetBytes, soakCycles: _cycles, autoRun: true)
           : ProofScreen(
               controller: _controller,
+              onOpenNativeSpeechQa: () => _navigator.currentState!.push(
+                MaterialPageRoute<void>(
+                  builder: (_) => NativeSpeechQaScreen(controller: _controller),
+                ),
+              ),
               onOpenBenchmark: () => _navigator.currentState!.push(
                 MaterialPageRoute<void>(
                   builder: (_) => BenchScreen(controller: _controller, assetBytes: widget.assetBytes),
