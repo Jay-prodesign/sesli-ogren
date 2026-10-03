@@ -138,3 +138,54 @@ jobs:
           pub-cache: false
       - run: flutter pub get
       - run: flutter build ios --profile --no-codesign --dart-define=GIT_SHA=${GITHUB_SHA}
+
+
+  ios-native-tts-sim:
+    name: P9 native TTS — iOS simulator
+    runs-on: macos-15
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: proof/round7-p1-runtime
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+
+      - name: Read Flutter pin
+        id: pin
+        working-directory: .
+        run: echo "version=$(tr -d '[:space:]' < .flutter-version)" >> "$GITHUB_OUTPUT"
+
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
+        with:
+          channel: stable
+          flutter-version: ${{ steps.pin.outputs.version }}
+          cache: false
+          pub-cache: false
+
+      - run: flutter pub get
+
+      - name: Boot available iPhone simulator
+        id: sim
+        run: |
+          set -euo pipefail
+          UDID="$(xcrun simctl list devices available -j | python3 -c '
+import json,sys
+data=json.load(sys.stdin)
+for runtime,devices in data["devices"].items():
+    if "iOS" not in runtime:
+        continue
+    for d in devices:
+        if d.get("isAvailable") and d.get("name","").startswith("iPhone"):
+            print(d["udid"])
+            raise SystemExit
+raise SystemExit("No available iPhone simulator")
+')"
+          echo "udid=$UDID" >> "$GITHUB_OUTPUT"
+          xcrun simctl boot "$UDID" || true
+          xcrun simctl bootstatus "$UDID" -b
+          flutter devices
+
+      - name: Run native flutter_tts lifecycle probe
+        run: flutter test integration_test/native_speech_plugin_test.dart -d "${{ steps.sim.outputs.udid }}"
