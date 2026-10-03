@@ -4,17 +4,20 @@
   "updated_at": "2026-10-03",
   "active_branch": "feat/round7-companion-production-sequence-v2",
   "active_phase": "P9_REAL_PHONE_QA",
-  "active_task": "VALIDATE_D_E_COMPANION_AND_DEVICE_TTS_ON_REAL_PHONE",
-  "completed_before_gate": {
-    "P7_REAL_FLUTTER_INTEGRATION": "PASS_CI",
-    "P8_REAL_TTS_LINKAGE": "PASS_CI",
+  "active_task": "VALIDATE_D_E_REAL_DEVICE_LEARNING_LOOP",
+  "verified_ci": {
     "workflow_run": 37114564676,
-    "android_profile_artifact": 11271108477,
-    "ios_profile_compile": "PASS_NO_CODESIGN"
+    "source_head": "4ef069a93d3025236d751e2147c70e290ac3aa94",
+    "format": "PASS",
+    "analyze": "PASS",
+    "flutter_tests": "PASS",
+    "android_profile_apk": "PASS",
+    "ios_profile_compile_no_codesign": "PASS"
   },
   "authority": {
-    "anatomy": "D/E fully limbless V1: 0 arms, 0 hands, 0 legs, 0 feet",
-    "visual_identity": "locked D/E canonical rasters",
+    "D": "assets/companions/D_KNOT_128.webp",
+    "E": "assets/companions/E_TILT_128.webp",
+    "anatomy": "0 arms / 0 hands / 0 legs / 0 feet",
     "semantic_states": [
       "IDLE",
       "LISTEN",
@@ -23,22 +26,31 @@
       "CORRECT",
       "SUCCESS"
     ],
-    "speech": "product-local DeviceSpeechOutput / flutter_tts; fixture-owned voice_locale"
+    "speech_locale": "fixture-owned content/voice locale"
   },
-  "physical_device_acceptance": [
-    "D and E remain visually coherent at real phone size",
-    "motion reads correctly for all six semantic states",
-    "blink overlay does not look like a painted patch",
-    "mouth warp looks acceptable during real speech",
-    "real TTS is audible with intended locale",
-    "SPEAK follows actual playback lifecycle",
-    "stop/interruption returns companion out of SPEAK immediately",
-    "reduced motion removes continuous motion without changing identity",
-    "audio failure falls back to transcript and learning remains usable",
-    "no clipping/safe-area/orientation defect",
-    "no unacceptable stutter"
+  "v1_runtime": {
+    "renderer": "canonical raster + bounded whole-character semantic motion",
+    "speech": "product-local device TTS",
+    "speaking_rule": "SPEAK begins on real playback start and settles on completion/stop/error",
+    "mouth": "local same-raster mouth warp; visual QA pending",
+    "blink": "procedural overlay candidate; visual QA pending",
+    "layered_rig": "DEFERRED_UNLESS_DEVICE_QA_PROVES_NEEDED"
+  },
+  "device_qa": [
+    "D and E identity fidelity at actual companion size",
+    "no clipping or blur in portrait/landscape and compact contexts",
+    "IDLE/LISTEN/THINK/SPEAK/CORRECT/SUCCESS are distinguishable but restrained",
+    "no arms/hands/legs/feet appear in any state",
+    "SPEAK begins only on actual device TTS playback start",
+    "SPEAK ends on completion, stop, interruption or TTS error",
+    "transcript and learning loop remain usable when audio fails",
+    "D/E selection changes identity only, not learning state",
+    "Reduced Motion removes continuous/local animation as intended",
+    "mouth warp looks natural on both D and E",
+    "blink overlay looks natural on both D and E; otherwise disable/defer rather than open a heavy rig",
+    "frame smoothness and input responsiveness are acceptable"
   ],
-  "fail_policy": "Repair only the failing visual/audio behavior. Do not reopen bulk asset generation or layered rig unless device evidence proves it necessary.",
-  "after_pass": "P10_SECONDARY_ASSETS_ADMISSION_REVIEW",
-  "blocker": "Physical-device validation. iOS install requires a signed device build; CI currently proves only no-codesign iOS compilation."
+  "next_after_pass": "P10_MINIMUM_COMPANION_LOOP_PASS; secondary assets remain optional/backlog",
+  "next_if_mouth_or_blink_visual_fail": "repair or disable only failing local effect; open layered rig only if a real learning/visual need remains",
+  "stop_condition": "physical device validation is required before claiming production asset DONE"
 }
