@@ -12,12 +12,7 @@ final worldStats = PaintStats();
 final companionStats = PaintStats();
 
 class ProofScreen extends StatelessWidget {
-  const ProofScreen({
-    super.key,
-    required this.controller,
-    this.onOpenBenchmark,
-    this.companionRenderer,
-  });
+  const ProofScreen({super.key, required this.controller, this.onOpenBenchmark, this.companionRenderer});
 
   final ProofController controller;
   final VoidCallback? onOpenBenchmark;
