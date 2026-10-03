@@ -15,8 +15,9 @@ void main() {
     final started = Completer<void>();
     final completed = Completer<void>();
 
-    await output.speak(
-      'Merhaba. Bu, Sesli Öğren için yerel konuşma yaşam döngüsü testidir.',
+    unawaited(
+      output.speak(
+        'Merhaba. Bu, Sesli Öğren için yerel konuşma yaşam döngüsü testidir.',
       locale: 'tr-TR',
       onStart: () {
         if (!started.isCompleted) started.complete();
@@ -24,7 +25,8 @@ void main() {
       onDone: () {
         if (!completed.isCompleted) completed.complete();
       },
-      onError: errors.add,
+        onError: errors.add,
+      ),
     );
 
     await started.future.timeout(const Duration(seconds: 5));
@@ -34,14 +36,16 @@ void main() {
     final interruptedStarted = Completer<void>();
     var interruptedDone = false;
 
-    await output.speak(
-      'Bu ikinci konuşma, durdurma davranışını doğrulamak için biraz daha uzun tutulmaktadır.',
+    unawaited(
+      output.speak(
+        'Bu ikinci konuşma, durdurma davranışını doğrulamak için biraz daha uzun tutulmaktadır.',
       locale: 'tr-TR',
       onStart: () {
         if (!interruptedStarted.isCompleted) interruptedStarted.complete();
       },
       onDone: () => interruptedDone = true,
-      onError: errors.add,
+        onError: errors.add,
+      ),
     );
 
     await interruptedStarted.future.timeout(const Duration(seconds: 5));
