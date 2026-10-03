@@ -71,6 +71,17 @@ jobs:
       - run: flutter analyze
       - run: flutter test
 
+      - name: Render P9 visual QA captures
+        run: flutter test --update-goldens tool/p9_visual_capture_test.dart
+
+      - name: Upload P9 visual QA captures
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: p9-visual-qa-${{ github.sha }}
+          path: proof/round7-p1-runtime/tool/p9_captures/*.png
+          if-no-files-found: error
+          retention-days: 7
+
       - name: Build profile APK (proof) and empty-app baseline
         run: |
           export JAVA_HOME="${JAVA_HOME_17_X64:-$JAVA_HOME}"
