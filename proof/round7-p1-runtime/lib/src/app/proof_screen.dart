@@ -21,6 +21,7 @@ class ProofScreen extends StatelessWidget {
 
   final ProofController controller;
   final VoidCallback? onOpenBenchmark;
+
   /// Optional test/host override. When null the selected Founder companion
   /// (D/Knot or E/Tilt) is resolved from the controller.
   final CompanionRenderer? companionRenderer;
@@ -32,10 +33,7 @@ class ProofScreen extends StatelessWidget {
       builder: (context, _) {
         final e = controller.engine;
         final reduced = controller.reducedMotion || MediaQuery.disableAnimationsOf(context);
-        final activeCompanionRenderer = companionRenderer ??
-            (controller.companionIdentity == CompanionIdentity.knot
-                ? const RasterCompanionRenderer.knot()
-                : const RasterCompanionRenderer.tilt());
+        final activeCompanionRenderer = companionRenderer ?? _rendererFor(controller.companionIdentity);
         return Scaffold(
           appBar: AppBar(
             title: const Text('Round 7 · P1 runtime proof'),
@@ -88,6 +86,13 @@ class ProofScreen extends StatelessWidget {
         );
       },
     );
+  }
+
+  static CompanionRenderer _rendererFor(CompanionIdentity identity) {
+    return switch (identity) {
+      CompanionIdentity.knot => const RasterCompanionRenderer.knot(),
+      CompanionIdentity.tilt => const RasterCompanionRenderer.tilt(),
+    };
   }
 
   void _conditions(BuildContext context) {
