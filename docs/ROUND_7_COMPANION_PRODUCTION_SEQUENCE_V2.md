@@ -158,13 +158,13 @@ Verified current state:
 - **P2 Minimal/static size gate: PASS**
 - **P2.5 Limbless anatomy normalization: PASS**
 - **P3/P4 destructive layered extraction: REJECTED / DEFERRED** — not a V1 blocker.
-- **P5 semantic whole-character motion: IMPLEMENTED / CI PASS**
-- **P6 V1 local mouth warp + blink candidate: IMPLEMENTED / CI PASS; device visual QA pending**
+- **P5 semantic whole-character motion: PASS — CI + D/E multi-frame synthetic visual QA**
+- **P6 V1 mouth warp: PASS (clean/subtle); procedural blink: REJECTED and disabled**
 - **P7 real D/E Flutter integration + identity selector: CI PASS**
-- **P8 product-local device TTS + playback-driven SPEAK lifecycle: CI PASS; real-device runtime QA pending**
+- **P8 product-local device TTS + playback-driven SPEAK lifecycle: CI PASS; physical audio/device validation pending**
 - **Android profile APK build/artifact: PASS**
 - **iOS profile compile without codesign: PASS**
 
-Current cursor: **P9 — real-phone QA of the actual D/E learning loop.**
+Current cursor: **P9 — physical native-device TTS/audio + smoothness QA only. All automatable visual/motion/layout QA is PASS.**
 
 Do not regenerate identities, reopen bulk state assets, or build a heavy layered rig unless real-device QA identifies a concrete failure that the lean renderer cannot fix locally.

@@ -4,14 +4,15 @@
   "updated_at": "2026-10-03",
   "active_branch": "feat/round7-companion-production-sequence-v2",
   "active_phase": "P9_REAL_PHONE_QA",
-  "active_task": "P9_SYNTHETIC_MOTION_SEQUENCE_QA",
+  "active_task": "PHYSICAL_NATIVE_TTS_AUDIO_AND_DEVICE_SMOOTHNESS_QA",
   "verified_ci": {
-    "workflow_run": 37133064076,
-    "source_head": "943b6f832e04540ecb30ac41af3a1d3269e94eaa",
+    "workflow_run": 37134312547,
+    "source_head": "11c8c9741ba682f15e917ef997daab44fd3757ea",
     "format": "PASS",
     "analyze": "PASS",
-    "flutter_tests": "PASS_INCLUDING_RESPONSIVE_P9_PHONE_MATRIX",
-    "p9_visual_capture": "PASS_ARTIFACT_UPLOADED",
+    "flutter_tests": "PASS",
+    "p9_visual_capture": "PASS",
+    "p9_motion_sequence": "PASS_D_AND_E_6_STATES_X_4_PHASES",
     "android_profile_apk": "PASS",
     "ios_profile_compile_no_codesign": "PASS"
   },
@@ -53,7 +54,7 @@
   ],
   "next_after_pass": "P10_MINIMUM_COMPANION_LOOP_PASS; secondary assets remain optional/backlog",
   "next_if_mouth_or_blink_visual_fail": "repair or disable only failing local effect; open layered rig only if a real learning/visual need remains",
-  "stop_condition": "physical device validation is required before claiming production asset DONE",
+  "stop_condition": "Physical native-device validation is the only remaining companion-production gate.",
   "preview": {
     "policy": "GAME_ENGINE_PARITY__FREE_TEMPORARY_PHONE_HTTPS_PREVIEW",
     "method": "Flutter Web build -> local python3 HTTP server -> Cloudflare cloudflared Quick Tunnel",
@@ -105,18 +106,27 @@
       "blink": "REMOVED_AFTER_FAIL",
       "clipping": "PASS",
       "readability": "PASS"
+    },
+    "motion_qa": {
+      "status": "PASS",
+      "matrix": "2 companions x 6 semantic states x 4 animation phases",
+      "D_motion_language": "PASS_CALM",
+      "E_motion_language": "PASS_MORE_ENERGETIC",
+      "mouth_warp": "PASS_CLEAN_SUBTLE",
+      "blink": "DISABLED",
+      "identity_drift": "NONE_OBSERVED"
     }
   },
   "remaining_gate": {
-    "type": "MOTION_SEQUENCE_THEN_PHYSICAL_NATIVE_AUDIO",
-    "synthetic_remaining": [
-      "multi-frame semantic motion visual QA for D/E"
+    "type": "PHYSICAL_DEVICE_ONLY",
+    "required": [
+      "actual native TTS audibility and expected locale/voice behavior",
+      "SPEAK starts from real playback start callback",
+      "SPEAK settles on completion, stop, interruption and TTS error",
+      "real-device animation smoothness and tap/scroll responsiveness",
+      "native safe-area/orientation behavior"
     ],
-    "physical_only": [
-      "actual device TTS audibility and locale",
-      "SPEAK starts/stops on real device playback lifecycle",
-      "real-device animation smoothness/input responsiveness"
-    ]
+    "synthetic_work_remaining": "NONE"
   },
   "qa_findings": [
     {
