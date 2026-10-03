@@ -67,11 +67,7 @@ jobs:
           pub-cache: false
 
       - run: flutter pub get
-      - name: Show Dart formatter diff once
-        run: |
-          dart format .
-          git diff -- test/native_speech_qa_screen_test.dart
-          git diff --exit-code
+      - run: dart format --output=none --set-exit-if-changed .
       - run: flutter analyze
       - run: flutter test
 
