@@ -38,29 +38,25 @@
     "SUCCESS": "short expand/lift/bounce + settle"
   },
   "rig_layer_requirement": {
-    "common_required": [
-      "rear_form",
-      "front_form",
-      "face_base",
-      "eye_L_white",
-      "eye_R_white",
+    "v1_minimum_required": [
+      "base_character_clean",
       "iris_pupil_L",
       "iris_pupil_R",
       "brow_L",
       "brow_R",
-      "mouth",
-      "occlusion_fill"
+      "mouth_neutral",
+      "mouth_speak_A",
+      "mouth_speak_B",
+      "blink_overlay_L",
+      "blink_overlay_R"
     ],
-    "explicitly_removed": [
-      "arm_L",
-      "hand_L",
-      "arm_R",
-      "hand_R",
-      "leg_L",
-      "foot_L",
-      "leg_R",
-      "foot_R",
-      "gesture_foreground"
+    "base_character_rule": "Keep eye whites/outlines and core face/ribbon geometry in the base. Remove only controls that must move/change independently.",
+    "body_motion": "Use bounded whole-character/ribbon deformation and transforms first; split ribbon forms only if a real state cannot be expressed cleanly.",
+    "deferred_unless_proven_needed": [
+      "rear_form",
+      "front_form",
+      "face_base_as_separate_full_layer",
+      "occlusion_fill"
     ]
   },
   "future_upgrade_rule": "If a real product need later proves a gesture appendage is necessary, open a versioned anatomy change for BOTH D and E and re-run rig/state/device QA. Do not silently add limbs to one state or one character."
