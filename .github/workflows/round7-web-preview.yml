@@ -51,7 +51,7 @@ jobs:
         run: |
           flutter build web \
             --release \
-            --base-href "/Jay-prodesign/sesli-ogren/web-preview/" \
+            --base-href "/gh/Jay-prodesign/sesli-ogren@web-preview/" \
             --dart-define=GIT_SHA=${{ github.sha }}
           printf '%s\n' "${GITHUB_SHA}" > build/web/PREVIEW_SHA.txt
 
@@ -75,4 +75,4 @@ jobs:
         working-directory: .
         run: |
           echo "### Phone preview" >> "$GITHUB_STEP_SUMMARY"
-          echo "https://raw.githack.com/Jay-prodesign/sesli-ogren/web-preview/index.html" >> "$GITHUB_STEP_SUMMARY"
+          echo "https://cdn.statically.io/gh/Jay-prodesign/sesli-ogren@web-preview/index.html" >> "$GITHUB_STEP_SUMMARY"
