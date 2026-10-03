@@ -19,7 +19,7 @@
       "E": "E_MASTER_LOCKED.png"
     }
   },
-  "current_cursor": "P7A_CANONICAL_RASTER_RENDERER",
+  "current_cursor": "P3A_BLINK_CONTROL",
   "phases": {
     "P0_AUTHORITY_AND_INVENTORY": "PASS",
     "P1_NEUTRAL_MASTERS": "PASS_CORE_IDENTITY",
@@ -33,7 +33,7 @@
     "P9_REAL_PHONE_QA": "BLOCKED_BY_P7_P8",
     "P10_SECONDARY_ASSETS": "LATER",
     "P2_5_ANATOMY_NORMALIZATION": "PASS_NO_EXTRA_ASSET_REQUIRED",
-    "P3A_SINGLE_MASTER_DEFORMATION_PROBE": "IN_PROGRESS",
+    "P3A_SINGLE_MASTER_DEFORMATION_PROBE": "IN_PROGRESS_BLINK_ONLY",
     "P3B_LAYERED_RIG_FALLBACK": "NOT_ADMITTED_UNLESS_P3A_FAILS"
   },
   "assets": {
@@ -71,7 +71,8 @@
       "state_specific_tilt_compress_expand"
     ],
     "identity_rule": "Never redraw the character to express a state.",
-    "fallback_if_failed": "Layered face-control authoring only if visual/device QA proves single-master deformation insufficient."
+    "fallback_if_failed": "Layered face-control authoring only if visual/device QA proves single-master deformation insufficient.",
+    "escalation_rule": "Do not admit layered rig for body/speech; only add tiny face-control overlays if blink/gaze cannot be expressed cleanly from the master."
   },
   "runtime": {
     "companion_renderer_seam": "READY",
@@ -137,5 +138,21 @@
     "D_V1": "REJECT_CLEAN_BASE_ARTIFACTS_DESPITE_EXACT_NEUTRAL_RECOMPOSE",
     "D_V2": "REJECT_CLEAN_BASE_NOT_GOOD_ENOUGH_FOR_MOVABLE_CONTROLS",
     "decision": "Do not continue destructive layer extraction from flattened raster. Use canonical raster + whole-character semantic motion now; reopen proper layered authoring only if runtime/device evidence requires facial controls."
+  },
+  "probes": {
+    "D_single_master": {
+      "status": "CONDITIONAL_PASS_BODY_AND_SPEECH",
+      "body_states": "PASS_TECHNICAL_PROBE",
+      "mouth_speech_warp": "PASS_TECHNICAL_PROBE",
+      "blink": "CHANGES_REQUIRED",
+      "stored_at": "/Learning App Runtime Assets/Probes/2026-10-03/D_KNOT_SINGLE_MASTER_PROBE.zip"
+    },
+    "E_single_master": {
+      "status": "CONDITIONAL_PASS_BODY_AND_SPEECH",
+      "body_states": "PASS_TECHNICAL_PROBE",
+      "mouth_speech_warp": "PASS_TECHNICAL_PROBE",
+      "blink": "CHANGES_REQUIRED",
+      "stored_at": "/Learning App Runtime Assets/Probes/2026-10-03/E_TILT_SINGLE_MASTER_PROBE.zip"
+    }
   }
 }
