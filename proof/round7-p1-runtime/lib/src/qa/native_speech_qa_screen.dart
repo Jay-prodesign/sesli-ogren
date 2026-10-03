@@ -207,7 +207,7 @@ class _NativeSpeechQaScreenState extends State<NativeSpeechQaScreen> {
               const SizedBox(height: 8),
               const Text(
                 'PASS here proves callback/state lifecycle only. '
-                'Actual speaker audibility, Turkish voice quality and physical-device smoothness remain observations.',
+                'Actual speaker audibility, fixture-locale voice behavior and physical-device smoothness remain observations.',
               ),
               const Divider(height: 24),
               for (final item in _timeline) Text('• $item'),
