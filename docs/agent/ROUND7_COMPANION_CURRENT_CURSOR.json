@@ -3,28 +3,33 @@
   "cursor_id": "R7-COMPANION-PRODUCTION-V2",
   "updated_at": "2026-10-03",
   "active_branch": "feat/round7-companion-production-sequence-v2",
-  "active_phase": "P1_NEUTRAL_MASTERS",
-  "active_task": "D_MASTER_NEUTRAL",
+  "active_phase": "P3_RIG_DECOMPOSITION",
+  "active_task": "D_LAYERED_SOURCE",
+  "known_inputs": {
+    "identity_source": "D_MASTER_LOCKED.png",
+    "rig_base": "D_RIG_SOURCE_BASE_LOCKED.png",
+    "blueprint": "D_LAYER_RECONSTRUCTION_BLUEPRINT.json",
+    "workspace_manifest": "D_LAYER_WORKSPACE_MANIFEST.json",
+    "runtime_contract": "COMPANION_RIG_RUNTIME_CONTRACT.json"
+  },
   "task_contract": {
-    "input_authority": "Founder reference set 2026-10-03",
-    "output": "one isolated D/Knot neutral master",
-    "requirements": [
-      "single D/Knot only",
-      "transparent background",
-      "no text/UI/environment",
-      "neutral calm expression",
-      "preserve current blue knot/ribbon identity and face proportions",
-      "safe margins",
-      "no baked feedback particles/effects"
+    "output": "minimum D layered source required for real motion; no redesign",
+    "reconstruction_order": [
+      "preserve locked silhouette and neutral master",
+      "face base + removable eye/brow/mouth controls",
+      "only body/foreground regions that must deform independently",
+      "hidden overlap/occlusion fill under moving regions",
+      "assign pivots and overlap margins",
+      "neutral recomposite parity"
     ],
     "acceptance": [
-      "identity parity against founder reference",
-      "clean isolation",
-      "no anatomy drift",
-      "no extra elements",
-      "usable as canonical source for derived sizes and rig"
+      "true alpha",
+      "clean overlap",
+      "pivot assigned",
+      "neutral recomposite parity",
+      "no identity drift"
     ]
   },
-  "next_after_pass": "E_MASTER_NEUTRAL",
-  "next_after_fail": "repair D only; preserve traits that pass"
+  "next_after_pass": "P3_E_LAYERED_SOURCE",
+  "next_after_fail": "repair only failing D layer; do not regenerate identity"
 }
