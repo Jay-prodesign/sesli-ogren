@@ -46,7 +46,10 @@ class ProofScreen extends StatelessWidget {
             child: LayoutBuilder(
               builder: (context, box) {
                 // One scrollable page: large text or small screens never push actions off-screen.
-                final worldHeight = (box.maxHeight * 0.4).clamp(200.0, 360.0);
+                final compactLandscape = box.maxWidth > box.maxHeight && box.maxHeight < 600;
+                final worldHeight = compactLandscape
+                    ? (box.maxHeight * 0.34).clamp(120.0, 150.0)
+                    : (box.maxHeight * 0.4).clamp(200.0, 360.0);
                 return SingleChildScrollView(
                   key: const Key('proof-scroll'),
                   child: Column(
