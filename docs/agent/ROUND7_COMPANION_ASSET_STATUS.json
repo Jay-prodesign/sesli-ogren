@@ -82,10 +82,10 @@
     "proxy_motion_language": "READY_AS_REFERENCE",
     "real_DE_renderer": "IMPLEMENTED_CI_PASS",
     "blink_gaze_controls": "BLINK_OVERLAY_REJECTED_BY_VISUAL_GEOMETRY_QA__DISABLED_V1; GAZE_LAYER_DEFERRED",
-    "mouth_controls": "LOCAL_RASTER_MOUTH_WARP_IMPLEMENTED_CI_PASS__DEVICE_VISUAL_QA_PENDING",
+    "mouth_controls": "LOCAL_RASTER_MOUTH_WARP_SYNTHETIC_VISUAL_QA_PASS__SUBTLE; REAL_AUDIO_DEVICE_QA_PENDING",
     "real_tts_playback": "IMPLEMENTED_CI_PASS__DEVICE_RUNTIME_QA_PENDING",
     "audio_visual_synchronization": "IMPLEMENTED_CI_PASS__SPEAK_FOLLOWS_REAL_TTS_START_DONE_STOP_ERROR_CALLBACKS",
-    "real_phone_QA": "ACTIVE_NEXT_GATE",
+    "real_phone_QA": "SYNTHETIC_VISUAL_PASS__MOTION_SEQUENCE_AND_NATIVE_AUDIO_DEVICE_QA_REMAIN",
     "body_state_motion": "IMPLEMENTED_CI_PASS",
     "v1_visual_strategy": "canonical flattened D/E + semantic whole-character motion",
     "face_layer_rig": "LATER_IF_DEVICE_QA_PROVES_NEEDED",
@@ -171,15 +171,16 @@
     }
   ],
   "latest_code": {
-    "head_commit": "30a3c2f241fce0d55b582f4ce95ebc3281f27c2f",
+    "head_commit": "943b6f832e04540ecb30ac41af3a1d3269e94eaa",
     "pr": 8,
     "bootstrap_validation": "PASS",
     "dart_format": "PASS",
     "flutter_analyze": "PASS",
-    "flutter_tests": "PASS_INCLUDING_P9_PHONE_MATRIX",
+    "flutter_tests": "PASS_INCLUDING_RESPONSIVE_P9_PHONE_MATRIX",
+    "p9_visual_capture": "PASS_ARTIFACT_UPLOADED",
     "android_profile_apk": "PASS_ARTIFACT_UPLOADED",
     "ios_profile_compile_no_codesign": "PASS",
-    "workflow_run": 37120853017
+    "workflow_run": 37133064076
   },
   "p9_gate": {
     "status": "ACTIVE",
@@ -216,6 +217,26 @@
         "reason": "normalized eye regions painted over flattened facial art can cover brow/skin and create artificial face patches",
         "action": "disable blink overlay; do not open layered rig unless a later real product need proves blink necessary"
       }
-    ]
+    ],
+    "synthetic_visual_qa": {
+      "status": "PASS_WITH_BLINK_REMOVED",
+      "workflow_run": 37133064076,
+      "source_head": "943b6f832e04540ecb30ac41af3a1d3269e94eaa",
+      "companion_scale": {
+        "portrait_logical_px": 124,
+        "compact_landscape_logical_px": 104,
+        "result": "PASS_READABILITY"
+      },
+      "identity": [
+        "D_Knot PASS",
+        "E_Tilt PASS"
+      ],
+      "mouth_warp": "PASS_CLEAN_SUBTLE",
+      "blink": "FAIL_REMOVED",
+      "layout": [
+        "portrait PASS",
+        "compact landscape PASS"
+      ]
+    }
   }
 }
