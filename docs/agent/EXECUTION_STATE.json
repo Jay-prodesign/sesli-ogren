@@ -1,5 +1,5 @@
 {
-  "schema_version": 2,
+  "schema_version": 3,
   "project": "Learning App",
   "product": "Sesli Öğren",
   "repository": {
@@ -10,56 +10,84 @@
     "default_branch": "main"
   },
   "mission": {
-    "id": "CLAUDE_HANDOFF_000",
-    "title": "Repository & Agent Bootstrap",
-    "executor": "Claude (Primary Engineer)"
+    "id": "ROUND7_COMPANION_RUNTIME_EVIDENCE",
+    "title": "Round 7 Companion / Runtime Evidence — physical native gate",
+    "executor": "ChatGPT (Founder-authorized bounded engineering delegate; Claude may resume after fresh-read)"
   },
-  "lifecycle_stage": "Lifecycle M3 — Repository & Agent Bootstrap review (TASKS.md milestone M0), pre-Architecture Proof",
-  "status": "AWAITING_BRAIN_REVIEW",
-  "active_milestone": "M0",
-  "brain_review": {
-    "latest": "M3_BOOTSTRAP_BRAIN_REVIEW_001",
-    "disposition": "CHANGES_REQUIRED",
-    "reviewed_head_sha": "97e9040acf6a668f279a4aa1fedcd9bbbce810e2",
-    "corrections_answered_by": "RET-0001"
+  "lifecycle_stage": "Post-M4 Architecture Proof — admitted Round 7 evidence program; M2/Golden Learning Slice NOT_EXECUTABLE",
+  "status": "IN_PROGRESS",
+  "active_milestone": "M1 DONE; Round 7 evidence program active outside M2 implementation",
+  "architecture_proof": {
+    "disposition": "ARCHITECTURE_PROOF_PASS / GO_ADAPT",
+    "reviewed_head_sha": "0327d2e5b854df1c9923c65ed88f77151cfe9eed",
+    "evidence_branch": "spike/v0-architecture-proof",
+    "pr_number": 2,
+    "merged": false,
+    "note": "Accepted architecture evidence lives on sibling stacked PR #2 and is not duplicated into this branch."
   },
   "tasks": {
-    "LA-0001": "AWAITING_BRAIN_REVIEW",
-    "LA-0002": "AWAITING_BRAIN_REVIEW",
-    "LA-0003": "AWAITING_BRAIN_REVIEW",
-    "LA-0004": "AWAITING_BRAIN_REVIEW",
-    "LA-0005": "AWAITING_BRAIN_REVIEW",
-    "LA-0006": "AWAITING_BRAIN_REVIEW",
-    "LA-0007": "AWAITING_BRAIN_REVIEW",
-    "LA-0008": "AWAITING_BRAIN_REVIEW"
+    "LA-0001": "DONE",
+    "LA-0002": "DONE",
+    "LA-0003": "DONE",
+    "LA-0004": "DONE",
+    "LA-0005": "DONE",
+    "LA-0006": "DONE",
+    "LA-0007": "DONE",
+    "LA-0008": "DONE"
   },
   "git": {
-    "branch": "chore/repository-bootstrap",
-    "base_sha": "52616b4b4f018ece72d3ee1de4949875bb144e9a",
-    "head_sha": "1ad2c8a3e4cfc34bf5ea85b3d7cfff7b4d9292e5",
-    "head_sha_note": "Content head of the Brain Review 001 corrections (local validator OK, 35/35 negative tests OK). A commit cannot record its own SHA, so the final PR head is the single reconciliation commit on top of this SHA. It and its CI run are reported in PR #1 and the engineer's final report.",
-    "pr_number": 1,
-    "pr_url": "https://github.com/Jay-prodesign/sesli-ogren/pull/1",
-    "pr_draft": true,
-    "merged": false
+    "branch": "feat/round7-companion-production-sequence-v2",
+    "base_sha": "c8c7f222ba6ca4c813bde6850f3e58c51cf5ca34",
+    "head_sha": "b25e6b78795a363cec7e17c1113a35e058503672",
+    "head_sha_note": "Evidence/application head immediately before this control-plane reconciliation commit; reconciliation itself changes control files only.",
+    "pr_number": 8,
+    "pr_url": "https://github.com/Jay-prodesign/sesli-ogren/pull/8",
+    "merged": false,
+    "stack": [
+      "main -> PR #1 bootstrap (PASS, unmerged)",
+      "bootstrap -> PR #2 architecture proof (PASS, unmerged)",
+      "proof/round7-companion-runtime -> PR #6 renderer seam -> PR #8 active companion production/evidence"
+    ]
   },
-  "ci": {
-    "workflow": "bootstrap-validation",
-    "job": "Validate repository control plane",
-    "result_at_head_sha": "REPORTED_EXTERNALLY",
-    "note": "Content and reconciliation commits are pushed together, so CI runs on the final head only. The conclusion is reported in PR #1 checks and the engineer's final report. Previous reviewed head 97e9040 was green.",
-    "run_url": null
+  "round7_evidence_program": {
+    "status": "PHYSICAL_NATIVE_DEVICE_GATE",
+    "companion_cursor": "docs/agent/ROUND7_COMPANION_CURRENT_CURSOR.json",
+    "companion_status": "docs/agent/ROUND7_COMPANION_ASSET_STATUS.json",
+    "synthetic_visual_qa": "PASS",
+    "synthetic_motion_qa": "PASS",
+    "responsive_phone_qa": "PASS",
+    "blink": "REJECTED_AND_REMOVED",
+    "mouth_warp": "PASS_CLEAN_SUBTLE",
+    "android_profile_build": "PASS",
+    "ios_no_codesign_compile": "PASS",
+    "remaining": [
+      "actual native TTS audibility / locale",
+      "real playback start/completion/stop/error -> SPEAK lifecycle on physical device",
+      "real-device smoothness / input responsiveness",
+      "native safe-area/orientation behavior"
+    ]
   },
-  "last_command_id": "CMD-0001",
-  "last_acknowledged_command_id": "CMD-0001",
-  "last_return_id": "RET-0001",
-  "command_processing_status": "ANSWERED",
-  "command_ledger": {
-    "CMD-0001": {
-      "status": "ANSWERED",
-      "return_id": "RET-0001"
-    }
+  "next_handoff": {
+    "id": "M5_GOLDEN_LEARNING_SLICE_HANDOFF_NOT_ISSUED",
+    "status": "NOT_EXECUTABLE",
+    "gate": "Close controlling Product/Visual + Round 7 physical device/voice/accessibility evidence, fresh-read canonical authority, then explicit Brain admission."
   },
+  "blockers": [
+    "Round 7 companion closure requires physical native-device TTS/audio + smoothness/safe-area validation.",
+    "M2/Golden Learning Slice implementation remains NOT_EXECUTABLE until explicit admission.",
+    "AUTO_AGENT_BRIDGE_BLOCKED remains optional/non-blocking."
+  ],
+  "protected_gate": "Merge, release, deploy, paid providers, credentials/secrets, licensing posture, production mutation: Product Owner only",
+  "next_action": "Keep the companion branch at P9 physical native-device gate. Do not reopen asset generation/rig work unless physical evidence proves a concrete need. While that gate is unavailable, only already-admitted Round 7 evidence/hygiene may continue; do not begin M2 implementation.",
+  "canonical_source_refs": [
+    "CURRENT_EXECUTION_STATE — Learning App",
+    "M4_ARCHITECTURE_PROOF_BRAIN_REVIEW_004 — ARCHITECTURE_PROOF_PASS / GO_ADAPT",
+    "M5_GOLDEN_LEARNING_SLICE_ACCEPTANCE_CONTRACT_v0.1 — Learning App",
+    "ROUND_7_COMPANION_PRODUCTION_SEQUENCE_V2 (repo execution authority)",
+    "ROUND7_COMPANION_CURRENT_CURSOR.json",
+    "ROUND7_COMPANION_ASSET_STATUS.json"
+  ],
+  "updated_at": "2026-10-03",
   "auto_agent_bridge": {
     "status": "AUTO_AGENT_BRIDGE_BLOCKED",
     "mechanism": "anthropics/claude-code-action@v1 via .github/workflows/claude-bridge.yml (wake-up only)",
@@ -74,28 +102,28 @@
       "Founder: grant the Brain (ChatGPT) GitHub connector issue/PR comment write (currently 403), or accept Drive-to-engineer transcription"
     ]
   },
-  "next_handoff": {
-    "id": "CLAUDE_HANDOFF_001",
-    "status": "NOT_EXECUTABLE",
-    "gate": "Brain BOOTSTRAP_PASS on the CLAUDE_HANDOFF_000 draft PR and explicit admission"
+  "last_command_id": "CMD-0001",
+  "last_acknowledged_command_id": "CMD-0001",
+  "last_return_id": "RET-0001",
+  "command_processing_status": "ANSWERED",
+  "command_ledger": {
+    "CMD-0001": {
+      "status": "ANSWERED",
+      "return_id": "RET-0001"
+    }
   },
-  "blockers": [
-    "AUTO_AGENT_BRIDGE_BLOCKED (Founder authorization gates; not blocking bootstrap review)"
-  ],
-  "protected_gate": "Merge, release, deploy, LICENSE, GitHub App install, secrets/variables, branch protection: Product Owner only",
-  "next_action": "Brain re-reviews draft PR #1 against CLAUDE_HANDOFF_000 and the M3 acceptance checklist and issues BOOTSTRAP_PASS or CHANGES_REQUIRED (preferably as CMD-0002).",
-  "canonical_source_refs": [
-    "CURRENT_EXECUTION_STATE — Learning App",
-    "CLAUDE_HANDOFF_000 — Repository & Agent Bootstrap — Learning App",
-    "M3_BOOTSTRAP_BRAIN_REVIEW_001 — CHANGES_REQUIRED — Learning App",
-    "M3_REPOSITORY_BOOTSTRAP_ACCEPTANCE_CHECKLIST_v0.1 — Learning App",
-    "DECISION_LOG — Learning App (D-019, D-020, D-023, D-024, D-025, D-026)",
-    "PRE_BOOTSTRAP_PRODUCT_READINESS_AND_MASTER_SEQUENCE_v1.0 — Learning App",
-    "ENGINEERING_EXECUTION_PROTOCOL — Learning App"
-  ],
-  "governance_read": {
-    "drive_status": "AVAILABLE",
-    "detail": "All seven required Drive authorities fresh-read by title on 2026-09-28 via the Google Drive connector. No Drive content copied into this repository."
-  },
-  "updated_at": "2026-09-28"
+  "temporary_execution_override": {
+    "status": "ACTIVE",
+    "authority": "Founder explicit instruction in Learning App chat",
+    "scope": "Dependency-safe, reversible, app-first Round 7 evidence work; no M2 feature implementation without admission.",
+    "exclusions": [
+      "merge",
+      "release",
+      "deploy",
+      "paid-provider spend",
+      "credentials/secrets",
+      "production mutation",
+      "cross-project mutation"
+    ]
+  }
 }

@@ -21,17 +21,18 @@ Milestone numbering follows the program sequence in
 M1 = Architecture Proof, …). Drive lifecycle-stage labels use a different
 numbering: lifecycle "M3" is this M0, and lifecycle "M4" is this M1.
 
-Next unallocated ID: **LA-0009**.
+Next unallocated ID: **LA-0018**.
 
 ---
 
 ## Milestone M0 — Repository & Agent Bootstrap
 
-- Status: ACTIVE
+- Status: DONE
 - Handoff: CLAUDE_HANDOFF_000 — Repository & Agent Bootstrap
 - Branch: `chore/repository-bootstrap`
-- Draft PR: [#1](https://github.com/Jay-prodesign/sesli-ogren/pull/1): Brain Review 001 = CHANGES_REQUIRED; corrections re-returned for Brain review (CMD-0001 → RET-0001)
-- Exit gate: Brain BOOTSTRAP_PASS on the bootstrap draft PR.
+- Draft PR: [#1](https://github.com/Jay-prodesign/sesli-ogren/pull/1): BOOTSTRAP_PASS at reviewed head `433c26c`; draft/unmerged, merge remains a Product Owner action
+- Exit gate: Brain BOOTSTRAP_PASS — **met**.
+- Cross-branch note: later Architecture Proof work used the reviewed bootstrap head; this branch does not duplicate those sibling-branch task files.
 
 ### Sprint M0.S1 — Bootstrap
 
@@ -39,7 +40,7 @@ Next unallocated ID: **LA-0009**.
 
 ##### LA-0001 — Pre-flight verification and canonical repository identity
 
-- Status: AWAITING_BRAIN_REVIEW
+- Status: DONE
 - Depends on: none
 - Owner: Brain
 - Executor: Claude (Primary Engineer)
@@ -50,7 +51,7 @@ Next unallocated ID: **LA-0009**.
 
 ##### LA-0002 — Repository hygiene baseline
 
-- Status: AWAITING_BRAIN_REVIEW
+- Status: DONE
 - Depends on: LA-0001
 - Owner: Brain
 - Executor: Claude (Primary Engineer)
@@ -59,7 +60,7 @@ Next unallocated ID: **LA-0009**.
 
 ##### LA-0003 — Agent operating contracts
 
-- Status: AWAITING_BRAIN_REVIEW
+- Status: DONE
 - Depends on: LA-0001
 - Owner: Brain
 - Executor: Claude (Primary Engineer)
@@ -70,7 +71,7 @@ Next unallocated ID: **LA-0009**.
 
 ##### LA-0004 — Task map and execution plans
 
-- Status: AWAITING_BRAIN_REVIEW
+- Status: DONE
 - Depends on: LA-0003
 - Owner: Brain
 - Executor: Claude (Primary Engineer)
@@ -79,7 +80,7 @@ Next unallocated ID: **LA-0009**.
 
 ##### LA-0005 — Agent control files and documentation skeleton
 
-- Status: AWAITING_BRAIN_REVIEW
+- Status: DONE
 - Depends on: LA-0003, LA-0004
 - Owner: Brain
 - Executor: Claude (Primary Engineer)
@@ -90,7 +91,7 @@ Next unallocated ID: **LA-0009**.
 
 ##### LA-0006 — Bootstrap validation script and CI workflow
 
-- Status: AWAITING_BRAIN_REVIEW
+- Status: DONE
 - Depends on: LA-0002, LA-0003, LA-0004, LA-0005
 - Owner: Brain
 - Executor: Claude (Primary Engineer)
@@ -99,7 +100,7 @@ Next unallocated ID: **LA-0009**.
 
 ##### LA-0007 — Draft PR delivery and state/evidence reconciliation
 
-- Status: AWAITING_BRAIN_REVIEW
+- Status: DONE
 - Depends on: LA-0006, LA-0008
 - Owner: Brain
 - Executor: Claude (Primary Engineer)
@@ -112,7 +113,7 @@ Next unallocated ID: **LA-0009**.
 
 ##### LA-0008 — Brain↔Engineer Command Bus & Automated Claude Invocation Bridge
 
-- Status: AWAITING_BRAIN_REVIEW
+- Status: DONE
 - Depends on: LA-0005, LA-0006
 - Owner: Brain
 - Executor: Claude (Primary Engineer)
@@ -123,11 +124,13 @@ Next unallocated ID: **LA-0009**.
 
 ## Milestone M1 — Architecture Proof
 
-- Status: PLANNED / NOT_EXECUTABLE
-- Handoff: CLAUDE_HANDOFF_001 — V0 Architecture Spike (staged, **NOT_EXECUTABLE**)
-- Entry gate: Brain BOOTSTRAP_PASS on M0 and explicit admission of CLAUDE_HANDOFF_001.
+- Status: DONE
+- Handoff: CLAUDE_HANDOFF_001 — V0 Architecture Spike
+- Entry gate: BOOTSTRAP_PASS + explicit admission — **met**.
+- Exit gate: ARCHITECTURE_PROOF_PASS / GO_ADAPT — **met** at immutable reviewed head `0327d2e5b854df1c9923c65ed88f77151cfe9eed`.
+- Evidence branch: `spike/v0-architecture-proof`, draft PR #2, unmerged. Detailed LA-0009…LA-0017 task/evidence files remain on that sibling stacked branch and are not duplicated into this Round 7 branch.
 - Source: PRE_BOOTSTRAP_PRODUCT_READINESS_AND_MASTER_SEQUENCE_v1.0 — Learning App (Drive); D-015, D-024, D-025
-- Tasks: none allocated (progressive detail; allocated only on Brain admission)
+- Current branch implication: Architecture Proof is accepted, but M2/M5 feature implementation is still NOT_EXECUTABLE. Round 7 evidence work is a bounded pre-admission evidence program, not Golden Learning Slice implementation.
 
 ### Sprint M1.S1 — Donor fresh-audit & layered reuse matrix
 
@@ -147,9 +150,10 @@ Next unallocated ID: **LA-0009**.
 ## Milestone M2 — VS-001 Golden Vertical Slice
 
 - Status: PLANNED / NOT_EXECUTABLE
-- Entry gate: Brain accepts the M1 selector outcome and admits VS-001.
-- Source: PRE_BOOTSTRAP_PRODUCT_READINESS_AND_MASTER_SEQUENCE_v1.0 — Learning App (Drive)
+- Entry gate: Architecture Proof PASS is met; execution still requires the controlling Product/Visual + Round 7 device/voice/accessibility evidence and explicit Brain admission.
+- Source: CURRENT_EXECUTION_STATE + PRE_BOOTSTRAP_PRODUCT_READINESS_AND_MASTER_SEQUENCE_v1.0 — Learning App (Drive)
 - Tasks: none allocated (progressive detail; allocated only on Brain admission)
+- Current blocker relevant to this branch: companion/runtime synthetic QA is PASS; physical native TTS/device validation remains open.
 
 ### Sprint M2.S1 — Slice foundation
 
