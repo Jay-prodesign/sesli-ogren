@@ -1,0 +1,72 @@
+name: round7-native-tts-sim
+
+on:
+  push:
+    branches:
+      - feat/round7-companion-production-sequence-v2
+    paths:
+      - "proof/round7-p1-runtime/integration_test/native_speech_plugin_test.dart"
+      - "proof/round7-p1-runtime/lib/src/speech/device_speech_output.dart"
+      - ".github/workflows/round7-native-tts-sim.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: round7-native-tts-sim
+  cancel-in-progress: true
+
+jobs:
+  ios-native-tts-sim:
+    name: P9 native TTS — iOS simulator
+    runs-on: macos-15
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: proof/round7-p1-runtime
+
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+
+      - name: Read Flutter pin
+        id: pin
+        working-directory: .
+        run: echo "version=$(tr -d '[:space:]' < .flutter-version)" >> "$GITHUB_OUTPUT"
+
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
+        with:
+          channel: stable
+          flutter-version: ${{ steps.pin.outputs.version }}
+          cache: false
+          pub-cache: false
+
+      - run: flutter pub get
+
+      - name: Boot one available iPhone simulator
+        id: sim
+        run: |
+          set -euo pipefail
+          UDID="$(xcrun simctl list devices available -j | python3 -c 'import json,sys; data=json.load(sys.stdin); print(next(d["udid"] for runtime,devices in data["devices"].items() if "iOS" in runtime for d in devices if d.get("isAvailable") and d.get("name","").startswith("iPhone")))')"
+          echo "udid=$UDID" >> "$GITHUB_OUTPUT"
+          echo "Selected simulator: $UDID"
+          xcrun simctl boot "$UDID" || true
+
+          STATE=""
+          for i in $(seq 1 45); do
+            STATE="$(xcrun simctl list devices -j | TARGET_UDID="$UDID" python3 -c 'import json,sys,os; data=json.load(sys.stdin); target=os.environ["TARGET_UDID"]; print(next((d.get("state","") for devices in data["devices"].values() for d in devices if d.get("udid")==target),""))' 2>/dev/null || true)"
+            echo "Simulator state: $STATE"
+            [ "$STATE" = "Booted" ] && break
+            sleep 2
+          done
+
+          if [ "$STATE" != "Booted" ]; then
+            echo "Simulator did not boot within 90 seconds."
+            xcrun simctl list devices available
+            exit 1
+          fi
+
+      - name: Run native flutter_tts lifecycle probe
+        run: flutter test integration_test/native_speech_plugin_test.dart -d "${{ steps.sim.outputs.udid }}"
