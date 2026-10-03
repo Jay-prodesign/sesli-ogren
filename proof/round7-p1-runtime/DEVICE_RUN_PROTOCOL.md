@@ -1,7 +1,9 @@
 # P1 physical-device run protocol (R7-06)
 
-R7-06 stays **OPEN** until D1, D2 and D3 physical-device runs are recorded, each with the exact
-commit and build provenance. Emulators, simulators, browsers and CI runners cannot close it.
+R7-06 stays **OPEN** until D1, D2 and D3 physical-device runs are eventually recorded, each with the exact
+commit and build provenance. The **current execution priority is iOS-first** because iPhone hardware is available now.
+D2/D3 Android are explicitly deferred until suitable hardware becomes available; their absence must not block today's
+D1 companion/native-speech QA. Emulators, simulators, browsers and CI runners cannot close the full cross-device matrix.
 
 ## P9 companion fast path
 
@@ -26,9 +28,9 @@ substitute for physical hardware.
 
 | Class | Requirement | Model / OS / refresh | Status |
 | --- | --- | --- | --- |
-| D1 | Current target iPhone (physical) | _to record_ | NOT_RUN |
-| D2 | Mid-range Android (physical) | _to record_ | NOT_RUN |
-| D3 | Lower-end supported Android (physical) | _to record_ | NOT_RUN |
+| D1 | Current available iPhone (physical) | _to record during run_ | **ACTIVE / NOT_RUN** |
+| D2 | Mid-range Android (physical) | _to record later_ | **DEFERRED_UNTIL_DEVICE_AVAILABLE** |
+| D3 | Lower-end supported Android (physical) | _to record later_ | **DEFERRED_UNTIL_DEVICE_AVAILABLE** |
 
 ## Build
 
