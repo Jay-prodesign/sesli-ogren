@@ -144,11 +144,6 @@ final class RasterCompanionRenderer implements CompanionRenderer {
     );
   }
 
-  static bool _blinkClosed(double t) {
-    // One short deterministic blink per 1.6 s motion cycle.
-    // No random timer means reproducible tests and no extra controller.
-    return t >= 0.13 && t <= 0.19;
-  }
 }
 
 final class _NormalizedOvalClipper extends CustomClipper<Path> {
@@ -169,38 +164,6 @@ final class _NormalizedOvalClipper extends CustomClipper<Path> {
 
   @override
   bool shouldReclip(_NormalizedOvalClipper oldClipper) => oldClipper.normalizedRect != normalizedRect;
-}
-
-final class _BlinkPainter extends CustomPainter {
-  const _BlinkPainter(this.profile);
-
-  final _RasterProfile profile;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final skin = Paint()
-      ..style = PaintingStyle.fill
-      ..color = profile.skin;
-    final lash = Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeCap = StrokeCap.round
-      ..strokeWidth = math.max(1.4, size.shortestSide * 0.035)
-      ..color = profile.lash;
-
-    for (final n in profile.eyeRects) {
-      final r = Rect.fromLTRB(n.left * size.width, n.top * size.height, n.right * size.width, n.bottom * size.height);
-      canvas.drawOval(r, skin);
-
-      final y = r.center.dy + r.height * 0.03;
-      final p = Path()
-        ..moveTo(r.left + r.width * 0.18, y)
-        ..quadraticBezierTo(r.center.dx, y + r.height * 0.22, r.right - r.width * 0.18, y);
-      canvas.drawPath(p, lash);
-    }
-  }
-
-  @override
-  bool shouldRepaint(_BlinkPainter oldDelegate) => oldDelegate.profile != profile;
 }
 
 /// Original Round 7 runtime proxy kept as a technical fallback.
