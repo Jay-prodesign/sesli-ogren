@@ -303,6 +303,9 @@ void main() {
       expect(tester.takeException(), isNull, reason: '${identity.name} @ $size initial');
       expect(find.byKey(const Key('companion-raster')), findsOneWidget);
       expect(find.byKey(const Key('proof-scroll')), findsOneWidget);
+      final visualSize = tester.getSize(find.byKey(const Key('companion-visual-box')));
+      final expectedExtent = size.width > size.height ? 104.0 : 124.0;
+      expect(visualSize, Size.square(expectedExtent), reason: '${identity.name} @ $size companion scale');
       final initialCompanionRect = tester.getRect(find.byKey(const Key('companion-raster')));
       expect(initialCompanionRect.top, greaterThanOrEqualTo(0));
       expect(
