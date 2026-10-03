@@ -55,9 +55,6 @@ final class _MotionPose {
 /// A heavier layered rig is admitted only if device QA proves this path
 /// insufficient.
 final class RasterCompanionRenderer implements CompanionRenderer {
-  const RasterCompanionRenderer._({required this.assetPath, required _RasterProfile profile, this.motionGain = 1.0})
-    : _profile = profile;
-
   const RasterCompanionRenderer.knot()
     : assetPath = 'assets/companions/D_KNOT_128.webp',
       motionGain = 0.85,
@@ -71,7 +68,7 @@ final class RasterCompanionRenderer implements CompanionRenderer {
   const RasterCompanionRenderer.tilt()
     : assetPath = 'assets/companions/E_TILT_128.webp',
       motionGain = 1.0,
-      profile = const _RasterProfile(
+      _profile = const _RasterProfile(
         mouthRect: Rect.fromLTRB(0.507, 0.398, 0.630, 0.507),
         eyeRects: [Rect.fromLTRB(0.374, 0.361, 0.512, 0.466), Rect.fromLTRB(0.541, 0.318, 0.670, 0.419)],
         skin: Color(0xFFF6E2E4),
