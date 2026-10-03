@@ -1,9 +1,10 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "project": "Learning App",
   "workstream": "Round 7 Companion Production",
   "updated_at": "2026-10-03",
   "active_branch": "feat/round7-companion-production-sequence-v2",
+  "execution_mode": "LEAN_APP_FIRST",
   "visual_authority": {
     "status": "FOUNDER_REFERENCE_SET_FROZEN",
     "library_path": "/Learning App/Founder References/2026-10-03",
@@ -12,36 +13,71 @@
       "DE_COMPANION_SYSTEM_FOUNDER_REF_02.jpeg",
       "DE_HOME_CONTEXT_FOUNDER_REF_03.jpeg",
       "DE_SCALE_CONTEXT_FOUNDER_REF_04.jpeg"
-    ]
+    ],
+    "canonical_neutral_sources": {
+      "D": "D_MASTER_LOCKED.png",
+      "E": "E_MASTER_LOCKED.png"
+    }
   },
-  "execution_mode": "LEAN_APP_FIRST",
-  "current_cursor": "P1_D_MASTER_NEUTRAL",
+  "current_cursor": "P3_D_LAYERED_SOURCE",
+  "phases": {
+    "P0_AUTHORITY_AND_INVENTORY": "PASS",
+    "P1_NEUTRAL_MASTERS": "PASS",
+    "P2_MINIMAL_SIZE_GATE": "PASS_STATIC_FALLBACK_QA",
+    "P3_RIG_DECOMPOSITION": "IN_PROGRESS",
+    "P4_NEUTRAL_RECOMPOSITION_PARITY": "BLOCKED_BY_P3",
+    "P5_SEMANTIC_MOTION_CLIPS": "BLOCKED_BY_P4",
+    "P6_SPEECH_CONTROLS": "BLOCKED_BY_P3_P4",
+    "P7_REAL_FLUTTER_INTEGRATION": "BLOCKED_BY_P4_P5",
+    "P8_REAL_TTS_LINKAGE": "BLOCKED_BY_P7",
+    "P9_REAL_PHONE_QA": "BLOCKED_BY_P7_P8",
+    "P10_SECONDARY_ASSETS": "LATER"
+  },
   "assets": {
     "D_MASTER_NEUTRAL": {
-      "status": "MISSING_CURRENT_AUTHORITY_SOURCE",
-      "next": true
+      "status": "PASS_CANONICAL_SOURCE",
+      "source": "D_MASTER_LOCKED.png",
+      "technical": "RGBA; true alpha; safe margins; copied to /Learning App Runtime Assets/D_MASTER_NEUTRAL_CANONICAL.png"
     },
     "E_MASTER_NEUTRAL": {
-      "status": "MISSING_CURRENT_AUTHORITY_SOURCE"
+      "status": "PASS_CANONICAL_SOURCE",
+      "source": "E_MASTER_LOCKED.png",
+      "technical": "RGBA; true alpha; safe margins; copied to /Learning App Runtime Assets/E_MASTER_NEUTRAL_CANONICAL.png"
     },
-    "E_GREETING_WAVE": {
-      "status": "CANDIDATE_ONLY_NOT_PRODUCTION_PASS"
-    },
-    "D_RIG_SOURCE": {
-      "status": "BLOCKED_BY_NEUTRAL_MASTER"
-    },
-    "E_RIG_SOURCE": {
-      "status": "BLOCKED_BY_NEUTRAL_MASTER"
-    },
-    "D_STATIC_DERIVATIVES": {
-      "status": "BLOCKED_BY_CURRENT_NEUTRAL_MASTER"
-    },
-    "E_STATIC_DERIVATIVES": {
-      "status": "BLOCKED_BY_CURRENT_NEUTRAL_MASTER"
-    },
-    "SECONDARY_POSES": {
-      "status": "LATER_AFTER_DEVICE_PASS"
-    }
+    "D_STATIC_FALLBACK_512_256_128": "PASS_STATIC_FALLBACK",
+    "E_STATIC_FALLBACK_512_256_128": "PASS_STATIC_FALLBACK",
+    "D_RIG_BASE": "PASS",
+    "E_RIG_BASE": "PASS",
+    "D_LAYERED_SOURCE": "MISSING_RECONSTRUCTION",
+    "E_LAYERED_SOURCE": "MISSING_RECONSTRUCTION",
+    "D_FACE_CONTROLS": "MISSING",
+    "E_FACE_CONTROLS": "MISSING",
+    "SECONDARY_POSES": "LATER_AFTER_DEVICE_PASS"
+  },
+  "rig_contract": {
+    "provider_neutral_contract": "EXISTS",
+    "D_blueprint": "PASS_NOT_LAYERED_ASSET",
+    "E_blueprint": "PASS_NOT_LAYERED_ASSET",
+    "required_layers": [
+      "rear_form",
+      "front_form",
+      "face_base",
+      "eye_L_white",
+      "eye_R_white",
+      "iris_pupil_L",
+      "iris_pupil_R",
+      "brow_L",
+      "brow_R",
+      "mouth",
+      "gesture_foreground",
+      "occlusion_fill"
+    ],
+    "required_acceptance": [
+      "true_alpha",
+      "clean_overlap",
+      "pivot_assigned",
+      "neutral_recomposite_parity"
+    ]
   },
   "runtime": {
     "companion_renderer_seam": "READY",
