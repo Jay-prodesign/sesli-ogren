@@ -65,42 +65,12 @@ final class RasterCompanionRenderer implements CompanionRenderer {
         final pulse = wave.abs();
 
         final (angle, dx, dy, scale) = switch (state) {
-          CompanionState.idle => (
-            0.0,
-            0.0,
-            -1.2 * wave * motionGain,
-            1.0 + 0.012 * wave * motionGain,
-          ),
-          CompanionState.listen => (
-            0.035 * motionGain,
-            1.0 * motionGain,
-            -0.4 * wave,
-            1.005,
-          ),
-          CompanionState.think => (
-            -0.035 * motionGain + 0.012 * wave,
-            0.0,
-            0.5 * wave,
-            0.995,
-          ),
-          CompanionState.speak => (
-            0.012 * motionGain,
-            0.0,
-            -0.5 * pulse,
-            1.0 + 0.025 * pulse * motionGain,
-          ),
-          CompanionState.correct => (
-            -0.022 * motionGain,
-            -0.5 * motionGain,
-            0.0,
-            0.995,
-          ),
-          CompanionState.success => (
-            0.0,
-            0.0,
-            -2.2 * pulse * motionGain,
-            1.025 + 0.018 * pulse * motionGain,
-          ),
+          CompanionState.idle => (0.0, 0.0, -1.2 * wave * motionGain, 1.0 + 0.012 * wave * motionGain),
+          CompanionState.listen => (0.035 * motionGain, 1.0 * motionGain, -0.4 * wave, 1.005),
+          CompanionState.think => (-0.035 * motionGain + 0.012 * wave, 0.0, 0.5 * wave, 0.995),
+          CompanionState.speak => (0.012 * motionGain, 0.0, -0.5 * pulse, 1.0 + 0.025 * pulse * motionGain),
+          CompanionState.correct => (-0.022 * motionGain, -0.5 * motionGain, 0.0, 0.995),
+          CompanionState.success => (0.0, 0.0, -2.2 * pulse * motionGain, 1.025 + 0.018 * pulse * motionGain),
         };
 
         return Transform.translate(
