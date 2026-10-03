@@ -1,18 +1,50 @@
 {
   "task_id": "R7-COMPANION-VISUAL-PRODUCTION-001",
-  "version": "1.3",
+  "version": "1.4",
   "authority": "ROUND_7_CURRENT_FINALIST_REBUILD_BRIEF_001",
-  "goal": "Produce parity-controlled, animation-first living Companion finalists without changing the approved D/Knot or E/Tilt design directions.",
+  "goal": "Produce parity-controlled, animation-first living Companion finalists and accept them only after source-jury plus bounded real-runtime context validation.",
   "stages": {
     "F0": {
-      "name": "Canonical form + motion anatomy proof",
+      "name": "Canonical form + motion anatomy + early runtime fit",
       "views": ["canonical three-quarter view","front/orientation view","pure filled silhouette","monochrome form","minimal-size legibility view","dense-learning placement","adult/professional-learning placement"],
-      "motion_anatomy": ["attention orientation carrier","idle/breathing deformation","listening deformation","thinking deformation","speaking deformation","success/supportive range","early rig/deformation feasibility"]
+      "motion_anatomy": ["attention orientation carrier","idle/breathing deformation","listening deformation","thinking deformation","speaking deformation","success/supportive range","early rig/deformation feasibility"],
+      "runtime_smoke": ["render through CompanionRenderer seam","minimal-size app context","dense-learning-screen context","silhouette/monochrome survival","Reduced Motion/minimal fallback compatibility","no semantic-state ownership drift"]
     },
     "F1": {"name":"Six-state parity","states":["AVAILABLE/IDLE","LISTENING","THINKING","SPEAKING","SUCCESS","SUPPORTIVE CORRECTION"]}
   },
+  "asset_lifecycle": {
+    "flow": ["locked product/design truth","asset classification","canonical master","isolated reusable source asset","source jury","bounded runtime integration","real-context acceptance","KEEP or bounded refine or REJECT","descendant multiplication"],
+    "classes": {
+      "AUTHORED_REFERENCE_LOCKED": "Companion canonical master, identity-carrying source assets, state descendants and motion keys.",
+      "PROCEDURAL_RUNTIME": "Focus/attention effects, generic state transitions, layout geometry, non-identity feedback and accessibility-safe presentation behavior.",
+      "DERIVED": "Minimal-size, monochrome, state, motion-key or hero derivatives that retain canonical master identity.",
+      "DEFER": "Decorative enrichment not required to close R7-01."
+    },
+    "master_rule": "One current canonical master/reference per finalist family. Derivatives may not silently supersede it; if a derivative drifts, the master wins unless an explicit design decision changes the master.",
+    "isolated_source_rule": "Reusable composable source assets are produced individually with clean isolation/transparent alpha when runtime composition requires it. Boards are composed only from source assets that already passed source jury.",
+    "placeholder_rule": "Keep the proven provisional renderer until the new candidate is integrated and passes production-context acceptance; replacement must remain easy to roll back during the bounded proof."
+  },
+  "acceptance_levels": {
+    "SOURCE_VISUAL_PASS": ["locked fields satisfied","lineage traceable","jury PASS","no hard fail"],
+    "PRODUCTION_ASSET_PASS": ["SOURCE_VISUAL_PASS","actual CompanionRenderer integration","semantic state remains owned by canonical learning/product state","minimal-size readability","dense-learning readability","adult/professional credibility","silhouette or monochrome survival","Reduced Motion/minimal fallback compatibility","no material layout/accessibility regression","no post-integration identity drift"]
+  },
+  "semantic_authority_firewall": {
+    "rule": "Visuals read and express canonical learning/product truth; they never create or mutate it.",
+    "forbidden_visual_authority": ["LearnerEvidence","LearnerState","mastery/readiness","success/correction truth","next-best learning action","pedagogical progression"]
+  },
   "parity": {
-    "canvas":"same square character-design sheet","camera":"orthographic-like character study; no dramatic perspective","background":"warm neutral off-white studio field","lighting":"soft neutral studio lighting; no colored rim light","material":"matte soft-touch synthetic material; no fur, cloth, glass, chrome, or glossy toy finish","screen_footprint":"same visual scale and margins","detail_budget":"low part count; animation/rig plausible","effects":"none","props":"none","text_policy":"candidate code and tiny view labels only; no marketing copy","emotion_policy":"emotion comes from whole-form orientation, tension, compression, spacing, apertures or structural alignment; never conventional face acting","runtime_translation":"tool remains open; design must support rig/deformation + reusable keyframed motion + bounded micro-motion"
+    "canvas":"same square character-design sheet",
+    "camera":"orthographic-like character study; no dramatic perspective",
+    "background":"warm neutral off-white studio field",
+    "lighting":"soft neutral studio lighting; no colored rim light",
+    "material":"matte soft-touch synthetic material; no fur, cloth, glass, chrome, or glossy toy finish",
+    "screen_footprint":"same visual scale and margins",
+    "detail_budget":"low part count; animation/rig plausible",
+    "effects":"none",
+    "props":"none",
+    "text_policy":"candidate code and tiny view labels only; no marketing copy",
+    "emotion_policy":"emotion comes from whole-form orientation, tension, compression, spacing, apertures or structural alignment; never conventional face acting",
+    "runtime_translation":"tool remains open; design must support rig/deformation + reusable keyframed motion + bounded micro-motion"
   },
   "shared_hard_fails": ["preschool or plush mascot","recognizable animal or pet","collectible creature","generic blob with face","generic AI orb","robot assistant","mini human","hooded or fantasy NPC","wizard or adventurer","school mascot or teacher caricature","eyes-and-mouth mascot grammar","arms, hands, legs, feet, ears, tail, hair, clothing, hat, glasses or props","face screen or visor","realistic fur or cloth","complex 3D dependency","continuous particles, glow, sparks or aura","domain-specific costume","obvious existing-IP resemblance","abstract logo or decorative object with no living character presence","static-only form with no coherent motion anatomy"],
   "failure_codes": {
@@ -25,6 +57,7 @@
     "STATE_INCOHERENCE":"states require unrelated redraws instead of one coherent character anatomy",
     "SILHOUETTE_COLLAPSE":"identity fails in filled silhouette, monochrome or minimal size",
     "EFFECT_DEPENDENCE":"identity/emotion depends on glow, particles, aura or decorative effects",
+    "RUNTIME_CONTEXT_FAIL":"source visual passes in isolation but fails readability, identity, fallback, layout/accessibility or semantic-state integrity after real app integration",
     "PROHIBITED_ARCHETYPE":"any shared hard-fail archetype is present"
   },
   "candidates": {
@@ -32,13 +65,14 @@
     "E":{"name":"E/Tilt","positive_identity":["single upright directional body with a clear forward tilt","one integrated folded facet or structural notch establishes orientation","composed, intentional, coach-like presence without humanoid posture","body-integrated directional hierarchy; no floating marker","strong vertical silhouette materially distinct from D/Knot","recognizable as a solid black shape at small size","not loop-based, not orb-based, not a rounded blob"],"f0_geometry":"One upright tilted body with an integrated directional facet; no detached topper, tab, badge, antenna, head, limbs or face. Whole-body orientation and deformation must carry living presence."}
   },
   "production_mode": {
-    "strategy":"design_plan_locked_generate_jury_repair_loop",
+    "strategy":"design_plan_locked_generate_jury_repair_integrate_loop",
     "design_authority":"ROUND_7_CURRENT_FINALIST_REBUILD_BRIEF_001",
     "rule":"Production limitations never reinterpret, simplify, replace or redesign D/Knot or E/Tilt.",
-    "loop":["lock current stage target","compile generation prompt","generate one candidate","jury against immutable contract","if any hard fail: REJECT","emit failure codes + concrete visual evidence","compile corrective prompt from failure codes while preserving passed traits","regenerate","repeat until PASS or generation surface is judged incapable"],
+    "loop":["lock current stage target","classify asset","compile generation prompt","generate one candidate","jury against immutable contract","if any hard fail: REJECT","emit failure codes + concrete visual evidence","compile corrective prompt from failure codes while preserving passed traits","regenerate","after source visual pass integrate bounded candidate into real renderer context","evaluate production-context acceptance","KEEP or bounded refine or REJECT","multiply descendants only after required acceptance"],
     "jury_boundary":"Jury diagnoses against the locked contract; it may not invent a new character direction.",
     "repair_boundary":"Repair prompt addresses only diagnosed failures and explicitly preserves already-passing traits.",
     "surface_escape":"Repeated failure of the same class is evidence to change production surface/workflow, not to weaken the design contract.",
-    "implementation_boundary":"Runtime/vector/rig technology may translate an approved character later; it is not design authority."
+    "implementation_boundary":"Runtime/vector/rig technology may translate an approved character later; it is not design authority.",
+    "evidence_boundary":"Routine reversible iterations use internal jury + bounded runtime checks. Durable evidence/independent review is reserved for material risk or the controlling Round 7 gate under D-064/D-065."
   }
 }
