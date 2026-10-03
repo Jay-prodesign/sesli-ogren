@@ -120,11 +120,7 @@ jobs:
 
           PR_NUMBER="$(gh pr list --repo "$GITHUB_REPOSITORY" --head "$GITHUB_REF_NAME" --state open --json number --jq '.[0].number // empty')"
           if [ -n "$PR_NUMBER" ]; then
-            BODY="PHONE_PREVIEW_URL: $URL
-
-Source commit: ${GITHUB_SHA}
-Free temporary Cloudflare Quick Tunnel for Learning App phone QA.
-This URL remains available while this workflow job is alive."
+            BODY="$(printf 'PHONE_PREVIEW_URL: %s\n\nSource commit: %s\nFree temporary Cloudflare Quick Tunnel for Learning App phone QA.\nThis URL remains available while this workflow job is alive.' "$URL" "$GITHUB_SHA")"
             gh api \
               --method POST \
               -H "Accept: application/vnd.github+json" \
