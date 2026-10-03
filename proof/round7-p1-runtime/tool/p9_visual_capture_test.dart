@@ -7,6 +7,7 @@ import 'package:r7_p1_runtime_proof/src/flow/flow_engine.dart';
 import 'package:r7_p1_runtime_proof/src/render/companion_renderer.dart';
 import 'package:r7_p1_runtime_proof/src/render/world_painter.dart';
 import 'package:r7_p1_runtime_proof/src/scene/fixture.dart';
+import 'package:r7_p1_runtime_proof/src/scene/scene_schema.dart';
 
 Future<List<ProofFixture>> _loadFixtures() async {
   TestWidgetsFlutterBinding.ensureInitialized();
