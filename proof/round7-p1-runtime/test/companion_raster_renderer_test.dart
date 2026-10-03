@@ -57,7 +57,7 @@ void main() {
     expect(find.byKey(const Key('companion-mouth-warp')), findsOneWidget);
   });
 
-  testWidgets('blink is a small overlay and does not replace the canonical raster', (tester) async {
+  testWidgets('V1 does not paint synthetic eyelids over the flattened canonical raster', (tester) async {
     await pumpRenderer(
       tester,
       renderer: const RasterCompanionRenderer.knot(),
@@ -66,10 +66,10 @@ void main() {
     );
 
     expect(find.byKey(const Key('companion-raster')), findsOneWidget);
-    expect(find.byKey(const Key('companion-blink-overlay')), findsOneWidget);
+    expect(find.byKey(const Key('companion-blink-overlay')), findsNothing);
   });
 
-  testWidgets('reduced/static rendering disables mouth animation and blink overlays', (tester) async {
+  testWidgets('reduced/static rendering disables local mouth animation', (tester) async {
     await pumpRenderer(
       tester,
       renderer: const RasterCompanionRenderer.tilt(),
