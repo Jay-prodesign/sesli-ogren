@@ -12,9 +12,16 @@ final worldStats = PaintStats();
 final companionStats = PaintStats();
 
 class ProofScreen extends StatelessWidget {
-  const ProofScreen({super.key, required this.controller, this.onOpenBenchmark, this.companionRenderer});
+  const ProofScreen({
+    super.key,
+    required this.controller,
+    this.onOpenNativeSpeechQa,
+    this.onOpenBenchmark,
+    this.companionRenderer,
+  });
 
   final ProofController controller;
+  final VoidCallback? onOpenNativeSpeechQa;
   final VoidCallback? onOpenBenchmark;
 
   /// Optional test/host override. When null the selected Founder companion
@@ -38,6 +45,12 @@ class ProofScreen extends StatelessWidget {
                 icon: const Icon(Icons.tune),
                 onPressed: () => _conditions(context),
               ),
+              if (onOpenNativeSpeechQa != null)
+                IconButton(
+                  tooltip: 'Native Speech QA',
+                  icon: const Icon(Icons.record_voice_over),
+                  onPressed: onOpenNativeSpeechQa,
+                ),
               if (onOpenBenchmark != null)
                 IconButton(tooltip: 'Benchmark', icon: const Icon(Icons.speed), onPressed: onOpenBenchmark),
             ],
