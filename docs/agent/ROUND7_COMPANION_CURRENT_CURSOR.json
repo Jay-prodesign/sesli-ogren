@@ -3,37 +3,23 @@
   "cursor_id": "R7-COMPANION-PRODUCTION-V2",
   "updated_at": "2026-10-03",
   "active_branch": "feat/round7-companion-production-sequence-v2",
-  "active_phase": "P7_REAL_FLUTTER_INTEGRATION",
-  "active_task": "CANONICAL_RASTER_RENDERER",
-  "inputs": {
-    "D": "D_STATIC_FALLBACK_512.png",
-    "E": "E_STATIC_FALLBACK_512.png",
-    "renderer_seam": "proof/round7-p1-runtime/lib/src/render/companion_renderer.dart",
-    "semantic_states": [
-      "IDLE",
-      "LISTEN",
-      "THINK",
-      "SPEAK",
-      "CORRECT",
-      "SUCCESS"
+  "active_phase": "P3A_SINGLE_MASTER_DEFORMATION_PROBE",
+  "active_task": "BLINK_CONTROL_OVERLAY",
+  "task_contract": {
+    "goal": "close blink without introducing a full layered rig",
+    "characters": [
+      "D_Knot",
+      "E_Tilt"
+    ],
+    "output": "small transparent eyelid overlays or equivalent local control; no redraw of whole character",
+    "acceptance": [
+      "eyes can close/reopen without identity drift",
+      "no visible rectangular/elliptical patch at app scale",
+      "works for both D and E with the same control model",
+      "reduced motion can keep blink or slow it",
+      "no limbs or new anatomy"
     ]
   },
-  "implementation": {
-    "strategy": "render canonical raster identity and animate whole character by semantic state",
-    "no_fake_face_layers": true,
-    "D_default_for_current_proof": true,
-    "E_supported_by_renderer_constructor": true,
-    "motion": {
-      "IDLE": "subtle float/breathe",
-      "LISTEN": "small orient/lean",
-      "THINK": "small counter-tilt/compress",
-      "SPEAK": "bounded pulse while speaking state is active",
-      "CORRECT": "calm supportive lean",
-      "SUCCESS": "short lift/expand"
-    },
-    "reduced_motion": "static state pose only",
-    "fallback": "existing semantic label/proxy behavior remains available"
-  },
-  "next_after_pass": "P8_REAL_TTS_LINKAGE",
-  "face_rig_reentry_gate": "Only if real-phone QA shows whole-character motion + real audio is insufficient."
+  "next_after_pass": "P4_REAL_FLUTTER_DEFORMATION_RENDERER",
+  "next_after_fail": "admit only minimal eye-layer authoring, not a full body rig"
 }
