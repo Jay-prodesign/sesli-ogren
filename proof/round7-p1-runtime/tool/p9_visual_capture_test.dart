@@ -92,6 +92,7 @@ Future<void> _captureFullScreen(
 
   controller.setReducedMotion(true);
   await tester.pump();
+  await tester.pumpAndSettle();
   expect(tester.takeException(), isNull);
 
   final name = 'p9_captures/full_${orientation}_${_identityName(identity)}_${state.name.toUpperCase()}.png';
