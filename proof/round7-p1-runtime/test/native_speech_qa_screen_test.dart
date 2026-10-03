@@ -78,7 +78,7 @@ void main() {
       expect(find.textContaining('stop() settled SPEAK'), findsOneWidget);
       expect(find.textContaining('stale-callback guard PASS'), findsOneWidget);
       expect(speech.speakCalls, 2);
-        expect(controller.speaking, isFalse);
+      expect(controller.speaking, isFalse);
     },
   );
 
