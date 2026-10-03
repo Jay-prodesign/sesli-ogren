@@ -42,3 +42,12 @@ specific problem that cannot be fixed locally.
 ## Protected actions
 
 Merge, release, deploy, paid providers, credentials/secrets, production mutation and licensing changes remain Product Owner gates.
+
+
+## Device execution priority
+
+- **D1 iPhone:** ACTIVE now. Run the physical Native Speech QA + audibility/orientation/smoothness checks.
+- **D2 mid-range Android:** DEFERRED_UNTIL_DEVICE_AVAILABLE.
+- **D3 lower-end Android:** DEFERRED_UNTIL_DEVICE_AVAILABLE.
+- Android unavailability must not block today's D1 evidence work.
+- The full R7-06 cross-device matrix remains OPEN until D1+D2+D3 are eventually recorded.
