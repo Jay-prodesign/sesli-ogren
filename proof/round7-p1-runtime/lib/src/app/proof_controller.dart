@@ -76,6 +76,8 @@ class ProofController extends ChangeNotifier {
       ..removeListener(_onEngine)
       ..dispose();
     _fixtureIndex = index;
+    _lastStep = null;
+    _lastTeach = -2;
     _engine = _newEngine(index);
     notifyListeners();
   }
