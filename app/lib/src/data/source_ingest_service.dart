@@ -48,7 +48,7 @@ class SourceIngestService {
       materialId: materialId,
       digest: digest,
       mediaType: SourceMediaType.pastedText,
-      sourceName: sourceName.trim().isEmpty ? 'Pasted text' : sourceName.trim(),
+      sourceName: _validatedTitle(sourceName, fallback: 'Pasted text'),
       mimeType: 'text/plain; charset=utf-8',
       byteSize: bytes.length,
       inlineText: normalized,
@@ -81,7 +81,10 @@ class SourceIngestService {
       );
     }
 
-    final safeName = _safeFileName(originalName);
+    final safeName = _validatedTitle(
+      _safeFileName(originalName),
+      fallback: 'document.pdf',
+    );
     final ExtractedPdf extracted;
     try {
       extracted = await _pdfTextExtractor.extract(
@@ -224,6 +227,20 @@ class SourceIngestService {
 
   static String _normalizeText(String text) =>
       text.replaceAll('\r\n', '\n').replaceAll('\r', '\n').trim();
+
+  static String _validatedTitle(
+    String value, {
+    required String fallback,
+  }) {
+    final trimmed = value.trim();
+    final resolved = trimmed.isEmpty ? fallback : trimmed;
+    if (resolved.length > 300) {
+      throw const SourceIngestException(
+        'Source title exceeds the bounded M5 title limit.',
+      );
+    }
+    return resolved;
+  }
 
   static String _safeFileName(String value) {
     final pieces = value.split(RegExp(r'[\\/]'));
