@@ -12,7 +12,19 @@ Do not copy or fork those migrations just to rename the directory. The M5 delta
 below is applied after them in the milestone validation batch:
 
 3. `server/db/migrations/0003_recall_learning_truth.sql`
+4. `server/db/migrations/0004_server_authoritative_recall_assistance.sql`
 
 This is deliberate D-066/D-072 behavior: reuse accepted substrate, avoid a
 second data authority, and batch the real PostgreSQL verification at the M5
 checkpoint. No production database mutation is authorized here.
+
+
+## M5 checkpoint validation
+
+The accepted M4 SQL harness remains the execution substrate. At the bounded M5
+checkpoint, apply the M4 migrations first, then every migration in
+`server/db/migrations/` in lexical order, and run `server/db/tests/`.
+
+The M5 server test suite must execute against real PostgreSQL semantics through
+the existing Supabase shim; static review alone is not a PASS. Hosted Supabase
+session/config evidence remains a separate protected-environment gate.
