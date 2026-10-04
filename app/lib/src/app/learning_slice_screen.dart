@@ -751,13 +751,6 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
           ),
           const SizedBox(height: 10),
           Text(continuation.nextAction.reasonText),
-          const SizedBox(height: 10),
-          Text(
-            'Neden: ${continuation.nextAction.reasonCode}',
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-            ),
-          ),
           const SizedBox(height: 20),
           FilledButton.icon(
             onPressed: _busy ? null : _openRecall,
