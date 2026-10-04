@@ -33,8 +33,11 @@ jobs:
           cache: false
       - working-directory: app
         run: flutter pub get
-      - working-directory: app
-        run: dart format --output=none --set-exit-if-changed .
+      - name: Show exact Dart formatter diff
+        working-directory: app
+        run: |
+          dart format .
+          git diff --exit-code -- .
       - working-directory: app
         run: flutter analyze
       - working-directory: app
