@@ -1261,6 +1261,130 @@ WHERE learner_id = ?
     });
   }
 
+  @override
+  Future<LearningContinuation> repairDerivedProjection({
+    required AuthenticatedLearner learner,
+    required LearnerState state,
+    required NextLearningAction nextAction,
+  }) {
+    if (nextAction.materialId != state.materialId ||
+        nextAction.sourceVersionId != state.sourceVersionId ||
+        nextAction.latestEvidenceId != state.latestEvidenceId) {
+      throw const LearningTruthConflict(
+        'Repair projection lineage is internally inconsistent.',
+      );
+    }
+
+    return _database.transaction((transaction) async {
+      final authorityRows = await transaction.query(
+        'materials',
+        columns: ['current_source_version_id'],
+        where:
+            'learner_id = ? AND material_id = ? AND lifecycle_status = ? '
+            'AND deleted_at_utc IS NULL',
+        whereArgs: [
+          learner.id.value,
+          state.materialId.value,
+          MaterialLifecycleStatus.active.name,
+        ],
+        limit: 1,
+      );
+      if (authorityRows.isEmpty ||
+          authorityRows.single['current_source_version_id'] !=
+              state.sourceVersionId.value) {
+        throw const LearningTruthConflict(
+          'Repair cannot project learning truth from a stale source version.',
+        );
+      }
+
+      final evidenceRows = await transaction.query(
+        'learner_evidence',
+        where: 'learner_id = ? AND evidence_id = ?',
+        whereArgs: [learner.id.value, state.latestEvidenceId.value],
+        limit: 1,
+      );
+      if (evidenceRows.isEmpty) {
+        throw const LearningTruthConflict(
+          'Repair requires durable canonical learner evidence.',
+        );
+      }
+      final latestEvidence = _evidenceFromRow(evidenceRows.single);
+      if (latestEvidence.materialId != state.materialId ||
+          latestEvidence.sourceVersionId != state.sourceVersionId) {
+        throw const LearningTruthConflict(
+          'Repair evidence does not belong to the current material/source.',
+        );
+      }
+
+      final countRows = await transaction.rawQuery(
+        '''
+SELECT COUNT(*) AS evidence_count
+FROM learner_evidence
+WHERE learner_id = ?
+  AND material_id = ?
+  AND source_version_id = ?
+''',
+        [
+          learner.id.value,
+          state.materialId.value,
+          state.sourceVersionId.value,
+        ],
+      );
+      final canonicalCount = countRows.single['evidence_count']! as int;
+      if (canonicalCount != state.evidenceCount) {
+        throw const LearningTruthConflict(
+          'Repair state evidence count does not match canonical evidence.',
+        );
+      }
+
+      final stateRow = {
+        'source_version_id': state.sourceVersionId.value,
+        'state_kind': state.kind.name,
+        'evidence_count': state.evidenceCount,
+        'latest_evidence_id': state.latestEvidenceId.value,
+        'rule_version': state.ruleVersion,
+        'updated_at_utc': state.updatedAt.toUtc().toIso8601String(),
+      };
+      final updatedState = await transaction.update(
+        'learner_states',
+        stateRow,
+        where: 'learner_id = ? AND material_id = ?',
+        whereArgs: [learner.id.value, state.materialId.value],
+      );
+      if (updatedState == 0) {
+        await transaction.insert(
+          'learner_states',
+          {
+            'learner_id': learner.id.value,
+            'material_id': state.materialId.value,
+            ...stateRow,
+          },
+          conflictAlgorithm: ConflictAlgorithm.abort,
+        );
+      }
+
+      final nextRow = _nextActionToRow(
+        learner: learner,
+        action: nextAction,
+      );
+      final updatedNext = await transaction.update(
+        'next_learning_actions',
+        nextRow,
+        where: 'learner_id = ? AND material_id = ?',
+        whereArgs: [learner.id.value, nextAction.materialId.value],
+      );
+      if (updatedNext == 0) {
+        await transaction.insert(
+          'next_learning_actions',
+          nextRow,
+          conflictAlgorithm: ConflictAlgorithm.abort,
+        );
+      }
+
+      return LearningContinuation(state: state, nextAction: nextAction);
+    });
+  }
+
   static bool _sameAction(RecallAction left, RecallAction right) {
     return left.materialId == right.materialId &&
         left.sourceVersionId == right.sourceVersionId &&
