@@ -41,7 +41,7 @@ class SqliteSourceStore implements SourceStore {
     final database = await selectedFactory.openDatabase(
       databasePath,
       options: OpenDatabaseOptions(
-        version: 5,
+        version: 6,
         onConfigure: (db) => db.execute('PRAGMA foreign_keys = ON'),
         onUpgrade: (db, oldVersion, newVersion) async {
           if (oldVersion < 2) {
@@ -55,6 +55,9 @@ class SqliteSourceStore implements SourceStore {
           }
           if (oldVersion < 5) {
             await _upgradeOperationalTelemetryV5(db);
+          }
+          if (oldVersion < 6) {
+            await _upgradeActiveRecallAttemptSchema(db);
           }
         },
         onCreate: (db, version) async {
@@ -220,6 +223,21 @@ CREATE TABLE recall_attempt_support (
 )
 ''');
           await db.execute('''
+CREATE TABLE active_recall_attempts (
+  learner_id TEXT NOT NULL,
+  material_id TEXT NOT NULL,
+  source_version_id TEXT NOT NULL,
+  action_id TEXT NOT NULL,
+  attempt_id TEXT NOT NULL,
+  opened_at_utc TEXT NOT NULL,
+  PRIMARY KEY (learner_id, material_id),
+  UNIQUE (learner_id, attempt_id),
+  FOREIGN KEY (learner_id, action_id)
+    REFERENCES recall_actions (learner_id, action_id)
+    ON DELETE CASCADE
+)
+''');
+          await db.execute('''
 CREATE TABLE operational_events (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   learner_id TEXT NOT NULL,
@@ -277,6 +295,24 @@ ON extracted_contents (learner_id, source_version_id, invalidated_at_utc)
       ),
     );
     return SqliteSourceStore._(database);
+  }
+
+  static Future<void> _upgradeActiveRecallAttemptSchema(Database db) async {
+    await db.execute('''
+CREATE TABLE IF NOT EXISTS active_recall_attempts (
+  learner_id TEXT NOT NULL,
+  material_id TEXT NOT NULL,
+  source_version_id TEXT NOT NULL,
+  action_id TEXT NOT NULL,
+  attempt_id TEXT NOT NULL,
+  opened_at_utc TEXT NOT NULL,
+  PRIMARY KEY (learner_id, material_id),
+  UNIQUE (learner_id, attempt_id),
+  FOREIGN KEY (learner_id, action_id)
+    REFERENCES recall_actions (learner_id, action_id)
+    ON DELETE CASCADE
+)
+''');
   }
 
   static Future<void> _upgradeOperationalTelemetrySchema(Database db) async {
@@ -772,6 +808,11 @@ LIMIT 1
       }
 
       await transaction.delete(
+        'active_recall_attempts',
+        where: 'learner_id = ? AND material_id = ?',
+        whereArgs: [learner.id.value, material.id.value],
+      );
+      await transaction.delete(
         'next_learning_actions',
         where: 'learner_id = ? AND material_id = ?',
         whereArgs: [learner.id.value, material.id.value],
@@ -840,6 +881,11 @@ LIMIT 1
         return;
       }
 
+      await transaction.delete(
+        'active_recall_attempts',
+        where: 'learner_id = ? AND material_id = ?',
+        whereArgs: [learner.id.value, materialId.value],
+      );
       await transaction.delete(
         'next_learning_actions',
         where: 'learner_id = ? AND material_id = ?',
@@ -1162,6 +1208,87 @@ LIMIT 1
   }
 
   @override
+  Future<ActiveRecallAttempt> openRecallAttempt({
+    required AuthenticatedLearner learner,
+    required RecallActionId actionId,
+    required RecallAttemptId proposedAttemptId,
+    required DateTime openedAt,
+  }) {
+    return _database.transaction((transaction) async {
+      final actionRows = await transaction.query(
+        'recall_actions',
+        where: 'learner_id = ? AND action_id = ?',
+        whereArgs: [learner.id.value, actionId.value],
+        limit: 1,
+      );
+      if (actionRows.isEmpty) {
+        throw const LearningTruthConflict(
+          'Active attempt cannot reference a missing recall action.',
+        );
+      }
+      final action = _actionFromRow(actionRows.single);
+
+      final authorityRows = await transaction.query(
+        'materials',
+        columns: ['current_source_version_id'],
+        where:
+            'learner_id = ? AND material_id = ? AND lifecycle_status = ? '
+            'AND deleted_at_utc IS NULL',
+        whereArgs: [
+          learner.id.value,
+          action.materialId.value,
+          MaterialLifecycleStatus.active.name,
+        ],
+        limit: 1,
+      );
+      if (authorityRows.isEmpty ||
+          authorityRows.single['current_source_version_id'] !=
+              action.sourceVersionId.value) {
+        throw const LearningTruthConflict(
+          'Active attempt cannot attach to a stale recall action.',
+        );
+      }
+
+      final existingRows = await transaction.query(
+        'active_recall_attempts',
+        where: 'learner_id = ? AND material_id = ?',
+        whereArgs: [learner.id.value, action.materialId.value],
+        limit: 1,
+      );
+      if (existingRows.isNotEmpty) {
+        final existing = _activeAttemptFromRow(existingRows.single);
+        if (existing.actionId != action.id ||
+            existing.sourceVersionId != action.sourceVersionId) {
+          throw const LearningTruthConflict(
+            'Existing active Recall attempt is stale or conflicts with the current action.',
+          );
+        }
+        return existing;
+      }
+
+      await transaction.insert(
+        'active_recall_attempts',
+        {
+          'learner_id': learner.id.value,
+          'material_id': action.materialId.value,
+          'source_version_id': action.sourceVersionId.value,
+          'action_id': action.id.value,
+          'attempt_id': proposedAttemptId.value,
+          'opened_at_utc': openedAt.toUtc().toIso8601String(),
+        },
+        conflictAlgorithm: ConflictAlgorithm.abort,
+      );
+      return ActiveRecallAttempt(
+        attemptId: proposedAttemptId,
+        actionId: action.id,
+        materialId: action.materialId,
+        sourceVersionId: action.sourceVersionId,
+        openedAt: openedAt.toUtc(),
+      );
+    });
+  }
+
+  @override
   Future<RecallAssistance> registerAssistance({
     required AuthenticatedLearner learner,
     required RecallAttemptId attemptId,
@@ -1453,6 +1580,26 @@ ON CONFLICT(learner_id, attempt_id) DO UPDATE SET
         );
       }
 
+      final activeRows = await transaction.query(
+        'active_recall_attempts',
+        where: 'learner_id = ? AND material_id = ?',
+        whereArgs: [learner.id.value, evidence.materialId.value],
+        limit: 1,
+      );
+      if (activeRows.isEmpty) {
+        throw const LearningTruthConflict(
+          'New learner evidence requires an active Recall attempt.',
+        );
+      }
+      final active = _activeAttemptFromRow(activeRows.single);
+      if (active.attemptId != evidence.attemptId ||
+          active.actionId != evidence.actionId ||
+          active.sourceVersionId != evidence.sourceVersionId) {
+        throw const LearningTruthConflict(
+          'Learner evidence does not match the active Recall attempt.',
+        );
+      }
+
       await transaction.insert(
         'learner_evidence',
         _evidenceToRow(learner: learner, evidence: evidence),
@@ -1527,6 +1674,16 @@ WHERE learner_id = ?
           conflictAlgorithm: ConflictAlgorithm.abort,
         );
       }
+
+      await transaction.delete(
+        'active_recall_attempts',
+        where: 'learner_id = ? AND material_id = ? AND attempt_id = ?',
+        whereArgs: [
+          learner.id.value,
+          evidence.materialId.value,
+          evidence.attemptId.value,
+        ],
+      );
 
       return PersistedLearningTruth(
         evidence: evidence,
@@ -1684,6 +1841,18 @@ WHERE learner_id = ?
 
       return LearningContinuation(state: state, nextAction: nextAction);
     });
+  }
+
+  static ActiveRecallAttempt _activeAttemptFromRow(
+    Map<String, Object?> row,
+  ) {
+    return ActiveRecallAttempt(
+      attemptId: RecallAttemptId(row['attempt_id']! as String),
+      actionId: RecallActionId(row['action_id']! as String),
+      materialId: MaterialId(row['material_id']! as String),
+      sourceVersionId: SourceVersionId(row['source_version_id']! as String),
+      openedAt: DateTime.parse(row['opened_at_utc']! as String).toUtc(),
+    );
   }
 
   static RecallAssistance _strongerAssistance(
