@@ -153,8 +153,21 @@ class ValidatorNegativeTests(unittest.TestCase):
         self.assertFailsWith(r"required file missing: docs/provenance/OPEN_SOURCE_REUSE_REGISTER\.md")
 
     def test_register_field_missing(self) -> None:
-        self.edit("docs/provenance/OPEN_SOURCE_REUSE_REGISTER.md",
-                  "| Approving decision / task |", "| Approver |")
+        path = self.root / "docs/provenance/OPEN_SOURCE_REUSE_REGISTER.md"
+        text = path.read_text(encoding="utf-8")
+        entries_at = text.index("## Entries")
+        prefix, entries = text[:entries_at], text[entries_at:]
+        self.assertIn(
+            "| Approving decision / task |",
+            entries,
+            "test setup: no real reuse entry contains the approval field",
+        )
+        entries = entries.replace(
+            "| Approving decision / task |",
+            "| Approver |",
+            1,
+        )
+        path.write_text(prefix + entries, encoding="utf-8")
         self.assertFailsWith(r"register field missing: Approving decision / task")
 
     def test_register_entry_invalid_class(self) -> None:
