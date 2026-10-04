@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:r7_p1_runtime_proof/src/app/proof_controller.dart';
@@ -9,9 +7,9 @@ import 'package:r7_p1_runtime_proof/src/speech/device_speech_output.dart';
 import 'helpers.dart';
 
 class _LifecycleSpeechOutput implements SpeechOutput {
-  Timer? _completion;
-  int _generation = 0;
+  VoidCallback? _activeOnDone;
   int speakCalls = 0;
+  int staleCallbacksFired = 0;
 
   @override
   Future<void> speak(
@@ -21,19 +19,25 @@ class _LifecycleSpeechOutput implements SpeechOutput {
     required VoidCallback onDone,
     required ValueChanged<Object> onError,
   }) async {
-    final generation = ++_generation;
     speakCalls++;
+    _activeOnDone = onDone;
     onStart();
-    _completion?.cancel();
-    _completion = Timer(speakCalls == 1 ? const Duration(milliseconds: 10) : const Duration(seconds: 1), () {
-      if (generation == _generation) onDone();
-    });
+  }
+
+  void completeCurrent() {
+    final onDone = _activeOnDone;
+    _activeOnDone = null;
+    onDone?.call();
   }
 
   @override
   Future<void> stop() async {
-    _generation++;
-    _completion?.cancel();
+    final staleOnDone = _activeOnDone;
+    _activeOnDone = null;
+    if (staleOnDone != null) {
+      staleCallbacksFired++;
+      staleOnDone();
+    }
   }
 
   @override
@@ -54,21 +58,30 @@ void main() {
           controller: controller,
           startTimeout: const Duration(seconds: 1),
           completionTimeout: const Duration(seconds: 1),
-          interruptAfter: const Duration(milliseconds: 10),
-          staleCallbackGuard: const Duration(milliseconds: 20),
+          interruptAfter: Duration.zero,
+          staleCallbackGuard: Duration.zero,
         ),
       ),
     );
 
     await tester.tap(find.byKey(const Key('run-native-speech-qa')));
     await tester.pump();
-    await tester.pump(const Duration(milliseconds: 20));
-    await tester.pump(const Duration(milliseconds: 20));
+
+    expect(speech.speakCalls, 1);
+    expect(controller.speaking, isTrue);
+
+    speech.completeCurrent();
+    await tester.pump();
+    await tester.pump();
+
+    expect(speech.speakCalls, 2);
+    expect(controller.speaking, isTrue);
+
     await tester.pump(const Duration(milliseconds: 100));
-    await tester.pump(const Duration(milliseconds: 50));
+    await tester.pump();
 
     expect(find.text('CALLBACK_LIFECYCLE_PASS'), findsOneWidget);
-    expect(speech.speakCalls, 2);
+    expect(speech.staleCallbacksFired, 1);
     expect(controller.speaking, isFalse);
   });
 
