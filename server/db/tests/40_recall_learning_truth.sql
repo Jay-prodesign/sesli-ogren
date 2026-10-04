@@ -52,9 +52,6 @@ begin
   end if;
 end $$;
 
-rollback;
-
-
 -- Assistance must be server-authoritative: clients cannot write attempt truth directly,
 -- cannot call the retired client-claimed hint signature, and can call only bounded RPCs.
 do $$
@@ -81,3 +78,5 @@ begin
     raise exception 'authenticated role missing bounded Recall RPC execute privilege';
   end if;
 end $$;
+
+rollback;
