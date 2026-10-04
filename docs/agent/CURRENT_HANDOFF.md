@@ -55,3 +55,13 @@ No merge, deploy, release, paid-provider spend, production credentials/secrets, 
 ## Deferred final mobile-readiness gate
 
 Physical iPhone + representative Android speech/audibility, accessibility, performance, safe-area/orientation and device behavior remain mandatory before release-candidate/public-release claims under D-068.
+
+
+## Routine validation — D-072
+
+- GitHub Actions are **OFF for routine implementation**.
+- PR #10 is closed unmerged; do not reopen it merely to obtain per-commit CI.
+- The M5-specific `.github/workflows/m5-app.yml` workflow has been removed.
+- Continue with static/deterministic repo review and implementation.
+- Mark Flutter/runtime/build checks that require unavailable tooling as `PENDING_BATCH_VALIDATION`.
+- Use at most one bounded Actions validation batch at an applicable milestone/release evidence point, unless the Founder explicitly changes this rule.

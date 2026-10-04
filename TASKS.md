@@ -156,7 +156,7 @@ Next unallocated ID: **LA-0022**.
 - Acceptance authority: M5_GOLDEN_LEARNING_SLICE_ACCEPTANCE_CONTRACT_v0.1.
 - Product authority: D-053/D-054 + V0_PRODUCT_SCOPE_v2.0; D/Knot is the only active Companion identity under D-070.
 - Scope: one authenticated learner, real PDF or pasted text, authoritative source/version/provenance, grounded/versioned processing, one meaningful active learning action, durable LearnerEvidence, truthful minimal LearnerState, explainable next action, persistence/reopen/recovery.
-- Boundary: physical device/mobile-readiness remains a later release blocker under D-068; no deploy/release/paid-provider/credentials/V1 learner-model expansion.
+- Boundary: physical device/mobile-readiness remains a later release blocker under D-068; routine GitHub Actions are OFF under D-072 and runtime/build evidence is batched at milestone/release; no deploy/release/paid-provider/credentials/V1 learner-model expansion.
 
 ### Sprint M2.S1 — Slice foundation
 
