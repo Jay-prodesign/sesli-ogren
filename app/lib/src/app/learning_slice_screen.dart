@@ -221,6 +221,38 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
     return 'attempt-$micros-$_attemptSequence';
   }
 
+  Future<void> _repairContinuation() async {
+    if (_busy) return;
+    _setBusy(true);
+    try {
+      final repaired = await widget.runtime.recall.repairContinuation(
+        learner: AppRuntime.learner,
+        materialId: AppRuntime.primaryMaterialId,
+      );
+      if (!mounted) return;
+
+      if (repaired != null) {
+        setState(() {
+          _continuation = repaired;
+          _phase = _SlicePhase.continuation;
+          _inlineError = null;
+        });
+        return;
+      }
+
+      await _openRecall();
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        _phase = _SlicePhase.source;
+        _inlineError =
+            'Güvenli devam oluşturulamadı. Kaynağı yeniden ekleyerek başlayabilirsin.';
+      });
+    } finally {
+      _setBusy(false);
+    }
+  }
+
   void _showRecoverableError() {
     if (!mounted) return;
     setState(() {
@@ -561,24 +593,8 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
           ),
           const SizedBox(height: 18),
           FilledButton(
-            onPressed: _busy
-                ? null
-                : () async {
-                    _setBusy(true);
-                    try {
-                      await _openRecall();
-                    } catch (_) {
-                      if (!mounted) return;
-                      setState(() {
-                        _phase = _SlicePhase.source;
-                        _inlineError =
-                            'Mevcut kaynakla devam edemedik. Metni yeniden ekleyebilirsin.';
-                      });
-                    } finally {
-                      _setBusy(false);
-                    }
-                  },
-            child: const Text('Kaynaktan yeniden başla'),
+            onPressed: _busy ? null : _repairContinuation,
+            child: const Text('Devamı onar'),
           ),
           const SizedBox(height: 8),
           TextButton(
