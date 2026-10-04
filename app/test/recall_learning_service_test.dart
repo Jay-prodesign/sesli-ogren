@@ -378,6 +378,51 @@ void main() {
     expect(incorrect.state.evidenceCount, 2);
   });
 
+  test('store rejects support that is not attached to the active attempt', () async {
+    final prompt = await recall.createCurrentPrompt(
+      learner: learnerA,
+      materialId: materialId,
+    );
+
+    await expectLater(
+      sourceStore.learningTruthStore().registerAssistance(
+        learner: learnerA,
+        attemptId: const RecallAttemptId('attempt-no-active'),
+        actionId: prompt.id,
+        assistance: RecallAssistance.hint,
+        recordedAt: DateTime.utc(2026, 10, 4, 12, 5),
+      ),
+      throwsA(isA<LearningTruthConflict>()),
+    );
+  });
+
+  test('completed Recall opens a distinct next attempt under a fixed clock', () async {
+    final prompt = await recall.createCurrentPrompt(
+      learner: learnerA,
+      materialId: materialId,
+    );
+    final action = await storedAction(prompt);
+
+    final firstSession = await recall.openAttempt(
+      learner: learnerA,
+      actionId: prompt.id,
+    );
+    final first = await recall.submit(
+      learner: learnerA,
+      actionId: prompt.id,
+      attemptId: firstSession.attempt.attemptId,
+      disposition: RecallResponseDisposition.answer,
+      answer: action.expectedAnswer,
+    );
+    final secondSession = await recall.openAttempt(
+      learner: learnerA,
+      actionId: prompt.id,
+    );
+
+    expect(secondSession.attempt.attemptId, isNot(first.evidence.attemptId));
+    expect(secondSession.assistance, RecallAssistance.none);
+  });
+
   test('same attempt replay is idempotent including persisted next action', () async {
     final prompt = await recall.createCurrentPrompt(
       learner: learnerA,
