@@ -1,4 +1,5 @@
 import '../domain/authenticated_learner.dart';
+import '../domain/learning_contracts.dart';
 import '../domain/learning_truth.dart';
 
 abstract interface class LearningTruthStore {
@@ -19,13 +20,13 @@ abstract interface class LearningTruthStore {
 
   Future<List<LearnerEvidence>> evidenceForMaterial({
     required AuthenticatedLearner learner,
-    required String materialId,
-    required String sourceVersionId,
+    required MaterialId materialId,
+    required SourceVersionId sourceVersionId,
   });
 
   Future<LearnerState?> learnerState({
     required AuthenticatedLearner learner,
-    required String materialId,
+    required MaterialId materialId,
   });
 
   /// Persists evidence first and updates the derived state in the same
