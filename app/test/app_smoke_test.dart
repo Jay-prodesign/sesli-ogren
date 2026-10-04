@@ -148,9 +148,11 @@ void main() {
     );
 
     await tester.pumpWidget(
-      MediaQuery(
-        data: const MediaQueryData(disableAnimations: true),
-        child: MaterialApp(home: LearningSliceScreen(runtime: runtime)),
+      MaterialApp(
+        home: MediaQuery(
+          data: const MediaQueryData(disableAnimations: true),
+          child: LearningSliceScreen(runtime: runtime),
+        ),
       ),
     );
     await tester.pumpAndSettle();
