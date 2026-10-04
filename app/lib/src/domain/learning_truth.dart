@@ -252,8 +252,70 @@ class RecallAttemptResult {
 class RecallTruthPolicy {
   const RecallTruthPolicy._();
 
+  static const evidenceRuleVersion = 'recall-evidence-v2';
   static const stateRuleVersion = 'recall-state-v2';
   static const nextActionPolicyVersion = 'recall-next-v1';
+
+  static RecallOutcome evaluate({
+    required String expectedAnswer,
+    required String response,
+    required RecallResponseDisposition disposition,
+    required RecallAssistance assistance,
+  }) {
+    final normalizedAnswer = normalizeAnswer(response);
+    if (disposition == RecallResponseDisposition.unknown ||
+        normalizedAnswer.isEmpty) {
+      return RecallOutcome.unknown;
+    }
+    if (assistance == RecallAssistance.answerExposed) {
+      return RecallOutcome.answerExposed;
+    }
+
+    final normalizedExpected = normalizeAnswer(expectedAnswer);
+    if (normalizedAnswer == normalizedExpected) {
+      return assistance == RecallAssistance.hint
+          ? RecallOutcome.helpedCorrect
+          : RecallOutcome.correct;
+    }
+    if (normalizedExpected.length >= 5 &&
+        editDistance(normalizedAnswer, normalizedExpected) <= 1) {
+      return RecallOutcome.partial;
+    }
+    return RecallOutcome.incorrect;
+  }
+
+  static String normalizeAnswer(String value) {
+    return value
+        .replaceAll('İ', 'i')
+        .replaceAll('I', 'ı')
+        .toLowerCase()
+        .replaceAll(RegExp(r'[^a-zçğıöşü0-9]+'), '')
+        .trim();
+  }
+
+  static int editDistance(String left, String right) {
+    if (left == right) return 0;
+    if (left.isEmpty) return right.length;
+    if (right.isEmpty) return left.length;
+
+    var previous = List<int>.generate(right.length + 1, (index) => index);
+    for (var i = 0; i < left.length; i++) {
+      final current = List<int>.filled(right.length + 1, 0);
+      current[0] = i + 1;
+      for (var j = 0; j < right.length; j++) {
+        final substitution = previous[j] + (left[i] == right[j] ? 0 : 1);
+        final insertion = current[j] + 1;
+        final deletion = previous[j + 1] + 1;
+        current[j + 1] = [
+          substitution,
+          insertion,
+          deletion,
+        ].reduce((a, b) => a < b ? a : b);
+      }
+      previous = current;
+    }
+    return previous.last;
+  }
 
   static RecallStateKind stateForOutcome(RecallOutcome outcome) {
     return switch (outcome) {
