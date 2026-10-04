@@ -1,7 +1,6 @@
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:pdfrx/pdfrx.dart';
 import 'package:sesli_ogren/src/data/pdf_text_extractor.dart';
 import 'package:sesli_ogren/src/data/source_ingest_service.dart';
 import 'package:sesli_ogren/src/data/sqlite_source_store.dart';
@@ -12,10 +11,6 @@ import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   sqfliteFfiInit();
-
-  setUpAll(() async {
-    await pdfrxFlutterInitialize();
-  });
 
   test('real two-page PDF keeps page provenance across store reopen', () async {
     final bytes = await File('test/fixtures/two_page_text.pdf').readAsBytes();

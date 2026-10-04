@@ -32,6 +32,12 @@ class PdfrxPdfTextExtractor implements PdfTextExtractor {
   final int maxPageCount;
   final int maxExtractedCharacters;
 
+  static Future<void>? _initialization;
+
+  static Future<void> _ensureInitialized() {
+    return _initialization ??= pdfrxFlutterInitialize();
+  }
+
   @override
   Future<ExtractedPdf> extract(
     Uint8List bytes, {
@@ -39,6 +45,7 @@ class PdfrxPdfTextExtractor implements PdfTextExtractor {
   }) async {
     PdfDocument? document;
     try {
+      await _ensureInitialized();
       document = await PdfDocument.openData(bytes, sourceName: sourceName);
       if (document.pages.length > maxPageCount) {
         throw const PdfTextExtractionException(
