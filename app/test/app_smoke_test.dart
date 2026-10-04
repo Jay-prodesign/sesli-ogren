@@ -131,9 +131,17 @@ void main() {
     expect(
       events.any(
         (event) =>
+            event.schemaVersion == 1 &&
             event.type == OperationalEventType.recallAttempt &&
             event.phase == OperationalEventPhase.completed &&
+            event.attemptId != null &&
             event.evidenceId != null &&
+            event.outcome == RecallOutcome.correct &&
+            event.stateKind == RecallStateKind.retrievedOnce &&
+            event.reasonCode == 'ONE_UNASSISTED_RETRIEVAL_OBSERVED' &&
+            event.ruleVersion == RecallLearningService.evidenceRuleVersion &&
+            event.policyVersion ==
+                RecallLearningService.nextActionPolicyVersion &&
             event.durationMs != null,
       ),
       isTrue,

@@ -10,7 +10,7 @@ import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 void main() {
   sqfliteFfiInit();
 
-  test('v2 database upgrades to canonical Recall support schema without reset', () async {
+  test('v2 database upgrades to current Recall and telemetry schema without reset', () async {
     final temp = await Directory.systemTemp.createTemp('sesli-ogren-v2-upgrade-');
     final path = '${temp.path}/upgrade.db';
     Database? legacy;
@@ -64,7 +64,9 @@ CREATE TABLE recall_actions (
         ),
       );
       expect(events, hasLength(1));
+      expect(events.single.schemaVersion, 1);
       expect(events.single.type, OperationalEventType.runtimeRestore);
+      expect(events.single.durationMs, 1);
     } finally {
       await legacy?.close();
       await upgraded?.close();
