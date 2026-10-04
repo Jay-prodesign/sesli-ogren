@@ -8,12 +8,7 @@ class SesliOgrenApp extends StatelessWidget {
     return MaterialApp(
       title: 'Sesli Öğren',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF65558F),
-        ),
-        useMaterial3: true,
-      ),
+      theme: ThemeData(colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF65558F)), useMaterial3: true),
       home: const FoundationScreen(),
     );
   }
@@ -46,11 +41,7 @@ class FoundationScreen extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 28),
-                  Text(
-                    'Sesli Öğren',
-                    style: theme.textTheme.headlineMedium,
-                    textAlign: TextAlign.center,
-                  ),
+                  Text('Sesli Öğren', style: theme.textTheme.headlineMedium, textAlign: TextAlign.center),
                   const SizedBox(height: 12),
                   Text(
                     'Materyalinden anlayarak ilerleyen bir öğrenme yolculuğu.',
