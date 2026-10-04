@@ -5,6 +5,8 @@ import 'package:sqflite/sqflite.dart';
 
 import '../domain/authenticated_learner.dart';
 import '../domain/learning_contracts.dart';
+import '../domain/learning_truth.dart';
+import 'learning_truth_store.dart';
 import 'source_store.dart';
 
 class SourceStoreConflict implements Exception {
@@ -20,6 +22,9 @@ class SqliteSourceStore implements SourceStore {
   SqliteSourceStore._(this._database);
 
   final Database _database;
+
+  LearningTruthStore learningTruthStore() =>
+      SqliteLearningTruthStore._(_database);
 
   static Future<SqliteSourceStore> open({
     DatabaseFactory? factory,
@@ -106,6 +111,75 @@ CREATE TABLE extracted_contents (
   FOREIGN KEY (learner_id, source_version_id)
     REFERENCES source_versions (learner_id, source_version_id) ON DELETE CASCADE
 )
+''');
+          await db.execute('''
+CREATE TABLE recall_actions (
+  learner_id TEXT NOT NULL,
+  action_id TEXT NOT NULL,
+  material_id TEXT NOT NULL,
+  source_version_id TEXT NOT NULL,
+  extracted_content_id TEXT NOT NULL,
+  prompt_text TEXT NOT NULL,
+  expected_answer TEXT NOT NULL,
+  anchor_start INTEGER NOT NULL,
+  anchor_end INTEGER NOT NULL,
+  page_number INTEGER,
+  rule_version TEXT NOT NULL,
+  created_at_utc TEXT NOT NULL,
+  PRIMARY KEY (learner_id, action_id),
+  FOREIGN KEY (learner_id, source_version_id)
+    REFERENCES source_versions (learner_id, source_version_id),
+  FOREIGN KEY (learner_id, extracted_content_id)
+    REFERENCES extracted_contents (learner_id, extracted_content_id)
+    ON DELETE CASCADE
+)
+''');
+          await db.execute('''
+CREATE TABLE learner_evidence (
+  learner_id TEXT NOT NULL,
+  evidence_id TEXT NOT NULL,
+  attempt_id TEXT NOT NULL,
+  action_id TEXT NOT NULL,
+  material_id TEXT NOT NULL,
+  source_version_id TEXT NOT NULL,
+  extracted_content_id TEXT NOT NULL,
+  outcome TEXT NOT NULL,
+  help_used INTEGER NOT NULL,
+  response_digest TEXT NOT NULL,
+  response_length INTEGER NOT NULL,
+  rule_version TEXT NOT NULL,
+  created_at_utc TEXT NOT NULL,
+  PRIMARY KEY (learner_id, evidence_id),
+  UNIQUE (learner_id, attempt_id),
+  FOREIGN KEY (learner_id, action_id)
+    REFERENCES recall_actions (learner_id, action_id)
+    ON DELETE CASCADE
+)
+''');
+          await db.execute('''
+CREATE TABLE learner_states (
+  learner_id TEXT NOT NULL,
+  material_id TEXT NOT NULL,
+  source_version_id TEXT NOT NULL,
+  state_kind TEXT NOT NULL,
+  evidence_count INTEGER NOT NULL,
+  latest_evidence_id TEXT NOT NULL,
+  rule_version TEXT NOT NULL,
+  updated_at_utc TEXT NOT NULL,
+  PRIMARY KEY (learner_id, material_id)
+)
+''');
+          await db.execute('''
+CREATE INDEX idx_recall_actions_source
+ON recall_actions (learner_id, material_id, source_version_id)
+''');
+          await db.execute('''
+CREATE INDEX idx_learner_evidence_material
+ON learner_evidence (learner_id, material_id, source_version_id, created_at_utc)
+''');
+          await db.execute('''
+CREATE INDEX idx_learner_states_source
+ON learner_states (learner_id, source_version_id)
 ''');
           await db.execute('''
 CREATE INDEX idx_materials_active
@@ -362,6 +436,12 @@ LIMIT 1
         );
       }
 
+      await transaction.delete(
+        'learner_states',
+        where: 'learner_id = ? AND material_id = ?',
+        whereArgs: [learner.id.value, material.id.value],
+      );
+
       await transaction.update(
         'materials',
         {
@@ -419,6 +499,12 @@ LIMIT 1
       if (changed == 0) {
         return;
       }
+
+      await transaction.delete(
+        'learner_states',
+        where: 'learner_id = ? AND material_id = ?',
+        whereArgs: [learner.id.value, materialId.value],
+      );
 
       await transaction.delete(
         'extracted_contents',
@@ -627,6 +713,408 @@ LIMIT 1
       invalidatedAt: row['invalidated_at_utc'] == null
           ? null
           : DateTime.parse(row['invalidated_at_utc']! as String).toUtc(),
+    );
+  }
+}
+
+
+class SqliteLearningTruthStore implements LearningTruthStore {
+  SqliteLearningTruthStore._(this._database);
+
+  final Database _database;
+
+  @override
+  Future<RecallAction> persistRecallAction({
+    required AuthenticatedLearner learner,
+    required RecallAction action,
+  }) {
+    return _database.transaction((transaction) async {
+      final authorityRows = await transaction.rawQuery(
+        '''
+SELECT 1
+FROM materials m
+JOIN source_versions s
+  ON s.learner_id = m.learner_id
+ AND s.source_version_id = m.current_source_version_id
+JOIN extracted_contents e
+  ON e.learner_id = s.learner_id
+ AND e.source_version_id = s.source_version_id
+WHERE m.learner_id = ?
+  AND m.material_id = ?
+  AND m.lifecycle_status = ?
+  AND m.deleted_at_utc IS NULL
+  AND s.source_version_id = ?
+  AND s.revoked_at_utc IS NULL
+  AND e.extracted_content_id = ?
+  AND e.invalidated_at_utc IS NULL
+LIMIT 1
+''',
+        [
+          learner.id.value,
+          action.materialId.value,
+          MaterialLifecycleStatus.active.name,
+          action.sourceVersionId.value,
+          action.extractedContentId.value,
+        ],
+      );
+      if (authorityRows.isEmpty) {
+        throw const LearningTruthConflict(
+          'Recall action does not point at current authoritative source truth.',
+        );
+      }
+
+      final existingRows = await transaction.query(
+        'recall_actions',
+        where: 'learner_id = ? AND action_id = ?',
+        whereArgs: [learner.id.value, action.id.value],
+        limit: 1,
+      );
+      if (existingRows.isNotEmpty) {
+        final existing = _actionFromRow(existingRows.single);
+        if (!_sameAction(existing, action)) {
+          throw const LearningTruthConflict(
+            'Recall action ID replay conflicts with existing action truth.',
+          );
+        }
+        return existing;
+      }
+
+      await transaction.insert(
+        'recall_actions',
+        _actionToRow(learner: learner, action: action),
+        conflictAlgorithm: ConflictAlgorithm.abort,
+      );
+      return action;
+    });
+  }
+
+  @override
+  Future<RecallAction?> recallAction({
+    required AuthenticatedLearner learner,
+    required RecallActionId actionId,
+  }) async {
+    final rows = await _database.query(
+      'recall_actions',
+      where: 'learner_id = ? AND action_id = ?',
+      whereArgs: [learner.id.value, actionId.value],
+      limit: 1,
+    );
+    return rows.isEmpty ? null : _actionFromRow(rows.single);
+  }
+
+  @override
+  Future<LearnerEvidence?> evidenceForAttempt({
+    required AuthenticatedLearner learner,
+    required RecallAttemptId attemptId,
+  }) async {
+    final rows = await _database.query(
+      'learner_evidence',
+      where: 'learner_id = ? AND attempt_id = ?',
+      whereArgs: [learner.id.value, attemptId.value],
+      limit: 1,
+    );
+    return rows.isEmpty ? null : _evidenceFromRow(rows.single);
+  }
+
+  @override
+  Future<List<LearnerEvidence>> evidenceForMaterial({
+    required AuthenticatedLearner learner,
+    required MaterialId materialId,
+    required SourceVersionId sourceVersionId,
+  }) async {
+    final rows = await _database.query(
+      'learner_evidence',
+      where:
+          'learner_id = ? AND material_id = ? AND source_version_id = ?',
+      whereArgs: [
+        learner.id.value,
+        materialId.value,
+        sourceVersionId.value,
+      ],
+      orderBy: 'created_at_utc ASC, evidence_id ASC',
+    );
+    return rows.map(_evidenceFromRow).toList(growable: false);
+  }
+
+  @override
+  Future<LearnerState?> learnerState({
+    required AuthenticatedLearner learner,
+    required MaterialId materialId,
+  }) async {
+    final rows = await _database.query(
+      'learner_states',
+      where: 'learner_id = ? AND material_id = ?',
+      whereArgs: [learner.id.value, materialId.value],
+      limit: 1,
+    );
+    return rows.isEmpty ? null : _stateFromRow(rows.single);
+  }
+
+  @override
+  Future<PersistedLearningTruth> persistEvidenceAndState({
+    required AuthenticatedLearner learner,
+    required LearnerEvidence evidence,
+    required RecallStateKind stateKind,
+    required String stateRuleVersion,
+  }) {
+    return _database.transaction((transaction) async {
+      final actionRows = await transaction.query(
+        'recall_actions',
+        where: 'learner_id = ? AND action_id = ?',
+        whereArgs: [learner.id.value, evidence.actionId.value],
+        limit: 1,
+      );
+      if (actionRows.isEmpty) {
+        throw const LearningTruthConflict(
+          'Evidence cannot reference a missing recall action.',
+        );
+      }
+      final action = _actionFromRow(actionRows.single);
+      if (action.materialId != evidence.materialId ||
+          action.sourceVersionId != evidence.sourceVersionId ||
+          action.extractedContentId != evidence.extractedContentId) {
+        throw const LearningTruthConflict(
+          'Evidence provenance does not match its recall action.',
+        );
+      }
+
+      final authorityRows = await transaction.query(
+        'materials',
+        columns: ['current_source_version_id'],
+        where:
+            'learner_id = ? AND material_id = ? AND lifecycle_status = ? '
+            'AND deleted_at_utc IS NULL',
+        whereArgs: [
+          learner.id.value,
+          evidence.materialId.value,
+          MaterialLifecycleStatus.active.name,
+        ],
+        limit: 1,
+      );
+      if (authorityRows.isEmpty ||
+          authorityRows.single['current_source_version_id'] !=
+              evidence.sourceVersionId.value) {
+        throw const LearningTruthConflict(
+          'Evidence source is no longer the current authoritative source.',
+        );
+      }
+
+      final existingRows = await transaction.query(
+        'learner_evidence',
+        where: 'learner_id = ? AND attempt_id = ?',
+        whereArgs: [learner.id.value, evidence.attemptId.value],
+        limit: 1,
+      );
+      if (existingRows.isNotEmpty) {
+        final existing = _evidenceFromRow(existingRows.single);
+        if (!_sameEvidence(existing, evidence)) {
+          throw const LearningTruthConflict(
+            'Attempt ID replay conflicts with existing learner evidence.',
+          );
+        }
+        final stateRows = await transaction.query(
+          'learner_states',
+          where: 'learner_id = ? AND material_id = ?',
+          whereArgs: [learner.id.value, evidence.materialId.value],
+          limit: 1,
+        );
+        if (stateRows.isEmpty) {
+          throw const LearningTruthConflict(
+            'Idempotent evidence replay found missing learner state.',
+          );
+        }
+        return PersistedLearningTruth(
+          evidence: existing,
+          state: _stateFromRow(stateRows.single),
+        );
+      }
+
+      await transaction.insert(
+        'learner_evidence',
+        _evidenceToRow(learner: learner, evidence: evidence),
+        conflictAlgorithm: ConflictAlgorithm.abort,
+      );
+
+      final countRows = await transaction.rawQuery(
+        '''
+SELECT COUNT(*) AS evidence_count
+FROM learner_evidence
+WHERE learner_id = ?
+  AND material_id = ?
+  AND source_version_id = ?
+''',
+        [
+          learner.id.value,
+          evidence.materialId.value,
+          evidence.sourceVersionId.value,
+        ],
+      );
+      final evidenceCount = countRows.single['evidence_count']! as int;
+      final state = LearnerState(
+        materialId: evidence.materialId,
+        sourceVersionId: evidence.sourceVersionId,
+        kind: stateKind,
+        evidenceCount: evidenceCount,
+        latestEvidenceId: evidence.id,
+        ruleVersion: stateRuleVersion,
+        updatedAt: evidence.createdAt,
+      );
+
+      await transaction.rawInsert(
+        '''
+INSERT INTO learner_states (
+  learner_id,
+  material_id,
+  source_version_id,
+  state_kind,
+  evidence_count,
+  latest_evidence_id,
+  rule_version,
+  updated_at_utc
+) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+ON CONFLICT(learner_id, material_id) DO UPDATE SET
+  source_version_id = excluded.source_version_id,
+  state_kind = excluded.state_kind,
+  evidence_count = excluded.evidence_count,
+  latest_evidence_id = excluded.latest_evidence_id,
+  rule_version = excluded.rule_version,
+  updated_at_utc = excluded.updated_at_utc
+''',
+        [
+          learner.id.value,
+          state.materialId.value,
+          state.sourceVersionId.value,
+          state.kind.name,
+          state.evidenceCount,
+          state.latestEvidenceId.value,
+          state.ruleVersion,
+          state.updatedAt.toUtc().toIso8601String(),
+        ],
+      );
+
+      return PersistedLearningTruth(evidence: evidence, state: state);
+    });
+  }
+
+  static bool _sameAction(RecallAction left, RecallAction right) {
+    return left.materialId == right.materialId &&
+        left.sourceVersionId == right.sourceVersionId &&
+        left.extractedContentId == right.extractedContentId &&
+        left.promptText == right.promptText &&
+        left.expectedAnswer == right.expectedAnswer &&
+        left.anchor.startOffset == right.anchor.startOffset &&
+        left.anchor.endOffset == right.anchor.endOffset &&
+        left.anchor.pageNumber == right.anchor.pageNumber &&
+        left.ruleVersion == right.ruleVersion;
+  }
+
+  static bool _sameEvidence(
+    LearnerEvidence left,
+    LearnerEvidence right,
+  ) {
+    return left.id == right.id &&
+        left.actionId == right.actionId &&
+        left.materialId == right.materialId &&
+        left.sourceVersionId == right.sourceVersionId &&
+        left.extractedContentId == right.extractedContentId &&
+        left.outcome == right.outcome &&
+        left.helpUsed == right.helpUsed &&
+        left.responseDigest == right.responseDigest &&
+        left.responseLength == right.responseLength &&
+        left.ruleVersion == right.ruleVersion;
+  }
+
+  static Map<String, Object?> _actionToRow({
+    required AuthenticatedLearner learner,
+    required RecallAction action,
+  }) {
+    return {
+      'learner_id': learner.id.value,
+      'action_id': action.id.value,
+      'material_id': action.materialId.value,
+      'source_version_id': action.sourceVersionId.value,
+      'extracted_content_id': action.extractedContentId.value,
+      'prompt_text': action.promptText,
+      'expected_answer': action.expectedAnswer,
+      'anchor_start': action.anchor.startOffset,
+      'anchor_end': action.anchor.endOffset,
+      'page_number': action.anchor.pageNumber,
+      'rule_version': action.ruleVersion,
+      'created_at_utc': action.createdAt.toUtc().toIso8601String(),
+    };
+  }
+
+  static Map<String, Object?> _evidenceToRow({
+    required AuthenticatedLearner learner,
+    required LearnerEvidence evidence,
+  }) {
+    return {
+      'learner_id': learner.id.value,
+      'evidence_id': evidence.id.value,
+      'attempt_id': evidence.attemptId.value,
+      'action_id': evidence.actionId.value,
+      'material_id': evidence.materialId.value,
+      'source_version_id': evidence.sourceVersionId.value,
+      'extracted_content_id': evidence.extractedContentId.value,
+      'outcome': evidence.outcome.name,
+      'help_used': evidence.helpUsed ? 1 : 0,
+      'response_digest': evidence.responseDigest,
+      'response_length': evidence.responseLength,
+      'rule_version': evidence.ruleVersion,
+      'created_at_utc': evidence.createdAt.toUtc().toIso8601String(),
+    };
+  }
+
+  static RecallAction _actionFromRow(Map<String, Object?> row) {
+    return RecallAction(
+      id: RecallActionId(row['action_id']! as String),
+      materialId: MaterialId(row['material_id']! as String),
+      sourceVersionId: SourceVersionId(row['source_version_id']! as String),
+      extractedContentId: ExtractedContentId(
+        row['extracted_content_id']! as String,
+      ),
+      promptText: row['prompt_text']! as String,
+      expectedAnswer: row['expected_answer']! as String,
+      anchor: SourceAnchor(
+        startOffset: row['anchor_start']! as int,
+        endOffset: row['anchor_end']! as int,
+        pageNumber: row['page_number'] as int?,
+      ),
+      ruleVersion: row['rule_version']! as String,
+      createdAt: DateTime.parse(row['created_at_utc']! as String).toUtc(),
+    );
+  }
+
+  static LearnerEvidence _evidenceFromRow(Map<String, Object?> row) {
+    return LearnerEvidence(
+      id: LearnerEvidenceId(row['evidence_id']! as String),
+      attemptId: RecallAttemptId(row['attempt_id']! as String),
+      actionId: RecallActionId(row['action_id']! as String),
+      materialId: MaterialId(row['material_id']! as String),
+      sourceVersionId: SourceVersionId(row['source_version_id']! as String),
+      extractedContentId: ExtractedContentId(
+        row['extracted_content_id']! as String,
+      ),
+      outcome: RecallOutcome.values.byName(row['outcome']! as String),
+      helpUsed: (row['help_used']! as int) == 1,
+      responseDigest: row['response_digest']! as String,
+      responseLength: row['response_length']! as int,
+      ruleVersion: row['rule_version']! as String,
+      createdAt: DateTime.parse(row['created_at_utc']! as String).toUtc(),
+    );
+  }
+
+  static LearnerState _stateFromRow(Map<String, Object?> row) {
+    return LearnerState(
+      materialId: MaterialId(row['material_id']! as String),
+      sourceVersionId: SourceVersionId(row['source_version_id']! as String),
+      kind: RecallStateKind.values.byName(row['state_kind']! as String),
+      evidenceCount: row['evidence_count']! as int,
+      latestEvidenceId: LearnerEvidenceId(
+        row['latest_evidence_id']! as String,
+      ),
+      ruleVersion: row['rule_version']! as String,
+      updatedAt: DateTime.parse(row['updated_at_utc']! as String).toUtc(),
     );
   }
 }
