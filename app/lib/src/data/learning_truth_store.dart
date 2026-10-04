@@ -18,6 +18,13 @@ abstract interface class LearningTruthStore {
     required RecallAttemptId attemptId,
   });
 
+  Future<ActiveRecallAttempt> openRecallAttempt({
+    required AuthenticatedLearner learner,
+    required RecallActionId actionId,
+    required RecallAttemptId proposedAttemptId,
+    required DateTime openedAt,
+  });
+
   Future<RecallAssistance> registerAssistance({
     required AuthenticatedLearner learner,
     required RecallAttemptId attemptId,
