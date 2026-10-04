@@ -47,7 +47,7 @@ begin
   end if;
   if public.la_recall_state_for_outcome('correct') <> 'retrieved_once'
      or public.la_recall_state_for_outcome('helped_correct') <> 'developing'
-     or public.la_recall_state_for_outcome('unknown') <> 'needs_review' then
+     or public.la_recall_state_for_outcome('unknown') <> 'not_assessed' then
     raise exception 'state derivation mismatch';
   end if;
 end $$;
