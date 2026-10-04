@@ -1,0 +1,63 @@
+{
+  "schema_version": 2,
+  "project": "Learning App",
+  "scope": "Round 7 D/Knot + E/Tilt companion anatomy",
+  "effective_date": "2026-10-03",
+  "status": "ACTIVE_AUTHORITY",
+  "principle": "D and E are abstract ribbon companions, not humanoid mascots. Their personality and action language come from ribbon/body deformation, orientation, eyes and mouth; V1 has no limbs.",
+  "shared_base_anatomy": {
+    "face": "1 integrated face region",
+    "arms": 0,
+    "hands": 0,
+    "legs": 0,
+    "feet": 0
+  },
+  "character_specific_structure": {
+    "D_Knot": {
+      "core_form": "soft interlaced knot/ribbon mass",
+      "motion_bias": "calm, grounded, inward, supportive"
+    },
+    "E_Tilt": {
+      "core_form": "tilted triangular/ribbon mass",
+      "motion_bias": "energetic, directional, outward, curious"
+    }
+  },
+  "invariants": [
+    "Both characters have 0 arms, 0 hands, 0 legs and 0 feet in V1.",
+    "No semantic state may invent limbs.",
+    "Expression comes from eyes, brows, mouth, body/ribbon deformation and orientation.",
+    "Pointing/presenting behavior must use ribbon orientation, UI emphasis or environmental highlighting rather than a hand.",
+    "Character differences come from ribbon geometry, palette, energy and motion language, not incompatible anatomy."
+  ],
+  "v1_state_language": {
+    "IDLE": "float/breathe + neutral gaze",
+    "LISTEN": "orient/lean + gaze hold",
+    "THINK": "tilt/compress + gaze shift + slower blink",
+    "SPEAK": "mouth animation + bounded ribbon/body pulse",
+    "CORRECT": "soft orientation + reduced energy + supportive expression",
+    "SUCCESS": "short expand/lift/bounce + settle"
+  },
+  "rig_layer_requirement": {
+    "v1_minimum_required": [
+      "base_character_clean",
+      "iris_pupil_L",
+      "iris_pupil_R",
+      "brow_L",
+      "brow_R",
+      "mouth_neutral",
+      "mouth_speak_A",
+      "mouth_speak_B",
+      "blink_overlay_L",
+      "blink_overlay_R"
+    ],
+    "base_character_rule": "Keep eye whites/outlines and core face/ribbon geometry in the base. Remove only controls that must move/change independently.",
+    "body_motion": "Use bounded whole-character/ribbon deformation and transforms first; split ribbon forms only if a real state cannot be expressed cleanly.",
+    "deferred_unless_proven_needed": [
+      "rear_form",
+      "front_form",
+      "face_base_as_separate_full_layer",
+      "occlusion_fill"
+    ]
+  },
+  "future_upgrade_rule": "If a real product need later proves a gesture appendage is necessary, open a versioned anatomy change for BOTH D and E and re-run rig/state/device QA. Do not silently add limbs to one state or one character."
+}

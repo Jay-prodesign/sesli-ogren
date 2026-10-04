@@ -1,0 +1,172 @@
+{
+  "project": "Learning App",
+  "cursor_id": "R7-COMPANION-PRODUCTION-V2",
+  "updated_at": "2026-10-04",
+  "active_branch": "feat/round7-companion-production-sequence-v2",
+  "active_phase": "P9_NON_PHYSICAL_CLOSURE__FINAL_DEVICE_DEFERRED_D068",
+  "active_task": "PR8_EXACT_HEAD_CI_THEN_NON_INSTALL_FOUNDER_PRODUCT_VISUAL_GATE",
+  "verified_ci": {
+    "workflow_run": 37140739027,
+    "source_head": "eb9c07285bf3ed201556cb7e60b8de9e561e22b5",
+    "ci_checkout_sha": "54a96e776fda7252cb578ec2c2d58ff4cdf5aabd",
+    "format": "PASS",
+    "analyze": "PASS",
+    "flutter_tests": "PASS",
+    "p9_visual_capture": "PASS",
+    "p9_motion_sequence": "PASS_D_AND_E_6_STATES_X_4_PHASES",
+    "android_profile_apk": "PASS_ARTIFACT_UPLOADED",
+    "android_profile_apk_sha256": "20b4d1d7d5f30252b7510fccd827d3fcad657bc08abad4d1331acf1a60d8f40d",
+    "ios_profile_compile_no_codesign": "PASS",
+    "ios_native_flutter_tts_simulator_lifecycle": "PASS_START_COMPLETION_STOP",
+    "tts_error_fallback_unit_test": "PASS_TEXT_AND_LEARNING_LOOP_PRESERVED"
+  },
+  "authority": {
+    "D": "assets/companions/D_KNOT_128.webp",
+    "E": "assets/companions/E_TILT_128.webp",
+    "anatomy": "0 arms / 0 hands / 0 legs / 0 feet",
+    "semantic_states": [
+      "IDLE",
+      "LISTEN",
+      "THINK",
+      "SPEAK",
+      "CORRECT",
+      "SUCCESS"
+    ],
+    "speech_locale": "fixture-owned content/voice locale"
+  },
+  "v1_runtime": {
+    "renderer": "canonical raster + bounded whole-character semantic motion",
+    "speech": "product-local device TTS",
+    "speaking_rule": "SPEAK begins on real playback start and settles on completion/stop/error",
+    "mouth": "PASS_CLEAN_SUBTLE_SYNTHETIC_VISUAL_QA",
+    "blink": "DISABLED_AFTER_VISUAL_QA_FAIL",
+    "layered_rig": "DEFERRED_UNLESS_DEVICE_QA_PROVES_NEEDED",
+    "native_speech_qa": "ONE_TAP_SCREEN_IMPLEMENTED__CALLBACK_LIFECYCLE_SELF_CHECK"
+  },
+  "device_qa": [
+    "D-068 defers real-phone installation until the app is otherwise complete enough for final mobile-readiness validation.",
+    "Physical D1/D2/D3 checks remain mandatory before release-candidate/public-release claims.",
+    "Do not reopen D/E assets, layered rigging or extra state PNGs unless later final-device evidence reveals a concrete user-visible defect."
+  ],
+  "next_after_pass": "FOUNDER_PRODUCT_VISUAL_PASS_NON_INSTALL_REVIEW__THEN_CANONICAL_FRESH_READ_AND_EXPLICIT_M5_ADMISSION",
+  "next_if_mouth_or_blink_visual_fail": "repair or disable only failing local effect; open layered rig only if a real learning/visual need remains",
+  "stop_condition": "After exact-head non-physical CI passes, stop only at the genuine Founder Product/Visual decision gate needed before explicit M5 admission. Do not stop for early physical installation; D1/D2/D3 are deferred under D-068.",
+  "preview": {
+    "policy": "GAME_ENGINE_PARITY__FREE_TEMPORARY_PHONE_HTTPS_PREVIEW",
+    "method": "Flutter Web build -> local python3 HTTP server -> Cloudflare cloudflared Quick Tunnel",
+    "provider": "Cloudflare Quick Tunnel",
+    "public_url_pattern": "https://<random>.trycloudflare.com",
+    "cost": "FREE_NO_ACCOUNT_NO_PAID_SERVICE",
+    "workflow": ".github/workflows/round7-web-preview.yml",
+    "trigger": "workflow_dispatch only; open a tunnel only when phone QA is actually requested",
+    "url_delivery": "workflow creates learning-app-phone-preview-url artifact before entering keep-alive",
+    "lifetime": "approximately 110 minutes while the GitHub Actions keep-alive job remains running",
+    "current_verified_run": 37120849702,
+    "current_source_commit": "30a3c2f241fce0d55b582f4ce95ebc3281f27c2f",
+    "obsolete_methods": [
+      "GitHub Pages attempt",
+      "Statically/jsDelivr/rawgit-style CDN preview"
+    ],
+    "native_boundary": "Web preview is the default visual/flow QA surface. Native builds remain required for platform-only TTS/audio lifecycle, signing, native performance and final production-device validation.",
+    "behavior": "On-demand workflow builds the exact Flutter Web proof, opens a free Cloudflare Quick Tunnel, uploads the live URL artifact, then keeps the tunnel alive for about 110 minutes.",
+    "current_status": "ON_DEMAND_NOT_ASSUMED_LIVE",
+    "note": "Preview is manual/on-demand. Do not treat an old trycloudflare URL as live authority; launch a fresh workflow when a phone visual check is needed."
+  },
+  "synthetic_p9": {
+    "status": "PASS",
+    "viewport_matrix": [
+      "430x932 portrait",
+      "932x430 landscape"
+    ],
+    "companions": [
+      "D_Knot",
+      "E_Tilt"
+    ],
+    "checks": [
+      "initial render no exception",
+      "canonical companion raster present",
+      "scroll surface present",
+      "challenge reachable",
+      "feedback reachable",
+      "reduced motion settles without running animations",
+      "companion raster remains present"
+    ],
+    "evidence_run": 37120853017,
+    "evidence_commit": "30a3c2f241fce0d55b582f4ce95ebc3281f27c2f",
+    "visual_qa": {
+      "status": "PASS",
+      "portrait_companion_extent": 124,
+      "compact_landscape_companion_extent": 104,
+      "identity_fidelity": "PASS_D_AND_E",
+      "mouth_warp": "PASS_CLEAN_SUBTLE",
+      "blink": "REMOVED_AFTER_FAIL",
+      "clipping": "PASS",
+      "readability": "PASS"
+    },
+    "motion_qa": {
+      "status": "PASS",
+      "matrix": "2 companions x 6 semantic states x 4 animation phases",
+      "D_motion_language": "PASS_CALM",
+      "E_motion_language": "PASS_MORE_ENERGETIC",
+      "mouth_warp": "PASS_CLEAN_SUBTLE",
+      "blink": "DISABLED",
+      "identity_drift": "NONE_OBSERVED"
+    }
+  },
+  "remaining_gate": {
+    "type": "PRE_M5_OWNER_GATE_PLUS_FINAL_DEVICE_GATE_DEFERRED",
+    "already_verified_non_physical": [
+      "canonical D/E raster assets integrated through the Companion renderer seam",
+      "semantic six-state motion and Reduced Motion/fallback behavior pass synthetic visual/motion QA",
+      "iPhone portrait/landscape synthetic layout matrix passes",
+      "iOS simulator native flutter_tts start/completion/stop lifecycle previously passed",
+      "iOS profile no-codesign compile passes"
+    ],
+    "pre_m5_required": [
+      "PR #8 exact-head round7-p1-proof CI PASS at current candidate head",
+      "Founder Product/Visual PASS for the controlling production-shaped proof",
+      "canonical fresh-read and explicit Brain M5 admission"
+    ],
+    "final_mobile_readiness_required": [
+      "actual native TTS audibility and expected locale/voice behavior on physical hardware",
+      "Native Speech QA CALLBACK_LIFECYCLE_PASS on physical hardware",
+      "real-device animation smoothness and tap/scroll responsiveness",
+      "native safe-area/orientation behavior",
+      "physical accessibility/device matrix across required iOS/Android classes"
+    ],
+    "synthetic_work_remaining": "NONE_UNLESS_CURRENT_CI_EXPOSES_A_DEFECT",
+    "current_priority": "EXACT_HEAD_CI_THEN_FOUNDER_PRODUCT_VISUAL",
+    "deferred": [
+      "D1 iPhone physical QA to final mobile-readiness",
+      "D2 mid-range Android physical QA to final mobile-readiness",
+      "D3 lower-end Android physical QA to final mobile-readiness"
+    ],
+    "full_matrix_status": "MANDATORY_BEFORE_RELEASE_CANDIDATE_OR_PUBLIC_RELEASE"
+  },
+  "qa_findings": [
+    {
+      "item": "blink_overlay",
+      "result": "FAIL_AND_REMOVED",
+      "decision": "V1 stays blink-free; keep limbless single-master renderer"
+    }
+  ],
+  "device_execution_priority": {
+    "mode": "FINAL_DEVICE_GATE_DEFERRED_D068",
+    "D1": "DEFERRED_TO_FINAL_MOBILE_READINESS",
+    "D2": "DEFERRED_TO_FINAL_MOBILE_READINESS_WHEN_HARDWARE_AVAILABLE",
+    "D3": "DEFERRED_TO_FINAL_MOBILE_READINESS_WHEN_HARDWARE_AVAILABLE",
+    "rule": "Do not ask for an early physical install. Continue implementation after pre-M5 gates; execute the physical matrix before release-candidate/public-release claims."
+  },
+  "candidate_ci": {
+    "head": "92f0ab4c517d8b9885a41ee0f0541447b53e75b3",
+    "bootstrap_validation": "PASS",
+    "round7_p1_proof": "RUNNING_PENDING",
+    "note": "Native Speech QA fail-closed behavior and viewport-fragile widget assertions were stabilized after the prior exact-head failure."
+  },
+  "founder_sequence_override": {
+    "decision_id": "D-068",
+    "rule": "Real phone install occurs after implementation is otherwise complete enough for final mobile-readiness validation.",
+    "physical_evidence": "REQUIRED_BUT_DEFERRED",
+    "pre_m5": "EXPLICITLY_BOUNDED"
+  }
+}

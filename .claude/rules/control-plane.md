@@ -11,3 +11,9 @@
   the files on disk. Run the validator before every push.
 - A staged `NOT_EXECUTABLE` handoff stays untouched until Brain PASS is recorded
   through the explicit executability-change path (AGENTS.md §13.5).
+## Founder tooling-cost rule
+
+- Do not recommend, introduce, or depend on paid third-party apps, paid SaaS, paid browser automation, wallet top-ups, or paid preview/hosting services unless the Founder explicitly asks for a paid option.
+- Prefer free/open-source tooling, GitHub/Flutter capabilities already available to the project, and zero-cost preview/deployment paths.
+- A paid-service limitation must not be presented as a reason to stop while a credible free path exists.
+

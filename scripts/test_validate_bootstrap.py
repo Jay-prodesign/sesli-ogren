@@ -93,6 +93,18 @@ class ValidatorNegativeTests(unittest.TestCase):
         s.update(changes)
         self.write(STATE, json.dumps(s, indent=2, ensure_ascii=False) + "\n")
 
+    def activate_m0_for_plan_validation(self) -> None:
+        self.edit(
+            "TASKS.md",
+            "## Milestone M0 — Repository & Agent Bootstrap\n\n- Status: DONE",
+            "## Milestone M0 — Repository & Agent Bootstrap\n\n- Status: ACTIVE",
+        )
+
+    def stage_test_handoff(self) -> None:
+        s = self.state()
+        s["next_handoff"] = {"id": "CLAUDE_HANDOFF_002", "status": "NOT_EXECUTABLE"}
+        self.write(STATE, json.dumps(s, indent=2, ensure_ascii=False) + "\n")
+
     def next_cmd_num(self) -> int:
         return max(int(p.stem[4:]) for p in (self.root / "docs/agent/commands").glob("CMD-*.md")) + 1
 
@@ -181,14 +193,17 @@ class ValidatorNegativeTests(unittest.TestCase):
         self.assertFailsWith(r"hierarchy break")
 
     def test_plan_contract_section_missing(self) -> None:
+        self.activate_m0_for_plan_validation()
         self.edit("docs/exec-plans/LA-0005.md", "## Escalation conditions", "## Notes")
         self.assertFailsWith(r"LA-0005\.md: missing contract section '## Escalation conditions'")
 
     def test_plan_dependency_mismatch(self) -> None:
+        self.activate_m0_for_plan_validation()
         self.edit("docs/exec-plans/LA-0008.md", "## Dependencies\n- LA-0005\n", "## Dependencies\n- LA-0001\n")
         self.assertFailsWith(r"LA-0008\.md: Dependencies .* != TASKS\.md Depends on")
 
     def test_broken_plan_pointer(self) -> None:
+        self.activate_m0_for_plan_validation()
         self.edit("TASKS.md", "(docs/exec-plans/LA-0003.md)", "(docs/exec-plans/LA-0099.md)")
         self.assertFailsWith(r"LA-0003 exec plan pointer")
 
@@ -199,10 +214,10 @@ class ValidatorNegativeTests(unittest.TestCase):
     def test_future_task_executable(self) -> None:
         self.edit("TASKS.md", "### Sprint M2.S1 — Slice foundation\n",
                   "### Sprint M2.S1 — Slice foundation\n\n#### Section M2.S1.A — X\n\n"
-                  "##### LA-0009 — Premature task\n\n- Status: READY\n- Depends on: none\n"
+                  "##### LA-0018 — Premature task\n\n- Status: READY\n- Depends on: none\n"
                   "- Owner: Brain\n- Executor: Claude\n- Verification: x\n- Exec plan: none\n")
-        self.edit("TASKS.md", "**LA-0009**", "**LA-0010**")
-        self.assertFailsWith(r"LA-0009 is executable under non-active milestone")
+        self.edit("TASKS.md", "Next unallocated ID: **LA-0018**.", "Next unallocated ID: **LA-0019**.")
+        self.assertFailsWith(r"LA-0018 is executable under non-active milestone")
 
     def test_la0008_missing(self) -> None:
         self.edit("TASKS.md", "##### LA-0008 — ", "##### LA-0009 — ")
@@ -260,12 +275,14 @@ class ValidatorNegativeTests(unittest.TestCase):
         self.assertFailsWith(r"executability guard: change to CLAUDE_HANDOFF_001 lacks Brain PASS")
 
     def test_guard_explicit_change_without_reconciled_state(self) -> None:
-        self.add_unread_cmd(change="CLAUDE_HANDOFF_001 -> READY", gate="Brain review 002 BOOTSTRAP_PASS")
-        self.assertFailsWith(r"executability guard: CLAUDE_HANDOFF_001 still NOT_EXECUTABLE")
+        self.stage_test_handoff()
+        self.add_unread_cmd(change="CLAUDE_HANDOFF_002 -> READY", gate="Brain review PASS")
+        self.assertFailsWith(r"executability guard: CLAUDE_HANDOFF_002 still NOT_EXECUTABLE")
 
     def test_guard_silent_admission(self) -> None:
-        self.add_unread_cmd(body="Begin CLAUDE_HANDOFF_001 now.")
-        self.assertFailsWith(r"executability guard: mentions staged CLAUDE_HANDOFF_001")
+        self.stage_test_handoff()
+        self.add_unread_cmd(body="Begin CLAUDE_HANDOFF_002 now.")
+        self.assertFailsWith(r"executability guard: mentions staged CLAUDE_HANDOFF_002")
 
     # --- workflows ---------------------------------------------------------
     def test_bridge_non_write_users(self) -> None:

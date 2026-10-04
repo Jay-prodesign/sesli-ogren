@@ -1,5 +1,5 @@
 {
-  "schema_version": 2,
+  "schema_version": 3,
   "project": "Learning App",
   "product": "Sesli Öğren",
   "repository": {
@@ -10,56 +10,97 @@
     "default_branch": "main"
   },
   "mission": {
-    "id": "CLAUDE_HANDOFF_000",
-    "title": "Repository & Agent Bootstrap",
-    "executor": "Claude (Primary Engineer)"
+    "id": "ROUND7_COMPANION_RUNTIME_EVIDENCE",
+    "title": "Round 7 Companion / Runtime Evidence — non-physical closure; final device gate deferred",
+    "executor": "ChatGPT (Founder-authorized bounded engineering delegate; Claude may resume after fresh-read)"
   },
-  "lifecycle_stage": "Lifecycle M3 — Repository & Agent Bootstrap review (TASKS.md milestone M0), pre-Architecture Proof",
-  "status": "AWAITING_BRAIN_REVIEW",
-  "active_milestone": "M0",
-  "brain_review": {
-    "latest": "M3_BOOTSTRAP_BRAIN_REVIEW_001",
-    "disposition": "CHANGES_REQUIRED",
-    "reviewed_head_sha": "97e9040acf6a668f279a4aa1fedcd9bbbce810e2",
-    "corrections_answered_by": "RET-0001"
+  "lifecycle_stage": "Post-M4 Architecture Proof — admitted Round 7 evidence program; physical install deferred to final mobile-readiness; M2/Golden Learning Slice NOT_EXECUTABLE pending Founder Product/Visual PASS + explicit admission",
+  "status": "IN_PROGRESS",
+  "active_milestone": "M1 DONE; Round 7 non-physical closure active; final physical-device validation deferred under D-068",
+  "architecture_proof": {
+    "disposition": "ARCHITECTURE_PROOF_PASS / GO_ADAPT",
+    "reviewed_head_sha": "0327d2e5b854df1c9923c65ed88f77151cfe9eed",
+    "evidence_branch": "spike/v0-architecture-proof",
+    "pr_number": 2,
+    "merged": false,
+    "note": "Accepted architecture evidence lives on sibling stacked PR #2 and is not duplicated into this branch."
   },
   "tasks": {
-    "LA-0001": "AWAITING_BRAIN_REVIEW",
-    "LA-0002": "AWAITING_BRAIN_REVIEW",
-    "LA-0003": "AWAITING_BRAIN_REVIEW",
-    "LA-0004": "AWAITING_BRAIN_REVIEW",
-    "LA-0005": "AWAITING_BRAIN_REVIEW",
-    "LA-0006": "AWAITING_BRAIN_REVIEW",
-    "LA-0007": "AWAITING_BRAIN_REVIEW",
-    "LA-0008": "AWAITING_BRAIN_REVIEW"
+    "LA-0001": "DONE",
+    "LA-0002": "DONE",
+    "LA-0003": "DONE",
+    "LA-0004": "DONE",
+    "LA-0005": "DONE",
+    "LA-0006": "DONE",
+    "LA-0007": "DONE",
+    "LA-0008": "DONE"
   },
   "git": {
-    "branch": "chore/repository-bootstrap",
-    "base_sha": "52616b4b4f018ece72d3ee1de4949875bb144e9a",
-    "head_sha": "1ad2c8a3e4cfc34bf5ea85b3d7cfff7b4d9292e5",
-    "head_sha_note": "Content head of the Brain Review 001 corrections (local validator OK, 35/35 negative tests OK). A commit cannot record its own SHA, so the final PR head is the single reconciliation commit on top of this SHA. It and its CI run are reported in PR #1 and the engineer's final report.",
-    "pr_number": 1,
-    "pr_url": "https://github.com/Jay-prodesign/sesli-ogren/pull/1",
-    "pr_draft": true,
-    "merged": false
+    "branch": "feat/round7-companion-production-sequence-v2",
+    "base_sha": "c8c7f222ba6ca4c813bde6850f3e58c51cf5ca34",
+    "head_sha": "92f0ab4c517d8b9885a41ee0f0541447b53e75b3",
+    "head_sha_note": "Current PR #8 head after native-speech QA test stabilization. Exact-head bootstrap PASS; round7-p1-proof CI is running/pending at the time of this control-plane projection.",
+    "pr_number": 8,
+    "pr_url": "https://github.com/Jay-prodesign/sesli-ogren/pull/8",
+    "merged": false,
+    "stack": [
+      "main -> PR #1 bootstrap (PASS, unmerged)",
+      "bootstrap -> PR #2 architecture proof (PASS, unmerged)",
+      "proof/round7-companion-runtime -> PR #6 renderer seam -> PR #8 active companion production/evidence"
+    ]
   },
-  "ci": {
-    "workflow": "bootstrap-validation",
-    "job": "Validate repository control plane",
-    "result_at_head_sha": "REPORTED_EXTERNALLY",
-    "note": "Content and reconciliation commits are pushed together, so CI runs on the final head only. The conclusion is reported in PR #1 checks and the engineer's final report. Previous reviewed head 97e9040 was green.",
-    "run_url": null
-  },
-  "last_command_id": "CMD-0001",
-  "last_acknowledged_command_id": "CMD-0001",
-  "last_return_id": "RET-0001",
-  "command_processing_status": "ANSWERED",
-  "command_ledger": {
-    "CMD-0001": {
-      "status": "ANSWERED",
-      "return_id": "RET-0001"
+  "round7_evidence_program": {
+    "status": "NON_PHYSICAL_EXACT_HEAD_CI_PENDING__PHYSICAL_DEVICE_GATE_DEFERRED_FINAL",
+    "companion_cursor": "docs/agent/ROUND7_COMPANION_CURRENT_CURSOR.json",
+    "companion_status": "docs/agent/ROUND7_COMPANION_ASSET_STATUS.json",
+    "synthetic_visual_qa": "PASS",
+    "synthetic_motion_qa": "PASS",
+    "responsive_phone_qa": "PASS",
+    "blink": "REJECTED_AND_REMOVED",
+    "mouth_warp": "PASS_CLEAN_SUBTLE",
+    "android_profile_build": "PASS",
+    "ios_no_codesign_compile": "PASS",
+    "remaining": [
+      "PR #8 exact-head round7-p1-proof CI completion at 92f0ab4c517d8b9885a41ee0f0541447b53e75b3",
+      "Founder Product/Visual PASS on the controlling production-shaped proof using a non-install review surface where practical",
+      "D1/D2/D3 physical native TTS/accessibility/performance/orientation evidence at the final mobile-readiness gate before release-candidate/public-release claims"
+    ],
+    "ios_native_tts_simulator_lifecycle": "PASS_START_COMPLETION_STOP",
+    "native_speech_qa": "ONE_TAP_SCREEN_READY",
+    "android_profile_apk_sha256": "20b4d1d7d5f30252b7510fccd827d3fcad657bc08abad4d1331acf1a60d8f40d",
+    "tts_error_fallback": "UNIT_TEST_PASS__TEXT_AND_LEARNING_LOOP_PRESERVED",
+    "device_execution_priority": {
+      "mode": "FINAL_DEVICE_GATE_DEFERRED_D068",
+      "D1": "DEFERRED_TO_FINAL_MOBILE_READINESS",
+      "D2": "DEFERRED_TO_FINAL_MOBILE_READINESS_WHEN_HARDWARE_AVAILABLE",
+      "D3": "DEFERRED_TO_FINAL_MOBILE_READINESS_WHEN_HARDWARE_AVAILABLE",
+      "full_cross_device_matrix": "MANDATORY_BEFORE_RELEASE_CANDIDATE_OR_PUBLIC_RELEASE"
     }
   },
+  "next_handoff": {
+    "id": "M5_GOLDEN_LEARNING_SLICE_HANDOFF_NOT_ISSUED",
+    "status": "NOT_EXECUTABLE",
+    "gate": "Exact-head Round 7 non-physical technical closure + Founder Product/Visual PASS + canonical fresh-read + explicit Brain admission. D-068 explicitly bounds physical D1/D2/D3 validation to the final mobile-readiness gate rather than blocking implementation."
+  },
+  "blockers": [
+    "PR #8 exact-head round7-p1-proof CI is still pending at 92f0ab4c517d8b9885a41ee0f0541447b53e75b3.",
+    "Founder Product/Visual PASS remains an owner gate before explicit M5 admission.",
+    "M2/Golden Learning Slice implementation remains NOT_EXECUTABLE until explicit admission.",
+    "Physical D1/D2/D3 validation remains mandatory but is deferred to final mobile-readiness under D-068, not an immediate implementation blocker.",
+    "AUTO_AGENT_BRIDGE_BLOCKED remains optional/non-blocking."
+  ],
+  "protected_gate": "Merge, release, deploy, paid providers, credentials/secrets, licensing posture, production mutation: Product Owner only",
+  "next_action": "Finish PR #8 exact-head non-physical CI. Then obtain Founder Product/Visual PASS through a non-install review surface if needed, fresh-read canonical authority, and issue explicit M5 Golden Learning Slice admission. Do not request early real-phone installation; keep D1/D2/D3 physical QA as a final mobile-readiness/release blocker under D-068.",
+  "canonical_source_refs": [
+    "CURRENT_EXECUTION_STATE — Learning App",
+    "D-068 — Final Install After Implementation / Physical Device Gate Bounded",
+    "M4_ARCHITECTURE_PROOF_BRAIN_REVIEW_004 — ARCHITECTURE_PROOF_PASS / GO_ADAPT",
+    "M5_GOLDEN_LEARNING_SLICE_ACCEPTANCE_CONTRACT_v0.1 — Learning App",
+    "ROUND_7_COMPANION_PRODUCTION_SEQUENCE_V2 (repo execution authority)",
+    "ROUND7_COMPANION_CURRENT_CURSOR.json",
+    "ROUND7_COMPANION_ASSET_STATUS.json"
+  ],
+  "updated_at": "2026-10-04",
   "auto_agent_bridge": {
     "status": "AUTO_AGENT_BRIDGE_BLOCKED",
     "mechanism": "anthropics/claude-code-action@v1 via .github/workflows/claude-bridge.yml (wake-up only)",
@@ -74,28 +115,35 @@
       "Founder: grant the Brain (ChatGPT) GitHub connector issue/PR comment write (currently 403), or accept Drive-to-engineer transcription"
     ]
   },
-  "next_handoff": {
-    "id": "CLAUDE_HANDOFF_001",
-    "status": "NOT_EXECUTABLE",
-    "gate": "Brain BOOTSTRAP_PASS on the CLAUDE_HANDOFF_000 draft PR and explicit admission"
+  "last_command_id": "CMD-0001",
+  "last_acknowledged_command_id": "CMD-0001",
+  "last_return_id": "RET-0001",
+  "command_processing_status": "ANSWERED",
+  "command_ledger": {
+    "CMD-0001": {
+      "status": "ANSWERED",
+      "return_id": "RET-0001"
+    }
   },
-  "blockers": [
-    "AUTO_AGENT_BRIDGE_BLOCKED (Founder authorization gates; not blocking bootstrap review)"
-  ],
-  "protected_gate": "Merge, release, deploy, LICENSE, GitHub App install, secrets/variables, branch protection: Product Owner only",
-  "next_action": "Brain re-reviews draft PR #1 against CLAUDE_HANDOFF_000 and the M3 acceptance checklist and issues BOOTSTRAP_PASS or CHANGES_REQUIRED (preferably as CMD-0002).",
-  "canonical_source_refs": [
-    "CURRENT_EXECUTION_STATE — Learning App",
-    "CLAUDE_HANDOFF_000 — Repository & Agent Bootstrap — Learning App",
-    "M3_BOOTSTRAP_BRAIN_REVIEW_001 — CHANGES_REQUIRED — Learning App",
-    "M3_REPOSITORY_BOOTSTRAP_ACCEPTANCE_CHECKLIST_v0.1 — Learning App",
-    "DECISION_LOG — Learning App (D-019, D-020, D-023, D-024, D-025, D-026)",
-    "PRE_BOOTSTRAP_PRODUCT_READINESS_AND_MASTER_SEQUENCE_v1.0 — Learning App",
-    "ENGINEERING_EXECUTION_PROTOCOL — Learning App"
-  ],
-  "governance_read": {
-    "drive_status": "AVAILABLE",
-    "detail": "All seven required Drive authorities fresh-read by title on 2026-09-28 via the Google Drive connector. No Drive content copied into this repository."
+  "temporary_execution_override": {
+    "status": "ACTIVE",
+    "authority": "Founder explicit instruction in Learning App chat",
+    "scope": "Dependency-safe, reversible, app-first Round 7 evidence work; no M2 feature implementation without admission.",
+    "exclusions": [
+      "merge",
+      "release",
+      "deploy",
+      "paid-provider spend",
+      "credentials/secrets",
+      "production mutation",
+      "cross-project mutation"
+    ]
   },
-  "updated_at": "2026-09-28"
+  "founder_sequence_override": {
+    "decision_id": "D-068",
+    "status": "ACTIVE",
+    "rule": "Real-phone installation is deferred until the app is otherwise complete enough for final device/mobile-readiness validation.",
+    "pre_m5_effect": "Physical R7 device evidence is explicitly bounded and does not block development; non-physical technical closure plus Founder Product/Visual PASS still precede explicit M5 admission.",
+    "release_effect": "Physical iOS/Android device, speech, accessibility, performance and orientation checks remain mandatory before release-candidate/public-release claims."
+  }
 }

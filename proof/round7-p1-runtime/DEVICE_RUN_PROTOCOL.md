@@ -1,15 +1,36 @@
 # P1 physical-device run protocol (R7-06)
 
-R7-06 stays **OPEN** until D1, D2 and D3 physical-device runs are recorded, each with the exact
-commit and build provenance. Emulators, simulators, browsers and CI runners cannot close it.
+R7-06 stays **OPEN** until D1, D2 and D3 physical-device runs are eventually recorded, each with the exact
+commit and build provenance. The **current execution priority is iOS-first** because iPhone hardware is available now.
+D2/D3 Android are explicitly deferred until suitable hardware becomes available; their absence must not block today's
+D1 companion/native-speech QA. Emulators, simulators, browsers and CI runners cannot close the full cross-device matrix.
+
+## P9 companion fast path
+
+For the current companion cursor, the remaining gate is physical-device-only. Before running the
+full R7-06 benchmark matrix, use the in-app **Native Speech QA** screen:
+
+1. Launch a profile build on real hardware.
+2. Tap the voice icon in the app bar and run **Native Speech QA**.
+3. Require `CALLBACK_LIFECYCLE_PASS`. This automatically checks playback start → SPEAK,
+   completion → settle, explicit stop → settle, and stale-callback suppression.
+4. Confirm by ear that speech is actually audible and matches the fixture-owned expected locale/voice behavior.
+5. Return to the learning flow, rotate portrait ↔ landscape, scroll/tap through the flow and check
+   that D/E remain unclipped and interaction/motion is smooth.
+6. If these checks pass, record them with the exact build SHA. If any fail, reopen only the failing
+   subsystem; do not regenerate assets or introduce a layered rig by default.
+
+CI run 37140739027 already proved the same native `flutter_tts` start/completion/stop callback path with an explicit `tr-TR` probe on
+an iOS simulator and built the Android profile APK. That is supporting evidence only and cannot
+substitute for physical hardware.
 
 ## Device matrix (record exact models before running)
 
 | Class | Requirement | Model / OS / refresh | Status |
 | --- | --- | --- | --- |
-| D1 | Current target iPhone (physical) | _to record_ | NOT_RUN |
-| D2 | Mid-range Android (physical) | _to record_ | NOT_RUN |
-| D3 | Lower-end supported Android (physical) | _to record_ | NOT_RUN |
+| D1 | Current available iPhone (physical) | _to record during run_ | **ACTIVE / NOT_RUN** |
+| D2 | Mid-range Android (physical) | _to record later_ | **DEFERRED_UNTIL_DEVICE_AVAILABLE** |
+| D3 | Lower-end supported Android (physical) | _to record later_ | **DEFERRED_UNTIL_DEVICE_AVAILABLE** |
 
 ## Build
 

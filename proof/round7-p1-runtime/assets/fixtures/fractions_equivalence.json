@@ -2,6 +2,7 @@
  "fixture_id": "R7-FIX-FRA",
  "fixture_version": "1.0",
  "domain_label": "Mathematics · Fraction equivalence",
+ "voice_locale": "en-US",
  "source": {
   "id": "R7-SRC-FRA-001",
   "version": "1.0",

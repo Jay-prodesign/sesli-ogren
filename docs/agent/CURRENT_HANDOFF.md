@@ -1,48 +1,54 @@
 # CURRENT HANDOFF
 
-Mission-level executable contract (Brain-owned, mirrored by the Engineer).
-This file is **not** a message log. Incremental Brain instructions arrive as
-[`commands/CMD-####.md`](commands/), and Engineer responses go to
-[`returns/RET-####.md`](returns/) ([`README.md`](README.md)).
-
-## Active
+## Active bounded evidence program
 
 | Field | Value |
 | --- | --- |
-| Handoff | **CLAUDE_HANDOFF_000 — Repository & Agent Bootstrap** |
-| State | **ACTIVE**. Brain Review 001 = CHANGES_REQUIRED. Corrections delivered (CMD-0001 → RET-0001) and **AWAITING_BRAIN_REVIEW** |
-| Executor | Claude (Primary Engineer) |
-| Milestone | M0 — Repository & Agent Bootstrap (Drive lifecycle stage "M3") |
-| Tasks | LA-0001 … LA-0008 (see [`TASKS.md`](../../TASKS.md)); LA-0008 = Brain↔Engineer Command Bus & Automated Claude Invocation Bridge (D-026) |
-| Branch | `chore/repository-bootstrap` |
-| Delivery | Existing unmerged **draft** PR against `main`: [#1](https://github.com/Jay-prodesign/sesli-ogren/pull/1) |
-| Evidence | [`ENGINEER_RETURN.md`](ENGINEER_RETURN.md) (consolidated) · [`returns/RET-0001.md`](returns/RET-0001.md) |
-| Exit gate | Brain **BOOTSTRAP_PASS** (or CHANGES_REQUIRED / BLOCKED), preferably issued as `CMD-0002` |
+| Mission | **ROUND7_COMPANION_RUNTIME_EVIDENCE** |
+| State | **ACTIVE — P9 NON-PHYSICAL TECH CLOSURE / FOUNDER VISUAL GATE PREP** |
+| Executor | ChatGPT as Founder-authorized bounded engineering delegate; Claude may resume after fresh-read |
+| Product | Sesli Öğren / Learning App |
+| Branch | `feat/round7-companion-production-sequence-v2` |
+| Delivery | Draft PR #8, stacked and unmerged |
+| Purpose | Close the admitted Round 7 non-physical companion/runtime evidence, honor D-068 final-install sequencing, and reach the Founder Product/Visual gate without admitting M2/Golden Learning Slice implementation |
+| Current result | Synthetic visual/layout/motion QA PASS; Android profile build PASS; iOS no-codesign compile PASS; iOS native flutter_tts simulator lifecycle PASS; one-tap Native Speech QA ready; blink rejected/removed; mouth warp PASS |
+| Remaining gate | Exact-head PR #8 CI + Founder Product/Visual PASS for pre-M5 admission. Physical iOS/Android audibility/accessibility/performance/orientation is deferred under D-068 to final mobile-readiness before release-candidate/public-release claims. |
+| Companion cursor | `docs/agent/ROUND7_COMPANION_CURRENT_CURSOR.json` |
+| Companion status | `docs/agent/ROUND7_COMPANION_ASSET_STATUS.json` |
 
-### Mission summary (non-private)
+### Authority reconciliation
 
-Bootstrap the repository's engineering governance: hygiene files, agent
-contracts (including the D-024 reuse-first gate and the D-026 command bus), the
-task map with the whole-V0 skeleton, complete execution contracts, agent control
-files, the provenance register template, minimal `.claude/rules/`, lightweight
-validation and CI, and an inert GitHub-triggered Claude wake-up bridge. No
-application or product implementation. No merge, deploy, or release.
+- Repository Bootstrap is **DONE / BOOTSTRAP_PASS** on sibling draft PR #1.
+- Architecture Proof is **DONE / ARCHITECTURE_PROOF_PASS / GO_ADAPT** at reviewed head
+  `0327d2e5b854df1c9923c65ed88f77151cfe9eed` on sibling draft PR #2.
+- Those sibling PRs remain unmerged; this branch therefore records their accepted outcomes without copying their full task/evidence trees.
+- The active Round 7 branch is evidence work only. It does **not** admit the Golden Learning Slice.
+- **D-068:** real-phone installation is deliberately deferred until the app is otherwise complete enough for final device/mobile-readiness validation. Physical evidence remains mandatory before release but is explicitly bounded for pre-M5 sequencing.
 
-### Governing references (Drive, by title only)
+### Lean execution rule
 
-- CURRENT_EXECUTION_STATE — Learning App
-- CLAUDE_HANDOFF_000 — Repository & Agent Bootstrap — Learning App
-- M3_BOOTSTRAP_BRAIN_REVIEW_001 — CHANGES_REQUIRED — Learning App
-- M3_REPOSITORY_BOOTSTRAP_ACCEPTANCE_CHECKLIST_v0.1 — Learning App
-- DECISION_LOG — Learning App: D-019, D-020, D-023 (PUBLIC repository), D-024 (reuse-first), D-025 (layered donors), D-026 (command bus)
-- PRE_BOOTSTRAP_PRODUCT_READINESS_AND_MASTER_SEQUENCE_v1.0 — Learning App
-- ENGINEERING_EXECUTION_PROTOCOL — Learning App
-- PRODUCT_LIFECYCLE_STAGE_GATES — Learning App; V0_PRODUCT_SCOPE_v1.0 — Learning App (boundary only)
+Do not create new companion art, state-PNG grids, layered rig infrastructure, or generic animation systems while the
+current canonical D/E assets satisfy the proof. Reopen those areas only if physical native-device evidence reveals a
+specific problem that cannot be fixed locally.
 
-## Staged
+## Staged / NOT EXECUTABLE
 
 | Field | Value |
 | --- | --- |
-| Handoff | **CLAUDE_HANDOFF_001 — V0 Architecture Spike** |
-| State | **NOT_EXECUTABLE**. Staged pending Brain BOOTSTRAP_PASS on the CLAUDE_HANDOFF_000 draft PR |
-| Rule | No agent may start any part of CLAUDE_HANDOFF_001 until Brain issues PASS and marks it executable here. A command must declare `Executability change` with PASS gate evidence and land together with this file and `EXECUTION_STATE.json` (AGENTS.md §13.5). |
+| Handoff | **M5_GOLDEN_LEARNING_SLICE_HANDOFF_NOT_ISSUED** |
+| State | **NOT_EXECUTABLE** |
+| Gate | Exact-head Round 7 non-physical technical closure + Founder Product/Visual PASS + canonical fresh-read + explicit Brain admission. D-068 bounds physical device/voice/accessibility execution to final mobile-readiness. |
+| Rule | No M2/Golden Learning Slice implementation starts from this Round 7 evidence branch. |
+
+## Protected actions
+
+Merge, release, deploy, paid providers, credentials/secrets, production mutation and licensing changes remain Product Owner gates.
+
+
+## Device execution priority
+
+- **D1 iPhone:** DEFERRED_TO_FINAL_MOBILE_READINESS under D-068.
+- **D2 mid-range Android:** DEFERRED_TO_FINAL_MOBILE_READINESS_WHEN_HARDWARE_AVAILABLE.
+- **D3 lower-end Android:** DEFERRED_TO_FINAL_MOBILE_READINESS_WHEN_HARDWARE_AVAILABLE.
+- The full physical matrix remains mandatory before release-candidate/public-release claims; it is not today's implementation blocker.
+- Current executable order: exact-head PR #8 CI → non-install Founder Product/Visual PASS → canonical fresh-read → explicit M5 admission.
