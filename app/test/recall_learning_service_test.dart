@@ -284,6 +284,51 @@ void main() {
     );
   });
 
+  test('store rejects fabricated positive state for incorrect evidence', () async {
+    final prompt = await recall.createCurrentPrompt(
+      learner: learnerA,
+      materialId: materialId,
+    );
+    final action = await storedAction(prompt);
+    const attemptId = RecallAttemptId('attempt-fake-state');
+    const evidenceId = LearnerEvidenceId('ev_fake_positive_state');
+    final evidence = LearnerEvidence(
+      id: evidenceId,
+      attemptId: attemptId,
+      actionId: prompt.id,
+      materialId: action.materialId,
+      sourceVersionId: action.sourceVersionId,
+      extractedContentId: action.extractedContentId,
+      outcome: RecallOutcome.incorrect,
+      assistance: RecallAssistance.none,
+      responseDigest: 'incorrect-digest',
+      responseLength: 9,
+      ruleVersion: RecallLearningService.evidenceRuleVersion,
+      createdAt: DateTime.utc(2026, 10, 4, 12, 6),
+    );
+    final fakeNext = NextLearningAction(
+      materialId: action.materialId,
+      sourceVersionId: action.sourceVersionId,
+      latestEvidenceId: evidenceId,
+      kind: NextLearningActionKind.repeatRecallLater,
+      reasonCode: 'ONE_UNASSISTED_RETRIEVAL_OBSERVED',
+      reasonText: 'fabricated positive continuation',
+      policyVersion: RecallLearningService.nextActionPolicyVersion,
+      createdAt: evidence.createdAt,
+    );
+
+    await expectLater(
+      sourceStore.learningTruthStore().persistEvidenceStateAndNextAction(
+        learner: learnerA,
+        evidence: evidence,
+        stateKind: RecallStateKind.retrievedOnce,
+        stateRuleVersion: RecallLearningService.stateRuleVersion,
+        nextAction: fakeNext,
+      ),
+      throwsA(isA<LearningTruthConflict>()),
+    );
+  });
+
   test('near answer is partial rather than silently correct', () async {
     final prompt = await recall.createCurrentPrompt(
       learner: learnerA,
