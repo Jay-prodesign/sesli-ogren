@@ -65,7 +65,7 @@ class SupabaseLearnerAuth {
     try {
       await Supabase.initialize(
         url: _projectUrl,
-        publishableKey: _publishableKey,
+        anonKey: _publishableKey,
       );
       return Supabase.instance.client;
     } catch (_) {
