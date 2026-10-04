@@ -1,54 +1,57 @@
 # CURRENT HANDOFF
 
-## Active bounded evidence program
+## Active mission
 
 | Field | Value |
 | --- | --- |
-| Mission | **ROUND7_COMPANION_RUNTIME_EVIDENCE** |
-| State | **ACTIVE — P9 NON-PHYSICAL TECH CLOSURE / FOUNDER VISUAL GATE PREP** |
-| Executor | ChatGPT as Founder-authorized bounded engineering delegate; Claude may resume after fresh-read |
+| Handoff | **CLAUDE_HANDOFF_002 — M5 Golden Learning Slice** |
+| State | **ACTIVE / EXECUTABLE — D-071** |
 | Product | Sesli Öğren / Learning App |
-| Branch | `feat/round7-companion-production-sequence-v2` |
-| Delivery | Draft PR #8, stacked and unmerged |
-| Purpose | Close the admitted Round 7 non-physical companion/runtime evidence, honor D-068 final-install sequencing, and reach the Founder Product/Visual gate without admitting M2/Golden Learning Slice implementation |
-| Current result | Synthetic visual/layout/motion QA PASS; Android profile build PASS; iOS no-codesign compile PASS; iOS native flutter_tts simulator lifecycle PASS; one-tap Native Speech QA ready; blink rejected/removed; mouth warp PASS |
-| Remaining gate | Exact-head PR #8 CI + Founder Product/Visual PASS for pre-M5 admission. Physical iOS/Android audibility/accessibility/performance/orientation is deferred under D-068 to final mobile-readiness before release-candidate/public-release claims. |
-| Companion cursor | `docs/agent/ROUND7_COMPANION_CURRENT_CURSOR.json` |
-| Companion status | `docs/agent/ROUND7_COMPANION_ASSET_STATUS.json` |
+| Branch | `feat/m5-golden-learning-slice` |
+| Executor | ChatGPT under Founder-authorized reversible engineering authority; Claude/Codex may resume only after fresh-read |
+| Acceptance authority | `M5_GOLDEN_LEARNING_SLICE_ACCEPTANCE_CONTRACT_v0.1` |
+| Current task | **LA-0018 — production-shaped foundation** |
+| Companion | **D/Knot only — D-070 Founder selection** |
 
-### Authority reconciliation
+## Mission
 
-- Repository Bootstrap is **DONE / BOOTSTRAP_PASS** on sibling draft PR #1.
-- Architecture Proof is **DONE / ARCHITECTURE_PROOF_PASS / GO_ADAPT** at reviewed head
-  `0327d2e5b854df1c9923c65ed88f77151cfe9eed` on sibling draft PR #2.
-- Those sibling PRs remain unmerged; this branch therefore records their accepted outcomes without copying their full task/evidence trees.
-- The active Round 7 branch is evidence work only. It does **not** admit the Golden Learning Slice.
-- **D-068:** real-phone installation is deliberately deferred until the app is otherwise complete enough for final device/mobile-readiness validation. Physical evidence remains mandatory before release but is explicitly bounded for pre-M5 sequencing.
+Implement the smallest credible production-shaped Golden Learning Slice:
 
-### Lean execution rule
+**real PDF or pasted/plain text → authoritative source/version/provenance → grounded/versioned processing → meaningful active learning action → durable LearnerEvidence → minimal truthful LearnerState → explainable next action → persistence/close/reopen + safe retry/recovery.**
 
-Do not create new companion art, state-PNG grids, layered rig infrastructure, or generic animation systems while the
-current canonical D/E assets satisfy the proof. Reopen those areas only if physical native-device evidence reveals a
-specific problem that cannot be fixed locally.
+At least one continuity transition must be exercised in addition to the evidence-producing action. Passive listening, app opens, taps, elapsed time, Companion reaction or completion animation cannot create mastery/readiness evidence.
 
-## Staged / NOT EXECUTABLE
+## Entry reconciliation
 
-| Field | Value |
-| --- | --- |
-| Handoff | **M5_GOLDEN_LEARNING_SLICE_HANDOFF_NOT_ISSUED** |
-| State | **NOT_EXECUTABLE** |
-| Gate | Exact-head Round 7 non-physical technical closure + Founder Product/Visual PASS + canonical fresh-read + explicit Brain admission. D-068 bounds physical device/voice/accessibility execution to final mobile-readiness. |
-| Rule | No M2/Golden Learning Slice implementation starts from this Round 7 evidence branch. |
+- M4 Architecture Proof: **PASS / GO_ADAPT**.
+- Accepted architecture substrate: selectively imported into this branch; stale architecture control-plane intentionally excluded.
+- Round 7 non-physical technical gate: **PASS**.
+- Founder Product/Visual: **PASS**, D/Knot selected under D-070.
+- Physical iOS/Android device gate: **deferred but mandatory before release** under D-068.
+- D-061: still PROPOSED; does not alter current D-054/V0 authority.
+- M5: **explicitly admitted by D-071**.
+
+## Executable order
+
+1. **LA-0018** — integrate accepted architecture substrate into the production-shaped foundation.
+2. **LA-0019** — real material source authority/provenance/safe ingest.
+3. **LA-0020** — active learning → LearnerEvidence → LearnerState → next action.
+4. **LA-0021** — coherent Flutter flow with D/Knot + close/reopen/recovery + checkpoint evidence.
+
+Do not stop for routine Founder confirmation between these tasks. Stop only for a genuine Founder product decision, access/credential blocker, irreversible/material risk, protected action, or final physical-device-only validation.
+
+## App-first / lean rule
+
+- Build concrete M5 needs first; no generic engine/framework/provider/governance layer without a second real use.
+- Reuse accepted architecture proof semantics where they reduce risk; do not promote proof-only UI or stale state wholesale.
+- D/Knot is the only production Companion identity; do not reopen E/Tilt or character discovery.
+- Visual/Companion behavior amplifies learning truth but never owns evidence/state/mastery.
+- Formal evidence is collected at the M5 checkpoint except where security, tenant isolation, schema/persistence or other material risk requires immediate proof.
 
 ## Protected actions
 
-Merge, release, deploy, paid providers, credentials/secrets, production mutation and licensing changes remain Product Owner gates.
+No merge, deploy, release, paid-provider spend, production credentials/secrets, production mutation, billing/admin activation, destructive migration or cross-project mutation is authorized.
 
+## Deferred final mobile-readiness gate
 
-## Device execution priority
-
-- **D1 iPhone:** DEFERRED_TO_FINAL_MOBILE_READINESS under D-068.
-- **D2 mid-range Android:** DEFERRED_TO_FINAL_MOBILE_READINESS_WHEN_HARDWARE_AVAILABLE.
-- **D3 lower-end Android:** DEFERRED_TO_FINAL_MOBILE_READINESS_WHEN_HARDWARE_AVAILABLE.
-- The full physical matrix remains mandatory before release-candidate/public-release claims; it is not today's implementation blocker.
-- Current executable order: exact-head PR #8 CI → non-install Founder Product/Visual PASS → canonical fresh-read → explicit M5 admission.
+Physical iPhone + representative Android speech/audibility, accessibility, performance, safe-area/orientation and device behavior remain mandatory before release-candidate/public-release claims under D-068.
