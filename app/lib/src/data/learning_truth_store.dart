@@ -61,6 +61,8 @@ abstract interface class LearningTruthStore {
   Future<PersistedLearningTruth> persistEvidenceStateAndNextAction({
     required AuthenticatedLearner learner,
     required LearnerEvidence evidence,
+    required RecallResponseDisposition disposition,
+    required String normalizedResponse,
     required RecallStateKind stateKind,
     required String stateRuleVersion,
     required NextLearningAction nextAction,
