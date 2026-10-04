@@ -960,37 +960,31 @@ WHERE learner_id = ?
         updatedAt: evidence.createdAt,
       );
 
-      await transaction.rawInsert(
-        '''
-INSERT INTO learner_states (
-  learner_id,
-  material_id,
-  source_version_id,
-  state_kind,
-  evidence_count,
-  latest_evidence_id,
-  rule_version,
-  updated_at_utc
-) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-ON CONFLICT(learner_id, material_id) DO UPDATE SET
-  source_version_id = excluded.source_version_id,
-  state_kind = excluded.state_kind,
-  evidence_count = excluded.evidence_count,
-  latest_evidence_id = excluded.latest_evidence_id,
-  rule_version = excluded.rule_version,
-  updated_at_utc = excluded.updated_at_utc
-''',
-        [
-          learner.id.value,
-          state.materialId.value,
-          state.sourceVersionId.value,
-          state.kind.name,
-          state.evidenceCount,
-          state.latestEvidenceId.value,
-          state.ruleVersion,
-          state.updatedAt.toUtc().toIso8601String(),
-        ],
+      final stateRow = {
+        'source_version_id': state.sourceVersionId.value,
+        'state_kind': state.kind.name,
+        'evidence_count': state.evidenceCount,
+        'latest_evidence_id': state.latestEvidenceId.value,
+        'rule_version': state.ruleVersion,
+        'updated_at_utc': state.updatedAt.toUtc().toIso8601String(),
+      };
+      final updated = await transaction.update(
+        'learner_states',
+        stateRow,
+        where: 'learner_id = ? AND material_id = ?',
+        whereArgs: [learner.id.value, state.materialId.value],
       );
+      if (updated == 0) {
+        await transaction.insert(
+          'learner_states',
+          {
+            'learner_id': learner.id.value,
+            'material_id': state.materialId.value,
+            ...stateRow,
+          },
+          conflictAlgorithm: ConflictAlgorithm.abort,
+        );
+      }
 
       return PersistedLearningTruth(evidence: evidence, state: state);
     });
