@@ -147,7 +147,7 @@ Next unallocated ID: **LA-0022**.
 - Status: PLANNED / NOT_EXECUTABLE
 - Intent: evidence return; Brain disposition GO_ADAPT or FALLBACK_CLEAN_FLUTTER.
 
-## Milestone M2 — M5 Golden Learning Slice
+## Milestone M2 — VS-001 / M5 Golden Learning Slice
 
 - Status: ACTIVE
 - Handoff: CLAUDE_HANDOFF_002 — M5 Golden Learning Slice
