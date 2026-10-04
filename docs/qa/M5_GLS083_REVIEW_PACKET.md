@@ -46,7 +46,8 @@ A BLOCKER or HIGH data-integrity/security finding prevents M5 PASS until remedia
 - `app/lib/src/domain/operational_event.dart`
 - `app/lib/src/data/operational_telemetry.dart`
 
-### Runtime / continuity / Companion
+### Authentication / runtime / continuity / Companion
+- `app/lib/src/auth/supabase_learner_auth.dart`
 - `app/lib/src/app/app_runtime.dart`
 - `app/lib/src/app/learning_slice_screen.dart`
 - `app/lib/src/app/companion_view.dart`
@@ -70,7 +71,13 @@ A BLOCKER or HIGH data-integrity/security finding prevents M5 PASS until remedia
    - one learner/material has one current authoritative SourceVersion;
    - derived content/action/evidence/state/next-action cannot silently point at a stale source.
 
-2. **Cross-user isolation**
+2. **Authenticated identity + cross-user isolation**
+   - production `AppRuntime` cannot open from a hard-coded/local learner fixture;
+   - runtime learner ID must derive from the authenticated Supabase subject;
+   - missing auth config/session fails closed before learner data opens;
+   - no service-role/secret key is present in client/repository.
+
+3. **Cross-user isolation**
    - every source/action/support/evidence/state/next-action/telemetry read or mutation is learner-scoped;
    - guessed IDs must not cross learner boundaries.
 
@@ -158,3 +165,12 @@ Use exactly one disposition:
 - **BLOCKED** — review cannot be completed credibly because required evidence/source is unavailable.
 
 Include all findings, not only the highest severity. Do not merge, run release actions, change product scope or mutate the branch.
+
+
+## Authentication-specific reviewer questions
+
+- Does any production path still open `AppRuntime` with `localM5LearnerFixture`?
+- Can missing/failed Supabase authentication fall through to a local learner identity?
+- Are only client-safe project URL/publishable-key values accepted at the Flutter boundary, with no service-role secret?
+- Does changing authenticated user result in a different learner-scoped local truth namespace?
+- Is anonymous authentication acceptable only as the bounded M5 account bootstrap, without being mistaken for final account/login UX?

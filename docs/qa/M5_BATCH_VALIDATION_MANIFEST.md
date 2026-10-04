@@ -18,6 +18,8 @@ Run only after:
 - Supported Android toolchain for Flutter 3.47.5
 - macOS/Xcode environment for the iOS no-codesign compile
 - clean checkout; no undocumented machine-local source or dependency override
+- Supabase project with anonymous auth enabled for this bounded M5 validation
+- `SUPABASE_URL` and `SUPABASE_PUBLISHABLE_KEY` supplied as protected build-time values; never committed
 
 ## Phase A — resolve and freeze dependencies
 
@@ -48,7 +50,9 @@ flutter pub get
 dart format --output=none --set-exit-if-changed .
 flutter analyze
 flutter test
-flutter build apk --profile
+flutter build apk --profile \
+  --dart-define=SUPABASE_URL="$SUPABASE_URL" \
+  --dart-define=SUPABASE_PUBLISHABLE_KEY="$SUPABASE_PUBLISHABLE_KEY"
 ```
 
 On macOS at the same exact frozen head:
@@ -56,7 +60,9 @@ On macOS at the same exact frozen head:
 ```bash
 cd app
 flutter pub get
-flutter build ios --profile --no-codesign
+flutter build ios --profile --no-codesign \
+  --dart-define=SUPABASE_URL="$SUPABASE_URL" \
+  --dart-define=SUPABASE_PUBLISHABLE_KEY="$SUPABASE_PUBLISHABLE_KEY"
 ```
 
 ## Required focused test coverage
@@ -75,7 +81,9 @@ The full `flutter test` run must include, at minimum:
 - continuation repair and close/reopen;
 - v2→current and v5→v6 migration preservation;
 - Reduced Motion/widget flow;
-- privacy-safe operational telemetry lineage.
+- privacy-safe operational telemetry lineage;
+- production bootstrap fails closed with no Supabase config;
+- configured runtime establishes a real Supabase authenticated session and maps its user ID into `AuthenticatedLearner` before opening local learning data.
 
 ## Evidence to record
 

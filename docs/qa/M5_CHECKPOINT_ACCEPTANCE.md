@@ -21,6 +21,7 @@ This matrix does **not** declare M5 PASS by itself.
 - Routine GitHub Actions: OFF under D-072.
 - Current execution container: no Flutter/Dart toolchain; runtime/build evidence must come from one bounded checkpoint batch.
 - Known reproducibility gap: `app/pubspec.lock` is currently absent for the new M5 dependencies and must be generated/committed before a PASS verdict.
+- Known authentication gap: production code now fails closed unless `SUPABASE_URL` + `SUPABASE_PUBLISHABLE_KEY` are provided and a real Supabase session can be established; live project/auth configuration evidence is still pending.
 
 ## A — Source truth and grounding
 
@@ -35,7 +36,7 @@ This matrix does **not** declare M5 PASS by itself.
 
 | Item | Disposition | Evidence / remaining work |
 | --- | --- | --- |
-| GLS-010 | STATIC_PASS / PENDING_BATCH | All persistence queries are learner-scoped; negative cross-user source/Recall tests are authored. |
+| GLS-010 | BLOCKED | Store/query paths are learner-scoped and cross-user negative tests are authored, but the production runtime previously used a local fixture. Supabase-authenticated runtime code is now present; PASS requires a real project/session configuration plus checkpoint evidence that the runtime learner ID comes from the authenticated Supabase subject. |
 | GLS-011 | STATIC_PASS | Evidence/state/next-action and support history are enforced at the domain/store boundary. New evidence requires a matching active Recall attempt. |
 | GLS-012 | STATIC_PASS | Source text is parsed as data; the admitted Recall path has no prompt/model instruction authority surface. |
 | GLS-013 | STATIC_PASS / PENDING_BATCH | Text/PDF byte/character/page bounds and malformed PDF checks exist; native parser behavior remains batch evidence. |
@@ -122,9 +123,10 @@ This matrix does **not** declare M5 PASS by itself.
 
 **NOT PASS YET.** Feature implementation is frozen enough to enter checkpoint, but M5 cannot be accepted until:
 
-1. exact dependency resolution is generated and committed;
-2. one bounded D-072 Flutter validation batch passes at the frozen head;
-3. GLS-083 independent read-only review is completed and material findings are resolved;
-4. Product Experience / Learning Experience / Creative Quality / accessibility dispositions for the actual slice are explicit.
+1. a real Supabase project/session validates the authenticated-learner boundary without committing secrets;
+2. exact dependency resolution is generated and committed;
+3. one bounded D-072 Flutter validation batch passes at the frozen head;
+4. GLS-083 independent read-only review is completed and material findings are resolved;
+5. Product Experience / Learning Experience / Creative Quality / accessibility dispositions for the actual slice are explicit.
 
 Physical-device mobile-readiness remains separately deferred under D-068.

@@ -75,14 +75,14 @@
     "current_task": "LA-0022"
   },
   "blockers": [
-    "No known feature-implementation blocker remains in LA-0021.",
-    "app/pubspec.lock for new M5 dependencies is missing and must be generated/committed at checkpoint.",
+    "Production runtime now requires Supabase-authenticated learner identity; real Supabase project/publishable-key configuration and live anonymous-auth session evidence are PENDING protected environment access.",
+    "app/pubspec.lock for M5 dependencies (including supabase_flutter) is missing and must be generated/committed at checkpoint.",
     "Current local execution container has no Flutter/Dart toolchain; runtime/build validation is PENDING_BATCH_VALIDATION under D-072.",
     "GLS-083 independent read-only review is PENDING.",
     "Physical device/mobile-readiness remains deferred under D-068 and is not claimed by the M5 checkpoint."
   ],
   "protected_gate": "Merge, release, deploy, paid providers, credentials/secrets, licensing posture, production mutation: Product Owner only",
-  "next_action": "Execute LA-0022 M5 checkpoint: freeze candidate, reconcile GLS matrix, close pubspec.lock/reproducibility, run one bounded D-072 validation batch only after freeze, obtain GLS-083 independent read-only review, then issue an explicit checkpoint verdict. Do not add feature breadth.",
+  "next_action": "Continue LA-0022 checkpoint without routine Actions: verify auth/config boundary statically, use connected Supabase only if Founder connects it, obtain independent GLS-083 review, then close dependency lock and run one bounded validation batch at the frozen head. Do not use the local learner fixture in production runtime.",
   "canonical_source_refs": [
     "CURRENT_EXECUTION_STATE — Learning App",
     "D-070 — Founder Product/Visual PASS / D-Knot selected",
