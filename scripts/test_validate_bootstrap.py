@@ -212,12 +212,45 @@ class ValidatorNegativeTests(unittest.TestCase):
         self.assertFailsWith(r"V0 skeleton milestone missing: Controlled Public V0 Release")
 
     def test_future_task_executable(self) -> None:
-        self.edit("TASKS.md", "### Sprint M2.S1 — Slice foundation\n",
-                  "### Sprint M2.S1 — Slice foundation\n\n#### Section M2.S1.A — X\n\n"
-                  "##### LA-0018 — Premature task\n\n- Status: READY\n- Depends on: none\n"
-                  "- Owner: Brain\n- Executor: Claude\n- Verification: x\n- Exec plan: none\n")
-        self.edit("TASKS.md", "Next unallocated ID: **LA-0018**.", "Next unallocated ID: **LA-0019**.")
-        self.assertFailsWith(r"LA-0018 is executable under non-active milestone")
+        tasks_path = self.root / "TASKS.md"
+        text = tasks_path.read_text(encoding="utf-8")
+
+        next_id_match = re.search(r"Next unallocated ID: \\*\\*LA-(\\d{4})\\*\\*\\.", text)
+        self.assertIsNotNone(next_id_match, "test setup: next unallocated task ID missing")
+        task_num = int(next_id_match.group(1))
+        task_id = f"LA-{task_num:04d}"
+        next_task_id = f"LA-{task_num + 1:04d}"
+
+        future = re.search(
+            r"## Milestone (M\\d+) — [^\\n]+\\n\\n- Status: PLANNED / NOT_EXECUTABLE"
+            r"(?P<body>.*?)(?=\\n## Milestone|\\Z)",
+            text,
+            re.DOTALL,
+        )
+        self.assertIsNotNone(future, "test setup: no non-active future milestone found")
+        milestone_id = future.group(1)
+        sprint = re.search(
+            rf"### Sprint ({re.escape(milestone_id)}\\.S\\d+) — [^\\n]+\\n",
+            future.group(0),
+        )
+        self.assertIsNotNone(sprint, "test setup: future milestone has no sprint")
+        sprint_id = sprint.group(1)
+
+        insertion = (
+            f"\\n#### Section {sprint_id}.Z — Negative test\\n\\n"
+            f"##### {task_id} — Premature task\\n\\n"
+            "- Status: READY\\n- Depends on: none\\n"
+            "- Owner: Brain\\n- Executor: Claude\\n- Verification: x\\n- Exec plan: none\\n"
+        )
+        insert_at = future.start() + sprint.end()
+        text = text[:insert_at] + insertion + text[insert_at:]
+        text = text.replace(
+            f"Next unallocated ID: **{task_id}**.",
+            f"Next unallocated ID: **{next_task_id}**.",
+            1,
+        )
+        tasks_path.write_text(text, encoding="utf-8")
+        self.assertFailsWith(fr"{task_id} is executable under non-active milestone")
 
     def test_la0008_missing(self) -> None:
         self.edit("TASKS.md", "##### LA-0008 — ", "##### LA-0009 — ")
