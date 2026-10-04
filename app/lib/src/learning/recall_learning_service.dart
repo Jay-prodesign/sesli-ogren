@@ -167,14 +167,14 @@ class RecallLearningService {
       );
     }
 
-    final sourceAnchor = extracted.anchors
-        .where(
-          (anchor) =>
-              candidate.sentenceStart >= anchor.startOffset &&
-              candidate.sentenceStart < anchor.endOffset,
-        )
-        .cast<SourceAnchor?>()
-        .firstOrNull;
+    SourceAnchor? sourceAnchor;
+    for (final anchor in extracted.anchors) {
+      if (candidate.sentenceStart >= anchor.startOffset &&
+          candidate.sentenceStart < anchor.endOffset) {
+        sourceAnchor = anchor;
+        break;
+      }
+    }
 
     final prompt = candidate.sentence.replaceRange(
       candidate.wordStartInSentence,
@@ -398,8 +398,4 @@ class _RecallCandidate {
   final int wordStartInSentence;
   final int wordEndInSentence;
   final String expectedAnswer;
-}
-
-extension _FirstOrNull<T> on Iterable<T> {
-  T? get firstOrNull => isEmpty ? null : first;
 }
