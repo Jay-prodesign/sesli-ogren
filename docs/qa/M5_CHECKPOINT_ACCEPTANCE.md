@@ -21,6 +21,7 @@ This matrix does **not** declare M5 PASS by itself.
 - Routine GitHub Actions: OFF under D-072.
 - Current execution container: no Flutter/Dart toolchain; runtime/build evidence must come from one bounded checkpoint batch.
 - Known reproducibility gap: `app/pubspec.lock` is currently absent for the new M5 dependencies and must be generated/committed before a PASS verdict.
+- Production learner bootstrap now requires a real Supabase Auth session before learner-scoped data opens; live project configuration/anonymous-auth enablement remains checkpoint evidence, not a repo secret.
 - Known authentication gap: production code now fails closed unless `SUPABASE_URL` + `SUPABASE_PUBLISHABLE_KEY` are provided and a real Supabase session can be established; live project/auth configuration evidence is still pending.
 
 ## A — Source truth and grounding
