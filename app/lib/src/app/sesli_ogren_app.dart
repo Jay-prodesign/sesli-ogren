@@ -9,7 +9,9 @@ class SesliOgrenApp extends StatelessWidget {
       title: 'Sesli Öğren',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF65558F)),
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: const Color(0xFF65558F),
+        ),
         useMaterial3: true,
       ),
       home: const FoundationScreen(),
