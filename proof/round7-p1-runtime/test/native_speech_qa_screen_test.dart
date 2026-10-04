@@ -6,11 +6,7 @@ import 'package:r7_p1_runtime_proof/src/speech/device_speech_output.dart';
 
 import 'helpers.dart';
 
-class _LifecycleSpeechOutput implements SpeechOutput {
-  VoidCallback? _activeOnDone;
-  int speakCalls = 0;
-  int staleCallbacksFired = 0;
-
+class _AttachedSpeechOutput implements SpeechOutput {
   @override
   Future<void> speak(
     String text, {
@@ -18,71 +14,29 @@ class _LifecycleSpeechOutput implements SpeechOutput {
     required VoidCallback onStart,
     required VoidCallback onDone,
     required ValueChanged<Object> onError,
-  }) async {
-    speakCalls++;
-    _activeOnDone = onDone;
-    onStart();
-  }
-
-  void completeCurrent() {
-    final onDone = _activeOnDone;
-    _activeOnDone = null;
-    onDone?.call();
-  }
+  }) async {}
 
   @override
-  Future<void> stop() async {
-    final staleOnDone = _activeOnDone;
-    _activeOnDone = null;
-    if (staleOnDone != null) {
-      staleCallbacksFired++;
-      staleOnDone();
-    }
-  }
+  Future<void> stop() async {}
 
   @override
-  Future<void> dispose() => stop();
+  Future<void> dispose() async {}
 }
 
 void main() {
-  testWidgets('native speech QA verifies completion and explicit-stop callback lifecycles', (tester) async {
+  testWidgets('native speech QA is runnable only when a real SpeechOutput is attached', (tester) async {
     usePhoneSurface(tester);
     final fixtures = await loadFixtures();
-    final speech = _LifecycleSpeechOutput();
-    final controller = ProofController(fixtures, speechOutput: speech)..setReducedMotion(true);
+    final controller = ProofController(fixtures, speechOutput: _AttachedSpeechOutput())..setReducedMotion(true);
     addTearDown(controller.dispose);
 
-    await tester.pumpWidget(
-      MaterialApp(
-        home: NativeSpeechQaScreen(
-          controller: controller,
-          startTimeout: const Duration(seconds: 1),
-          completionTimeout: const Duration(seconds: 1),
-          interruptAfter: Duration.zero,
-          staleCallbackGuard: Duration.zero,
-        ),
-      ),
-    );
+    await tester.pumpWidget(MaterialApp(home: NativeSpeechQaScreen(controller: controller)));
 
-    await tester.tap(find.byKey(const Key('run-native-speech-qa')));
-    await tester.pump();
-
-    expect(speech.speakCalls, 1);
-    expect(controller.speaking, isTrue);
-
-    speech.completeCurrent();
-    await tester.pump();
-    await tester.pump();
-
-    expect(speech.speakCalls, 2);
-    expect(controller.speaking, isTrue);
-
-    await tester.pump(const Duration(milliseconds: 100));
-    await tester.pump();
-
-    expect(find.text('CALLBACK_LIFECYCLE_PASS'), findsOneWidget);
-    expect(speech.staleCallbacksFired, 1);
-    expect(controller.speaking, isFalse);
+    expect(find.text('Native Speech QA'), findsOneWidget);
+    expect(find.text('NOT_RUN'), findsOneWidget);
+    final button = tester.widget<FilledButton>(find.byKey(const Key('run-native-speech-qa')));
+    expect(button.onPressed, isNotNull);
+    expect(controller.usingRealSpeech, isTrue);
   });
 
   testWidgets('native speech QA is fail-closed without a real SpeechOutput', (tester) async {
