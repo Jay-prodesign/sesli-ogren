@@ -73,4 +73,62 @@ CREATE TABLE recall_actions (
       await temp.delete(recursive: true);
     }
   });
+
+
+  test('v5 database upgrades active Recall attempt schema without reset', () async {
+    final temp = await Directory.systemTemp.createTemp('sesli-ogren-v5-upgrade-');
+    final path = '${temp.path}/upgrade.db';
+    Database? legacy;
+    SqliteSourceStore? upgraded;
+    Database? inspected;
+
+    try {
+      legacy = await databaseFactoryFfi.openDatabase(
+        path,
+        options: OpenDatabaseOptions(
+          version: 5,
+          onCreate: (db, version) async {
+            await db.execute('''
+CREATE TABLE recall_actions (
+  learner_id TEXT NOT NULL,
+  action_id TEXT NOT NULL,
+  PRIMARY KEY (learner_id, action_id)
+)
+''');
+            await db.execute('''
+CREATE TABLE sentinel (
+  value TEXT NOT NULL
+)
+''');
+            await db.insert('sentinel', {'value': 'preserved'});
+          },
+        ),
+      );
+      await legacy.close();
+      legacy = null;
+
+      upgraded = await SqliteSourceStore.open(
+        factory: databaseFactoryFfi,
+        path: path,
+      );
+      await upgraded.close();
+      upgraded = null;
+
+      inspected = await databaseFactoryFfi.openDatabase(path);
+      final tables = await inspected.rawQuery(
+        "SELECT name FROM sqlite_master WHERE type = 'table'",
+      );
+      expect(
+        tables.map((row) => row['name']),
+        contains('active_recall_attempts'),
+      );
+      final sentinel = await inspected.query('sentinel');
+      expect(sentinel.single['value'], 'preserved');
+    } finally {
+      await legacy?.close();
+      await upgraded?.close();
+      await inspected?.close();
+      await temp.delete(recursive: true);
+    }
+  });
 }
