@@ -62,6 +62,37 @@ class RecallLearningService {
     return persisted.toPrompt();
   }
 
+  Future<RecallSupport> requestHint({
+    required AuthenticatedLearner learner,
+    required RecallActionId actionId,
+  }) async {
+    final action = await _currentAction(
+      learner: learner,
+      actionId: actionId,
+    );
+    final firstCharacter = action.expectedAnswer.substring(0, 1);
+    return RecallSupport(
+      kind: RecallSupportKind.hint,
+      text: 'İlk harf: $firstCharacter · ${action.expectedAnswer.length} harf',
+      assistance: RecallAssistance.hint,
+    );
+  }
+
+  Future<RecallSupport> revealAnswer({
+    required AuthenticatedLearner learner,
+    required RecallActionId actionId,
+  }) async {
+    final action = await _currentAction(
+      learner: learner,
+      actionId: actionId,
+    );
+    return RecallSupport(
+      kind: RecallSupportKind.answer,
+      text: action.expectedAnswer,
+      assistance: RecallAssistance.answerExposed,
+    );
+  }
+
   Future<RecallAttemptResult> submit({
     required AuthenticatedLearner learner,
     required RecallActionId actionId,
@@ -76,26 +107,10 @@ class RecallLearningService {
       );
     }
 
-    final action = await _learningStore.recallAction(
+    final action = await _currentAction(
       learner: learner,
       actionId: actionId,
     );
-    if (action == null) {
-      throw const RecallLearningException(
-        'Recall action is missing or belongs to another learner.',
-      );
-    }
-
-    final currentSource = await _sourceStore.currentSourceVersion(
-      learner: learner,
-      materialId: action.materialId,
-    );
-    if (currentSource == null ||
-        currentSource.identity.sourceVersionId != action.sourceVersionId) {
-      throw const RecallLearningException(
-        'Recall action is stale because the authoritative source changed.',
-      );
-    }
     final extracted = await _sourceStore.extractedContentForSource(
       learner: learner,
       sourceVersionId: action.sourceVersionId,
@@ -160,10 +175,56 @@ class RecallLearningService {
       stateRuleVersion: stateRuleVersion,
       nextAction: nextAction,
     );
+    final excerpt = _sourceExcerpt(extracted, action.anchor);
     return RecallAttemptResult(
       evidence: persisted.evidence,
       state: persisted.state,
       nextAction: persisted.nextAction,
+      correctAnswer: action.expectedAnswer,
+      sourceExcerpt: excerpt,
+    );
+  }
+
+  Future<RecallAction> _currentAction({
+    required AuthenticatedLearner learner,
+    required RecallActionId actionId,
+  }) async {
+    final action = await _learningStore.recallAction(
+      learner: learner,
+      actionId: actionId,
+    );
+    if (action == null) {
+      throw const RecallLearningException(
+        'Recall action is missing or belongs to another learner.',
+      );
+    }
+    final currentSource = await _sourceStore.currentSourceVersion(
+      learner: learner,
+      materialId: action.materialId,
+    );
+    if (currentSource == null ||
+        currentSource.identity.sourceVersionId != action.sourceVersionId) {
+      throw const RecallLearningException(
+        'Recall action is stale because the authoritative source changed.',
+      );
+    }
+    return action;
+  }
+
+  static String _sourceExcerpt(
+    ExtractedContentRecord extracted,
+    SourceAnchor anchor,
+  ) {
+    if (anchor.startOffset < 0 ||
+        anchor.endOffset <= anchor.startOffset ||
+        anchor.endOffset > extracted.normalizedText.length) {
+      throw const RecallLearningException(
+        'Recall source anchor is outside current extracted content.',
+      );
+    }
+    return extracted.normalizedText.substring(
+      anchor.startOffset,
+      anchor.endOffset,
     );
   }
 

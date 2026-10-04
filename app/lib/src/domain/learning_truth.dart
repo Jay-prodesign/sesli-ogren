@@ -193,16 +193,34 @@ class NextLearningAction {
   final DateTime createdAt;
 }
 
+enum RecallSupportKind { hint, answer }
+
+class RecallSupport {
+  const RecallSupport({
+    required this.kind,
+    required this.text,
+    required this.assistance,
+  });
+
+  final RecallSupportKind kind;
+  final String text;
+  final RecallAssistance assistance;
+}
+
 class RecallAttemptResult {
   const RecallAttemptResult({
     required this.evidence,
     required this.state,
     required this.nextAction,
+    required this.correctAnswer,
+    required this.sourceExcerpt,
   });
 
   final LearnerEvidence evidence;
   final LearnerState state;
   final NextLearningAction nextAction;
+  final String correctAnswer;
+  final String sourceExcerpt;
 }
 
 class LearningContinuation {
