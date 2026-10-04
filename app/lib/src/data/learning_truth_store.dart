@@ -29,14 +29,20 @@ abstract interface class LearningTruthStore {
     required MaterialId materialId,
   });
 
-  /// Persists evidence first and updates the derived state in the same
-  /// transaction. A replay of the same attempt is idempotent; a conflicting
-  /// replay fails closed.
-  Future<PersistedLearningTruth> persistEvidenceAndState({
+  Future<NextLearningAction?> nextLearningAction({
+    required AuthenticatedLearner learner,
+    required MaterialId materialId,
+  });
+
+  /// Persists evidence first, then the derived state and next action in the
+  /// same transaction. A replay of the same attempt is idempotent; a
+  /// conflicting replay fails closed.
+  Future<PersistedLearningTruth> persistEvidenceStateAndNextAction({
     required AuthenticatedLearner learner,
     required LearnerEvidence evidence,
     required RecallStateKind stateKind,
     required String stateRuleVersion,
+    required NextLearningAction nextAction,
   });
 }
 
@@ -53,8 +59,10 @@ class PersistedLearningTruth {
   const PersistedLearningTruth({
     required this.evidence,
     required this.state,
+    required this.nextAction,
   });
 
   final LearnerEvidence evidence;
   final LearnerState state;
+  final NextLearningAction nextAction;
 }

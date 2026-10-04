@@ -18,14 +18,15 @@ class RecallLearningService {
        _now = now ?? DateTime.now;
 
   static const promptRuleVersion = 'recall-cloze-v1';
-  static const evidenceRuleVersion = 'recall-evidence-v1';
-  static const stateRuleVersion = 'recall-state-v1';
+  static const evidenceRuleVersion = 'recall-evidence-v2';
+  static const stateRuleVersion = 'recall-state-v2';
+  static const nextActionPolicyVersion = 'recall-next-v1';
 
   final SourceStore _sourceStore;
   final LearningTruthStore _learningStore;
   final DateTime Function() _now;
 
-  Future<RecallAction> createCurrentAction({
+  Future<RecallPrompt> createCurrentPrompt({
     required AuthenticatedLearner learner,
     required MaterialId materialId,
   }) async {
@@ -54,10 +55,11 @@ class RecallLearningService {
       extracted: extracted,
       now: _now().toUtc(),
     );
-    return _learningStore.persistRecallAction(
+    final persisted = await _learningStore.persistRecallAction(
       learner: learner,
       action: action,
     );
+    return persisted.toPrompt();
   }
 
   Future<RecallAttemptResult> submit({
@@ -66,10 +68,12 @@ class RecallLearningService {
     required RecallAttemptId attemptId,
     required RecallResponseDisposition disposition,
     String answer = '',
-    bool hintUsed = false,
+    RecallAssistance assistance = RecallAssistance.none,
   }) async {
-    if (attemptId.value.trim().isEmpty) {
-      throw const RecallLearningException('Attempt ID cannot be empty.');
+    if (!RegExp(r'^[A-Za-z0-9_.:-]{8,128}$').hasMatch(attemptId.value)) {
+      throw const RecallLearningException(
+        'Attempt ID must be a stable 8-128 character identifier.',
+      );
     }
 
     final action = await _learningStore.recallAction(
@@ -111,7 +115,7 @@ class RecallLearningService {
       expected: action.expectedAnswer,
       normalizedAnswer: normalizedAnswer,
       disposition: disposition,
-      hintUsed: hintUsed,
+      assistance: assistance,
     );
 
     final responseDigest = sha256
@@ -125,6 +129,7 @@ class RecallLearningService {
           ),
         )
         .toString();
+    final now = _now().toUtc();
     final evidence = LearnerEvidence(
       id: LearnerEvidenceId('ev_${evidenceIdDigest.substring(0, 32)}'),
       attemptId: attemptId,
@@ -133,25 +138,67 @@ class RecallLearningService {
       sourceVersionId: action.sourceVersionId,
       extractedContentId: action.extractedContentId,
       outcome: outcome,
-      helpUsed: hintUsed,
+      assistance: assistance,
       responseDigest: responseDigest,
       responseLength: normalizedAnswer.length,
       ruleVersion: evidenceRuleVersion,
-      createdAt: _now().toUtc(),
+      createdAt: now,
     );
 
     final stateKind = _stateForOutcome(outcome);
-    final persisted = await _learningStore.persistEvidenceAndState(
+    final nextAction = _nextActionFor(
+      materialId: action.materialId,
+      sourceVersionId: action.sourceVersionId,
+      evidenceId: evidence.id,
+      outcome: outcome,
+      now: now,
+    );
+    final persisted = await _learningStore.persistEvidenceStateAndNextAction(
       learner: learner,
       evidence: evidence,
       stateKind: stateKind,
       stateRuleVersion: stateRuleVersion,
+      nextAction: nextAction,
     );
     return RecallAttemptResult(
       evidence: persisted.evidence,
       state: persisted.state,
-      nextAction: _nextActionFor(persisted.state.kind),
+      nextAction: persisted.nextAction,
     );
+  }
+
+  Future<LearningContinuation?> reopen({
+    required AuthenticatedLearner learner,
+    required MaterialId materialId,
+  }) async {
+    final source = await _sourceStore.currentSourceVersion(
+      learner: learner,
+      materialId: materialId,
+    );
+    if (source == null) {
+      return null;
+    }
+    final state = await _learningStore.learnerState(
+      learner: learner,
+      materialId: materialId,
+    );
+    final nextAction = await _learningStore.nextLearningAction(
+      learner: learner,
+      materialId: materialId,
+    );
+    if (state == null && nextAction == null) {
+      return null;
+    }
+    if (state == null ||
+        nextAction == null ||
+        state.sourceVersionId != source.identity.sourceVersionId ||
+        nextAction.sourceVersionId != source.identity.sourceVersionId ||
+        nextAction.latestEvidenceId != state.latestEvidenceId) {
+      throw const RecallLearningException(
+        'Persisted learning continuation is incomplete or stale.',
+      );
+    }
+    return LearningContinuation(state: state, nextAction: nextAction);
   }
 
   static RecallAction _buildAction({
@@ -228,8 +275,7 @@ class RecallLearningService {
         r'[A-Za-zÇĞİÖŞÜçğıöşü]+',
       ).allMatches(sentence).where((match) {
         final word = match.group(0)!;
-        return word.length >= 5 &&
-            !_stopWords.contains(_normalizeAnswer(word));
+        return word.length >= 5 && !_stopWords.contains(_normalizeAnswer(word));
       }).toList();
 
       if (matches.isNotEmpty) {
@@ -256,15 +302,21 @@ class RecallLearningService {
     required String expected,
     required String normalizedAnswer,
     required RecallResponseDisposition disposition,
-    required bool hintUsed,
+    required RecallAssistance assistance,
   }) {
     if (disposition == RecallResponseDisposition.unknown ||
         normalizedAnswer.isEmpty) {
       return RecallOutcome.unknown;
     }
+    if (assistance == RecallAssistance.answerExposed) {
+      return RecallOutcome.answerExposed;
+    }
+
     final normalizedExpected = _normalizeAnswer(expected);
     if (normalizedAnswer == normalizedExpected) {
-      return hintUsed ? RecallOutcome.helpedCorrect : RecallOutcome.correct;
+      return assistance == RecallAssistance.hint
+          ? RecallOutcome.helpedCorrect
+          : RecallOutcome.correct;
     }
     if (normalizedExpected.length >= 5 &&
         _editDistance(normalizedAnswer, normalizedExpected) <= 1) {
@@ -278,38 +330,61 @@ class RecallLearningService {
       RecallOutcome.correct => RecallStateKind.retrievedOnce,
       RecallOutcome.helpedCorrect || RecallOutcome.partial =>
         RecallStateKind.developing,
-      RecallOutcome.incorrect || RecallOutcome.unknown =>
-        RecallStateKind.needsReview,
+      RecallOutcome.incorrect => RecallStateKind.needsReview,
+      RecallOutcome.answerExposed || RecallOutcome.unknown =>
+        RecallStateKind.notAssessed,
     };
   }
 
-  static NextLearningAction _nextActionFor(RecallStateKind state) {
-    return switch (state) {
-      RecallStateKind.retrievedOnce => const NextLearningAction(
-        kind: NextLearningActionKind.continueToNextRecall,
-        reasonCode: 'UNASSISTED_RETRIEVAL_CORRECT',
-        reasonText:
-            'Bu kavramı bir kez ipucusuz geri çağırdın. Bu ustalık kanıtı değil; sıradaki kısa hatırlamaya geç.',
+  static NextLearningAction _nextActionFor({
+    required MaterialId materialId,
+    required SourceVersionId sourceVersionId,
+    required LearnerEvidenceId evidenceId,
+    required RecallOutcome outcome,
+    required DateTime now,
+  }) {
+    final (kind, reasonCode, reasonText) = switch (outcome) {
+      RecallOutcome.correct => (
+        NextLearningActionKind.repeatRecallLater,
+        'ONE_UNASSISTED_RETRIEVAL_OBSERVED',
+        'Bu kavramı bir kez ipucusuz geri çağırdın. Bu ustalık kanıtı değil; daha sonra yeniden hatırlayacağız.',
       ),
-      RecallStateKind.developing => const NextLearningAction(
-        kind: NextLearningActionKind.retryRecallWithoutHint,
-        reasonCode: 'PARTIAL_OR_HELPED_RETRIEVAL',
-        reasonText:
-            'Yanıt kısmen doğru ya da ipucuyla geldi. Aynı kavramı kısa süre sonra ipucusuz yeniden dene.',
+      RecallOutcome.helpedCorrect => (
+        NextLearningActionKind.retryRecallWithoutHint,
+        'HINTED_SUCCESS_NEEDS_UNASSISTED_RETRIEVAL',
+        'Doğru yanıta ipucuyla ulaştın. Bunu bağımsız hatırlama saymadan daha sonra ipucusuz yeniden dene.',
       ),
-      RecallStateKind.needsReview => const NextLearningAction(
-        kind: NextLearningActionKind.reviewSourceThenRecall,
-        reasonCode: 'RETRIEVAL_NOT_ESTABLISHED',
-        reasonText:
-            'Bu denemede güvenilir geri çağırma oluşmadı. Kaynak bölümünü gözden geçirip yeniden dene.',
+      RecallOutcome.answerExposed => (
+        NextLearningActionKind.retryRecallWithoutHint,
+        'ANSWER_EXPOSED_NO_RETRIEVAL_CLAIM',
+        'Yanıt gösterildiği için geri çağırma kanıtı oluşmadı. Daha sonra kaynağı kapatıp ipucusuz yeniden dene.',
       ),
-      RecallStateKind.notAssessed => const NextLearningAction(
-        kind: NextLearningActionKind.reviewSourceThenRecall,
-        reasonCode: 'NO_ACTIVE_EVIDENCE',
-        reasonText:
-            'Henüz aktif öğrenme kanıtı yok. Önce kısa bir geri çağırma denemesi yap.',
+      RecallOutcome.partial => (
+        NextLearningActionKind.retryRecallWithoutHint,
+        'PARTIAL_RETRIEVAL_NEEDS_RETRY',
+        'Yanıt kısmen yaklaştı. Kaynak geri bildirimini gördükten sonra ipucusuz yeniden dene.',
+      ),
+      RecallOutcome.incorrect => (
+        NextLearningActionKind.reviewSourceThenRecall,
+        'INCORRECT_RETRIEVAL_NEEDS_REPAIR',
+        'Bu denemede eşleşme oluşmadı. Kaynak bölümünü gözden geçirip yeniden dene.',
+      ),
+      RecallOutcome.unknown => (
+        NextLearningActionKind.reviewSourceThenRecall,
+        'NO_EVALUABLE_RETRIEVAL',
+        'Bu denemede değerlendirilebilir bir geri çağırma yanıtı yok. Kaynağı gözden geçirip hazır olduğunda yeniden dene.',
       ),
     };
+    return NextLearningAction(
+      materialId: materialId,
+      sourceVersionId: sourceVersionId,
+      latestEvidenceId: evidenceId,
+      kind: kind,
+      reasonCode: reasonCode,
+      reasonText: reasonText,
+      policyVersion: nextActionPolicyVersion,
+      createdAt: now,
+    );
   }
 
   static String _normalizeAnswer(String value) {
