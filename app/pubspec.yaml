@@ -12,6 +12,7 @@ dependencies:
   crypto: 3.0.7
   pdfrx: 2.6.1
   sqflite: 2.4.4
+  supabase_flutter: 2.17.2
 
 dev_dependencies:
   flutter_test:

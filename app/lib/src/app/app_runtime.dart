@@ -28,7 +28,9 @@ class AppRuntime {
   final RecallLearningService recall;
   final OperationalTelemetry telemetry;
 
-  static Future<AppRuntime> open() async {
+  static Future<AppRuntime> open({
+    required AuthenticatedLearner learner,
+  }) async {
     final store = await SqliteSourceStore.open();
     final ingest = SourceIngestService(
       store: store,
@@ -39,7 +41,7 @@ class AppRuntime {
       learningStore: store.learningTruthStore(),
     );
     return AppRuntime(
-      learner: localM5LearnerFixture,
+      learner: learner,
       store: store,
       ingest: ingest,
       recall: recall,

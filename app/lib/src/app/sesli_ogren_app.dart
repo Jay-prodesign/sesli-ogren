@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
+import '../auth/supabase_learner_auth.dart';
 import 'app_runtime.dart';
 import 'companion_view.dart';
 import 'learning_slice_screen.dart';
@@ -24,10 +25,12 @@ class _SesliOgrenAppState extends State<SesliOgrenApp> {
   }
 
   void _openRuntime() {
-    _runtimeFuture = AppRuntime.open().then((runtime) {
-      _runtime = runtime;
-      return runtime;
-    });
+    _runtimeFuture = SupabaseLearnerAuth.authenticate()
+        .then((learner) => AppRuntime.open(learner: learner))
+        .then((runtime) {
+          _runtime = runtime;
+          return runtime;
+        });
   }
 
   @override
@@ -76,7 +79,10 @@ class _SesliOgrenAppState extends State<SesliOgrenApp> {
             return LearningSliceScreen(runtime: snapshot.data!);
           }
           if (snapshot.hasError) {
-            return _RuntimeErrorScreen(onRetry: _retryRuntime);
+            return _RuntimeErrorScreen(
+              error: snapshot.error!,
+              onRetry: _retryRuntime,
+            );
           }
           return const _RuntimeLoadingScreen();
         },
@@ -113,8 +119,12 @@ class _RuntimeLoadingScreen extends StatelessWidget {
 }
 
 class _RuntimeErrorScreen extends StatelessWidget {
-  const _RuntimeErrorScreen({required this.onRetry});
+  const _RuntimeErrorScreen({
+    required this.error,
+    required this.onRetry,
+  });
 
+  final Object error;
   final VoidCallback onRetry;
 
   @override
@@ -135,13 +145,17 @@ class _RuntimeErrorScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 20),
                   Text(
-                    'Yerel öğrenme alanı açılamadı.',
+                    error is LearnerAuthConfigurationException
+                        ? 'Uygulama bağlantısı henüz yapılandırılmadı.'
+                        : 'Güvenli öğrenme oturumu açılamadı.',
                     style: Theme.of(context).textTheme.titleLarge,
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 10),
-                  const Text(
-                    'Veri yazmadan yeniden deneyebilirsin.',
+                  Text(
+                    error is LearnerAuthConfigurationException
+                        ? 'Öğrenme verisi açılmadı. Güvenli bağlantı yapılandırması gerekiyor.'
+                        : 'Öğrenme verisi açılmadan yeniden deneyebilirsin.',
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 20),
