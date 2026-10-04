@@ -62,15 +62,23 @@ void main() {
 
   tearDown(() => sourceStore.close());
 
-  test('creating Recall action does not create learner evidence or state', () async {
-    final action = await recall.createCurrentAction(
+  Future<RecallAction> storedAction(RecallPrompt prompt) async {
+    final action = await sourceStore.learningTruthStore().recallAction(
+      learner: learnerA,
+      actionId: prompt.id,
+    );
+    expect(action, isNotNull);
+    return action!;
+  }
+
+  test('creating Recall prompt exposes no answer and creates no learning truth', () async {
+    final prompt = await recall.createCurrentPrompt(
       learner: learnerA,
       materialId: materialId,
     );
 
-    expect(action.promptText, contains('_____'));
-    expect(action.expectedAnswer, isNotEmpty);
-    expect(action.anchor.startOffset, greaterThanOrEqualTo(0));
+    expect(prompt.promptText, contains('_____'));
+    expect(prompt.anchor.startOffset, greaterThanOrEqualTo(0));
 
     final learningStore = sourceStore.learningTruthStore();
     final source = await sourceStore.currentSourceVersion(
@@ -92,50 +100,61 @@ void main() {
       ),
       isNull,
     );
+    expect(
+      await learningStore.nextLearningAction(
+        learner: learnerA,
+        materialId: materialId,
+      ),
+      isNull,
+    );
   });
 
-  test('unassisted correct Recall creates evidence but never claims mastery', () async {
-    final action = await recall.createCurrentAction(
+  test('unassisted correct Recall records one observation, never mastery', () async {
+    final prompt = await recall.createCurrentPrompt(
       learner: learnerA,
       materialId: materialId,
     );
+    final action = await storedAction(prompt);
     final result = await recall.submit(
       learner: learnerA,
-      actionId: action.id,
+      actionId: prompt.id,
       attemptId: const RecallAttemptId('attempt-correct'),
       disposition: RecallResponseDisposition.answer,
       answer: action.expectedAnswer,
     );
 
     expect(result.evidence.outcome, RecallOutcome.correct);
-    expect(result.evidence.helpUsed, isFalse);
+    expect(result.evidence.assistance, RecallAssistance.none);
     expect(result.state.kind, RecallStateKind.retrievedOnce);
     expect(result.state.evidenceCount, 1);
-    expect(
-      result.nextAction.kind,
-      NextLearningActionKind.continueToNextRecall,
-    );
+    expect(result.nextAction.kind, NextLearningActionKind.repeatRecallLater);
     expect(
       result.nextAction.reasonCode,
-      'UNASSISTED_RETRIEVAL_CORRECT',
+      'ONE_UNASSISTED_RETRIEVAL_OBSERVED',
+    );
+    expect(
+      result.nextAction.policyVersion,
+      RecallLearningService.nextActionPolicyVersion,
     );
   });
 
   test('hinted correct Recall remains developing', () async {
-    final action = await recall.createCurrentAction(
+    final prompt = await recall.createCurrentPrompt(
       learner: learnerA,
       materialId: materialId,
     );
+    final action = await storedAction(prompt);
     final result = await recall.submit(
       learner: learnerA,
-      actionId: action.id,
+      actionId: prompt.id,
       attemptId: const RecallAttemptId('attempt-helped'),
       disposition: RecallResponseDisposition.answer,
       answer: action.expectedAnswer,
-      hintUsed: true,
+      assistance: RecallAssistance.hint,
     );
 
     expect(result.evidence.outcome, RecallOutcome.helpedCorrect);
+    expect(result.evidence.assistance, RecallAssistance.hint);
     expect(result.state.kind, RecallStateKind.developing);
     expect(
       result.nextAction.kind,
@@ -143,17 +162,41 @@ void main() {
     );
   });
 
-  test('near answer is partial rather than silently correct', () async {
-    final action = await recall.createCurrentAction(
+  test('answer exposure never becomes retrieval success', () async {
+    final prompt = await recall.createCurrentPrompt(
       learner: learnerA,
       materialId: materialId,
     );
+    final action = await storedAction(prompt);
+    final result = await recall.submit(
+      learner: learnerA,
+      actionId: prompt.id,
+      attemptId: const RecallAttemptId('attempt-exposed'),
+      disposition: RecallResponseDisposition.answer,
+      answer: action.expectedAnswer,
+      assistance: RecallAssistance.answerExposed,
+    );
+
+    expect(result.evidence.outcome, RecallOutcome.answerExposed);
+    expect(result.state.kind, RecallStateKind.notAssessed);
+    expect(
+      result.nextAction.reasonCode,
+      'ANSWER_EXPOSED_NO_RETRIEVAL_CLAIM',
+    );
+  });
+
+  test('near answer is partial rather than silently correct', () async {
+    final prompt = await recall.createCurrentPrompt(
+      learner: learnerA,
+      materialId: materialId,
+    );
+    final action = await storedAction(prompt);
     final answer = action.expectedAnswer;
     final nearAnswer = answer.substring(0, answer.length - 1);
 
     final result = await recall.submit(
       learner: learnerA,
-      actionId: action.id,
+      actionId: prompt.id,
       attemptId: const RecallAttemptId('attempt-partial'),
       disposition: RecallResponseDisposition.answer,
       answer: nearAnswer,
@@ -163,24 +206,25 @@ void main() {
     expect(result.state.kind, RecallStateKind.developing);
   });
 
-  test('unknown and incorrect remain distinct evidence outcomes', () async {
-    final action = await recall.createCurrentAction(
+  test('unknown remains unassessed while incorrect becomes needs-review', () async {
+    final prompt = await recall.createCurrentPrompt(
       learner: learnerA,
       materialId: materialId,
     );
 
     final unknown = await recall.submit(
       learner: learnerA,
-      actionId: action.id,
+      actionId: prompt.id,
       attemptId: const RecallAttemptId('attempt-unknown'),
       disposition: RecallResponseDisposition.unknown,
     );
     expect(unknown.evidence.outcome, RecallOutcome.unknown);
-    expect(unknown.state.kind, RecallStateKind.needsReview);
+    expect(unknown.state.kind, RecallStateKind.notAssessed);
+    expect(unknown.nextAction.reasonCode, 'NO_EVALUABLE_RETRIEVAL');
 
     final incorrect = await recall.submit(
       learner: learnerA,
-      actionId: action.id,
+      actionId: prompt.id,
       attemptId: const RecallAttemptId('attempt-incorrect'),
       disposition: RecallResponseDisposition.answer,
       answer: 'tamamenyanlis',
@@ -190,22 +234,23 @@ void main() {
     expect(incorrect.state.evidenceCount, 2);
   });
 
-  test('same attempt replay is idempotent', () async {
-    final action = await recall.createCurrentAction(
+  test('same attempt replay is idempotent including persisted next action', () async {
+    final prompt = await recall.createCurrentPrompt(
       learner: learnerA,
       materialId: materialId,
     );
+    final action = await storedAction(prompt);
 
     final first = await recall.submit(
       learner: learnerA,
-      actionId: action.id,
+      actionId: prompt.id,
       attemptId: const RecallAttemptId('attempt-replay'),
       disposition: RecallResponseDisposition.answer,
       answer: action.expectedAnswer,
     );
     final replay = await recall.submit(
       learner: learnerA,
-      actionId: action.id,
+      actionId: prompt.id,
       attemptId: const RecallAttemptId('attempt-replay'),
       disposition: RecallResponseDisposition.answer,
       answer: action.expectedAnswer,
@@ -213,17 +258,20 @@ void main() {
 
     expect(replay.evidence.id, first.evidence.id);
     expect(replay.state.evidenceCount, 1);
+    expect(replay.nextAction.reasonCode, first.nextAction.reasonCode);
+    expect(replay.nextAction.policyVersion, first.nextAction.policyVersion);
   });
 
   test('conflicting replay of same attempt ID fails closed', () async {
-    final action = await recall.createCurrentAction(
+    final prompt = await recall.createCurrentPrompt(
       learner: learnerA,
       materialId: materialId,
     );
+    final action = await storedAction(prompt);
 
     await recall.submit(
       learner: learnerA,
-      actionId: action.id,
+      actionId: prompt.id,
       attemptId: const RecallAttemptId('attempt-conflict'),
       disposition: RecallResponseDisposition.answer,
       answer: action.expectedAnswer,
@@ -232,7 +280,7 @@ void main() {
     await expectLater(
       recall.submit(
         learner: learnerA,
-        actionId: action.id,
+        actionId: prompt.id,
         attemptId: const RecallAttemptId('attempt-conflict'),
         disposition: RecallResponseDisposition.answer,
         answer: 'farkliyanit',
@@ -242,7 +290,7 @@ void main() {
   });
 
   test('another learner cannot read or submit the action', () async {
-    final action = await recall.createCurrentAction(
+    final prompt = await recall.createCurrentPrompt(
       learner: learnerA,
       materialId: materialId,
     );
@@ -251,30 +299,59 @@ void main() {
     expect(
       await learningStore.recallAction(
         learner: learnerB,
-        actionId: action.id,
+        actionId: prompt.id,
       ),
       isNull,
     );
     await expectLater(
       recall.submit(
         learner: learnerB,
-        actionId: action.id,
+        actionId: prompt.id,
         attemptId: const RecallAttemptId('attempt-other-user'),
         disposition: RecallResponseDisposition.answer,
-        answer: action.expectedAnswer,
+        answer: 'guessed',
       ),
       throwsA(isA<RecallLearningException>()),
     );
   });
 
-  test('source supersession makes old Recall action stale and clears state', () async {
-    final action = await recall.createCurrentAction(
+  test('repeating one easy prompt cannot escalate state beyond one observation', () async {
+    final prompt = await recall.createCurrentPrompt(
       learner: learnerA,
       materialId: materialId,
     );
+    final action = await storedAction(prompt);
+
+    final first = await recall.submit(
+      learner: learnerA,
+      actionId: prompt.id,
+      attemptId: const RecallAttemptId('attempt-farm-1'),
+      disposition: RecallResponseDisposition.answer,
+      answer: action.expectedAnswer,
+    );
+    final second = await recall.submit(
+      learner: learnerA,
+      actionId: prompt.id,
+      attemptId: const RecallAttemptId('attempt-farm-2'),
+      disposition: RecallResponseDisposition.answer,
+      answer: action.expectedAnswer,
+    );
+
+    expect(first.state.kind, RecallStateKind.retrievedOnce);
+    expect(second.state.kind, RecallStateKind.retrievedOnce);
+    expect(second.state.evidenceCount, 2);
+    expect(second.nextAction.kind, NextLearningActionKind.repeatRecallLater);
+  });
+
+  test('source supersession clears current state and next action', () async {
+    final prompt = await recall.createCurrentPrompt(
+      learner: learnerA,
+      materialId: materialId,
+    );
+    final action = await storedAction(prompt);
     await recall.submit(
       learner: learnerA,
-      actionId: action.id,
+      actionId: prompt.id,
       attemptId: const RecallAttemptId('attempt-before-source-change'),
       disposition: RecallResponseDisposition.answer,
       answer: action.expectedAnswer,
@@ -289,8 +366,16 @@ void main() {
       sourceName: 'Biyoloji notu',
     );
 
+    final learningStore = sourceStore.learningTruthStore();
     expect(
-      await sourceStore.learningTruthStore().learnerState(
+      await learningStore.learnerState(
+        learner: learnerA,
+        materialId: materialId,
+      ),
+      isNull,
+    );
+    expect(
+      await learningStore.nextLearningAction(
         learner: learnerA,
         materialId: materialId,
       ),
@@ -299,7 +384,7 @@ void main() {
     await expectLater(
       recall.submit(
         learner: learnerA,
-        actionId: action.id,
+        actionId: prompt.id,
         attemptId: const RecallAttemptId('attempt-stale-action'),
         disposition: RecallResponseDisposition.answer,
         answer: action.expectedAnswer,
@@ -308,14 +393,15 @@ void main() {
     );
   });
 
-  test('material deletion removes active Recall truth', () async {
-    final action = await recall.createCurrentAction(
+  test('material deletion removes active Recall truth and continuation', () async {
+    final prompt = await recall.createCurrentPrompt(
       learner: learnerA,
       materialId: materialId,
     );
+    final action = await storedAction(prompt);
     final result = await recall.submit(
       learner: learnerA,
-      actionId: action.id,
+      actionId: prompt.id,
       attemptId: const RecallAttemptId('attempt-delete'),
       disposition: RecallResponseDisposition.answer,
       answer: action.expectedAnswer,
@@ -331,7 +417,7 @@ void main() {
     expect(
       await learningStore.recallAction(
         learner: learnerA,
-        actionId: action.id,
+        actionId: prompt.id,
       ),
       isNull,
     );
@@ -349,9 +435,16 @@ void main() {
       ),
       isNull,
     );
+    expect(
+      await learningStore.nextLearningAction(
+        learner: learnerA,
+        materialId: materialId,
+      ),
+      isNull,
+    );
   });
 
-  test('evidence and state survive database close and reopen', () async {
+  test('evidence state and next action survive database close and reopen', () async {
     final temp = await Directory.systemTemp.createTemp('sesli-ogren-learning-');
     final databasePath = '${temp.path}/learning.db';
     SqliteSourceStore? persistentStore;
@@ -366,7 +459,7 @@ void main() {
         pdfTextExtractor: const _UnusedPdfExtractor(),
         now: () => DateTime.utc(2026, 10, 4, 14),
       );
-      final persistentRecall = RecallLearningService(
+      var persistentRecall = RecallLearningService(
         sourceStore: persistentStore,
         learningStore: persistentStore.learningTruthStore(),
         now: () => DateTime.utc(2026, 10, 4, 14, 5),
@@ -378,16 +471,19 @@ void main() {
             'Mitokondri hücresel solunum sırasında kullanılabilir enerji '
             'üretimine katkı sağlar.',
       );
-      final action = await persistentRecall.createCurrentAction(
+      final prompt = await persistentRecall.createCurrentPrompt(
         learner: learnerA,
         materialId: materialId,
       );
+      final internalAction = await persistentStore
+          .learningTruthStore()
+          .recallAction(learner: learnerA, actionId: prompt.id);
       final result = await persistentRecall.submit(
         learner: learnerA,
-        actionId: action.id,
+        actionId: prompt.id,
         attemptId: const RecallAttemptId('attempt-persist'),
         disposition: RecallResponseDisposition.answer,
-        answer: action.expectedAnswer,
+        answer: internalAction!.expectedAnswer,
       );
       await persistentStore.close();
       persistentStore = null;
@@ -396,19 +492,31 @@ void main() {
         factory: databaseFactoryFfi,
         path: databasePath,
       );
-      final learningStore = persistentStore.learningTruthStore();
-      final reopenedEvidence = await learningStore.evidenceForAttempt(
-        learner: learnerA,
-        attemptId: result.evidence.attemptId,
+      persistentRecall = RecallLearningService(
+        sourceStore: persistentStore,
+        learningStore: persistentStore.learningTruthStore(),
+        now: () => DateTime.utc(2026, 10, 4, 14, 10),
       );
-      final reopenedState = await learningStore.learnerState(
+      final continuation = await persistentRecall.reopen(
         learner: learnerA,
         materialId: materialId,
       );
 
-      expect(reopenedEvidence?.id, result.evidence.id);
-      expect(reopenedState?.kind, RecallStateKind.retrievedOnce);
-      expect(reopenedState?.evidenceCount, 1);
+      expect(continuation, isNotNull);
+      expect(continuation!.state.kind, RecallStateKind.retrievedOnce);
+      expect(continuation.state.evidenceCount, 1);
+      expect(
+        continuation.nextAction.reasonCode,
+        result.nextAction.reasonCode,
+      );
+      expect(
+        continuation.nextAction.policyVersion,
+        result.nextAction.policyVersion,
+      );
+      expect(
+        continuation.nextAction.latestEvidenceId,
+        result.evidence.id,
+      );
     } finally {
       await persistentStore?.close();
       await temp.delete(recursive: true);
