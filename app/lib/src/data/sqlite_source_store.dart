@@ -383,57 +383,12 @@ LIMIT 1
     required AuthenticatedLearner learner,
     required MaterialId materialId,
     required DateTime deletedAt,
-  }) {
-    final deletedAtUtc = deletedAt.toUtc().toIso8601String();
-    return _database.transaction((transaction) async {
-      final changed = await transaction.update(
-        'materials',
-        {
-          'lifecycle_status': MaterialLifecycleStatus.deleted.name,
-          'processing_state': MaterialProcessingState.none.name,
-          'current_source_version_id': null,
-          'deleted_at_utc': deletedAtUtc,
-          'updated_at_utc': deletedAtUtc,
-        },
-        where:
-            'learner_id = ? AND material_id = ? AND lifecycle_status = ? '
-            'AND deleted_at_utc IS NULL',
-        whereArgs: [
-          learner.id.value,
-          materialId.value,
-          MaterialLifecycleStatus.active.name,
-        ],
-      );
-      if (changed == 0) {
-        return;
-      }
-      await transaction.update(
-        'source_versions',
-        {'revoked_at_utc': deletedAtUtc},
-        where:
-            'learner_id = ? AND material_id = ? AND revoked_at_utc IS NULL',
-        whereArgs: [learner.id.value, materialId.value],
-      );
-      await transaction.rawUpdate(
-        '''
-UPDATE extracted_contents
-SET invalidated_at_utc = ?
-WHERE learner_id = ?
-  AND invalidated_at_utc IS NULL
-  AND source_version_id IN (
-    SELECT source_version_id
-    FROM source_versions
-    WHERE learner_id = ? AND material_id = ?
-  )
-''',
-        [
-          deletedAtUtc,
-          learner.id.value,
-          learner.id.value,
-          materialId.value,
-        ],
-      );
-    });
+  }) async {
+    await _database.delete(
+      'materials',
+      where: 'learner_id = ? AND material_id = ?',
+      whereArgs: [learner.id.value, materialId.value],
+    );
   }
 
   @override

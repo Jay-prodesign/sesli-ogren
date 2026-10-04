@@ -72,8 +72,8 @@ void main() {
   });
 
   test('malformed PDF fails closed with no extracted truth', () async {
-    expect(
-      () => const PdfrxPdfTextExtractor().extract(
+    await expectLater(
+      const PdfrxPdfTextExtractor().extract(
         File('test/fixtures/two_page_text.pdf').readAsBytesSync().sublist(0, 8),
         sourceName: 'truncated.pdf',
       ),

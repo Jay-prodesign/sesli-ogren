@@ -145,8 +145,8 @@ void main() {
       text: 'New source',
     );
 
-    expect(
-      () => service.ingestPastedText(
+    await expectLater(
+      service.ingestPastedText(
         learner: learnerA,
         materialId: material,
         text: 'Old source',
@@ -221,8 +221,8 @@ void main() {
       maxTextCharacters: 4,
     );
 
-    expect(
-      () => bounded.ingestPastedText(
+    await expectLater(
+      bounded.ingestPastedText(
         learner: learnerA,
         materialId: material,
         text: '12345',
@@ -242,8 +242,8 @@ void main() {
       pdfTextExtractor: extractor,
     );
 
-    expect(
-      () => bounded.ingestPdf(
+    await expectLater(
+      bounded.ingestPdf(
         learner: learnerA,
         materialId: material,
         bytes: Uint8List.fromList([1, 2, 3, 4, 5]),
@@ -262,8 +262,8 @@ void main() {
       maxPdfBytes: 5,
     );
 
-    expect(
-      () => bounded.ingestPdf(
+    await expectLater(
+      bounded.ingestPdf(
         learner: learnerA,
         materialId: material,
         bytes: Uint8List.fromList([0x25, 0x50, 0x44, 0x46, 0x2D, 0x31]),
