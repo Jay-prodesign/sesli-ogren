@@ -215,22 +215,22 @@ class ValidatorNegativeTests(unittest.TestCase):
         tasks_path = self.root / "TASKS.md"
         text = tasks_path.read_text(encoding="utf-8")
 
-        next_id_match = re.search(r"Next unallocated ID: \\*\\*LA-(\\d{4})\\*\\*\\.", text)
+        next_id_match = re.search(r"Next unallocated ID: \*\*LA-(\d{4})\*\*\.", text)
         self.assertIsNotNone(next_id_match, "test setup: next unallocated task ID missing")
         task_num = int(next_id_match.group(1))
         task_id = f"LA-{task_num:04d}"
         next_task_id = f"LA-{task_num + 1:04d}"
 
         future = re.search(
-            r"## Milestone (M\\d+) — [^\\n]+\\n\\n- Status: PLANNED / NOT_EXECUTABLE"
-            r"(?P<body>.*?)(?=\\n## Milestone|\\Z)",
+            r"## Milestone (M\d+) — [^\n]+\n\n- Status: PLANNED / NOT_EXECUTABLE"
+            r"(?P<body>.*?)(?=\n## Milestone|\Z)",
             text,
             re.DOTALL,
         )
         self.assertIsNotNone(future, "test setup: no non-active future milestone found")
         milestone_id = future.group(1)
         sprint = re.search(
-            rf"### Sprint ({re.escape(milestone_id)}\\.S\\d+) — [^\\n]+\\n",
+            rf"### Sprint ({re.escape(milestone_id)}\.S\d+) — [^\n]+\n",
             future.group(0),
         )
         self.assertIsNotNone(sprint, "test setup: future milestone has no sprint")
