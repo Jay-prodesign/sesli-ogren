@@ -6,7 +6,7 @@ import '../domain/learning_contracts.dart';
 import '../learning/recall_learning_service.dart';
 
 class AppRuntime {
-  AppRuntime._({
+  AppRuntime({
     required this.store,
     required this.ingest,
     required this.recall,
@@ -35,7 +35,7 @@ class AppRuntime {
       sourceStore: store,
       learningStore: store.learningTruthStore(),
     );
-    return AppRuntime._(store: store, ingest: ingest, recall: recall);
+    return AppRuntime(store: store, ingest: ingest, recall: recall);
   }
 
   Future<void> close() => store.close();

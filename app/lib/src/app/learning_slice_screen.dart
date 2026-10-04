@@ -26,7 +26,7 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
   RecallPrompt? _prompt;
   RecallAttemptResult? _result;
   LearningContinuation? _continuation;
-  RecallAssistance _assistance = RecallAssistance.none;
+  RecallAttemptId? _activeAttemptId;
   String? _supportText;
   String? _inlineError;
   bool _busy = false;
@@ -128,7 +128,7 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
       _prompt = prompt;
       _result = null;
       _continuation = null;
-      _assistance = RecallAssistance.none;
+      _activeAttemptId = RecallAttemptId(_nextAttemptId());
       _supportText = null;
       _inlineError = null;
       _phase = _SlicePhase.recall;
@@ -137,18 +137,17 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
 
   Future<void> _requestHint() async {
     final prompt = _prompt;
-    if (prompt == null || _busy) return;
+    final attemptId = _activeAttemptId;
+    if (prompt == null || attemptId == null || _busy) return;
     _setBusy(true);
     try {
       final support = await widget.runtime.recall.requestHint(
         learner: AppRuntime.learner,
         actionId: prompt.id,
+        attemptId: attemptId,
       );
       if (!mounted) return;
       setState(() {
-        if (_assistance != RecallAssistance.answerExposed) {
-          _assistance = support.assistance;
-        }
         _supportText = support.text;
         _inlineError = null;
       });
@@ -161,16 +160,17 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
 
   Future<void> _revealAnswer() async {
     final prompt = _prompt;
-    if (prompt == null || _busy) return;
+    final attemptId = _activeAttemptId;
+    if (prompt == null || attemptId == null || _busy) return;
     _setBusy(true);
     try {
       final support = await widget.runtime.recall.revealAnswer(
         learner: AppRuntime.learner,
         actionId: prompt.id,
+        attemptId: attemptId,
       );
       if (!mounted) return;
       setState(() {
-        _assistance = support.assistance;
         _supportText = 'Yanıt: ${support.text}';
         _answerController.text = support.text;
         _inlineError = null;
@@ -184,7 +184,8 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
 
   Future<void> _submit({bool unknown = false}) async {
     final prompt = _prompt;
-    if (prompt == null || _busy) return;
+    final attemptId = _activeAttemptId;
+    if (prompt == null || attemptId == null || _busy) return;
     if (!unknown && _answerController.text.trim().isEmpty) {
       setState(() => _inlineError = 'Yanıtını yaz veya “Bilmiyorum”u seç.');
       return;
@@ -195,12 +196,11 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
       final result = await widget.runtime.recall.submit(
         learner: AppRuntime.learner,
         actionId: prompt.id,
-        attemptId: RecallAttemptId(_nextAttemptId()),
+        attemptId: attemptId,
         disposition: unknown
             ? RecallResponseDisposition.unknown
             : RecallResponseDisposition.answer,
         answer: unknown ? '' : _answerController.text,
-        assistance: unknown ? RecallAssistance.none : _assistance,
       );
       if (!mounted) return;
       setState(() {
