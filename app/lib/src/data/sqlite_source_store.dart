@@ -41,7 +41,7 @@ class SqliteSourceStore implements SourceStore {
     final database = await selectedFactory.openDatabase(
       databasePath,
       options: OpenDatabaseOptions(
-        version: 4,
+        version: 5,
         onConfigure: (db) => db.execute('PRAGMA foreign_keys = ON'),
         onUpgrade: (db, oldVersion, newVersion) async {
           if (oldVersion < 2) {
@@ -52,6 +52,9 @@ class SqliteSourceStore implements SourceStore {
           }
           if (oldVersion < 4) {
             await _upgradeOperationalTelemetrySchema(db);
+          }
+          if (oldVersion < 5) {
+            await _upgradeOperationalTelemetryV5(db);
           }
         },
         onCreate: (db, version) async {
@@ -220,12 +223,17 @@ CREATE TABLE recall_attempt_support (
 CREATE TABLE operational_events (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   learner_id TEXT NOT NULL,
+  schema_version INTEGER NOT NULL DEFAULT 1,
   event_type TEXT NOT NULL,
   phase TEXT NOT NULL,
   material_id TEXT,
   source_version_id TEXT,
   action_id TEXT,
+  attempt_id TEXT,
   evidence_id TEXT,
+  outcome TEXT,
+  state_kind TEXT,
+  reason_code TEXT,
   rule_version TEXT,
   policy_version TEXT,
   duration_ms INTEGER,
@@ -293,6 +301,39 @@ CREATE TABLE IF NOT EXISTS operational_events (
 CREATE INDEX IF NOT EXISTS idx_operational_events_learner_time
 ON operational_events (learner_id, created_at_utc)
 ''');
+  }
+
+  static Future<void> _upgradeOperationalTelemetryV5(Database db) async {
+    final columns = await db.rawQuery('PRAGMA table_info(operational_events)');
+    final names = columns.map((row) => row['name'] as String).toSet();
+
+    Future<void> add(String name, String sql) async {
+      if (!names.contains(name)) {
+        await db.execute(sql);
+      }
+    }
+
+    await add(
+      'schema_version',
+      'ALTER TABLE operational_events '
+          'ADD COLUMN schema_version INTEGER NOT NULL DEFAULT 1',
+    );
+    await add(
+      'attempt_id',
+      'ALTER TABLE operational_events ADD COLUMN attempt_id TEXT',
+    );
+    await add(
+      'outcome',
+      'ALTER TABLE operational_events ADD COLUMN outcome TEXT',
+    );
+    await add(
+      'state_kind',
+      'ALTER TABLE operational_events ADD COLUMN state_kind TEXT',
+    );
+    await add(
+      'reason_code',
+      'ALTER TABLE operational_events ADD COLUMN reason_code TEXT',
+    );
   }
 
   static Future<void> _upgradeRecallSupportSchema(Database db) async {
@@ -1832,12 +1873,17 @@ class SqliteOperationalTelemetry implements OperationalTelemetry {
   }) async {
     await _database.insert('operational_events', {
       'learner_id': learner.id.value,
+      'schema_version': event.schemaVersion,
       'event_type': event.type.name,
       'phase': event.phase.name,
       'material_id': event.materialId?.value,
       'source_version_id': event.sourceVersionId?.value,
       'action_id': event.actionId?.value,
+      'attempt_id': event.attemptId?.value,
       'evidence_id': event.evidenceId?.value,
+      'outcome': event.outcome?.name,
+      'state_kind': event.stateKind?.name,
+      'reason_code': event.reasonCode,
       'rule_version': event.ruleVersion,
       'policy_version': event.policyVersion,
       'duration_ms': event.durationMs,
@@ -1858,6 +1904,7 @@ class SqliteOperationalTelemetry implements OperationalTelemetry {
     );
     return rows.map((row) {
       return OperationalEvent(
+        schemaVersion: (row['schema_version'] as int?) ?? 1,
         type: OperationalEventType.values.byName(
           row['event_type']! as String,
         ),
@@ -1873,9 +1920,19 @@ class SqliteOperationalTelemetry implements OperationalTelemetry {
         actionId: row['action_id'] == null
             ? null
             : RecallActionId(row['action_id']! as String),
+        attemptId: row['attempt_id'] == null
+            ? null
+            : RecallAttemptId(row['attempt_id']! as String),
         evidenceId: row['evidence_id'] == null
             ? null
             : LearnerEvidenceId(row['evidence_id']! as String),
+        outcome: row['outcome'] == null
+            ? null
+            : RecallOutcome.values.byName(row['outcome']! as String),
+        stateKind: row['state_kind'] == null
+            ? null
+            : RecallStateKind.values.byName(row['state_kind']! as String),
+        reasonCode: row['reason_code'] as String?,
         ruleVersion: row['rule_version'] as String?,
         policyVersion: row['policy_version'] as String?,
         durationMs: row['duration_ms'] as int?,
