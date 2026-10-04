@@ -2,6 +2,7 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:sesli_ogren/src/data/learning_truth_store.dart';
 import 'package:sesli_ogren/src/data/pdf_text_extractor.dart';
 import 'package:sesli_ogren/src/data/source_ingest_service.dart';
 import 'package:sesli_ogren/src/data/sqlite_source_store.dart';
@@ -351,50 +352,51 @@ void main() {
   });
 
   test('evidence and state survive database close and reopen', () async {
-    await sourceStore.close();
-
     final temp = await Directory.systemTemp.createTemp('sesli-ogren-learning-');
     final databasePath = '${temp.path}/learning.db';
+    SqliteSourceStore? persistentStore;
+
     try {
-      sourceStore = await SqliteSourceStore.open(
+      persistentStore = await SqliteSourceStore.open(
         factory: databaseFactoryFfi,
         path: databasePath,
       );
-      ingest = SourceIngestService(
-        store: sourceStore,
+      final persistentIngest = SourceIngestService(
+        store: persistentStore,
         pdfTextExtractor: const _UnusedPdfExtractor(),
         now: () => DateTime.utc(2026, 10, 4, 14),
       );
-      recall = RecallLearningService(
-        sourceStore: sourceStore,
-        learningStore: sourceStore.learningTruthStore(),
+      final persistentRecall = RecallLearningService(
+        sourceStore: persistentStore,
+        learningStore: persistentStore.learningTruthStore(),
         now: () => DateTime.utc(2026, 10, 4, 14, 5),
       );
-      await ingest.ingestPastedText(
+      await persistentIngest.ingestPastedText(
         learner: learnerA,
         materialId: materialId,
         text:
             'Mitokondri hücresel solunum sırasında kullanılabilir enerji '
             'üretimine katkı sağlar.',
       );
-      final action = await recall.createCurrentAction(
+      final action = await persistentRecall.createCurrentAction(
         learner: learnerA,
         materialId: materialId,
       );
-      final result = await recall.submit(
+      final result = await persistentRecall.submit(
         learner: learnerA,
         actionId: action.id,
         attemptId: const RecallAttemptId('attempt-persist'),
         disposition: RecallResponseDisposition.answer,
         answer: action.expectedAnswer,
       );
-      await sourceStore.close();
+      await persistentStore.close();
+      persistentStore = null;
 
-      sourceStore = await SqliteSourceStore.open(
+      persistentStore = await SqliteSourceStore.open(
         factory: databaseFactoryFfi,
         path: databasePath,
       );
-      final learningStore = sourceStore.learningTruthStore();
+      final learningStore = persistentStore.learningTruthStore();
       final reopenedEvidence = await learningStore.evidenceForAttempt(
         learner: learnerA,
         attemptId: result.evidence.attemptId,
@@ -408,7 +410,7 @@ void main() {
       expect(reopenedState?.kind, RecallStateKind.retrievedOnce);
       expect(reopenedState?.evidenceCount, 1);
     } finally {
-      await sourceStore.close();
+      await persistentStore?.close();
       await temp.delete(recursive: true);
     }
   });
