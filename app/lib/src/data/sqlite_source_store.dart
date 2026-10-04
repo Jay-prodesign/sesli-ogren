@@ -1325,6 +1325,27 @@ LIMIT 1
           'Support cannot attach to a missing recall action.',
         );
       }
+      final action = _actionFromRow(actionRows.single);
+
+      final activeRows = await transaction.query(
+        'active_recall_attempts',
+        where: 'learner_id = ? AND material_id = ?',
+        whereArgs: [learner.id.value, action.materialId.value],
+        limit: 1,
+      );
+      if (activeRows.isEmpty) {
+        throw const LearningTruthConflict(
+          'Support requires an active Recall attempt.',
+        );
+      }
+      final active = _activeAttemptFromRow(activeRows.single);
+      if (active.attemptId != attemptId ||
+          active.actionId != action.id ||
+          active.sourceVersionId != action.sourceVersionId) {
+        throw const LearningTruthConflict(
+          'Support does not match the active Recall attempt.',
+        );
+      }
 
       final existingRows = await transaction.query(
         'recall_attempt_support',
