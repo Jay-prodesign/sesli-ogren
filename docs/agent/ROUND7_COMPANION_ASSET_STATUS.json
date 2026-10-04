@@ -2,7 +2,7 @@
   "schema_version": 2,
   "project": "Learning App",
   "workstream": "Round 7 Companion Production",
-  "updated_at": "2026-10-03",
+  "updated_at": "2026-10-04",
   "active_branch": "feat/round7-companion-production-sequence-v2",
   "execution_mode": "LEAN_APP_FIRST",
   "visual_authority": {
@@ -19,7 +19,7 @@
       "E": "E_MASTER_LOCKED.png"
     }
   },
-  "current_cursor": "P9_PHYSICAL_NATIVE_DEVICE_QA",
+  "current_cursor": "P9_NON_PHYSICAL_CLOSURE__PHYSICAL_DEVICE_VALIDATION_DEFERRED_D068",
   "phases": {
     "P0_AUTHORITY_AND_INVENTORY": "PASS",
     "P1_NEUTRAL_MASTERS": "PASS_CORE_IDENTITY",
@@ -29,8 +29,8 @@
     "P5_SEMANTIC_MOTION_CLIPS": "PASS_CI_AND_SYNTHETIC_VISUAL_QA",
     "P6_SPEECH_CONTROLS": "PASS_MOUTH_WARP__BLINK_REJECTED_DISABLED",
     "P7_REAL_FLUTTER_INTEGRATION": "PASS_CI",
-    "P8_REAL_TTS_LINKAGE": "PASS_CI__PHYSICAL_AUDIO_QA_PENDING",
-    "P9_REAL_PHONE_QA": "PHYSICAL_NATIVE_ONLY_REMAINS",
+    "P8_REAL_TTS_LINKAGE": "PASS_CI__PHYSICAL_AUDIO_QA_DEFERRED_TO_FINAL_MOBILE_READINESS_D068",
+    "P9_REAL_PHONE_QA": "DEFERRED_TO_FINAL_MOBILE_READINESS_D068__STILL_REQUIRED_BEFORE_RELEASE",
     "P10_SECONDARY_ASSETS": "LATER",
     "P2_5_ANATOMY_NORMALIZATION": "PASS_NO_EXTRA_ASSET_REQUIRED",
     "P3A_SINGLE_MASTER_DEFORMATION_PROBE": "PASS_SYNTHETIC_VISUAL_AND_MOTION_QA__PHYSICAL_NATIVE_GATE_REMAINS",
@@ -83,9 +83,9 @@
     "real_DE_renderer": "IMPLEMENTED_CI_PASS",
     "blink_gaze_controls": "BLINK_OVERLAY_REJECTED_BY_VISUAL_GEOMETRY_QA__DISABLED_V1; GAZE_LAYER_DEFERRED",
     "mouth_controls": "PASS_CLEAN_SUBTLE_SYNTHETIC_VISUAL_QA",
-    "real_tts_playback": "IMPLEMENTED_CI_PASS__IOS_NATIVE_SIMULATOR_LIFECYCLE_PASS__PHYSICAL_AUDIO_QA_PENDING",
-    "audio_visual_synchronization": "IMPLEMENTED_CI_PASS__ONE_TAP_NATIVE_SPEECH_QA_AVAILABLE__PHYSICAL_CONFIRMATION_PENDING",
-    "real_phone_QA": "ONLY_PHYSICAL_NATIVE_TTS_SMOOTHNESS_SAFE_AREA_REMAINS",
+    "real_tts_playback": "IMPLEMENTED_CI_PASS__IOS_NATIVE_SIMULATOR_LIFECYCLE_PASS__PHYSICAL_AUDIO_QA_DEFERRED_FINAL_D068",
+    "audio_visual_synchronization": "IMPLEMENTED_CI_PASS__ONE_TAP_NATIVE_SPEECH_QA_AVAILABLE__PHYSICAL_CONFIRMATION_DEFERRED_FINAL_D068",
+    "real_phone_QA": "DEFERRED_TO_FINAL_MOBILE_READINESS_D068__MANDATORY_BEFORE_RELEASE",
     "body_state_motion": "PASS_SYNTHETIC_MULTI_FRAME_VISUAL_QA",
     "v1_visual_strategy": "canonical flattened D/E + semantic whole-character motion",
     "face_layer_rig": "LATER_IF_DEVICE_QA_PROVES_NEEDED",
@@ -185,10 +185,12 @@
     "android_profile_apk": "PASS_ARTIFACT_UPLOADED",
     "android_profile_apk_sha256": "20b4d1d7d5f30252b7510fccd827d3fcad657bc08abad4d1331acf1a60d8f40d",
     "ios_profile_compile_no_codesign": "PASS",
-    "tts_error_fallback_unit_test": "PASS_TEXT_AND_LEARNING_LOOP_PRESERVED"
+    "tts_error_fallback_unit_test": "PASS_TEXT_AND_LEARNING_LOOP_PRESERVED",
+    "candidate_head": "92f0ab4c517d8b9885a41ee0f0541447b53e75b3",
+    "candidate_exact_head_ci": "RUNNING_PENDING"
   },
   "p9_gate": {
-    "status": "PHYSICAL_NATIVE_ONLY_REMAINS",
+    "status": "PHYSICAL_NATIVE_REQUIRED_BUT_DEFERRED_TO_FINAL_MOBILE_READINESS_D068",
     "non_device_evidence": "PASS_INCLUDING_NATIVE_IOS_SIMULATOR_TTS_CALLBACK_LIFECYCLE_AND_IPHONE_PORTRAIT_LANDSCAPE_D_E_MATRIX",
     "required_physical_checks": [
       "actual device TTS audibility and expected fixture-owned locale/voice behavior",
@@ -196,7 +198,7 @@
       "real-device frame smoothness and tap/scroll responsiveness",
       "native safe-area/platform orientation behavior on the target physical device"
     ],
-    "ios_note": "CI compile is no-codesign; installable iOS device validation still needs a signed physical-device path.",
+    "ios_note": "D-068 defers signed physical-device installation until the app is otherwise complete enough for final mobile-readiness validation. Physical evidence remains mandatory before release-candidate/public-release claims.",
     "synthetic_phone_matrix": {
       "status": "PASS",
       "viewports": [
@@ -266,6 +268,12 @@
         "portrait/landscape safe areas are correct"
       ],
       "separate_native_capability_evidence": "Standalone integration probe sets tr-TR explicitly and passes native start/completion/stop callbacks on iOS simulator; current bounded proof fixtures remain en-US by design."
-    }
+    },
+    "current_pre_m5_rule": "Physical P9 evidence is explicitly bounded for pre-M5 sequencing; exact-head non-physical technical closure plus Founder Product/Visual PASS still precede explicit M5 admission."
+  },
+  "founder_sequence_override": {
+    "decision_id": "D-068",
+    "status": "ACTIVE",
+    "rule": "Do not request early real-phone installation; keep physical P9 as final mobile-readiness evidence."
   }
 }
