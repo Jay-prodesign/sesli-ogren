@@ -44,8 +44,6 @@ void main() {
     usePhoneSurface(tester);
     final fixtures = await loadFixtures();
     final controller = ProofController(fixtures)..setReducedMotion(true);
-    addTearDown(controller.dispose);
-
     await tester.pumpWidget(MaterialApp(home: NativeSpeechQaScreen(controller: controller)));
 
     expect(find.text('Native Speech QA'), findsOneWidget);
