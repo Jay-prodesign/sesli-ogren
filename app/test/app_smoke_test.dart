@@ -45,6 +45,7 @@ void main() {
     addTearDown(store.close);
 
     final runtime = AppRuntime(
+      learner: AppRuntime.localM5LearnerFixture,
       store: store,
       ingest: SourceIngestService(
         store: store,
@@ -87,6 +88,7 @@ void main() {
       now: () => DateTime.utc(2026, 10, 4, 16, 1),
     );
     final runtime = AppRuntime(
+      learner: AppRuntime.localM5LearnerFixture,
       store: store,
       ingest: ingest,
       recall: recall,
@@ -94,7 +96,7 @@ void main() {
     );
 
     await ingest.ingestPastedText(
-      learner: AppRuntime.learner,
+      learner: runtime.learner,
       materialId: AppRuntime.primaryMaterialId,
       text:
           'Fotosentez sırasında klorofil ışık enerjisini kimyasal enerjiye '
@@ -102,11 +104,11 @@ void main() {
       sourceName: 'Biyoloji notu',
     );
     final prompt = await recall.createCurrentPrompt(
-      learner: AppRuntime.learner,
+      learner: runtime.learner,
       materialId: AppRuntime.primaryMaterialId,
     );
     final action = await store.learningTruthStore().recallAction(
-      learner: AppRuntime.learner,
+      learner: runtime.learner,
       actionId: prompt.id,
     );
     expect(action, isNotNull);
@@ -126,7 +128,7 @@ void main() {
     expect(find.text('Devam noktası'), findsOneWidget);
 
     final events = await store.operationalTelemetry().events(
-      learner: AppRuntime.learner,
+      learner: runtime.learner,
     );
     expect(
       events.any(
@@ -173,6 +175,7 @@ void main() {
     );
     addTearDown(store.close);
     final runtime = AppRuntime(
+      learner: AppRuntime.localM5LearnerFixture,
       store: store,
       ingest: SourceIngestService(
         store: store,

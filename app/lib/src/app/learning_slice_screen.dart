@@ -49,7 +49,7 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
   Future<void> _recordEvent(OperationalEvent event) async {
     try {
       await widget.runtime.telemetry.record(
-        learner: AppRuntime.learner,
+        learner: widget.runtime.learner,
         event: event,
       );
     } catch (_) {
@@ -71,7 +71,7 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
     _setBusy(true);
     try {
       final material = await widget.runtime.store.material(
-        learner: AppRuntime.learner,
+        learner: widget.runtime.learner,
         materialId: AppRuntime.primaryMaterialId,
       );
       if (!mounted) return;
@@ -96,7 +96,7 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
       }
 
       final continuation = await widget.runtime.recall.reopen(
-        learner: AppRuntime.learner,
+        learner: widget.runtime.learner,
         materialId: AppRuntime.primaryMaterialId,
       );
       if (!mounted) return;
@@ -163,7 +163,7 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
     _setBusy(true);
     try {
       final ingestResult = await widget.runtime.ingest.ingestPastedText(
-        learner: AppRuntime.learner,
+        learner: widget.runtime.learner,
         materialId: AppRuntime.primaryMaterialId,
         text: text,
         sourceName: 'Çalışma materyalim',
@@ -215,7 +215,7 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
     );
     try {
       final prompt = await widget.runtime.recall.createCurrentPrompt(
-        learner: AppRuntime.learner,
+        learner: widget.runtime.learner,
         materialId: AppRuntime.primaryMaterialId,
       );
       stopwatch.stop();
@@ -265,7 +265,7 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
     _setBusy(true);
     try {
       final support = await widget.runtime.recall.requestHint(
-        learner: AppRuntime.learner,
+        learner: widget.runtime.learner,
         actionId: prompt.id,
         attemptId: attemptId,
       );
@@ -288,7 +288,7 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
     _setBusy(true);
     try {
       final support = await widget.runtime.recall.revealAnswer(
-        learner: AppRuntime.learner,
+        learner: widget.runtime.learner,
         actionId: prompt.id,
         attemptId: attemptId,
       );
@@ -329,7 +329,7 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
     _setBusy(true);
     try {
       final result = await widget.runtime.recall.submit(
-        learner: AppRuntime.learner,
+        learner: widget.runtime.learner,
         actionId: prompt.id,
         attemptId: attemptId,
         disposition: unknown
@@ -403,7 +403,7 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
     _setBusy(true);
     try {
       final repaired = await widget.runtime.recall.repairContinuation(
-        learner: AppRuntime.learner,
+        learner: widget.runtime.learner,
         materialId: AppRuntime.primaryMaterialId,
       );
       if (!mounted) return;
