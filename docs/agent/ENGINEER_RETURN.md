@@ -1,3 +1,37 @@
+# M5 ENGINEER RETURN — LA-0019 CLOSED / LA-0020 ACTIVE
+
+## LA-0019 disposition
+
+**DONE (implementation), with milestone runtime batch pending under D-072.**
+
+Implemented:
+- authoritative Material → immutable SourceVersion → ExtractedContent separation;
+- exact-byte source identity for pasted text and PDF;
+- bounded pasted-text and PDF input limits;
+- real PDF extraction path with page provenance anchors and explicit OCR-not-admitted failure;
+- learner-scoped SQLite persistence;
+- retry idempotency, stale/superseded-source fail-closed behavior;
+- deletion tombstone + raw payload purge + extracted-content purge;
+- same material ID cannot silently resurrect after deletion;
+- real two-page PDF fixture/reopen test authored;
+- D-024 dependency/provenance entries for crypto, sqflite, sqflite_common_ffi and pdfrx.
+
+Static/contract evidence:
+- pdfrx 2.6.1 requirements align with repo Flutter 3.47.5 and iOS deployment target 15.0;
+- pdfrx direct-engine initialization is explicitly awaited;
+- sqflite DatabaseFactory/OpenDatabaseOptions/in-memory test usage matches upstream API;
+- SQLite tombstone/purge schema sequence was checked deterministically outside GitHub Actions.
+
+Pending at M5 checkpoint:
+- one bounded Flutter pub resolution/format/analyze/test/Android+iOS build batch under D-072;
+- GLS-083 independent read-only review of persistence/idempotency.
+
+## Current cursor
+
+**LA-0020 — IN_PROGRESS.** Implement one meaningful source-grounded active learning action, durable LearnerEvidence, minimal deterministic versioned LearnerState and explainable next action. Passive activity cannot become mastery/readiness truth.
+
+---
+
 # M5 ENGINEER RETURN — LA-0018 CLOSED / LA-0019 ACTIVE
 
 ## LA-0018 disposition

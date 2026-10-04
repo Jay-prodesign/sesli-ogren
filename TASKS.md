@@ -173,7 +173,7 @@ Next unallocated ID: **LA-0022**.
 
 ##### LA-0019 — Real material source authority, provenance and safe ingest
 
-- Status: IN_PROGRESS
+- Status: DONE
 - Depends on: LA-0018
 - Owner: Brain
 - Executor: ChatGPT (temporary reversible engineering authority)
@@ -186,7 +186,7 @@ Next unallocated ID: **LA-0022**.
 
 ##### LA-0020 — Active learning action → LearnerEvidence → LearnerState → next action
 
-- Status: PLANNED
+- Status: IN_PROGRESS
 - Depends on: LA-0019
 - Owner: Brain
 - Executor: ChatGPT (temporary reversible engineering authority)
