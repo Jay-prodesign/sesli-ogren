@@ -229,18 +229,22 @@ class ValidatorNegativeTests(unittest.TestCase):
         )
         self.assertIsNotNone(future, "test setup: no non-active future milestone found")
         milestone_id = future.group(1)
+
         sprint = re.search(
-            rf"### Sprint ({re.escape(milestone_id)}\.S\d+) — [^\n]+\n",
+            rf"### Sprint ({re.escape(milestone_id)}\.S\d+) — [^\n]+"
+            r"(?P<body>.*?)(?=\n### Sprint|\Z)",
             future.group(0),
+            re.DOTALL,
         )
         self.assertIsNotNone(sprint, "test setup: future milestone has no sprint")
         sprint_id = sprint.group(1)
 
         insertion = (
-            f"\\n#### Section {sprint_id}.Z — Negative test\\n\\n"
-            f"##### {task_id} — Premature task\\n\\n"
-            "- Status: READY\\n- Depends on: none\\n"
-            "- Owner: Brain\\n- Executor: Claude\\n- Verification: x\\n- Exec plan: none\\n"
+            f"\n\n#### Section {sprint_id}.Z — Negative test\n\n"
+            f"##### {task_id} — Premature task\n\n"
+            "- Status: READY\n- Depends on: none\n"
+            "- Owner: Brain\n- Executor: Claude\n- Verification: x\n"
+            f"- Exec plan: docs/exec-plans/{task_id}.md\n"
         )
         insert_at = future.start() + sprint.end()
         text = text[:insert_at] + insertion + text[insert_at:]
