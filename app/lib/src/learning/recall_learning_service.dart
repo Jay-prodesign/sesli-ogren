@@ -228,6 +228,52 @@ class RecallLearningService {
     );
   }
 
+  Future<LearningContinuation?> repairContinuation({
+    required AuthenticatedLearner learner,
+    required MaterialId materialId,
+  }) async {
+    final source = await _sourceStore.currentSourceVersion(
+      learner: learner,
+      materialId: materialId,
+    );
+    if (source == null) {
+      return null;
+    }
+
+    final evidence = await _learningStore.evidenceForMaterial(
+      learner: learner,
+      materialId: materialId,
+      sourceVersionId: source.identity.sourceVersionId,
+    );
+    if (evidence.isEmpty) {
+      return null;
+    }
+
+    final latest = evidence.last;
+    final state = LearnerState(
+      materialId: materialId,
+      sourceVersionId: source.identity.sourceVersionId,
+      kind: _stateForOutcome(latest.outcome),
+      evidenceCount: evidence.length,
+      latestEvidenceId: latest.id,
+      ruleVersion: stateRuleVersion,
+      updatedAt: latest.createdAt,
+    );
+    final nextAction = _nextActionFor(
+      materialId: materialId,
+      sourceVersionId: source.identity.sourceVersionId,
+      evidenceId: latest.id,
+      outcome: latest.outcome,
+      now: latest.createdAt,
+    );
+
+    return _learningStore.repairDerivedProjection(
+      learner: learner,
+      state: state,
+      nextAction: nextAction,
+    );
+  }
+
   Future<LearningContinuation?> reopen({
     required AuthenticatedLearner learner,
     required MaterialId materialId,

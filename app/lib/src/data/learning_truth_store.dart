@@ -44,6 +44,14 @@ abstract interface class LearningTruthStore {
     required String stateRuleVersion,
     required NextLearningAction nextAction,
   });
+
+  /// Rebuilds only derived state/next-action projections from already durable
+  /// canonical evidence. It never inserts or rewrites LearnerEvidence.
+  Future<LearningContinuation> repairDerivedProjection({
+    required AuthenticatedLearner learner,
+    required LearnerState state,
+    required NextLearningAction nextAction,
+  });
 }
 
 class LearningTruthConflict implements Exception {
