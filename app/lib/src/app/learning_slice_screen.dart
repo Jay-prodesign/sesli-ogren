@@ -59,7 +59,15 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
   }
 
   Future<void> _restore() async {
-
+    final stopwatch = Stopwatch()..start();
+    await _recordEvent(
+      OperationalEvent(
+        type: OperationalEventType.runtimeRestore,
+        phase: OperationalEventPhase.started,
+        materialId: AppRuntime.primaryMaterialId,
+        createdAt: DateTime.now().toUtc(),
+      ),
+    );
     _setBusy(true);
     try {
       final material = await widget.runtime.store.material(
@@ -69,6 +77,17 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
       if (!mounted) return;
 
       if (material == null) {
+        stopwatch.stop();
+        await _recordEvent(
+          OperationalEvent(
+            type: OperationalEventType.runtimeRestore,
+            phase: OperationalEventPhase.completed,
+            materialId: AppRuntime.primaryMaterialId,
+            durationMs: stopwatch.elapsedMilliseconds,
+            createdAt: DateTime.now().toUtc(),
+          ),
+        );
+        if (!mounted) return;
         setState(() {
           _phase = _SlicePhase.source;
           _inlineError = null;
@@ -91,6 +110,7 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
       } else {
         await _openRecall();
       }
+
       stopwatch.stop();
       await _recordEvent(
         OperationalEvent(
@@ -117,7 +137,7 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
       setState(() {
         _phase = _SlicePhase.error;
         _inlineError =
-            'Devam kaydı kullanılamadı. Kaynaktan güvenli bir Recall yeniden başlatabiliriz.';
+            'Devam kaydı kullanılamadı. Kaynaktan güvenli bir hatırlama yeniden başlatabiliriz.';
       });
     } finally {
       _setBusy(false);
@@ -193,34 +213,49 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
         createdAt: DateTime.now().toUtc(),
       ),
     );
-    final prompt = await widget.runtime.recall.createCurrentPrompt(
-      learner: AppRuntime.learner,
-      materialId: AppRuntime.primaryMaterialId,
-    );
-    stopwatch.stop();
-    await _recordEvent(
-      OperationalEvent(
-        type: OperationalEventType.recallPrompt,
-        phase: OperationalEventPhase.completed,
-        materialId: prompt.materialId,
-        sourceVersionId: prompt.sourceVersionId,
-        actionId: prompt.id,
-        ruleVersion: prompt.ruleVersion,
-        durationMs: stopwatch.elapsedMilliseconds,
-        createdAt: DateTime.now().toUtc(),
-      ),
-    );
-    if (!mounted) return;
-    _answerController.clear();
-    setState(() {
-      _prompt = prompt;
-      _result = null;
-      _continuation = null;
-      _activeAttemptId = RecallAttemptId(_nextAttemptId());
-      _supportText = null;
-      _inlineError = null;
-      _phase = _SlicePhase.recall;
-    });
+    try {
+      final prompt = await widget.runtime.recall.createCurrentPrompt(
+        learner: AppRuntime.learner,
+        materialId: AppRuntime.primaryMaterialId,
+      );
+      stopwatch.stop();
+      await _recordEvent(
+        OperationalEvent(
+          type: OperationalEventType.recallPrompt,
+          phase: OperationalEventPhase.completed,
+          materialId: prompt.materialId,
+          sourceVersionId: prompt.sourceVersionId,
+          actionId: prompt.id,
+          ruleVersion: prompt.ruleVersion,
+          durationMs: stopwatch.elapsedMilliseconds,
+          createdAt: DateTime.now().toUtc(),
+        ),
+      );
+      if (!mounted) return;
+      _answerController.clear();
+      setState(() {
+        _prompt = prompt;
+        _result = null;
+        _continuation = null;
+        _activeAttemptId = RecallAttemptId(_nextAttemptId());
+        _supportText = null;
+        _inlineError = null;
+        _phase = _SlicePhase.recall;
+      });
+    } catch (error) {
+      stopwatch.stop();
+      await _recordEvent(
+        OperationalEvent(
+          type: OperationalEventType.recallPrompt,
+          phase: OperationalEventPhase.failed,
+          materialId: AppRuntime.primaryMaterialId,
+          durationMs: stopwatch.elapsedMilliseconds,
+          errorClass: error.runtimeType.toString(),
+          createdAt: DateTime.now().toUtc(),
+        ),
+      );
+      rethrow;
+    }
   }
 
   Future<void> _requestHint() async {
@@ -567,7 +602,7 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
           FilledButton.icon(
             onPressed: _busy ? null : _saveSource,
             icon: const Icon(Icons.arrow_forward_rounded),
-            label: const Text('Recall oluştur'),
+            label: const Text('Hatırlama başlat'),
           ),
         ],
       ),
@@ -723,7 +758,7 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
           FilledButton.icon(
             onPressed: _busy ? null : _openRecall,
             icon: const Icon(Icons.refresh_rounded),
-            label: const Text('Recall’u aç'),
+            label: const Text('Hatırlamaya dön'),
           ),
           const SizedBox(height: 8),
           TextButton(

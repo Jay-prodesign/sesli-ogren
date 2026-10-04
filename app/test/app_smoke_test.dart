@@ -8,6 +8,7 @@ import 'package:sesli_ogren/src/data/pdf_text_extractor.dart';
 import 'package:sesli_ogren/src/data/source_ingest_service.dart';
 import 'package:sesli_ogren/src/data/sqlite_source_store.dart';
 import 'package:sesli_ogren/src/learning/recall_learning_service.dart';
+import 'package:sesli_ogren/src/domain/operational_event.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 class _UnusedPdfExtractor implements PdfTextExtractor {
@@ -53,6 +54,7 @@ void main() {
         sourceStore: store,
         learningStore: store.learningTruthStore(),
       ),
+      telemetry: store.operationalTelemetry(),
     );
 
     await tester.pumpWidget(testShell(runtime));
@@ -60,7 +62,7 @@ void main() {
 
     expect(find.text('Sesli Öğren'), findsOneWidget);
     expect(find.text('Çalışma materyalini ekle'), findsOneWidget);
-    expect(find.text('Recall oluştur'), findsOneWidget);
+    expect(find.text('Hatırlama başlat'), findsOneWidget);
     expect(find.text('İpucu'), findsNothing);
   });
 
@@ -84,7 +86,12 @@ void main() {
       learningStore: store.learningTruthStore(),
       now: () => DateTime.utc(2026, 10, 4, 16, 1),
     );
-    final runtime = AppRuntime(store: store, ingest: ingest, recall: recall);
+    final runtime = AppRuntime(
+      store: store,
+      ingest: ingest,
+      recall: recall,
+      telemetry: store.operationalTelemetry(),
+    );
 
     await ingest.ingestPastedText(
       learner: AppRuntime.learner,
@@ -117,6 +124,20 @@ void main() {
     await tester.tap(find.text('Devam et'));
     await tester.pumpAndSettle();
     expect(find.text('Devam noktası'), findsOneWidget);
+
+    final events = await store.operationalTelemetry().events(
+      learner: AppRuntime.learner,
+    );
+    expect(
+      events.any(
+        (event) =>
+            event.type == OperationalEventType.recallAttempt &&
+            event.phase == OperationalEventPhase.completed &&
+            event.evidenceId != null &&
+            event.durationMs != null,
+      ),
+      isTrue,
+    );
 
     await tester.pumpWidget(const SizedBox.shrink());
     await tester.pump();
@@ -153,6 +174,7 @@ void main() {
         sourceStore: store,
         learningStore: store.learningTruthStore(),
       ),
+      telemetry: store.operationalTelemetry(),
     );
 
     await tester.pumpWidget(
@@ -166,6 +188,6 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Çalışma materyalini ekle'), findsOneWidget);
-    expect(find.text('Recall oluştur'), findsOneWidget);
+    expect(find.text('Hatırlama başlat'), findsOneWidget);
   });
 }

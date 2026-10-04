@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:sesli_ogren/src/data/sqlite_source_store.dart';
 import 'package:sesli_ogren/src/domain/authenticated_learner.dart';
 import 'package:sesli_ogren/src/domain/learning_truth.dart';
+import 'package:sesli_ogren/src/domain/operational_event.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 void main() {
@@ -45,6 +46,25 @@ CREATE TABLE recall_actions (
         actionId: const RecallActionId('action-upgrade'),
       );
       expect(assistance, RecallAssistance.none);
+
+      await upgraded.operationalTelemetry().record(
+        learner: const AuthenticatedLearner(
+          id: LearnerId('learner-upgrade'),
+        ),
+        event: OperationalEvent(
+          type: OperationalEventType.runtimeRestore,
+          phase: OperationalEventPhase.completed,
+          durationMs: 1,
+          createdAt: DateTime.utc(2026, 10, 4, 16),
+        ),
+      );
+      final events = await upgraded.operationalTelemetry().events(
+        learner: const AuthenticatedLearner(
+          id: LearnerId('learner-upgrade'),
+        ),
+      );
+      expect(events, hasLength(1));
+      expect(events.single.type, OperationalEventType.runtimeRestore);
     } finally {
       await legacy?.close();
       await upgraded?.close();
