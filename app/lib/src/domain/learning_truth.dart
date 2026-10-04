@@ -26,6 +26,32 @@ class RecallAttemptId {
   int get hashCode => value.hashCode;
 }
 
+class ActiveRecallAttempt {
+  const ActiveRecallAttempt({
+    required this.attemptId,
+    required this.actionId,
+    required this.materialId,
+    required this.sourceVersionId,
+    required this.openedAt,
+  });
+
+  final RecallAttemptId attemptId;
+  final RecallActionId actionId;
+  final MaterialId materialId;
+  final SourceVersionId sourceVersionId;
+  final DateTime openedAt;
+}
+
+class RecallAttemptSession {
+  const RecallAttemptSession({
+    required this.attempt,
+    required this.assistance,
+  });
+
+  final ActiveRecallAttempt attempt;
+  final RecallAssistance assistance;
+}
+
 class LearnerEvidenceId {
   const LearnerEvidenceId(this.value);
 
