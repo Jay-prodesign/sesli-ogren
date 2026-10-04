@@ -197,7 +197,7 @@ as $$
     when 'helped_correct' then 'developing'
     when 'partial' then 'developing'
     when 'incorrect' then 'needs_review'
-    when 'unknown' then 'needs_review'
+    when 'unknown' then 'not_assessed'
     else 'not_assessed'
   end
 $$;
