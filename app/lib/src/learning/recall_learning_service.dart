@@ -18,7 +18,7 @@ class RecallLearningService {
        _now = now ?? DateTime.now;
 
   static const promptRuleVersion = 'recall-cloze-v1';
-  static const evidenceRuleVersion = 'recall-evidence-v2';
+  static const evidenceRuleVersion = RecallTruthPolicy.evidenceRuleVersion;
   static const stateRuleVersion = RecallTruthPolicy.stateRuleVersion;
   static const nextActionPolicyVersion =
       RecallTruthPolicy.nextActionPolicyVersion;
@@ -226,10 +226,10 @@ class RecallLearningService {
     );
     final normalizedAnswer = disposition == RecallResponseDisposition.unknown
         ? ''
-        : _normalizeAnswer(answer);
-    final outcome = _evaluate(
-      expected: action.expectedAnswer,
-      normalizedAnswer: normalizedAnswer,
+        : RecallTruthPolicy.normalizeAnswer(answer);
+    final outcome = RecallTruthPolicy.evaluate(
+      expectedAnswer: action.expectedAnswer,
+      response: normalizedAnswer,
       disposition: disposition,
       assistance: assistance,
     );
@@ -272,6 +272,8 @@ class RecallLearningService {
     final persisted = await _learningStore.persistEvidenceStateAndNextAction(
       learner: learner,
       evidence: evidence,
+      disposition: disposition,
+      normalizedResponse: normalizedAnswer,
       stateKind: stateKind,
       stateRuleVersion: stateRuleVersion,
       nextAction: nextAction,
@@ -506,98 +508,12 @@ class RecallLearningService {
     return null;
   }
 
-  static RecallOutcome _evaluate({
-    required String expected,
-    required String normalizedAnswer,
-    required RecallResponseDisposition disposition,
-    required RecallAssistance assistance,
-  }) {
-    if (disposition == RecallResponseDisposition.unknown ||
-        normalizedAnswer.isEmpty) {
-      return RecallOutcome.unknown;
-    }
-    if (assistance == RecallAssistance.answerExposed) {
-      return RecallOutcome.answerExposed;
-    }
-
-    final normalizedExpected = _normalizeAnswer(expected);
-    if (normalizedAnswer == normalizedExpected) {
-      return assistance == RecallAssistance.hint
-          ? RecallOutcome.helpedCorrect
-          : RecallOutcome.correct;
-    }
-    if (normalizedExpected.length >= 5 &&
-        _editDistance(normalizedAnswer, normalizedExpected) <= 1) {
-      return RecallOutcome.partial;
-    }
-    return RecallOutcome.incorrect;
-  }
-
-  static RecallStateKind _stateForOutcome(RecallOutcome outcome) {
-    return RecallTruthPolicy.stateForOutcome(outcome);
-  }
-
-  static NextLearningAction _nextActionFor({
-    required MaterialId materialId,
-    required SourceVersionId sourceVersionId,
-    required LearnerEvidenceId evidenceId,
-    required RecallOutcome outcome,
-    required DateTime now,
-  }) {
-    return RecallTruthPolicy.nextActionFor(
-      materialId: materialId,
-      sourceVersionId: sourceVersionId,
-      evidenceId: evidenceId,
-      outcome: outcome,
-      createdAt: now,
-    );
-  }
-
   static void _validateAttemptId(RecallAttemptId attemptId) {
     if (!RegExp(r'^[A-Za-z0-9_.:-]{8,128}$').hasMatch(attemptId.value)) {
       throw const RecallLearningException(
         'Attempt ID must be a stable 8-128 character identifier.',
       );
     }
-  }
-
-  static String _normalizeAnswer(String value) {
-    return value
-        .replaceAll('İ', 'i')
-        .replaceAll('I', 'ı')
-        .toLowerCase()
-        .replaceAll(RegExp(r'[^a-zçğıöşü0-9]+'), '')
-        .trim();
-  }
-
-  static int _editDistance(String left, String right) {
-    if (left == right) {
-      return 0;
-    }
-    if (left.isEmpty) {
-      return right.length;
-    }
-    if (right.isEmpty) {
-      return left.length;
-    }
-
-    var previous = List<int>.generate(right.length + 1, (index) => index);
-    for (var i = 0; i < left.length; i++) {
-      final current = List<int>.filled(right.length + 1, 0);
-      current[0] = i + 1;
-      for (var j = 0; j < right.length; j++) {
-        final substitution = previous[j] + (left[i] == right[j] ? 0 : 1);
-        final insertion = current[j] + 1;
-        final deletion = previous[j + 1] + 1;
-        current[j + 1] = [
-          substitution,
-          insertion,
-          deletion,
-        ].reduce((a, b) => a < b ? a : b);
-      }
-      previous = current;
-    }
-    return previous.last;
   }
 
   static const _stopWords = <String>{
