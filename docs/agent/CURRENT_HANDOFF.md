@@ -10,7 +10,7 @@
 | Branch | `feat/m5-golden-learning-slice` |
 | Executor | ChatGPT under Founder-authorized reversible engineering authority; Claude/Codex may resume only after fresh-read |
 | Acceptance authority | `M5_GOLDEN_LEARNING_SLICE_ACCEPTANCE_CONTRACT_v0.1` |
-| Current task | **LA-0018 — production-shaped foundation** |
+| Current task | **LA-0019 — source authority / provenance / safe ingest** |
 | Companion | **D/Knot only — D-070 Founder selection** |
 
 ## Mission
@@ -33,8 +33,8 @@ At least one continuity transition must be exercised in addition to the evidence
 
 ## Executable order
 
-1. **LA-0018** — integrate accepted architecture substrate into the production-shaped foundation.
-2. **LA-0019** — real material source authority/provenance/safe ingest.
+1. **LA-0018** — DONE: accepted architecture substrate integrated into the production-shaped foundation.
+2. **LA-0019** — IN PROGRESS: real material source authority/provenance/safe ingest.
 3. **LA-0020** — active learning → LearnerEvidence → LearnerState → next action.
 4. **LA-0021** — coherent Flutter flow with D/Knot + close/reopen/recovery + checkpoint evidence.
 

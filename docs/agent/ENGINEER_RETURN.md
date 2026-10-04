@@ -1,3 +1,15 @@
+# M5 ENGINEER RETURN — LA-0018 CLOSED / LA-0019 ACTIVE
+
+## LA-0018 disposition
+
+**DONE.** Production `app/` exists independently from proof UI; D/Knot is the only production Companion asset; accepted Architecture Proof substrate is selectively imported without stale control-plane overwrite; the app has a small canonical source/persistence seam; PR #10 exact-head `7107f2e4d5eb5a07ac6e066b2cb56bbfcda29606` passed bootstrap-validation, spike-proof, flutter-proof and m5-app (format, analyze, tests, Android profile APK, iOS profile no-codesign).
+
+## Current cursor
+
+**LA-0019 — IN_PROGRESS.** Implement authoritative real PDF/plain-text ingest, immutable source/version/provenance identity, retry/idempotency, tenant isolation and supersession/deletion semantics. No production credentials, deploy/release, OCR, broad library UI or V1 learner-model work is admitted.
+
+---
+
 # ENGINEER RETURN — CLAUDE_HANDOFF_000 — Repository & Agent Bootstrap (correction round 1)
 
 ## Verdict
