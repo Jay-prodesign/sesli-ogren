@@ -22,6 +22,15 @@ class _UnusedPdfExtractor implements PdfTextExtractor {
   }
 }
 
+Widget testShell(AppRuntime runtime) {
+  return MaterialApp(
+    home: MediaQuery(
+      data: const MediaQueryData(disableAnimations: true),
+      child: LearningSliceScreen(runtime: runtime),
+    ),
+  );
+}
+
 void main() {
   sqfliteFfiInit();
 
@@ -46,9 +55,7 @@ void main() {
       ),
     );
 
-    await tester.pumpWidget(
-      MaterialApp(home: LearningSliceScreen(runtime: runtime)),
-    );
+    await tester.pumpWidget(testShell(runtime));
     await tester.pumpAndSettle();
 
     expect(find.text('Sesli Öğren'), findsOneWidget);
@@ -97,9 +104,7 @@ void main() {
     );
     expect(action, isNotNull);
 
-    await tester.pumpWidget(
-      MaterialApp(home: LearningSliceScreen(runtime: runtime)),
-    );
+    await tester.pumpWidget(testShell(runtime));
     await tester.pumpAndSettle();
 
     expect(find.text('Hatırla'), findsOneWidget);
@@ -117,9 +122,12 @@ void main() {
     await tester.pump();
     await tester.pumpWidget(
       MaterialApp(
-        home: LearningSliceScreen(
-          key: const ValueKey('reopened-slice'),
-          runtime: runtime,
+        home: MediaQuery(
+          data: const MediaQueryData(disableAnimations: true),
+          child: LearningSliceScreen(
+            key: const ValueKey('reopened-slice'),
+            runtime: runtime,
+          ),
         ),
       ),
     );
