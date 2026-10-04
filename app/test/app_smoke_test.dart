@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sesli_ogren/src/app/app_runtime.dart';
 import 'package:sesli_ogren/src/app/learning_slice_screen.dart';
+import 'package:sesli_ogren/src/app/sesli_ogren_app.dart';
+import 'package:sesli_ogren/src/auth/supabase_learner_auth.dart';
 import 'package:sesli_ogren/src/data/pdf_text_extractor.dart';
 import 'package:sesli_ogren/src/data/source_ingest_service.dart';
 import 'package:sesli_ogren/src/data/sqlite_source_store.dart';
@@ -35,6 +37,26 @@ Widget testShell(AppRuntime runtime) {
 
 void main() {
   sqfliteFfiInit();
+
+  test('production auth fails closed when Supabase config is absent', () async {
+    await expectLater(
+      SupabaseLearnerAuth.authenticate(),
+      throwsA(isA<LearnerAuthConfigurationException>()),
+    );
+  });
+
+  testWidgets('production app does not open learner data without auth config', (
+    tester,
+  ) async {
+    await tester.pumpWidget(const SesliOgrenApp());
+    await tester.pumpAndSettle();
+
+    expect(
+      find.text('Uygulama bağlantısı henüz yapılandırılmadı.'),
+      findsOneWidget,
+    );
+    expect(find.textContaining('Öğrenme verisi açılmadı'), findsOneWidget);
+  });
 
   testWidgets('production learning slice boots at truthful source entry', (
     tester,
