@@ -246,6 +246,8 @@ void main() {
       learningStore.persistEvidenceStateAndNextAction(
         learner: learnerA,
         evidence: fabricatedEvidence,
+        disposition: RecallResponseDisposition.answer,
+        normalizedResponse: 'fabricated',
         stateKind: RecallStateKind.retrievedOnce,
         stateRuleVersion: RecallLearningService.stateRuleVersion,
         nextAction: fabricatedNext,
