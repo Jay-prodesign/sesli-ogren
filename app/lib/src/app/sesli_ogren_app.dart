@@ -1,52 +1,153 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
-class SesliOgrenApp extends StatelessWidget {
+import 'app_runtime.dart';
+import 'companion_view.dart';
+import 'learning_slice_screen.dart';
+
+class SesliOgrenApp extends StatefulWidget {
   const SesliOgrenApp({super.key});
 
   @override
+  State<SesliOgrenApp> createState() => _SesliOgrenAppState();
+}
+
+class _SesliOgrenAppState extends State<SesliOgrenApp> {
+  late Future<AppRuntime> _runtimeFuture;
+  AppRuntime? _runtime;
+
+  @override
+  void initState() {
+    super.initState();
+    _openRuntime();
+  }
+
+  void _openRuntime() {
+    _runtimeFuture = AppRuntime.open().then((runtime) {
+      _runtime = runtime;
+      return runtime;
+    });
+  }
+
+  @override
+  void dispose() {
+    final runtime = _runtime;
+    if (runtime != null) {
+      unawaited(runtime.close());
+    }
+    super.dispose();
+  }
+
+  void _retryRuntime() {
+    final runtime = _runtime;
+    if (runtime != null) {
+      unawaited(runtime.close());
+    }
+    _runtime = null;
+    setState(_openRuntime);
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final scheme = ColorScheme.fromSeed(
+      seedColor: const Color(0xFF65558F),
+      brightness: Brightness.light,
+    );
     return MaterialApp(
       title: 'Sesli Öğren',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF65558F)), useMaterial3: true),
-      home: const FoundationScreen(),
+      theme: ThemeData(
+        colorScheme: scheme,
+        useMaterial3: true,
+        inputDecorationTheme: const InputDecorationTheme(
+          filled: true,
+        ),
+        filledButtonTheme: FilledButtonThemeData(
+          style: FilledButton.styleFrom(
+            minimumSize: const Size.fromHeight(48),
+          ),
+        ),
+      ),
+      home: FutureBuilder<AppRuntime>(
+        future: _runtimeFuture,
+        builder: (context, snapshot) {
+          if (snapshot.hasData) {
+            return LearningSliceScreen(runtime: snapshot.data!);
+          }
+          if (snapshot.hasError) {
+            return _RuntimeErrorScreen(onRetry: _retryRuntime);
+          }
+          return const _RuntimeLoadingScreen();
+        },
+      ),
     );
   }
 }
 
-class FoundationScreen extends StatelessWidget {
-  const FoundationScreen({super.key});
+class _RuntimeLoadingScreen extends StatelessWidget {
+  const _RuntimeLoadingScreen();
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    return const Scaffold(
+      body: SafeArea(
+        child: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              CompanionView(
+                state: CompanionVisualState.think,
+                size: 112,
+              ),
+              SizedBox(height: 20),
+              CircularProgressIndicator(),
+              SizedBox(height: 12),
+              Text('Öğrenme alanın hazırlanıyor…'),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _RuntimeErrorScreen extends StatelessWidget {
+  const _RuntimeErrorScreen({required this.onRetry});
+
+  final VoidCallback onRetry;
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
         child: Center(
           child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 520),
+            constraints: const BoxConstraints(maxWidth: 440),
             child: Padding(
               padding: const EdgeInsets.all(24),
               child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  Semantics(
-                    label: 'Düğüm, Sesli Öğren rehberi',
-                    image: true,
-                    child: Image.asset(
-                      'assets/companions/D_KNOT_128.webp',
-                      width: 128,
-                      height: 128,
-                      filterQuality: FilterQuality.medium,
-                    ),
+                  const CompanionView(
+                    state: CompanionVisualState.correct,
+                    size: 112,
                   ),
-                  const SizedBox(height: 28),
-                  Text('Sesli Öğren', style: theme.textTheme.headlineMedium, textAlign: TextAlign.center),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 20),
                   Text(
-                    'Materyalinden anlayarak ilerleyen bir öğrenme yolculuğu.',
-                    style: theme.textTheme.bodyLarge,
+                    'Yerel öğrenme alanı açılamadı.',
+                    style: Theme.of(context).textTheme.titleLarge,
                     textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 10),
+                  const Text(
+                    'Veri yazmadan yeniden deneyebilirsin.',
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 20),
+                  FilledButton(
+                    onPressed: onRetry,
+                    child: const Text('Yeniden dene'),
                   ),
                 ],
               ),
