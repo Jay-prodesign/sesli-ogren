@@ -21,6 +21,7 @@ class CompanionView extends StatefulWidget {
 class _CompanionViewState extends State<CompanionView>
     with SingleTickerProviderStateMixin {
   late final AnimationController _motion;
+  bool _reducedMotion = false;
 
   @override
   void initState() {
@@ -32,6 +33,26 @@ class _CompanionViewState extends State<CompanionView>
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final media = MediaQuery.maybeOf(context);
+    final reduced =
+        (media?.disableAnimations ?? false) ||
+        (media?.accessibleNavigation ?? false);
+    if (reduced == _reducedMotion) {
+      return;
+    }
+    _reducedMotion = reduced;
+    if (_reducedMotion) {
+      _motion
+        ..stop()
+        ..value = 0;
+    } else if (!_motion.isAnimating) {
+      _motion.repeat();
+    }
+  }
+
+  @override
   void dispose() {
     _motion.dispose();
     super.dispose();
@@ -39,11 +60,6 @@ class _CompanionViewState extends State<CompanionView>
 
   @override
   Widget build(BuildContext context) {
-    final media = MediaQuery.maybeOf(context);
-    final reducedMotion =
-        (media?.disableAnimations ?? false) ||
-        (media?.accessibleNavigation ?? false);
-
     return Semantics(
       image: true,
       label: _semanticLabel(widget.state),
@@ -53,7 +69,7 @@ class _CompanionViewState extends State<CompanionView>
           child: AnimatedBuilder(
             animation: _motion,
             builder: (context, child) {
-              final t = reducedMotion ? 0.0 : _motion.value;
+              final t = _reducedMotion ? 0.0 : _motion.value;
               final wave = math.sin(t * math.pi * 2);
               final pulse = wave.abs();
               final pose = switch (widget.state) {

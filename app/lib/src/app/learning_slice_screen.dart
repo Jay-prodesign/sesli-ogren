@@ -286,6 +286,10 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final media = MediaQuery.maybeOf(context);
+    final reducedMotion =
+        (media?.disableAnimations ?? false) ||
+        (media?.accessibleNavigation ?? false);
     return Scaffold(
       body: SafeArea(
         child: DecoratedBox(
@@ -327,7 +331,9 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
                   ),
                   const SizedBox(height: 28),
                   AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 220),
+                    duration: reducedMotion
+                        ? Duration.zero
+                        : const Duration(milliseconds: 220),
                     child: _phaseBody(context),
                   ),
                   if (_busy) ...[
