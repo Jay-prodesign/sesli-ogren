@@ -11,8 +11,11 @@ import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
-  pdfrxFlutterInitialize();
   sqfliteFfiInit();
+
+  setUpAll(() async {
+    await pdfrxFlutterInitialize();
+  });
 
   test('real two-page PDF keeps page provenance across store reopen', () async {
     final bytes = await File('test/fixtures/two_page_text.pdf').readAsBytes();
