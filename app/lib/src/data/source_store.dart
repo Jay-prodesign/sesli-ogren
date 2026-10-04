@@ -1,18 +1,36 @@
 import '../domain/authenticated_learner.dart';
 import '../domain/learning_contracts.dart';
 
-/// Persistence seam required by the admitted M5 source journey.
-///
-/// The store is learner-scoped by contract. Concrete local/test and backend
-/// adapters are introduced only when LA-0019 needs them.
 abstract interface class SourceStore {
-  Future<SourceVersionIdentity?> currentSourceVersion({
+  Future<SourceVersionRecord?> currentSourceVersion({
     required AuthenticatedLearner learner,
     required MaterialId materialId,
   });
 
-  Future<void> persistSourceVersion({
+  Future<SourceVersionRecord?> sourceVersion({
     required AuthenticatedLearner learner,
-    required SourceVersionIdentity sourceVersion,
+    required SourceVersionId sourceVersionId,
   });
+
+  Future<List<SourceVersionRecord>> sourceVersions({
+    required AuthenticatedLearner learner,
+    required MaterialId materialId,
+  });
+
+  /// Persists one immutable source version.
+  ///
+  /// Repeating the same learner/material/version is idempotent. A different
+  /// version for the same material supersedes the previous current version.
+  Future<SourceVersionRecord> persistSourceVersion({
+    required AuthenticatedLearner learner,
+    required SourceVersionRecord sourceVersion,
+  });
+
+  Future<void> deleteMaterial({
+    required AuthenticatedLearner learner,
+    required MaterialId materialId,
+    required DateTime deletedAt,
+  });
+
+  Future<void> close();
 }
