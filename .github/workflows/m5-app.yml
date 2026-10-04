@@ -1,0 +1,63 @@
+name: m5-app
+
+on:
+  pull_request:
+    paths:
+      - "app/**"
+      - ".flutter-version"
+      - ".github/workflows/m5-app.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: m5-app-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  flutter:
+    name: M5 app — analyze, test, profile APK
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - id: flutter-version
+        run: echo "version=$(tr -d '[:space:]' < .flutter-version)" >> "$GITHUB_OUTPUT"
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
+        with:
+          flutter-version: ${{ steps.flutter-version.outputs.version }}
+          channel: stable
+          cache: false
+      - working-directory: app
+        run: flutter pub get
+      - working-directory: app
+        run: dart format --output=none --set-exit-if-changed .
+      - working-directory: app
+        run: flutter analyze
+      - working-directory: app
+        run: flutter test
+      - working-directory: app
+        run: flutter build apk --profile
+
+  ios-compile:
+    name: M5 app — iOS profile compile
+    runs-on: macos-15
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - id: flutter-version
+        run: echo "version=$(tr -d '[:space:]' < .flutter-version)" >> "$GITHUB_OUTPUT"
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
+        with:
+          flutter-version: ${{ steps.flutter-version.outputs.version }}
+          channel: stable
+          cache: false
+      - working-directory: app
+        run: flutter pub get
+      - working-directory: app
+        run: flutter build ios --profile --no-codesign
