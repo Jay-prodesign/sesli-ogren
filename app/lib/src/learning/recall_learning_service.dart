@@ -19,8 +19,9 @@ class RecallLearningService {
 
   static const promptRuleVersion = 'recall-cloze-v1';
   static const evidenceRuleVersion = 'recall-evidence-v2';
-  static const stateRuleVersion = 'recall-state-v2';
-  static const nextActionPolicyVersion = 'recall-next-v1';
+  static const stateRuleVersion = RecallTruthPolicy.stateRuleVersion;
+  static const nextActionPolicyVersion =
+      RecallTruthPolicy.nextActionPolicyVersion;
 
   final SourceStore _sourceStore;
   final LearningTruthStore _learningStore;
@@ -451,14 +452,7 @@ class RecallLearningService {
   }
 
   static RecallStateKind _stateForOutcome(RecallOutcome outcome) {
-    return switch (outcome) {
-      RecallOutcome.correct => RecallStateKind.retrievedOnce,
-      RecallOutcome.helpedCorrect || RecallOutcome.partial =>
-        RecallStateKind.developing,
-      RecallOutcome.incorrect => RecallStateKind.needsReview,
-      RecallOutcome.answerExposed || RecallOutcome.unknown =>
-        RecallStateKind.notAssessed,
-    };
+    return RecallTruthPolicy.stateForOutcome(outcome);
   }
 
   static NextLearningAction _nextActionFor({
@@ -468,46 +462,11 @@ class RecallLearningService {
     required RecallOutcome outcome,
     required DateTime now,
   }) {
-    final (kind, reasonCode, reasonText) = switch (outcome) {
-      RecallOutcome.correct => (
-        NextLearningActionKind.repeatRecallLater,
-        'ONE_UNASSISTED_RETRIEVAL_OBSERVED',
-        'Bu kavramı bir kez ipucusuz geri çağırdın. Bu ustalık kanıtı değil; daha sonra yeniden hatırlayacağız.',
-      ),
-      RecallOutcome.helpedCorrect => (
-        NextLearningActionKind.retryRecallWithoutHint,
-        'HINTED_SUCCESS_NEEDS_UNASSISTED_RETRIEVAL',
-        'Doğru yanıta ipucuyla ulaştın. Bunu bağımsız hatırlama saymadan daha sonra ipucusuz yeniden dene.',
-      ),
-      RecallOutcome.answerExposed => (
-        NextLearningActionKind.retryRecallWithoutHint,
-        'ANSWER_EXPOSED_NO_RETRIEVAL_CLAIM',
-        'Yanıt gösterildiği için geri çağırma kanıtı oluşmadı. Daha sonra kaynağı kapatıp ipucusuz yeniden dene.',
-      ),
-      RecallOutcome.partial => (
-        NextLearningActionKind.retryRecallWithoutHint,
-        'PARTIAL_RETRIEVAL_NEEDS_RETRY',
-        'Yanıt kısmen yaklaştı. Kaynak geri bildirimini gördükten sonra ipucusuz yeniden dene.',
-      ),
-      RecallOutcome.incorrect => (
-        NextLearningActionKind.reviewSourceThenRecall,
-        'INCORRECT_RETRIEVAL_NEEDS_REPAIR',
-        'Bu denemede eşleşme oluşmadı. Kaynak bölümünü gözden geçirip yeniden dene.',
-      ),
-      RecallOutcome.unknown => (
-        NextLearningActionKind.reviewSourceThenRecall,
-        'NO_EVALUABLE_RETRIEVAL',
-        'Bu denemede değerlendirilebilir bir geri çağırma yanıtı yok. Kaynağı gözden geçirip hazır olduğunda yeniden dene.',
-      ),
-    };
-    return NextLearningAction(
+    return RecallTruthPolicy.nextActionFor(
       materialId: materialId,
       sourceVersionId: sourceVersionId,
-      latestEvidenceId: evidenceId,
-      kind: kind,
-      reasonCode: reasonCode,
-      reasonText: reasonText,
-      policyVersion: nextActionPolicyVersion,
+      evidenceId: evidenceId,
+      outcome: outcome,
       createdAt: now,
     );
   }

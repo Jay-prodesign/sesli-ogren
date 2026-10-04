@@ -223,6 +223,89 @@ class RecallAttemptResult {
   final String sourceExcerpt;
 }
 
+class RecallTruthPolicy {
+  const RecallTruthPolicy._();
+
+  static const stateRuleVersion = 'recall-state-v2';
+  static const nextActionPolicyVersion = 'recall-next-v1';
+
+  static RecallStateKind stateForOutcome(RecallOutcome outcome) {
+    return switch (outcome) {
+      RecallOutcome.correct => RecallStateKind.retrievedOnce,
+      RecallOutcome.helpedCorrect || RecallOutcome.partial =>
+        RecallStateKind.developing,
+      RecallOutcome.incorrect => RecallStateKind.needsReview,
+      RecallOutcome.answerExposed || RecallOutcome.unknown =>
+        RecallStateKind.notAssessed,
+    };
+  }
+
+  static NextLearningAction nextActionFor({
+    required MaterialId materialId,
+    required SourceVersionId sourceVersionId,
+    required LearnerEvidenceId evidenceId,
+    required RecallOutcome outcome,
+    required DateTime createdAt,
+  }) {
+    final (kind, reasonCode, reasonText) = switch (outcome) {
+      RecallOutcome.correct => (
+        NextLearningActionKind.repeatRecallLater,
+        'ONE_UNASSISTED_RETRIEVAL_OBSERVED',
+        'Bu kavramı bir kez ipucusuz geri çağırdın. Bu ustalık kanıtı değil; daha sonra yeniden hatırlayacağız.',
+      ),
+      RecallOutcome.helpedCorrect => (
+        NextLearningActionKind.retryRecallWithoutHint,
+        'HINTED_SUCCESS_NEEDS_UNASSISTED_RETRIEVAL',
+        'Doğru yanıta ipucuyla ulaştın. Bunu bağımsız hatırlama saymadan daha sonra ipucusuz yeniden dene.',
+      ),
+      RecallOutcome.answerExposed => (
+        NextLearningActionKind.retryRecallWithoutHint,
+        'ANSWER_EXPOSED_NO_RETRIEVAL_CLAIM',
+        'Yanıt gösterildiği için geri çağırma kanıtı oluşmadı. Daha sonra kaynağı kapatıp ipucusuz yeniden dene.',
+      ),
+      RecallOutcome.partial => (
+        NextLearningActionKind.retryRecallWithoutHint,
+        'PARTIAL_RETRIEVAL_NEEDS_RETRY',
+        'Yanıt kısmen yaklaştı. Kaynak geri bildirimini gördükten sonra ipucusuz yeniden dene.',
+      ),
+      RecallOutcome.incorrect => (
+        NextLearningActionKind.reviewSourceThenRecall,
+        'INCORRECT_RETRIEVAL_NEEDS_REPAIR',
+        'Bu denemede eşleşme oluşmadı. Kaynak bölümünü gözden geçirip yeniden dene.',
+      ),
+      RecallOutcome.unknown => (
+        NextLearningActionKind.reviewSourceThenRecall,
+        'NO_EVALUABLE_RETRIEVAL',
+        'Bu denemede değerlendirilebilir bir geri çağırma yanıtı yok. Kaynağı gözden geçirip hazır olduğunda yeniden dene.',
+      ),
+    };
+    return NextLearningAction(
+      materialId: materialId,
+      sourceVersionId: sourceVersionId,
+      latestEvidenceId: evidenceId,
+      kind: kind,
+      reasonCode: reasonCode,
+      reasonText: reasonText,
+      policyVersion: nextActionPolicyVersion,
+      createdAt: createdAt,
+    );
+  }
+
+  static bool sameNextAction(
+    NextLearningAction left,
+    NextLearningAction right,
+  ) {
+    return left.materialId == right.materialId &&
+        left.sourceVersionId == right.sourceVersionId &&
+        left.latestEvidenceId == right.latestEvidenceId &&
+        left.kind == right.kind &&
+        left.reasonCode == right.reasonCode &&
+        left.reasonText == right.reasonText &&
+        left.policyVersion == right.policyVersion &&
+        left.createdAt.toUtc() == right.createdAt.toUtc();
+  }
+}
+
 class LearningContinuation {
   const LearningContinuation({
     required this.state,

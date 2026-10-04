@@ -1277,6 +1277,30 @@ ON CONFLICT(learner_id, attempt_id) DO UPDATE SET
         );
       }
 
+      final canonicalStateKind =
+          RecallTruthPolicy.stateForOutcome(evidence.outcome);
+      if (stateRuleVersion != RecallTruthPolicy.stateRuleVersion ||
+          stateKind != canonicalStateKind) {
+        throw const LearningTruthConflict(
+          'Learner state transition does not match canonical Recall policy.',
+        );
+      }
+      final canonicalNextAction = RecallTruthPolicy.nextActionFor(
+        materialId: evidence.materialId,
+        sourceVersionId: evidence.sourceVersionId,
+        evidenceId: evidence.id,
+        outcome: evidence.outcome,
+        createdAt: evidence.createdAt,
+      );
+      if (!RecallTruthPolicy.sameNextAction(
+        nextAction,
+        canonicalNextAction,
+      )) {
+        throw const LearningTruthConflict(
+          'Next learning action does not match canonical Recall policy.',
+        );
+      }
+
       final authorityRows = await transaction.query(
         'materials',
         columns: ['current_source_version_id'],
@@ -1470,6 +1494,32 @@ WHERE learner_id = ?
           latestEvidence.sourceVersionId != state.sourceVersionId) {
         throw const LearningTruthConflict(
           'Repair evidence does not belong to the current material/source.',
+        );
+      }
+
+      final canonicalStateKind =
+          RecallTruthPolicy.stateForOutcome(latestEvidence.outcome);
+      if (state.ruleVersion != RecallTruthPolicy.stateRuleVersion ||
+          state.kind != canonicalStateKind ||
+          state.latestEvidenceId != latestEvidence.id ||
+          state.updatedAt.toUtc() != latestEvidence.createdAt.toUtc()) {
+        throw const LearningTruthConflict(
+          'Repair state does not match canonical evidence derivation.',
+        );
+      }
+      final canonicalNextAction = RecallTruthPolicy.nextActionFor(
+        materialId: state.materialId,
+        sourceVersionId: state.sourceVersionId,
+        evidenceId: latestEvidence.id,
+        outcome: latestEvidence.outcome,
+        createdAt: latestEvidence.createdAt,
+      );
+      if (!RecallTruthPolicy.sameNextAction(
+        nextAction,
+        canonicalNextAction,
+      )) {
+        throw const LearningTruthConflict(
+          'Repair next action does not match canonical evidence policy.',
         );
       }
 
