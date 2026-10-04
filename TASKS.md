@@ -21,7 +21,7 @@ Milestone numbering follows the program sequence in
 M1 = Architecture Proof, …). Drive lifecycle-stage labels use a different
 numbering: lifecycle "M3" is this M0, and lifecycle "M4" is this M1.
 
-Next unallocated ID: **LA-0018**.
+Next unallocated ID: **LA-0022**.
 
 ---
 
@@ -147,28 +147,65 @@ Next unallocated ID: **LA-0018**.
 - Status: PLANNED / NOT_EXECUTABLE
 - Intent: evidence return; Brain disposition GO_ADAPT or FALLBACK_CLEAN_FLUTTER.
 
-## Milestone M2 — VS-001 Golden Vertical Slice
+## Milestone M2 — M5 Golden Learning Slice
 
-- Status: PLANNED / NOT_EXECUTABLE
-- Entry gate: Architecture Proof PASS is met; execution still requires the controlling Product/Visual + Round 7 device/voice/accessibility evidence and explicit Brain admission.
-- Source: CURRENT_EXECUTION_STATE + PRE_BOOTSTRAP_PRODUCT_READINESS_AND_MASTER_SEQUENCE_v1.0 — Learning App (Drive)
-- Tasks: none allocated (progressive detail; allocated only on Brain admission)
-- Current blocker relevant to this branch: companion/runtime synthetic QA is PASS; physical native TTS/device validation remains open.
+- Status: ACTIVE
+- Handoff: CLAUDE_HANDOFF_002 — M5 Golden Learning Slice
+- Branch: `feat/m5-golden-learning-slice`
+- Entry gate: D-071 explicit Brain admission — **met** after M4 PASS, D-070 Founder Product/Visual PASS, Round 7 non-physical PASS and D-068 physical-device bounding.
+- Acceptance authority: M5_GOLDEN_LEARNING_SLICE_ACCEPTANCE_CONTRACT_v0.1.
+- Product authority: D-053/D-054 + V0_PRODUCT_SCOPE_v2.0; D/Knot is the only active Companion identity under D-070.
+- Scope: one authenticated learner, real PDF or pasted text, authoritative source/version/provenance, grounded/versioned processing, one meaningful active learning action, durable LearnerEvidence, truthful minimal LearnerState, explainable next action, persistence/reopen/recovery.
+- Boundary: physical device/mobile-readiness remains a later release blocker under D-068; no deploy/release/paid-provider/credentials/V1 learner-model expansion.
 
 ### Sprint M2.S1 — Slice foundation
 
-- Status: PLANNED / NOT_EXECUTABLE
-- Intent: admitted client/backend skeleton, auth, persistence and CI toolchain for the selected path.
+#### Section M2.S1.A — Production substrate and canonical persistence
 
-### Sprint M2.S2 — Core material journey
+##### LA-0018 — Integrate accepted architecture substrate into M5 production-shaped foundation
 
-- Status: PLANNED / NOT_EXECUTABLE
-- Intent: Auth → PDF/Text → Processing → Material Workspace → Summary.
+- Status: IN_PROGRESS
+- Depends on: none
+- Owner: Brain
+- Executor: ChatGPT (temporary reversible engineering authority)
+- Verification: accepted architecture proof substrate is available on the M5 branch without stale control-plane overwrite; canonical production-shaped domain/persistence boundary is defined for the admitted slice; bootstrap validator remains green.
+- Exec plan: [docs/exec-plans/LA-0018.md](docs/exec-plans/LA-0018.md)
 
-### Sprint M2.S3 — Library, reopen & slice hardening
+##### LA-0019 — Real material source authority, provenance and safe ingest
 
-- Status: PLANNED / NOT_EXECUTABLE
-- Intent: Library → Reopen with persistence, retry, analytics and security boundaries; slice-level QA.
+- Status: PLANNED
+- Depends on: LA-0018
+- Owner: Brain
+- Executor: ChatGPT (temporary reversible engineering authority)
+- Verification: PDF/plain-text source produces one authoritative Material/Source identity + immutable source version/provenance; retry cannot fork truth; deletion/supersession invalidation semantics are testable.
+- Exec plan: [docs/exec-plans/LA-0019.md](docs/exec-plans/LA-0019.md)
+
+### Sprint M2.S2 — Learning truth loop
+
+#### Section M2.S2.A — Evidence, state and next action
+
+##### LA-0020 — Active learning action → LearnerEvidence → LearnerState → next action
+
+- Status: PLANNED
+- Depends on: LA-0019
+- Owner: Brain
+- Executor: ChatGPT (temporary reversible engineering authority)
+- Verification: at least one meaningful active action records durable canonical evidence; state derivation is deterministic/minimal; next action is explainable; passive consumption cannot create mastery/readiness.
+- Exec plan: [docs/exec-plans/LA-0020.md](docs/exec-plans/LA-0020.md)
+
+### Sprint M2.S3 — User-visible continuity and hardening
+
+#### Section M2.S3.A — D/Knot app flow, reopen and recovery
+
+##### LA-0021 — Production-shaped mobile flow with D/Knot, close/reopen and recovery
+
+- Status: PLANNED
+- Depends on: LA-0020
+- Owner: Brain
+- Executor: ChatGPT (temporary reversible engineering authority)
+- Verification: the admitted slice is runnable as one coherent Flutter flow; D/Knot reflects learning state without owning truth; one continuity transition is exercised; close/reopen preserves source/action/evidence/state/next-action validity; stale/corrupt/retry paths fail closed or repair safely; applicable CI/security/accessibility checks pass.
+- Exec plan: [docs/exec-plans/LA-0021.md](docs/exec-plans/LA-0021.md)
+
 
 ## Milestone M3 — V0 Implementation Tranches
 
