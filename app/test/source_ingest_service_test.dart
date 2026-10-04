@@ -61,15 +61,16 @@ void main() {
   tearDown(() => store.close());
 
   test('same pasted source retry is idempotent', () async {
+    const sourceText = '  İlk satır\r\nİkinci satır  ';
     final first = await service.ingestPastedText(
       learner: learnerA,
       materialId: material,
-      text: '  İlk satır\r\nİkinci satır  ',
+      text: sourceText,
     );
     final retry = await service.ingestPastedText(
       learner: learnerA,
       materialId: material,
-      text: 'İlk satır\nİkinci satır',
+      text: sourceText,
     );
 
     expect(
@@ -87,6 +88,29 @@ void main() {
     expect(
       retry.material.currentSourceVersionId,
       retry.sourceVersion.identity.sourceVersionId,
+    );
+  });
+
+
+  test('source text change creates a new exact source version', () async {
+    final first = await service.ingestPastedText(
+      learner: learnerA,
+      materialId: material,
+      text: 'Satır 1\r\nSatır 2',
+    );
+    final second = await service.ingestPastedText(
+      learner: learnerA,
+      materialId: material,
+      text: 'Satır 1\nSatır 2',
+    );
+
+    expect(
+      second.sourceVersion.identity.sourceVersionId,
+      isNot(first.sourceVersion.identity.sourceVersionId),
+    );
+    expect(
+      first.extractedContent.normalizedText,
+      second.extractedContent.normalizedText,
     );
   });
 

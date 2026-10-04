@@ -31,18 +31,25 @@ class SourceIngestService {
     required String text,
     String sourceName = 'Pasted text',
   }) async {
-    final normalized = _normalizeText(text);
-    if (normalized.isEmpty) {
+    _requireIdentity(learner: learner, materialId: materialId);
+    if (text.trim().isEmpty) {
       throw const SourceIngestException('Pasted text cannot be empty.');
     }
-    if (normalized.length > maxTextCharacters) {
+    if (text.length > maxTextCharacters) {
       throw const SourceIngestException(
         'Pasted text exceeds the bounded M5 source limit.',
       );
     }
 
-    final bytes = utf8.encode(normalized);
-    final digest = sha256.convert(bytes).toString();
+    final normalized = _normalizeText(text);
+    if (normalized.length > maxTextCharacters) {
+      throw const SourceIngestException(
+        'Normalized text exceeds the bounded M5 source limit.',
+      );
+    }
+
+    final sourceBytes = utf8.encode(text);
+    final digest = sha256.convert(sourceBytes).toString();
     return _persist(
       learner: learner,
       materialId: materialId,
@@ -50,8 +57,8 @@ class SourceIngestService {
       mediaType: SourceMediaType.pastedText,
       sourceName: _validatedTitle(sourceName, fallback: 'Pasted text'),
       mimeType: 'text/plain; charset=utf-8',
-      byteSize: bytes.length,
-      inlineText: normalized,
+      byteSize: sourceBytes.length,
+      inlineText: text,
       extractedText: normalized,
       extractionMethod: 'inline_text',
       extractionMethodVersion: 'v1',
@@ -67,6 +74,7 @@ class SourceIngestService {
     required Uint8List bytes,
     required String originalName,
   }) async {
+    _requireIdentity(learner: learner, materialId: materialId);
     if (bytes.isEmpty) {
       throw const SourceIngestException('PDF cannot be empty.');
     }
@@ -217,13 +225,22 @@ class SourceIngestService {
     }
   }
 
-  static bool _hasPdfHeader(Uint8List bytes) =>
-      bytes.length >= 5 &&
-      bytes[0] == 0x25 &&
-      bytes[1] == 0x50 &&
-      bytes[2] == 0x44 &&
-      bytes[3] == 0x46 &&
-      bytes[4] == 0x2D;
+  static bool _hasPdfHeader(Uint8List bytes) {
+    if (bytes.length < 5) {
+      return false;
+    }
+    final searchLimit = bytes.length < 1024 ? bytes.length - 4 : 1020;
+    for (var index = 0; index < searchLimit; index++) {
+      if (bytes[index] == 0x25 &&
+          bytes[index + 1] == 0x50 &&
+          bytes[index + 2] == 0x44 &&
+          bytes[index + 3] == 0x46 &&
+          bytes[index + 4] == 0x2D) {
+        return true;
+      }
+    }
+    return false;
+  }
 
   static String _normalizeText(String text) =>
       text.replaceAll('\r\n', '\n').replaceAll('\r', '\n').trim();
