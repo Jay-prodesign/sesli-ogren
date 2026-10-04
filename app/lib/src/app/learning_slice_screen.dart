@@ -31,7 +31,6 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
   String? _supportText;
   String? _inlineError;
   bool _busy = false;
-  int _attemptSequence = 0;
 
   @override
   void initState() {
@@ -218,6 +217,10 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
         learner: widget.runtime.learner,
         materialId: AppRuntime.primaryMaterialId,
       );
+      final session = await widget.runtime.recall.openAttempt(
+        learner: widget.runtime.learner,
+        actionId: prompt.id,
+      );
       stopwatch.stop();
       await _recordEvent(
         OperationalEvent(
@@ -226,6 +229,7 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
           materialId: prompt.materialId,
           sourceVersionId: prompt.sourceVersionId,
           actionId: prompt.id,
+          attemptId: session.attempt.attemptId,
           ruleVersion: prompt.ruleVersion,
           durationMs: stopwatch.elapsedMilliseconds,
           createdAt: DateTime.now().toUtc(),
@@ -237,8 +241,8 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
         _prompt = prompt;
         _result = null;
         _continuation = null;
-        _activeAttemptId = RecallAttemptId(_nextAttemptId());
-        _supportText = null;
+        _activeAttemptId = session.attempt.attemptId;
+        _supportText = _restoredSupportNotice(session.assistance);
         _inlineError = null;
         _phase = _SlicePhase.recall;
       });
@@ -381,12 +385,6 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
     } finally {
       _setBusy(false);
     }
-  }
-
-  String _nextAttemptId() {
-    _attemptSequence++;
-    final micros = DateTime.now().microsecondsSinceEpoch;
-    return 'attempt-$micros-$_attemptSequence';
   }
 
   Future<void> _repairContinuation() async {
@@ -820,6 +818,15 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
       ),
     );
   }
+
+  static String? _restoredSupportNotice(RecallAssistance assistance) =>
+      switch (assistance) {
+        RecallAssistance.none => null,
+        RecallAssistance.hint =>
+          'Bu denemede daha önce ipucu kullandın. Sonuç bağımsız hatırlama sayılmayacak.',
+        RecallAssistance.answerExposed =>
+          'Bu denemede yanıt daha önce gösterildi. Sonuç bağımsız hatırlama sayılmayacak.',
+      };
 
   static String _outcomeText(RecallOutcome outcome) => switch (outcome) {
     RecallOutcome.correct =>
