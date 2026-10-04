@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sesli_ogren/src/data/pdf_text_extractor.dart';
 import 'package:sesli_ogren/src/data/source_ingest_service.dart';
@@ -10,8 +12,28 @@ class _UnusedPdfExtractor implements PdfTextExtractor {
   const _UnusedPdfExtractor();
 
   @override
-  Future<ExtractedPdf> extract(bytes, {required String sourceName}) {
+  Future<ExtractedPdf> extract(
+    Uint8List bytes, {
+    required String sourceName,
+  }) {
     throw UnimplementedError();
+  }
+}
+
+class _RecordingPdfExtractor implements PdfTextExtractor {
+  int calls = 0;
+
+  @override
+  Future<ExtractedPdf> extract(
+    Uint8List bytes, {
+    required String sourceName,
+  }) async {
+    calls++;
+    return const ExtractedPdf(
+      text: 'PDF text',
+      anchors: [SourceAnchor(startOffset: 0, endOffset: 8, pageNumber: 1)],
+      pageCount: 1,
+    );
   }
 }
 
@@ -50,15 +72,25 @@ void main() {
       text: 'İlk satır\nİkinci satır',
     );
 
-    expect(retry.identity.sourceVersionId, first.identity.sourceVersionId);
+    expect(
+      retry.sourceVersion.identity.sourceVersionId,
+      first.sourceVersion.identity.sourceVersionId,
+    );
     expect(
       await store.sourceVersions(learner: learnerA, materialId: material),
       hasLength(1),
     );
-    expect(retry.extractedText, 'İlk satır\nİkinci satır');
+    expect(
+      retry.extractedContent.normalizedText,
+      'İlk satır\nİkinci satır',
+    );
+    expect(
+      retry.material.currentSourceVersionId,
+      retry.sourceVersion.identity.sourceVersionId,
+    );
   });
 
-  test('new content supersedes previous current version without rewriting it', () async {
+  test('new content supersedes old source and invalidates old extraction', () async {
     final first = await service.ingestPastedText(
       learner: learnerA,
       materialId: material,
@@ -75,9 +107,21 @@ void main() {
       materialId: material,
     );
     expect(versions, hasLength(2));
-    expect(versions.first.identity.sourceVersionId, first.identity.sourceVersionId);
-    expect(versions.first.supersededBy, second.identity.sourceVersionId);
-    expect(versions.first.extractedText, 'Version one');
+    expect(
+      versions.first.identity.sourceVersionId,
+      first.sourceVersion.identity.sourceVersionId,
+    );
+    expect(
+      versions.first.supersededBy,
+      second.sourceVersion.identity.sourceVersionId,
+    );
+    expect(
+      await store.extractedContentForSource(
+        learner: learnerA,
+        sourceVersionId: first.sourceVersion.identity.sourceVersionId,
+      ),
+      isNull,
+    );
     expect(
       (await store.currentSourceVersion(
         learner: learnerA,
@@ -85,11 +129,33 @@ void main() {
       ))!
           .identity
           .sourceVersionId,
-      second.identity.sourceVersionId,
+      second.sourceVersion.identity.sourceVersionId,
     );
   });
 
-  test('guessed source version from another learner is fail-closed', () async {
+  test('retry of superseded source fails closed instead of becoming current', () async {
+    await service.ingestPastedText(
+      learner: learnerA,
+      materialId: material,
+      text: 'Old source',
+    );
+    await service.ingestPastedText(
+      learner: learnerA,
+      materialId: material,
+      text: 'New source',
+    );
+
+    expect(
+      () => service.ingestPastedText(
+        learner: learnerA,
+        materialId: material,
+        text: 'Old source',
+      ),
+      throwsA(isA<SourceStoreConflict>()),
+    );
+  });
+
+  test('guessed identifiers cannot cross learner boundary', () async {
     final source = await service.ingestPastedText(
       learner: learnerA,
       materialId: material,
@@ -99,14 +165,18 @@ void main() {
     expect(
       await store.sourceVersion(
         learner: learnerB,
-        sourceVersionId: source.identity.sourceVersionId,
+        sourceVersionId: source.sourceVersion.identity.sourceVersionId,
       ),
+      isNull,
+    );
+    expect(
+      await store.material(learner: learnerB, materialId: material),
       isNull,
     );
   });
 
-  test('deleted material no longer resolves as current truth', () async {
-    await service.ingestPastedText(
+  test('deleted material revokes source and extracted truth', () async {
+    final source = await service.ingestPastedText(
       learner: learnerA,
       materialId: material,
       text: 'Delete me',
@@ -118,11 +188,89 @@ void main() {
     );
 
     expect(
+      await store.material(learner: learnerA, materialId: material),
+      isNull,
+    );
+    expect(
       await store.currentSourceVersion(
         learner: learnerA,
         materialId: material,
       ),
       isNull,
     );
+    expect(
+      await store.sourceVersion(
+        learner: learnerA,
+        sourceVersionId: source.sourceVersion.identity.sourceVersionId,
+      ),
+      isNull,
+    );
+    expect(
+      await store.extractedContentForSource(
+        learner: learnerA,
+        sourceVersionId: source.sourceVersion.identity.sourceVersionId,
+      ),
+      isNull,
+    );
+  });
+
+  test('oversized pasted text fails before persistence', () async {
+    final bounded = SourceIngestService(
+      store: store,
+      pdfTextExtractor: const _UnusedPdfExtractor(),
+      maxTextCharacters: 4,
+    );
+
+    expect(
+      () => bounded.ingestPastedText(
+        learner: learnerA,
+        materialId: material,
+        text: '12345',
+      ),
+      throwsA(isA<SourceIngestException>()),
+    );
+    expect(
+      await store.material(learner: learnerA, materialId: material),
+      isNull,
+    );
+  });
+
+  test('malformed PDF fails before parser execution', () async {
+    final extractor = _RecordingPdfExtractor();
+    final bounded = SourceIngestService(
+      store: store,
+      pdfTextExtractor: extractor,
+    );
+
+    expect(
+      () => bounded.ingestPdf(
+        learner: learnerA,
+        materialId: material,
+        bytes: Uint8List.fromList([1, 2, 3, 4, 5]),
+        originalName: 'fake.pdf',
+      ),
+      throwsA(isA<SourceIngestException>()),
+    );
+    expect(extractor.calls, 0);
+  });
+
+  test('oversized PDF fails before parser execution', () async {
+    final extractor = _RecordingPdfExtractor();
+    final bounded = SourceIngestService(
+      store: store,
+      pdfTextExtractor: extractor,
+      maxPdfBytes: 5,
+    );
+
+    expect(
+      () => bounded.ingestPdf(
+        learner: learnerA,
+        materialId: material,
+        bytes: Uint8List.fromList([0x25, 0x50, 0x44, 0x46, 0x2D, 0x31]),
+        originalName: 'large.pdf',
+      ),
+      throwsA(isA<SourceIngestException>()),
+    );
+    expect(extractor.calls, 0);
   });
 }
