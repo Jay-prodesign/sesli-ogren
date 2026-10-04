@@ -188,7 +188,8 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Devam noktası'), findsOneWidget);
-    expect(find.textContaining('ONE_UNASSISTED_RETRIEVAL_OBSERVED'), findsOneWidget);
+    expect(find.textContaining('ONE_UNASSISTED_RETRIEVAL_OBSERVED'), findsNothing);
+    expect(find.textContaining('Neden:'), findsNothing);
   });
 
   testWidgets(
