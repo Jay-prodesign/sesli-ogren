@@ -38,6 +38,15 @@ class _NativeSpeechQaScreenState extends State<NativeSpeechQaScreen> {
 
   ProofController get controller => widget.controller;
 
+  @override
+  void initState() {
+    super.initState();
+    if (!controller.usingRealSpeech) {
+      _result = 'BLOCKED_NO_REAL_DEVICE_SPEECH';
+      _timeline.add('Real SpeechOutput is not attached. This surface cannot grant a native callback PASS.');
+    }
+  }
+
   void _note(String value) {
     if (!mounted) return;
     setState(() => _timeline.add(value));
@@ -194,7 +203,7 @@ class _NativeSpeechQaScreenState extends State<NativeSpeechQaScreen> {
               const SizedBox(height: 16),
               FilledButton.icon(
                 key: const Key('run-native-speech-qa'),
-                onPressed: _running ? null : _run,
+                onPressed: _running || !controller.usingRealSpeech ? null : _run,
                 icon: const Icon(Icons.record_voice_over),
                 label: Text(_running ? 'Running…' : 'Run Native Speech QA'),
               ),
