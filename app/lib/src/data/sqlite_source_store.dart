@@ -36,8 +36,13 @@ class SqliteSourceStore implements SourceStore {
     final database = await selectedFactory.openDatabase(
       databasePath,
       options: OpenDatabaseOptions(
-        version: 1,
+        version: 2,
         onConfigure: (db) => db.execute('PRAGMA foreign_keys = ON'),
+        onUpgrade: (db, oldVersion, newVersion) async {
+          if (oldVersion < 2) {
+            await _upgradeLearningTruthSchema(db);
+          }
+        },
         onCreate: (db, version) async {
           await db.execute('''
 CREATE TABLE materials (
@@ -144,6 +149,7 @@ CREATE TABLE learner_evidence (
   source_version_id TEXT NOT NULL,
   extracted_content_id TEXT NOT NULL,
   outcome TEXT NOT NULL,
+  assistance TEXT NOT NULL,
   help_used INTEGER NOT NULL,
   response_digest TEXT NOT NULL,
   response_length INTEGER NOT NULL,
@@ -170,6 +176,23 @@ CREATE TABLE learner_states (
 )
 ''');
           await db.execute('''
+CREATE TABLE next_learning_actions (
+  learner_id TEXT NOT NULL,
+  material_id TEXT NOT NULL,
+  source_version_id TEXT NOT NULL,
+  latest_evidence_id TEXT NOT NULL,
+  action_kind TEXT NOT NULL,
+  reason_code TEXT NOT NULL,
+  reason_text TEXT NOT NULL,
+  policy_version TEXT NOT NULL,
+  created_at_utc TEXT NOT NULL,
+  PRIMARY KEY (learner_id, material_id),
+  FOREIGN KEY (learner_id, latest_evidence_id)
+    REFERENCES learner_evidence (learner_id, evidence_id)
+    ON DELETE CASCADE
+)
+''');
+          await db.execute('''
 CREATE INDEX idx_recall_actions_source
 ON recall_actions (learner_id, material_id, source_version_id)
 ''');
@@ -180,6 +203,10 @@ ON learner_evidence (learner_id, material_id, source_version_id, created_at_utc)
           await db.execute('''
 CREATE INDEX idx_learner_states_source
 ON learner_states (learner_id, source_version_id)
+''');
+          await db.execute('''
+CREATE INDEX idx_next_learning_actions_source
+ON next_learning_actions (learner_id, source_version_id)
 ''');
           await db.execute('''
 CREATE INDEX idx_materials_active
@@ -197,6 +224,117 @@ ON extracted_contents (learner_id, source_version_id, invalidated_at_utc)
       ),
     );
     return SqliteSourceStore._(database);
+  }
+
+  static Future<void> _upgradeLearningTruthSchema(Database db) async {
+    await db.execute('''
+CREATE TABLE IF NOT EXISTS recall_actions (
+  learner_id TEXT NOT NULL,
+  action_id TEXT NOT NULL,
+  material_id TEXT NOT NULL,
+  source_version_id TEXT NOT NULL,
+  extracted_content_id TEXT NOT NULL,
+  prompt_text TEXT NOT NULL,
+  expected_answer TEXT NOT NULL,
+  anchor_start INTEGER NOT NULL,
+  anchor_end INTEGER NOT NULL,
+  page_number INTEGER,
+  rule_version TEXT NOT NULL,
+  created_at_utc TEXT NOT NULL,
+  PRIMARY KEY (learner_id, action_id),
+  FOREIGN KEY (learner_id, source_version_id)
+    REFERENCES source_versions (learner_id, source_version_id),
+  FOREIGN KEY (learner_id, extracted_content_id)
+    REFERENCES extracted_contents (learner_id, extracted_content_id)
+    ON DELETE CASCADE
+)
+''');
+    await db.execute('''
+CREATE TABLE IF NOT EXISTS learner_evidence (
+  learner_id TEXT NOT NULL,
+  evidence_id TEXT NOT NULL,
+  attempt_id TEXT NOT NULL,
+  action_id TEXT NOT NULL,
+  material_id TEXT NOT NULL,
+  source_version_id TEXT NOT NULL,
+  extracted_content_id TEXT NOT NULL,
+  outcome TEXT NOT NULL,
+  assistance TEXT NOT NULL DEFAULT 'none',
+  help_used INTEGER NOT NULL DEFAULT 0,
+  response_digest TEXT NOT NULL,
+  response_length INTEGER NOT NULL,
+  rule_version TEXT NOT NULL,
+  created_at_utc TEXT NOT NULL,
+  PRIMARY KEY (learner_id, evidence_id),
+  UNIQUE (learner_id, attempt_id),
+  FOREIGN KEY (learner_id, action_id)
+    REFERENCES recall_actions (learner_id, action_id)
+    ON DELETE CASCADE
+)
+''');
+    final evidenceColumns = await db.rawQuery(
+      'PRAGMA table_info(learner_evidence)',
+    );
+    final evidenceColumnNames = evidenceColumns
+        .map((row) => row['name'] as String)
+        .toSet();
+    if (!evidenceColumnNames.contains('assistance')) {
+      await db.execute(
+        "ALTER TABLE learner_evidence "
+        "ADD COLUMN assistance TEXT NOT NULL DEFAULT 'none'",
+      );
+      await db.execute(
+        "UPDATE learner_evidence "
+        "SET assistance = CASE WHEN help_used = 1 THEN 'hint' ELSE 'none' END",
+      );
+    }
+    await db.execute('''
+CREATE TABLE IF NOT EXISTS learner_states (
+  learner_id TEXT NOT NULL,
+  material_id TEXT NOT NULL,
+  source_version_id TEXT NOT NULL,
+  state_kind TEXT NOT NULL,
+  evidence_count INTEGER NOT NULL,
+  latest_evidence_id TEXT NOT NULL,
+  rule_version TEXT NOT NULL,
+  updated_at_utc TEXT NOT NULL,
+  PRIMARY KEY (learner_id, material_id)
+)
+''');
+    await db.execute('''
+CREATE TABLE IF NOT EXISTS next_learning_actions (
+  learner_id TEXT NOT NULL,
+  material_id TEXT NOT NULL,
+  source_version_id TEXT NOT NULL,
+  latest_evidence_id TEXT NOT NULL,
+  action_kind TEXT NOT NULL,
+  reason_code TEXT NOT NULL,
+  reason_text TEXT NOT NULL,
+  policy_version TEXT NOT NULL,
+  created_at_utc TEXT NOT NULL,
+  PRIMARY KEY (learner_id, material_id),
+  FOREIGN KEY (learner_id, latest_evidence_id)
+    REFERENCES learner_evidence (learner_id, evidence_id)
+    ON DELETE CASCADE
+)
+''');
+    await db.execute(
+      'CREATE INDEX IF NOT EXISTS idx_recall_actions_source '
+      'ON recall_actions (learner_id, material_id, source_version_id)',
+    );
+    await db.execute(
+      'CREATE INDEX IF NOT EXISTS idx_learner_evidence_material '
+      'ON learner_evidence '
+      '(learner_id, material_id, source_version_id, created_at_utc)',
+    );
+    await db.execute(
+      'CREATE INDEX IF NOT EXISTS idx_learner_states_source '
+      'ON learner_states (learner_id, source_version_id)',
+    );
+    await db.execute(
+      'CREATE INDEX IF NOT EXISTS idx_next_learning_actions_source '
+      'ON next_learning_actions (learner_id, source_version_id)',
+    );
   }
 
   @override
@@ -437,6 +575,11 @@ LIMIT 1
       }
 
       await transaction.delete(
+        'next_learning_actions',
+        where: 'learner_id = ? AND material_id = ?',
+        whereArgs: [learner.id.value, material.id.value],
+      );
+      await transaction.delete(
         'learner_states',
         where: 'learner_id = ? AND material_id = ?',
         whereArgs: [learner.id.value, material.id.value],
@@ -500,6 +643,11 @@ LIMIT 1
         return;
       }
 
+      await transaction.delete(
+        'next_learning_actions',
+        where: 'learner_id = ? AND material_id = ?',
+        whereArgs: [learner.id.value, materialId.value],
+      );
       await transaction.delete(
         'learner_states',
         where: 'learner_id = ? AND material_id = ?',
@@ -851,12 +999,35 @@ LIMIT 1
   }
 
   @override
-  Future<PersistedLearningTruth> persistEvidenceAndState({
+  Future<NextLearningAction?> nextLearningAction({
+    required AuthenticatedLearner learner,
+    required MaterialId materialId,
+  }) async {
+    final rows = await _database.query(
+      'next_learning_actions',
+      where: 'learner_id = ? AND material_id = ?',
+      whereArgs: [learner.id.value, materialId.value],
+      limit: 1,
+    );
+    return rows.isEmpty ? null : _nextActionFromRow(rows.single);
+  }
+
+  @override
+  Future<PersistedLearningTruth> persistEvidenceStateAndNextAction({
     required AuthenticatedLearner learner,
     required LearnerEvidence evidence,
     required RecallStateKind stateKind,
     required String stateRuleVersion,
+    required NextLearningAction nextAction,
   }) {
+    if (nextAction.materialId != evidence.materialId ||
+        nextAction.sourceVersionId != evidence.sourceVersionId ||
+        nextAction.latestEvidenceId != evidence.id) {
+      throw const LearningTruthConflict(
+        'Next action lineage does not match the evidence transition.',
+      );
+    }
+
     return _database.transaction((transaction) async {
       final actionRows = await transaction.query(
         'recall_actions',
@@ -918,14 +1089,21 @@ LIMIT 1
           whereArgs: [learner.id.value, evidence.materialId.value],
           limit: 1,
         );
-        if (stateRows.isEmpty) {
+        final nextRows = await transaction.query(
+          'next_learning_actions',
+          where: 'learner_id = ? AND material_id = ?',
+          whereArgs: [learner.id.value, evidence.materialId.value],
+          limit: 1,
+        );
+        if (stateRows.isEmpty || nextRows.isEmpty) {
           throw const LearningTruthConflict(
-            'Idempotent evidence replay found missing learner state.',
+            'Idempotent evidence replay found incomplete learning projection.',
           );
         }
         return PersistedLearningTruth(
           evidence: existing,
           state: _stateFromRow(stateRows.single),
+          nextAction: _nextActionFromRow(nextRows.single),
         );
       }
 
@@ -968,13 +1146,13 @@ WHERE learner_id = ?
         'rule_version': state.ruleVersion,
         'updated_at_utc': state.updatedAt.toUtc().toIso8601String(),
       };
-      final updated = await transaction.update(
+      final updatedState = await transaction.update(
         'learner_states',
         stateRow,
         where: 'learner_id = ? AND material_id = ?',
         whereArgs: [learner.id.value, state.materialId.value],
       );
-      if (updated == 0) {
+      if (updatedState == 0) {
         await transaction.insert(
           'learner_states',
           {
@@ -986,7 +1164,29 @@ WHERE learner_id = ?
         );
       }
 
-      return PersistedLearningTruth(evidence: evidence, state: state);
+      final nextRow = _nextActionToRow(
+        learner: learner,
+        action: nextAction,
+      );
+      final updatedNext = await transaction.update(
+        'next_learning_actions',
+        nextRow,
+        where: 'learner_id = ? AND material_id = ?',
+        whereArgs: [learner.id.value, nextAction.materialId.value],
+      );
+      if (updatedNext == 0) {
+        await transaction.insert(
+          'next_learning_actions',
+          nextRow,
+          conflictAlgorithm: ConflictAlgorithm.abort,
+        );
+      }
+
+      return PersistedLearningTruth(
+        evidence: evidence,
+        state: state,
+        nextAction: nextAction,
+      );
     });
   }
 
@@ -1012,7 +1212,7 @@ WHERE learner_id = ?
         left.sourceVersionId == right.sourceVersionId &&
         left.extractedContentId == right.extractedContentId &&
         left.outcome == right.outcome &&
-        left.helpUsed == right.helpUsed &&
+        left.assistance == right.assistance &&
         left.responseDigest == right.responseDigest &&
         left.responseLength == right.responseLength &&
         left.ruleVersion == right.ruleVersion;
@@ -1051,11 +1251,29 @@ WHERE learner_id = ?
       'source_version_id': evidence.sourceVersionId.value,
       'extracted_content_id': evidence.extractedContentId.value,
       'outcome': evidence.outcome.name,
+      'assistance': evidence.assistance.name,
       'help_used': evidence.helpUsed ? 1 : 0,
       'response_digest': evidence.responseDigest,
       'response_length': evidence.responseLength,
       'rule_version': evidence.ruleVersion,
       'created_at_utc': evidence.createdAt.toUtc().toIso8601String(),
+    };
+  }
+
+  static Map<String, Object?> _nextActionToRow({
+    required AuthenticatedLearner learner,
+    required NextLearningAction action,
+  }) {
+    return {
+      'learner_id': learner.id.value,
+      'material_id': action.materialId.value,
+      'source_version_id': action.sourceVersionId.value,
+      'latest_evidence_id': action.latestEvidenceId.value,
+      'action_kind': action.kind.name,
+      'reason_code': action.reasonCode,
+      'reason_text': action.reasonText,
+      'policy_version': action.policyVersion,
+      'created_at_utc': action.createdAt.toUtc().toIso8601String(),
     };
   }
 
@@ -1080,6 +1298,11 @@ WHERE learner_id = ?
   }
 
   static LearnerEvidence _evidenceFromRow(Map<String, Object?> row) {
+    final assistance = row['assistance'] == null
+        ? ((row['help_used']! as int) == 1
+              ? RecallAssistance.hint
+              : RecallAssistance.none)
+        : RecallAssistance.values.byName(row['assistance']! as String);
     return LearnerEvidence(
       id: LearnerEvidenceId(row['evidence_id']! as String),
       attemptId: RecallAttemptId(row['attempt_id']! as String),
@@ -1090,7 +1313,7 @@ WHERE learner_id = ?
         row['extracted_content_id']! as String,
       ),
       outcome: RecallOutcome.values.byName(row['outcome']! as String),
-      helpUsed: (row['help_used']! as int) == 1,
+      assistance: assistance,
       responseDigest: row['response_digest']! as String,
       responseLength: row['response_length']! as int,
       ruleVersion: row['rule_version']! as String,
@@ -1109,6 +1332,23 @@ WHERE learner_id = ?
       ),
       ruleVersion: row['rule_version']! as String,
       updatedAt: DateTime.parse(row['updated_at_utc']! as String).toUtc(),
+    );
+  }
+
+  static NextLearningAction _nextActionFromRow(Map<String, Object?> row) {
+    return NextLearningAction(
+      materialId: MaterialId(row['material_id']! as String),
+      sourceVersionId: SourceVersionId(row['source_version_id']! as String),
+      latestEvidenceId: LearnerEvidenceId(
+        row['latest_evidence_id']! as String,
+      ),
+      kind: NextLearningActionKind.values.byName(
+        row['action_kind']! as String,
+      ),
+      reasonCode: row['reason_code']! as String,
+      reasonText: row['reason_text']! as String,
+      policyVersion: row['policy_version']! as String,
+      createdAt: DateTime.parse(row['created_at_utc']! as String).toUtc(),
     );
   }
 }
