@@ -168,6 +168,91 @@ void main() {
     expect(find.textContaining('ONE_UNASSISTED_RETRIEVAL_OBSERVED'), findsOneWidget);
   });
 
+  testWidgets(
+    'answer exposure survives close and reopen without becoming independent',
+    (tester) async {
+      final store = await SqliteSourceStore.open(
+        factory: databaseFactoryFfi,
+        path: inMemoryDatabasePath,
+      );
+      addTearDown(store.close);
+
+      final ingest = SourceIngestService(
+        store: store,
+        pdfTextExtractor: const _UnusedPdfExtractor(),
+        now: () => DateTime.utc(2026, 10, 4, 17),
+      );
+      final recall = RecallLearningService(
+        sourceStore: store,
+        learningStore: store.learningTruthStore(),
+        now: () => DateTime.utc(2026, 10, 4, 17, 1),
+      );
+      final runtime = AppRuntime(
+        learner: AppRuntime.localM5LearnerFixture,
+        store: store,
+        ingest: ingest,
+        recall: recall,
+        telemetry: store.operationalTelemetry(),
+      );
+
+      await ingest.ingestPastedText(
+        learner: runtime.learner,
+        materialId: AppRuntime.primaryMaterialId,
+        text:
+            'Fotosentez sırasında klorofil ışık enerjisini kimyasal enerjiye '
+            'dönüştürmeye yardımcı olur. Bitkiler bu süreçte karbondioksit kullanır.',
+      );
+      final prompt = await recall.createCurrentPrompt(
+        learner: runtime.learner,
+        materialId: AppRuntime.primaryMaterialId,
+      );
+      final action = await store.learningTruthStore().recallAction(
+        learner: runtime.learner,
+        actionId: prompt.id,
+      );
+      expect(action, isNotNull);
+
+      await tester.pumpWidget(testShell(runtime));
+      await tester.pumpAndSettle();
+      expect(find.text('Hatırla'), findsOneWidget);
+
+      await tester.tap(find.text('Yanıtı göster'));
+      await tester.pumpAndSettle();
+      expect(find.textContaining('Yanıt:'), findsOneWidget);
+
+      await tester.pumpWidget(const SizedBox.shrink());
+      await tester.pump();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: MediaQuery(
+            data: const MediaQueryData(disableAnimations: true),
+            child: LearningSliceScreen(
+              key: const ValueKey('reopened-supported-attempt'),
+              runtime: runtime,
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Hatırla'), findsOneWidget);
+      expect(
+        find.textContaining('yanıt daha önce gösterildi'),
+        findsOneWidget,
+      );
+
+      await tester.enterText(find.byType(TextField), action!.expectedAnswer);
+      await tester.tap(find.text('Yanıtla'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('İpucusuz hatırladın'), findsNothing);
+      expect(
+        find.textContaining('geri çağırma başarısı olarak sayılmadı'),
+        findsOneWidget,
+      );
+    },
+  );
+
   testWidgets('Reduced Motion keeps the learning slice usable', (tester) async {
     final store = await SqliteSourceStore.open(
       factory: databaseFactoryFfi,
