@@ -11,12 +11,12 @@
   },
   "mission": {
     "id": "ROUND7_COMPANION_RUNTIME_EVIDENCE",
-    "title": "Round 7 Companion / Runtime Evidence — physical native gate",
+    "title": "Round 7 Companion / Runtime Evidence — non-physical closure; final device gate deferred",
     "executor": "ChatGPT (Founder-authorized bounded engineering delegate; Claude may resume after fresh-read)"
   },
-  "lifecycle_stage": "Post-M4 Architecture Proof — admitted Round 7 evidence program; M2/Golden Learning Slice NOT_EXECUTABLE",
+  "lifecycle_stage": "Post-M4 Architecture Proof — admitted Round 7 evidence program; physical install deferred to final mobile-readiness; M2/Golden Learning Slice NOT_EXECUTABLE pending Founder Product/Visual PASS + explicit admission",
   "status": "IN_PROGRESS",
-  "active_milestone": "M1 DONE; Round 7 evidence program active outside M2 implementation",
+  "active_milestone": "M1 DONE; Round 7 non-physical closure active; final physical-device validation deferred under D-068",
   "architecture_proof": {
     "disposition": "ARCHITECTURE_PROOF_PASS / GO_ADAPT",
     "reviewed_head_sha": "0327d2e5b854df1c9923c65ed88f77151cfe9eed",
@@ -38,8 +38,8 @@
   "git": {
     "branch": "feat/round7-companion-production-sequence-v2",
     "base_sha": "c8c7f222ba6ca4c813bde6850f3e58c51cf5ca34",
-    "head_sha": "eb9c07285bf3ed201556cb7e60b8de9e561e22b5",
-    "head_sha_note": "Latest fully verified application/evidence head before this docs-only reconciliation. PR CI checked out merge ref 54a96e776fda7252cb578ec2c2d58ff4cdf5aabd.",
+    "head_sha": "92f0ab4c517d8b9885a41ee0f0541447b53e75b3",
+    "head_sha_note": "Current PR #8 head after native-speech QA test stabilization. Exact-head bootstrap PASS; round7-p1-proof CI is running/pending at the time of this control-plane projection.",
     "pr_number": 8,
     "pr_url": "https://github.com/Jay-prodesign/sesli-ogren/pull/8",
     "merged": false,
@@ -50,7 +50,7 @@
     ]
   },
   "round7_evidence_program": {
-    "status": "PHYSICAL_NATIVE_DEVICE_GATE",
+    "status": "NON_PHYSICAL_EXACT_HEAD_CI_PENDING__PHYSICAL_DEVICE_GATE_DEFERRED_FINAL",
     "companion_cursor": "docs/agent/ROUND7_COMPANION_CURRENT_CURSOR.json",
     "companion_status": "docs/agent/ROUND7_COMPANION_ASSET_STATUS.json",
     "synthetic_visual_qa": "PASS",
@@ -61,46 +61,46 @@
     "android_profile_build": "PASS",
     "ios_no_codesign_compile": "PASS",
     "remaining": [
-      "D1 iPhone physical native TTS audibility / fixture-owned locale voice behavior",
-      "D1 iPhone Native Speech QA callback PASS",
-      "D1 real-device smoothness / input responsiveness",
-      "D1 native safe-area/orientation behavior",
-      "D2/D3 Android physical matrix evidence later when hardware is available"
+      "PR #8 exact-head round7-p1-proof CI completion at 92f0ab4c517d8b9885a41ee0f0541447b53e75b3",
+      "Founder Product/Visual PASS on the controlling production-shaped proof using a non-install review surface where practical",
+      "D1/D2/D3 physical native TTS/accessibility/performance/orientation evidence at the final mobile-readiness gate before release-candidate/public-release claims"
     ],
     "ios_native_tts_simulator_lifecycle": "PASS_START_COMPLETION_STOP",
     "native_speech_qa": "ONE_TAP_SCREEN_READY",
     "android_profile_apk_sha256": "20b4d1d7d5f30252b7510fccd827d3fcad657bc08abad4d1331acf1a60d8f40d",
     "tts_error_fallback": "UNIT_TEST_PASS__TEXT_AND_LEARNING_LOOP_PRESERVED",
     "device_execution_priority": {
-      "mode": "IOS_FIRST",
-      "D1": "ACTIVE",
-      "D2": "DEFERRED_UNTIL_ANDROID_DEVICE_AVAILABLE",
-      "D3": "DEFERRED_UNTIL_ANDROID_DEVICE_AVAILABLE",
-      "full_cross_device_matrix": "OPEN"
+      "mode": "FINAL_DEVICE_GATE_DEFERRED_D068",
+      "D1": "DEFERRED_TO_FINAL_MOBILE_READINESS",
+      "D2": "DEFERRED_TO_FINAL_MOBILE_READINESS_WHEN_HARDWARE_AVAILABLE",
+      "D3": "DEFERRED_TO_FINAL_MOBILE_READINESS_WHEN_HARDWARE_AVAILABLE",
+      "full_cross_device_matrix": "MANDATORY_BEFORE_RELEASE_CANDIDATE_OR_PUBLIC_RELEASE"
     }
   },
   "next_handoff": {
     "id": "M5_GOLDEN_LEARNING_SLICE_HANDOFF_NOT_ISSUED",
     "status": "NOT_EXECUTABLE",
-    "gate": "Close controlling Product/Visual + Round 7 physical device/voice/accessibility evidence, fresh-read canonical authority, then explicit Brain admission."
+    "gate": "Exact-head Round 7 non-physical technical closure + Founder Product/Visual PASS + canonical fresh-read + explicit Brain admission. D-068 explicitly bounds physical D1/D2/D3 validation to the final mobile-readiness gate rather than blocking implementation."
   },
   "blockers": [
-    "Immediate companion closure work is D1 iPhone physical native-device TTS/audio + smoothness/safe-area validation.",
-    "D2/D3 Android physical runs are deferred until suitable hardware is available; full R7-06 cross-device closure remains open until then.",
+    "PR #8 exact-head round7-p1-proof CI is still pending at 92f0ab4c517d8b9885a41ee0f0541447b53e75b3.",
+    "Founder Product/Visual PASS remains an owner gate before explicit M5 admission.",
     "M2/Golden Learning Slice implementation remains NOT_EXECUTABLE until explicit admission.",
+    "Physical D1/D2/D3 validation remains mandatory but is deferred to final mobile-readiness under D-068, not an immediate implementation blocker.",
     "AUTO_AGENT_BRIDGE_BLOCKED remains optional/non-blocking."
   ],
   "protected_gate": "Merge, release, deploy, paid providers, credentials/secrets, licensing posture, production mutation: Product Owner only",
-  "next_action": "Prioritize D1 iPhone physical QA now using the one-tap Native Speech QA screen plus audibility/fixture-locale/orientation/smoothness observation. Do not wait for Android hardware for today's D1 evidence. Keep D2/D3 deferred for later full R7-06 matrix closure. Do not reopen companion assets/rigging unless physical evidence reveals a concrete defect. Do not begin M2 implementation without explicit admission.",
+  "next_action": "Finish PR #8 exact-head non-physical CI. Then obtain Founder Product/Visual PASS through a non-install review surface if needed, fresh-read canonical authority, and issue explicit M5 Golden Learning Slice admission. Do not request early real-phone installation; keep D1/D2/D3 physical QA as a final mobile-readiness/release blocker under D-068.",
   "canonical_source_refs": [
     "CURRENT_EXECUTION_STATE — Learning App",
+    "D-068 — Final Install After Implementation / Physical Device Gate Bounded",
     "M4_ARCHITECTURE_PROOF_BRAIN_REVIEW_004 — ARCHITECTURE_PROOF_PASS / GO_ADAPT",
     "M5_GOLDEN_LEARNING_SLICE_ACCEPTANCE_CONTRACT_v0.1 — Learning App",
     "ROUND_7_COMPANION_PRODUCTION_SEQUENCE_V2 (repo execution authority)",
     "ROUND7_COMPANION_CURRENT_CURSOR.json",
     "ROUND7_COMPANION_ASSET_STATUS.json"
   ],
-  "updated_at": "2026-10-03",
+  "updated_at": "2026-10-04",
   "auto_agent_bridge": {
     "status": "AUTO_AGENT_BRIDGE_BLOCKED",
     "mechanism": "anthropics/claude-code-action@v1 via .github/workflows/claude-bridge.yml (wake-up only)",
@@ -138,5 +138,12 @@
       "production mutation",
       "cross-project mutation"
     ]
+  },
+  "founder_sequence_override": {
+    "decision_id": "D-068",
+    "status": "ACTIVE",
+    "rule": "Real-phone installation is deferred until the app is otherwise complete enough for final device/mobile-readiness validation.",
+    "pre_m5_effect": "Physical R7 device evidence is explicitly bounded and does not block development; non-physical technical closure plus Founder Product/Visual PASS still precede explicit M5 admission.",
+    "release_effect": "Physical iOS/Android device, speech, accessibility, performance and orientation checks remain mandatory before release-candidate/public-release claims."
   }
 }
