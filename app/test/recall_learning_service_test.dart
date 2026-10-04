@@ -444,6 +444,48 @@ void main() {
     );
   });
 
+  test('continuation repair rebuilds projections without adding evidence', () async {
+    final prompt = await recall.createCurrentPrompt(
+      learner: learnerA,
+      materialId: materialId,
+    );
+    final action = await storedAction(prompt);
+    final result = await recall.submit(
+      learner: learnerA,
+      actionId: prompt.id,
+      attemptId: const RecallAttemptId('attempt-repair'),
+      disposition: RecallResponseDisposition.answer,
+      answer: action.expectedAnswer,
+    );
+
+    final source = await sourceStore.currentSourceVersion(
+      learner: learnerA,
+      materialId: materialId,
+    );
+    final before = await sourceStore.learningTruthStore().evidenceForMaterial(
+      learner: learnerA,
+      materialId: materialId,
+      sourceVersionId: source!.identity.sourceVersionId,
+    );
+
+    final repaired = await recall.repairContinuation(
+      learner: learnerA,
+      materialId: materialId,
+    );
+    final after = await sourceStore.learningTruthStore().evidenceForMaterial(
+      learner: learnerA,
+      materialId: materialId,
+      sourceVersionId: source.identity.sourceVersionId,
+    );
+
+    expect(repaired, isNotNull);
+    expect(repaired!.state.latestEvidenceId, result.evidence.id);
+    expect(repaired.state.evidenceCount, before.length);
+    expect(repaired.nextAction.reasonCode, result.nextAction.reasonCode);
+    expect(repaired.nextAction.policyVersion, result.nextAction.policyVersion);
+    expect(after.map((item) => item.id), before.map((item) => item.id));
+  });
+
   test('evidence state and next action survive database close and reopen', () async {
     final temp = await Directory.systemTemp.createTemp('sesli-ogren-learning-');
     final databasePath = '${temp.path}/learning.db';
