@@ -186,7 +186,7 @@ Next unallocated ID: **LA-0022**.
 
 ##### LA-0020 — Active learning action → LearnerEvidence → LearnerState → next action
 
-- Status: IN_PROGRESS
+- Status: DONE
 - Depends on: LA-0019
 - Owner: Brain
 - Executor: ChatGPT (temporary reversible engineering authority)
@@ -199,7 +199,7 @@ Next unallocated ID: **LA-0022**.
 
 ##### LA-0021 — Production-shaped mobile flow with D/Knot, close/reopen and recovery
 
-- Status: PLANNED
+- Status: IN_PROGRESS
 - Depends on: LA-0020
 - Owner: Brain
 - Executor: ChatGPT (temporary reversible engineering authority)

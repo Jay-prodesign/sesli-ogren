@@ -1,3 +1,34 @@
+# M5 ENGINEER RETURN — LA-0020 CLOSED / LA-0021 ACTIVE
+
+## LA-0020 disposition
+
+**DONE (implementation), with M5 checkpoint validation/review pending under D-072 / GLS-083.**
+
+Implemented:
+- deterministic source-grounded Recall cloze action;
+- UI-facing prompt that does not expose the stored expected answer;
+- canonical LearnerEvidence with stable attempt/evidence identity and response digest rather than raw-answer analytics duplication;
+- distinct independent, hinted, answer-exposed, partial, incorrect and unknown semantics;
+- unknown/answer exposure remain not-assessed rather than becoming fabricated weakness or mastery;
+- bounded LearnerState with explicit rule version and no mastery/pass probability;
+- versioned, reason-coded NextLearningAction persisted atomically with evidence/state;
+- replay idempotency and conflicting-replay fail-closed behavior;
+- anti-farming semantics: repeated same prompt cannot escalate beyond one observed retrieval state;
+- stale-source/current-source checks and source-supersession projection clearing;
+- deletion cleanup;
+- SQLite schema v2 migration including prior-state semantic recomputation and next-action backfill;
+- close/reopen continuation contract.
+
+Pending checkpoint evidence:
+- one bounded Flutter pub/format/analyze/test/Android+iOS build batch under D-072;
+- GLS-083 independent read-only review for evidence/state/idempotency/persistence.
+
+## Current cursor
+
+**LA-0021 — IN_PROGRESS.** Build one coherent production-shaped Flutter path: source → Recall → evidence reaction → next action → close/reopen/recovery, with D/Knot as the only Companion identity.
+
+---
+
 # M5 ENGINEER RETURN — LA-0019 CLOSED / LA-0020 ACTIVE
 
 ## LA-0019 disposition

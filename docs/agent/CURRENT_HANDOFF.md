@@ -10,7 +10,7 @@
 | Branch | `feat/m5-golden-learning-slice` |
 | Executor | ChatGPT under Founder-authorized reversible engineering authority; Claude/Codex may resume only after fresh-read |
 | Acceptance authority | `M5_GOLDEN_LEARNING_SLICE_ACCEPTANCE_CONTRACT_v0.1` |
-| Current task | **LA-0020 — active learning → evidence → state → next action** |
+| Current task | **LA-0021 — coherent D/Knot Flutter flow + reopen/recovery** |
 | Companion | **D/Knot only — D-070 Founder selection** |
 
 ## Mission
@@ -35,8 +35,8 @@ At least one continuity transition must be exercised in addition to the evidence
 
 1. **LA-0018** — DONE: accepted architecture substrate integrated into the production-shaped foundation.
 2. **LA-0019** — DONE: authoritative Material → immutable SourceVersion → ExtractedContent, bounded PDF/text ingest, retry/supersession/delete/tenant semantics; runtime batch pending D-072.
-3. **LA-0020** — IN PROGRESS: active learning → LearnerEvidence → LearnerState → next action.
-4. **LA-0021** — coherent Flutter flow with D/Knot + close/reopen/recovery + checkpoint evidence.
+3. **LA-0020** — DONE: source-grounded Recall → canonical evidence → bounded deterministic state → persisted reason-coded next action; runtime batch + GLS-083 review pending checkpoint.
+4. **LA-0021** — IN PROGRESS: coherent Flutter flow with D/Knot + close/reopen/recovery + checkpoint evidence.
 
 Do not stop for routine Founder confirmation between these tasks. Stop only for a genuine Founder product decision, access/credential blocker, irreversible/material risk, protected action, or final physical-device-only validation.
 
