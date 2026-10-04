@@ -21,7 +21,7 @@ Milestone numbering follows the program sequence in
 M1 = Architecture Proof, …). Drive lifecycle-stage labels use a different
 numbering: lifecycle "M3" is this M0, and lifecycle "M4" is this M1.
 
-Next unallocated ID: **LA-0022**.
+Next unallocated ID: **LA-0023**.
 
 ---
 
@@ -199,13 +199,27 @@ Next unallocated ID: **LA-0022**.
 
 ##### LA-0021 — Production-shaped mobile flow with D/Knot, close/reopen and recovery
 
-- Status: IN_PROGRESS
+- Status: DONE
 - Depends on: LA-0020
 - Owner: Brain
 - Executor: ChatGPT (temporary reversible engineering authority)
 - Verification: the admitted slice is runnable as one coherent Flutter flow; D/Knot reflects learning state without owning truth; one continuity transition is exercised; close/reopen preserves source/action/evidence/state/next-action validity; stale/corrupt/retry paths fail closed or repair safely; applicable CI/security/accessibility checks pass.
 - Exec plan: [docs/exec-plans/LA-0021.md](docs/exec-plans/LA-0021.md)
 
+
+
+### Sprint M2.S4 — M5 checkpoint
+
+#### Section M2.S4.A — Evidence, review and disposition
+
+##### LA-0022 — M5 checkpoint evidence, independent review and disposition
+
+- Status: IN_PROGRESS
+- Depends on: LA-0021
+- Owner: Brain
+- Executor: ChatGPT (temporary reversible engineering authority)
+- Verification: exact candidate head is frozen; applicable GLS matrix is reconciled; one bounded D-072 runtime/build batch is completed only after code freeze; dependency lock/reproducibility is closed; GLS-083 independent read-only review findings are resolved; Product/Learning/Creative/accessibility dispositions are explicit; remaining physical-device work stays bounded under D-068; Brain records PASS / CHANGES_REQUIRED / BLOCKED / OWNER_GATE.
+- Exec plan: [docs/exec-plans/LA-0022.md](docs/exec-plans/LA-0022.md)
 
 ## Milestone M3 — V0 Implementation Tranches
 

@@ -1,3 +1,27 @@
+# M5 ENGINEER RETURN — LA-0021 CLOSED / LA-0022 CHECKPOINT ACTIVE
+
+## LA-0021 disposition
+
+**DONE (implementation), checkpoint validation pending under D-072 / GLS-083.**
+
+Implemented and hardened:
+- coherent pasted-text → Recall → evidence reaction → reason-coded next action → continuation flow;
+- D/Knot-only semantic Companion states with Reduced Motion handling and image/text fallback;
+- SQLite-backed close/reopen continuation and explicit repair path;
+- privacy-safe operational telemetry separated from learner truth;
+- restart-safe active Recall attempt persistence (schema v6);
+- canonical hint/answer exposure that cannot be downgraded by client declaration;
+- answer exposure survives app close/reopen and cannot be laundered into independent retrieval;
+- source supersession clears active attempt/state/next-action projections;
+- successful evidence closes the active attempt; idempotent replay remains supported;
+- local M5 learner identity remains an explicit runtime fixture boundary, not a production-auth claim.
+
+## Current cursor
+
+**LA-0022 — IN_PROGRESS.** No new feature breadth. Close exact-head reproducibility, dependency lock, one bounded validation batch, GLS-083 independent review and explicit M5 checkpoint disposition. Physical-device mobile readiness remains deferred under D-068.
+
+---
+
 # M5 ENGINEER RETURN — LA-0020 CLOSED / LA-0021 ACTIVE
 
 ## LA-0020 disposition
