@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../domain/learning_truth.dart';
+import '../domain/operational_event.dart';
 import 'app_runtime.dart';
 import 'companion_view.dart';
 
@@ -45,7 +46,20 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
     super.dispose();
   }
 
+  Future<void> _recordEvent(OperationalEvent event) async {
+    try {
+      await widget.runtime.telemetry.record(
+        learner: AppRuntime.learner,
+        event: event,
+      );
+    } catch (_) {
+      // Operational telemetry must never become learning-state authority
+      // or block the learner's flow.
+    }
+  }
+
   Future<void> _restore() async {
+
     _setBusy(true);
     try {
       final material = await widget.runtime.store.material(
@@ -77,7 +91,28 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
       } else {
         await _openRecall();
       }
-    } catch (_) {
+      stopwatch.stop();
+      await _recordEvent(
+        OperationalEvent(
+          type: OperationalEventType.runtimeRestore,
+          phase: OperationalEventPhase.completed,
+          materialId: AppRuntime.primaryMaterialId,
+          durationMs: stopwatch.elapsedMilliseconds,
+          createdAt: DateTime.now().toUtc(),
+        ),
+      );
+    } catch (error) {
+      stopwatch.stop();
+      await _recordEvent(
+        OperationalEvent(
+          type: OperationalEventType.runtimeRestore,
+          phase: OperationalEventPhase.failed,
+          materialId: AppRuntime.primaryMaterialId,
+          durationMs: stopwatch.elapsedMilliseconds,
+          errorClass: error.runtimeType.toString(),
+          createdAt: DateTime.now().toUtc(),
+        ),
+      );
       if (!mounted) return;
       setState(() {
         _phase = _SlicePhase.error;
@@ -96,17 +131,48 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
       return;
     }
 
+    final stopwatch = Stopwatch()..start();
+    await _recordEvent(
+      OperationalEvent(
+        type: OperationalEventType.sourceIngest,
+        phase: OperationalEventPhase.started,
+        materialId: AppRuntime.primaryMaterialId,
+        createdAt: DateTime.now().toUtc(),
+      ),
+    );
     _setBusy(true);
     try {
-      await widget.runtime.ingest.ingestPastedText(
+      final ingestResult = await widget.runtime.ingest.ingestPastedText(
         learner: AppRuntime.learner,
         materialId: AppRuntime.primaryMaterialId,
         text: text,
         sourceName: 'Çalışma materyalim',
       );
       _sourceController.clear();
+      stopwatch.stop();
+      await _recordEvent(
+        OperationalEvent(
+          type: OperationalEventType.sourceIngest,
+          phase: OperationalEventPhase.completed,
+          materialId: AppRuntime.primaryMaterialId,
+          sourceVersionId: ingestResult.sourceVersion.identity.sourceVersionId,
+          durationMs: stopwatch.elapsedMilliseconds,
+          createdAt: DateTime.now().toUtc(),
+        ),
+      );
       await _openRecall();
-    } catch (_) {
+    } catch (error) {
+      stopwatch.stop();
+      await _recordEvent(
+        OperationalEvent(
+          type: OperationalEventType.sourceIngest,
+          phase: OperationalEventPhase.failed,
+          materialId: AppRuntime.primaryMaterialId,
+          durationMs: stopwatch.elapsedMilliseconds,
+          errorClass: error.runtimeType.toString(),
+          createdAt: DateTime.now().toUtc(),
+        ),
+      );
       if (!mounted) return;
       setState(() {
         _inlineError =
@@ -118,9 +184,31 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
   }
 
   Future<void> _openRecall() async {
+    final stopwatch = Stopwatch()..start();
+    await _recordEvent(
+      OperationalEvent(
+        type: OperationalEventType.recallPrompt,
+        phase: OperationalEventPhase.started,
+        materialId: AppRuntime.primaryMaterialId,
+        createdAt: DateTime.now().toUtc(),
+      ),
+    );
     final prompt = await widget.runtime.recall.createCurrentPrompt(
       learner: AppRuntime.learner,
       materialId: AppRuntime.primaryMaterialId,
+    );
+    stopwatch.stop();
+    await _recordEvent(
+      OperationalEvent(
+        type: OperationalEventType.recallPrompt,
+        phase: OperationalEventPhase.completed,
+        materialId: prompt.materialId,
+        sourceVersionId: prompt.sourceVersionId,
+        actionId: prompt.id,
+        ruleVersion: prompt.ruleVersion,
+        durationMs: stopwatch.elapsedMilliseconds,
+        createdAt: DateTime.now().toUtc(),
+      ),
     );
     if (!mounted) return;
     _answerController.clear();
@@ -191,6 +279,17 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
       return;
     }
 
+    final stopwatch = Stopwatch()..start();
+    await _recordEvent(
+      OperationalEvent(
+        type: OperationalEventType.recallAttempt,
+        phase: OperationalEventPhase.started,
+        materialId: prompt.materialId,
+        sourceVersionId: prompt.sourceVersionId,
+        actionId: prompt.id,
+        createdAt: DateTime.now().toUtc(),
+      ),
+    );
     _setBusy(true);
     try {
       final result = await widget.runtime.recall.submit(
@@ -202,13 +301,41 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
             : RecallResponseDisposition.answer,
         answer: unknown ? '' : _answerController.text,
       );
+      stopwatch.stop();
+      await _recordEvent(
+        OperationalEvent(
+          type: OperationalEventType.recallAttempt,
+          phase: OperationalEventPhase.completed,
+          materialId: result.evidence.materialId,
+          sourceVersionId: result.evidence.sourceVersionId,
+          actionId: result.evidence.actionId,
+          evidenceId: result.evidence.id,
+          ruleVersion: result.evidence.ruleVersion,
+          policyVersion: result.nextAction.policyVersion,
+          durationMs: stopwatch.elapsedMilliseconds,
+          createdAt: DateTime.now().toUtc(),
+        ),
+      );
       if (!mounted) return;
       setState(() {
         _result = result;
         _phase = _SlicePhase.result;
         _inlineError = null;
       });
-    } catch (_) {
+    } catch (error) {
+      stopwatch.stop();
+      await _recordEvent(
+        OperationalEvent(
+          type: OperationalEventType.recallAttempt,
+          phase: OperationalEventPhase.failed,
+          materialId: prompt.materialId,
+          sourceVersionId: prompt.sourceVersionId,
+          actionId: prompt.id,
+          durationMs: stopwatch.elapsedMilliseconds,
+          errorClass: error.runtimeType.toString(),
+          createdAt: DateTime.now().toUtc(),
+        ),
+      );
       _showRecoverableError();
     } finally {
       _setBusy(false);
@@ -223,6 +350,15 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
 
   Future<void> _repairContinuation() async {
     if (_busy) return;
+    final stopwatch = Stopwatch()..start();
+    await _recordEvent(
+      OperationalEvent(
+        type: OperationalEventType.continuationRepair,
+        phase: OperationalEventPhase.started,
+        materialId: AppRuntime.primaryMaterialId,
+        createdAt: DateTime.now().toUtc(),
+      ),
+    );
     _setBusy(true);
     try {
       final repaired = await widget.runtime.recall.repairContinuation(
@@ -231,6 +367,20 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
       );
       if (!mounted) return;
 
+      stopwatch.stop();
+      await _recordEvent(
+        OperationalEvent(
+          type: OperationalEventType.continuationRepair,
+          phase: OperationalEventPhase.completed,
+          materialId: AppRuntime.primaryMaterialId,
+          sourceVersionId: repaired?.state.sourceVersionId,
+          evidenceId: repaired?.state.latestEvidenceId,
+          ruleVersion: repaired?.state.ruleVersion,
+          policyVersion: repaired?.nextAction.policyVersion,
+          durationMs: stopwatch.elapsedMilliseconds,
+          createdAt: DateTime.now().toUtc(),
+        ),
+      );
       if (repaired != null) {
         setState(() {
           _continuation = repaired;
@@ -241,7 +391,18 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
       }
 
       await _openRecall();
-    } catch (_) {
+    } catch (error) {
+      stopwatch.stop();
+      await _recordEvent(
+        OperationalEvent(
+          type: OperationalEventType.continuationRepair,
+          phase: OperationalEventPhase.failed,
+          materialId: AppRuntime.primaryMaterialId,
+          durationMs: stopwatch.elapsedMilliseconds,
+          errorClass: error.runtimeType.toString(),
+          createdAt: DateTime.now().toUtc(),
+        ),
+      );
       if (!mounted) return;
       setState(() {
         _phase = _SlicePhase.source;

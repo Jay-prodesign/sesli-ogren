@@ -6,7 +6,9 @@ import 'package:sqflite/sqflite.dart';
 import '../domain/authenticated_learner.dart';
 import '../domain/learning_contracts.dart';
 import '../domain/learning_truth.dart';
+import '../domain/operational_event.dart';
 import 'learning_truth_store.dart';
+import 'operational_telemetry.dart';
 import 'source_store.dart';
 
 class SourceStoreConflict implements Exception {
@@ -26,6 +28,9 @@ class SqliteSourceStore implements SourceStore {
   LearningTruthStore learningTruthStore() =>
       SqliteLearningTruthStore._(_database);
 
+  OperationalTelemetry operationalTelemetry() =>
+      SqliteOperationalTelemetry._(_database);
+
   static Future<SqliteSourceStore> open({
     DatabaseFactory? factory,
     String? path,
@@ -36,7 +41,7 @@ class SqliteSourceStore implements SourceStore {
     final database = await selectedFactory.openDatabase(
       databasePath,
       options: OpenDatabaseOptions(
-        version: 3,
+        version: 4,
         onConfigure: (db) => db.execute('PRAGMA foreign_keys = ON'),
         onUpgrade: (db, oldVersion, newVersion) async {
           if (oldVersion < 2) {
@@ -44,6 +49,9 @@ class SqliteSourceStore implements SourceStore {
           }
           if (oldVersion < 3) {
             await _upgradeRecallSupportSchema(db);
+          }
+          if (oldVersion < 4) {
+            await _upgradeOperationalTelemetrySchema(db);
           }
         },
         onCreate: (db, version) async {
@@ -209,6 +217,27 @@ CREATE TABLE recall_attempt_support (
 )
 ''');
           await db.execute('''
+CREATE TABLE operational_events (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  learner_id TEXT NOT NULL,
+  event_type TEXT NOT NULL,
+  phase TEXT NOT NULL,
+  material_id TEXT,
+  source_version_id TEXT,
+  action_id TEXT,
+  evidence_id TEXT,
+  rule_version TEXT,
+  policy_version TEXT,
+  duration_ms INTEGER,
+  error_class TEXT,
+  created_at_utc TEXT NOT NULL
+)
+''');
+          await db.execute('''
+CREATE INDEX idx_operational_events_learner_time
+ON operational_events (learner_id, created_at_utc)
+''');
+          await db.execute('''
 CREATE INDEX idx_recall_actions_source
 ON recall_actions (learner_id, material_id, source_version_id)
 ''');
@@ -240,6 +269,30 @@ ON extracted_contents (learner_id, source_version_id, invalidated_at_utc)
       ),
     );
     return SqliteSourceStore._(database);
+  }
+
+  static Future<void> _upgradeOperationalTelemetrySchema(Database db) async {
+    await db.execute('''
+CREATE TABLE IF NOT EXISTS operational_events (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  learner_id TEXT NOT NULL,
+  event_type TEXT NOT NULL,
+  phase TEXT NOT NULL,
+  material_id TEXT,
+  source_version_id TEXT,
+  action_id TEXT,
+  evidence_id TEXT,
+  rule_version TEXT,
+  policy_version TEXT,
+  duration_ms INTEGER,
+  error_class TEXT,
+  created_at_utc TEXT NOT NULL
+)
+''');
+    await db.execute('''
+CREATE INDEX IF NOT EXISTS idx_operational_events_learner_time
+ON operational_events (learner_id, created_at_utc)
+''');
   }
 
   static Future<void> _upgradeRecallSupportSchema(Database db) async {
@@ -1766,3 +1819,70 @@ WHERE learner_id = ?
     );
   }
 }
+
+class SqliteOperationalTelemetry implements OperationalTelemetry {
+  SqliteOperationalTelemetry._(this._database);
+
+  final Database _database;
+
+  @override
+  Future<void> record({
+    required AuthenticatedLearner learner,
+    required OperationalEvent event,
+  }) async {
+    await _database.insert('operational_events', {
+      'learner_id': learner.id.value,
+      'event_type': event.type.name,
+      'phase': event.phase.name,
+      'material_id': event.materialId?.value,
+      'source_version_id': event.sourceVersionId?.value,
+      'action_id': event.actionId?.value,
+      'evidence_id': event.evidenceId?.value,
+      'rule_version': event.ruleVersion,
+      'policy_version': event.policyVersion,
+      'duration_ms': event.durationMs,
+      'error_class': event.errorClass,
+      'created_at_utc': event.createdAt.toUtc().toIso8601String(),
+    });
+  }
+
+  @override
+  Future<List<OperationalEvent>> events({
+    required AuthenticatedLearner learner,
+  }) async {
+    final rows = await _database.query(
+      'operational_events',
+      where: 'learner_id = ?',
+      whereArgs: [learner.id.value],
+      orderBy: 'id ASC',
+    );
+    return rows.map((row) {
+      return OperationalEvent(
+        type: OperationalEventType.values.byName(
+          row['event_type']! as String,
+        ),
+        phase: OperationalEventPhase.values.byName(
+          row['phase']! as String,
+        ),
+        materialId: row['material_id'] == null
+            ? null
+            : MaterialId(row['material_id']! as String),
+        sourceVersionId: row['source_version_id'] == null
+            ? null
+            : SourceVersionId(row['source_version_id']! as String),
+        actionId: row['action_id'] == null
+            ? null
+            : RecallActionId(row['action_id']! as String),
+        evidenceId: row['evidence_id'] == null
+            ? null
+            : LearnerEvidenceId(row['evidence_id']! as String),
+        ruleVersion: row['rule_version'] as String?,
+        policyVersion: row['policy_version'] as String?,
+        durationMs: row['duration_ms'] as int?,
+        errorClass: row['error_class'] as String?,
+        createdAt: DateTime.parse(row['created_at_utc']! as String).toUtc(),
+      );
+    }).toList(growable: false);
+  }
+}
+

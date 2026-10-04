@@ -1,3 +1,4 @@
+import '../data/operational_telemetry.dart';
 import '../data/pdf_text_extractor.dart';
 import '../data/source_ingest_service.dart';
 import '../data/sqlite_source_store.dart';
@@ -10,6 +11,7 @@ class AppRuntime {
     required this.store,
     required this.ingest,
     required this.recall,
+    required this.telemetry,
   });
 
   /// M5 keeps auth behind the domain boundary without introducing production
@@ -24,6 +26,7 @@ class AppRuntime {
   final SqliteSourceStore store;
   final SourceIngestService ingest;
   final RecallLearningService recall;
+  final OperationalTelemetry telemetry;
 
   static Future<AppRuntime> open() async {
     final store = await SqliteSourceStore.open();
@@ -35,7 +38,12 @@ class AppRuntime {
       sourceStore: store,
       learningStore: store.learningTruthStore(),
     );
-    return AppRuntime(store: store, ingest: ingest, recall: recall);
+    return AppRuntime(
+      store: store,
+      ingest: ingest,
+      recall: recall,
+      telemetry: store.operationalTelemetry(),
+    );
   }
 
   Future<void> close() => store.close();
