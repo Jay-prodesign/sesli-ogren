@@ -10,20 +10,20 @@
     "default_branch": "main"
   },
   "mission": {
-    "id": "ROUND7_COMPANION_RUNTIME_EVIDENCE",
-    "title": "Round 7 Companion / Runtime Evidence — non-physical closure; final device gate deferred",
-    "executor": "ChatGPT (Founder-authorized bounded engineering delegate; Claude may resume after fresh-read)"
+    "id": "M5_GOLDEN_LEARNING_SLICE",
+    "title": "M5 Golden Learning Slice — admitted production-shaped vertical slice",
+    "executor": "ChatGPT (Founder-authorized reversible engineering delegate; Claude/Codex may resume only after fresh-read)"
   },
-  "lifecycle_stage": "Post-M4 Architecture Proof — admitted Round 7 evidence program; physical install deferred to final mobile-readiness; M2/Golden Learning Slice NOT_EXECUTABLE pending Founder Product/Visual PASS + explicit admission",
+  "lifecycle_stage": "M5 Golden Learning Slice — ADMITTED / EXECUTABLE under D-071; physical mobile-readiness deferred to final gate under D-068",
   "status": "IN_PROGRESS",
-  "active_milestone": "M1 DONE; Round 7 non-physical closure active; final physical-device validation deferred under D-068",
+  "active_milestone": "Repository Milestone M2 / Lifecycle M5 — Golden Learning Slice ACTIVE",
   "architecture_proof": {
     "disposition": "ARCHITECTURE_PROOF_PASS / GO_ADAPT",
     "reviewed_head_sha": "0327d2e5b854df1c9923c65ed88f77151cfe9eed",
     "evidence_branch": "spike/v0-architecture-proof",
     "pr_number": 2,
     "merged": false,
-    "note": "Accepted architecture evidence lives on sibling stacked PR #2 and is not duplicated into this branch."
+    "note": "Accepted architecture proof substrate imported selectively into the M5 branch at e875a885466578447f0a50ed215dddf91aea5c2e; stale architecture control-plane was intentionally not imported."
   },
   "tasks": {
     "LA-0001": "DONE",
@@ -33,72 +33,60 @@
     "LA-0005": "DONE",
     "LA-0006": "DONE",
     "LA-0007": "DONE",
-    "LA-0008": "DONE"
+    "LA-0008": "DONE",
+    "LA-0018": "IN_PROGRESS",
+    "LA-0019": "PLANNED",
+    "LA-0020": "PLANNED",
+    "LA-0021": "PLANNED"
   },
   "git": {
-    "branch": "feat/round7-companion-production-sequence-v2",
-    "base_sha": "c8c7f222ba6ca4c813bde6850f3e58c51cf5ca34",
-    "head_sha": "92f0ab4c517d8b9885a41ee0f0541447b53e75b3",
-    "head_sha_note": "Current PR #8 head after native-speech QA test stabilization. Exact-head bootstrap PASS; round7-p1-proof CI is running/pending at the time of this control-plane projection.",
-    "pr_number": 8,
-    "pr_url": "https://github.com/Jay-prodesign/sesli-ogren/pull/8",
+    "branch": "feat/m5-golden-learning-slice",
+    "base_sha": "84e96dce5b3cc9f32af3f459d422b652d0e86624",
+    "head_sha": "ee7cce9372a89287a89b535ae705a7a6322bde7d",
+    "head_sha_note": "M5 branch projection head before CURRENT_HANDOFF/EXECUTION_STATE control-plane commits; accepted Round 7 candidate base is 84e96dce… and accepted architecture substrate import commit is e875a885… .",
+    "pr_number": null,
+    "pr_url": null,
     "merged": false,
     "stack": [
       "main -> PR #1 bootstrap (PASS, unmerged)",
-      "bootstrap -> PR #2 architecture proof (PASS, unmerged)",
-      "proof/round7-companion-runtime -> PR #6 renderer seam -> PR #8 active companion production/evidence"
+      "bootstrap -> PR #2 architecture proof (PASS, unmerged; accepted substrate selectively imported)",
+      "Round 7 sibling lineage -> accepted non-physical candidate 84e96dce…",
+      "84e96dce… -> feat/m5-golden-learning-slice (ACTIVE)"
     ]
   },
   "round7_evidence_program": {
-    "status": "NON_PHYSICAL_EXACT_HEAD_CI_PENDING__PHYSICAL_DEVICE_GATE_DEFERRED_FINAL",
-    "companion_cursor": "docs/agent/ROUND7_COMPANION_CURRENT_CURSOR.json",
-    "companion_status": "docs/agent/ROUND7_COMPANION_ASSET_STATUS.json",
-    "synthetic_visual_qa": "PASS",
-    "synthetic_motion_qa": "PASS",
-    "responsive_phone_qa": "PASS",
-    "blink": "REJECTED_AND_REMOVED",
-    "mouth_warp": "PASS_CLEAN_SUBTLE",
-    "android_profile_build": "PASS",
-    "ios_no_codesign_compile": "PASS",
-    "remaining": [
-      "PR #8 exact-head round7-p1-proof CI completion at 92f0ab4c517d8b9885a41ee0f0541447b53e75b3",
-      "Founder Product/Visual PASS on the controlling production-shaped proof using a non-install review surface where practical",
-      "D1/D2/D3 physical native TTS/accessibility/performance/orientation evidence at the final mobile-readiness gate before release-candidate/public-release claims"
-    ],
-    "ios_native_tts_simulator_lifecycle": "PASS_START_COMPLETION_STOP",
-    "native_speech_qa": "ONE_TAP_SCREEN_READY",
-    "android_profile_apk_sha256": "20b4d1d7d5f30252b7510fccd827d3fcad657bc08abad4d1331acf1a60d8f40d",
-    "tts_error_fallback": "UNIT_TEST_PASS__TEXT_AND_LEARNING_LOOP_PRESERVED",
-    "device_execution_priority": {
-      "mode": "FINAL_DEVICE_GATE_DEFERRED_D068",
-      "D1": "DEFERRED_TO_FINAL_MOBILE_READINESS",
-      "D2": "DEFERRED_TO_FINAL_MOBILE_READINESS_WHEN_HARDWARE_AVAILABLE",
-      "D3": "DEFERRED_TO_FINAL_MOBILE_READINESS_WHEN_HARDWARE_AVAILABLE",
-      "full_cross_device_matrix": "MANDATORY_BEFORE_RELEASE_CANDIDATE_OR_PUBLIC_RELEASE"
-    }
+    "status": "PRE_M5_CLOSED_OR_BOUNDED",
+    "founder_product_visual": "PASS_D_KNOT_SELECTED_D070",
+    "non_physical_technical": "PASS",
+    "physical_device": "DEFERRED_FINAL_MOBILE_READINESS_D068",
+    "D1": "DEFERRED",
+    "D2": "DEFERRED",
+    "D3": "DEFERRED",
+    "release_rule": "Physical iOS/Android speech/accessibility/performance/orientation checks remain mandatory before release-candidate/public-release claims."
   },
   "next_handoff": {
-    "id": "M5_GOLDEN_LEARNING_SLICE_HANDOFF_NOT_ISSUED",
-    "status": "NOT_EXECUTABLE",
-    "gate": "Exact-head Round 7 non-physical technical closure + Founder Product/Visual PASS + canonical fresh-read + explicit Brain admission. D-068 explicitly bounds physical D1/D2/D3 validation to the final mobile-readiness gate rather than blocking implementation."
+    "id": "CLAUDE_HANDOFF_002",
+    "title": "M5 Golden Learning Slice",
+    "status": "ACTIVE_EXECUTABLE",
+    "admission": "D-071",
+    "acceptance": "M5_GOLDEN_LEARNING_SLICE_ACCEPTANCE_CONTRACT_v0.1",
+    "current_task": "LA-0018"
   },
   "blockers": [
-    "PR #8 exact-head round7-p1-proof CI is still pending at 92f0ab4c517d8b9885a41ee0f0541447b53e75b3.",
-    "Founder Product/Visual PASS remains an owner gate before explicit M5 admission.",
-    "M2/Golden Learning Slice implementation remains NOT_EXECUTABLE until explicit admission.",
-    "Physical D1/D2/D3 validation remains mandatory but is deferred to final mobile-readiness under D-068, not an immediate implementation blocker.",
+    "No current implementation blocker. Protected actions remain gated.",
+    "Physical device/mobile-readiness is deferred under D-068 and is not an implementation blocker.",
     "AUTO_AGENT_BRIDGE_BLOCKED remains optional/non-blocking."
   ],
   "protected_gate": "Merge, release, deploy, paid providers, credentials/secrets, licensing posture, production mutation: Product Owner only",
-  "next_action": "Finish PR #8 exact-head non-physical CI. Then obtain Founder Product/Visual PASS through a non-install review surface if needed, fresh-read canonical authority, and issue explicit M5 Golden Learning Slice admission. Do not request early real-phone installation; keep D1/D2/D3 physical QA as a final mobile-readiness/release blocker under D-068.",
+  "next_action": "Execute LA-0018: turn the accepted architecture proof substrate into the smallest production-shaped M5 foundation, preserving D/Knot and current product truth. Then proceed dependency-safely to LA-0019 without requesting routine Founder confirmation.",
   "canonical_source_refs": [
     "CURRENT_EXECUTION_STATE — Learning App",
-    "D-068 — Final Install After Implementation / Physical Device Gate Bounded",
-    "M4_ARCHITECTURE_PROOF_BRAIN_REVIEW_004 — ARCHITECTURE_PROOF_PASS / GO_ADAPT",
+    "D-070 — Founder Product/Visual PASS / D-Knot selected",
+    "D-071 — M5 Golden Learning Slice explicit admission",
     "M5_GOLDEN_LEARNING_SLICE_ACCEPTANCE_CONTRACT_v0.1 — Learning App",
-    "ROUND_7_COMPANION_PRODUCTION_SEQUENCE_V2 (repo execution authority)",
-    "ROUND7_COMPANION_CURRENT_CURSOR.json",
-    "ROUND7_COMPANION_ASSET_STATUS.json"
+    "D-053 / D-054 / V0_PRODUCT_SCOPE_v2.0",
+    "M4_ARCHITECTURE_PROOF_BRAIN_REVIEW_004 — ARCHITECTURE_PROOF_PASS / GO_ADAPT",
+    "D-068 — Final Install After Implementation / Physical Device Gate Bounded"
   ],
   "updated_at": "2026-10-04",
   "auto_agent_bridge": {
@@ -127,8 +115,8 @@
   },
   "temporary_execution_override": {
     "status": "ACTIVE",
-    "authority": "Founder explicit instruction in Learning App chat",
-    "scope": "Dependency-safe, reversible, app-first Round 7 evidence work; no M2 feature implementation without admission.",
+    "authority": "Founder explicit instruction in Learning App chat + D-071 admission",
+    "scope": "Dependency-safe, reversible, app-first M5 Golden Learning Slice implementation through the defined checkpoint.",
     "exclusions": [
       "merge",
       "release",
@@ -136,14 +124,28 @@
       "paid-provider spend",
       "credentials/secrets",
       "production mutation",
-      "cross-project mutation"
+      "cross-project mutation",
+      "V1 learner-model expansion"
     ]
   },
   "founder_sequence_override": {
     "decision_id": "D-068",
     "status": "ACTIVE",
     "rule": "Real-phone installation is deferred until the app is otherwise complete enough for final device/mobile-readiness validation.",
-    "pre_m5_effect": "Physical R7 device evidence is explicitly bounded and does not block development; non-physical technical closure plus Founder Product/Visual PASS still precede explicit M5 admission.",
+    "pre_m5_effect": "Satisfied/bounded for admission.",
     "release_effect": "Physical iOS/Android device, speech, accessibility, performance and orientation checks remain mandatory before release-candidate/public-release claims."
+  },
+  "founder_visual_decision": {
+    "decision_id": "D-070",
+    "companion": "D_KNOT",
+    "product_visual": "PASS",
+    "e_tilt": "REJECTED_FINALIST_REFERENCE_ONLY"
+  },
+  "m5_admission": {
+    "decision_id": "D-071",
+    "status": "ACTIVE_EXECUTABLE",
+    "scope": "real PDF/text -> source/version/provenance -> grounded processing -> active learning -> LearnerEvidence -> minimal LearnerState -> explainable next action -> persistence/reopen/recovery",
+    "continuity_transition_required": true,
+    "passive_consumption_creates_mastery": false
   }
 }
