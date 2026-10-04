@@ -485,7 +485,7 @@ class RecallLearningService {
         r'[A-Za-zÇĞİÖŞÜçğıöşü]+',
       ).allMatches(sentence).where((match) {
         final word = match.group(0)!;
-        return word.length >= 5 && !_stopWords.contains(_normalizeAnswer(word));
+        return word.length >= 5 && !_stopWords.contains(RecallTruthPolicy.normalizeAnswer(word));
       }).toList();
 
       if (matches.isNotEmpty) {
