@@ -209,6 +209,7 @@ as $$
   select case p_state
     when 'retrieved_once' then 'UNASSISTED_RETRIEVAL_CORRECT'
     when 'developing' then 'PARTIAL_OR_HELPED_RETRIEVAL'
+    when 'not_assessed' then 'NO_EVALUABLE_RETRIEVAL'
     else 'RETRIEVAL_NOT_ESTABLISHED'
   end
 $$;
