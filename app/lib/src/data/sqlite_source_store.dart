@@ -36,11 +36,14 @@ class SqliteSourceStore implements SourceStore {
     final database = await selectedFactory.openDatabase(
       databasePath,
       options: OpenDatabaseOptions(
-        version: 2,
+        version: 3,
         onConfigure: (db) => db.execute('PRAGMA foreign_keys = ON'),
         onUpgrade: (db, oldVersion, newVersion) async {
           if (oldVersion < 2) {
             await _upgradeLearningTruthSchema(db);
+          }
+          if (oldVersion < 3) {
+            await _upgradeRecallSupportSchema(db);
           }
         },
         onCreate: (db, version) async {
@@ -193,6 +196,19 @@ CREATE TABLE next_learning_actions (
 )
 ''');
           await db.execute('''
+CREATE TABLE recall_attempt_support (
+  learner_id TEXT NOT NULL,
+  attempt_id TEXT NOT NULL,
+  action_id TEXT NOT NULL,
+  assistance TEXT NOT NULL,
+  updated_at_utc TEXT NOT NULL,
+  PRIMARY KEY (learner_id, attempt_id),
+  FOREIGN KEY (learner_id, action_id)
+    REFERENCES recall_actions (learner_id, action_id)
+    ON DELETE CASCADE
+)
+''');
+          await db.execute('''
 CREATE INDEX idx_recall_actions_source
 ON recall_actions (learner_id, material_id, source_version_id)
 ''');
@@ -224,6 +240,22 @@ ON extracted_contents (learner_id, source_version_id, invalidated_at_utc)
       ),
     );
     return SqliteSourceStore._(database);
+  }
+
+  static Future<void> _upgradeRecallSupportSchema(Database db) async {
+    await db.execute('''
+CREATE TABLE IF NOT EXISTS recall_attempt_support (
+  learner_id TEXT NOT NULL,
+  attempt_id TEXT NOT NULL,
+  action_id TEXT NOT NULL,
+  assistance TEXT NOT NULL,
+  updated_at_utc TEXT NOT NULL,
+  PRIMARY KEY (learner_id, attempt_id),
+  FOREIGN KEY (learner_id, action_id)
+    REFERENCES recall_actions (learner_id, action_id)
+    ON DELETE CASCADE
+)
+''');
   }
 
   static Future<void> _upgradeLearningTruthSchema(Database db) async {
@@ -1036,6 +1068,108 @@ LIMIT 1
   }
 
   @override
+  Future<RecallAssistance> registerAssistance({
+    required AuthenticatedLearner learner,
+    required RecallAttemptId attemptId,
+    required RecallActionId actionId,
+    required RecallAssistance assistance,
+    required DateTime recordedAt,
+  }) {
+    if (assistance == RecallAssistance.none) {
+      throw const LearningTruthConflict(
+        'Only actual support exposure can be registered.',
+      );
+    }
+    return _database.transaction((transaction) async {
+      final evidenceRows = await transaction.query(
+        'learner_evidence',
+        where: 'learner_id = ? AND attempt_id = ?',
+        whereArgs: [learner.id.value, attemptId.value],
+        limit: 1,
+      );
+      if (evidenceRows.isNotEmpty) {
+        throw const LearningTruthConflict(
+          'Support cannot be changed after learner evidence is recorded.',
+        );
+      }
+
+      final actionRows = await transaction.query(
+        'recall_actions',
+        where: 'learner_id = ? AND action_id = ?',
+        whereArgs: [learner.id.value, actionId.value],
+        limit: 1,
+      );
+      if (actionRows.isEmpty) {
+        throw const LearningTruthConflict(
+          'Support cannot attach to a missing recall action.',
+        );
+      }
+
+      final existingRows = await transaction.query(
+        'recall_attempt_support',
+        where: 'learner_id = ? AND attempt_id = ?',
+        whereArgs: [learner.id.value, attemptId.value],
+        limit: 1,
+      );
+      var canonical = assistance;
+      if (existingRows.isNotEmpty) {
+        final existingActionId = existingRows.single['action_id']! as String;
+        if (existingActionId != actionId.value) {
+          throw const LearningTruthConflict(
+            'Attempt support cannot move between recall actions.',
+          );
+        }
+        final existing = RecallAssistance.values.byName(
+          existingRows.single['assistance']! as String,
+        );
+        canonical = _strongerAssistance(existing, assistance);
+      }
+
+      await transaction.rawInsert(
+        '''
+INSERT INTO recall_attempt_support (
+  learner_id, attempt_id, action_id, assistance, updated_at_utc
+) VALUES (?, ?, ?, ?, ?)
+ON CONFLICT(learner_id, attempt_id) DO UPDATE SET
+  assistance = excluded.assistance,
+  updated_at_utc = excluded.updated_at_utc
+''',
+        [
+          learner.id.value,
+          attemptId.value,
+          actionId.value,
+          canonical.name,
+          recordedAt.toUtc().toIso8601String(),
+        ],
+      );
+      return canonical;
+    });
+  }
+
+  @override
+  Future<RecallAssistance> assistanceForAttempt({
+    required AuthenticatedLearner learner,
+    required RecallAttemptId attemptId,
+    required RecallActionId actionId,
+  }) async {
+    final rows = await _database.query(
+      'recall_attempt_support',
+      where: 'learner_id = ? AND attempt_id = ?',
+      whereArgs: [learner.id.value, attemptId.value],
+      limit: 1,
+    );
+    if (rows.isEmpty) {
+      return RecallAssistance.none;
+    }
+    if (rows.single['action_id'] != actionId.value) {
+      throw const LearningTruthConflict(
+        'Attempt support belongs to a different recall action.',
+      );
+    }
+    return RecallAssistance.values.byName(rows.single['assistance']! as String);
+  }
+
+  @override
   Future<List<LearnerEvidence>> evidenceForMaterial({
     required AuthenticatedLearner learner,
     required MaterialId materialId,
@@ -1117,6 +1251,29 @@ LIMIT 1
           action.extractedContentId != evidence.extractedContentId) {
         throw const LearningTruthConflict(
           'Evidence provenance does not match its recall action.',
+        );
+      }
+
+      final supportRows = await transaction.query(
+        'recall_attempt_support',
+        where: 'learner_id = ? AND attempt_id = ?',
+        whereArgs: [learner.id.value, evidence.attemptId.value],
+        limit: 1,
+      );
+      var canonicalAssistance = RecallAssistance.none;
+      if (supportRows.isNotEmpty) {
+        if (supportRows.single['action_id'] != evidence.actionId.value) {
+          throw const LearningTruthConflict(
+            'Attempt support does not belong to the evidence action.',
+          );
+        }
+        canonicalAssistance = RecallAssistance.values.byName(
+          supportRows.single['assistance']! as String,
+        );
+      }
+      if (canonicalAssistance != evidence.assistance) {
+        throw const LearningTruthConflict(
+          'Learner evidence assistance does not match canonical support history.',
         );
       }
 
@@ -1383,6 +1540,18 @@ WHERE learner_id = ?
 
       return LearningContinuation(state: state, nextAction: nextAction);
     });
+  }
+
+  static RecallAssistance _strongerAssistance(
+    RecallAssistance left,
+    RecallAssistance right,
+  ) {
+    int rank(RecallAssistance value) => switch (value) {
+      RecallAssistance.none => 0,
+      RecallAssistance.hint => 1,
+      RecallAssistance.answerExposed => 2,
+    };
+    return rank(left) >= rank(right) ? left : right;
   }
 
   static bool _sameAction(RecallAction left, RecallAction right) {

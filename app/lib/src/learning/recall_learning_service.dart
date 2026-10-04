@@ -65,31 +65,49 @@ class RecallLearningService {
   Future<RecallSupport> requestHint({
     required AuthenticatedLearner learner,
     required RecallActionId actionId,
+    required RecallAttemptId attemptId,
   }) async {
+    _validateAttemptId(attemptId);
     final action = await _currentAction(
       learner: learner,
       actionId: actionId,
+    );
+    final assistance = await _learningStore.registerAssistance(
+      learner: learner,
+      attemptId: attemptId,
+      actionId: action.id,
+      assistance: RecallAssistance.hint,
+      recordedAt: _now().toUtc(),
     );
     final firstCharacter = action.expectedAnswer.substring(0, 1);
     return RecallSupport(
       kind: RecallSupportKind.hint,
       text: 'İlk harf: $firstCharacter · ${action.expectedAnswer.length} harf',
-      assistance: RecallAssistance.hint,
+      assistance: assistance,
     );
   }
 
   Future<RecallSupport> revealAnswer({
     required AuthenticatedLearner learner,
     required RecallActionId actionId,
+    required RecallAttemptId attemptId,
   }) async {
+    _validateAttemptId(attemptId);
     final action = await _currentAction(
       learner: learner,
       actionId: actionId,
     );
+    final assistance = await _learningStore.registerAssistance(
+      learner: learner,
+      attemptId: attemptId,
+      actionId: action.id,
+      assistance: RecallAssistance.answerExposed,
+      recordedAt: _now().toUtc(),
+    );
     return RecallSupport(
       kind: RecallSupportKind.answer,
       text: action.expectedAnswer,
-      assistance: RecallAssistance.answerExposed,
+      assistance: assistance,
     );
   }
 
@@ -99,13 +117,8 @@ class RecallLearningService {
     required RecallAttemptId attemptId,
     required RecallResponseDisposition disposition,
     String answer = '',
-    RecallAssistance assistance = RecallAssistance.none,
   }) async {
-    if (!RegExp(r'^[A-Za-z0-9_.:-]{8,128}$').hasMatch(attemptId.value)) {
-      throw const RecallLearningException(
-        'Attempt ID must be a stable 8-128 character identifier.',
-      );
-    }
+    _validateAttemptId(attemptId);
 
     final action = await _currentAction(
       learner: learner,
@@ -123,6 +136,11 @@ class RecallLearningService {
       );
     }
 
+    final assistance = await _learningStore.assistanceForAttempt(
+      learner: learner,
+      attemptId: attemptId,
+      actionId: action.id,
+    );
     final normalizedAnswer = disposition == RecallResponseDisposition.unknown
         ? ''
         : _normalizeAnswer(answer);
@@ -492,6 +510,101 @@ class RecallLearningService {
       policyVersion: nextActionPolicyVersion,
       createdAt: now,
     );
+  }
+
+  static void _validateAttemptId(RecallAttemptId attemptId) {
+    if (!RegExp(r'^[A-Za-z0-9_.:-]{8,128}
+    return value
+        .replaceAll('İ', 'i')
+        .replaceAll('I', 'ı')
+        .toLowerCase()
+        .replaceAll(RegExp(r'[^a-zçğıöşü0-9]+'), '')
+        .trim();
+  }
+
+  static int _editDistance(String left, String right) {
+    if (left == right) {
+      return 0;
+    }
+    if (left.isEmpty) {
+      return right.length;
+    }
+    if (right.isEmpty) {
+      return left.length;
+    }
+
+    var previous = List<int>.generate(right.length + 1, (index) => index);
+    for (var i = 0; i < left.length; i++) {
+      final current = List<int>.filled(right.length + 1, 0);
+      current[0] = i + 1;
+      for (var j = 0; j < right.length; j++) {
+        final substitution = previous[j] + (left[i] == right[j] ? 0 : 1);
+        final insertion = current[j] + 1;
+        final deletion = previous[j + 1] + 1;
+        current[j + 1] = [
+          substitution,
+          insertion,
+          deletion,
+        ].reduce((a, b) => a < b ? a : b);
+      }
+      previous = current;
+    }
+    return previous.last;
+  }
+
+  static const _stopWords = <String>{
+    'ancak',
+    'bunun',
+    'daha',
+    'fakat',
+    'gibi',
+    'için',
+    'ile',
+    'olan',
+    'olarak',
+    'sonra',
+    'şekilde',
+    'veya',
+    'çünkü',
+    'the',
+    'that',
+    'this',
+    'with',
+    'from',
+  };
+}
+
+class RecallLearningException implements Exception {
+  const RecallLearningException(this.message);
+
+  final String message;
+
+  @override
+  String toString() => 'RecallLearningException: $message';
+}
+
+class _RecallCandidate {
+  const _RecallCandidate({
+    required this.sentence,
+    required this.sentenceStart,
+    required this.sentenceEnd,
+    required this.wordStartInSentence,
+    required this.wordEndInSentence,
+    required this.expectedAnswer,
+  });
+
+  final String sentence;
+  final int sentenceStart;
+  final int sentenceEnd;
+  final int wordStartInSentence;
+  final int wordEndInSentence;
+  final String expectedAnswer;
+}
+).hasMatch(attemptId.value)) {
+      throw const RecallLearningException(
+        'Attempt ID must be a stable 8-128 character identifier.',
+      );
+    }
   }
 
   static String _normalizeAnswer(String value) {

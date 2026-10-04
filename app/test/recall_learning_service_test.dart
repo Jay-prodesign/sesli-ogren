@@ -144,13 +144,20 @@ void main() {
       materialId: materialId,
     );
     final action = await storedAction(prompt);
+    const attemptId = RecallAttemptId('attempt-helped');
+    final support = await recall.requestHint(
+      learner: learnerA,
+      actionId: prompt.id,
+      attemptId: attemptId,
+    );
+    expect(support.assistance, RecallAssistance.hint);
+
     final result = await recall.submit(
       learner: learnerA,
       actionId: prompt.id,
-      attemptId: const RecallAttemptId('attempt-helped'),
+      attemptId: attemptId,
       disposition: RecallResponseDisposition.answer,
       answer: action.expectedAnswer,
-      assistance: RecallAssistance.hint,
     );
 
     expect(result.evidence.outcome, RecallOutcome.helpedCorrect);
@@ -168,13 +175,20 @@ void main() {
       materialId: materialId,
     );
     final action = await storedAction(prompt);
+    const attemptId = RecallAttemptId('attempt-exposed');
+    final support = await recall.revealAnswer(
+      learner: learnerA,
+      actionId: prompt.id,
+      attemptId: attemptId,
+    );
+    expect(support.assistance, RecallAssistance.answerExposed);
+
     final result = await recall.submit(
       learner: learnerA,
       actionId: prompt.id,
-      attemptId: const RecallAttemptId('attempt-exposed'),
+      attemptId: attemptId,
       disposition: RecallResponseDisposition.answer,
       answer: action.expectedAnswer,
-      assistance: RecallAssistance.answerExposed,
     );
 
     expect(result.evidence.outcome, RecallOutcome.answerExposed);
@@ -182,6 +196,91 @@ void main() {
     expect(
       result.nextAction.reasonCode,
       'ANSWER_EXPOSED_NO_RETRIEVAL_CLAIM',
+    );
+  });
+
+  test('store rejects evidence that lies about recorded assistance', () async {
+    final prompt = await recall.createCurrentPrompt(
+      learner: learnerA,
+      materialId: materialId,
+    );
+    final action = await storedAction(prompt);
+    const attemptId = RecallAttemptId('attempt-store-guard');
+
+    await recall.requestHint(
+      learner: learnerA,
+      actionId: prompt.id,
+      attemptId: attemptId,
+    );
+
+    final learningStore = sourceStore.learningTruthStore();
+    const fabricatedEvidenceId = LearnerEvidenceId(
+      'ev_fabricated_store_guard',
+    );
+    final fabricatedEvidence = LearnerEvidence(
+      id: fabricatedEvidenceId,
+      attemptId: attemptId,
+      actionId: prompt.id,
+      materialId: action.materialId,
+      sourceVersionId: action.sourceVersionId,
+      extractedContentId: action.extractedContentId,
+      outcome: RecallOutcome.correct,
+      assistance: RecallAssistance.none,
+      responseDigest: 'fabricated',
+      responseLength: 10,
+      ruleVersion: RecallLearningService.evidenceRuleVersion,
+      createdAt: DateTime.utc(2026, 10, 4, 12, 5),
+    );
+    final fabricatedNext = NextLearningAction(
+      materialId: action.materialId,
+      sourceVersionId: action.sourceVersionId,
+      latestEvidenceId: fabricatedEvidenceId,
+      kind: NextLearningActionKind.repeatRecallLater,
+      reasonCode: 'FABRICATED',
+      reasonText: 'must be rejected',
+      policyVersion: RecallLearningService.nextActionPolicyVersion,
+      createdAt: DateTime.utc(2026, 10, 4, 12, 5),
+    );
+
+    await expectLater(
+      learningStore.persistEvidenceStateAndNextAction(
+        learner: learnerA,
+        evidence: fabricatedEvidence,
+        stateKind: RecallStateKind.retrievedOnce,
+        stateRuleVersion: RecallLearningService.stateRuleVersion,
+        nextAction: fabricatedNext,
+      ),
+      throwsA(isA<LearningTruthConflict>()),
+    );
+  });
+
+  test('answer exposure dominates an earlier hint for the same attempt', () async {
+    final prompt = await recall.createCurrentPrompt(
+      learner: learnerA,
+      materialId: materialId,
+    );
+    const attemptId = RecallAttemptId('attempt-support-escalation');
+
+    final hinted = await recall.requestHint(
+      learner: learnerA,
+      actionId: prompt.id,
+      attemptId: attemptId,
+    );
+    final exposed = await recall.revealAnswer(
+      learner: learnerA,
+      actionId: prompt.id,
+      attemptId: attemptId,
+    );
+
+    expect(hinted.assistance, RecallAssistance.hint);
+    expect(exposed.assistance, RecallAssistance.answerExposed);
+    expect(
+      await sourceStore.learningTruthStore().assistanceForAttempt(
+        learner: learnerA,
+        attemptId: attemptId,
+        actionId: prompt.id,
+      ),
+      RecallAssistance.answerExposed,
     );
   });
 
