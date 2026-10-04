@@ -318,6 +318,77 @@ CREATE TABLE IF NOT EXISTS next_learning_actions (
     ON DELETE CASCADE
 )
 ''');
+    await db.execute('''
+UPDATE learner_states
+SET state_kind = CASE (
+      SELECT e.outcome
+      FROM learner_evidence e
+      WHERE e.learner_id = learner_states.learner_id
+        AND e.evidence_id = learner_states.latest_evidence_id
+    )
+      WHEN 'correct' THEN 'retrievedOnce'
+      WHEN 'helpedCorrect' THEN 'developing'
+      WHEN 'partial' THEN 'developing'
+      WHEN 'incorrect' THEN 'needsReview'
+      WHEN 'unknown' THEN 'notAssessed'
+      ELSE 'notAssessed'
+    END,
+    rule_version = 'recall-state-v2'
+WHERE EXISTS (
+  SELECT 1
+  FROM learner_evidence e
+  WHERE e.learner_id = learner_states.learner_id
+    AND e.evidence_id = learner_states.latest_evidence_id
+)
+''');
+    await db.execute('''
+INSERT OR REPLACE INTO next_learning_actions (
+  learner_id,
+  material_id,
+  source_version_id,
+  latest_evidence_id,
+  action_kind,
+  reason_code,
+  reason_text,
+  policy_version,
+  created_at_utc
+)
+SELECT
+  s.learner_id,
+  s.material_id,
+  s.source_version_id,
+  s.latest_evidence_id,
+  CASE e.outcome
+    WHEN 'correct' THEN 'repeatRecallLater'
+    WHEN 'helpedCorrect' THEN 'retryRecallWithoutHint'
+    WHEN 'partial' THEN 'retryRecallWithoutHint'
+    WHEN 'incorrect' THEN 'reviewSourceThenRecall'
+    WHEN 'unknown' THEN 'reviewSourceThenRecall'
+    ELSE 'reviewSourceThenRecall'
+  END,
+  CASE e.outcome
+    WHEN 'correct' THEN 'ONE_UNASSISTED_RETRIEVAL_OBSERVED'
+    WHEN 'helpedCorrect' THEN 'HINTED_SUCCESS_NEEDS_UNASSISTED_RETRIEVAL'
+    WHEN 'partial' THEN 'PARTIAL_RETRIEVAL_NEEDS_RETRY'
+    WHEN 'incorrect' THEN 'INCORRECT_RETRIEVAL_NEEDS_REPAIR'
+    WHEN 'unknown' THEN 'NO_EVALUABLE_RETRIEVAL'
+    ELSE 'NO_EVALUABLE_RETRIEVAL'
+  END,
+  CASE e.outcome
+    WHEN 'correct' THEN 'One unassisted retrieval was observed; repeat later.'
+    WHEN 'helpedCorrect' THEN 'Hinted success needs a later unassisted retry.'
+    WHEN 'partial' THEN 'Partial retrieval needs feedback and retry.'
+    WHEN 'incorrect' THEN 'Review the source and retry Recall.'
+    WHEN 'unknown' THEN 'No evaluable retrieval response; review or retry later.'
+    ELSE 'Review the source before the next Recall.'
+  END,
+  'recall-next-v1',
+  s.updated_at_utc
+FROM learner_states s
+JOIN learner_evidence e
+  ON e.learner_id = s.learner_id
+ AND e.evidence_id = s.latest_evidence_id
+''');
     await db.execute(
       'CREATE INDEX IF NOT EXISTS idx_recall_actions_source '
       'ON recall_actions (learner_id, material_id, source_version_id)',
