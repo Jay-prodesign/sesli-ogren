@@ -28,8 +28,6 @@ void main() {
     usePhoneSurface(tester);
     final fixtures = await loadFixtures();
     final controller = ProofController(fixtures, speechOutput: _AttachedSpeechOutput())..setReducedMotion(true);
-    addTearDown(controller.dispose);
-
     await tester.pumpWidget(MaterialApp(home: NativeSpeechQaScreen(controller: controller)));
 
     expect(find.text('Native Speech QA'), findsOneWidget);
@@ -37,6 +35,9 @@ void main() {
     final button = tester.widget<FilledButton>(find.byKey(const Key('run-native-speech-qa')));
     expect(button.onPressed, isNotNull);
     expect(controller.usingRealSpeech, isTrue);
+
+    await tester.pumpWidget(const SizedBox.shrink());
+    controller.dispose();
   });
 
   testWidgets('native speech QA is fail-closed without a real SpeechOutput', (tester) async {
@@ -52,5 +53,8 @@ void main() {
     final button = tester.widget<FilledButton>(find.byKey(const Key('run-native-speech-qa')));
     expect(button.onPressed, isNull);
     expect(controller.usingRealSpeech, isFalse);
+
+    await tester.pumpWidget(const SizedBox.shrink());
+    controller.dispose();
   });
 }
