@@ -238,6 +238,39 @@ void main() {
     );
   });
 
+  test('deleted material keeps a tombstone and cannot be silently reused', () async {
+    final source = await service.ingestPastedText(
+      learner: learnerA,
+      materialId: material,
+      text: 'Delete and do not resurrect',
+    );
+    await store.deleteMaterial(
+      learner: learnerA,
+      materialId: material,
+      deletedAt: DateTime.utc(2026, 10, 4, 11),
+    );
+
+    final versions = await store.sourceVersions(
+      learner: learnerA,
+      materialId: material,
+    );
+    expect(versions, hasLength(1));
+    expect(versions.single.identity.sourceVersionId,
+        source.sourceVersion.identity.sourceVersionId);
+    expect(versions.single.revokedAt, isNotNull);
+    expect(versions.single.sourceName, 'Deleted source');
+    expect(versions.single.inlineText, isNull);
+
+    await expectLater(
+      service.ingestPastedText(
+        learner: learnerA,
+        materialId: material,
+        text: 'Delete and do not resurrect',
+      ),
+      throwsA(isA<SourceStoreConflict>()),
+    );
+  });
+
   test('oversized pasted text fails before persistence', () async {
     final bounded = SourceIngestService(
       store: store,

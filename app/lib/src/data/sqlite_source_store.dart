@@ -71,9 +71,20 @@ CREATE TABLE source_versions (
   FOREIGN KEY (learner_id, material_id)
     REFERENCES materials (learner_id, material_id) ON DELETE CASCADE,
   CHECK (
-    (media_type = 'pastedText' AND inline_text IS NOT NULL AND source_blob IS NULL)
+    (
+      revoked_at_utc IS NULL
+      AND (
+        (media_type = 'pastedText' AND inline_text IS NOT NULL AND source_blob IS NULL)
+        OR
+        (media_type = 'pdf' AND inline_text IS NULL AND source_blob IS NOT NULL)
+      )
+    )
     OR
-    (media_type = 'pdf' AND inline_text IS NULL AND source_blob IS NOT NULL)
+    (
+      revoked_at_utc IS NOT NULL
+      AND inline_text IS NULL
+      AND source_blob IS NULL
+    )
   )
 )
 ''');
@@ -383,12 +394,60 @@ LIMIT 1
     required AuthenticatedLearner learner,
     required MaterialId materialId,
     required DateTime deletedAt,
-  }) async {
-    await _database.delete(
-      'materials',
-      where: 'learner_id = ? AND material_id = ?',
-      whereArgs: [learner.id.value, materialId.value],
-    );
+  }) {
+    final deletedAtUtc = deletedAt.toUtc().toIso8601String();
+    return _database.transaction((transaction) async {
+      final changed = await transaction.update(
+        'materials',
+        {
+          'title': 'Deleted material',
+          'lifecycle_status': MaterialLifecycleStatus.deleted.name,
+          'processing_state': MaterialProcessingState.none.name,
+          'current_source_version_id': null,
+          'updated_at_utc': deletedAtUtc,
+          'deleted_at_utc': deletedAtUtc,
+        },
+        where:
+            'learner_id = ? AND material_id = ? AND lifecycle_status = ? '
+            'AND deleted_at_utc IS NULL',
+        whereArgs: [
+          learner.id.value,
+          materialId.value,
+          MaterialLifecycleStatus.active.name,
+        ],
+      );
+      if (changed == 0) {
+        return;
+      }
+
+      await transaction.delete(
+        'extracted_contents',
+        where:
+            'learner_id = ? AND source_version_id IN ('
+            'SELECT source_version_id FROM source_versions '
+            'WHERE learner_id = ? AND material_id = ?'
+            ')',
+        whereArgs: [
+          learner.id.value,
+          learner.id.value,
+          materialId.value,
+        ],
+      );
+
+      await transaction.update(
+        'source_versions',
+        {
+          'source_name': 'Deleted source',
+          'byte_size': 0,
+          'inline_text': null,
+          'source_blob': null,
+          'revoked_at_utc': deletedAtUtc,
+        },
+        where:
+            'learner_id = ? AND material_id = ? AND revoked_at_utc IS NULL',
+        whereArgs: [learner.id.value, materialId.value],
+      );
+    });
   }
 
   @override
