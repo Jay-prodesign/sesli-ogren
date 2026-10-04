@@ -141,13 +141,16 @@ class RecallLearningService {
     );
 
     final stateKind = _stateForOutcome(outcome);
-    final nextAction = _nextActionFor(stateKind);
-    return _learningStore.persistEvidenceAndState(
+    final persisted = await _learningStore.persistEvidenceAndState(
       learner: learner,
       evidence: evidence,
       stateKind: stateKind,
       stateRuleVersion: stateRuleVersion,
-      nextAction: nextAction,
+    );
+    return RecallAttemptResult(
+      evidence: persisted.evidence,
+      state: persisted.state,
+      nextAction: _nextActionFor(persisted.state.kind),
     );
   }
 

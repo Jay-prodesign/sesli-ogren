@@ -32,12 +32,11 @@ abstract interface class LearningTruthStore {
   /// Persists evidence first and updates the derived state in the same
   /// transaction. A replay of the same attempt is idempotent; a conflicting
   /// replay fails closed.
-  Future<RecallAttemptResult> persistEvidenceAndState({
+  Future<PersistedLearningTruth> persistEvidenceAndState({
     required AuthenticatedLearner learner,
     required LearnerEvidence evidence,
     required RecallStateKind stateKind,
     required String stateRuleVersion,
-    required NextLearningAction nextAction,
   });
 }
 
@@ -48,4 +47,14 @@ class LearningTruthConflict implements Exception {
 
   @override
   String toString() => 'LearningTruthConflict: $message';
+}
+
+class PersistedLearningTruth {
+  const PersistedLearningTruth({
+    required this.evidence,
+    required this.state,
+  });
+
+  final LearnerEvidence evidence;
+  final LearnerState state;
 }
