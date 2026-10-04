@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
+import 'package:crypto/crypto.dart';
 import 'package:sqflite/sqflite.dart';
 
 import '../domain/authenticated_learner.dart';
@@ -1463,6 +1464,8 @@ ON CONFLICT(learner_id, attempt_id) DO UPDATE SET
   Future<PersistedLearningTruth> persistEvidenceStateAndNextAction({
     required AuthenticatedLearner learner,
     required LearnerEvidence evidence,
+    required RecallResponseDisposition disposition,
+    required String normalizedResponse,
     required RecallStateKind stateKind,
     required String stateRuleVersion,
     required NextLearningAction nextAction,
@@ -1516,6 +1519,41 @@ ON CONFLICT(learner_id, attempt_id) DO UPDATE SET
       if (canonicalAssistance != evidence.assistance) {
         throw const LearningTruthConflict(
           'Learner evidence assistance does not match canonical support history.',
+        );
+      }
+
+      final canonicalOutcome = RecallTruthPolicy.evaluate(
+        expectedAnswer: action.expectedAnswer,
+        response: normalizedResponse,
+        disposition: disposition,
+        assistance: canonicalAssistance,
+      );
+      final canonicalResponseDigest = sha256
+          .convert(utf8.encode(normalizedResponse))
+          .toString();
+      if (canonicalOutcome != evidence.outcome ||
+          canonicalResponseDigest != evidence.responseDigest ||
+          normalizedResponse.length != evidence.responseLength ||
+          evidence.ruleVersion != RecallTruthPolicy.evidenceRuleVersion) {
+        throw const LearningTruthConflict(
+          'Learner evidence does not match canonical Recall evaluation.',
+        );
+      }
+      final canonicalStateKind = RecallTruthPolicy.stateForOutcome(
+        canonicalOutcome,
+      );
+      final canonicalNextAction = RecallTruthPolicy.nextActionFor(
+        materialId: evidence.materialId,
+        sourceVersionId: evidence.sourceVersionId,
+        evidenceId: evidence.id,
+        outcome: canonicalOutcome,
+        createdAt: evidence.createdAt,
+      );
+      if (stateKind != canonicalStateKind ||
+          stateRuleVersion != RecallTruthPolicy.stateRuleVersion ||
+          !RecallTruthPolicy.sameNextAction(nextAction, canonicalNextAction)) {
+        throw const LearningTruthConflict(
+          'Derived learning state or next action does not match canonical policy.',
         );
       }
 
