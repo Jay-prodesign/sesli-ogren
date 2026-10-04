@@ -72,11 +72,16 @@ class RecallLearningService {
       actionId: actionId,
     );
     final now = _now().toUtc();
+    final existingEvidence = await _learningStore.evidenceForMaterial(
+      learner: learner,
+      materialId: action.materialId,
+      sourceVersionId: action.sourceVersionId,
+    );
     final seed = sha256
         .convert(
           utf8.encode(
             '${learner.id.value}\u0000${action.id.value}\u0000'
-            '${now.microsecondsSinceEpoch}',
+            '${existingEvidence.length}\u0000${now.microsecondsSinceEpoch}',
           ),
         )
         .toString();
