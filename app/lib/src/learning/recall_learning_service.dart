@@ -63,6 +63,43 @@ class RecallLearningService {
     return persisted.toPrompt();
   }
 
+  Future<RecallAttemptSession> openAttempt({
+    required AuthenticatedLearner learner,
+    required RecallActionId actionId,
+  }) async {
+    final action = await _currentAction(
+      learner: learner,
+      actionId: actionId,
+    );
+    final now = _now().toUtc();
+    final seed = sha256
+        .convert(
+          utf8.encode(
+            '${learner.id.value}\u0000${action.id.value}\u0000'
+            '${now.microsecondsSinceEpoch}',
+          ),
+        )
+        .toString();
+    final proposedAttemptId = RecallAttemptId(
+      'attempt-${seed.substring(0, 32)}',
+    );
+    final active = await _learningStore.openRecallAttempt(
+      learner: learner,
+      actionId: action.id,
+      proposedAttemptId: proposedAttemptId,
+      openedAt: now,
+    );
+    final assistance = await _learningStore.assistanceForAttempt(
+      learner: learner,
+      attemptId: active.attemptId,
+      actionId: active.actionId,
+    );
+    return RecallAttemptSession(
+      attempt: active,
+      assistance: assistance,
+    );
+  }
+
   Future<RecallSupport> requestHint({
     required AuthenticatedLearner learner,
     required RecallActionId actionId,
@@ -73,6 +110,17 @@ class RecallLearningService {
       learner: learner,
       actionId: actionId,
     );
+    final active = await _learningStore.openRecallAttempt(
+      learner: learner,
+      actionId: action.id,
+      proposedAttemptId: attemptId,
+      openedAt: _now().toUtc(),
+    );
+    if (active.attemptId != attemptId) {
+      throw const RecallLearningException(
+        'Recall support belongs to a different active attempt.',
+      );
+    }
     final assistance = await _learningStore.registerAssistance(
       learner: learner,
       attemptId: attemptId,
@@ -98,6 +146,17 @@ class RecallLearningService {
       learner: learner,
       actionId: actionId,
     );
+    final active = await _learningStore.openRecallAttempt(
+      learner: learner,
+      actionId: action.id,
+      proposedAttemptId: attemptId,
+      openedAt: _now().toUtc(),
+    );
+    if (active.attemptId != attemptId) {
+      throw const RecallLearningException(
+        'Recall support belongs to a different active attempt.',
+      );
+    }
     final assistance = await _learningStore.registerAssistance(
       learner: learner,
       attemptId: attemptId,
@@ -135,6 +194,24 @@ class RecallLearningService {
       throw const RecallLearningException(
         'Recall action provenance is no longer valid.',
       );
+    }
+
+    final existingEvidence = await _learningStore.evidenceForAttempt(
+      learner: learner,
+      attemptId: attemptId,
+    );
+    if (existingEvidence == null) {
+      final active = await _learningStore.openRecallAttempt(
+        learner: learner,
+        actionId: action.id,
+        proposedAttemptId: attemptId,
+        openedAt: _now().toUtc(),
+      );
+      if (active.attemptId != attemptId) {
+        throw const RecallLearningException(
+          'Submission does not match the active Recall attempt.',
+        );
+      }
     }
 
     final assistance = await _learningStore.assistanceForAttempt(
