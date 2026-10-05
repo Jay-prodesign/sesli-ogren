@@ -271,6 +271,10 @@ void main() {
     expect(find.textContaining('ışık enerjisini kimyasal enerjiye'), findsOneWidget);
     expect(find.text('Önemli noktalar'), findsOneWidget);
     expect(find.textContaining('öğrenme kanıtı oluşturmaz'), findsOneWidget);
+    expect(find.text('Hatırla ile dene'), findsOneWidget);
+    await tapVisible(tester, find.text('Hatırla ile dene'));
+    await pumpUntilFound(tester, find.text('Hatırla'));
+    expect(find.text('Hatırla'), findsOneWidget);
   });
 
   testWidgets('answer exposure survives close and reopen without becoming independent', (tester) async {
