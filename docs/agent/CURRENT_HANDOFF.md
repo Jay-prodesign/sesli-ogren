@@ -66,3 +66,14 @@ Physical iPhone + representative Android speech/audibility, accessibility, perfo
 - Continue with static/deterministic repo review and implementation.
 - Mark Flutter/runtime/build checks that require unavailable tooling as `PENDING_BATCH_VALIDATION`.
 - Use at most one bounded Actions validation batch at an applicable milestone/release evidence point, unless the Founder explicitly changes this rule.
+
+
+## Founder pause checkpoint — 2026-10-05
+
+Work is intentionally **PAUSED BY FOUNDER**. Do not advance implementation until the Founder explicitly resumes.
+
+Resume authority: `docs/agent/PAUSE_CHECKPOINT_2026-10-05.md`.
+
+Current runtime candidate: `01670f42029ef228706c4a772594102e5656ebdf`.
+
+When resumed, fresh-read the control plane and continue LA-0022 from the first unresolved gate only: real Supabase authenticated learner evidence → Flutter 3.47.5 lockfile + single bounded D-072 validation batch (including server SQL) → GLS-083 independent review → M5 verdict. No new feature breadth before M5 closes.
