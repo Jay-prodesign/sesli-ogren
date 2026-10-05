@@ -65,7 +65,7 @@ flutter build apk --profile \
   --dart-define=SUPABASE_PUBLISHABLE_KEY="$SUPABASE_PUBLISHABLE_KEY"
 ```
 
-On macOS at the same exact frozen head:
+On macOS at the same exact final validation head:
 
 ```bash
 cd app
@@ -93,7 +93,8 @@ The full `flutter test` run must include, at minimum:
 - Reduced Motion/widget flow;
 - privacy-safe operational telemetry lineage;
 - production bootstrap fails closed with no Supabase config;
-- configured runtime establishes a real Supabase authenticated session and maps its user ID into `AuthenticatedLearner` before opening local learning data.
+- live Supabase anonymous-auth probe returns one authenticated anonymous subject/session without logging credentials/tokens;
+- production Flutter bootstrap remains statically mapped from Supabase `currentSession.user` / anonymous `response.user` into `AuthenticatedLearner(LearnerId(user.id))` before `AppRuntime.open`; the profile app boot with real defines must reach the source-entry flow rather than the fail-closed configuration/auth screen.
 
 ## Evidence to record
 
@@ -103,6 +104,8 @@ Capture:
 - committed `app/pubspec.lock` SHA;
 - each command result;
 - test count/result;
+- live Supabase auth probe PASS + project host + hashed user-ID fingerprint (never token/key);
+- combined SQL migration/test report;
 - Android profile APK build result;
 - iOS profile no-codesign build result;
 - representative durations already emitted by the admitted flow where available;
