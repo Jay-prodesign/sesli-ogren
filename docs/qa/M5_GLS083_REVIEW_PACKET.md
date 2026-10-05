@@ -5,14 +5,16 @@
 - Project: Learning App / Sesli Öğren
 - Mission: M5 Golden Learning Slice
 - Branch: `feat/m5-golden-learning-slice`
-- Implementation closure head: `f583804e0bfe0c2565e86094850cfd979daf5ed1`
-- Checkpoint lineage at packet authoring: `27244cc838474b36d6e4d45f996d5f3810947d0f`
+- Frozen runtime implementation candidate: `01670f42029ef228706c4a772594102e5656ebdf`
+- Later commits are checkpoint/control-plane documentation only unless the packet is explicitly refreshed again.
 - Governing acceptance: `M5_GOLDEN_LEARNING_SLICE_ACCEPTANCE_CONTRACT_v0.1`
 - Review trigger: GLS-083
 - Reviewer mode: **read-only**
 - Routine GitHub Actions: **OFF under D-072**
 
 The reviewer must evaluate the code independently. This packet is a map, not a PASS claim.
+
+Static checkpoint review S-001 previously found that the server path collapsed answer exposure into hint/no-help semantics. That defect was corrected in `b0d5df8a…` + `01670f42…`. The independent reviewer must verify the correction rather than inheriting the prior review conclusion.
 
 ## Why independent review is required
 
@@ -41,6 +43,9 @@ A BLOCKER or HIGH data-integrity/security finding prevents M5 PASS until remedia
 - `app/lib/src/domain/learning_truth.dart`
 - `app/lib/src/data/learning_truth_store.dart`
 - `app/lib/src/learning/recall_learning_service.dart`
+- `server/db/migrations/0003_recall_learning_truth.sql`
+- `server/db/migrations/0004_server_authoritative_recall_assistance.sql`
+- `server/db/tests/40_recall_learning_truth.sql`
 
 ### Operational separation
 - `app/lib/src/domain/operational_event.dart`
