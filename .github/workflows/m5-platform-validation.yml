@@ -6,6 +6,9 @@ on:
       - feat/m5-golden-learning-slice
     paths:
       - ".github/workflows/m5-platform-validation.yml"
+      - "server/db/migrations/**"
+      - "server/db/tests/**"
+      - "scripts/m5_validate_server_sql.sh"
 
 permissions:
   contents: read
