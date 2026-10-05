@@ -44,8 +44,8 @@
   "git": {
     "branch": "feat/m5-golden-learning-slice",
     "base_sha": "84e96dce5b3cc9f32af3f459d422b652d0e86624",
-    "head_sha": "64579d48bcf9c33f4c709927a0e453349efb7c5b",
-    "head_sha_note": "M5 runtime implementation candidate after synthetic adversarial review correction S-003. e576ca17… fixed S-002 compile blocker; 64579d48… additionally corrects server Recall rule-version provenance for answer-exposure semantics. Later commits are tests/docs/validation tooling only unless explicitly re-frozen.",
+    "head_sha": "5aa22d11e07e6e301056f78391d177833892ed00",
+    "head_sha_note": "Current M5 branch head after Flutter formatting/analyzer/Recall/test-contract cleanup. Runtime candidate semantics remain rooted in 64579d48… plus bounded validation corrections; do not treat this as release-ready until remaining tests/build gates pass.",
     "pr_number": 10,
     "pr_url": "https://github.com/Jay-prodesign/sesli-ogren/pull/10",
     "merged": false,
@@ -76,13 +76,14 @@
     "current_task": "LA-0022"
   },
   "blockers": [
-    "Local Flutter 3.47.5 analyzer found a compile-blocking Recall refactor regression: app/lib/src/learning/recall_learning_service.dart still calls removed wrappers `_stateForOutcome` and `_nextActionFor`. Root cause is commit e18281d41901e78da08b4a8b6d319e19b9acc5f6, which moved these helpers to RecallTruthPolicy but did not update the remaining call sites.",
-    "A real Supabase project/session must be configured and anonymous sign-in enabled to evidence the authenticated-learner M5 path; only client-safe project URL/publishable key are needed.",
-    "Current ChatGPT execution container has no established Flutter/Dart checkpoint environment; one bounded D-072 runtime/build validation batch remains pending.",
-    "Accessibility runtime evidence remains pending in the batch; physical VoiceOver/TalkBack/device/orientation evidence remains deferred under D-068."
+    "Bounded GitHub Actions run #2 (37317173842) on 5aa22d11…: Flutter 3.47.5/toolchain PASS, lockfile reproducibility PASS, format PASS, analyze PASS; tests FAIL (34 passed, 6 failed); Android profile build not reached.",
+    "Real PDF integration test fails on both Windows local and Ubuntu Actions with SourceIngestException: PDF could not be parsed safely. Fixture itself is structurally valid and independently readable as two pages, so diagnose pdfrx/PDFium host-test initialization/native-asset loading before changing product behavior or dependency.",
+    "app_smoke_test uses pumpAndSettle while D/Knot has a repeating AnimationController; production app widget test times out, causing downstream guarded-function conflicts. Test harness must use bounded/condition-based pumping instead of waiting for global settle.",
+    "A real Supabase project/session remains required for authenticated-learner live auth evidence; only client-safe project URL/publishable key are needed.",
+    "Server SQL suite and iOS/macOS validation remain pending; physical device checks remain deferred under D-068."
   ],
   "protected_gate": "Merge, release, deploy, paid providers, credentials/secrets, licensing posture, production mutation: Product Owner only",
-  "next_action": "Codex/local: make the exact RecallTruthPolicy call-site correction only (`_stateForOutcome` -> `RecallTruthPolicy.stateForOutcome`; `_nextActionFor(... now:)` -> `RecallTruthPolicy.nextActionFor(... createdAt:)`), then rerun analyze -> tests -> Android profile build, stopping at first failure. Keep existing formatter-only changes; do not push until validation passes.",
+  "next_action": "Codex/local: test-only smoke harness correction (remove pumpAndSettle dependency on infinite D/Knot motion) plus one temporary, non-committed direct pdfrx diagnostic that exposes the underlying PdfDocument.openData exception for the valid two-page fixture. Do not change product PDF behavior or upgrade dependencies until that diagnostic identifies the failure.",
   "canonical_source_refs": [
     "CURRENT_EXECUTION_STATE — Learning App",
     "D-070 — Founder Product/Visual PASS / D-Knot selected",
@@ -165,12 +166,18 @@
     "deferred": "Physical-device evidence remains deferred under D-068.",
     "batch_rule": "GitHub Actions are allowed again by Founder decision on 2026-10-05, but must be used sparingly. Do not run Actions on every commit. Prefer one bounded validation workflow after a stable candidate is pushed, and avoid reruns unless a concrete failure has been corrected.",
     "one_shot_actions_workflow": {
-      "status": "ARMED_WAITING_FOR_LOCAL_ANALYZER_FIX",
+      "status": "BOUNDED_CYCLE_ACTIVE_WAITING_TEST_FIXES",
       "path": ".github/workflows/m5-bounded-validation.yml",
       "added_at_commit": "12f3e87ee4e03dd142010714dadb2d3799e85065",
       "trigger": "next push to feat/m5-golden-learning-slice containing app/** changes",
       "scope": "Flutter 3.47.5 toolchain check, lockfile reproducibility, format, analyze, flutter test, Android profile build, APK SHA-256",
-      "cleanup": "Remove/disable after the bounded M5 run completes so routine app pushes do not keep triggering it."
+      "cleanup": "Remove/disable after the bounded M5 run completes so routine app pushes do not keep triggering it.",
+      "last_run": {
+        "run_id": 37317173842,
+        "head_sha": "5aa22d11e07e6e301056f78391d177833892ed00",
+        "result": "FAIL_TEST_STAGE",
+        "summary": "format/analyze PASS; 34 tests PASS, 6 FAIL; Android build not reached"
+      }
     }
   },
   "pause_checkpoint": {
