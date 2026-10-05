@@ -1,5 +1,7 @@
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sesli_ogren/src/data/pdf_text_extractor.dart';
 import 'package:sesli_ogren/src/data/source_ingest_service.dart';
@@ -11,6 +13,26 @@ import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   sqfliteFfiInit();
+
+  const pathProviderChannel = MethodChannel('plugins.flutter.io/path_provider');
+  final messenger =
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
+
+  setUp(() {
+    messenger.setMockMethodCallHandler(pathProviderChannel, (call) {
+      if (call.method == 'getTemporaryDirectory' ||
+          call.method == 'getTemporaryPath') {
+        return SynchronousFuture<Object?>(Directory.systemTemp.path);
+      }
+      throw MissingPluginException(
+        'Unexpected path_provider method: ${call.method}',
+      );
+    });
+  });
+
+  tearDown(() {
+    messenger.setMockMethodCallHandler(pathProviderChannel, null);
+  });
 
   test('real two-page PDF keeps page provenance across store reopen', () async {
     final bytes = await File('test/fixtures/two_page_text.pdf').readAsBytes();
