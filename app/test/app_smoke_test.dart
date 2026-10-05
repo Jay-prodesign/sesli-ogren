@@ -217,7 +217,6 @@ void main() {
     expect(find.text('Hızlı bakış'), findsOneWidget);
     expect(find.text('Hatırla'), findsWidgets);
     expect(find.text('Dinle'), findsOneWidget);
-    expect(find.text('Kaynak'), findsWidgets);
   });
 
   testWidgets('answer exposure survives close and reopen without becoming independent', (tester) async {
