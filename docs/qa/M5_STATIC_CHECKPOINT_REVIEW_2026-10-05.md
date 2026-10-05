@@ -2,7 +2,7 @@
 
 - Task: LA-0022
 - Branch: `feat/m5-golden-learning-slice`
-- Runtime implementation candidate reviewed before control-plane-only commits: `01670f42029ef228706c4a772594102e5656ebdf`
+- Frozen runtime implementation candidate after static corrections: `e576ca177ff8872cbbfc4f127eb016cefa7f611c`
 - Mode: Brain/static checkpoint review; **not** the independent GLS-083 review
 - Runtime/build execution: pending the single bounded D-072 batch
 
@@ -32,6 +32,17 @@ No known code-level BLOCKER/HIGH remains from this static pass after the correct
   - `b0d5df8adc0f8155946cc308f280651022ee9a13`
   - `01670f42029ef228706c4a772594102e5656ebdf`
 - Remaining evidence: real PostgreSQL/Supabase-shim execution in the bounded M5 batch.
+
+## Finding S-002 — RESOLVED / COMPILE BATCH PENDING
+
+- Severity before correction: **BLOCKER**
+- Area: local SQLite learning-truth persistence / Dart compilation
+- File: `app/lib/src/data/sqlite_source_store.dart`
+- Failure: `persistEvidenceStateAndNextAction` declared `canonicalStateKind` and `canonicalNextAction` twice in the same Dart scope. The bounded analyze/build batch would fail before runtime validation.
+- Correction: removed only the redundant second derivation/check block; the first, stronger canonical outcome → state → next-action verification remains authoritative.
+- Correction commit: `e576ca177ff8872cbbfc4f127eb016cefa7f611c`.
+- Static structural follow-up: no duplicate `final` declarations were found in the other override method scopes of `sqlite_source_store.dart`.
+- Remaining evidence: Dart format/analyze/test/build in the bounded Flutter batch.
 
 ## Authentication boundary — STATIC_PASS / LIVE SESSION PENDING
 
