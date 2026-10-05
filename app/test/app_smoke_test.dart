@@ -217,6 +217,7 @@ void main() {
     expect(find.text('Hızlı bakış'), findsOneWidget);
     expect(find.text('Hatırla'), findsWidgets);
     expect(find.text('Dinle'), findsOneWidget);
+    await tester.scrollUntilVisible(find.text('Kaynak'), 220);
     expect(find.text('Kaynak'), findsOneWidget);
   });
 
