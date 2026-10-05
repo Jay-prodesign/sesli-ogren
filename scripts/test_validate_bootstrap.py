@@ -168,7 +168,7 @@ class ValidatorNegativeTests(unittest.TestCase):
             1,
         )
         path.write_text(prefix + entries, encoding="utf-8")
-        self.assertFailsWith(r"register field missing: Approving decision / task")
+        self.assertFailsWith(r"REUSE-0001 missing value for 'Approving decision / task'")
 
     def test_register_entry_invalid_class(self) -> None:
         entry = (
