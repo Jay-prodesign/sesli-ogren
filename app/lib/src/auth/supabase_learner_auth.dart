@@ -33,6 +33,8 @@ class SupabaseLearnerAuth {
     }
   }
 
+  static Future<SupabaseClient> clientForAuthenticatedRuntime() => _clientForConfiguredProject();
+
   static Future<SupabaseClient> _clientForConfiguredProject() async {
     if (_projectUrl.trim().isEmpty || _publishableKey.trim().isEmpty) {
       throw const LearnerAuthConfigurationException('Supabase client configuration is missing.');
