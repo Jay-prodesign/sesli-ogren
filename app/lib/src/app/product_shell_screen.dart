@@ -170,8 +170,9 @@ class _HomeSurface extends StatelessWidget {
     if (continuation == null) return 'Aktif öğrenmeye başla';
     return switch (continuation.state.kind) {
       RecallStateKind.retrievedOnce => 'Hatırlamanı güçlendir',
+      RecallStateKind.developing => 'Bir kez daha dene',
       RecallStateKind.needsReview => 'Kısa bir tekrar yap',
-      RecallStateKind.unknown => 'Ne kadar hatırladığını gör',
+      RecallStateKind.notAssessed => 'Ne kadar hatırladığını gör',
     };
   }
 
