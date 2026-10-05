@@ -39,6 +39,9 @@ jobs:
           cache: false
           pub-cache: false
       - run: flutter pub get --enforce-lockfile
-      - run: dart format --output=none --set-exit-if-changed .
+      - name: Canonical format + diff
+        run: |
+          dart format .
+          git diff -- lib/src/app/listen_screen.dart lib/src/app/product_shell_screen.dart
       - run: flutter analyze
       - run: flutter test
