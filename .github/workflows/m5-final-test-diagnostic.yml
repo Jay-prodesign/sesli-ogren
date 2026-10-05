@@ -11,9 +11,9 @@ permissions:
   contents: read
 
 jobs:
-  validate:
+  diagnose:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 8
     steps:
       - uses: actions/checkout@v4
         with:
@@ -25,44 +25,109 @@ jobs:
           channel: "stable"
           cache: true
 
-      - name: Resolve locked dependencies
+      - name: Resolve dependencies
+        working-directory: app
+        run: flutter pub get
+
+      - name: Instrument source-entry widget boot
         working-directory: app
         run: |
-          flutter pub get
-          git diff --exit-code -- pubspec.lock
+          cat > test/_m5_smoke_boot_diagnostic_test.dart <<'DART'
+          import 'dart:typed_data';
 
-      - name: app_smoke_test
-        working-directory: app
-        run: timeout 90s flutter test test/app_smoke_test.dart --timeout 45s -r expanded
+          import 'package:flutter/material.dart';
+          import 'package:flutter_test/flutter_test.dart';
+          import 'package:sesli_ogren/src/app/app_runtime.dart';
+          import 'package:sesli_ogren/src/app/learning_slice_screen.dart';
+          import 'package:sesli_ogren/src/data/pdf_text_extractor.dart';
+          import 'package:sesli_ogren/src/data/source_ingest_service.dart';
+          import 'package:sesli_ogren/src/data/sqlite_source_store.dart';
+          import 'package:sesli_ogren/src/learning/recall_learning_service.dart';
+          import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
-      - name: pdf_text_extractor_test
-        working-directory: app
-        run: timeout 90s flutter test test/pdf_text_extractor_test.dart --timeout 45s -r expanded
+          class _UnusedPdfExtractor implements PdfTextExtractor {
+            const _UnusedPdfExtractor();
 
-      - name: recall_learning_service_test
-        working-directory: app
-        run: timeout 90s flutter test test/recall_learning_service_test.dart --timeout 45s -r expanded
+            @override
+            Future<ExtractedPdf> extract(
+              Uint8List bytes, {
+              required String sourceName,
+            }) {
+              throw UnimplementedError();
+            }
+          }
 
-      - name: recall_support_upgrade_test
-        working-directory: app
-        run: timeout 90s flutter test test/recall_support_upgrade_test.dart --timeout 45s -r expanded
+          void main() {
+            sqfliteFfiInit();
 
-      - name: source_contract_test
-        working-directory: app
-        run: timeout 90s flutter test test/source_contract_test.dart --timeout 45s -r expanded
+            testWidgets(
+              'diagnose source-entry widget boot',
+              (tester) async {
+                debugPrint('SMOKE_DIAG A before store open');
+                final store = await SqliteSourceStore.open(
+                  factory: databaseFactoryFfi,
+                  path: inMemoryDatabasePath,
+                );
+                debugPrint('SMOKE_DIAG B store open');
 
-      - name: source_ingest_service_test
-        working-directory: app
-        run: timeout 90s flutter test test/source_ingest_service_test.dart --timeout 45s -r expanded
+                final runtime = AppRuntime(
+                  learner: AppRuntime.localM5LearnerFixture,
+                  store: store,
+                  ingest: SourceIngestService(
+                    store: store,
+                    pdfTextExtractor: const _UnusedPdfExtractor(),
+                  ),
+                  recall: RecallLearningService(
+                    sourceStore: store,
+                    learningStore: store.learningTruthStore(),
+                  ),
+                  telemetry: store.operationalTelemetry(),
+                );
 
-      - name: Android profile build
-        working-directory: app
-        run: flutter build apk --profile
+                debugPrint('SMOKE_DIAG C before pumpWidget');
+                await tester.pumpWidget(
+                  MaterialApp(
+                    home: MediaQuery(
+                      data: const MediaQueryData(disableAnimations: true),
+                      child: LearningSliceScreen(runtime: runtime),
+                    ),
+                  ),
+                );
+                debugPrint('SMOKE_DIAG D after pumpWidget');
 
-      - name: Verify PDFium packaging and APK SHA-256
-        working-directory: app
-        run: |
-          APK=build/app/outputs/flutter-apk/app-profile.apk
-          test -f "$APK"
-          unzip -l "$APK" | grep -q "libpdfium.so"
-          sha256sum "$APK"
+                var found = false;
+                for (var i = 0; i < 100; i++) {
+                  await tester.runAsync(() async {
+                    await Future<void>.delayed(
+                      const Duration(milliseconds: 5),
+                    );
+                  });
+                  if (i % 10 == 0) {
+                    debugPrint('SMOKE_DIAG YIELD $i');
+                  }
+                  await tester.pump(const Duration(milliseconds: 20));
+                  if (find.text('Çalışma materyalini ekle').evaluate().isNotEmpty) {
+                    found = true;
+                    debugPrint('SMOKE_DIAG E source found at $i');
+                    break;
+                  }
+                }
+
+                if (!found) {
+                  fail('SMOKE_DIAG source state not reached');
+                }
+
+                debugPrint('SMOKE_DIAG F before unmount');
+                await tester.pumpWidget(const SizedBox.shrink());
+                await tester.pump();
+                debugPrint('SMOKE_DIAG G before close');
+                await tester.runAsync(store.close);
+                debugPrint('SMOKE_DIAG H closed');
+              },
+              timeout: const Timeout(Duration(seconds: 45)),
+            );
+          }
+          DART
+
+          timeout 90s flutter test test/_m5_smoke_boot_diagnostic_test.dart -r expanded
+          rm -f test/_m5_smoke_boot_diagnostic_test.dart
