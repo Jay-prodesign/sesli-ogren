@@ -44,8 +44,8 @@
   "git": {
     "branch": "feat/m5-golden-learning-slice",
     "base_sha": "84e96dce5b3cc9f32af3f459d422b652d0e86624",
-    "head_sha": "72494bec8525f37a9fed8a6b6f38d60033b57e08",
-    "head_sha_note": "Validated M5 app/test candidate. Subsequent branch commits only remove temporary validation workflows and update control-plane state unless explicitly noted.",
+    "head_sha": "17773e631e3dc1ae28dd1a4656e0509309083923",
+    "head_sha_note": "Current validated M5 checkpoint head before evidence-only documentation cleanup. Runtime/product behavior remains the validated M5 candidate plus bounded test/SQL corrections.",
     "pr_number": 10,
     "pr_url": "https://github.com/Jay-prodesign/sesli-ogren/pull/10",
     "merged": false,
@@ -76,13 +76,11 @@
     "current_task": "LA-0022"
   },
   "blockers": [
-    "Live Supabase anonymous-auth evidence remains pending. Only client-safe SUPABASE_URL + SUPABASE_PUBLISHABLE_KEY may be used; never service-role credentials.",
-    "Combined server SQL migration/RPC regression suite remains pending against a fresh ephemeral PostgreSQL validation database.",
-    "iOS/macOS profile no-codesign build evidence remains pending.",
+    "Live Supabase anonymous-auth evidence remains BLOCKED because GitHub protected client config is absent: SUPABASE_URL and SUPABASE_PUBLISHABLE_KEY are not configured for the validation environment. Only these client-safe values may be used; never service-role credentials.",
     "Physical iOS/Android speech/accessibility/performance/orientation checks remain deferred under D-068 and mandatory before release-candidate/public-release claims."
   ],
   "protected_gate": "Merge, release, deploy, paid providers, credentials/secrets, licensing posture, production mutation: Product Owner only",
-  "next_action": "Run one bounded platform validation for the remaining M5 non-physical gates: fresh ephemeral PostgreSQL SQL suite, macOS iOS profile no-codesign build, and secret-safe live Supabase anonymous-auth probe only if protected client-safe values are available. Do not broaden product scope.",
+  "next_action": "Resolve the sole remaining non-physical M5 blocker: provide/configure client-safe SUPABASE_URL + SUPABASE_PUBLISHABLE_KEY in a protected validation environment, then run the existing secret-safe anonymous-auth probe once. Do not broaden product scope. Physical-device checks remain deferred under D-068.",
   "canonical_source_refs": [
     "CURRENT_EXECUTION_STATE — Learning App",
     "D-070 — Founder Product/Visual PASS / D-Knot selected",
@@ -165,7 +163,7 @@
     "deferred": "Physical-device evidence remains deferred under D-068.",
     "batch_rule": "GitHub Actions are allowed again by Founder decision on 2026-10-05, but must be used sparingly. Do not run Actions on every commit. Prefer one bounded validation workflow after a stable candidate is pushed, and avoid reruns unless a concrete failure has been corrected.",
     "one_shot_actions_workflow": {
-      "status": "PASS_REMOVED_AFTER_RUN",
+      "status": "PASS_PENDING_WORKFLOW_CLEANUP",
       "path": ".github/workflows/m5-bounded-validation.yml",
       "added_at_commit": "12f3e87ee4e03dd142010714dadb2d3799e85065",
       "trigger": "next push to feat/m5-golden-learning-slice containing app/** changes",
@@ -270,18 +268,18 @@
     }
   },
   "validation_batch_readiness": {
-    "status": "FLUTTER_ANDROID_PASS_PENDING_SQL_IOS_LIVE_AUTH",
+    "status": "NON_PHYSICAL_PASS_EXCEPT_LIVE_AUTH_CONFIG",
     "manifest": "docs/qa/M5_BATCH_VALIDATION_MANIFEST.md",
     "return": "docs/qa/M5_FINAL_VALIDATION_RETURN.md",
     "sql_helper": "scripts/m5_validate_server_sql.sh",
     "live_auth_helper": "scripts/m5_probe_supabase_anonymous_auth.py",
     "execution_rule": "Run the single D-072 batch only after the Founder-accepted synthetic review artifact is present and app/pubspec.lock is generated/reviewed/committed from Flutter 3.47.5.",
     "server_rpc_regression_test_commit": "f00df73dbf7851f48d7edf8e95ae463859c18bb4",
-    "server_rpc_regression_scope": "Actual RPC-level unassisted replay/idempotency, hint semantics, answer-exposure non-laundering, assistance monotonicity, cross-user isolation, and submitted-attempt support-mutation rejection. PENDING execution in the single SQL batch.",
+    "server_rpc_regression_scope": "PASS in GitHub Actions platform validation run 37337837569: 5/5 SQL tests including Recall RPC semantics, RLS/tenant isolation and idempotency.",
     "linux_runner": "scripts/m5_run_final_validation_linux.sh",
     "macos_runner": "scripts/m5_run_final_validation_macos.sh",
     "guard": "Both runners require the accepted synthetic review artifact plus committed app/pubspec.lock before executing. Linux runner performs live auth, bootstrap checks, dependency reproducibility, format/analyze/tests, Android profile build and combined SQL suite; macOS runner performs lock reproducibility and iOS profile no-codesign build.",
-    "execution_environment": "HYBRID. Flutter/Android bounded Actions checkpoint passed. Remaining non-physical gates may use one additional bounded platform validation run; routine/per-commit Actions remain discouraged.",
+    "execution_environment": "HYBRID checkpoint completed: Flutter/Android run 37334117375 PASS; server SQL + iOS run 37337837569 PASS. Live auth remains blocked only by missing protected client-safe Supabase config. Routine/per-commit Actions remain disabled/removed after checkpoint.",
     "actions_freeze_branch": "HISTORICAL ONLY — prior temporary lockfile workflow branch; not authoritative for current validation."
   },
   "agent_cost_efficiency": {
@@ -315,5 +313,19 @@
       "Scrollable controls are brought into view before tap assertions.",
       "Real PDFium parsing is validated in a Dart native-assets probe rather than Flutter host-test plugin context."
     ]
+  },
+  "platform_validation": {
+    "status": "PASS_EXCEPT_LIVE_AUTH_CONFIG",
+    "actions_run_id": 37337837569,
+    "validated_head_sha": "17773e631e3dc1ae28dd1a4656e0509309083923",
+    "server_sql": "PASS_5_OF_5",
+    "server_sql_artifact_id": 11357231937,
+    "server_sql_artifact_sha256": "01f40d5dde24baa25aa9db3510bee0815b213ae10c0e0afa0bf2dd2918703368",
+    "ios_profile_build": "PASS",
+    "ios_app_size": "34.4MB",
+    "ios_app_fingerprint_sha256": "74a5eaafa081fc64a33ade9575f4ac49f53bbd51b21834a8c92f1f1b9003f9b7",
+    "xcode": "26.6",
+    "supabase_client_config_present": false,
+    "live_auth_probe": "BLOCKED_MISSING_PROTECTED_CLIENT_VALUES"
   }
 }
