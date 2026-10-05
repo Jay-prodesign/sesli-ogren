@@ -83,7 +83,7 @@
     "Accessibility runtime evidence remains pending in the batch; physical VoiceOver/TalkBack/device/orientation evidence remains deferred under D-068."
   ],
   "protected_gate": "Merge, release, deploy, paid providers, credentials/secrets, licensing posture, production mutation: Product Owner only",
-  "next_action": "Generate/review/freeze app/pubspec.lock with Flutter 3.47.5, then execute the single guarded D-072 final validation batch. Synthetic GLS-083 review is accepted for M5 by Founder; do not wait for external review.",
+  "next_action": "Complete Flutter 3.47.5 lockfile freeze, then execute the single guarded D-072 final validation batch. Live Supabase authenticated-session evidence remains the only protected runtime prerequisite that may block the batch.",
   "canonical_source_refs": [
     "CURRENT_EXECUTION_STATE — Learning App",
     "D-070 — Founder Product/Visual PASS / D-Knot selected",
@@ -237,7 +237,8 @@
       "draft": true,
       "head_review_metadata_commit": "b429de5c194c988724788318f670af4cf19ea244",
       "actions_runs_observed": 0,
-      "note": "PR #12 remains historical/review-only and need not block M5. Synthetic adversarial review is accepted by Founder as the M5 review gate."
+      "note": "PR #12 is closed and historical only. Founder accepted synthetic review for M5; it must not block LA-0022.",
+      "state": "CLOSED_HISTORICAL"
     },
     "manual_completion_paths": [
       "GitHub PR #12 -> Reviewers -> Copilot -> Request, only if the account/repository exposes Copilot review and Founder accepts any AI-credit/Actions spend.",
