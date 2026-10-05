@@ -15,7 +15,6 @@ class ExplainScreen extends StatefulWidget {
 
   final AppRuntime runtime;
   final SourceVersionRecord source;
-  final SourceVersionRecord source;
 
   @override
   State<ExplainScreen> createState() => _ExplainScreenState();
@@ -70,6 +69,7 @@ class _Ready extends StatelessWidget {
 
   final GroundedExplainReady result;
   final AppRuntime runtime;
+  final SourceVersionRecord source;
 
   @override
   Widget build(BuildContext context) {
