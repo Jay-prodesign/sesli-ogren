@@ -24,6 +24,26 @@ alter table public.learner_evidence
     'partial', 'incorrect', 'unknown'
   ));
 
+-- 0004 changes Recall evidence semantics by making answer exposure canonical.
+-- Preserve historical v1 evidence as historical truth, but require all new
+-- evidence produced by this migration's RPC to use recall-evidence-v2.
+alter table public.learner_evidence
+  drop constraint if exists learner_evidence_rule_version_check;
+alter table public.learner_evidence
+  add constraint learner_evidence_rule_version_check
+  check (rule_version in ('recall-evidence-v1', 'recall-evidence-v2'));
+
+-- LearnerState is a mutable derived projection, so migrate existing projections
+-- to the current v2 state policy rather than mislabeling historical evidence.
+alter table public.learner_states
+  drop constraint if exists learner_states_rule_version_check;
+update public.learner_states
+set rule_version = 'recall-state-v2'
+where rule_version = 'recall-state-v1';
+alter table public.learner_states
+  add constraint learner_states_rule_version_check
+  check (rule_version = 'recall-state-v2');
+
 grant select (assistance) on public.learner_evidence to authenticated;
 
 create table public.recall_attempt_sessions (
@@ -341,7 +361,7 @@ begin
     v_action.extracted_content_id, v_action.id, p_attempt_id,
     p_response_disposition, v_outcome, v_session.assistance,
     v_session.assistance <> 'none', v_digest, char_length(v_normalized),
-    'recall-evidence-v1'
+    'recall-evidence-v2'
   )
   returning id into v_evidence;
 
@@ -364,7 +384,7 @@ begin
   values(
     v_user, v_action.material_id, v_action.source_asset_id,
     v_action.extracted_content_id, v_state, v_count,
-    v_evidence, 'recall-state-v1', now()
+    v_evidence, 'recall-state-v2', now()
   )
   on conflict(account_id, material_id) do update set
     source_asset_id = excluded.source_asset_id,
