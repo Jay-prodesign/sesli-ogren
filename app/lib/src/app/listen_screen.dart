@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+
 import '../speech/device_speech_output.dart';
 import 'app_runtime.dart';
 import 'companion_view.dart';
@@ -128,11 +129,7 @@ class _ListenScreenState extends State<ListenScreen> {
                 ],
                 const SizedBox(height: 18),
                 if (_speaking)
-                  FilledButton.icon(
-                    onPressed: _stop,
-                    icon: const Icon(Icons.stop_rounded),
-                    label: const Text('Durdur'),
-                  )
+                  FilledButton.icon(onPressed: _stop, icon: const Icon(Icons.stop_rounded), label: const Text('Durdur'))
                 else
                   FilledButton.icon(
                     onPressed: () => _play(source.text),
