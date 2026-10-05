@@ -21,7 +21,7 @@ Milestone numbering follows the program sequence in
 M1 = Architecture Proof, …). Drive lifecycle-stage labels use a different
 numbering: lifecycle "M3" is this M0, and lifecycle "M4" is this M1.
 
-Next unallocated ID: **LA-0025**.
+Next unallocated ID: **LA-0026**.
 
 ---
 
@@ -236,12 +236,21 @@ Next unallocated ID: **LA-0025**.
 
 ##### LA-0024 — Full-product shell + material continuity
 
-- Status: IN_PROGRESS
+- Status: DONE
 - Depends on: LA-0022
 - Owner: Brain
 - Executor: ChatGPT (bounded reversible engineering)
 - Verification: D-077 development closure plus the post-M5 Tier-A premise audit admit the shortest user-visible path from real PDF/text intake through Home/Library, Material Workspace, grounded orientation, truthful progress/next-action, Recall and product-local Listen without adding a flat feature grid or unsupported mastery claims.
 - Exec plan: [docs/exec-plans/LA-0024.md](docs/exec-plans/LA-0024.md)
+
+##### LA-0025 — Grounded Teach / Explain
+
+- Status: DONE
+- Depends on: LA-0024
+- Owner: Brain
+- Executor: ChatGPT (bounded reversible engineering)
+- Verification: bounded checkpoint workflow `37377094721` passed strict format, Flutter analyze/test and PostgreSQL server migration/test coverage on `089038967b57748d784192f7869c2d51b35cabf9`.
+- Exec plan: [docs/exec-plans/LA-0025.md](docs/exec-plans/LA-0025.md)
 
 ## Milestone M3 — V0 Implementation Tranches
 
