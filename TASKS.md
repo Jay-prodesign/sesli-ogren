@@ -21,7 +21,7 @@ Milestone numbering follows the program sequence in
 M1 = Architecture Proof, …). Drive lifecycle-stage labels use a different
 numbering: lifecycle "M3" is this M0, and lifecycle "M4" is this M1.
 
-Next unallocated ID: **LA-0024**.
+Next unallocated ID: **LA-0025**.
 
 ---
 
@@ -231,6 +231,17 @@ Next unallocated ID: **LA-0024**.
 - Executor: ChatGPT / Brain audit
 - Verification: Drive `LA-0023 — PROJECT WORK MATURITY & DEPTH AUDIT — TASK SPEC + QUALITY GATE` records PASS WITH CHANGES REQUIRED, keeps LA-0022 as the active cursor, and projects only current-risk/hygiene remediation rather than reopening feature breadth.
 - Exec plan: [docs/exec-plans/LA-0023.md](docs/exec-plans/LA-0023.md)
+
+#### Section M2.S4.C — Post-M5 full-product admission
+
+##### LA-0024 — Full-product shell + material continuity
+
+- Status: IN_PROGRESS
+- Depends on: LA-0022
+- Owner: Brain
+- Executor: ChatGPT (bounded reversible engineering)
+- Verification: D-077 development closure plus the post-M5 Tier-A premise audit admit the shortest user-visible path from real PDF/text intake through Home/Library, Material Workspace, grounded orientation, truthful progress/next-action, Recall and product-local Listen without adding a flat feature grid or unsupported mastery claims.
+- Exec plan: [docs/exec-plans/LA-0024.md](docs/exec-plans/LA-0024.md)
 
 ## Milestone M3 — V0 Implementation Tranches
 
