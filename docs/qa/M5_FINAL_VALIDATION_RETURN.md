@@ -1,26 +1,25 @@
 # M5 Final Validation Return
 
-> Fill only after the Founder-accepted synthetic GLS-083 review gate is recorded and the final lockfile head is frozen.
-> This file records the single bounded D-072 checkpoint batch; it is not a new gate.
+> Founder-accepted synthetic GLS-083 review is the M5 review evidence. External independence is waived for LA-0022/M5 only.
+> This return records the bounded checkpoint evidence and does not by itself grant M5 PASS.
 
 ## Identity
 
 - Runtime candidate reviewed by GLS-083: `64579d48bcf9c33f4c709927a0e453349efb7c5b`
-- GLS-083 disposition: PASS_FOUNDER_WAIVER / SYNTHETIC_ACCEPTED
-- Final validation head: PENDING
+- GLS-083 disposition: `PASS_FOUNDER_WAIVER / SYNTHETIC_ACCEPTED`
+- Flutter/Android validated app head: `72494bec8525f37a9fed8a6b6f38d60033b57e08`
+- Platform validation head: `17773e631e3dc1ae28dd1a4656e0509309083923`
 - Branch: `feat/m5-golden-learning-slice`
-- `app/pubspec.lock` blob/commit SHA: PENDING
-- Validation date: PENDING
-- Executor/environment: PENDING
+- Validation date: 2026-10-05
+- Executor/environment: GitHub-hosted Ubuntu + macOS runners; local Codex evidence used only for earlier formatting/analyzer corrections.
 
 ## Toolchain
 
-- Flutter: PENDING
-- Dart: PENDING
-- Java: PENDING
-- Android toolchain: PENDING
-- Xcode/macOS: PENDING
-- PostgreSQL/psql: PENDING
+- Flutter: 3.47.5 — PASS
+- Dart: 3.13.4 — PASS
+- Android profile toolchain: PASS
+- Xcode: 26.6 — PASS
+- PostgreSQL: 16 — PASS
 
 ## Live Supabase anonymous-auth evidence
 
@@ -30,116 +29,115 @@ Command:
 python3 scripts/m5_probe_supabase_anonymous_auth.py
 ```
 
-- Result: PENDING
-- Project host: PENDING
-- Anonymous authenticated user/session verified: PENDING
-- User-ID SHA-256 prefix: PENDING
-- Keys/tokens logged: MUST_BE_FALSE
-- Anonymous sign-ins enabled: PENDING
-- Notes: PENDING
-
-Do not record access tokens, refresh tokens, publishable key values, service-role
-keys, or other secrets in this artifact.
+- Result: `BLOCKED_MISSING_PROTECTED_CLIENT_VALUES`
+- `SUPABASE_URL`: absent from validation environment
+- `SUPABASE_PUBLISHABLE_KEY`: absent from validation environment
+- Project host: NOT_AVAILABLE
+- Anonymous authenticated user/session verified: NOT_RUN
+- User-ID SHA-256 prefix: NOT_AVAILABLE
+- Keys/tokens logged: FALSE
+- Notes: Only client-safe project URL + publishable key are permitted. Service-role credentials are prohibited.
 
 ## Repository control plane
 
-- `python3 scripts/validate_bootstrap.py`: PENDING
-- `python3 scripts/test_validate_bootstrap.py`: PENDING
+- Final-head bootstrap validator: NOT_RERUN_IN_FINAL_M5_BATCH
+- Final-head bootstrap validator unit tests: NOT_RERUN_IN_FINAL_M5_BATCH
+- Deviation: this does not control the current disposition because live auth is already the unresolved non-physical blocker; do not spend another Actions run solely for duplicate evidence.
 
 ## Flutter dependency reproducibility
 
-- `flutter pub get`: PENDING
-- `git diff --exit-code -- app/pubspec.lock` after resolution: PENDING
-- Unexpected dependency/provenance change: PENDING
+- `flutter pub get`: PASS
+- committed lockfile reproducibility: PASS
+- unexpected dependency/provenance change: NONE OBSERVED
+- Flutter/Android Actions run: `37334117375`
 
 ## Flutter static + test evidence
 
-- `dart format --output=none --set-exit-if-changed .`: PENDING
-- `flutter analyze`: PENDING
-- `flutter test`: PENDING
-- Test count / failures / skips: PENDING
+- format: PASS
+- `flutter analyze`: PASS
+- `flutter test`: PASS — 39 tests
+- real PDF engine probe: PASS — 2 pages + expected text
+- Android profile APK: PASS — 94.0 MB
+- PDFium packaged in APK: PASS
+- APK SHA-256: `04e2294ba054c5ed20eb2509f50b76d94759e8f9692e1555e69a14261f7d0b74`
 
-Required focused coverage disposition:
-- source idempotency/supersession: PENDING
-- malformed/oversized + real PDF extraction: PENDING
-- tenant isolation: PENDING
-- assistance / answer-exposure integrity: PENDING
-- direct-store fabricated state/assistance rejection: PENDING
-- active-attempt continuity: PENDING
-- idempotent/conflicting replay: PENDING
-- stale-source/delete/tombstone behavior: PENDING
-- continuation repair/reopen: PENDING
-- migrations: PENDING
-- Reduced Motion/widget flow: PENDING
-- privacy-safe telemetry: PENDING
-- missing-auth-config fail-closed: PENDING
+Focused coverage:
+- source idempotency/supersession: PASS
+- PDF ingest/provenance contract: PASS
+- real native PDF extraction: PASS via pdfrx_engine native-assets probe
+- tenant isolation: PASS
+- assistance / answer-exposure integrity: PASS
+- direct-store fabricated state rejection: PASS
+- active-attempt continuity: PASS
+- idempotent/conflicting replay: PASS
+- stale-source/delete/tombstone behavior: PASS
+- continuation repair/reopen: PASS
+- Reduced Motion/widget flow: PASS in automated surface
+- privacy-safe telemetry: PASS
+- missing-auth-config fail-closed: PASS
 
 ## Server SQL evidence
 
 Command:
 
 ```bash
-bash scripts/m5_validate_server_sql.sh
+bash scripts/m5_validate_server_sql.sh m5-server-sql-report.txt
 ```
 
-- Result: PENDING
-- Migration order observed: PENDING
-- Expected: `0001`, `0002`, `0003`, `0004`
-- Test files observed: PENDING
-- Expected: `10`, `11`, `20`, `30`, `40`
-- RPC unassisted immediate replay/idempotency: PENDING
-- RPC hinted exact answer → helped_correct/developing: PENDING
-- RPC answer exposure → answer_exposed/not_assessed: PENDING
-- RPC answer-exposure monotonicity across later hint: PENDING
-- RPC cross-user reveal/submit rejection: PENDING
-- RPC submitted-attempt hint/answer mutation rejection: PENDING
-- Report path/hash: PENDING
+- Result: PASS
+- Actions run: `37337837569`
+- Tests: 5/5 PASS
+- `10_canonical_flow.sql`: PASS
+- `11_canonical_flow_reopen.sql`: PASS
+- `20_tenant_isolation.sql`: PASS
+- `30_job_idempotency.sql`: PASS
+- `40_recall_learning_truth.sql`: PASS
+- RPC unassisted replay/idempotency: PASS
+- hinted exact answer → helped_correct/developing: PASS
+- answer exposure → answer_exposed/not_assessed: PASS
+- assistance monotonicity: PASS
+- cross-user reveal/submit rejection: PASS
+- submitted-attempt support mutation rejection: PASS
+- uploaded report artifact ID: `11357231937`
+- uploaded report ZIP SHA-256: `01f40d5dde24baa25aa9db3510bee0815b213ae10c0e0afa0bf2dd2918703368`
 
 ## Android profile evidence
 
-- Build command/result: PENDING
-- Artifact path/hash: PENDING
-- Real Supabase defines supplied via protected environment: PENDING
-- Profile app boot reaches authenticated source-entry flow: PENDING
-- Fail-closed auth/config screen absent with valid configuration: PENDING
+- Build/result: PASS
+- Artifact: `build/app/outputs/flutter-apk/app-profile.apk`
+- SHA-256: `04e2294ba054c5ed20eb2509f50b76d94759e8f9692e1555e69a14261f7d0b74`
+- Real Supabase defines supplied: NO — protected client values absent
+- Authenticated source-entry boot: NOT_RUN / BLOCKED_BY_LIVE_AUTH_CONFIG
+- Missing-config fail-closed screen: PASS
 
 ## iOS profile no-codesign evidence
 
-- Build command/result: PENDING
-- Real Supabase defines supplied via protected environment: PENDING
-- Xcode warnings materially relevant to supported runtime: PENDING
+- Build/result: PASS
+- Artifact: `build/ios/iphoneos/Runner.app` — 34.4 MB
+- app fingerprint SHA-256: `74a5eaafa081fc64a33ade9575f4ac49f53bbd51b21834a8c92f1f1b9003f9b7`
+- Xcode: 26.6
+- Real Supabase defines supplied: NO — protected client values absent
+- Expected warning: codesigning disabled for profile validation
+- Material build warnings: NONE OBSERVED
 
 ## Accessibility runtime evidence
 
-- Reduced Motion runtime behavior: PENDING
-- Large-text/layout check in bounded non-physical environment: PENDING
-- Semantic labels/tree where automatable: PENDING
-- Physical VoiceOver/TalkBack: DEFERRED_D068 — do not claim PASS here
-
-## Warnings / deviations
-
-PENDING
+- Reduced Motion automated behavior: PASS
+- Physical VoiceOver/TalkBack: `DEFERRED_D068`
+- Physical performance/orientation/speech: `DEFERRED_D068`
+- No release-candidate/public-release PASS may be claimed until D-068 physical checks are completed.
 
 ## Remaining blockers
 
-PENDING
+1. Live Supabase anonymous-auth proof using only client-safe `SUPABASE_URL` + `SUPABASE_PUBLISHABLE_KEY`.
+2. Physical-device validation remains deferred under D-068 and is not a blocker to this non-physical checkpoint, but is mandatory before release.
 
 ## Batch disposition
 
-Use one:
-
-- `BATCH_PASS`
-- `CHANGES_REQUIRED`
-- `BLOCKED`
-
-Disposition: PENDING
+`BLOCKED` — solely on the remaining live-auth configuration/evidence gate.
 
 ## M5 verdict input
 
-This return does not itself grant M5 PASS. Brain reconciles it with:
-- GLS-083 independent review;
-- M5 acceptance matrix;
-- Product/Learning/Creative/accessibility dispositions;
-- D-068 deferred physical-device boundary.
+`M5_NOT_YET_PASS — NON_PHYSICAL_IMPLEMENTATION/BUILD/SQL EVIDENCE PASS; LIVE AUTH EVIDENCE BLOCKED BY MISSING CLIENT-SAFE CONFIG.`
 
-Recommended checkpoint verdict input: PENDING
+Do not broaden product scope. Resolve the live-auth gate next. Once it passes, Brain may issue the M5 checkpoint verdict; D-068 physical-device work remains a later mandatory release gate.
