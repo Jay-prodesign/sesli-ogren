@@ -169,7 +169,7 @@ class _HomeSurface extends StatelessWidget {
             body: _nextReason(data.continuation),
             buttonLabel: 'Devam et',
             icon: Icons.arrow_forward_rounded,
-            onPressed: onOpenLearning,
+            onPressed: onOpenWorkspace,
           ),
           const SizedBox(height: 22),
           Text('Materyalin', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700)),
