@@ -327,3 +327,63 @@ It does not authorize feature breadth or protected actions. During the current
 M5 checkpoint, LA-0022 remains the only active cursor. The intended first
 post-M5 Tier-A subject is the Desire / Engagement / Core-Loop Premise Audit,
 which remains NOT_EXECUTABLE until M5 closes and Brain explicitly admits it.
+
+
+## 15. Asset necessity, experience role, and sustainable production (D-075)
+
+Production-intended visual/animation work must start from a user, learning, or
+product need rather than from visual appetite.
+
+Before generating or regenerating a material asset, apply:
+
+1. **Asset Necessity Gate** — state the user/learning/product event the asset
+   enables and what materially weakens if it does not exist.
+2. **Is this really an asset problem?** — prefer layout, typography, copy,
+   emphasis, deterministic runtime motion, sound/haptic, state logic, or an
+   existing asset when those solve the need more clearly or cheaply.
+3. **Experience Role** — define where/when the asset appears, the canonical
+   state/event it represents, what the learner should understand, intended
+   emotional/behavioral effect, supported action, and likely misunderstanding
+   if it fails.
+4. **Reuse / existing-asset audit** — inspect Learning App assets first; do not
+   regenerate a valid asset without a concrete runtime-driven reason.
+5. **Asset family/system decision** — prefer derivation from a coherent approved
+   family over one-off independent images when repeated use is expected.
+6. **Production economics** — evaluate initial, variant, correction,
+   rig/animation, export, integration, and maintenance cost against the actual
+   solo/AI-assisted production envelope.
+7. **Greybox/proof before polish** when the interaction or learning behavior is
+   materially uncertain.
+
+After generation/acquisition, apply only the relevant gates:
+
+- identity QA for identity-bearing assets;
+- differentiation QA for signature/product-recognition assets, not every
+  commodity utility image;
+- **Character / Asset Behavior Gate** for behavior-bearing assets: correct
+  moment/state, proportional response, no false mastery/reward signal, no
+  unintended childish/noisy/manipulative tone, credible repeated use, and
+  Reduced Motion/accessibility compatibility.
+
+The controlling production path is:
+
+USER / LEARNING NEED -> ASSET NECESSITY -> IS THIS REALLY AN ASSET PROBLEM? ->
+EXPERIENCE ROLE -> EXISTING-ASSET AUDIT -> ASSET FAMILY/SYSTEM ->
+PRODUCTION-ECONOMICS -> GREYBOX/LOW-COST PROOF when needed -> ASSET SPEC ->
+GENERATION/ACQUISITION -> IDENTITY/DIFFERENTIATION/BEHAVIOR QA as applicable ->
+PREPARATION/RIG/EXPORT -> APP INTEGRATION -> RUNTIME QA -> DEVICE QA ->
+USER/LEARNING EFFECT CHECK only where the asset carries a material experience
+hypothesis -> PASS / REWORK / KILL.
+
+Asset governance is tiered:
+
+- **Tier A — Signature / Behavior-Critical:** full D-075 path; includes D/Knot
+  identity/state/behavior, competence/progress representation, first-value
+  signature visuals, and major feedback/recovery/success moments.
+- **Tier B — Routine / Commodity:** lean existing-asset check, small spec,
+  prepare/generate, integrate, runtime/device QA where applicable, done.
+
+D-075 refines D-066 and does not weaken canonical master authority, provenance,
+SOURCE VISUAL PASS vs PRODUCTION ASSET PASS, app integration, or device QA.
+D/Knot remains locked under D-070. During LA-0022, this section does not
+authorize new asset breadth or reopen character discovery.
