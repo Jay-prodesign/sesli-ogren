@@ -43,31 +43,19 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
       learner: widget.runtime.learner,
       materialId: material.id,
     );
-    final continuation = await widget.runtime.recall.reopen(
-      learner: widget.runtime.learner,
-      materialId: material.id,
-    );
-    return _HomeSnapshot(
-      material: material,
-      source: source,
-      continuation: continuation,
-    );
+    final continuation = await widget.runtime.recall.reopen(learner: widget.runtime.learner, materialId: material.id);
+    return _HomeSnapshot(material: material, source: source, continuation: continuation);
   }
 
   Future<void> _openLearning() async {
-    await Navigator.of(context).push<void>(
-      MaterialPageRoute(
-        builder: (_) => LearningSliceScreen(runtime: widget.runtime),
-      ),
-    );
+    await Navigator.of(context)
+        .push<void>(MaterialPageRoute(builder: (_) => LearningSliceScreen(runtime: widget.runtime)));
     if (!mounted) return;
     setState(_refresh);
   }
 
   Future<void> _openListen() async {
-    await Navigator.of(context).push<void>(
-      MaterialPageRoute(builder: (_) => ListenScreen(runtime: widget.runtime)),
-    );
+    await Navigator.of(context).push<void>(MaterialPageRoute(builder: (_) => ListenScreen(runtime: widget.runtime)));
   }
 
   @override
@@ -185,8 +173,7 @@ class _HomeSurface extends StatelessWidget {
   }
 
   static String _nextReason(LearningContinuation? continuation) =>
-      continuation?.nextAction.reasonText ??
-      'Kaynağından kısa bir Recall ile ilk gerçek öğrenme kanıtını oluştur.';
+      continuation?.nextAction.reasonText ?? 'Kaynağından kısa bir Recall ile ilk gerçek öğrenme kanıtını oluştur.';
 }
 
 class _LibrarySurface extends StatelessWidget {
@@ -256,12 +243,7 @@ class _ContextRow extends StatelessWidget {
 }
 
 class _ContextCard extends StatelessWidget {
-  const _ContextCard({
-    required this.icon,
-    required this.title,
-    required this.body,
-    this.onPressed,
-  });
+  const _ContextCard({required this.icon, required this.title, required this.body, this.onPressed});
 
   final IconData icon;
   final String title;
