@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../domain/learning_contracts.dart';
 import '../domain/learning_truth.dart';
 import 'app_runtime.dart';
+import 'explain_screen.dart';
 import 'learning_slice_screen.dart';
 import 'listen_screen.dart';
 
@@ -57,6 +58,10 @@ class _MaterialWorkspaceScreenState extends State<MaterialWorkspaceScreen> {
   Future<void> _openListen() =>
       Navigator.of(context).push<void>(MaterialPageRoute(builder: (_) => ListenScreen(runtime: widget.runtime)));
 
+  Future<void> _openExplain(SourceVersionRecord source) => Navigator.of(context).push<void>(
+    MaterialPageRoute(builder: (_) => ExplainScreen(runtime: widget.runtime, source: source)),
+  );
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -73,7 +78,12 @@ class _MaterialWorkspaceScreenState extends State<MaterialWorkspaceScreen> {
             if (!snapshot.hasData) {
               return const Center(child: CircularProgressIndicator());
             }
-            return _WorkspaceBody(data: snapshot.data!, onRecall: _openRecall, onListen: _openListen);
+            return _WorkspaceBody(
+              data: snapshot.data!,
+              onRecall: _openRecall,
+              onListen: _openListen,
+              onExplain: () => _openExplain(snapshot.data!.source),
+            );
           },
         ),
       ),
@@ -82,11 +92,12 @@ class _MaterialWorkspaceScreenState extends State<MaterialWorkspaceScreen> {
 }
 
 class _WorkspaceBody extends StatelessWidget {
-  const _WorkspaceBody({required this.data, required this.onRecall, required this.onListen});
+  const _WorkspaceBody({required this.data, required this.onRecall, required this.onListen, required this.onExplain});
 
   final _WorkspaceSnapshot data;
   final VoidCallback onRecall;
   final VoidCallback onListen;
+  final VoidCallback onExplain;
 
   @override
   Widget build(BuildContext context) {
@@ -151,6 +162,13 @@ class _WorkspaceBody extends StatelessWidget {
         _LearningStatusCard(continuation: data.continuation),
         const SizedBox(height: 22),
         Text('Çalış', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700)),
+        const SizedBox(height: 10),
+        _ActionCard(
+          icon: Icons.auto_awesome_outlined,
+          title: 'Açıkla',
+          body: 'Kaynağına bağlı, kaynak metinden açıkça ayrılan öğretici açıklama.',
+          onPressed: onExplain,
+        ),
         const SizedBox(height: 10),
         _ActionCard(
           icon: Icons.psychology_alt_outlined,
