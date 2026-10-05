@@ -49,7 +49,17 @@ Do not manually fabricate or copy a lockfile from another project.
 
 ## Phase B — frozen-head validation
 
-After the lockfile commit, use a clean checkout of that exact head.
+After the lockfile commit, use a clean checkout of that exact head. Record it as the final M5 validation head; runtime code must still trace back to the reviewed frozen runtime candidate except for any explicitly re-reviewed material fix.
+
+First prove the live anonymous-auth service boundary once. This probe uses only the client-safe project URL/publishable key, creates one anonymous authenticated user/session, verifies the authenticated `/auth/v1/user` subject, hashes the returned user ID for evidence, and never prints tokens/keys:
+
+```bash
+python3 scripts/m5_probe_supabase_anonymous_auth.py
+```
+
+Do not loop this probe: each successful run creates an anonymous user and Supabase rate-limits anonymous sign-ins.
+
+Then run repository + Flutter/Android validation:
 
 ```bash
 python3 scripts/validate_bootstrap.py
@@ -57,6 +67,7 @@ python3 scripts/test_validate_bootstrap.py
 
 cd app
 flutter pub get
+git diff --exit-code -- pubspec.lock
 dart format --output=none --set-exit-if-changed .
 flutter analyze
 flutter test
@@ -64,6 +75,15 @@ flutter build apk --profile \
   --dart-define=SUPABASE_URL="$SUPABASE_URL" \
   --dart-define=SUPABASE_PUBLISHABLE_KEY="$SUPABASE_PUBLISHABLE_KEY"
 ```
+
+Run the accepted M4 base + M5 SQL delta in one clean local Supabase-like PostgreSQL lineage:
+
+```bash
+cd ..
+bash scripts/m5_validate_server_sql.sh
+```
+
+The SQL report must show migrations `0001`, `0002`, `0003`, `0004` in lexical order and tests `10`, `11`, `20`, `30`, `40`.
 
 On macOS at the same exact final validation head:
 
