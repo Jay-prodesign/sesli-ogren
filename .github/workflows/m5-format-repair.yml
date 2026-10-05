@@ -1,0 +1,45 @@
+name: m5-format-repair
+
+on:
+  push:
+    branches:
+      - feat/m5-golden-learning-slice
+    paths:
+      - ".github/workflows/m5-format-repair.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  format-two-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feat/m5-golden-learning-slice
+          fetch-depth: 0
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: "3.47.5"
+          channel: stable
+          cache: true
+
+      - name: Format only bounded test files
+        run: |
+          dart format app/test/app_smoke_test.dart app/test/_pdfrx_diagnostic_test.dart
+          git diff --check
+          git diff -- app/test/app_smoke_test.dart app/test/_pdfrx_diagnostic_test.dart
+
+      - name: Commit formatter-only changes
+        run: |
+          if git diff --quiet -- app/test/app_smoke_test.dart app/test/_pdfrx_diagnostic_test.dart; then
+            echo "No formatting changes needed."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add app/test/app_smoke_test.dart app/test/_pdfrx_diagnostic_test.dart
+          git commit -m "style(m5): format bounded validation tests"
+          git push origin HEAD:feat/m5-golden-learning-slice
