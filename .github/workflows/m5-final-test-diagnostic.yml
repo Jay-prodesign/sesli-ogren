@@ -1,0 +1,68 @@
+name: m5-final-test-diagnostic
+
+on:
+  push:
+    branches:
+      - feat/m5-golden-learning-slice
+    paths:
+      - ".github/workflows/m5-final-test-diagnostic.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feat/m5-golden-learning-slice
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: "3.47.5"
+          channel: "stable"
+          cache: true
+
+      - name: Resolve locked dependencies
+        working-directory: app
+        run: |
+          flutter pub get
+          git diff --exit-code -- pubspec.lock
+
+      - name: app_smoke_test
+        working-directory: app
+        run: timeout 90s flutter test test/app_smoke_test.dart --timeout 45s -r expanded
+
+      - name: pdf_text_extractor_test
+        working-directory: app
+        run: timeout 90s flutter test test/pdf_text_extractor_test.dart --timeout 45s -r expanded
+
+      - name: recall_learning_service_test
+        working-directory: app
+        run: timeout 90s flutter test test/recall_learning_service_test.dart --timeout 45s -r expanded
+
+      - name: recall_support_upgrade_test
+        working-directory: app
+        run: timeout 90s flutter test test/recall_support_upgrade_test.dart --timeout 45s -r expanded
+
+      - name: source_contract_test
+        working-directory: app
+        run: timeout 90s flutter test test/source_contract_test.dart --timeout 45s -r expanded
+
+      - name: source_ingest_service_test
+        working-directory: app
+        run: timeout 90s flutter test test/source_ingest_service_test.dart --timeout 45s -r expanded
+
+      - name: Android profile build
+        working-directory: app
+        run: flutter build apk --profile
+
+      - name: Verify PDFium packaging and APK SHA-256
+        working-directory: app
+        run: |
+          APK=build/app/outputs/flutter-apk/app-profile.apk
+          test -f "$APK"
+          unzip -l "$APK" | grep -q "libpdfium.so"
+          sha256sum "$APK"
