@@ -235,7 +235,7 @@ void main() {
     await tapVisible(tester, find.text('Açıkla'));
     await pumpUntilFound(tester, find.text('Açıklama henüz hazır değil'));
     expect(find.textContaining('yapay bir sonuç göstermiyoruz'), findsOneWidget);
-    await tester.pageBack();
+    Navigator.of(tester.element(find.text('Açıklama henüz hazır değil'))).pop();
     await tester.pumpAndSettle();
     expect(find.text('Hatırla'), findsWidgets);
     expect(find.text('Dinle'), findsOneWidget);
@@ -273,8 +273,8 @@ void main() {
     expect(find.textContaining('öğrenme kanıtı oluşturmaz'), findsOneWidget);
     expect(find.text('Hatırla ile dene'), findsOneWidget);
     await tapVisible(tester, find.text('Hatırla ile dene'));
-    await pumpUntilFound(tester, find.text('Hatırla'));
-    expect(find.text('Hatırla'), findsOneWidget);
+    await pumpUntilFound(tester, find.byType(LearningSliceScreen));
+    expect(find.byType(LearningSliceScreen), findsOneWidget);
   });
 
   testWidgets('answer exposure survives close and reopen without becoming independent', (tester) async {
