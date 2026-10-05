@@ -14,17 +14,26 @@ void main() {
       await pdfrxFlutterInitialize();
       debugPrint('PDFRX_DIAGNOSTIC initialization=PASS');
     } catch (error, stackTrace) {
-      debugPrint('PDFRX_DIAGNOSTIC initialization=FAIL type=${error.runtimeType} message=$error');
+      debugPrint(
+        'PDFRX_DIAGNOSTIC initialization=FAIL type=${error.runtimeType} message=$error',
+      );
       debugPrintStack(stackTrace: stackTrace);
       rethrow;
     }
 
     PdfDocument? document;
     try {
-      document = await PdfDocument.openData(bytes, sourceName: 'two_page_text.pdf');
-      debugPrint('PDFRX_DIAGNOSTIC openData=PASS pages=${document.pages.length}');
+      document = await PdfDocument.openData(
+        bytes,
+        sourceName: 'two_page_text.pdf',
+      );
+      debugPrint(
+        'PDFRX_DIAGNOSTIC openData=PASS pages=${document.pages.length}',
+      );
     } catch (error, stackTrace) {
-      debugPrint('PDFRX_DIAGNOSTIC openData=FAIL type=${error.runtimeType} message=$error');
+      debugPrint(
+        'PDFRX_DIAGNOSTIC openData=FAIL type=${error.runtimeType} message=$error',
+      );
       debugPrintStack(stackTrace: stackTrace);
       rethrow;
     } finally {
