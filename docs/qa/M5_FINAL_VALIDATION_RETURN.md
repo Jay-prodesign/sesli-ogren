@@ -87,6 +87,12 @@ bash scripts/m5_validate_server_sql.sh
 - Expected: `0001`, `0002`, `0003`, `0004`
 - Test files observed: PENDING
 - Expected: `10`, `11`, `20`, `30`, `40`
+- RPC unassisted immediate replay/idempotency: PENDING
+- RPC hinted exact answer → helped_correct/developing: PENDING
+- RPC answer exposure → answer_exposed/not_assessed: PENDING
+- RPC answer-exposure monotonicity across later hint: PENDING
+- RPC cross-user reveal/submit rejection: PENDING
+- RPC submitted-attempt hint/answer mutation rejection: PENDING
 - Report path/hash: PENDING
 
 ## Android profile evidence
