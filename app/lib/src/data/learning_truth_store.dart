@@ -3,15 +3,9 @@ import '../domain/learning_contracts.dart';
 import '../domain/learning_truth.dart';
 
 abstract interface class LearningTruthStore {
-  Future<RecallAction> persistRecallAction({
-    required AuthenticatedLearner learner,
-    required RecallAction action,
-  });
+  Future<RecallAction> persistRecallAction({required AuthenticatedLearner learner, required RecallAction action});
 
-  Future<RecallAction?> recallAction({
-    required AuthenticatedLearner learner,
-    required RecallActionId actionId,
-  });
+  Future<RecallAction?> recallAction({required AuthenticatedLearner learner, required RecallActionId actionId});
 
   Future<LearnerEvidence?> evidenceForAttempt({
     required AuthenticatedLearner learner,
@@ -45,10 +39,7 @@ abstract interface class LearningTruthStore {
     required SourceVersionId sourceVersionId,
   });
 
-  Future<LearnerState?> learnerState({
-    required AuthenticatedLearner learner,
-    required MaterialId materialId,
-  });
+  Future<LearnerState?> learnerState({required AuthenticatedLearner learner, required MaterialId materialId});
 
   Future<NextLearningAction?> nextLearningAction({
     required AuthenticatedLearner learner,
@@ -87,11 +78,7 @@ class LearningTruthConflict implements Exception {
 }
 
 class PersistedLearningTruth {
-  const PersistedLearningTruth({
-    required this.evidence,
-    required this.state,
-    required this.nextAction,
-  });
+  const PersistedLearningTruth({required this.evidence, required this.state, required this.nextAction});
 
   final LearnerEvidence evidence;
   final LearnerState state;

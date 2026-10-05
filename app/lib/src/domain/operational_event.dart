@@ -1,13 +1,7 @@
 import 'learning_contracts.dart';
 import 'learning_truth.dart';
 
-enum OperationalEventType {
-  runtimeRestore,
-  sourceIngest,
-  recallPrompt,
-  recallAttempt,
-  continuationRepair,
-}
+enum OperationalEventType { runtimeRestore, sourceIngest, recallPrompt, recallAttempt, continuationRepair }
 
 enum OperationalEventPhase { started, completed, failed }
 

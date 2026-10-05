@@ -35,10 +35,7 @@ CREATE TABLE recall_actions (
       await legacy.close();
       legacy = null;
 
-      upgraded = await SqliteSourceStore.open(
-        factory: databaseFactoryFfi,
-        path: path,
-      );
+      upgraded = await SqliteSourceStore.open(factory: databaseFactoryFfi, path: path);
 
       final assistance = await upgraded.learningTruthStore().assistanceForAttempt(
         learner: const AuthenticatedLearner(id: LearnerId('learner-upgrade')),
@@ -48,9 +45,7 @@ CREATE TABLE recall_actions (
       expect(assistance, RecallAssistance.none);
 
       await upgraded.operationalTelemetry().record(
-        learner: const AuthenticatedLearner(
-          id: LearnerId('learner-upgrade'),
-        ),
+        learner: const AuthenticatedLearner(id: LearnerId('learner-upgrade')),
         event: OperationalEvent(
           type: OperationalEventType.runtimeRestore,
           phase: OperationalEventPhase.completed,
@@ -59,9 +54,7 @@ CREATE TABLE recall_actions (
         ),
       );
       final events = await upgraded.operationalTelemetry().events(
-        learner: const AuthenticatedLearner(
-          id: LearnerId('learner-upgrade'),
-        ),
+        learner: const AuthenticatedLearner(id: LearnerId('learner-upgrade')),
       );
       expect(events, hasLength(1));
       expect(events.single.schemaVersion, 1);
@@ -73,7 +66,6 @@ CREATE TABLE recall_actions (
       await temp.delete(recursive: true);
     }
   });
-
 
   test('v5 database upgrades active Recall attempt schema without reset', () async {
     final temp = await Directory.systemTemp.createTemp('sesli-ogren-v5-upgrade-');
@@ -107,21 +99,13 @@ CREATE TABLE sentinel (
       await legacy.close();
       legacy = null;
 
-      upgraded = await SqliteSourceStore.open(
-        factory: databaseFactoryFfi,
-        path: path,
-      );
+      upgraded = await SqliteSourceStore.open(factory: databaseFactoryFfi, path: path);
       await upgraded.close();
       upgraded = null;
 
       inspected = await databaseFactoryFfi.openDatabase(path);
-      final tables = await inspected.rawQuery(
-        "SELECT name FROM sqlite_master WHERE type = 'table'",
-      );
-      expect(
-        tables.map((row) => row['name']),
-        contains('active_recall_attempts'),
-      );
+      final tables = await inspected.rawQuery("SELECT name FROM sqlite_master WHERE type = 'table'");
+      expect(tables.map((row) => row['name']), contains('active_recall_attempts'));
       final sentinel = await inspected.query('sentinel');
       expect(sentinel.single['value'], 'preserved');
     } finally {

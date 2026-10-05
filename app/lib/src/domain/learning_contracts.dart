@@ -16,8 +16,7 @@ class SourceVersionId {
   final String value;
 
   @override
-  bool operator ==(Object other) =>
-      other is SourceVersionId && other.value == value;
+  bool operator ==(Object other) => other is SourceVersionId && other.value == value;
 
   @override
   int get hashCode => value.hashCode;
@@ -29,8 +28,7 @@ class ExtractedContentId {
   final String value;
 
   @override
-  bool operator ==(Object other) =>
-      other is ExtractedContentId && other.value == value;
+  bool operator ==(Object other) => other is ExtractedContentId && other.value == value;
 
   @override
   int get hashCode => value.hashCode;
@@ -47,21 +45,13 @@ enum MaterialLifecycleStatus { active, deleted }
 enum MaterialProcessingState { none, ready, failed }
 
 class SourceAnchor {
-  const SourceAnchor({
-    required this.startOffset,
-    required this.endOffset,
-    this.pageNumber,
-  });
+  const SourceAnchor({required this.startOffset, required this.endOffset, this.pageNumber});
 
   final int startOffset;
   final int endOffset;
   final int? pageNumber;
 
-  Map<String, Object?> toJson() => {
-    'startOffset': startOffset,
-    'endOffset': endOffset,
-    'pageNumber': pageNumber,
-  };
+  Map<String, Object?> toJson() => {'startOffset': startOffset, 'endOffset': endOffset, 'pageNumber': pageNumber};
 
   factory SourceAnchor.fromJson(Map<String, Object?> json) => SourceAnchor(
     startOffset: json['startOffset']! as int,
@@ -93,8 +83,7 @@ class MaterialRecord {
   final DateTime updatedAt;
   final DateTime? deletedAt;
 
-  bool get isActive =>
-      lifecycleStatus == MaterialLifecycleStatus.active && deletedAt == null;
+  bool get isActive => lifecycleStatus == MaterialLifecycleStatus.active && deletedAt == null;
 }
 
 class SourceVersionIdentity {
@@ -168,11 +157,7 @@ class ExtractedContentRecord {
 }
 
 class SourceIngestResult {
-  const SourceIngestResult({
-    required this.material,
-    required this.sourceVersion,
-    required this.extractedContent,
-  });
+  const SourceIngestResult({required this.material, required this.sourceVersion, required this.extractedContent});
 
   final MaterialRecord material;
   final SourceVersionRecord sourceVersion;

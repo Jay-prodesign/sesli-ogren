@@ -25,12 +25,12 @@ class _SesliOgrenAppState extends State<SesliOgrenApp> {
   }
 
   void _openRuntime() {
-    _runtimeFuture = SupabaseLearnerAuth.authenticate()
-        .then((learner) => AppRuntime.open(learner: learner))
-        .then((runtime) {
-          _runtime = runtime;
-          return runtime;
-        });
+    _runtimeFuture = SupabaseLearnerAuth.authenticate().then((learner) => AppRuntime.open(learner: learner)).then((
+      runtime,
+    ) {
+      _runtime = runtime;
+      return runtime;
+    });
   }
 
   @override
@@ -53,24 +53,15 @@ class _SesliOgrenAppState extends State<SesliOgrenApp> {
 
   @override
   Widget build(BuildContext context) {
-    final scheme = ColorScheme.fromSeed(
-      seedColor: const Color(0xFF65558F),
-      brightness: Brightness.light,
-    );
+    final scheme = ColorScheme.fromSeed(seedColor: const Color(0xFF65558F), brightness: Brightness.light);
     return MaterialApp(
       title: 'Sesli Öğren',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         colorScheme: scheme,
         useMaterial3: true,
-        inputDecorationTheme: const InputDecorationTheme(
-          filled: true,
-        ),
-        filledButtonTheme: FilledButtonThemeData(
-          style: FilledButton.styleFrom(
-            minimumSize: const Size.fromHeight(48),
-          ),
-        ),
+        inputDecorationTheme: const InputDecorationTheme(filled: true),
+        filledButtonTheme: FilledButtonThemeData(style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(48))),
       ),
       home: FutureBuilder<AppRuntime>(
         future: _runtimeFuture,
@@ -79,10 +70,7 @@ class _SesliOgrenAppState extends State<SesliOgrenApp> {
             return LearningSliceScreen(runtime: snapshot.data!);
           }
           if (snapshot.hasError) {
-            return _RuntimeErrorScreen(
-              error: snapshot.error!,
-              onRetry: _retryRuntime,
-            );
+            return _RuntimeErrorScreen(error: snapshot.error!, onRetry: _retryRuntime);
           }
           return const _RuntimeLoadingScreen();
         },
@@ -102,10 +90,7 @@ class _RuntimeLoadingScreen extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              CompanionView(
-                state: CompanionVisualState.think,
-                size: 112,
-              ),
+              CompanionView(state: CompanionVisualState.think, size: 112),
               SizedBox(height: 20),
               CircularProgressIndicator(),
               SizedBox(height: 12),
@@ -119,10 +104,7 @@ class _RuntimeLoadingScreen extends StatelessWidget {
 }
 
 class _RuntimeErrorScreen extends StatelessWidget {
-  const _RuntimeErrorScreen({
-    required this.error,
-    required this.onRetry,
-  });
+  const _RuntimeErrorScreen({required this.error, required this.onRetry});
 
   final Object error;
   final VoidCallback onRetry;
@@ -139,10 +121,7 @@ class _RuntimeErrorScreen extends StatelessWidget {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const CompanionView(
-                    state: CompanionVisualState.correct,
-                    size: 112,
-                  ),
+                  const CompanionView(state: CompanionVisualState.correct, size: 112),
                   const SizedBox(height: 20),
                   Text(
                     error is LearnerAuthConfigurationException
@@ -159,10 +138,7 @@ class _RuntimeErrorScreen extends StatelessWidget {
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 20),
-                  FilledButton(
-                    onPressed: onRetry,
-                    child: const Text('Yeniden dene'),
-                  ),
+                  FilledButton(onPressed: onRetry, child: const Text('Yeniden dene')),
                 ],
               ),
             ),

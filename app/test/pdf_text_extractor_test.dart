@@ -18,12 +18,10 @@ void main() {
     final databasePath = '${temp.path}/source.db';
     const learner = AuthenticatedLearner(id: LearnerId('pdf-learner'));
     const materialId = MaterialId('pdf-material');
+    SqliteSourceStore? store;
 
     try {
-      var store = await SqliteSourceStore.open(
-        factory: databaseFactoryFfi,
-        path: databasePath,
-      );
+      store = await SqliteSourceStore.open(factory: databaseFactoryFfi, path: databasePath);
       final service = SourceIngestService(
         store: store,
         pdfTextExtractor: const PdfrxPdfTextExtractor(),
@@ -46,15 +44,10 @@ void main() {
 
       final sourceVersionId = result.sourceVersion.identity.sourceVersionId;
       await store.close();
+      store = null;
 
-      store = await SqliteSourceStore.open(
-        factory: databaseFactoryFfi,
-        path: databasePath,
-      );
-      final reopenedSource = await store.currentSourceVersion(
-        learner: learner,
-        materialId: materialId,
-      );
+      store = await SqliteSourceStore.open(factory: databaseFactoryFfi, path: databasePath);
+      final reopenedSource = await store.currentSourceVersion(learner: learner, materialId: materialId);
       final reopenedExtraction = await store.extractedContentForSource(
         learner: learner,
         sourceVersionId: sourceVersionId,
@@ -63,8 +56,8 @@ void main() {
       expect(reopenedSource?.identity.sourceVersionId, sourceVersionId);
       expect(reopenedExtraction?.sourceVersionId, sourceVersionId);
       expect(reopenedExtraction?.anchors.map((anchor) => anchor.pageNumber), [1, 2]);
-      await store.close();
     } finally {
+      await store?.close();
       await temp.delete(recursive: true);
     }
   });

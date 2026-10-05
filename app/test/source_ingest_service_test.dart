@@ -12,10 +12,7 @@ class _UnusedPdfExtractor implements PdfTextExtractor {
   const _UnusedPdfExtractor();
 
   @override
-  Future<ExtractedPdf> extract(
-    Uint8List bytes, {
-    required String sourceName,
-  }) {
+  Future<ExtractedPdf> extract(Uint8List bytes, {required String sourceName}) {
     throw UnimplementedError();
   }
 }
@@ -24,10 +21,7 @@ class _RecordingPdfExtractor implements PdfTextExtractor {
   int calls = 0;
 
   @override
-  Future<ExtractedPdf> extract(
-    Uint8List bytes, {
-    required String sourceName,
-  }) async {
+  Future<ExtractedPdf> extract(Uint8List bytes, {required String sourceName}) async {
     calls++;
     return const ExtractedPdf(
       text: 'PDF text',
@@ -47,10 +41,7 @@ void main() {
   const material = MaterialId('material-1');
 
   setUp(() async {
-    store = await SqliteSourceStore.open(
-      factory: databaseFactoryFfi,
-      path: inMemoryDatabasePath,
-    );
+    store = await SqliteSourceStore.open(factory: databaseFactoryFfi, path: inMemoryDatabasePath);
     service = SourceIngestService(
       store: store,
       pdfTextExtractor: const _UnusedPdfExtractor(),
@@ -62,83 +53,31 @@ void main() {
 
   test('same pasted source retry is idempotent', () async {
     const sourceText = '  İlk satır\r\nİkinci satır  ';
-    final first = await service.ingestPastedText(
-      learner: learnerA,
-      materialId: material,
-      text: sourceText,
-    );
-    final retry = await service.ingestPastedText(
-      learner: learnerA,
-      materialId: material,
-      text: sourceText,
-    );
+    final first = await service.ingestPastedText(learner: learnerA, materialId: material, text: sourceText);
+    final retry = await service.ingestPastedText(learner: learnerA, materialId: material, text: sourceText);
 
-    expect(
-      retry.sourceVersion.identity.sourceVersionId,
-      first.sourceVersion.identity.sourceVersionId,
-    );
-    expect(
-      await store.sourceVersions(learner: learnerA, materialId: material),
-      hasLength(1),
-    );
-    expect(
-      retry.extractedContent.normalizedText,
-      'İlk satır\nİkinci satır',
-    );
-    expect(
-      retry.material.currentSourceVersionId,
-      retry.sourceVersion.identity.sourceVersionId,
-    );
+    expect(retry.sourceVersion.identity.sourceVersionId, first.sourceVersion.identity.sourceVersionId);
+    expect(await store.sourceVersions(learner: learnerA, materialId: material), hasLength(1));
+    expect(retry.extractedContent.normalizedText, 'İlk satır\nİkinci satır');
+    expect(retry.material.currentSourceVersionId, retry.sourceVersion.identity.sourceVersionId);
   });
 
-
   test('source text change creates a new exact source version', () async {
-    final first = await service.ingestPastedText(
-      learner: learnerA,
-      materialId: material,
-      text: 'Satır 1\r\nSatır 2',
-    );
-    final second = await service.ingestPastedText(
-      learner: learnerA,
-      materialId: material,
-      text: 'Satır 1\nSatır 2',
-    );
+    final first = await service.ingestPastedText(learner: learnerA, materialId: material, text: 'Satır 1\r\nSatır 2');
+    final second = await service.ingestPastedText(learner: learnerA, materialId: material, text: 'Satır 1\nSatır 2');
 
-    expect(
-      second.sourceVersion.identity.sourceVersionId,
-      isNot(first.sourceVersion.identity.sourceVersionId),
-    );
-    expect(
-      first.extractedContent.normalizedText,
-      second.extractedContent.normalizedText,
-    );
+    expect(second.sourceVersion.identity.sourceVersionId, isNot(first.sourceVersion.identity.sourceVersionId));
+    expect(first.extractedContent.normalizedText, second.extractedContent.normalizedText);
   });
 
   test('new content supersedes old source and invalidates old extraction', () async {
-    final first = await service.ingestPastedText(
-      learner: learnerA,
-      materialId: material,
-      text: 'Version one',
-    );
-    final second = await service.ingestPastedText(
-      learner: learnerA,
-      materialId: material,
-      text: 'Version two',
-    );
+    final first = await service.ingestPastedText(learner: learnerA, materialId: material, text: 'Version one');
+    final second = await service.ingestPastedText(learner: learnerA, materialId: material, text: 'Version two');
 
-    final versions = await store.sourceVersions(
-      learner: learnerA,
-      materialId: material,
-    );
+    final versions = await store.sourceVersions(learner: learnerA, materialId: material);
     expect(versions, hasLength(2));
-    expect(
-      versions.first.identity.sourceVersionId,
-      first.sourceVersion.identity.sourceVersionId,
-    );
-    expect(
-      versions.first.supersededBy,
-      second.sourceVersion.identity.sourceVersionId,
-    );
+    expect(versions.first.identity.sourceVersionId, first.sourceVersion.identity.sourceVersionId);
+    expect(versions.first.supersededBy, second.sourceVersion.identity.sourceVersionId);
     expect(
       await store.extractedContentForSource(
         learner: learnerA,
@@ -147,86 +86,39 @@ void main() {
       isNull,
     );
     expect(
-      (await store.currentSourceVersion(
-        learner: learnerA,
-        materialId: material,
-      ))!
-          .identity
-          .sourceVersionId,
+      (await store.currentSourceVersion(learner: learnerA, materialId: material))!.identity.sourceVersionId,
       second.sourceVersion.identity.sourceVersionId,
     );
   });
 
   test('retry of superseded source fails closed instead of becoming current', () async {
-    await service.ingestPastedText(
-      learner: learnerA,
-      materialId: material,
-      text: 'Old source',
-    );
-    await service.ingestPastedText(
-      learner: learnerA,
-      materialId: material,
-      text: 'New source',
-    );
+    await service.ingestPastedText(learner: learnerA, materialId: material, text: 'Old source');
+    await service.ingestPastedText(learner: learnerA, materialId: material, text: 'New source');
 
     await expectLater(
-      service.ingestPastedText(
-        learner: learnerA,
-        materialId: material,
-        text: 'Old source',
-      ),
+      service.ingestPastedText(learner: learnerA, materialId: material, text: 'Old source'),
       throwsA(isA<SourceStoreConflict>()),
     );
   });
 
   test('guessed identifiers cannot cross learner boundary', () async {
-    final source = await service.ingestPastedText(
-      learner: learnerA,
-      materialId: material,
-      text: 'Tenant-owned source',
-    );
+    final source = await service.ingestPastedText(learner: learnerA, materialId: material, text: 'Tenant-owned source');
 
     expect(
-      await store.sourceVersion(
-        learner: learnerB,
-        sourceVersionId: source.sourceVersion.identity.sourceVersionId,
-      ),
+      await store.sourceVersion(learner: learnerB, sourceVersionId: source.sourceVersion.identity.sourceVersionId),
       isNull,
     );
-    expect(
-      await store.material(learner: learnerB, materialId: material),
-      isNull,
-    );
+    expect(await store.material(learner: learnerB, materialId: material), isNull);
   });
 
   test('deleted material revokes source and extracted truth', () async {
-    final source = await service.ingestPastedText(
-      learner: learnerA,
-      materialId: material,
-      text: 'Delete me',
-    );
-    await store.deleteMaterial(
-      learner: learnerA,
-      materialId: material,
-      deletedAt: DateTime.utc(2026, 10, 4, 11),
-    );
+    final source = await service.ingestPastedText(learner: learnerA, materialId: material, text: 'Delete me');
+    await store.deleteMaterial(learner: learnerA, materialId: material, deletedAt: DateTime.utc(2026, 10, 4, 11));
 
+    expect(await store.material(learner: learnerA, materialId: material), isNull);
+    expect(await store.currentSourceVersion(learner: learnerA, materialId: material), isNull);
     expect(
-      await store.material(learner: learnerA, materialId: material),
-      isNull,
-    );
-    expect(
-      await store.currentSourceVersion(
-        learner: learnerA,
-        materialId: material,
-      ),
-      isNull,
-    );
-    expect(
-      await store.sourceVersion(
-        learner: learnerA,
-        sourceVersionId: source.sourceVersion.identity.sourceVersionId,
-      ),
+      await store.sourceVersion(learner: learnerA, sourceVersionId: source.sourceVersion.identity.sourceVersionId),
       isNull,
     );
     expect(
@@ -244,29 +136,17 @@ void main() {
       materialId: material,
       text: 'Delete and do not resurrect',
     );
-    await store.deleteMaterial(
-      learner: learnerA,
-      materialId: material,
-      deletedAt: DateTime.utc(2026, 10, 4, 11),
-    );
+    await store.deleteMaterial(learner: learnerA, materialId: material, deletedAt: DateTime.utc(2026, 10, 4, 11));
 
-    final versions = await store.sourceVersions(
-      learner: learnerA,
-      materialId: material,
-    );
+    final versions = await store.sourceVersions(learner: learnerA, materialId: material);
     expect(versions, hasLength(1));
-    expect(versions.single.identity.sourceVersionId,
-        source.sourceVersion.identity.sourceVersionId);
+    expect(versions.single.identity.sourceVersionId, source.sourceVersion.identity.sourceVersionId);
     expect(versions.single.revokedAt, isNotNull);
     expect(versions.single.sourceName, 'Deleted source');
     expect(versions.single.inlineText, isNull);
 
     await expectLater(
-      service.ingestPastedText(
-        learner: learnerA,
-        materialId: material,
-        text: 'Delete and do not resurrect',
-      ),
+      service.ingestPastedText(learner: learnerA, materialId: material, text: 'Delete and do not resurrect'),
       throwsA(isA<SourceStoreConflict>()),
     );
   });
@@ -279,25 +159,15 @@ void main() {
     );
 
     await expectLater(
-      bounded.ingestPastedText(
-        learner: learnerA,
-        materialId: material,
-        text: '12345',
-      ),
+      bounded.ingestPastedText(learner: learnerA, materialId: material, text: '12345'),
       throwsA(isA<SourceIngestException>()),
     );
-    expect(
-      await store.material(learner: learnerA, materialId: material),
-      isNull,
-    );
+    expect(await store.material(learner: learnerA, materialId: material), isNull);
   });
 
   test('malformed PDF fails before parser execution', () async {
     final extractor = _RecordingPdfExtractor();
-    final bounded = SourceIngestService(
-      store: store,
-      pdfTextExtractor: extractor,
-    );
+    final bounded = SourceIngestService(store: store, pdfTextExtractor: extractor);
 
     await expectLater(
       bounded.ingestPdf(
@@ -313,11 +183,7 @@ void main() {
 
   test('oversized PDF fails before parser execution', () async {
     final extractor = _RecordingPdfExtractor();
-    final bounded = SourceIngestService(
-      store: store,
-      pdfTextExtractor: extractor,
-      maxPdfBytes: 5,
-    );
+    final bounded = SourceIngestService(store: store, pdfTextExtractor: extractor, maxPdfBytes: 5);
 
     await expectLater(
       bounded.ingestPdf(
