@@ -32,6 +32,20 @@ Widget testShell(AppRuntime runtime) {
   );
 }
 
+Future<void> pumpUntilFound(
+  WidgetTester tester,
+  Finder finder, {
+  int maxPumps = 100,
+}) async {
+  for (var i = 0; i < maxPumps; i++) {
+    await tester.pump(const Duration(milliseconds: 20));
+    if (finder.evaluate().isNotEmpty) {
+      return;
+    }
+  }
+  fail('Expected widget was not reached within bounded pumps.');
+}
+
 void main() {
   sqfliteFfiInit();
 
@@ -41,7 +55,10 @@ void main() {
 
   testWidgets('production app does not open learner data without auth config', (tester) async {
     await tester.pumpWidget(const SesliOgrenApp());
-    await tester.pumpAndSettle();
+    await pumpUntilFound(
+      tester,
+      find.text('Uygulama bağlantısı henüz yapılandırılmadı.'),
+    );
 
     expect(find.text('Uygulama bağlantısı henüz yapılandırılmadı.'), findsOneWidget);
     expect(find.textContaining('Öğrenme verisi açılmadı'), findsOneWidget);
@@ -60,7 +77,7 @@ void main() {
     );
 
     await tester.pumpWidget(testShell(runtime));
-    await tester.pumpAndSettle();
+    await pumpUntilFound(tester, find.text('Çalışma materyalini ekle'));
 
     expect(find.text('Sesli Öğren'), findsOneWidget);
     expect(find.text('Çalışma materyalini ekle'), findsOneWidget);
@@ -103,17 +120,17 @@ void main() {
     expect(action, isNotNull);
 
     await tester.pumpWidget(testShell(runtime));
-    await tester.pumpAndSettle();
+    await pumpUntilFound(tester, find.text('Hatırla'));
 
     expect(find.text('Hatırla'), findsOneWidget);
     await tester.enterText(find.byType(TextField), action!.expectedAnswer);
     await tester.tap(find.text('Yanıtla'));
-    await tester.pumpAndSettle();
+    await pumpUntilFound(tester, find.text('İpucusuz hatırladın'));
 
     expect(find.text('İpucusuz hatırladın'), findsOneWidget);
     expect(find.text('Sıradaki adım'), findsOneWidget);
     await tester.tap(find.text('Devam et'));
-    await tester.pumpAndSettle();
+    await pumpUntilFound(tester, find.text('Devam noktası'));
     expect(find.text('Devam noktası'), findsOneWidget);
 
     final events = await store.operationalTelemetry().events(learner: runtime.learner);
@@ -145,7 +162,7 @@ void main() {
         ),
       ),
     );
-    await tester.pumpAndSettle();
+    await pumpUntilFound(tester, find.text('Devam noktası'));
 
     expect(find.text('Devam noktası'), findsOneWidget);
     expect(find.textContaining('ONE_UNASSISTED_RETRIEVAL_OBSERVED'), findsNothing);
@@ -186,11 +203,11 @@ void main() {
     expect(action, isNotNull);
 
     await tester.pumpWidget(testShell(runtime));
-    await tester.pumpAndSettle();
+    await pumpUntilFound(tester, find.text('Hatırla'));
     expect(find.text('Hatırla'), findsOneWidget);
 
     await tester.tap(find.text('Yanıtı göster'));
-    await tester.pumpAndSettle();
+    await pumpUntilFound(tester, find.textContaining('Yanıt:'));
     expect(find.textContaining('Yanıt:'), findsOneWidget);
 
     await tester.pumpWidget(const SizedBox.shrink());
@@ -203,14 +220,17 @@ void main() {
         ),
       ),
     );
-    await tester.pumpAndSettle();
+    await pumpUntilFound(tester, find.text('Hatırla'));
 
     expect(find.text('Hatırla'), findsOneWidget);
     expect(find.textContaining('yanıt daha önce gösterildi'), findsOneWidget);
 
     await tester.enterText(find.byType(TextField), action!.expectedAnswer);
     await tester.tap(find.text('Yanıtla'));
-    await tester.pumpAndSettle();
+    await pumpUntilFound(
+      tester,
+      find.textContaining('geri çağırma başarısı olarak sayılmadı'),
+    );
 
     expect(find.text('İpucusuz hatırladın'), findsNothing);
     expect(find.textContaining('geri çağırma başarısı olarak sayılmadı'), findsOneWidget);
@@ -235,7 +255,7 @@ void main() {
         ),
       ),
     );
-    await tester.pumpAndSettle();
+    await pumpUntilFound(tester, find.text('Çalışma materyalini ekle'));
 
     expect(find.text('Çalışma materyalini ekle'), findsOneWidget);
     expect(find.text('Hatırlama başlat'), findsOneWidget);
