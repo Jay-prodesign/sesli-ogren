@@ -80,11 +80,11 @@
     "app/pubspec.lock for the final M5 dependencies is missing and must be generated/committed from the exact Flutter 3.47.5 toolchain.",
     "A real Supabase project/session must be configured and anonymous sign-in enabled to evidence the authenticated-learner M5 path; only client-safe project URL/publishable key are needed.",
     "Current ChatGPT execution container has no established Flutter/Dart checkpoint environment; one bounded D-072 runtime/build validation batch remains pending.",
-    "GLS-083 independent read-only review is pending and must target runtime candidate e576ca17… including corrected server assistance semantics and local persistence compile fix.",
+    "GLS-083 is READY_FOR_INDEPENDENT_EXECUTION against e576ca17… with a committed read-only reviewer command; no separate independent reviewer runtime is available in the current ChatGPT tool environment, so an external Codex/Claude reviewer return is required before the single bounded validation batch.",
     "Accessibility runtime evidence remains pending in the batch; physical VoiceOver/TalkBack/device/orientation evidence remains deferred under D-068."
   ],
   "protected_gate": "Merge, release, deploy, paid providers, credentials/secrets, licensing posture, production mutation: Product Owner only",
-  "next_action": "Keep runtime scope frozen at candidate e576ca17…. First obtain GLS-083 independent read-only review and resolve any material finding before spending the single runtime/build batch. Then generate/review/commit app/pubspec.lock with Flutter 3.47.5 and run one bounded D-072 batch including real Supabase anonymous authenticated session evidence, app format/analyze/tests, Android profile build, iOS profile no-codesign build, and server SQL validation. Then issue the M5 verdict. Do not add feature breadth.",
+  "next_action": "Execute GLS-083 in a separate independent reviewer context using docs/qa/M5_GLS083_INDEPENDENT_REVIEW_COMMAND.md against frozen runtime candidate e576ca17…. If REVIEW_PASS, generate/review/commit app/pubspec.lock with Flutter 3.47.5 and run the single bounded D-072 batch including real Supabase auth, app format/analyze/tests, Android profile build, iOS profile no-codesign build, accessibility runtime evidence, and server SQL validation. If CHANGES_REQUIRED, remediate only material findings, re-freeze, refresh the packet, and repeat independent review before spending the batch.",
   "canonical_source_refs": [
     "CURRENT_EXECUTION_STATE — Learning App",
     "D-070 — Founder Product/Visual PASS / D-Knot selected",
@@ -220,5 +220,13 @@
       "tier_b": "Routine / commodity assets use lean existing-asset-check -> small spec -> prepare/generate -> integrate -> runtime/device QA when applicable -> done."
     },
     "current_effect": "No new M5 asset breadth. D/Knot remains locked under D-070. LA-0022 remains active."
+  },
+  "gls083_review": {
+    "status": "READY_FOR_INDEPENDENT_EXECUTION",
+    "runtime_candidate": "e576ca177ff8872cbbfc4f127eb016cefa7f611c",
+    "packet": "docs/qa/M5_GLS083_REVIEW_PACKET.md",
+    "reviewer_command": "docs/qa/M5_GLS083_INDEPENDENT_REVIEW_COMMAND.md",
+    "return_path": "docs/qa/M5_GLS083_INDEPENDENT_REVIEW_RETURN.md",
+    "execution_note": "This ChatGPT/Brain stream cannot self-count as the independent reviewer because it authored the static review and remediations. No separate Codex/Claude reviewer runtime is available in the current tool environment; external independent execution is the remaining gate."
   }
 }
