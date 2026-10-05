@@ -1,3 +1,5 @@
+> **SUPERSEDED AS AN EXECUTION STOP — 2026-10-05.** Founder subsequently instructed the project to continue. This file remains historical evidence of the pause cursor; it no longer blocks execution. Current authority is `docs/agent/CURRENT_HANDOFF.md` + `docs/agent/EXECUTION_STATE.json`.
+
 # PAUSE CHECKPOINT — 2026-10-05
 
 Project: **Learning App / Sesli Öğren**
