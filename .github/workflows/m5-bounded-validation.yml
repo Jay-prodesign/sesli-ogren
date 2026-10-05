@@ -43,21 +43,9 @@ jobs:
           flutter pub get
           git diff --exit-code -- pubspec.lock
 
-      - name: Canonical format validation workspace
+      - name: Format check
         working-directory: app
-        run: |
-          dart format .
-          git diff --check
-          git diff --name-only
-
-      - name: Upload canonical formatted tests
-        uses: actions/upload-artifact@v4
-        with:
-          name: m5-canonical-formatted-tests
-          path: |
-            app/test/app_smoke_test.dart
-            app/test/pdf_text_extractor_test.dart
-          if-no-files-found: error
+        run: dart format --output=none --set-exit-if-changed .
 
       - name: Analyze
         working-directory: app
