@@ -6,6 +6,7 @@ import 'app_runtime.dart';
 import 'companion_view.dart';
 import 'learning_slice_screen.dart';
 import 'listen_screen.dart';
+import 'material_workspace_screen.dart';
 
 class ProductShellScreen extends StatefulWidget {
   const ProductShellScreen({required this.runtime, super.key});
@@ -54,6 +55,14 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
     setState(_refresh);
   }
 
+  Future<void> _openWorkspace() async {
+    await Navigator.of(context).push<void>(
+      MaterialPageRoute(builder: (_) => MaterialWorkspaceScreen(runtime: widget.runtime)),
+    );
+    if (!mounted) return;
+    setState(_refresh);
+  }
+
   Future<void> _openListen() async {
     await Navigator.of(context).push<void>(MaterialPageRoute(builder: (_) => ListenScreen(runtime: widget.runtime)));
   }
@@ -72,8 +81,13 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
             return IndexedStack(
               index: _index,
               children: [
-                _HomeSurface(data: data, onOpenLearning: _openLearning, onOpenListen: _openListen),
-                _LibrarySurface(data: data, onOpenLearning: _openLearning),
+                _HomeSurface(
+                  data: data,
+                  onOpenLearning: _openLearning,
+                  onOpenListen: _openListen,
+                  onOpenWorkspace: _openWorkspace,
+                ),
+                _LibrarySurface(data: data, onOpenLearning: _openLearning, onOpenWorkspace: _openWorkspace),
               ],
             );
           },
@@ -100,11 +114,17 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
 }
 
 class _HomeSurface extends StatelessWidget {
-  const _HomeSurface({required this.data, required this.onOpenLearning, required this.onOpenListen});
+  const _HomeSurface({
+    required this.data,
+    required this.onOpenLearning,
+    required this.onOpenListen,
+    required this.onOpenWorkspace,
+  });
 
   final _HomeSnapshot data;
   final VoidCallback onOpenLearning;
   final VoidCallback onOpenListen;
+  final VoidCallback onOpenWorkspace;
 
   @override
   Widget build(BuildContext context) {
@@ -154,7 +174,7 @@ class _HomeSurface extends StatelessWidget {
           const SizedBox(height: 22),
           Text('Materyalin', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700)),
           const SizedBox(height: 10),
-          _MaterialCard(data: data, onPressed: onOpenLearning),
+          _MaterialCard(data: data, onPressed: onOpenWorkspace),
           const SizedBox(height: 22),
           _ContextRow(onRecall: onOpenLearning, onListen: onOpenListen),
         ],
@@ -177,10 +197,11 @@ class _HomeSurface extends StatelessWidget {
 }
 
 class _LibrarySurface extends StatelessWidget {
-  const _LibrarySurface({required this.data, required this.onOpenLearning});
+  const _LibrarySurface({required this.data, required this.onOpenLearning, required this.onOpenWorkspace});
 
   final _HomeSnapshot data;
   final VoidCallback onOpenLearning;
+  final VoidCallback onOpenWorkspace;
 
   @override
   Widget build(BuildContext context) {
@@ -204,7 +225,7 @@ class _LibrarySurface extends StatelessWidget {
             onPressed: onOpenLearning,
           )
         else
-          _MaterialCard(data: data, onPressed: onOpenLearning),
+          _MaterialCard(data: data, onPressed: onOpenWorkspace),
       ],
     );
   }
