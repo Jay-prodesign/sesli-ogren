@@ -101,7 +101,7 @@ jobs:
 
       - name: Test
         working-directory: app
-        run: flutter test
+        run: timeout 300s flutter test --timeout 45s -r expanded
 
       - name: Android profile build
         working-directory: app
