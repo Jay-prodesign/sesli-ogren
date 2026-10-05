@@ -199,3 +199,18 @@ Use a local/agent machine environment instead:
 
 Current ChatGPT container has Java + Git but no Flutter/Dart/Android SDK/psql,
 so it cannot execute the final runtime batch itself.
+
+
+## Agent credit efficiency
+
+Founder rule: minimize Codex/Claude credit consumption.
+
+- Brain owns planning, research, reconciliation, review, documentation and task scoping whenever local runtime access is unnecessary.
+- Codex/Claude receive only bounded implementation/runtime/terminal tasks that genuinely require their environment.
+- Do not ask them to repeat broad project reads, audits, explanations or evidence already available in current authority.
+- Give exact files, exact commands, exact allowed changes and an explicit stop condition.
+- Batch adjacent checks when safe.
+- Stop at the first controlling failure instead of continuing expensive downstream work.
+- Returns should be concise: result, changed files, blocker, exact next action.
+
+This rule applies to the current M5 work and future Learning App execution unless the Founder overrides it.
