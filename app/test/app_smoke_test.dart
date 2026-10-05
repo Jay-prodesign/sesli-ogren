@@ -34,9 +34,6 @@ Widget testShell(AppRuntime runtime) {
 
 Future<void> pumpUntilFound(WidgetTester tester, Finder finder, {int maxPumps = 100}) async {
   for (var i = 0; i < maxPumps; i++) {
-    await tester.runAsync(() async {
-      await Future<void>.delayed(const Duration(milliseconds: 5));
-    });
     await tester.pump(const Duration(milliseconds: 20));
     if (finder.evaluate().isNotEmpty) {
       return;
@@ -61,10 +58,8 @@ void main() {
   });
 
   testWidgets('production learning slice boots at truthful source entry', (tester) async {
-    final store = await SqliteSourceStore.open(factory: databaseFactoryFfi, path: inMemoryDatabasePath);
-    addTearDown(() async {
-      await tester.runAsync(store.close);
-    });
+    final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
+    addTearDown(store.close);
 
     final runtime = AppRuntime(
       learner: AppRuntime.localM5LearnerFixture,
@@ -84,10 +79,8 @@ void main() {
   });
 
   testWidgets('source to Recall result persists and reopens as one continuation', (tester) async {
-    final store = await SqliteSourceStore.open(factory: databaseFactoryFfi, path: inMemoryDatabasePath);
-    addTearDown(() async {
-      await tester.runAsync(store.close);
-    });
+    final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
+    addTearDown(store.close);
 
     final ingest = SourceIngestService(
       store: store,
@@ -170,10 +163,8 @@ void main() {
   });
 
   testWidgets('answer exposure survives close and reopen without becoming independent', (tester) async {
-    final store = await SqliteSourceStore.open(factory: databaseFactoryFfi, path: inMemoryDatabasePath);
-    addTearDown(() async {
-      await tester.runAsync(store.close);
-    });
+    final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
+    addTearDown(store.close);
 
     final ingest = SourceIngestService(
       store: store,
@@ -236,10 +227,8 @@ void main() {
   });
 
   testWidgets('Reduced Motion keeps the learning slice usable', (tester) async {
-    final store = await SqliteSourceStore.open(factory: databaseFactoryFfi, path: inMemoryDatabasePath);
-    addTearDown(() async {
-      await tester.runAsync(store.close);
-    });
+    final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
+    addTearDown(store.close);
     final runtime = AppRuntime(
       learner: AppRuntime.localM5LearnerFixture,
       store: store,
