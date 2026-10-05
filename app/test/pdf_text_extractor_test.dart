@@ -43,7 +43,10 @@ void main() {
     SqliteSourceStore? store;
 
     try {
-      store = await SqliteSourceStore.open(factory: databaseFactoryFfi, path: databasePath);
+      store = await SqliteSourceStore.open(
+        factory: databaseFactoryFfi,
+        path: databasePath,
+      );
       final service = SourceIngestService(
         store: store,
         pdfTextExtractor: const PdfrxPdfTextExtractor(),
@@ -60,16 +63,31 @@ void main() {
       expect(result.sourceVersion.sourceName, 'two_page_text.pdf');
       expect(result.sourceVersion.mimeType, 'application/pdf');
       expect(result.sourceVersion.byteSize, bytes.length);
-      expect(result.extractedContent.normalizedText, contains('Learning evidence page one'));
-      expect(result.extractedContent.normalizedText, contains('Second page keeps provenance'));
-      expect(result.extractedContent.anchors.map((anchor) => anchor.pageNumber), [1, 2]);
+      expect(
+        result.extractedContent.normalizedText,
+        contains('Learning evidence page one'),
+      );
+      expect(
+        result.extractedContent.normalizedText,
+        contains('Second page keeps provenance'),
+      );
+      expect(
+        result.extractedContent.anchors.map((anchor) => anchor.pageNumber),
+        [1, 2],
+      );
 
       final sourceVersionId = result.sourceVersion.identity.sourceVersionId;
       await store.close();
       store = null;
 
-      store = await SqliteSourceStore.open(factory: databaseFactoryFfi, path: databasePath);
-      final reopenedSource = await store.currentSourceVersion(learner: learner, materialId: materialId);
+      store = await SqliteSourceStore.open(
+        factory: databaseFactoryFfi,
+        path: databasePath,
+      );
+      final reopenedSource = await store.currentSourceVersion(
+        learner: learner,
+        materialId: materialId,
+      );
       final reopenedExtraction = await store.extractedContentForSource(
         learner: learner,
         sourceVersionId: sourceVersionId,
@@ -77,7 +95,10 @@ void main() {
 
       expect(reopenedSource?.identity.sourceVersionId, sourceVersionId);
       expect(reopenedExtraction?.sourceVersionId, sourceVersionId);
-      expect(reopenedExtraction?.anchors.map((anchor) => anchor.pageNumber), [1, 2]);
+      expect(reopenedExtraction?.anchors.map((anchor) => anchor.pageNumber), [
+        1,
+        2,
+      ]);
     } finally {
       await store?.close();
       await temp.delete(recursive: true);
