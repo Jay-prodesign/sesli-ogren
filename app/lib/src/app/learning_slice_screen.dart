@@ -611,7 +611,9 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
         children: [
           Text('Çalışma materyalini ekle', style: Theme.of(context).textTheme.titleLarge),
           const SizedBox(height: 8),
-          const Text('PDF seçebilir veya metni doğrudan yapıştırabilirsin. Kaynak sürümü öğrenme kanıtından ayrı tutulur.'),
+          const Text(
+            'PDF seçebilir veya metni doğrudan yapıştırabilirsin. Kaynak sürümü öğrenme kanıtından ayrı tutulur.',
+          ),
           const SizedBox(height: 18),
           OutlinedButton.icon(
             onPressed: _busy ? null : _pickPdf,
@@ -621,7 +623,11 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
           const Padding(
             padding: EdgeInsets.symmetric(vertical: 14),
             child: Row(
-              children: [Expanded(child: Divider()), Padding(padding: EdgeInsets.symmetric(horizontal: 12), child: Text('veya')), Expanded(child: Divider())],
+              children: [
+                Expanded(child: Divider()),
+                Padding(padding: EdgeInsets.symmetric(horizontal: 12), child: Text('veya')),
+                Expanded(child: Divider()),
+              ],
             ),
           ),
           TextField(
