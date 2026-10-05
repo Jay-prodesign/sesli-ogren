@@ -45,7 +45,7 @@
     "branch": "feat/m5-golden-learning-slice",
     "base_sha": "84e96dce5b3cc9f32af3f459d422b652d0e86624",
     "head_sha": "e576ca177ff8872cbbfc4f127eb016cefa7f611c",
-    "head_sha_note": "M5 runtime implementation candidate after static checkpoint corrections. S-001 server answer-exposure laundering risk was corrected in b0d5df8a… + 01670f42…; S-002 duplicate Dart canonical-transition declarations that would block compilation were removed in e576ca17…. Later checkpoint/control-plane documentation commits do not widen runtime feature scope.",
+    "head_sha_note": "M5 runtime implementation candidate after static checkpoint corrections. S-001 server answer-exposure laundering risk was corrected in b0d5df8a… + 01670f42…; S-002 duplicate Dart canonical-transition declarations that would block compilation were removed in e576ca17…. Later commits may change documentation/control-plane state or bounded M5 validation tooling, but do not widen `app/`/`server/` runtime feature scope.",
     "pr_number": 10,
     "pr_url": "https://github.com/Jay-prodesign/sesli-ogren/pull/10",
     "merged": false,
@@ -227,6 +227,6 @@
     "packet": "docs/qa/M5_GLS083_REVIEW_PACKET.md",
     "reviewer_command": "docs/qa/M5_GLS083_INDEPENDENT_REVIEW_COMMAND.md",
     "return_path": "docs/qa/M5_GLS083_INDEPENDENT_REVIEW_RETURN.md",
-    "execution_note": "This ChatGPT/Brain stream cannot self-count as the independent reviewer because it authored the static review and remediations. No separate Codex/Claude reviewer runtime is available in the current tool environment; external independent execution is the remaining gate."
+    "execution_note": "This ChatGPT/Brain stream cannot self-count as the independent reviewer because it authored the static review and remediations. No separate Codex/Claude reviewer runtime is available in the current tool environment. Post-candidate branch commits may include docs/control-plane and validation tooling; reviewer runtime scope remains frozen `app/` + `server/` at e576ca17…."
   }
 }
