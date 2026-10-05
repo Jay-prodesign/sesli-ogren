@@ -93,7 +93,8 @@
     "D-053 / D-054 / V0_PRODUCT_SCOPE_v2.0",
     "M4_ARCHITECTURE_PROOF_BRAIN_REVIEW_004 — ARCHITECTURE_PROOF_PASS / GO_ADAPT",
     "D-068 — Final Install After Implementation / Physical Device Gate Bounded",
-    "D-074 — Adaptive Task Governance / Premise Audit / Dependency Propagation"
+    "D-074 — Adaptive Task Governance / Premise Audit / Dependency Propagation",
+    "D-075 — Asset Necessity / Experience Role / Sustainable Production Pipeline"
   ],
   "updated_at": "2026-10-05",
   "auto_agent_bridge": {
@@ -190,5 +191,34 @@
     "propagation": "CHANGE -> BLAST-RADIUS ANALYSIS -> AFFECTED/UNAFFECTED -> REVALIDATE/UPDATE_REQUIRED/NO_CHANGE",
     "current_effect": "No M5 cursor or feature-scope change. LA-0022 remains active.",
     "post_m5_intent": "Desire / Engagement / Core-Loop Premise Audit is the intended first post-M5 Tier-A subject but remains NOT_EXECUTABLE until M5 closes and explicit admission occurs."
+  },
+  "asset_governance_overlay": {
+    "decision_id": "D-075",
+    "status": "APPROVED_ACTIVE",
+    "purpose": "Asset necessity, experience role, sustainable production economics and behavior-correct runtime integration.",
+    "pre_generation": [
+      "Asset Necessity Gate",
+      "Is this really an asset problem?",
+      "Experience Role",
+      "Reuse / existing-asset audit",
+      "Asset family/system decision",
+      "Production-economics check",
+      "Greybox/low-cost proof when interaction or learning behavior is materially uncertain"
+    ],
+    "post_generation": [
+      "Identity QA when applicable",
+      "Differentiation QA for signature assets",
+      "Character / Asset Behavior Gate when applicable",
+      "Preparation / rig / export",
+      "App integration",
+      "Runtime QA",
+      "Device QA",
+      "User/learning effect check only for material experience hypotheses"
+    ],
+    "tiers": {
+      "tier_a": "Signature / behavior-critical assets use full D-075 path.",
+      "tier_b": "Routine / commodity assets use lean existing-asset-check -> small spec -> prepare/generate -> integrate -> runtime/device QA when applicable -> done."
+    },
+    "current_effect": "No new M5 asset breadth. D/Knot remains locked under D-070. LA-0022 remains active."
   }
 }
