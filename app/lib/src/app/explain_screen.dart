@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../domain/learning_contracts.dart';
 import '../generation/grounded_explain_gateway.dart';
 import 'app_runtime.dart';
+import 'learning_slice_screen.dart';
 
 class ExplainScreen extends StatefulWidget {
   const ExplainScreen({
@@ -53,7 +54,7 @@ class _ExplainScreenState extends State<ExplainScreen> {
             if (!result.matches(widget.source.identity)) {
               return _Unavailable(reason: GroundedExplainUnavailableReason.staleSource, onRetry: _retry);
             }
-            return _Ready(result: result);
+            return _Ready(result: result, runtime: widget.runtime);
           }
           return _Unavailable(reason: (result as GroundedExplainUnavailable).reason, onRetry: _retry);
         },
@@ -63,9 +64,10 @@ class _ExplainScreenState extends State<ExplainScreen> {
 }
 
 class _Ready extends StatelessWidget {
-  const _Ready({required this.result});
+  const _Ready({required this.result, required this.runtime});
 
   final GroundedExplainReady result;
+  final AppRuntime runtime;
 
   @override
   Widget build(BuildContext context) {
@@ -102,6 +104,14 @@ class _Ready extends StatelessWidget {
             padding: EdgeInsets.all(16),
             child: Text('Açıklamayı okumak öğrenme kanıtı oluşturmaz. Hazır olduğunda Hatırla ile aktif olarak dene.'),
           ),
+        ),
+        const SizedBox(height: 14),
+        FilledButton.icon(
+          onPressed: () => Navigator.of(context).push<void>(
+            MaterialPageRoute(builder: (_) => LearningSliceScreen(runtime: runtime)),
+          ),
+          icon: const Icon(Icons.psychology_alt_outlined),
+          label: const Text('Hatırla ile dene'),
         ),
       ],
     );
