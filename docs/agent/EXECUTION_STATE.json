@@ -84,7 +84,7 @@
     "Accessibility runtime evidence remains pending in the batch; physical VoiceOver/TalkBack/device/orientation evidence remains deferred under D-068."
   ],
   "protected_gate": "Merge, release, deploy, paid providers, credentials/secrets, licensing posture, production mutation: Product Owner only",
-  "next_action": "Synthetic adversarial review is PASS with no unresolved BLOCKER/HIGH after S-003, but external independence remains required unless Founder explicitly waives it. Refresh the review-only PR to runtime candidate 64579d48…. After actual independent REVIEW_PASS (or explicit Founder waiver): Flutter 3.47.5 lockfile freeze -> single guarded D-072 validation batch -> M5 verdict.",
+  "next_action": "Synthetic adversarial review is PASS with no unresolved BLOCKER/HIGH after S-003. External independence remains pending on review-only PR #12 / frozen runtime candidate 64579d48… unless Founder explicitly waives the independence requirement. After actual independent REVIEW_PASS (or explicit waiver), freeze Flutter 3.47.5 pubspec.lock and run the single guarded D-072 validation batch.",
   "canonical_source_refs": [
     "CURRENT_EXECUTION_STATE — Learning App",
     "D-070 — Founder Product/Visual PASS / D-Knot selected",
@@ -241,10 +241,10 @@
       "note": "PR #12 supersedes stale PR #11. Synthetic review is supplemental only; actual independent review remains pending unless Founder explicitly waives that requirement."
     },
     "manual_completion_paths": [
-      "GitHub PR #11 -> Reviewers -> Copilot -> Request (preferred if Copilot code review is available on the account/repository).",
-      "Open a separate Claude/Codex reviewer context and give it docs/qa/M5_GLS083_INDEPENDENT_REVIEW_COMMAND.md plus PR #11 / frozen SHA e576ca17…."
+      "GitHub PR #12 -> Reviewers -> Copilot -> Request, only if the account/repository exposes Copilot review and Founder accepts any AI-credit/Actions spend.",
+      "Open a separate Claude/Codex reviewer context and give it docs/qa/M5_GLS083_INDEPENDENT_REVIEW_COMMAND.md plus PR #12 / frozen SHA 64579d48…."
     ],
-    "paid_browser_automation": "NOT_AUTHORIZED — metered browser automation could click the GitHub UI, but paid-provider spend remains a Product Owner gate and was not explicitly authorized.",
+    "paid_browser_automation": "NOT_AUTHORIZED — do not use metered browser automation or paid reviewer execution without explicit Founder authorization.",
     "synthetic_review": {
       "status": "SYNTHETIC_PASS_NO_UNRESOLVED_BLOCKER_HIGH",
       "artifact": "docs/qa/M5_GLS083_SYNTHETIC_ADVERSARIAL_REVIEW_2026-10-05.md",
