@@ -119,7 +119,7 @@ begin
 end $$;
 
 
-do $
+do $$
 begin
   if public.la_recall_next_reason('not_assessed') <> 'NO_EVALUABLE_RETRIEVAL' then
     raise exception 'not_assessed Recall must preserve NO_EVALUABLE_RETRIEVAL continuation reason';
