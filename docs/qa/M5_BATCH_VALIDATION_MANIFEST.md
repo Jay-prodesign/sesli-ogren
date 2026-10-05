@@ -83,7 +83,7 @@ cd ..
 bash scripts/m5_validate_server_sql.sh
 ```
 
-The SQL report must show migrations `0001`, `0002`, `0003`, `0004` in lexical order and tests `10`, `11`, `20`, `30`, `40`.
+The SQL report must show migrations `0001`, `0002`, `0003`, `0004` in lexical order and tests `10`, `11`, `20`, `30`, `40`. Test `40` must execute the RPC-level Recall assistance/isolation regression added at `f00df73…`: unassisted immediate replay/idempotency, hint-only success, answer-exposure non-laundering, assistance monotonicity, cross-user rejection, and no support mutation after submission.
 
 On macOS at the same exact final validation head:
 
