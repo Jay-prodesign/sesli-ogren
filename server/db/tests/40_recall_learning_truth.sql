@@ -98,7 +98,25 @@ begin
      ) then
     raise exception 'authenticated learner cannot read canonical assistance classification';
   end if;
-end $$;
+
+  if not exists (
+       select 1
+       from pg_constraint
+       where conrelid = 'public.learner_evidence'::regclass
+         and conname = 'learner_evidence_rule_version_check'
+     ) then
+    raise exception 'learner evidence rule-version constraint missing';
+  end if;
+
+  if not exists (
+       select 1
+       from pg_constraint
+       where conrelid = 'public.learner_states'::regclass
+         and conname = 'learner_states_rule_version_check'
+     ) then
+    raise exception 'learner state rule-version constraint missing';
+  end if;
+end $;
 
 
 do $$
@@ -268,6 +286,18 @@ select pg_temp.ok(
    from public.learner_evidence
    where account_id = :user_a and attempt_id = 'm5-exposed-0001'),
   'answer exposure persisted canonically'
+);
+select pg_temp.ok(
+  (select rule_version = 'recall-evidence-v2'
+   from public.learner_evidence
+   where account_id = :user_a and attempt_id = 'm5-exposed-0001'),
+  'new server Recall evidence uses v2 semantics'
+);
+select pg_temp.ok(
+  (select rule_version = 'recall-state-v2'
+   from public.learner_states
+   where account_id = :user_a and material_id = :'material_a'),
+  'derived learner state uses v2 policy'
 );
 
 -- 4) Assistance is monotonic: answer exposure followed by a hint cannot
