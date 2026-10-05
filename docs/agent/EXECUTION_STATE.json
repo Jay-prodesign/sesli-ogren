@@ -15,7 +15,7 @@
     "executor": "ChatGPT (Founder-authorized reversible engineering delegate; Claude/Codex may resume only after fresh-read)"
   },
   "lifecycle_stage": "M5 Golden Learning Slice — ADMITTED / EXECUTABLE under D-071; physical mobile-readiness deferred to final gate under D-068",
-  "status": "IN_PROGRESS",
+  "status": "BLOCKED",
   "active_milestone": "Repository Milestone M2 / Lifecycle M5 — Golden Learning Slice ACTIVE",
   "architecture_proof": {
     "disposition": "ARCHITECTURE_PROOF_PASS / GO_ADAPT",
@@ -44,8 +44,8 @@
   "git": {
     "branch": "feat/m5-golden-learning-slice",
     "base_sha": "84e96dce5b3cc9f32af3f459d422b652d0e86624",
-    "head_sha": "17773e631e3dc1ae28dd1a4656e0509309083923",
-    "head_sha_note": "Current validated M5 checkpoint head before evidence-only documentation cleanup. Runtime/product behavior remains the validated M5 candidate plus bounded test/SQL corrections.",
+    "head_sha": "f90e502c30a1f6f83cb01a10395d6afcf8df8e63",
+    "head_sha_note": "Current branch head is evidence/control-plane cleanup only after validated M5 runtime/app head 72494bec… and platform validation head 17773e63…. No product runtime change after the validated app head.",
     "pr_number": 10,
     "pr_url": "https://github.com/Jay-prodesign/sesli-ogren/pull/10",
     "merged": false,
@@ -80,7 +80,7 @@
     "Physical iOS/Android speech/accessibility/performance/orientation checks remain deferred under D-068 and mandatory before release-candidate/public-release claims."
   ],
   "protected_gate": "Merge, release, deploy, paid providers, credentials/secrets, licensing posture, production mutation: Product Owner only",
-  "next_action": "Resolve the sole remaining non-physical M5 blocker: provide/configure client-safe SUPABASE_URL + SUPABASE_PUBLISHABLE_KEY in a protected validation environment, then run the existing secret-safe anonymous-auth probe once. Do not broaden product scope. Physical-device checks remain deferred under D-068.",
+  "next_action": "Configure or otherwise supply client-safe SUPABASE_URL + SUPABASE_PUBLISHABLE_KEY in a protected validation environment, then run exactly one secret-safe anonymous-auth probe. Do not request/use service-role credentials. No further code/build/SQL work is justified before this gate.",
   "canonical_source_refs": [
     "CURRENT_EXECUTION_STATE — Learning App",
     "D-070 — Founder Product/Visual PASS / D-Knot selected",
@@ -163,12 +163,12 @@
     "deferred": "Physical-device evidence remains deferred under D-068.",
     "batch_rule": "GitHub Actions are allowed again by Founder decision on 2026-10-05, but must be used sparingly. Do not run Actions on every commit. Prefer one bounded validation workflow after a stable candidate is pushed, and avoid reruns unless a concrete failure has been corrected.",
     "one_shot_actions_workflow": {
-      "status": "PASS_PENDING_WORKFLOW_CLEANUP",
+      "status": "PASS_REMOVED_AFTER_RUN",
       "path": ".github/workflows/m5-bounded-validation.yml",
       "added_at_commit": "12f3e87ee4e03dd142010714dadb2d3799e85065",
       "trigger": "next push to feat/m5-golden-learning-slice containing app/** changes",
       "scope": "Flutter 3.47.5 toolchain check, lockfile reproducibility, format, analyze, flutter test, Android profile build, APK SHA-256",
-      "cleanup": "COMPLETED — workflow removed after successful bounded run.",
+      "cleanup": "COMPLETED — M5 bounded Flutter/Android workflow removed after PASS; M5 platform validation workflow also removed after PASS.",
       "last_run": {
         "run_id": 37334117375,
         "head_sha": "72494bec8525f37a9fed8a6b6f38d60033b57e08",
@@ -268,7 +268,7 @@
     }
   },
   "validation_batch_readiness": {
-    "status": "NON_PHYSICAL_PASS_EXCEPT_LIVE_AUTH_CONFIG",
+    "status": "BLOCKED_LIVE_AUTH_ONLY",
     "manifest": "docs/qa/M5_BATCH_VALIDATION_MANIFEST.md",
     "return": "docs/qa/M5_FINAL_VALIDATION_RETURN.md",
     "sql_helper": "scripts/m5_validate_server_sql.sh",
