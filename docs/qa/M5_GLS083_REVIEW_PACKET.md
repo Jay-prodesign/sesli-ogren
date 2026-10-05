@@ -5,7 +5,7 @@
 - Project: Learning App / Sesli Öğren
 - Mission: M5 Golden Learning Slice
 - Branch: `feat/m5-golden-learning-slice`
-- Frozen runtime implementation candidate: `e576ca177ff8872cbbfc4f127eb016cefa7f611c`
+- Frozen runtime implementation candidate: `64579d48bcf9c33f4c709927a0e453349efb7c5b`
 - Later commits are checkpoint/control-plane documentation or M5 validation tooling only unless this packet is explicitly refreshed again. No `app/` or `server/` runtime code after the frozen SHA is in review scope.
 - Governing acceptance: `M5_GOLDEN_LEARNING_SLICE_ACCEPTANCE_CONTRACT_v0.1`
 - Review trigger: GLS-083
@@ -14,7 +14,7 @@
 
 The reviewer must evaluate the code independently. This packet is a map, not a PASS claim.
 
-Static checkpoint review found two material defects before independent review: S-001 server answer-exposure laundering, corrected in `b0d5df8a…` + `01670f42…`; and S-002 duplicate Dart canonical-transition declarations that would block compilation, corrected in `e576ca17…`. The independent reviewer must verify the corrected candidate rather than inheriting the Brain/static review conclusion.
+Brain/static + synthetic review found three material defects before independent review: S-001 answer-exposure laundering, S-002 duplicate Dart declarations, and S-003 server rule-version provenance drift. All are corrected in the current frozen candidate lineage. The independent reviewer must verify the corrected candidate rather than inheriting prior review conclusions.
 
 ## Why independent review is required
 
@@ -192,3 +192,5 @@ coverage for the already-frozen runtime semantics and does not alter
 The independent reviewer should still review runtime semantics at the frozen
 candidate SHA. The stronger test is checkpoint evidence and remains PENDING
 execution in the single D-072 batch.
+
+Synthetic supplemental review: `docs/qa/M5_GLS083_SYNTHETIC_ADVERSARIAL_REVIEW_2026-10-05.md` — useful evidence, explicitly not independent.
