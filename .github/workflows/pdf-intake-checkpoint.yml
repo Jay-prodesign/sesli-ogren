@@ -41,6 +41,9 @@ jobs:
         run: |
           flutter pub get
           echo "LOCK_BASE64=$(base64 -w0 pubspec.lock)"
-      - run: dart format .
+      - name: Canonical format + diff
+        run: |
+          dart format .
+          git diff -- lib/src/app/learning_slice_screen.dart lib/src/app/material_workspace_screen.dart
       - run: flutter analyze
       - run: flutter test
