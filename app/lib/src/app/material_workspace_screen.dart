@@ -43,22 +43,13 @@ class _MaterialWorkspaceScreenState extends State<MaterialWorkspaceScreen> {
       learner: widget.runtime.learner,
       sourceVersionId: source.identity.sourceVersionId,
     );
-    final continuation = await widget.runtime.recall.reopen(
-      learner: widget.runtime.learner,
-      materialId: material.id,
-    );
-    return _WorkspaceSnapshot(
-      material: material,
-      source: source,
-      extracted: extracted,
-      continuation: continuation,
-    );
+    final continuation = await widget.runtime.recall.reopen(learner: widget.runtime.learner, materialId: material.id);
+    return _WorkspaceSnapshot(material: material, source: source, extracted: extracted, continuation: continuation);
   }
 
   Future<void> _openRecall() async {
-    await Navigator.of(context).push<void>(
-      MaterialPageRoute(builder: (_) => LearningSliceScreen(runtime: widget.runtime)),
-    );
+    await Navigator.of(context)
+        .push<void>(MaterialPageRoute(builder: (_) => LearningSliceScreen(runtime: widget.runtime)));
     if (!mounted) return;
     setState(() => _snapshot = _load());
   }
@@ -75,16 +66,14 @@ class _MaterialWorkspaceScreenState extends State<MaterialWorkspaceScreen> {
           future: _snapshot,
           builder: (context, snapshot) {
             if (snapshot.hasError) {
-              return const Center(child: Padding(padding: EdgeInsets.all(24), child: Text('Materyal açılamadı.')));
+              return const Center(
+                child: Padding(padding: EdgeInsets.all(24), child: Text('Materyal açılamadı.')),
+              );
             }
             if (!snapshot.hasData) {
               return const Center(child: CircularProgressIndicator());
             }
-            return _WorkspaceBody(
-              data: snapshot.data!,
-              onRecall: _openRecall,
-              onListen: _openListen,
-            );
+            return _WorkspaceBody(data: snapshot.data!, onRecall: _openRecall, onListen: _openListen);
           },
         ),
       ),
@@ -121,7 +110,10 @@ class _WorkspaceBody extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(data.material.title, style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w800)),
+                  Text(
+                    data.material.title,
+                    style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w800),
+                  ),
                   const SizedBox(height: 4),
                   Text(
                     _sourceLabel(data),
@@ -240,10 +232,7 @@ class _WorkspaceBody extends StatelessWidget {
             ),
             const Divider(height: 1),
             Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(20),
-                child: SelectableText(text),
-              ),
+              child: SingleChildScrollView(padding: const EdgeInsets.all(20), child: SelectableText(text)),
             ),
           ],
         ),
@@ -312,12 +301,7 @@ class _LearningStatusCard extends StatelessWidget {
 }
 
 class _ActionCard extends StatelessWidget {
-  const _ActionCard({
-    required this.icon,
-    required this.title,
-    required this.body,
-    required this.onPressed,
-  });
+  const _ActionCard({required this.icon, required this.title, required this.body, required this.onPressed});
 
   final IconData icon;
   final String title;
