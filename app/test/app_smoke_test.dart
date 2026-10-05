@@ -11,6 +11,7 @@ import 'package:sesli_ogren/src/data/pdf_text_extractor.dart';
 import 'package:sesli_ogren/src/data/source_ingest_service.dart';
 import 'package:sesli_ogren/src/data/sqlite_source_store.dart';
 import 'package:sesli_ogren/src/learning/recall_learning_service.dart';
+import 'package:sesli_ogren/src/learning/explain_back_gateway.dart';
 import 'package:sesli_ogren/src/generation/grounded_explain_gateway.dart';
 import 'package:sesli_ogren/src/domain/learning_truth.dart';
 import 'package:sesli_ogren/src/domain/operational_event.dart';
@@ -25,6 +26,14 @@ class _UnusedPdfExtractor implements PdfTextExtractor {
   }
 }
 
+
+class _UnavailableExplainBackGateway implements ExplainBackGateway {
+  const _UnavailableExplainBackGateway();
+
+  @override
+  Future<ExplainBackResult> evaluate(ExplainBackRequest request) async =>
+      const ExplainBackUnavailable('Test evaluator is intentionally unavailable.');
+}
 
 class _ReadyExplainGateway implements GroundedExplainGateway {
   const _ReadyExplainGateway();
@@ -272,6 +281,16 @@ void main() {
     expect(find.text('Önemli noktalar'), findsOneWidget);
     expect(find.textContaining('öğrenme kanıtı oluşturmaz'), findsOneWidget);
     expect(find.text('Hatırla ile dene'), findsOneWidget);
+    expect(find.text('Kendi cümlelerinle anlat'), findsOneWidget);
+    await tapVisible(tester, find.text('Kendi cümlelerinle anlat'));
+    await pumpUntilFound(tester, find.text('Anlatımımı değerlendir'));
+    expect(find.textContaining('öğrenme kanıtı veya ustalık iddiası oluşturmaz'), findsOneWidget);
+    await tester.enterText(find.byType(TextField), 'Fotosentez ışık enerjisini kimyasal enerjiye dönüştürür.');
+    await tapVisible(tester, find.text('Anlatımımı değerlendir'));
+    await pumpUntilFound(tester, find.text('Henüz güvenilir değerlendirme yok'));
+    expect(find.textContaining('öğrenme kanıtı olarak kaydetmiyoruz'), findsOneWidget);
+    Navigator.of(tester.element(find.text('Henüz güvenilir değerlendirme yok'))).pop();
+    await tester.pumpAndSettle();
     await tapVisible(tester, find.text('Hatırla ile dene'));
     await pumpUntilFound(tester, find.byType(LearningSliceScreen));
     expect(find.byType(LearningSliceScreen), findsOneWidget);
