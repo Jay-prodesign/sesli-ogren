@@ -74,7 +74,7 @@ Founder explicitly **RESUMED** work in the Learning App conversation after the r
 
 Resume record: `docs/agent/PAUSE_CHECKPOINT_2026-10-05.md` now records the supersession.
 
-Current runtime candidate is `e576ca177ff8872cbbfc4f127eb016cefa7f611c`; this supersedes `01670f42…` only to remove the checkpoint-discovered duplicate-declaration compile blocker. Later control-plane/documentation commits do not widen runtime feature scope.
+Current runtime candidate is `64579d48bcf9c33f4c709927a0e453349efb7c5b`. This includes the synthetic-review S-003 rule-version provenance correction. Later test/docs/tooling commits do not widen runtime scope.
 
 Continue LA-0022 from unresolved evidence gates only: GLS-083 independent read-only review of `e576ca17…` → resolve any material review finding and re-freeze if needed → Flutter 3.47.5 lockfile → single bounded D-072 validation batch including live Supabase auth + server SQL + Android/iOS builds → M5 verdict. No new feature breadth before M5 closes.
 
@@ -129,11 +129,11 @@ admitted after M5.
 
 ## GLS-083 external independent-review handoff
 
-Status: READY_FOR_INDEPENDENT_EXECUTION.
+Status: SYNTHETIC_PASS / READY_FOR_INDEPENDENT_EXECUTION.
 
 Use `docs/qa/M5_GLS083_INDEPENDENT_REVIEW_COMMAND.md` in a separate
 Codex/Claude/reviewer context against frozen runtime candidate
-`e576ca177ff8872cbbfc4f127eb016cefa7f611c`.
+`64579d48bcf9c33f4c709927a0e453349efb7c5b`.
 
 The current ChatGPT/Brain stream must not count its own static review as GLS-083
 independence because it identified/remediated S-001 and S-002. No independent
@@ -149,7 +149,7 @@ followed by re-freeze + refreshed independent review.
 Review surface: PR #11 — `review/m5-gls083-e576ca17` against
 `feat/round7-companion-production-sequence-v2`.
 
-- Runtime under review remains exactly `e576ca177ff8872cbbfc4f127eb016cefa7f611c`.
+- Runtime under review remains exactly `64579d48bcf9c33f4c709927a0e453349efb7c5b`.
 - The review branch has one extra `.github/copilot-instructions.md` metadata
   commit only; no runtime code change.
 - The metadata commit uses `[skip ci]`; zero pull-request workflow runs were
@@ -161,3 +161,5 @@ Review surface: PR #11 — `review/m5-gls083-e576ca17` against
 
 An actual independent reviewer may use PR #11 directly. Continue to lockfile +
 single bounded batch only after a real REVIEW_PASS return exists.
+
+Synthetic adversarial review: `docs/qa/M5_GLS083_SYNTHETIC_ADVERSARIAL_REVIEW_2026-10-05.md` reports no unresolved BLOCKER/HIGH after S-003. It is supplemental evidence only and does not self-grant independence.
