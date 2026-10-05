@@ -77,3 +77,28 @@ Resume record: `docs/agent/PAUSE_CHECKPOINT_2026-10-05.md` now records the super
 Current runtime candidate is `e576ca177ff8872cbbfc4f127eb016cefa7f611c`; this supersedes `01670f42…` only to remove the checkpoint-discovered duplicate-declaration compile blocker. Later control-plane/documentation commits do not widen runtime feature scope.
 
 Continue LA-0022 from unresolved evidence gates only: GLS-083 independent read-only review of `e576ca17…` → resolve any material review finding and re-freeze if needed → Flutter 3.47.5 lockfile → single bounded D-072 validation batch including live Supabase auth + server SQL + Android/iOS builds → M5 verdict. No new feature breadth before M5 closes.
+
+
+## D-074 adaptive governance overlay
+
+This mission remains LA-0022 / M5 evidence closure. D-074 changes **how future
+material decisions are admitted and propagated**, not the current runtime scope.
+
+- Tier A: high-uncertainty/high-blast-radius product or learning decisions use
+  Task Intent -> decision-grade Task Spec -> Spec Quality Gate ->
+  execution/evidence -> Result Gate -> canonical decision -> blast-radius
+  propagation.
+- Tier B: approved routine production remains lean:
+  Need -> small spec -> implement -> smallest useful QA -> device QA when
+  applicable -> done.
+- Product / Learning Premise Audit runs only at major milestone closure,
+  credible contradictory evidence, or before major tranche admission.
+- Dependency propagation is impact-based:
+  affected surfaces become REVALIDATE / UPDATE_REQUIRED; unaffected surfaces
+  remain unchanged.
+- The intended first post-M5 Tier-A subject is Desire / Engagement / Core-Loop
+  Premise Audit, but it is NOT_EXECUTABLE until M5 closes and Brain explicitly
+  admits it.
+
+Do not interrupt the current GLS-083 -> lockfile -> single bounded validation
+batch -> M5 verdict sequence to start that post-M5 work early.
