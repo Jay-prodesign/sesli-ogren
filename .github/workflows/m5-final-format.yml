@@ -1,0 +1,45 @@
+name: m5-final-format
+
+on:
+  push:
+    branches:
+      - feat/m5-golden-learning-slice
+    paths:
+      - ".github/workflows/m5-final-format.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  format:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feat/m5-golden-learning-slice
+          fetch-depth: 0
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: "3.47.5"
+          channel: "stable"
+          cache: true
+
+      - name: Canonical app formatting
+        working-directory: app
+        run: |
+          dart format .
+          git diff --check
+
+      - name: Commit formatter-only diff
+        run: |
+          if git diff --quiet -- app; then
+            echo "No formatting changes needed."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add app
+          git commit -m "style(m5): canonicalize app Dart formatting"
+          git push origin HEAD:feat/m5-golden-learning-slice
