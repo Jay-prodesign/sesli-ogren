@@ -1,12 +1,12 @@
 # M5 Final Validation Return
 
-> Fill only after GLS-083 returns REVIEW_PASS and the final lockfile head is frozen.
+> Fill only after the Founder-accepted synthetic GLS-083 review gate is recorded and the final lockfile head is frozen.
 > This file records the single bounded D-072 checkpoint batch; it is not a new gate.
 
 ## Identity
 
 - Runtime candidate reviewed by GLS-083: `64579d48bcf9c33f4c709927a0e453349efb7c5b`
-- GLS-083 disposition: PENDING
+- GLS-083 disposition: PASS_FOUNDER_WAIVER / SYNTHETIC_ACCEPTED
 - Final validation head: PENDING
 - Branch: `feat/m5-golden-learning-slice`
 - `app/pubspec.lock` blob/commit SHA: PENDING
