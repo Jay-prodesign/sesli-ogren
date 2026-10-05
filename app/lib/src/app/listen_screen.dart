@@ -2,14 +2,16 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
+import '../domain/learning_contracts.dart';
 import '../speech/device_speech_output.dart';
 import 'app_runtime.dart';
 import 'companion_view.dart';
 
 class ListenScreen extends StatefulWidget {
-  const ListenScreen({required this.runtime, super.key});
+  const ListenScreen({required this.runtime, required this.materialId, super.key});
 
   final AppRuntime runtime;
+  final MaterialId materialId;
 
   @override
   State<ListenScreen> createState() => _ListenScreenState();
@@ -30,7 +32,7 @@ class _ListenScreenState extends State<ListenScreen> {
   Future<_ListenSource> _load() async {
     final version = await widget.runtime.store.currentSourceVersion(
       learner: widget.runtime.learner,
-      materialId: AppRuntime.primaryMaterialId,
+      materialId: widget.materialId,
     );
     if (version == null) {
       throw StateError('listen_source_missing');
