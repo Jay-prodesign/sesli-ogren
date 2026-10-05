@@ -26,19 +26,13 @@ class SqliteSourceStore implements SourceStore {
 
   final Database _database;
 
-  LearningTruthStore learningTruthStore() =>
-      SqliteLearningTruthStore._(_database);
+  LearningTruthStore learningTruthStore() => SqliteLearningTruthStore._(_database);
 
-  OperationalTelemetry operationalTelemetry() =>
-      SqliteOperationalTelemetry._(_database);
+  OperationalTelemetry operationalTelemetry() => SqliteOperationalTelemetry._(_database);
 
-  static Future<SqliteSourceStore> open({
-    DatabaseFactory? factory,
-    String? path,
-  }) async {
+  static Future<SqliteSourceStore> open({DatabaseFactory? factory, String? path}) async {
     final selectedFactory = factory ?? databaseFactory;
-    final databasePath =
-        path ?? '${await getDatabasesPath()}/sesli_ogren_sources.db';
+    final databasePath = path ?? '${await getDatabasesPath()}/sesli_ogren_sources.db';
     final database = await selectedFactory.openDatabase(
       databasePath,
       options: OpenDatabaseOptions(
@@ -355,22 +349,10 @@ ON operational_events (learner_id, created_at_utc)
       'ALTER TABLE operational_events '
           'ADD COLUMN schema_version INTEGER NOT NULL DEFAULT 1',
     );
-    await add(
-      'attempt_id',
-      'ALTER TABLE operational_events ADD COLUMN attempt_id TEXT',
-    );
-    await add(
-      'outcome',
-      'ALTER TABLE operational_events ADD COLUMN outcome TEXT',
-    );
-    await add(
-      'state_kind',
-      'ALTER TABLE operational_events ADD COLUMN state_kind TEXT',
-    );
-    await add(
-      'reason_code',
-      'ALTER TABLE operational_events ADD COLUMN reason_code TEXT',
-    );
+    await add('attempt_id', 'ALTER TABLE operational_events ADD COLUMN attempt_id TEXT');
+    await add('outcome', 'ALTER TABLE operational_events ADD COLUMN outcome TEXT');
+    await add('state_kind', 'ALTER TABLE operational_events ADD COLUMN state_kind TEXT');
+    await add('reason_code', 'ALTER TABLE operational_events ADD COLUMN reason_code TEXT');
   }
 
   static Future<void> _upgradeRecallSupportSchema(Database db) async {
@@ -435,12 +417,8 @@ CREATE TABLE IF NOT EXISTS learner_evidence (
     ON DELETE CASCADE
 )
 ''');
-    final evidenceColumns = await db.rawQuery(
-      'PRAGMA table_info(learner_evidence)',
-    );
-    final evidenceColumnNames = evidenceColumns
-        .map((row) => row['name'] as String)
-        .toSet();
+    final evidenceColumns = await db.rawQuery('PRAGMA table_info(learner_evidence)');
+    final evidenceColumnNames = evidenceColumns.map((row) => row['name'] as String).toSet();
     if (!evidenceColumnNames.contains('assistance')) {
       await db.execute(
         "ALTER TABLE learner_evidence "
@@ -572,20 +550,13 @@ JOIN learner_evidence e
   }
 
   @override
-  Future<MaterialRecord?> material({
-    required AuthenticatedLearner learner,
-    required MaterialId materialId,
-  }) async {
+  Future<MaterialRecord?> material({required AuthenticatedLearner learner, required MaterialId materialId}) async {
     final rows = await _database.query(
       'materials',
       where:
           'learner_id = ? AND material_id = ? AND lifecycle_status = ? '
           'AND deleted_at_utc IS NULL',
-      whereArgs: [
-        learner.id.value,
-        materialId.value,
-        MaterialLifecycleStatus.active.name,
-      ],
+      whereArgs: [learner.id.value, materialId.value, MaterialLifecycleStatus.active.name],
       limit: 1,
     );
     return rows.isEmpty ? null : _materialFromRow(rows.single);
@@ -622,8 +593,7 @@ LIMIT 1
   }) async {
     final rows = await _database.query(
       'source_versions',
-      where:
-          'learner_id = ? AND source_version_id = ? AND revoked_at_utc IS NULL',
+      where: 'learner_id = ? AND source_version_id = ? AND revoked_at_utc IS NULL',
       whereArgs: [learner.id.value, sourceVersionId.value],
       limit: 1,
     );
@@ -687,14 +657,10 @@ LIMIT 1
       if (materialRows.isNotEmpty) {
         existingMaterial = _materialFromRow(materialRows.single);
         if (!existingMaterial.isActive) {
-          throw const SourceStoreConflict(
-            'A deleted material cannot be silently resurrected.',
-          );
+          throw const SourceStoreConflict('A deleted material cannot be silently resurrected.');
         }
         if (existingMaterial.mediaType != material.mediaType) {
-          throw const SourceStoreConflict(
-            'A material cannot silently change its source media type.',
-          );
+          throw const SourceStoreConflict('A material cannot silently change its source media type.');
         }
       } else {
         await transaction.insert(
@@ -717,19 +683,14 @@ LIMIT 1
       final existingSourceRows = await transaction.query(
         'source_versions',
         where: 'learner_id = ? AND source_version_id = ?',
-        whereArgs: [
-          learner.id.value,
-          sourceVersion.identity.sourceVersionId.value,
-        ],
+        whereArgs: [learner.id.value, sourceVersion.identity.sourceVersionId.value],
         limit: 1,
       );
 
       if (existingSourceRows.isNotEmpty) {
         final existingSource = _sourceFromRow(existingSourceRows.single);
         if (existingSource.revokedAt != null) {
-          throw const SourceStoreConflict(
-            'A revoked source version cannot be silently resurrected.',
-          );
+          throw const SourceStoreConflict('A revoked source version cannot be silently resurrected.');
         }
 
         final refreshedMaterialRows = await transaction.query(
@@ -738,14 +699,9 @@ LIMIT 1
           whereArgs: [learner.id.value, material.id.value],
           limit: 1,
         );
-        final refreshedMaterial = _materialFromRow(
-          refreshedMaterialRows.single,
-        );
-        if (refreshedMaterial.currentSourceVersionId !=
-            existingSource.identity.sourceVersionId) {
-          throw const SourceStoreConflict(
-            'A retry of a superseded source version is stale and fails closed.',
-          );
+        final refreshedMaterial = _materialFromRow(refreshedMaterialRows.single);
+        if (refreshedMaterial.currentSourceVersionId != existingSource.identity.sourceVersionId) {
+          throw const SourceStoreConflict('A retry of a superseded source version is stale and fails closed.');
         }
 
         final extractionRows = await transaction.query(
@@ -753,16 +709,11 @@ LIMIT 1
           where:
               'learner_id = ? AND source_version_id = ? '
               'AND invalidated_at_utc IS NULL',
-          whereArgs: [
-            learner.id.value,
-            existingSource.identity.sourceVersionId.value,
-          ],
+          whereArgs: [learner.id.value, existingSource.identity.sourceVersionId.value],
           limit: 1,
         );
         if (extractionRows.isEmpty) {
-          throw const SourceStoreConflict(
-            'Current source version is missing valid extracted content.',
-          );
+          throw const SourceStoreConflict('Current source version is missing valid extracted content.');
         }
         return SourceIngestResult(
           material: refreshedMaterial,
@@ -773,11 +724,7 @@ LIMIT 1
 
       await transaction.insert(
         'source_versions',
-        _sourceToRow(
-          learner: learner,
-          record: sourceVersion,
-          rawSourceBytes: rawSourceBytes,
-        ),
+        _sourceToRow(learner: learner, record: sourceVersion, rawSourceBytes: rawSourceBytes),
         conflictAlgorithm: ConflictAlgorithm.abort,
       );
 
@@ -826,8 +773,7 @@ LIMIT 1
         'materials',
         {
           'processing_state': MaterialProcessingState.ready.name,
-          'current_source_version_id':
-              sourceVersion.identity.sourceVersionId.value,
+          'current_source_version_id': sourceVersion.identity.sourceVersionId.value,
           'updated_at_utc': supersededAt,
         },
         where: 'learner_id = ? AND material_id = ?',
@@ -870,11 +816,7 @@ LIMIT 1
         where:
             'learner_id = ? AND material_id = ? AND lifecycle_status = ? '
             'AND deleted_at_utc IS NULL',
-        whereArgs: [
-          learner.id.value,
-          materialId.value,
-          MaterialLifecycleStatus.active.name,
-        ],
+        whereArgs: [learner.id.value, materialId.value, MaterialLifecycleStatus.active.name],
       );
       if (changed == 0) {
         return;
@@ -931,33 +873,19 @@ LIMIT 1
     required Uint8List? rawSourceBytes,
   }) {
     if (sourceVersion.identity.materialId != material.id) {
-      throw const SourceStoreConflict(
-        'Source version does not belong to the material being persisted.',
-      );
+      throw const SourceStoreConflict('Source version does not belong to the material being persisted.');
     }
-    if (extractedContent.sourceVersionId !=
-        sourceVersion.identity.sourceVersionId) {
-      throw const SourceStoreConflict(
-        'Extracted content does not belong to the source version.',
-      );
+    if (extractedContent.sourceVersionId != sourceVersion.identity.sourceVersionId) {
+      throw const SourceStoreConflict('Extracted content does not belong to the source version.');
     }
-    if (extractedContent.sourceContentDigest !=
-        sourceVersion.identity.contentDigest) {
-      throw const SourceStoreConflict(
-        'Extracted content digest does not match the source version.',
-      );
+    if (extractedContent.sourceContentDigest != sourceVersion.identity.contentDigest) {
+      throw const SourceStoreConflict('Extracted content digest does not match the source version.');
     }
-    if (sourceVersion.mediaType == SourceMediaType.pdf &&
-        (rawSourceBytes == null || rawSourceBytes.isEmpty)) {
-      throw const SourceStoreConflict(
-        'PDF source bytes are required for durable source authority.',
-      );
+    if (sourceVersion.mediaType == SourceMediaType.pdf && (rawSourceBytes == null || rawSourceBytes.isEmpty)) {
+      throw const SourceStoreConflict('PDF source bytes are required for durable source authority.');
     }
-    if (sourceVersion.mediaType == SourceMediaType.pastedText &&
-        rawSourceBytes != null) {
-      throw const SourceStoreConflict(
-        'Pasted text must not carry a parallel raw binary source.',
-      );
+    if (sourceVersion.mediaType == SourceMediaType.pastedText && rawSourceBytes != null) {
+      throw const SourceStoreConflict('Pasted text must not carry a parallel raw binary source.');
     }
   }
 
@@ -1014,9 +942,7 @@ LIMIT 1
       'normalized_text': record.normalizedText,
       'method': record.method,
       'method_version': record.methodVersion,
-      'anchors_json': jsonEncode(
-        record.anchors.map((anchor) => anchor.toJson()).toList(growable: false),
-      ),
+      'anchors_json': jsonEncode(record.anchors.map((anchor) => anchor.toJson()).toList(growable: false)),
       'warnings_json': jsonEncode(record.warnings),
       'source_content_digest': record.sourceContentDigest,
       'created_at_utc': record.createdAt.toUtc().toIso8601String(),
@@ -1029,20 +955,14 @@ LIMIT 1
       id: MaterialId(row['material_id']! as String),
       title: row['title']! as String,
       mediaType: SourceMediaType.values.byName(row['media_type']! as String),
-      lifecycleStatus: MaterialLifecycleStatus.values.byName(
-        row['lifecycle_status']! as String,
-      ),
-      processingState: MaterialProcessingState.values.byName(
-        row['processing_state']! as String,
-      ),
+      lifecycleStatus: MaterialLifecycleStatus.values.byName(row['lifecycle_status']! as String),
+      processingState: MaterialProcessingState.values.byName(row['processing_state']! as String),
       currentSourceVersionId: row['current_source_version_id'] == null
           ? null
           : SourceVersionId(row['current_source_version_id']! as String),
       createdAt: DateTime.parse(row['created_at_utc']! as String).toUtc(),
       updatedAt: DateTime.parse(row['updated_at_utc']! as String).toUtc(),
-      deletedAt: row['deleted_at_utc'] == null
-          ? null
-          : DateTime.parse(row['deleted_at_utc']! as String).toUtc(),
+      deletedAt: row['deleted_at_utc'] == null ? null : DateTime.parse(row['deleted_at_utc']! as String).toUtc(),
     );
   }
 
@@ -1052,12 +972,8 @@ LIMIT 1
         materialId: MaterialId(row['material_id']! as String),
         sourceVersionId: SourceVersionId(row['source_version_id']! as String),
         contentDigest: row['content_digest']! as String,
-        trustClass: SourceTrustClass.values.byName(
-          row['trust_class']! as String,
-        ),
-        knowledgeClass: SourceKnowledgeClass.values.byName(
-          row['knowledge_class']! as String,
-        ),
+        trustClass: SourceTrustClass.values.byName(row['trust_class']! as String),
+        knowledgeClass: SourceKnowledgeClass.values.byName(row['knowledge_class']! as String),
       ),
       mediaType: SourceMediaType.values.byName(row['media_type']! as String),
       sourceName: row['source_name']! as String,
@@ -1065,12 +981,8 @@ LIMIT 1
       byteSize: row['byte_size']! as int,
       inlineText: row['inline_text'] as String?,
       createdAt: DateTime.parse(row['created_at_utc']! as String).toUtc(),
-      supersededBy: row['superseded_by'] == null
-          ? null
-          : SourceVersionId(row['superseded_by']! as String),
-      revokedAt: row['revoked_at_utc'] == null
-          ? null
-          : DateTime.parse(row['revoked_at_utc']! as String).toUtc(),
+      supersededBy: row['superseded_by'] == null ? null : SourceVersionId(row['superseded_by']! as String),
+      revokedAt: row['revoked_at_utc'] == null ? null : DateTime.parse(row['revoked_at_utc']! as String).toUtc(),
     );
   }
 
@@ -1084,10 +996,7 @@ LIMIT 1
       method: row['method']! as String,
       methodVersion: row['method_version']! as String,
       anchors: anchorsJson
-          .map(
-            (value) =>
-                SourceAnchor.fromJson(Map<String, Object?>.from(value as Map)),
-          )
+          .map((value) => SourceAnchor.fromJson(Map<String, Object?>.from(value as Map)))
           .toList(growable: false),
       warnings: warningsJson.cast<String>().toList(growable: false),
       sourceContentDigest: row['source_content_digest']! as String,
@@ -1105,10 +1014,7 @@ class SqliteLearningTruthStore implements LearningTruthStore {
   final Database _database;
 
   @override
-  Future<RecallAction> persistRecallAction({
-    required AuthenticatedLearner learner,
-    required RecallAction action,
-  }) {
+  Future<RecallAction> persistRecallAction({required AuthenticatedLearner learner, required RecallAction action}) {
     return _database.transaction((transaction) async {
       final authorityRows = await transaction.rawQuery(
         '''
@@ -1139,9 +1045,7 @@ LIMIT 1
         ],
       );
       if (authorityRows.isEmpty) {
-        throw const LearningTruthConflict(
-          'Recall action does not point at current authoritative source truth.',
-        );
+        throw const LearningTruthConflict('Recall action does not point at current authoritative source truth.');
       }
 
       final existingRows = await transaction.query(
@@ -1153,9 +1057,7 @@ LIMIT 1
       if (existingRows.isNotEmpty) {
         final existing = _actionFromRow(existingRows.single);
         if (!_sameAction(existing, action)) {
-          throw const LearningTruthConflict(
-            'Recall action ID replay conflicts with existing action truth.',
-          );
+          throw const LearningTruthConflict('Recall action ID replay conflicts with existing action truth.');
         }
         return existing;
       }
@@ -1170,10 +1072,7 @@ LIMIT 1
   }
 
   @override
-  Future<RecallAction?> recallAction({
-    required AuthenticatedLearner learner,
-    required RecallActionId actionId,
-  }) async {
+  Future<RecallAction?> recallAction({required AuthenticatedLearner learner, required RecallActionId actionId}) async {
     final rows = await _database.query(
       'recall_actions',
       where: 'learner_id = ? AND action_id = ?',
@@ -1212,9 +1111,7 @@ LIMIT 1
         limit: 1,
       );
       if (actionRows.isEmpty) {
-        throw const LearningTruthConflict(
-          'Active attempt cannot reference a missing recall action.',
-        );
+        throw const LearningTruthConflict('Active attempt cannot reference a missing recall action.');
       }
       final action = _actionFromRow(actionRows.single);
 
@@ -1224,19 +1121,11 @@ LIMIT 1
         where:
             'learner_id = ? AND material_id = ? AND lifecycle_status = ? '
             'AND deleted_at_utc IS NULL',
-        whereArgs: [
-          learner.id.value,
-          action.materialId.value,
-          MaterialLifecycleStatus.active.name,
-        ],
+        whereArgs: [learner.id.value, action.materialId.value, MaterialLifecycleStatus.active.name],
         limit: 1,
       );
-      if (authorityRows.isEmpty ||
-          authorityRows.single['current_source_version_id'] !=
-              action.sourceVersionId.value) {
-        throw const LearningTruthConflict(
-          'Active attempt cannot attach to a stale recall action.',
-        );
+      if (authorityRows.isEmpty || authorityRows.single['current_source_version_id'] != action.sourceVersionId.value) {
+        throw const LearningTruthConflict('Active attempt cannot attach to a stale recall action.');
       }
 
       final existingRows = await transaction.query(
@@ -1247,8 +1136,7 @@ LIMIT 1
       );
       if (existingRows.isNotEmpty) {
         final existing = _activeAttemptFromRow(existingRows.single);
-        if (existing.actionId != action.id ||
-            existing.sourceVersionId != action.sourceVersionId) {
+        if (existing.actionId != action.id || existing.sourceVersionId != action.sourceVersionId) {
           throw const LearningTruthConflict(
             'Existing active Recall attempt is stale or conflicts with the current action.',
           );
@@ -1283,9 +1171,7 @@ LIMIT 1
     required DateTime recordedAt,
   }) {
     if (assistance == RecallAssistance.none) {
-      throw const LearningTruthConflict(
-        'Only actual support exposure can be registered.',
-      );
+      throw const LearningTruthConflict('Only actual support exposure can be registered.');
     }
     return _database.transaction((transaction) async {
       final evidenceRows = await transaction.query(
@@ -1295,9 +1181,7 @@ LIMIT 1
         limit: 1,
       );
       if (evidenceRows.isNotEmpty) {
-        throw const LearningTruthConflict(
-          'Support cannot be changed after learner evidence is recorded.',
-        );
+        throw const LearningTruthConflict('Support cannot be changed after learner evidence is recorded.');
       }
 
       final actionRows = await transaction.query(
@@ -1307,9 +1191,7 @@ LIMIT 1
         limit: 1,
       );
       if (actionRows.isEmpty) {
-        throw const LearningTruthConflict(
-          'Support cannot attach to a missing recall action.',
-        );
+        throw const LearningTruthConflict('Support cannot attach to a missing recall action.');
       }
       final action = _actionFromRow(actionRows.single);
 
@@ -1320,17 +1202,13 @@ LIMIT 1
         limit: 1,
       );
       if (activeRows.isEmpty) {
-        throw const LearningTruthConflict(
-          'Support requires an active Recall attempt.',
-        );
+        throw const LearningTruthConflict('Support requires an active Recall attempt.');
       }
       final active = _activeAttemptFromRow(activeRows.single);
       if (active.attemptId != attemptId ||
           active.actionId != action.id ||
           active.sourceVersionId != action.sourceVersionId) {
-        throw const LearningTruthConflict(
-          'Support does not match the active Recall attempt.',
-        );
+        throw const LearningTruthConflict('Support does not match the active Recall attempt.');
       }
 
       final existingRows = await transaction.query(
@@ -1343,13 +1221,9 @@ LIMIT 1
       if (existingRows.isNotEmpty) {
         final existingActionId = existingRows.single['action_id']! as String;
         if (existingActionId != actionId.value) {
-          throw const LearningTruthConflict(
-            'Attempt support cannot move between recall actions.',
-          );
+          throw const LearningTruthConflict('Attempt support cannot move between recall actions.');
         }
-        final existing = RecallAssistance.values.byName(
-          existingRows.single['assistance']! as String,
-        );
+        final existing = RecallAssistance.values.byName(existingRows.single['assistance']! as String);
         canonical = _strongerAssistance(existing, assistance);
       }
 
@@ -1362,13 +1236,7 @@ ON CONFLICT(learner_id, attempt_id) DO UPDATE SET
   assistance = excluded.assistance,
   updated_at_utc = excluded.updated_at_utc
 ''',
-        [
-          learner.id.value,
-          attemptId.value,
-          actionId.value,
-          canonical.name,
-          recordedAt.toUtc().toIso8601String(),
-        ],
+        [learner.id.value, attemptId.value, actionId.value, canonical.name, recordedAt.toUtc().toIso8601String()],
       );
       return canonical;
     });
@@ -1390,9 +1258,7 @@ ON CONFLICT(learner_id, attempt_id) DO UPDATE SET
       return RecallAssistance.none;
     }
     if (rows.single['action_id'] != actionId.value) {
-      throw const LearningTruthConflict(
-        'Attempt support belongs to a different recall action.',
-      );
+      throw const LearningTruthConflict('Attempt support belongs to a different recall action.');
     }
     return RecallAssistance.values.byName(rows.single['assistance']! as String);
   }
@@ -1413,10 +1279,7 @@ ON CONFLICT(learner_id, attempt_id) DO UPDATE SET
   }
 
   @override
-  Future<LearnerState?> learnerState({
-    required AuthenticatedLearner learner,
-    required MaterialId materialId,
-  }) async {
+  Future<LearnerState?> learnerState({required AuthenticatedLearner learner, required MaterialId materialId}) async {
     final rows = await _database.query(
       'learner_states',
       where: 'learner_id = ? AND material_id = ?',
@@ -1453,9 +1316,7 @@ ON CONFLICT(learner_id, attempt_id) DO UPDATE SET
     if (nextAction.materialId != evidence.materialId ||
         nextAction.sourceVersionId != evidence.sourceVersionId ||
         nextAction.latestEvidenceId != evidence.id) {
-      throw const LearningTruthConflict(
-        'Next action lineage does not match the evidence transition.',
-      );
+      throw const LearningTruthConflict('Next action lineage does not match the evidence transition.');
     }
 
     return _database.transaction((transaction) async {
@@ -1466,17 +1327,13 @@ ON CONFLICT(learner_id, attempt_id) DO UPDATE SET
         limit: 1,
       );
       if (actionRows.isEmpty) {
-        throw const LearningTruthConflict(
-          'Evidence cannot reference a missing recall action.',
-        );
+        throw const LearningTruthConflict('Evidence cannot reference a missing recall action.');
       }
       final action = _actionFromRow(actionRows.single);
       if (action.materialId != evidence.materialId ||
           action.sourceVersionId != evidence.sourceVersionId ||
           action.extractedContentId != evidence.extractedContentId) {
-        throw const LearningTruthConflict(
-          'Evidence provenance does not match its recall action.',
-        );
+        throw const LearningTruthConflict('Evidence provenance does not match its recall action.');
       }
 
       final supportRows = await transaction.query(
@@ -1488,18 +1345,12 @@ ON CONFLICT(learner_id, attempt_id) DO UPDATE SET
       var canonicalAssistance = RecallAssistance.none;
       if (supportRows.isNotEmpty) {
         if (supportRows.single['action_id'] != evidence.actionId.value) {
-          throw const LearningTruthConflict(
-            'Attempt support does not belong to the evidence action.',
-          );
+          throw const LearningTruthConflict('Attempt support does not belong to the evidence action.');
         }
-        canonicalAssistance = RecallAssistance.values.byName(
-          supportRows.single['assistance']! as String,
-        );
+        canonicalAssistance = RecallAssistance.values.byName(supportRows.single['assistance']! as String);
       }
       if (canonicalAssistance != evidence.assistance) {
-        throw const LearningTruthConflict(
-          'Learner evidence assistance does not match canonical support history.',
-        );
+        throw const LearningTruthConflict('Learner evidence assistance does not match canonical support history.');
       }
 
       final canonicalOutcome = RecallTruthPolicy.evaluate(
@@ -1508,20 +1359,14 @@ ON CONFLICT(learner_id, attempt_id) DO UPDATE SET
         disposition: disposition,
         assistance: canonicalAssistance,
       );
-      final canonicalResponseDigest = sha256
-          .convert(utf8.encode(normalizedResponse))
-          .toString();
+      final canonicalResponseDigest = sha256.convert(utf8.encode(normalizedResponse)).toString();
       if (canonicalOutcome != evidence.outcome ||
           canonicalResponseDigest != evidence.responseDigest ||
           normalizedResponse.length != evidence.responseLength ||
           evidence.ruleVersion != RecallTruthPolicy.evidenceRuleVersion) {
-        throw const LearningTruthConflict(
-          'Learner evidence does not match canonical Recall evaluation.',
-        );
+        throw const LearningTruthConflict('Learner evidence does not match canonical Recall evaluation.');
       }
-      final canonicalStateKind = RecallTruthPolicy.stateForOutcome(
-        canonicalOutcome,
-      );
+      final canonicalStateKind = RecallTruthPolicy.stateForOutcome(canonicalOutcome);
       final canonicalNextAction = RecallTruthPolicy.nextActionFor(
         materialId: evidence.materialId,
         sourceVersionId: evidence.sourceVersionId,
@@ -1532,9 +1377,7 @@ ON CONFLICT(learner_id, attempt_id) DO UPDATE SET
       if (stateKind != canonicalStateKind ||
           stateRuleVersion != RecallTruthPolicy.stateRuleVersion ||
           !RecallTruthPolicy.sameNextAction(nextAction, canonicalNextAction)) {
-        throw const LearningTruthConflict(
-          'Derived learning state or next action does not match canonical policy.',
-        );
+        throw const LearningTruthConflict('Derived learning state or next action does not match canonical policy.');
       }
 
       final authorityRows = await transaction.query(
@@ -1543,19 +1386,12 @@ ON CONFLICT(learner_id, attempt_id) DO UPDATE SET
         where:
             'learner_id = ? AND material_id = ? AND lifecycle_status = ? '
             'AND deleted_at_utc IS NULL',
-        whereArgs: [
-          learner.id.value,
-          evidence.materialId.value,
-          MaterialLifecycleStatus.active.name,
-        ],
+        whereArgs: [learner.id.value, evidence.materialId.value, MaterialLifecycleStatus.active.name],
         limit: 1,
       );
       if (authorityRows.isEmpty ||
-          authorityRows.single['current_source_version_id'] !=
-              evidence.sourceVersionId.value) {
-        throw const LearningTruthConflict(
-          'Evidence source is no longer the current authoritative source.',
-        );
+          authorityRows.single['current_source_version_id'] != evidence.sourceVersionId.value) {
+        throw const LearningTruthConflict('Evidence source is no longer the current authoritative source.');
       }
 
       final existingRows = await transaction.query(
@@ -1567,9 +1403,7 @@ ON CONFLICT(learner_id, attempt_id) DO UPDATE SET
       if (existingRows.isNotEmpty) {
         final existing = _evidenceFromRow(existingRows.single);
         if (!_sameEvidence(existing, evidence)) {
-          throw const LearningTruthConflict(
-            'Attempt ID replay conflicts with existing learner evidence.',
-          );
+          throw const LearningTruthConflict('Attempt ID replay conflicts with existing learner evidence.');
         }
         final stateRows = await transaction.query(
           'learner_states',
@@ -1584,9 +1418,7 @@ ON CONFLICT(learner_id, attempt_id) DO UPDATE SET
           limit: 1,
         );
         if (stateRows.isEmpty || nextRows.isEmpty) {
-          throw const LearningTruthConflict(
-            'Idempotent evidence replay found incomplete learning projection.',
-          );
+          throw const LearningTruthConflict('Idempotent evidence replay found incomplete learning projection.');
         }
         return PersistedLearningTruth(
           evidence: existing,
@@ -1602,17 +1434,13 @@ ON CONFLICT(learner_id, attempt_id) DO UPDATE SET
         limit: 1,
       );
       if (activeRows.isEmpty) {
-        throw const LearningTruthConflict(
-          'New learner evidence requires an active Recall attempt.',
-        );
+        throw const LearningTruthConflict('New learner evidence requires an active Recall attempt.');
       }
       final active = _activeAttemptFromRow(activeRows.single);
       if (active.attemptId != evidence.attemptId ||
           active.actionId != evidence.actionId ||
           active.sourceVersionId != evidence.sourceVersionId) {
-        throw const LearningTruthConflict(
-          'Learner evidence does not match the active Recall attempt.',
-        );
+        throw const LearningTruthConflict('Learner evidence does not match the active Recall attempt.');
       }
 
       await transaction.insert(
@@ -1629,11 +1457,7 @@ WHERE learner_id = ?
   AND material_id = ?
   AND source_version_id = ?
 ''',
-        [
-          learner.id.value,
-          evidence.materialId.value,
-          evidence.sourceVersionId.value,
-        ],
+        [learner.id.value, evidence.materialId.value, evidence.sourceVersionId.value],
       );
       final evidenceCount = countRows.single['evidence_count']! as int;
       final state = LearnerState(
@@ -1676,28 +1500,16 @@ WHERE learner_id = ?
         whereArgs: [learner.id.value, nextAction.materialId.value],
       );
       if (updatedNext == 0) {
-        await transaction.insert(
-          'next_learning_actions',
-          nextRow,
-          conflictAlgorithm: ConflictAlgorithm.abort,
-        );
+        await transaction.insert('next_learning_actions', nextRow, conflictAlgorithm: ConflictAlgorithm.abort);
       }
 
       await transaction.delete(
         'active_recall_attempts',
         where: 'learner_id = ? AND material_id = ? AND attempt_id = ?',
-        whereArgs: [
-          learner.id.value,
-          evidence.materialId.value,
-          evidence.attemptId.value,
-        ],
+        whereArgs: [learner.id.value, evidence.materialId.value, evidence.attemptId.value],
       );
 
-      return PersistedLearningTruth(
-        evidence: evidence,
-        state: state,
-        nextAction: nextAction,
-      );
+      return PersistedLearningTruth(evidence: evidence, state: state, nextAction: nextAction);
     });
   }
 
@@ -1710,9 +1522,7 @@ WHERE learner_id = ?
     if (nextAction.materialId != state.materialId ||
         nextAction.sourceVersionId != state.sourceVersionId ||
         nextAction.latestEvidenceId != state.latestEvidenceId) {
-      throw const LearningTruthConflict(
-        'Repair projection lineage is internally inconsistent.',
-      );
+      throw const LearningTruthConflict('Repair projection lineage is internally inconsistent.');
     }
 
     return _database.transaction((transaction) async {
@@ -1722,19 +1532,11 @@ WHERE learner_id = ?
         where:
             'learner_id = ? AND material_id = ? AND lifecycle_status = ? '
             'AND deleted_at_utc IS NULL',
-        whereArgs: [
-          learner.id.value,
-          state.materialId.value,
-          MaterialLifecycleStatus.active.name,
-        ],
+        whereArgs: [learner.id.value, state.materialId.value, MaterialLifecycleStatus.active.name],
         limit: 1,
       );
-      if (authorityRows.isEmpty ||
-          authorityRows.single['current_source_version_id'] !=
-              state.sourceVersionId.value) {
-        throw const LearningTruthConflict(
-          'Repair cannot project learning truth from a stale source version.',
-        );
+      if (authorityRows.isEmpty || authorityRows.single['current_source_version_id'] != state.sourceVersionId.value) {
+        throw const LearningTruthConflict('Repair cannot project learning truth from a stale source version.');
       }
 
       final evidenceRows = await transaction.query(
@@ -1744,28 +1546,19 @@ WHERE learner_id = ?
         limit: 1,
       );
       if (evidenceRows.isEmpty) {
-        throw const LearningTruthConflict(
-          'Repair requires durable canonical learner evidence.',
-        );
+        throw const LearningTruthConflict('Repair requires durable canonical learner evidence.');
       }
       final latestEvidence = _evidenceFromRow(evidenceRows.single);
-      if (latestEvidence.materialId != state.materialId ||
-          latestEvidence.sourceVersionId != state.sourceVersionId) {
-        throw const LearningTruthConflict(
-          'Repair evidence does not belong to the current material/source.',
-        );
+      if (latestEvidence.materialId != state.materialId || latestEvidence.sourceVersionId != state.sourceVersionId) {
+        throw const LearningTruthConflict('Repair evidence does not belong to the current material/source.');
       }
 
-      final canonicalStateKind = RecallTruthPolicy.stateForOutcome(
-        latestEvidence.outcome,
-      );
+      final canonicalStateKind = RecallTruthPolicy.stateForOutcome(latestEvidence.outcome);
       if (state.ruleVersion != RecallTruthPolicy.stateRuleVersion ||
           state.kind != canonicalStateKind ||
           state.latestEvidenceId != latestEvidence.id ||
           state.updatedAt.toUtc() != latestEvidence.createdAt.toUtc()) {
-        throw const LearningTruthConflict(
-          'Repair state does not match canonical evidence derivation.',
-        );
+        throw const LearningTruthConflict('Repair state does not match canonical evidence derivation.');
       }
       final canonicalNextAction = RecallTruthPolicy.nextActionFor(
         materialId: state.materialId,
@@ -1775,9 +1568,7 @@ WHERE learner_id = ?
         createdAt: latestEvidence.createdAt,
       );
       if (!RecallTruthPolicy.sameNextAction(nextAction, canonicalNextAction)) {
-        throw const LearningTruthConflict(
-          'Repair next action does not match canonical evidence policy.',
-        );
+        throw const LearningTruthConflict('Repair next action does not match canonical evidence policy.');
       }
 
       final countRows = await transaction.rawQuery(
@@ -1792,9 +1583,7 @@ WHERE learner_id = ?
       );
       final canonicalCount = countRows.single['evidence_count']! as int;
       if (canonicalCount != state.evidenceCount) {
-        throw const LearningTruthConflict(
-          'Repair state evidence count does not match canonical evidence.',
-        );
+        throw const LearningTruthConflict('Repair state evidence count does not match canonical evidence.');
       }
 
       final stateRow = {
@@ -1827,11 +1616,7 @@ WHERE learner_id = ?
         whereArgs: [learner.id.value, nextAction.materialId.value],
       );
       if (updatedNext == 0) {
-        await transaction.insert(
-          'next_learning_actions',
-          nextRow,
-          conflictAlgorithm: ConflictAlgorithm.abort,
-        );
+        await transaction.insert('next_learning_actions', nextRow, conflictAlgorithm: ConflictAlgorithm.abort);
       }
 
       return LearningContinuation(state: state, nextAction: nextAction);
@@ -1848,10 +1633,7 @@ WHERE learner_id = ?
     );
   }
 
-  static RecallAssistance _strongerAssistance(
-    RecallAssistance left,
-    RecallAssistance right,
-  ) {
+  static RecallAssistance _strongerAssistance(RecallAssistance left, RecallAssistance right) {
     int rank(RecallAssistance value) => switch (value) {
       RecallAssistance.none => 0,
       RecallAssistance.hint => 1,
@@ -1885,10 +1667,7 @@ WHERE learner_id = ?
         left.ruleVersion == right.ruleVersion;
   }
 
-  static Map<String, Object?> _actionToRow({
-    required AuthenticatedLearner learner,
-    required RecallAction action,
-  }) {
+  static Map<String, Object?> _actionToRow({required AuthenticatedLearner learner, required RecallAction action}) {
     return {
       'learner_id': learner.id.value,
       'action_id': action.id.value,
@@ -1949,9 +1728,7 @@ WHERE learner_id = ?
       id: RecallActionId(row['action_id']! as String),
       materialId: MaterialId(row['material_id']! as String),
       sourceVersionId: SourceVersionId(row['source_version_id']! as String),
-      extractedContentId: ExtractedContentId(
-        row['extracted_content_id']! as String,
-      ),
+      extractedContentId: ExtractedContentId(row['extracted_content_id']! as String),
       promptText: row['prompt_text']! as String,
       expectedAnswer: row['expected_answer']! as String,
       anchor: SourceAnchor(
@@ -1966,9 +1743,7 @@ WHERE learner_id = ?
 
   static LearnerEvidence _evidenceFromRow(Map<String, Object?> row) {
     final assistance = row['assistance'] == null
-        ? ((row['help_used']! as int) == 1
-              ? RecallAssistance.hint
-              : RecallAssistance.none)
+        ? ((row['help_used']! as int) == 1 ? RecallAssistance.hint : RecallAssistance.none)
         : RecallAssistance.values.byName(row['assistance']! as String);
     return LearnerEvidence(
       id: LearnerEvidenceId(row['evidence_id']! as String),
@@ -1976,9 +1751,7 @@ WHERE learner_id = ?
       actionId: RecallActionId(row['action_id']! as String),
       materialId: MaterialId(row['material_id']! as String),
       sourceVersionId: SourceVersionId(row['source_version_id']! as String),
-      extractedContentId: ExtractedContentId(
-        row['extracted_content_id']! as String,
-      ),
+      extractedContentId: ExtractedContentId(row['extracted_content_id']! as String),
       outcome: RecallOutcome.values.byName(row['outcome']! as String),
       assistance: assistance,
       responseDigest: row['response_digest']! as String,
@@ -2020,10 +1793,7 @@ class SqliteOperationalTelemetry implements OperationalTelemetry {
   final Database _database;
 
   @override
-  Future<void> record({
-    required AuthenticatedLearner learner,
-    required OperationalEvent event,
-  }) async {
+  Future<void> record({required AuthenticatedLearner learner, required OperationalEvent event}) async {
     await _database.insert('operational_events', {
       'learner_id': learner.id.value,
       'schema_version': event.schemaVersion,
@@ -2046,9 +1816,7 @@ class SqliteOperationalTelemetry implements OperationalTelemetry {
   }
 
   @override
-  Future<List<OperationalEvent>> events({
-    required AuthenticatedLearner learner,
-  }) async {
+  Future<List<OperationalEvent>> events({required AuthenticatedLearner learner}) async {
     final rows = await _database.query(
       'operational_events',
       where: 'learner_id = ?',
@@ -2059,31 +1827,17 @@ class SqliteOperationalTelemetry implements OperationalTelemetry {
         .map((row) {
           return OperationalEvent(
             schemaVersion: (row['schema_version'] as int?) ?? 1,
-            type: OperationalEventType.values.byName(
-              row['event_type']! as String,
-            ),
+            type: OperationalEventType.values.byName(row['event_type']! as String),
             phase: OperationalEventPhase.values.byName(row['phase']! as String),
-            materialId: row['material_id'] == null
-                ? null
-                : MaterialId(row['material_id']! as String),
+            materialId: row['material_id'] == null ? null : MaterialId(row['material_id']! as String),
             sourceVersionId: row['source_version_id'] == null
                 ? null
                 : SourceVersionId(row['source_version_id']! as String),
-            actionId: row['action_id'] == null
-                ? null
-                : RecallActionId(row['action_id']! as String),
-            attemptId: row['attempt_id'] == null
-                ? null
-                : RecallAttemptId(row['attempt_id']! as String),
-            evidenceId: row['evidence_id'] == null
-                ? null
-                : LearnerEvidenceId(row['evidence_id']! as String),
-            outcome: row['outcome'] == null
-                ? null
-                : RecallOutcome.values.byName(row['outcome']! as String),
-            stateKind: row['state_kind'] == null
-                ? null
-                : RecallStateKind.values.byName(row['state_kind']! as String),
+            actionId: row['action_id'] == null ? null : RecallActionId(row['action_id']! as String),
+            attemptId: row['attempt_id'] == null ? null : RecallAttemptId(row['attempt_id']! as String),
+            evidenceId: row['evidence_id'] == null ? null : LearnerEvidenceId(row['evidence_id']! as String),
+            outcome: row['outcome'] == null ? null : RecallOutcome.values.byName(row['outcome']! as String),
+            stateKind: row['state_kind'] == null ? null : RecallStateKind.values.byName(row['state_kind']! as String),
             reasonCode: row['reason_code'] as String?,
             ruleVersion: row['rule_version'] as String?,
             policyVersion: row['policy_version'] as String?,

@@ -6,9 +6,7 @@ class SupabaseLearnerAuth {
   SupabaseLearnerAuth._();
 
   static const _projectUrl = String.fromEnvironment('SUPABASE_URL');
-  static const _publishableKey = String.fromEnvironment(
-    'SUPABASE_PUBLISHABLE_KEY',
-  );
+  static const _publishableKey = String.fromEnvironment('SUPABASE_PUBLISHABLE_KEY');
 
   static SupabaseClient? _client;
   static Future<SupabaseClient>? _initializing;
@@ -25,25 +23,19 @@ class SupabaseLearnerAuth {
       final user = response.user;
       final session = response.session;
       if (user == null || session == null) {
-        throw const LearnerAuthenticationException(
-          'Authentication completed without a durable session.',
-        );
+        throw const LearnerAuthenticationException('Authentication completed without a durable session.');
       }
       return AuthenticatedLearner(id: LearnerId(user.id));
     } on LearnerAuthenticationException {
       rethrow;
     } catch (_) {
-      throw const LearnerAuthenticationException(
-        'A learner session could not be established.',
-      );
+      throw const LearnerAuthenticationException('A learner session could not be established.');
     }
   }
 
   static Future<SupabaseClient> _clientForConfiguredProject() async {
     if (_projectUrl.trim().isEmpty || _publishableKey.trim().isEmpty) {
-      throw const LearnerAuthConfigurationException(
-        'Supabase client configuration is missing.',
-      );
+      throw const LearnerAuthConfigurationException('Supabase client configuration is missing.');
     }
 
     final existing = _client;
@@ -63,15 +55,10 @@ class SupabaseLearnerAuth {
 
   static Future<SupabaseClient> _initializeClient() async {
     try {
-      await Supabase.initialize(
-        url: _projectUrl,
-        publishableKey: _publishableKey,
-      );
+      await Supabase.initialize(url: _projectUrl, publishableKey: _publishableKey);
       return Supabase.instance.client;
     } catch (_) {
-      throw const LearnerAuthenticationException(
-        'Authentication service could not be initialized.',
-      );
+      throw const LearnerAuthenticationException('Authentication service could not be initialized.');
     }
   }
 }
