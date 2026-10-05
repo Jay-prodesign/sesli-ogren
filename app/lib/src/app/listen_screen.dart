@@ -1,6 +1,6 @@
-import 'package:flutter/material.dart';
+import 'dart:async';
 
-import '../domain/learning_contracts.dart';
+import 'package:flutter/material.dart';
 import '../speech/device_speech_output.dart';
 import 'app_runtime.dart';
 import 'companion_view.dart';
@@ -72,7 +72,7 @@ class _ListenScreenState extends State<ListenScreen> {
 
   @override
   void dispose() {
-    _speech.dispose();
+    unawaited(_speech.dispose());
     super.dispose();
   }
 
