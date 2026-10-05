@@ -124,7 +124,6 @@ class _HomeSurface extends StatelessWidget {
   final _HomeSnapshot data;
   final VoidCallback onOpenLearning;
   final VoidCallback onOpenListen;
-  final VoidCallback onOpenMaterial;
   final VoidCallback onOpenWorkspace;
 
   @override
