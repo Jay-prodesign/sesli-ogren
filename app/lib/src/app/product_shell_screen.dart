@@ -6,7 +6,6 @@ import 'app_runtime.dart';
 import 'companion_view.dart';
 import 'learning_slice_screen.dart';
 import 'listen_screen.dart';
-import 'material_overview_screen.dart';
 import 'material_workspace_screen.dart';
 
 class ProductShellScreen extends StatefulWidget {
@@ -59,14 +58,6 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
   Future<void> _openWorkspace() async {
     await Navigator.of(context).push<void>(
       MaterialPageRoute(builder: (_) => MaterialWorkspaceScreen(runtime: widget.runtime)),
-    );
-    if (!mounted) return;
-    setState(_refresh);
-  }
-
-  Future<void> _openMaterial() async {
-    await Navigator.of(context).push<void>(
-      MaterialPageRoute(builder: (_) => MaterialOverviewScreen(runtime: widget.runtime)),
     );
     if (!mounted) return;
     setState(_refresh);
