@@ -6,6 +6,8 @@ import '../domain/learning_contracts.dart';
 abstract interface class SourceStore {
   Future<MaterialRecord?> material({required AuthenticatedLearner learner, required MaterialId materialId});
 
+  Future<List<MaterialRecord>> activeMaterials({required AuthenticatedLearner learner});
+
   Future<SourceVersionRecord?> currentSourceVersion({
     required AuthenticatedLearner learner,
     required MaterialId materialId,
