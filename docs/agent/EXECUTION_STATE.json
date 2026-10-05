@@ -43,8 +43,8 @@
   "git": {
     "branch": "feat/m5-golden-learning-slice",
     "base_sha": "84e96dce5b3cc9f32af3f459d422b652d0e86624",
-    "head_sha": "ff7b36c0617b60e8b7bc275b89401b81bd7a1595",
-    "head_sha_note": "M5 implementation freeze candidate as of 2026-10-05 before control-plane-only reconciliation commits. Includes authenticated Supabase bootstrap, server-authoritative Recall assistance/state hardening, continuation guards and current M5 tests. Control-plane documentation commits after this SHA do not widen runtime feature scope.",
+    "head_sha": "01670f42029ef228706c4a772594102e5656ebdf",
+    "head_sha_note": "M5 runtime implementation candidate after checkpoint correction. Static review found and corrected server-side answer-exposure laundering risk; b0d5df8a… implements canonical none/hint/answer_exposed assistance and 01670f42… adds regression/schema coverage. Later checkpoint/control-plane documentation commits do not widen runtime feature scope.",
     "pr_number": 10,
     "pr_url": "https://github.com/Jay-prodesign/sesli-ogren/pull/10",
     "merged": false,
@@ -75,15 +75,16 @@
     "current_task": "LA-0022"
   },
   "blockers": [
-    "No known feature-implementation blocker remains in LA-0021; runtime feature scope is frozen at implementation candidate ff7b36c0617b60e8b7bc275b89401b81bd7a1595 pending checkpoint evidence.",
-    "app/pubspec.lock for the final M5 dependencies is missing and must be generated/committed from the exact Flutter toolchain.",
+    "No known code-level BLOCKER/HIGH remains from the 2026-10-05 Brain static checkpoint review. Server answer-exposure semantics were corrected and are PENDING PostgreSQL batch execution.",
+    "app/pubspec.lock for the final M5 dependencies is missing and must be generated/committed from the exact Flutter 3.47.5 toolchain.",
     "A real Supabase project/session must be configured and anonymous sign-in enabled to evidence the authenticated-learner M5 path; only client-safe project URL/publishable key are needed.",
     "Current ChatGPT execution container cannot reach GitHub over the network and has no established Flutter/Dart checkpoint environment; runtime/build validation remains PENDING_BATCH_VALIDATION under D-072.",
-    "GLS-083 independent read-only review is PENDING.",
+    "GLS-083 independent read-only review is PENDING; the refreshed packet targets candidate 01670f42… and must verify the corrected server assistance path.",
+    "Product Experience / Learning Experience / Creative Quality / accessibility checkpoint dispositions remain PENDING.",
     "Physical device/mobile-readiness remains deferred under D-068 and is not claimed by the M5 checkpoint."
   ],
   "protected_gate": "Merge, release, deploy, paid providers, credentials/secrets, licensing posture, production mutation: Product Owner only",
-  "next_action": "Keep runtime feature scope frozen at ff7b36c… and complete LA-0022 checkpoint evidence: validate a real Supabase-authenticated learner session without committing secrets; generate/commit app/pubspec.lock in a supported Flutter 3.47.5 environment; run the single bounded D-072 validation batch; obtain GLS-083 independent read-only review; record Product/Learning/Creative/accessibility dispositions; then issue the M5 checkpoint verdict. Do not add feature breadth.",
+  "next_action": "Keep runtime scope frozen at candidate 01670f42… and close external/evidence gates only: real Supabase authenticated session; Flutter 3.47.5 pubspec.lock + single bounded analyze/test/Android+iOS build batch including server SQL harness; GLS-083 independent review; Product/Learning/Creative/accessibility dispositions; then issue the M5 verdict. Do not add feature breadth.",
   "canonical_source_refs": [
     "CURRENT_EXECUTION_STATE — Learning App",
     "D-070 — Founder Product/Visual PASS / D-Knot selected",
