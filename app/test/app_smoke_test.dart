@@ -26,14 +26,6 @@ class _UnusedPdfExtractor implements PdfTextExtractor {
   }
 }
 
-class _UnavailableExplainBackGateway implements ExplainBackGateway {
-  const _UnavailableExplainBackGateway();
-
-  @override
-  Future<ExplainBackResult> evaluate(ExplainBackRequest request) async =>
-      const ExplainBackUnavailable('Test evaluator is intentionally unavailable.');
-}
-
 class _ReadyExplainGateway implements GroundedExplainGateway {
   const _ReadyExplainGateway();
 
