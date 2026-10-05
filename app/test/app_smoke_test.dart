@@ -215,6 +215,12 @@ void main() {
     expect(find.text('Öğrenme durumu'), findsOneWidget);
     expect(find.text('Henüz ölçülmedi'), findsOneWidget);
     expect(find.text('Hızlı bakış'), findsOneWidget);
+    expect(find.text('Açıkla'), findsOneWidget);
+    await tapVisible(tester, find.text('Açıkla'));
+    await pumpUntilFound(tester, find.text('Açıklama henüz hazır değil'));
+    expect(find.textContaining('yapay bir sonuç göstermiyoruz'), findsOneWidget);
+    await tester.pageBack();
+    await tester.pumpAndSettle();
     expect(find.text('Hatırla'), findsWidgets);
     expect(find.text('Dinle'), findsOneWidget);
   });
