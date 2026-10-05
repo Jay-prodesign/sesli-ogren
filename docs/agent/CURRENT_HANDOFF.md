@@ -146,20 +146,22 @@ followed by re-freeze + refreshed independent review.
 
 ## GLS-083 review-only PR surface
 
-Review surface: PR #11 — `review/m5-gls083-e576ca17` against
+Current review surface: PR #12 — `review/m5-gls083-64579d48` against
 `feat/round7-companion-production-sequence-v2`.
 
-- Runtime under review remains exactly `64579d48bcf9c33f4c709927a0e453349efb7c5b`.
+- Runtime under review is exactly `64579d48bcf9c33f4c709927a0e453349efb7c5b`.
+- PR #12 supersedes closed/stale PR #11.
 - The review branch has one extra `.github/copilot-instructions.md` metadata
   commit only; no runtime code change.
 - The metadata commit uses `[skip ci]`; zero pull-request workflow runs were
-  observed for it, preserving D-072.
-- GitHub connector requests for Copilot review were attempted but did not
-  appear in requested-reviewers or submitted reviews. Therefore **no GLS-083
-  independent review has occurred yet**.
-- PR #11 is draft, REVIEW ONLY, and must not be merged.
+  observed, preserving D-072.
+- Synthetic adversarial review reports no unresolved BLOCKER/HIGH after S-003,
+  but it is not independent.
+- PR #12 is draft, REVIEW ONLY, and must not be merged.
 
-An actual independent reviewer may use PR #11 directly. Continue to lockfile +
-single bounded batch only after a real REVIEW_PASS return exists.
+An actual independent reviewer may use PR #12 directly. Continue to lockfile +
+single bounded batch only after a real REVIEW_PASS return exists, unless the
+Founder explicitly waives external independence.
 
-Synthetic adversarial review: `docs/qa/M5_GLS083_SYNTHETIC_ADVERSARIAL_REVIEW_2026-10-05.md` reports no unresolved BLOCKER/HIGH after S-003. It is supplemental evidence only and does not self-grant independence.
+Synthetic adversarial review: `docs/qa/M5_GLS083_SYNTHETIC_ADVERSARIAL_REVIEW_2026-10-05.md`.
+
