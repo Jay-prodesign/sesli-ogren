@@ -30,32 +30,21 @@ jobs:
         run: flutter test
   server:
     runs-on: ubuntu-24.04
-    timeout-minutes: 15
-    services:
-      postgres:
-        image: postgres:16
-        env:
-          POSTGRES_PASSWORD: postgres
-        ports: ["5432:5432"]
-        options: >-
-          --health-cmd "pg_isready -U postgres"
-          --health-interval 5s
-          --health-timeout 5s
-          --health-retries 10
+    timeout-minutes: 10
     env:
-      PGPASSWORD: postgres
+      PGPORT: "54329"
+      PGADMIN: supabase_admin
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with: {persist-credentials: false}
-      - name: Install pgTAP
+      - name: Start disposable PostgreSQL 16 cluster
         run: |
-          sudo apt-get update -qq
-          sudo apt-get install -y postgresql-client postgresql-16-pgtap
+          PGBIN=/usr/lib/postgresql/16/bin
+          export PGHOST="$RUNNER_TEMP/pg"
+          mkdir -p "$PGHOST"
+          "$PGBIN/initdb" -D "$RUNNER_TEMP/pgdata" -U supabase_admin -A trust >/dev/null
+          "$PGBIN/pg_ctl" -D "$RUNNER_TEMP/pgdata" -o "-p $PGPORT -k $PGHOST -c listen_addresses=''" -l "$RUNNER_TEMP/pg.log" -w start
+          echo "PGHOST=$PGHOST" >> "$GITHUB_ENV"
       - name: M4 base + production server deltas + tests
         run: |
-          export PGHOST=localhost PGPORT=5432 PGUSER=postgres PGDATABASE=postgres
-          psql -v ON_ERROR_STOP=1 -c 'create extension if not exists pgtap;'
-          psql -v ON_ERROR_STOP=1 -f spike/architecture-proof/db/migrations/0001_canonical_core.sql
-          psql -v ON_ERROR_STOP=1 -f spike/architecture-proof/db/migrations/0002_generation_rpcs.sql
-          for f in server/db/migrations/*.sql; do psql -v ON_ERROR_STOP=1 -f "$f"; done
-          for f in server/db/tests/*.sql; do psql -v ON_ERROR_STOP=1 -f "$f"; done
+          spike/architecture-proof/db/run_sql_suite.sh la_0026 spike/architecture-proof/db/migrations server/db/migrations server/db/tests
