@@ -228,7 +228,18 @@
     "reviewer_command": "docs/qa/M5_GLS083_INDEPENDENT_REVIEW_COMMAND.md",
     "return_path": "docs/qa/M5_GLS083_INDEPENDENT_REVIEW_RETURN.md",
     "execution_note": "This ChatGPT/Brain stream cannot self-count as the independent reviewer because it authored the static review and remediations. No separate Codex/Claude reviewer runtime is available in the current tool environment. Post-candidate branch commits may include docs/control-plane and validation tooling; reviewer runtime scope remains frozen `app/` + `server/` at e576ca17….",
-    "review_surface": null,
+    "review_surface": {
+      "pr_number": 12,
+      "pr_url": "https://github.com/Jay-prodesign/sesli-ogren/pull/12",
+      "branch": "review/m5-gls083-64579d48",
+      "base": "feat/round7-companion-production-sequence-v2",
+      "runtime_candidate": "64579d48bcf9c33f4c709927a0e453349efb7c5b",
+      "review_only": true,
+      "draft": true,
+      "head_review_metadata_commit": "b429de5c194c988724788318f670af4cf19ea244",
+      "actions_runs_observed": 0,
+      "note": "PR #12 supersedes stale PR #11. Synthetic review is supplemental only; actual independent review remains pending unless Founder explicitly waives that requirement."
+    },
     "manual_completion_paths": [
       "GitHub PR #11 -> Reviewers -> Copilot -> Request (preferred if Copilot code review is available on the account/repository).",
       "Open a separate Claude/Codex reviewer context and give it docs/qa/M5_GLS083_INDEPENDENT_REVIEW_COMMAND.md plus PR #11 / frozen SHA e576ca17…."
