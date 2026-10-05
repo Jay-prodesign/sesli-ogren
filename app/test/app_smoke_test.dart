@@ -11,6 +11,7 @@ import 'package:sesli_ogren/src/data/pdf_text_extractor.dart';
 import 'package:sesli_ogren/src/data/source_ingest_service.dart';
 import 'package:sesli_ogren/src/data/sqlite_source_store.dart';
 import 'package:sesli_ogren/src/learning/recall_learning_service.dart';
+import 'package:sesli_ogren/src/generation/grounded_explain_gateway.dart';
 import 'package:sesli_ogren/src/domain/learning_truth.dart';
 import 'package:sesli_ogren/src/domain/operational_event.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
@@ -22,6 +23,21 @@ class _UnusedPdfExtractor implements PdfTextExtractor {
   Future<ExtractedPdf> extract(Uint8List bytes, {required String sourceName}) {
     throw UnimplementedError();
   }
+}
+
+
+class _ReadyExplainGateway implements GroundedExplainGateway {
+  const _ReadyExplainGateway();
+
+  @override
+  Future<GroundedExplainResult> explain(GroundedExplainRequest request) async => GroundedExplainReady(
+    sourceVersionId: request.sourceVersionId,
+    sourceContentDigest: request.sourceContentDigest,
+    explanation: 'Fotosentez, bitkinin ışık enerjisini kimyasal enerjiye dönüştürmesine yardımcı olan süreçtir.',
+    keyPoints: const ['Işık enerjisi kullanılır', 'Kimyasal enerji depolanır'],
+    language: 'tr-TR',
+    executionRef: 'test:grounded-explain',
+  );
 }
 
 Widget testShell(AppRuntime runtime) {
@@ -223,6 +239,38 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Hatırla'), findsWidgets);
     expect(find.text('Dinle'), findsOneWidget);
+  });
+
+  testWidgets('grounded Explain labels generated interpretation and preserves Recall as active step', (tester) async {
+    final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
+    addTearDown(store.close);
+    final ingest = SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor());
+    final runtime = AppRuntime(
+      learner: AppRuntime.localM5LearnerFixture,
+      store: store,
+      ingest: ingest,
+      recall: RecallLearningService(sourceStore: store, learningStore: store.learningTruthStore()),
+      telemetry: store.operationalTelemetry(),
+      explain: const _ReadyExplainGateway(),
+    );
+    await ingest.ingestPastedText(
+      learner: runtime.learner,
+      materialId: AppRuntime.primaryMaterialId,
+      text: 'Fotosentez ışık enerjisinin kimyasal enerjiye dönüşmesine yardımcı olur.',
+      sourceName: 'Biyoloji notu',
+    );
+
+    await tester.pumpWidget(MaterialApp(home: ProductShellScreen(runtime: runtime)));
+    await pumpUntilFound(tester, find.text('Biyoloji notu'));
+    await tapVisible(tester, find.text('Biyoloji notu').last);
+    await pumpUntilFound(tester, find.text('Açıkla'));
+    await tapVisible(tester, find.text('Açıkla'));
+    await pumpUntilFound(tester, find.text('Kaynağına dayalı açıklama'));
+
+    expect(find.textContaining('kaynak metnin kendisi değil'), findsOneWidget);
+    expect(find.textContaining('ışık enerjisini kimyasal enerjiye'), findsOneWidget);
+    expect(find.text('Önemli noktalar'), findsOneWidget);
+    expect(find.textContaining('öğrenme kanıtı oluşturmaz'), findsOneWidget);
   });
 
   testWidgets('answer exposure survives close and reopen without becoming independent', (tester) async {
