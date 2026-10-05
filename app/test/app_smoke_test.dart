@@ -42,6 +42,12 @@ Future<void> pumpUntilFound(WidgetTester tester, Finder finder, {int maxPumps = 
   fail('Expected widget was not reached within bounded pumps.');
 }
 
+Future<void> tapVisible(WidgetTester tester, Finder finder) async {
+  await tester.ensureVisible(finder);
+  await tester.pump();
+  await tester.tap(finder);
+}
+
 void main() {
   sqfliteFfiInit();
 
@@ -117,12 +123,12 @@ void main() {
 
     expect(find.text('Hatırla'), findsOneWidget);
     await tester.enterText(find.byType(TextField), action!.expectedAnswer);
-    await tester.tap(find.text('Yanıtla'));
+    await tapVisible(tester, find.text('Yanıtla'));
     await pumpUntilFound(tester, find.text('İpucusuz hatırladın'));
 
     expect(find.text('İpucusuz hatırladın'), findsOneWidget);
     expect(find.text('Sıradaki adım'), findsOneWidget);
-    await tester.tap(find.text('Devam et'));
+    await tapVisible(tester, find.text('Devam et'));
     await pumpUntilFound(tester, find.text('Devam noktası'));
     expect(find.text('Devam noktası'), findsOneWidget);
 
@@ -199,7 +205,7 @@ void main() {
     await pumpUntilFound(tester, find.text('Hatırla'));
     expect(find.text('Hatırla'), findsOneWidget);
 
-    await tester.tap(find.text('Yanıtı göster'));
+    await tapVisible(tester, find.text('Yanıtı göster'));
     await pumpUntilFound(tester, find.textContaining('Yanıt:'));
     expect(find.textContaining('Yanıt:'), findsOneWidget);
 
@@ -219,7 +225,7 @@ void main() {
     expect(find.textContaining('yanıt daha önce gösterildi'), findsOneWidget);
 
     await tester.enterText(find.byType(TextField), action!.expectedAnswer);
-    await tester.tap(find.text('Yanıtla'));
+    await tapVisible(tester, find.text('Yanıtla'));
     await pumpUntilFound(tester, find.textContaining('geri çağırma başarısı olarak sayılmadı'));
 
     expect(find.text('İpucusuz hatırladın'), findsNothing);
