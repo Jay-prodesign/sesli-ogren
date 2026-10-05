@@ -17,7 +17,7 @@ permissions:
 jobs:
   flutter-validation:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 30
 
     steps:
       - name: Checkout
@@ -42,26 +42,22 @@ jobs:
           flutter pub get
           git diff --exit-code -- pubspec.lock
 
-      - name: Capture canonical Dart formatting
+      - name: Format check
         working-directory: app
-        run: |
-          dart format .
-          git diff --check
-          git diff -- test/app_smoke_test.dart test/_pdfrx_diagnostic_test.dart || true
+        run: dart format --output=none --set-exit-if-changed .
 
-      - name: Upload canonical formatted tests
-        uses: actions/upload-artifact@v4
-        with:
-          name: canonical-formatted-tests
-          path: |
-            app/test/app_smoke_test.dart
-            app/test/_pdfrx_diagnostic_test.dart
-          if-no-files-found: error
-
-      - name: Analyze formatted diagnostic workspace
+      - name: Analyze
         working-directory: app
         run: flutter analyze
 
-      - name: Focused PDF diagnostic
+      - name: Test
         working-directory: app
-        run: timeout 60s flutter test test/_pdfrx_diagnostic_test.dart -r expanded
+        run: flutter test
+
+      - name: Android profile build
+        working-directory: app
+        run: flutter build apk --profile
+
+      - name: APK SHA-256
+        working-directory: app
+        run: sha256sum build/app/outputs/flutter-apk/app-profile.apk
