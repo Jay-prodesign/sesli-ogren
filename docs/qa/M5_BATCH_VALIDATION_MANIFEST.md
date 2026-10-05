@@ -129,3 +129,7 @@ This batch does not replace:
 - final speech/audibility/device-performance/orientation checks.
 
 Those remain at final mobile-readiness.
+
+## Durable return
+
+Record the single bounded batch in `docs/qa/M5_FINAL_VALIDATION_RETURN.md`. Do not create parallel evidence packets for the same run.
