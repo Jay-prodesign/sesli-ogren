@@ -170,3 +170,23 @@ bash scripts/m5_run_final_validation_macos.sh
 ```
 
 Both helpers fail closed when the accepted synthetic review artifact or lockfile is missing. They do not create the review return or grant M5 PASS.
+
+
+## Founder override — no GitHub Actions
+
+GitHub Actions is not an allowed execution path for the remaining M5
+checkpoint. Do not create, trigger, rerun, or use Actions jobs as validation
+evidence.
+
+Execute the manifest only on an explicit local/agent machine environment with
+the pinned Flutter 3.47.5 toolchain. The existing guarded scripts remain the
+preferred commands because they fail closed on the accepted synthetic review
+artifact and lockfile.
+
+Environment split:
+- Linux/local agent: live Supabase auth probe, bootstrap checks, Flutter
+  format/analyze/tests, Android profile build, combined PostgreSQL SQL suite.
+- macOS/local agent: lockfile reproducibility + iOS profile no-codesign build.
+
+The abandoned lockfile-freeze Actions runs are historical failed preparation
+only and must not affect M5 verdict.
