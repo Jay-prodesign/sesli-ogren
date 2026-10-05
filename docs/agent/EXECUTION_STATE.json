@@ -84,7 +84,7 @@
     "Accessibility runtime evidence remains pending in the batch; physical VoiceOver/TalkBack/device/orientation evidence remains deferred under D-068."
   ],
   "protected_gate": "Merge, release, deploy, paid providers, credentials/secrets, licensing posture, production mutation: Product Owner only",
-  "next_action": "Execute GLS-083 in a separate independent reviewer context using docs/qa/M5_GLS083_INDEPENDENT_REVIEW_COMMAND.md against frozen runtime candidate e576ca17…. If REVIEW_PASS, generate/review/commit app/pubspec.lock with Flutter 3.47.5 and run the single bounded D-072 batch including real Supabase auth, app format/analyze/tests, Android profile build, iOS profile no-codesign build, accessibility runtime evidence, and server SQL validation. If CHANGES_REQUIRED, remediate only material findings, re-freeze, refresh the packet, and repeat independent review before spending the batch.",
+  "next_action": "Obtain an actual independent GLS-083 review on review-only PR #11 / frozen runtime candidate e576ca17…. The PR is isolated and `[skip ci]` produced zero observed workflow runs, but Copilot reviewer dispatch via the GitHub connector was not confirmed; requested-reviewers/reviews remained empty. Do not self-grant review PASS. Once an actual independent REVIEW_PASS exists, freeze Flutter 3.47.5 pubspec.lock and run the one bounded D-072 batch.",
   "canonical_source_refs": [
     "CURRENT_EXECUTION_STATE — Learning App",
     "D-070 — Founder Product/Visual PASS / D-Knot selected",
@@ -227,7 +227,20 @@
     "packet": "docs/qa/M5_GLS083_REVIEW_PACKET.md",
     "reviewer_command": "docs/qa/M5_GLS083_INDEPENDENT_REVIEW_COMMAND.md",
     "return_path": "docs/qa/M5_GLS083_INDEPENDENT_REVIEW_RETURN.md",
-    "execution_note": "This ChatGPT/Brain stream cannot self-count as the independent reviewer because it authored the static review and remediations. No separate Codex/Claude reviewer runtime is available in the current tool environment. Post-candidate branch commits may include docs/control-plane and validation tooling; reviewer runtime scope remains frozen `app/` + `server/` at e576ca17…."
+    "execution_note": "This ChatGPT/Brain stream cannot self-count as the independent reviewer because it authored the static review and remediations. No separate Codex/Claude reviewer runtime is available in the current tool environment. Post-candidate branch commits may include docs/control-plane and validation tooling; reviewer runtime scope remains frozen `app/` + `server/` at e576ca17….",
+    "review_surface": {
+      "pr_number": 11,
+      "pr_url": "https://github.com/Jay-prodesign/sesli-ogren/pull/11",
+      "branch": "review/m5-gls083-e576ca17",
+      "base": "feat/round7-companion-production-sequence-v2",
+      "runtime_candidate": "e576ca177ff8872cbbfc4f127eb016cefa7f611c",
+      "review_only": true,
+      "draft": true,
+      "head_review_metadata_commit": "d0bd7fe17a1f59dc9a9a1e82bb98de1d63c9209a",
+      "actions_runs_observed": 0,
+      "copilot_dispatch": "REQUEST_ATTEMPTED_NOT_CONFIRMED",
+      "note": "GitHub reviewer requests for copilot-pull-request-reviewer[bot] and copilot did not appear in requested-reviewers or reviews through the connector. Do not count as GLS-083 evidence until an actual independent review is present."
+    }
   },
   "validation_batch_readiness": {
     "status": "READY_PENDING_GLS083_REVIEW_PASS_AND_LOCKFILE",
