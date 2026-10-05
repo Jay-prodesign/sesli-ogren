@@ -15,7 +15,7 @@ This matrix does **not** declare M5 PASS by itself.
 
 - Repository: `Jay-prodesign/sesli-ogren`
 - Branch: `feat/m5-golden-learning-slice`
-- Frozen runtime implementation candidate: `01670f42029ef228706c4a772594102e5656ebdf`
+- Frozen runtime implementation candidate: `e576ca177ff8872cbbfc4f127eb016cefa7f611c`
 - Checkpoint-control-only reconciliation commits may follow this SHA; they do not widen runtime feature scope.
 - Flutter pin: `.flutter-version` = 3.47.5.
 - Routine GitHub Actions: OFF under D-072.
@@ -117,12 +117,12 @@ This matrix does **not** declare M5 PASS by itself.
 | GLS-080 | PENDING_BATCH | Exact final checkpoint head must be frozen after evidence-only fixes. |
 | GLS-081 | BLOCKED | `app/pubspec.lock` is absent and the current container has no Flutter/Dart toolchain. Generate/commit exact resolution in the single checkpoint batch. |
 | GLS-082 | STATIC_PASS / PENDING_BATCH | D-024 register records direct M5 dependencies/licenses; exact transitive resolution/notice evidence awaits lock generation. |
-| GLS-083 | PENDING_REVIEW | Independent read-only review packet is refreshed for candidate `01670f42…`; reviewer must include the corrected server answer-exposure semantics. Brain static review is recorded separately and does not count as independent review. |
+| GLS-083 | PENDING_REVIEW | Independent read-only review packet is refreshed for candidate `e576ca17…`; reviewer must include the corrected server answer-exposure semantics. Brain static review is recorded separately and does not count as independent review. |
 | GLS-084 | PENDING | No known unresolved blocker other than the explicit GLS-081 reproducibility gap and required review/batch evidence. |
 
 ## Static checkpoint correction
 
-A Brain/static review found one HIGH learning-truth integrity defect in the server assistance delta: answer exposure was not represented separately from hint/no-help. It was corrected in `b0d5df8a…` and regression/schema coverage was added in `01670f42…`. Static disposition is **RESOLVED / PENDING BATCH**; see `docs/qa/M5_STATIC_CHECKPOINT_REVIEW_2026-10-05.md`.
+Brain/static review found and corrected two material checkpoint defects: (S-001) server answer exposure could be laundered into unassisted success; corrected in `b0d5df8a…` + `01670f42…`; and (S-002) duplicate Dart declarations in local persistence would block compilation; corrected in `e576ca17…`. Static disposition is **RESOLVED / PENDING BATCH**; see `docs/qa/M5_STATIC_CHECKPOINT_REVIEW_2026-10-05.md`.
 
 ## Current checkpoint verdict
 
