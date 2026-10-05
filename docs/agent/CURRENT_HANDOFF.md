@@ -125,3 +125,20 @@ D/Knot remains locked under D-070. Do not regenerate, redesign, or expand the
 Companion family merely to exercise D-075. Apply D-075 only if a genuine
 current-gate asset defect is discovered or when future asset work is explicitly
 admitted after M5.
+
+
+## GLS-083 external independent-review handoff
+
+Status: READY_FOR_INDEPENDENT_EXECUTION.
+
+Use `docs/qa/M5_GLS083_INDEPENDENT_REVIEW_COMMAND.md` in a separate
+Codex/Claude/reviewer context against frozen runtime candidate
+`e576ca177ff8872cbbfc4f127eb016cefa7f611c`.
+
+The current ChatGPT/Brain stream must not count its own static review as GLS-083
+independence because it identified/remediated S-001 and S-002. No independent
+reviewer runtime is available in the current tool environment.
+
+Do not spend the single D-072 runtime/build batch until the independent return
+is REVIEW_PASS. CHANGES_REQUIRED reopens only the material finding surface,
+followed by re-freeze + refreshed independent review.
