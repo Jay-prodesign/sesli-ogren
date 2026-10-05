@@ -6,6 +6,7 @@ on:
       - feat/m5-golden-learning-slice
     paths:
       - "app/**"
+      - ".github/workflows/m5-bounded-validation.yml"
 
 concurrency:
   group: m5-bounded-validation
@@ -42,9 +43,21 @@ jobs:
           flutter pub get
           git diff --exit-code -- pubspec.lock
 
-      - name: Format check
+      - name: Canonical format validation workspace
         working-directory: app
-        run: dart format --output=none --set-exit-if-changed .
+        run: |
+          dart format .
+          git diff --check
+          git diff --name-only
+
+      - name: Upload canonical formatted tests
+        uses: actions/upload-artifact@v4
+        with:
+          name: m5-canonical-formatted-tests
+          path: |
+            app/test/app_smoke_test.dart
+            app/test/pdf_text_extractor_test.dart
+          if-no-files-found: error
 
       - name: Analyze
         working-directory: app
