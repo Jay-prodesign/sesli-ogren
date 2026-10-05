@@ -250,7 +250,7 @@ custom code, record it here with a concrete reason, as AGENTS.md §12 requires:
 
 | Field | Value |
 | --- | --- |
-| Task ID | Post-M5 full-product intake tranche |
+| Task ID | LA-0024 |
 | Upstream repository | https://github.com/miguelpruivo/flutter_file_picker |
 | Exact tag / commit / version | file_picker 13.1.0 exact-pinned in `app/pubspec.yaml`; deterministic transitive resolution captured in `app/pubspec.lock`; bounded Flutter checkpoint PASS on 2026-10-05 |
 | License | MIT |
