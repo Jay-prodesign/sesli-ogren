@@ -11,9 +11,7 @@
 - Mutation authority: **NONE**
 - Merge/release/deploy authority: **NONE**
 
-Later branch commits are documentation/control-plane only unless this command is
-explicitly refreshed. Review runtime code exactly as it existed at the frozen
-candidate SHA.
+Later branch commits may contain documentation/control-plane changes and bounded M5 validation tooling only. Review `app/` and `server/` runtime code exactly as it existed at the frozen candidate SHA. Validation helper scripts are not evidence of runtime PASS and must not widen review scope.
 
 ## Independent-review requirement
 
