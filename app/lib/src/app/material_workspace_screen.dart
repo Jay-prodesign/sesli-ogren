@@ -133,6 +133,27 @@ class _WorkspaceBody extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 26),
+        if (data.extracted != null && data.extracted!.normalizedText.trim().isNotEmpty) ...[
+          Text('Hızlı bakış', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700)),
+          const SizedBox(height: 6),
+          Text(
+            'AI özeti değil; yüklediğin kaynağın başlangıcından doğrudan bir görünüm.',
+            style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+          ),
+          const SizedBox(height: 10),
+          Card(
+            elevation: 0,
+            color: theme.colorScheme.surfaceContainerLow,
+            child: Padding(
+              padding: const EdgeInsets.all(18),
+              child: Text(
+                _orientationText(data.extracted!.normalizedText),
+                style: theme.textTheme.bodyLarge?.copyWith(height: 1.5),
+              ),
+            ),
+          ),
+          const SizedBox(height: 22),
+        ],
         Text('Öğrenme durumu', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700)),
         const SizedBox(height: 10),
         _LearningStatusCard(continuation: data.continuation),
@@ -185,6 +206,12 @@ class _WorkspaceBody extends StatelessWidget {
         ),
       ],
     );
+  }
+
+  static String _orientationText(String text) {
+    final normalized = text.trim();
+    if (normalized.length <= 520) return normalized;
+    return '${normalized.substring(0, 520).trimRight()}…';
   }
 
   static String _sourceLabel(_WorkspaceSnapshot data) {
