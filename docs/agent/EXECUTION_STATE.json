@@ -228,5 +228,13 @@
     "reviewer_command": "docs/qa/M5_GLS083_INDEPENDENT_REVIEW_COMMAND.md",
     "return_path": "docs/qa/M5_GLS083_INDEPENDENT_REVIEW_RETURN.md",
     "execution_note": "This ChatGPT/Brain stream cannot self-count as the independent reviewer because it authored the static review and remediations. No separate Codex/Claude reviewer runtime is available in the current tool environment. Post-candidate branch commits may include docs/control-plane and validation tooling; reviewer runtime scope remains frozen `app/` + `server/` at e576ca17…."
+  },
+  "validation_batch_readiness": {
+    "status": "READY_PENDING_GLS083_REVIEW_PASS_AND_LOCKFILE",
+    "manifest": "docs/qa/M5_BATCH_VALIDATION_MANIFEST.md",
+    "return": "docs/qa/M5_FINAL_VALIDATION_RETURN.md",
+    "sql_helper": "scripts/m5_validate_server_sql.sh",
+    "live_auth_helper": "scripts/m5_probe_supabase_anonymous_auth.py",
+    "execution_rule": "Do not run the single D-072 batch before independent GLS-083 REVIEW_PASS and final lockfile freeze."
   }
 }
