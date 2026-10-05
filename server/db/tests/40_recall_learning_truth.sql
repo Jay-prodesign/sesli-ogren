@@ -47,8 +47,20 @@ begin
   end if;
   if public.la_recall_state_for_outcome('correct') <> 'retrieved_once'
      or public.la_recall_state_for_outcome('helped_correct') <> 'developing'
+     or public.la_recall_state_for_outcome('answer_exposed') <> 'not_assessed'
      or public.la_recall_state_for_outcome('unknown') <> 'not_assessed' then
     raise exception 'state derivation mismatch';
+  end if;
+
+  if public.la_recall_next_reason_for_outcome('correct')
+       <> 'ONE_UNASSISTED_RETRIEVAL_OBSERVED'
+     or public.la_recall_next_reason_for_outcome('helped_correct')
+       <> 'HINTED_SUCCESS_NEEDS_UNASSISTED_RETRIEVAL'
+     or public.la_recall_next_reason_for_outcome('answer_exposed')
+       <> 'ANSWER_EXPOSED_NO_RETRIEVAL_CLAIM'
+     or public.la_recall_next_reason_for_outcome('unknown')
+       <> 'NO_EVALUABLE_RETRIEVAL' then
+    raise exception 'outcome-specific next-action reason mismatch';
   end if;
 end $$;
 
@@ -67,15 +79,24 @@ begin
   end if;
 
   if to_regprocedure('public.submit_recall_attempt(uuid,text,text,text)') is null
-     or to_regprocedure('public.reveal_recall_hint(uuid,text)') is null then
+     or to_regprocedure('public.reveal_recall_hint(uuid,text)') is null
+     or to_regprocedure('public.reveal_recall_answer(uuid,text)') is null then
     raise exception 'server-authoritative Recall RPCs missing';
   end if;
 
   if not has_function_privilege('authenticated',
        'public.submit_recall_attempt(uuid,text,text,text)', 'EXECUTE')
      or not has_function_privilege('authenticated',
-       'public.reveal_recall_hint(uuid,text)', 'EXECUTE') then
+       'public.reveal_recall_hint(uuid,text)', 'EXECUTE')
+     or not has_function_privilege('authenticated',
+       'public.reveal_recall_answer(uuid,text)', 'EXECUTE') then
     raise exception 'authenticated role missing bounded Recall RPC execute privilege';
+  end if;
+
+  if not has_column_privilege(
+       'authenticated', 'public.learner_evidence', 'assistance', 'SELECT'
+     ) then
+    raise exception 'authenticated learner cannot read canonical assistance classification';
   end if;
 end $$;
 
