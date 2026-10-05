@@ -254,7 +254,7 @@ Next unallocated ID: **LA-0027**.
 
 ##### LA-0026 — Active Explain-Back
 
-- Status: ADMITTED / READY
+- Status: IN_PROGRESS
 - Depends on: LA-0025
 - Owner: Brain
 - Executor: ChatGPT (bounded reversible engineering)
