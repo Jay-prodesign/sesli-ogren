@@ -83,7 +83,7 @@
     "Accessibility runtime evidence remains pending in the batch; physical VoiceOver/TalkBack/device/orientation evidence remains deferred under D-068."
   ],
   "protected_gate": "Merge, release, deploy, paid providers, credentials/secrets, licensing posture, production mutation: Product Owner only",
-  "next_action": "Keep runtime scope frozen at candidate e576ca17… and close remaining external/evidence gates only: real Supabase authenticated session; Flutter 3.47.5 pubspec.lock + single bounded format/analyze/test/Android+iOS build and server SQL batch; GLS-083 independent review; then issue the M5 verdict. Product/Learning/Creative bounded dispositions and static accessibility review are complete. Do not add feature breadth.",
+  "next_action": "Keep runtime scope frozen at candidate e576ca17…. First obtain GLS-083 independent read-only review and resolve any material finding before spending the single runtime/build batch. Then generate/review/commit app/pubspec.lock with Flutter 3.47.5 and run one bounded D-072 batch including real Supabase anonymous authenticated session evidence, app format/analyze/tests, Android profile build, iOS profile no-codesign build, and server SQL validation. Then issue the M5 verdict. Do not add feature breadth.",
   "canonical_source_refs": [
     "CURRENT_EXECUTION_STATE — Learning App",
     "D-070 — Founder Product/Visual PASS / D-Knot selected",
