@@ -175,7 +175,8 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
           createdAt: DateTime.now().toUtc(),
         ),
       );
-      await _openRecall();
+      if (!mounted) return;
+      Navigator.of(context).pop(true);
     } catch (error) {
       stopwatch.stop();
       await _recordEvent(
@@ -233,7 +234,8 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
           createdAt: DateTime.now().toUtc(),
         ),
       );
-      await _openRecall();
+      if (!mounted) return;
+      Navigator.of(context).pop(true);
     } catch (error) {
       stopwatch.stop();
       await _recordEvent(
