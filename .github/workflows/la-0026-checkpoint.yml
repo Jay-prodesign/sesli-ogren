@@ -23,7 +23,9 @@ jobs:
       - working-directory: app
         run: flutter pub get
       - working-directory: app
-        run: dart format --output=none --set-exit-if-changed .
+        run: |
+          dart format .
+          git diff --exit-code -- .
       - working-directory: app
         run: flutter analyze
       - working-directory: app
