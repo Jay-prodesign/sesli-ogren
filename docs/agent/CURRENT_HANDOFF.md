@@ -102,3 +102,26 @@ material decisions are admitted and propagated**, not the current runtime scope.
 
 Do not interrupt the current GLS-083 -> lockfile -> single bounded validation
 batch -> M5 verdict sequence to start that post-M5 work early.
+
+
+## D-075 asset governance overlay
+
+D-075 refines future/current-gate asset work without changing the LA-0022
+runtime candidate or opening new visual scope.
+
+Before material asset generation/regeneration:
+Asset Necessity -> Is this really an asset problem? -> Experience Role ->
+existing-asset reuse audit -> asset family/system -> production economics ->
+greybox/low-cost proof when the interaction/learning behavior is uncertain.
+
+Signature/behavior-critical assets use full identity/differentiation/behavior
+review. Routine/commodity assets remain lean.
+
+The Character / Asset Behavior Gate checks state/timing correctness,
+proportionality, product-age/tone credibility, false reward/mastery signaling,
+long-session use, and Reduced Motion/accessibility compatibility.
+
+D/Knot remains locked under D-070. Do not regenerate, redesign, or expand the
+Companion family merely to exercise D-075. Apply D-075 only if a genuine
+current-gate asset defect is discovered or when future asset work is explicitly
+admitted after M5.
