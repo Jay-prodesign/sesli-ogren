@@ -2,7 +2,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
-enum CompanionVisualState { idle, listen, think, correct, success }
+enum CompanionVisualState { idle, listen, think, speak, correct, success }
 
 class CompanionView extends StatefulWidget {
   const CompanionView({required this.state, this.size = 128, super.key});
@@ -66,6 +66,7 @@ class _CompanionViewState extends State<CompanionView> with SingleTickerProvider
                 CompanionVisualState.idle => (angle: 0.0, dx: 0.0, dy: -1.7 * wave, scale: 1.0 + 0.014 * wave),
                 CompanionVisualState.listen => (angle: 0.047, dx: 1.35, dy: -0.55 * wave, scale: 1.01),
                 CompanionVisualState.think => (angle: -0.051 + 0.017 * wave, dx: 0.0, dy: 0.68 * wave, scale: 0.99),
+                CompanionVisualState.speak => (angle: 0.018 * wave, dx: 0.0, dy: -1.2 * wave, scale: 1.012 + 0.012 * pulse),
                 CompanionVisualState.correct => (angle: -0.038, dx: -1.0, dy: 0.0, scale: 0.99),
                 CompanionVisualState.success => (angle: 0.0, dx: 0.0, dy: -3.4 * pulse, scale: 1.025 + 0.025 * pulse),
               };
@@ -96,6 +97,7 @@ class _CompanionViewState extends State<CompanionView> with SingleTickerProvider
     CompanionVisualState.idle => 'Düğüm hazır',
     CompanionVisualState.listen => 'Düğüm seni dinliyor',
     CompanionVisualState.think => 'Düğüm düşünüyor',
+    CompanionVisualState.speak => 'Düğüm konuşuyor',
     CompanionVisualState.correct => 'Düğüm destek oluyor',
     CompanionVisualState.success => 'Düğüm başarıyı kutluyor',
   };
