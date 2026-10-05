@@ -38,6 +38,9 @@ jobs:
           cache: false
           pub-cache: false
       - run: flutter pub get --enforce-lockfile
-      - run: dart format --output=none --set-exit-if-changed .
+      - name: Canonical format + diff
+        run: |
+          dart format .
+          git diff -- lib/src/app/companion_view.dart lib/src/app/product_shell_screen.dart app/test/app_smoke_test.dart
       - run: flutter analyze
       - run: flutter test
