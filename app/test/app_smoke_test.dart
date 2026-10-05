@@ -11,7 +11,6 @@ import 'package:sesli_ogren/src/data/pdf_text_extractor.dart';
 import 'package:sesli_ogren/src/data/source_ingest_service.dart';
 import 'package:sesli_ogren/src/data/sqlite_source_store.dart';
 import 'package:sesli_ogren/src/learning/recall_learning_service.dart';
-import 'package:sesli_ogren/src/learning/explain_back_gateway.dart';
 import 'package:sesli_ogren/src/generation/grounded_explain_gateway.dart';
 import 'package:sesli_ogren/src/domain/learning_truth.dart';
 import 'package:sesli_ogren/src/domain/operational_event.dart';
