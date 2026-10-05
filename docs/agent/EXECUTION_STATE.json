@@ -80,11 +80,10 @@
     "app/pubspec.lock for the final M5 dependencies is missing and must be generated/committed from the exact Flutter 3.47.5 toolchain.",
     "A real Supabase project/session must be configured and anonymous sign-in enabled to evidence the authenticated-learner M5 path; only client-safe project URL/publishable key are needed.",
     "Current ChatGPT execution container has no established Flutter/Dart checkpoint environment; one bounded D-072 runtime/build validation batch remains pending.",
-    "GLS-083 synthetic adversarial review is PASS with no unresolved BLOCKER/HIGH after S-003, but external independent review remains required unless explicitly waived by Founder.",
     "Accessibility runtime evidence remains pending in the batch; physical VoiceOver/TalkBack/device/orientation evidence remains deferred under D-068."
   ],
   "protected_gate": "Merge, release, deploy, paid providers, credentials/secrets, licensing posture, production mutation: Product Owner only",
-  "next_action": "Synthetic adversarial review is PASS with no unresolved BLOCKER/HIGH after S-003. External independence remains pending on review-only PR #12 / frozen runtime candidate 64579d48… unless Founder explicitly waives the independence requirement. After actual independent REVIEW_PASS (or explicit waiver), freeze Flutter 3.47.5 pubspec.lock and run the single guarded D-072 validation batch.",
+  "next_action": "Generate/review/freeze app/pubspec.lock with Flutter 3.47.5, then execute the single guarded D-072 final validation batch. Synthetic GLS-083 review is accepted for M5 by Founder; do not wait for external review.",
   "canonical_source_refs": [
     "CURRENT_EXECUTION_STATE — Learning App",
     "D-070 — Founder Product/Visual PASS / D-Knot selected",
@@ -222,7 +221,7 @@
     "current_effect": "No new M5 asset breadth. D/Knot remains locked under D-070. LA-0022 remains active."
   },
   "gls083_review": {
-    "status": "READY_FOR_INDEPENDENT_EXECUTION_AFTER_SYNTHETIC_PASS",
+    "status": "FOUNDER_WAIVER_SYNTHETIC_ACCEPTED",
     "runtime_candidate": "64579d48bcf9c33f4c709927a0e453349efb7c5b",
     "packet": "docs/qa/M5_GLS083_REVIEW_PACKET.md",
     "reviewer_command": "docs/qa/M5_GLS083_INDEPENDENT_REVIEW_COMMAND.md",
@@ -238,7 +237,7 @@
       "draft": true,
       "head_review_metadata_commit": "b429de5c194c988724788318f670af4cf19ea244",
       "actions_runs_observed": 0,
-      "note": "PR #12 supersedes stale PR #11. Synthetic review is supplemental only; actual independent review remains pending unless Founder explicitly waives that requirement."
+      "note": "PR #12 remains historical/review-only and need not block M5. Synthetic adversarial review is accepted by Founder as the M5 review gate."
     },
     "manual_completion_paths": [
       "GitHub PR #12 -> Reviewers -> Copilot -> Request, only if the account/repository exposes Copilot review and Founder accepts any AI-credit/Actions spend.",
@@ -250,10 +249,15 @@
       "artifact": "docs/qa/M5_GLS083_SYNTHETIC_ADVERSARIAL_REVIEW_2026-10-05.md",
       "finding_s003": "RESOLVED_HIGH",
       "independence": false
+    },
+    "founder_disposition": {
+      "date": "2026-10-05",
+      "decision": "For M5/LA-0022 only, synthetic adversarial review is accepted as sufficient review evidence and external independence is waived.",
+      "scope": "M5 checkpoint only; does not remove independent review expectations for future high-risk tasks."
     }
   },
   "validation_batch_readiness": {
-    "status": "READY_PENDING_GLS083_REVIEW_PASS_AND_LOCKFILE",
+    "status": "READY_PENDING_LOCKFILE_AND_EXECUTION_ENVIRONMENT",
     "manifest": "docs/qa/M5_BATCH_VALIDATION_MANIFEST.md",
     "return": "docs/qa/M5_FINAL_VALIDATION_RETURN.md",
     "sql_helper": "scripts/m5_validate_server_sql.sh",
