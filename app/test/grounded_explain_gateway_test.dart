@@ -47,9 +47,6 @@ void main() {
     );
 
     expect(result, isA<GroundedExplainUnavailable>());
-    expect(
-      (result as GroundedExplainUnavailable).reason,
-      GroundedExplainUnavailableReason.providerNotConfigured,
-    );
+    expect((result as GroundedExplainUnavailable).reason, GroundedExplainUnavailableReason.providerNotConfigured);
   });
 }

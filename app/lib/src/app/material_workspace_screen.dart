@@ -59,7 +59,9 @@ class _MaterialWorkspaceScreenState extends State<MaterialWorkspaceScreen> {
       Navigator.of(context).push<void>(MaterialPageRoute(builder: (_) => ListenScreen(runtime: widget.runtime)));
 
   Future<void> _openExplain(SourceVersionRecord source) => Navigator.of(context).push<void>(
-    MaterialPageRoute(builder: (_) => ExplainScreen(runtime: widget.runtime, source: source)),
+    MaterialPageRoute(
+      builder: (_) => ExplainScreen(runtime: widget.runtime, source: source),
+    ),
   );
 
   @override

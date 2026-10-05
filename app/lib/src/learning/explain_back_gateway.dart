@@ -10,12 +10,7 @@ class ExplainBackAttemptId {
   int get hashCode => value.hashCode;
 }
 
-enum ExplainBackEvaluationKind {
-  sufficient,
-  gapDetected,
-  notEvaluable,
-  unavailable,
-}
+enum ExplainBackEvaluationKind { sufficient, gapDetected, notEvaluable, unavailable }
 
 class ExplainBackRequest {
   const ExplainBackRequest({
@@ -59,8 +54,7 @@ class ExplainBackEvaluated extends ExplainBackResult {
   final String executionRef;
 
   bool matches(SourceVersionIdentity source) =>
-      sourceVersionId == source.sourceVersionId &&
-      sourceContentDigest == source.contentDigest;
+      sourceVersionId == source.sourceVersionId && sourceContentDigest == source.contentDigest;
 }
 
 class ExplainBackUnavailable extends ExplainBackResult {
@@ -79,7 +73,5 @@ class UnavailableExplainBackGateway implements ExplainBackGateway {
 
   @override
   Future<ExplainBackResult> evaluate(ExplainBackRequest request) async =>
-      const ExplainBackUnavailable(
-        'Yanıtın anlamını güvenilir biçimde değerlendirecek servis henüz etkin değil.',
-      );
+      const ExplainBackUnavailable('Yanıtın anlamını güvenilir biçimde değerlendirecek servis henüz etkin değil.');
 }

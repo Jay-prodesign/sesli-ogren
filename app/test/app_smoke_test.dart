@@ -26,7 +26,6 @@ class _UnusedPdfExtractor implements PdfTextExtractor {
   }
 }
 
-
 class _UnavailableExplainBackGateway implements ExplainBackGateway {
   const _UnavailableExplainBackGateway();
 

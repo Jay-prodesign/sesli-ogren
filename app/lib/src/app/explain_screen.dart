@@ -7,11 +7,7 @@ import 'explain_back_screen.dart';
 import 'learning_slice_screen.dart';
 
 class ExplainScreen extends StatefulWidget {
-  const ExplainScreen({
-    required this.runtime,
-    required this.source,
-    super.key,
-  });
+  const ExplainScreen({required this.runtime, required this.source, super.key});
 
   final AppRuntime runtime;
   final SourceVersionRecord source;
@@ -94,7 +90,10 @@ class _Ready extends StatelessWidget {
               padding: const EdgeInsets.only(bottom: 8),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children: [const Text('•  '), Expanded(child: Text(point))],
+                children: [
+                  const Text('•  '),
+                  Expanded(child: Text(point)),
+                ],
               ),
             ),
         ],
@@ -104,22 +103,26 @@ class _Ready extends StatelessWidget {
           color: theme.colorScheme.secondaryContainer.withValues(alpha: 0.45),
           child: const Padding(
             padding: EdgeInsets.all(16),
-            child: Text('Açıklamayı okumak öğrenme kanıtı oluşturmaz. Hazır olduğunda kendi cümlelerinle anlat veya Hatırla ile aktif olarak dene.'),
+            child: Text(
+              'Açıklamayı okumak öğrenme kanıtı oluşturmaz. Hazır olduğunda kendi cümlelerinle anlat veya Hatırla ile aktif olarak dene.',
+            ),
           ),
         ),
         const SizedBox(height: 14),
         FilledButton.icon(
           onPressed: () => Navigator.of(context).push<void>(
-            MaterialPageRoute(builder: (_) => ExplainBackScreen(runtime: runtime, source: source)),
+            MaterialPageRoute(
+              builder: (_) => ExplainBackScreen(runtime: runtime, source: source),
+            ),
           ),
           icon: const Icon(Icons.record_voice_over_outlined),
           label: const Text('Kendi cümlelerinle anlat'),
         ),
         const SizedBox(height: 10),
         FilledButton.icon(
-          onPressed: () => Navigator.of(context).push<void>(
-            MaterialPageRoute(builder: (_) => LearningSliceScreen(runtime: runtime)),
-          ),
+          onPressed: () =>
+              Navigator.of(context)
+                  .push<void>(MaterialPageRoute(builder: (_) => LearningSliceScreen(runtime: runtime))),
           icon: const Icon(Icons.psychology_alt_outlined),
           label: const Text('Hatırla ile dene'),
         ),

@@ -23,10 +23,7 @@ class SupabaseGroundedExplainGateway implements GroundedExplainGateway {
 
       final rows = await client.rpc<List<dynamic>>(
         'read_grounded_explain',
-        params: {
-          'p_material_id': request.materialId.value,
-          'p_source_content_hash': request.sourceContentDigest,
-        },
+        params: {'p_material_id': request.materialId.value, 'p_source_content_hash': request.sourceContentDigest},
       );
       if (rows.isEmpty) {
         return const GroundedExplainUnavailable(reason: GroundedExplainUnavailableReason.temporaryFailure);

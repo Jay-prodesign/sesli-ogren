@@ -35,7 +35,11 @@ class _ExplainBackScreenState extends State<ExplainBackScreen> {
     setState(() => _submitting = true);
     final ordinal = _attemptOrdinal++;
     final digest = sha256
-        .convert(utf8.encode('${widget.runtime.learner.id.value}\u0000${widget.source.identity.sourceVersionId.value}\u0000$ordinal\u0000$response'))
+        .convert(
+          utf8.encode(
+            '${widget.runtime.learner.id.value}\u0000${widget.source.identity.sourceVersionId.value}\u0000$ordinal\u0000$response',
+          ),
+        )
         .toString();
     final result = await widget.runtime.explainBack.evaluate(
       ExplainBackRequest(

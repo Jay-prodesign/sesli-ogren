@@ -53,12 +53,7 @@ class GroundedExplainUnavailable extends GroundedExplainResult {
   final GroundedExplainUnavailableReason reason;
 }
 
-enum GroundedExplainUnavailableReason {
-  providerNotConfigured,
-  sourceUnavailable,
-  staleSource,
-  temporaryFailure,
-}
+enum GroundedExplainUnavailableReason { providerNotConfigured, sourceUnavailable, staleSource, temporaryFailure }
 
 /// Safe production default until a live server-side provider is authorized.
 class UnavailableGroundedExplainGateway implements GroundedExplainGateway {
