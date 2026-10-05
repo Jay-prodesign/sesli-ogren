@@ -5,7 +5,7 @@
 - Project: Learning App / Sesli Öğren
 - Mission: M5 Golden Learning Slice
 - Branch: `feat/m5-golden-learning-slice`
-- Frozen runtime implementation candidate: `01670f42029ef228706c4a772594102e5656ebdf`
+- Frozen runtime implementation candidate: `e576ca177ff8872cbbfc4f127eb016cefa7f611c`
 - Later commits are checkpoint/control-plane documentation only unless the packet is explicitly refreshed again.
 - Governing acceptance: `M5_GOLDEN_LEARNING_SLICE_ACCEPTANCE_CONTRACT_v0.1`
 - Review trigger: GLS-083
@@ -14,7 +14,7 @@
 
 The reviewer must evaluate the code independently. This packet is a map, not a PASS claim.
 
-Static checkpoint review S-001 previously found that the server path collapsed answer exposure into hint/no-help semantics. That defect was corrected in `b0d5df8a…` + `01670f42…`. The independent reviewer must verify the correction rather than inheriting the prior review conclusion.
+Static checkpoint review found two material defects before independent review: S-001 server answer-exposure laundering, corrected in `b0d5df8a…` + `01670f42…`; and S-002 duplicate Dart canonical-transition declarations that would block compilation, corrected in `e576ca17…`. The independent reviewer must verify the corrected candidate rather than inheriting the Brain/static review conclusion.
 
 ## Why independent review is required
 
