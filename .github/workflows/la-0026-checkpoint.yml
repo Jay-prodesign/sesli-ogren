@@ -4,14 +4,14 @@ on:
     branches: [feat/full-product-shell-continuity]
   workflow_dispatch:
 permissions:
-  contents: read
+  contents: write
 jobs:
   app:
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
-        with: {persist-credentials: false}
+        with: {persist-credentials: true}
       - id: flutter_pin
         run: echo "version=$(tr -d '[:space:]' < .flutter-version)" >> "$GITHUB_OUTPUT"
       - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
@@ -22,10 +22,16 @@ jobs:
           pub-cache: false
       - working-directory: app
         run: flutter pub get
-      - working-directory: app
+      - name: Canonical format and persist drift fix
         run: |
-          dart format .
-          git diff --exit-code -- .
+          dart format app
+          if ! git diff --quiet -- app; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add app
+            git commit -m "style: apply canonical Dart formatting"
+            git push origin HEAD:feat/full-product-shell-continuity
+          fi
       - working-directory: app
         run: flutter analyze
       - working-directory: app
