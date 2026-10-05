@@ -77,7 +77,12 @@ def main() -> None:
     }
     signup = urllib.request.Request(
         f"{url}/auth/v1/signup",
-        data=b"{}",
+        data=json.dumps(
+            {
+                "data": {},
+                "gotrue_meta_security": {"captcha_token": None},
+            }
+        ).encode("utf-8"),
         headers=headers,
         method="POST",
     )
