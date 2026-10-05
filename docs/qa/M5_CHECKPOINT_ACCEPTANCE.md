@@ -98,9 +98,9 @@ This matrix does **not** declare M5 PASS by itself.
 | GLS-061 | STATIC_PASS / PENDING_BATCH | Reopen exposes one reason-coded continuation plus “Materyali güncelle” override; missing/corrupt continuation enters repair/fallback. |
 | GLS-062 | STATIC_PASS | Recall offers hint, direct answer exposure and “Bilmiyorum”; learner is not trapped. |
 | GLS-063 | STATIC_PASS | Result shows outcome-specific feedback, correct expression and source context. |
-| GLS-064 | STATIC_PASS / PENDING_REVIEW / PENDING_BATCH | Critical meaning is textual; D/Knot has semantics/fallback; Reduced Motion is wired and tests authored. Text scaling/screen-reader/layout execution still needs checkpoint review/batch. |
+| GLS-064 | STATIC_REVIEW_PASS / PENDING_BATCH | Critical meaning is textual; D/Knot has semantics/fallback; Reduced Motion is wired; 48dp primary action sizing is present. Static accessibility review is complete. Large-text/layout/semantic execution remains batch evidence and physical VoiceOver/TalkBack remains under D-068. |
 | GLS-065 | DEFERRED_D068 | No mobile-readiness claim is made. Physical iPhone + representative Android evidence remains required later under D-068. |
-| GLS-066 | PENDING_REVIEW | Engineering implementation cannot self-grant Product Experience, Learning Experience or Creative Quality PASS. Actual-slice dispositions are still required. |
+| GLS-066 | M5_BOUNDED_PASS | Brain checkpoint dispositions are explicit in `docs/qa/M5_EXPERIENCE_DISPOSITIONS_2026-10-05.md`: Product Experience M5_BOUNDED_PASS; Learning Experience STATIC_PASS/BATCH_PENDING; Creative Quality M5_BOUNDED_PASS; Accessibility STATIC_REVIEW_PASS/RUNTIME_PENDING. This is not a V0 experience-quality claim. |
 
 ## H — Conditional speech and visual surfaces
 
@@ -132,6 +132,6 @@ A Brain/static review found one HIGH learning-truth integrity defect in the serv
 2. exact dependency resolution is generated and committed;
 3. one bounded D-072 Flutter validation batch passes at the frozen head;
 4. GLS-083 independent read-only review is completed and material findings are resolved;
-5. Product Experience / Learning Experience / Creative Quality / accessibility dispositions for the actual slice are explicit.
+5. remaining accessibility/runtime evidence in the bounded batch is complete.
 
 Physical-device mobile-readiness remains separately deferred under D-068.
