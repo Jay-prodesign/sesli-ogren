@@ -117,7 +117,7 @@ This matrix does **not** declare M5 PASS by itself.
 | GLS-080 | PENDING_BATCH | Exact final checkpoint head must be frozen after evidence-only fixes. |
 | GLS-081 | BLOCKED | `app/pubspec.lock` is absent and the current container has no Flutter/Dart toolchain. Generate/commit exact resolution in the single checkpoint batch. |
 | GLS-082 | STATIC_PASS / PENDING_BATCH | D-024 register records direct M5 dependencies/licenses; exact transitive resolution/notice evidence awaits lock generation. |
-| GLS-083 | SYNTHETIC_PASS / INDEPENDENT_PENDING | Synthetic adversarial review found S-003 HIGH rule-version provenance drift and it was corrected in `64579d48…`; no unresolved BLOCKER/HIGH remains synthetically. This is not an independence claim. External independent review remains required unless Founder explicitly waives that requirement. |
+| GLS-083 | PASS_FOUNDER_WAIVER | Synthetic adversarial review found and corrected S-003 and reports no unresolved BLOCKER/HIGH. Founder accepted synthetic review as sufficient for M5 only; external independence is waived for this checkpoint. |
 | GLS-084 | PENDING | No known unresolved blocker other than the explicit GLS-081 reproducibility gap and required review/batch evidence. |
 
 ## Static checkpoint correction
