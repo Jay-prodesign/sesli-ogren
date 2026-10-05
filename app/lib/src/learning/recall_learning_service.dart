@@ -9,11 +9,8 @@ import '../domain/learning_contracts.dart';
 import '../domain/learning_truth.dart';
 
 class RecallLearningService {
-  const RecallLearningService({
-    required this._sourceStore,
-    required this._learningStore,
-    DateTime Function()? now,
-  }) : _now = now ?? DateTime.now;
+  const RecallLearningService({required this._sourceStore, required this._learningStore, DateTime Function()? now})
+    : _now = now ?? DateTime.now;
 
   static const promptRuleVersion = 'recall-cloze-v1';
   static const evidenceRuleVersion = RecallTruthPolicy.evidenceRuleVersion;
