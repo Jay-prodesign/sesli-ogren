@@ -69,3 +69,14 @@ Still **BLOCKED** for M5 PASS:
 ## Independent-review boundary
 
 This review is intentionally not counted as GLS-083 because the same ChatGPT/Brain execution stream identified and corrected S-001. The independent reviewer must inspect the corrected candidate, including the server assistance delta, and return REVIEW_PASS / CHANGES_REQUIRED / BLOCKED.
+
+
+## Dependency / native-target compatibility — STATIC_PASS
+
+Current package constraints were checked against the pinned Flutter/Dart line before the runtime batch:
+- `pdfrx 2.6.1` requires Flutter 3.47+ / Dart 3.13+ and iOS 15+; repository pin is Flutter 3.47.5, `app/pubspec.yaml` requires Dart ^3.13.4, and the iOS Xcode project is set to deployment target 15.0.
+- direct low-level PDF access already calls `pdfrxFlutterInitialize()` lazily before `PdfDocument.openData`.
+- `sqflite 2.4.4`, `supabase_flutter 2.17.2`, `crypto 3.0.7` and `flutter_lints 6.0.0` have minimum Dart requirements below the M5 Dart 3.13.4 line.
+- exact transitive compatibility remains a lockfile/runtime-batch claim only; this static check does not replace `flutter pub get`.
+
+No dependency/toolchain incompatibility blocker is known from static review.
