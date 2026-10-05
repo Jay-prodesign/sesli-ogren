@@ -60,12 +60,12 @@ Physical iPhone + representative Android speech/audibility, accessibility, perfo
 
 ## Routine validation — D-072
 
-- GitHub Actions are **OFF for routine implementation**.
-- PR #10 is closed unmerged; do not reopen it merely to obtain per-commit CI.
-- The M5-specific `.github/workflows/m5-app.yml` workflow has been removed.
-- Continue with static/deterministic repo review and implementation.
-- Mark Flutter/runtime/build checks that require unavailable tooling as `PENDING_BATCH_VALIDATION`.
-- Use at most one bounded Actions validation batch at an applicable milestone/release evidence point, unless the Founder explicitly changes this rule.
+- Founder superseded the earlier hard no-Actions stop.
+- Bounded GitHub Actions were used only for the M5 checkpoint and are now complete.
+- Flutter/Android bounded run `37334117375`: PASS — Flutter 3.47.5, lockfile, format, analyze, 39 tests, real PDF engine probe, Android profile build, PDFium packaging.
+- Platform run `37337837569`: PASS — PostgreSQL SQL suite 5/5 and iOS profile no-codesign build.
+- M5-specific temporary validation workflows have been removed after evidence capture.
+- Do not restore per-commit M5 CI. Future Actions use remains bounded/milestone-driven.
 
 
 ## Founder resume checkpoint — 2026-10-05
