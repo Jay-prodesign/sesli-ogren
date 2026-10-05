@@ -387,3 +387,19 @@ D-075 refines D-066 and does not weaken canonical master authority, provenance,
 SOURCE VISUAL PASS vs PRODUCTION ASSET PASS, app integration, or device QA.
 D/Knot remains locked under D-070. During LA-0022, this section does not
 authorize new asset breadth or reopen character discovery.
+
+
+## 16. Agent credit efficiency
+
+Codex/Claude usage must be cost-efficient.
+
+1. Brain handles planning, research, reconciliation, review, documentation, task decomposition and command drafting unless a local runtime/repository capability is required.
+2. Codex/Claude are delegated only bounded implementation, terminal/runtime execution, or repo-local verification that materially needs their environment.
+3. Do not repeat broad fresh-reads, historical audits, summaries, explanations, or evidence generation when current task authority can be supplied directly.
+4. Prefer one narrow command with exact scope, files, allowed mutations, validation, and stop condition.
+5. Batch adjacent checks when safe; avoid multiple sessions for work that can be completed in one bounded run.
+6. Stop on the first controlling failure. Do not continue downstream validation whose result cannot change the current disposition.
+7. Engineer returns should be concise and decision-relevant: commands/results, changed files, blocker/deviation, and exact next action.
+8. Do not spend agent credits merely to restate context Brain already knows.
+
+This efficiency rule does not weaken security, correctness, protected-action, evidence, or project-isolation requirements.
