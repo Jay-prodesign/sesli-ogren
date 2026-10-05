@@ -74,6 +74,6 @@ Founder explicitly **RESUMED** work in the Learning App conversation after the r
 
 Resume record: `docs/agent/PAUSE_CHECKPOINT_2026-10-05.md` now records the supersession.
 
-Current runtime candidate remains `01670f42029ef228706c4a772594102e5656ebdf`; later control-plane/documentation commits do not widen runtime feature scope.
+Current runtime candidate is `e576ca177ff8872cbbfc4f127eb016cefa7f611c`; this supersedes `01670f42…` only to remove the checkpoint-discovered duplicate-declaration compile blocker. Later control-plane/documentation commits do not widen runtime feature scope.
 
 Continue LA-0022 from unresolved evidence gates only: real Supabase authenticated learner evidence → Flutter 3.47.5 lockfile + single bounded D-072 validation batch (including server SQL) → GLS-083 independent review → M5 verdict. No new feature breadth before M5 closes.
