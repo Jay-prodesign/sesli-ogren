@@ -15,7 +15,7 @@ This matrix does **not** declare M5 PASS by itself.
 
 - Repository: `Jay-prodesign/sesli-ogren`
 - Branch: `feat/m5-golden-learning-slice`
-- Frozen runtime implementation candidate: `ff7b36c0617b60e8b7bc275b89401b81bd7a1595`
+- Frozen runtime implementation candidate: `01670f42029ef228706c4a772594102e5656ebdf`
 - Checkpoint-control-only reconciliation commits may follow this SHA; they do not widen runtime feature scope.
 - Flutter pin: `.flutter-version` = 3.47.5.
 - Routine GitHub Actions: OFF under D-072.
@@ -50,13 +50,13 @@ This matrix does **not** declare M5 PASS by itself.
 | GLS-020 | STATIC_PASS | Source-grounded Recall is a meaningful active retrieval action. |
 | GLS-021 | STATIC_PASS | LearnerEvidence is inserted before the derived LearnerState/NextLearningAction projection in one transaction. |
 | GLS-022 | STATIC_PASS / PENDING_BATCH | Stable attempt identity + unique learner/attempt key + replay comparison prevent double-counting; regression tests authored. |
-| GLS-023 | STATIC_PASS / PENDING_BATCH | Independent, hinted, answer-exposed, partial, incorrect and unknown remain distinct. Canonical support history cannot be downgraded by client declaration. |
+| GLS-023 | STATIC_PASS / PENDING_BATCH | Independent, hinted, answer-exposed, partial, incorrect and unknown remain distinct. Local assistance is monotonic; static checkpoint review also corrected the server delta so answer exposure is canonical and cannot be laundered into unassisted success. PostgreSQL execution remains batch evidence. |
 | GLS-024 | STATIC_PASS | UI/open/time/Companion/telemetry paths never write learner mastery/readiness truth. |
 | GLS-025 | STATIC_PASS | State vocabulary is bounded observation only; no mastery probability/readiness percentage is claimed. |
 | GLS-026 | STATIC_PASS | Prompt/evidence/state/next-action rule or policy versions are explicit; same canonical evidence maps through one RecallTruthPolicy. |
 | GLS-027 | STATIC_PASS | Next action is persisted with stable reason code + policy version and tied to latest evidence. |
 | GLS-028 | STATIC_PASS / PENDING_BATCH | Repeated same-prompt evidence cannot escalate beyond the bounded retrieved-once state; test authored. |
-| GLS-029 | STATIC_PASS | Unknown, incorrect, partial, hinted and answer-exposed outcomes map to distinct non-shaming repair/retry behavior. |
+| GLS-029 | STATIC_PASS / PENDING_BATCH | Unknown, incorrect, partial, hinted and answer-exposed outcomes map to distinct non-shaming repair/retry behavior locally; server outcome-specific reason parity was added in the checkpoint correction and awaits PostgreSQL batch execution. |
 
 ## D — AI/evaluation
 
@@ -117,8 +117,12 @@ This matrix does **not** declare M5 PASS by itself.
 | GLS-080 | PENDING_BATCH | Exact final checkpoint head must be frozen after evidence-only fixes. |
 | GLS-081 | BLOCKED | `app/pubspec.lock` is absent and the current container has no Flutter/Dart toolchain. Generate/commit exact resolution in the single checkpoint batch. |
 | GLS-082 | STATIC_PASS / PENDING_BATCH | D-024 register records direct M5 dependencies/licenses; exact transitive resolution/notice evidence awaits lock generation. |
-| GLS-083 | PENDING_REVIEW | Persistence/migration, idempotency, assistance/evidence/state and active-attempt changes trigger independent read-only review. |
+| GLS-083 | PENDING_REVIEW | Independent read-only review packet is refreshed for candidate `01670f42…`; reviewer must include the corrected server answer-exposure semantics. Brain static review is recorded separately and does not count as independent review. |
 | GLS-084 | PENDING | No known unresolved blocker other than the explicit GLS-081 reproducibility gap and required review/batch evidence. |
+
+## Static checkpoint correction
+
+A Brain/static review found one HIGH learning-truth integrity defect in the server assistance delta: answer exposure was not represented separately from hint/no-help. It was corrected in `b0d5df8a…` and regression/schema coverage was added in `01670f42…`. Static disposition is **RESOLVED / PENDING BATCH**; see `docs/qa/M5_STATIC_CHECKPOINT_REVIEW_2026-10-05.md`.
 
 ## Current checkpoint verdict
 
