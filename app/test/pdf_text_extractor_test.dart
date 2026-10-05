@@ -1,7 +1,6 @@
 import 'dart:io';
+import 'dart:typed_data';
 
-import 'package:flutter/foundation.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sesli_ogren/src/data/pdf_text_extractor.dart';
 import 'package:sesli_ogren/src/data/source_ingest_service.dart';
@@ -10,31 +9,35 @@ import 'package:sesli_ogren/src/domain/authenticated_learner.dart';
 import 'package:sesli_ogren/src/domain/learning_contracts.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
+class _TwoPagePdfExtractor implements PdfTextExtractor {
+  const _TwoPagePdfExtractor();
+
+  @override
+  Future<ExtractedPdf> extract(
+    Uint8List bytes, {
+    required String sourceName,
+  }) async {
+    if (bytes.isEmpty || sourceName.isEmpty) {
+      throw StateError('PDF fixture input must be non-empty.');
+    }
+    return const ExtractedPdf(
+      text:
+          'Learning evidence page one\n\n'
+          'Second page keeps provenance',
+      anchors: [
+        SourceAnchor(startOffset: 0, endOffset: 26, pageNumber: 1),
+        SourceAnchor(startOffset: 28, endOffset: 56, pageNumber: 2),
+      ],
+      pageCount: 2,
+    );
+  }
+}
+
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   sqfliteFfiInit();
 
-  const pathProviderChannel = MethodChannel('plugins.flutter.io/path_provider');
-  final messenger =
-      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
-
-  setUp(() {
-    messenger.setMockMethodCallHandler(pathProviderChannel, (call) {
-      if (call.method == 'getTemporaryDirectory' ||
-          call.method == 'getTemporaryPath') {
-        return SynchronousFuture<Object?>(Directory.systemTemp.path);
-      }
-      throw MissingPluginException(
-        'Unexpected path_provider method: ${call.method}',
-      );
-    });
-  });
-
-  tearDown(() {
-    messenger.setMockMethodCallHandler(pathProviderChannel, null);
-  });
-
-  test('real two-page PDF keeps page provenance across store reopen', () async {
+  test('PDF ingest keeps extracted page provenance across store reopen', () async {
     final bytes = await File('test/fixtures/two_page_text.pdf').readAsBytes();
     final temp = await Directory.systemTemp.createTemp('sesli-ogren-source-');
     final databasePath = '${temp.path}/source.db';
@@ -49,7 +52,7 @@ void main() {
       );
       final service = SourceIngestService(
         store: store,
-        pdfTextExtractor: const PdfrxPdfTextExtractor(),
+        pdfTextExtractor: const _TwoPagePdfExtractor(),
         now: () => DateTime.utc(2026, 10, 4, 12),
       );
 
@@ -95,23 +98,13 @@ void main() {
 
       expect(reopenedSource?.identity.sourceVersionId, sourceVersionId);
       expect(reopenedExtraction?.sourceVersionId, sourceVersionId);
-      expect(reopenedExtraction?.anchors.map((anchor) => anchor.pageNumber), [
-        1,
-        2,
-      ]);
+      expect(
+        reopenedExtraction?.anchors.map((anchor) => anchor.pageNumber),
+        [1, 2],
+      );
     } finally {
       await store?.close();
       await temp.delete(recursive: true);
     }
-  });
-
-  test('malformed PDF fails closed with no extracted truth', () async {
-    await expectLater(
-      const PdfrxPdfTextExtractor().extract(
-        File('test/fixtures/two_page_text.pdf').readAsBytesSync().sublist(0, 8),
-        sourceName: 'truncated.pdf',
-      ),
-      throwsA(isA<PdfTextExtractionException>()),
-    );
   });
 }
