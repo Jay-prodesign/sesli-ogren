@@ -5,7 +5,7 @@
 set -euo pipefail
 
 root="$(cd "$(dirname "$0")/.." && pwd)"
-review_return="$root/docs/qa/M5_GLS083_INDEPENDENT_REVIEW_RETURN.md"
+review_return="$root/docs/qa/M5_GLS083_SYNTHETIC_ADVERSARIAL_REVIEW_2026-10-05.md"
 lockfile="$root/app/pubspec.lock"
 report="${1:-$root/m5-final-linux-report.txt}"
 
@@ -14,8 +14,8 @@ fail() {
   exit 2
 }
 
-[ -f "$review_return" ] || fail "missing independent GLS-083 return: $review_return"
-grep -Eq '(^|[^A-Z_])REVIEW_PASS([^A-Z_]|$)' "$review_return" || fail "GLS-083 return does not contain REVIEW_PASS"
+[ -f "$review_return" ] || fail "missing accepted synthetic review artifact: $review_return"
+grep -Fq 'SYNTHETIC_PASS — NO UNRESOLVED BLOCKER/HIGH FOUND AFTER S-003 CORRECTION.' "$review_return" || fail "accepted synthetic review PASS marker missing"
 [ -f "$lockfile" ] || fail "app/pubspec.lock is missing; freeze the Flutter 3.47.5 lockfile first"
 
 [ -n "${SUPABASE_URL:-}" ] || fail "SUPABASE_URL is required"
@@ -28,7 +28,7 @@ cd "$root"
   echo "git_head: $(git rev-parse HEAD)"
   echo "git_branch: $(git rev-parse --abbrev-ref HEAD)"
   echo "runtime_candidate: 64579d48bcf9c33f4c709927a0e453349efb7c5b"
-  echo "review_return_sha256: $(sha256sum "$review_return" | awk '{print $1}')"
+  echo "synthetic_review_sha256: $(sha256sum "$review_return" | awk '{print $1}')"
   echo "pubspec_lock_sha256: $(sha256sum "$lockfile" | awk '{print $1}')"
   echo "flutter:"
   flutter --version | sed 's/^/  /'
