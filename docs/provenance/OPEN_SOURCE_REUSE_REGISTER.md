@@ -152,7 +152,7 @@ custom code, record it here with a concrete reason, as AGENTS.md §12 requires:
 | --- | --- |
 | Task ID | LA-0018 |
 | Upstream repository | https://github.com/flutter/packages |
-| Exact tag / commit / version | flutter_lints 6.0.0 exact-pinned in `app/pubspec.yaml`; lockfile resolution is PENDING_BATCH_VALIDATION under D-072 |
+| Exact tag / commit / version | flutter_lints 6.0.0 exact-pinned in `app/pubspec.yaml`; lockfile resolution PASS in M5 bounded validation run 37334117375 |
 | License | BSD-3-Clause (© The Flutter Authors) |
 | Reuse class | DEPENDENCY |
 | Dependency / files / modules used | `dev_dependencies` of `app/`; analysis only |
@@ -168,7 +168,7 @@ custom code, record it here with a concrete reason, as AGENTS.md §12 requires:
 | --- | --- |
 | Task ID | LA-0019 |
 | Upstream repository | https://github.com/dart-lang/core |
-| Exact tag / commit / version | crypto 3.0.7 exact-pinned in `app/pubspec.yaml`; lockfile resolution is PENDING_BATCH_VALIDATION under D-072 |
+| Exact tag / commit / version | crypto 3.0.7 exact-pinned in `app/pubspec.yaml`; lockfile resolution PASS in M5 bounded validation run 37334117375 |
 | License | BSD-3-Clause (© Dart project authors) |
 | Reuse class | DEPENDENCY |
 | Dependency / files / modules used | SHA-256 only for deterministic content/source-version identity |
@@ -184,7 +184,7 @@ custom code, record it here with a concrete reason, as AGENTS.md §12 requires:
 | --- | --- |
 | Task ID | LA-0019 |
 | Upstream repository | https://github.com/tekartik/sqflite |
-| Exact tag / commit / version | sqflite 2.4.4 exact-pinned in `app/pubspec.yaml`; lockfile resolution is PENDING_BATCH_VALIDATION under D-072 |
+| Exact tag / commit / version | sqflite 2.4.4 exact-pinned in `app/pubspec.yaml`; lockfile resolution PASS in M5 bounded validation run 37334117375 |
 | License | BSD-2-Clause |
 | Reuse class | DEPENDENCY |
 | Dependency / files / modules used | Local SQLite persistence for learner-scoped Material/SourceVersion truth during the admitted M5 slice |
@@ -200,7 +200,7 @@ custom code, record it here with a concrete reason, as AGENTS.md §12 requires:
 | --- | --- |
 | Task ID | LA-0019 |
 | Upstream repository | https://github.com/tekartik/sqflite |
-| Exact tag / commit / version | sqflite_common_ffi 2.4.3 exact-pinned as a dev dependency; lockfile resolution is PENDING_BATCH_VALIDATION under D-072 |
+| Exact tag / commit / version | sqflite_common_ffi 2.4.3 exact-pinned as a dev dependency; lockfile resolution PASS in M5 bounded validation run 37334117375 |
 | License | BSD-2-Clause |
 | Reuse class | DEPENDENCY |
 | Dependency / files / modules used | Test-only in-memory SQLite factory for tenant/idempotency/supersession/deletion tests |
@@ -216,7 +216,7 @@ custom code, record it here with a concrete reason, as AGENTS.md §12 requires:
 | --- | --- |
 | Task ID | LA-0019 |
 | Upstream repository | https://github.com/espresso3389/pdfrx |
-| Exact tag / commit / version | pdfrx 2.6.1 exact-pinned in `app/pubspec.yaml`; transitive PDF engine/native lock resolution is PENDING_BATCH_VALIDATION under D-072 |
+| Exact tag / commit / version | pdfrx 2.6.1 exact-pinned in `app/pubspec.yaml`; lockfile PASS resolves pdfrx_engine 0.6.1 + pdfium_flutter 0.3.1; real two-page native PDF engine probe PASS in run 37334117375 |
 | License | MIT for pdfrx/pdfrx_engine/pdfium_flutter; bundled PDFium is BSD-style with its own third-party notices |
 | Reuse class | DEPENDENCY |
 | Dependency / files / modules used | Low-level `PdfDocument.openData` + per-page `loadText()` only; no PDF viewer/editing surface admitted |
@@ -234,7 +234,7 @@ custom code, record it here with a concrete reason, as AGENTS.md §12 requires:
 | --- | --- |
 | Task ID | LA-0022 |
 | Upstream repository | https://github.com/supabase/supabase-flutter |
-| Exact tag / commit / version | supabase_flutter 2.17.2 exact-pinned in `app/pubspec.yaml`; lock/transitive resolution is PENDING_BATCH_VALIDATION under D-072 |
+| Exact tag / commit / version | supabase_flutter 2.17.2 exact-pinned in `app/pubspec.yaml`; lock/transitive resolution PASS in M5 bounded validation run 37334117375; live project auth evidence remains blocked only by missing client-safe project URL/publishable key |
 | License | MIT |
 | Reuse class | DEPENDENCY |
 | Dependency / files / modules used | Flutter client bootstrap + persisted Auth session + anonymous authenticated user creation only |
