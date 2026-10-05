@@ -117,7 +117,7 @@ This matrix does **not** declare M5 PASS by itself.
 | GLS-080 | PENDING_BATCH | Exact final checkpoint head must be frozen after evidence-only fixes. |
 | GLS-081 | BLOCKED | `app/pubspec.lock` is absent and the current container has no Flutter/Dart toolchain. Generate/commit exact resolution in the single checkpoint batch. |
 | GLS-082 | STATIC_PASS / PENDING_BATCH | D-024 register records direct M5 dependencies/licenses; exact transitive resolution/notice evidence awaits lock generation. |
-| GLS-083 | PENDING_REVIEW | Independent read-only review packet is refreshed for candidate `e576ca17…`; reviewer must include the corrected server answer-exposure semantics. Brain static review is recorded separately and does not count as independent review. |
+| GLS-083 | READY_FOR_INDEPENDENT_EXECUTION | Read-only packet + exact reviewer command are committed for frozen candidate `e576ca17…`. Same Brain/static review stream is explicitly ineligible to self-grant independence. External independent reviewer return remains required before the single bounded validation batch. |
 | GLS-084 | PENDING | No known unresolved blocker other than the explicit GLS-081 reproducibility gap and required review/batch evidence. |
 
 ## Static checkpoint correction
