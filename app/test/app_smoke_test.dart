@@ -32,11 +32,7 @@ Widget testShell(AppRuntime runtime) {
   );
 }
 
-Future<void> pumpUntilFound(
-  WidgetTester tester,
-  Finder finder, {
-  int maxPumps = 100,
-}) async {
+Future<void> pumpUntilFound(WidgetTester tester, Finder finder, {int maxPumps = 100}) async {
   for (var i = 0; i < maxPumps; i++) {
     await tester.pump(const Duration(milliseconds: 20));
     if (finder.evaluate().isNotEmpty) {
@@ -55,10 +51,7 @@ void main() {
 
   testWidgets('production app does not open learner data without auth config', (tester) async {
     await tester.pumpWidget(const SesliOgrenApp());
-    await pumpUntilFound(
-      tester,
-      find.text('Uygulama bağlantısı henüz yapılandırılmadı.'),
-    );
+    await pumpUntilFound(tester, find.text('Uygulama bağlantısı henüz yapılandırılmadı.'));
 
     expect(find.text('Uygulama bağlantısı henüz yapılandırılmadı.'), findsOneWidget);
     expect(find.textContaining('Öğrenme verisi açılmadı'), findsOneWidget);
@@ -227,10 +220,7 @@ void main() {
 
     await tester.enterText(find.byType(TextField), action!.expectedAnswer);
     await tester.tap(find.text('Yanıtla'));
-    await pumpUntilFound(
-      tester,
-      find.textContaining('geri çağırma başarısı olarak sayılmadı'),
-    );
+    await pumpUntilFound(tester, find.textContaining('geri çağırma başarısı olarak sayılmadı'));
 
     expect(find.text('İpucusuz hatırladın'), findsNothing);
     expect(find.textContaining('geri çağırma başarısı olarak sayılmadı'), findsOneWidget);
