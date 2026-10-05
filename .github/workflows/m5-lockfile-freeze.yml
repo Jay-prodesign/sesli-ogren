@@ -1,0 +1,55 @@
+name: m5-lockfile-freeze
+
+on:
+  push:
+    branches: [freeze/m5-lockfile-64579d48]
+    paths:
+      - ".github/workflows/m5-lockfile-freeze.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: m5-lockfile-freeze
+  cancel-in-progress: false
+
+jobs:
+  generate:
+    name: Generate Flutter 3.47.5 lockfile
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+
+      - name: Verify frozen runtime ancestry and Flutter pin
+        shell: bash
+        run: |
+          set -euo pipefail
+          git merge-base --is-ancestor 64579d48bcf9c33f4c709927a0e453349efb7c5b HEAD
+          test "$(tr -d '[:space:]' < .flutter-version)" = "3.47.5"
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
+        with:
+          channel: stable
+          flutter-version: "3.47.5"
+          cache: false
+          pub-cache: false
+
+      - name: Generate lockfile
+        working-directory: app
+        shell: bash
+        run: |
+          set -euo pipefail
+          flutter --version
+          dart --version
+          test ! -e pubspec.lock
+          flutter pub get
+          test -s pubspec.lock
+          echo "LOCK_SHA256=$(sha256sum pubspec.lock | awk '{print $1}')"
+          echo "===M5_LOCKFILE_BEGIN==="
+          cat pubspec.lock
+          echo "===M5_LOCKFILE_END==="
