@@ -84,7 +84,7 @@
     "Accessibility runtime evidence remains pending in the batch; physical VoiceOver/TalkBack/device/orientation evidence remains deferred under D-068."
   ],
   "protected_gate": "Merge, release, deploy, paid providers, credentials/secrets, licensing posture, production mutation: Product Owner only",
-  "next_action": "Obtain an actual independent GLS-083 review on review-only PR #11 / frozen runtime candidate e576ca17…. The PR is isolated and `[skip ci]` produced zero observed workflow runs, but Copilot reviewer dispatch via the GitHub connector was not confirmed; requested-reviewers/reviews remained empty. Do not self-grant review PASS. Once an actual independent REVIEW_PASS exists, freeze Flutter 3.47.5 pubspec.lock and run the one bounded D-072 batch.",
+  "next_action": "External-only GLS-083 gate: obtain an actual independent review on PR #11 / frozen runtime candidate e576ca17…. Preferred zero-code path is GitHub PR #11 -> Reviewers -> Copilot -> Request if available; otherwise run the committed reviewer command in a separate Claude/Codex context. Do not use metered browser automation without explicit paid-spend authorization. After actual REVIEW_PASS: Flutter 3.47.5 lockfile freeze -> single bounded D-072 validation batch -> M5 verdict.",
   "canonical_source_refs": [
     "CURRENT_EXECUTION_STATE — Learning App",
     "D-070 — Founder Product/Visual PASS / D-Knot selected",
@@ -240,7 +240,12 @@
       "actions_runs_observed": 0,
       "copilot_dispatch": "REQUEST_ATTEMPTED_NOT_CONFIRMED",
       "note": "GitHub reviewer requests for copilot-pull-request-reviewer[bot] and copilot did not appear in requested-reviewers or reviews through the connector. Do not count as GLS-083 evidence until an actual independent review is present."
-    }
+    },
+    "manual_completion_paths": [
+      "GitHub PR #11 -> Reviewers -> Copilot -> Request (preferred if Copilot code review is available on the account/repository).",
+      "Open a separate Claude/Codex reviewer context and give it docs/qa/M5_GLS083_INDEPENDENT_REVIEW_COMMAND.md plus PR #11 / frozen SHA e576ca17…."
+    ],
+    "paid_browser_automation": "NOT_AUTHORIZED — metered browser automation could click the GitHub UI, but paid-provider spend remains a Product Owner gate and was not explicitly authorized."
   },
   "validation_batch_readiness": {
     "status": "READY_PENDING_GLS083_REVIEW_PASS_AND_LOCKFILE",
