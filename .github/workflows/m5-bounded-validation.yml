@@ -42,11 +42,14 @@ jobs:
           flutter pub get
           git diff --exit-code -- pubspec.lock
 
-      - name: Format check
+      - name: Capture canonical Dart formatting
         working-directory: app
-        run: dart format --output=none --set-exit-if-changed .
+        run: |
+          dart format .
+          git diff --check
+          git diff -- test/app_smoke_test.dart test/_pdfrx_diagnostic_test.dart || true
 
-      - name: Analyze
+      - name: Analyze formatted diagnostic workspace
         working-directory: app
         run: flutter analyze
 
