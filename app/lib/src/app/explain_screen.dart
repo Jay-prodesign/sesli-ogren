@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../domain/learning_contracts.dart';
 import '../generation/grounded_explain_gateway.dart';
 import 'app_runtime.dart';
+import 'explain_back_screen.dart';
 import 'learning_slice_screen.dart';
 
 class ExplainScreen extends StatefulWidget {
@@ -13,6 +14,7 @@ class ExplainScreen extends StatefulWidget {
   });
 
   final AppRuntime runtime;
+  final SourceVersionRecord source;
   final SourceVersionRecord source;
 
   @override
@@ -54,7 +56,7 @@ class _ExplainScreenState extends State<ExplainScreen> {
             if (!result.matches(widget.source.identity)) {
               return _Unavailable(reason: GroundedExplainUnavailableReason.staleSource, onRetry: _retry);
             }
-            return _Ready(result: result, runtime: widget.runtime);
+            return _Ready(result: result, runtime: widget.runtime, source: widget.source);
           }
           return _Unavailable(reason: (result as GroundedExplainUnavailable).reason, onRetry: _retry);
         },
@@ -64,7 +66,7 @@ class _ExplainScreenState extends State<ExplainScreen> {
 }
 
 class _Ready extends StatelessWidget {
-  const _Ready({required this.result, required this.runtime});
+  const _Ready({required this.result, required this.runtime, required this.source});
 
   final GroundedExplainReady result;
   final AppRuntime runtime;
@@ -102,10 +104,18 @@ class _Ready extends StatelessWidget {
           color: theme.colorScheme.secondaryContainer.withValues(alpha: 0.45),
           child: const Padding(
             padding: EdgeInsets.all(16),
-            child: Text('Açıklamayı okumak öğrenme kanıtı oluşturmaz. Hazır olduğunda Hatırla ile aktif olarak dene.'),
+            child: Text('Açıklamayı okumak öğrenme kanıtı oluşturmaz. Hazır olduğunda kendi cümlelerinle anlat veya Hatırla ile aktif olarak dene.'),
           ),
         ),
         const SizedBox(height: 14),
+        FilledButton.icon(
+          onPressed: () => Navigator.of(context).push<void>(
+            MaterialPageRoute(builder: (_) => ExplainBackScreen(runtime: runtime, source: source)),
+          ),
+          icon: const Icon(Icons.record_voice_over_outlined),
+          label: const Text('Kendi cümlelerinle anlat'),
+        ),
+        const SizedBox(height: 10),
         FilledButton.icon(
           onPressed: () => Navigator.of(context).push<void>(
             MaterialPageRoute(builder: (_) => LearningSliceScreen(runtime: runtime)),
