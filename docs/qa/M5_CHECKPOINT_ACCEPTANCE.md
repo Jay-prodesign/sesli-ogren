@@ -50,7 +50,7 @@ This matrix does **not** declare M5 PASS by itself.
 | GLS-020 | STATIC_PASS | Source-grounded Recall is a meaningful active retrieval action. |
 | GLS-021 | STATIC_PASS | LearnerEvidence is inserted before the derived LearnerState/NextLearningAction projection in one transaction. |
 | GLS-022 | STATIC_PASS / PENDING_BATCH | Stable attempt identity + unique learner/attempt key + replay comparison prevent double-counting; regression tests authored. |
-| GLS-023 | STATIC_PASS / PENDING_BATCH | Independent, hinted, answer-exposed, partial, incorrect and unknown remain distinct. Local assistance is monotonic; static checkpoint review also corrected the server delta so answer exposure is canonical and cannot be laundered into unassisted success. PostgreSQL execution remains batch evidence. |
+| GLS-023 | STATIC_PASS / STRONGER_RPC_BATCH_PENDING | Independent, hinted, answer-exposed, partial, incorrect and unknown remain distinct. Local assistance is monotonic; static checkpoint review also corrected the server delta so answer exposure is canonical and cannot be laundered into unassisted success. PostgreSQL execution remains batch evidence. |
 | GLS-024 | STATIC_PASS | UI/open/time/Companion/telemetry paths never write learner mastery/readiness truth. |
 | GLS-025 | STATIC_PASS | State vocabulary is bounded observation only; no mastery probability/readiness percentage is claimed. |
 | GLS-026 | STATIC_PASS | Prompt/evidence/state/next-action rule or policy versions are explicit; same canonical evidence maps through one RecallTruthPolicy. |
@@ -123,6 +123,10 @@ This matrix does **not** declare M5 PASS by itself.
 ## Static checkpoint correction
 
 Brain/static review found and corrected two material checkpoint defects: (S-001) server answer exposure could be laundered into unassisted success; corrected in `b0d5df8a…` + `01670f42…`; and (S-002) duplicate Dart declarations in local persistence would block compilation; corrected in `e576ca17…`. Static disposition is **RESOLVED / PENDING BATCH**; see `docs/qa/M5_STATIC_CHECKPOINT_REVIEW_2026-10-05.md`.
+
+## Validation-test hardening
+
+Post-freeze commit `f00df73…` strengthens `server/db/tests/40_recall_learning_truth.sql` with real RPC-level assistance/idempotency/isolation regressions. It does not change runtime/migration semantics and therefore does not change the frozen GLS-083 runtime candidate. Execution remains part of the single bounded SQL batch.
 
 ## Current checkpoint verdict
 
