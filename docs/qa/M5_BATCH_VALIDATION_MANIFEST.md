@@ -157,9 +157,7 @@ Record the single bounded batch in `docs/qa/M5_FINAL_VALIDATION_RETURN.md`. Do n
 
 ## Guarded execution helpers
 
-After a real GLS-083 `REVIEW_PASS` return exists and `app/pubspec.lock` has
-been generated/reviewed/committed with Flutter 3.47.5, prefer the guarded
-helpers instead of manually retyping the batch:
+After the Founder-accepted synthetic GLS-083 review artifact is present and `app/pubspec.lock` has been generated/reviewed/committed with Flutter 3.47.5, prefer the guarded helpers instead of manually retyping the batch:
 
 Linux/Android + live auth + server SQL:
 ```bash
@@ -171,5 +169,4 @@ macOS/iOS profile no-codesign:
 bash scripts/m5_run_final_validation_macos.sh
 ```
 
-Both helpers fail closed when the independent review return or lockfile is
-missing. They do not create the review return or grant M5 PASS.
+Both helpers fail closed when the accepted synthetic review artifact or lockfile is missing. They do not create the review return or grant M5 PASS.
