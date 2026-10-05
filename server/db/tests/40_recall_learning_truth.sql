@@ -116,7 +116,7 @@ begin
      ) then
     raise exception 'learner state rule-version constraint missing';
   end if;
-end $;
+end $$;
 
 
 do $
@@ -134,15 +134,15 @@ $$;
 \set user_a '''c1000000-0000-4000-8000-000000000001'''
 \set user_b '''c1000000-0000-4000-8000-000000000002'''
 
-create or replace function pg_temp.ok(v boolean, msg text) returns void language plpgsql as $
+create or replace function pg_temp.ok(v boolean, msg text) returns void language plpgsql as $$
 begin
   if v is distinct from true then
     raise exception 'recall_behavior_assert_failed: %', msg;
   end if;
-end $;
+end $$;
 
 create or replace function pg_temp.denied(stmt text, expected text, msg text)
-returns void language plpgsql as $
+returns void language plpgsql as $$
 declare err text;
 begin
   begin
@@ -155,7 +155,7 @@ begin
     return;
   end;
   raise exception 'recall_behavior_assert_failed: % (statement succeeded)', msg;
-end $;
+end $$;
 
 insert into auth.users (id, email) values
   (:user_a, 'm5-recall-a@example.test'),
