@@ -21,7 +21,7 @@ Milestone numbering follows the program sequence in
 M1 = Architecture Proof, …). Drive lifecycle-stage labels use a different
 numbering: lifecycle "M3" is this M0, and lifecycle "M4" is this M1.
 
-Next unallocated ID: **LA-0023**.
+Next unallocated ID: **LA-0024**.
 
 ---
 
@@ -221,10 +221,21 @@ Next unallocated ID: **LA-0023**.
 - Verification: exact candidate head is frozen; applicable GLS matrix is reconciled; one bounded D-072 runtime/build batch is completed only after code freeze; dependency lock/reproducibility is closed; GLS-083 independent read-only review findings are resolved; Product/Learning/Creative/accessibility dispositions are explicit; remaining physical-device work stays bounded under D-068; Brain records PASS / CHANGES_REQUIRED / BLOCKED / OWNER_GATE.
 - Exec plan: [docs/exec-plans/LA-0022.md](docs/exec-plans/LA-0022.md)
 
+#### Section M2.S4.B — Project maturity / governance audit
+
+##### LA-0023 — Project work maturity & depth audit
+
+- Status: DONE
+- Depends on: LA-0021
+- Owner: Brain
+- Executor: ChatGPT / Brain audit
+- Verification: Drive `LA-0023 — PROJECT WORK MATURITY & DEPTH AUDIT — TASK SPEC + QUALITY GATE` records PASS WITH CHANGES REQUIRED, keeps LA-0022 as the active cursor, and projects only current-risk/hygiene remediation rather than reopening feature breadth.
+- Exec plan: [docs/exec-plans/LA-0023.md](docs/exec-plans/LA-0023.md)
+
 ## Milestone M3 — V0 Implementation Tranches
 
 - Status: PLANNED / NOT_EXECUTABLE
-- Entry gate: Brain accepts VS-001 and admits each tranche separately.
+- Entry gate: Brain accepts VS-001 and admits each tranche separately. Under D-074, a Product / Learning Premise Audit is required before the first major post-M5 product/learning tranche is admitted; exact audit task remains NOT_EXECUTABLE/unallocated until M5 closes.
 - Source: PRE_BOOTSTRAP_PRODUCT_READINESS_AND_MASTER_SEQUENCE_v1.0 — Learning App (Drive)
 - Tasks: none allocated (progressive detail; allocated only on Brain admission)
 
