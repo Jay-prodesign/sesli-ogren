@@ -226,7 +226,7 @@
     "packet": "docs/qa/M5_GLS083_REVIEW_PACKET.md",
     "reviewer_command": "docs/qa/M5_GLS083_INDEPENDENT_REVIEW_COMMAND.md",
     "return_path": "docs/qa/M5_GLS083_INDEPENDENT_REVIEW_RETURN.md",
-    "execution_note": "This ChatGPT/Brain stream cannot self-count as the independent reviewer because it authored the static review and remediations. No separate Codex/Claude reviewer runtime is available in the current tool environment. Post-candidate branch commits may include docs/control-plane and validation tooling; reviewer runtime scope remains frozen `app/` + `server/` at e576ca17….",
+    "execution_note": "Synthetic adversarial review is the accepted M5 review evidence by Founder decision. External independence is waived for LA-0022/M5 only. Current runtime candidate is 64579d48….",
     "review_surface": {
       "pr_number": 12,
       "pr_url": "https://github.com/Jay-prodesign/sesli-ogren/pull/12",
@@ -262,11 +262,11 @@
     "return": "docs/qa/M5_FINAL_VALIDATION_RETURN.md",
     "sql_helper": "scripts/m5_validate_server_sql.sh",
     "live_auth_helper": "scripts/m5_probe_supabase_anonymous_auth.py",
-    "execution_rule": "Do not run the single D-072 batch before independent GLS-083 REVIEW_PASS and final lockfile freeze.",
+    "execution_rule": "Run the single D-072 batch only after the Founder-accepted synthetic review artifact is present and app/pubspec.lock is generated/reviewed/committed from Flutter 3.47.5.",
     "server_rpc_regression_test_commit": "f00df73dbf7851f48d7edf8e95ae463859c18bb4",
     "server_rpc_regression_scope": "Actual RPC-level unassisted replay/idempotency, hint semantics, answer-exposure non-laundering, assistance monotonicity, cross-user isolation, and submitted-attempt support-mutation rejection. PENDING execution in the single SQL batch.",
     "linux_runner": "scripts/m5_run_final_validation_linux.sh",
     "macos_runner": "scripts/m5_run_final_validation_macos.sh",
-    "guard": "Both runners require an actual independent REVIEW_PASS return plus committed app/pubspec.lock before executing. Linux runner performs live auth, bootstrap checks, dependency reproducibility, format/analyze/tests, Android profile build and combined SQL suite; macOS runner performs lock reproducibility and iOS profile no-codesign build."
+    "guard": "Both runners require the accepted synthetic review artifact plus committed app/pubspec.lock before executing. Linux runner performs live auth, bootstrap checks, dependency reproducibility, format/analyze/tests, Android profile build and combined SQL suite; macOS runner performs lock reproducibility and iOS profile no-codesign build."
   }
 }
