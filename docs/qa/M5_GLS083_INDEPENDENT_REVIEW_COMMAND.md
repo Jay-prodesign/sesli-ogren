@@ -6,7 +6,7 @@
 - Task: LA-0022
 - Review gate: GLS-083
 - Branch: `feat/m5-golden-learning-slice`
-- **Frozen runtime candidate:** `e576ca177ff8872cbbfc4f127eb016cefa7f611c`
+- **Frozen runtime candidate:** `64579d48bcf9c33f4c709927a0e453349efb7c5b`
 - Reviewer mode: **READ-ONLY**
 - Mutation authority: **NONE**
 - Merge/release/deploy authority: **NONE**
@@ -16,7 +16,7 @@ Later branch commits may contain documentation/control-plane changes and bounded
 ## Independent-review requirement
 
 The reviewer must be a separate reviewer context from the Brain/static review
-that authored/fixed S-001 and S-002. Do not inherit the prior PASS conclusion.
+that authored/fixed S-001, S-002 and S-003. Do not inherit prior PASS conclusions.
 
 Known prior findings to verify independently:
 
