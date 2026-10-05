@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sesli_ogren/src/app/app_runtime.dart';
 import 'package:sesli_ogren/src/app/learning_slice_screen.dart';
+import 'package:sesli_ogren/src/app/product_shell_screen.dart';
 import 'package:sesli_ogren/src/app/sesli_ogren_app.dart';
 import 'package:sesli_ogren/src/auth/supabase_learner_auth.dart';
 import 'package:sesli_ogren/src/data/pdf_text_extractor.dart';
@@ -166,6 +167,57 @@ void main() {
     expect(find.text('Devam noktası'), findsOneWidget);
     expect(find.textContaining('ONE_UNASSISTED_RETRIEVAL_OBSERVED'), findsNothing);
     expect(find.textContaining('Neden:'), findsNothing);
+  });
+
+  testWidgets('full product shell opens one coherent grounded material workspace', (tester) async {
+    final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
+    addTearDown(store.close);
+
+    final ingest = SourceIngestService(
+      store: store,
+      pdfTextExtractor: const _UnusedPdfExtractor(),
+      now: () => DateTime.utc(2026, 10, 5, 19),
+    );
+    final runtime = AppRuntime(
+      learner: AppRuntime.localM5LearnerFixture,
+      store: store,
+      ingest: ingest,
+      recall: RecallLearningService(sourceStore: store, learningStore: store.learningTruthStore()),
+      telemetry: store.operationalTelemetry(),
+    );
+
+    await ingest.ingestPastedText(
+      learner: runtime.learner,
+      materialId: AppRuntime.primaryMaterialId,
+      text:
+          'Fotosentez, bitkilerin ışık enerjisini kullanarak karbondioksit ve sudan '
+          'kimyasal enerji depolamasına yardımcı olan süreçtir.',
+      sourceName: 'Fotosentez çalışma notu',
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: MediaQuery(
+          data: const MediaQueryData(disableAnimations: true),
+          child: ProductShellScreen(runtime: runtime),
+        ),
+      ),
+    );
+    await pumpUntilFound(tester, find.text('Şimdi ne yapmalı?'));
+
+    expect(find.text('Kütüphane'), findsOneWidget);
+    expect(find.text('Materyalin'), findsOneWidget);
+    expect(find.text('Fotosentez çalışma notu'), findsWidgets);
+
+    await tapVisible(tester, find.text('Fotosentez çalışma notu').last);
+    await pumpUntilFound(tester, find.text('Öğrenme durumu'));
+
+    expect(find.text('Öğrenme durumu'), findsOneWidget);
+    expect(find.text('Henüz ölçülmedi'), findsOneWidget);
+    expect(find.text('Hızlı bakış'), findsOneWidget);
+    expect(find.text('Hatırla'), findsOneWidget);
+    expect(find.text('Dinle'), findsOneWidget);
+    expect(find.text('Kaynak'), findsOneWidget);
   });
 
   testWidgets('answer exposure survives close and reopen without becoming independent', (tester) async {
