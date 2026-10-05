@@ -27,6 +27,9 @@ Known prior findings to verify independently:
 - S-002: duplicate Dart canonical-transition declarations in
   `sqlite_source_store.dart` would block compilation. Correction:
   `e576ca177ff8872cbbfc4f127eb016cefa7f611c`.
+- S-003: server answer-exposure semantics were written under stale v1
+  evidence/state rule labels. Correction:
+  `64579d48bcf9c33f4c709927a0e453349efb7c5b`.
 
 These are review targets, not accepted facts.
 
