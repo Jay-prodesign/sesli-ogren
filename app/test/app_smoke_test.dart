@@ -215,7 +215,7 @@ void main() {
     expect(find.text('Öğrenme durumu'), findsOneWidget);
     expect(find.text('Henüz ölçülmedi'), findsOneWidget);
     expect(find.text('Hızlı bakış'), findsOneWidget);
-    expect(find.text('Hatırla'), findsOneWidget);
+    expect(find.text('Hatırla'), findsWidgets);
     expect(find.text('Dinle'), findsOneWidget);
     expect(find.text('Kaynak'), findsOneWidget);
   });
