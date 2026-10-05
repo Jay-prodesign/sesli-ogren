@@ -179,3 +179,23 @@ for future high-risk tasks.
 Next cursor inside LA-0022:
 Flutter 3.47.5 lockfile freeze -> one guarded D-072 final validation batch ->
 M5 verdict.
+
+
+## Founder override — NO GITHUB ACTIONS
+
+Founder explicitly stopped GitHub Actions for the remaining M5 work after
+repeated failed runs. Do not create, trigger, rerun, or rely on any GitHub
+Actions workflow for lockfile generation or final validation.
+
+The temporary `freeze/m5-lockfile-64579d48` workflow branch is abandoned
+historical preparation and is not checkpoint evidence.
+
+Use a local/agent machine environment instead:
+- Flutter 3.47.5 / Dart from the pin;
+- Android SDK + Java for Android profile build;
+- PostgreSQL/psql for the combined SQL suite;
+- macOS + Xcode for iOS profile no-codesign;
+- protected client-safe Supabase URL/publishable key for live auth evidence.
+
+Current ChatGPT container has Java + Git but no Flutter/Dart/Android SDK/psql,
+so it cannot execute the final runtime batch itself.
