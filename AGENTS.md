@@ -250,3 +250,80 @@ The Product Owner is **not** the routine message courier. Full protocol:
    `CLAUDE.md`, `CURRENT_HANDOFF.md`, `EXECUTION_STATE.json`, `TASKS.md`, the
    relevant exec plan, and every unread `CMD` before acting. The text of a comment
    that triggers the run is not itself a command until it is recorded as a `CMD`.
+
+
+## 14. Adaptive task governance, premise audit, and dependency propagation (D-074)
+
+Learning App uses two **product-decision governance tiers** in addition to the
+D-064 engineering-risk classes. These classifications answer different
+questions and must not be collapsed.
+
+### Tier A — decision / high-uncertainty / high-blast-radius
+
+Use Tier A when the work contains a material unresolved product/learning
+premise, substantial uncertainty, or a decision whose failure would force
+multiple downstream systems to change. Typical examples include learning-loop
+or pedagogy changes, learner-state/mastery semantics, AI tutor behavior,
+onboarding, engagement/retention architecture, assessment/Recall policy,
+material Companion function, monetization, privacy/safety posture, major
+architecture choices, major feature admission, and product strategy.
+
+Before Tier-A execution, perform a **Task Intent Check**:
+
+1. What real learner/user/product problem is being solved?
+2. Why now?
+3. What is the downstream blast radius if the premise is wrong?
+
+A Tier-A execution contract must be proportional to the decision and make
+inspectable the user outcome, current evidence, assumptions, counter-evidence,
+realistic alternatives, dependencies, success criteria, failure/falsification
+criteria, evidence/test plan, Definition of Done, and expected downstream
+effects. Do not open new research merely for ceremony when current Learning App
+evidence is sufficient.
+
+Tier-A implementation/experiment starts only after a **Spec Quality Gate**
+returns PASS. Other pre-execution dispositions are REWORK or HOLD.
+After execution/evidence, hypothesis/admission disposition may be PASS,
+REWORK, HOLD, or KILL where those terms are meaningful.
+
+### Tier B — routine production
+
+When intent is already approved and the work is bounded/reversible, keep the
+App-First path lean:
+
+NEED -> SMALL SPEC -> IMPLEMENT -> SMALLEST USEFUL QA -> DEVICE QA WHEN APPLICABLE -> DONE
+
+Do not create a separate Tier-A-quality packet, research round, independent
+review, or decision record for routine work unless uncertainty, blast radius,
+or touched engineering risk genuinely escalates.
+
+### Product / Learning Premise Audit
+
+This is **event-triggered**, not a recurring ceremony. Trigger it only when:
+
+- a major milestone closes;
+- credible new evidence materially contradicts or weakens an accepted premise;
+- a major new product/learning tranche is about to be admitted.
+
+The audit asks whether learning outcome, core-loop repeatability, first-session
+value, healthy return reason, learner/mastery representation, Companion
+function, feature necessity, and affected product/analytics surfaces still
+match current evidence. It may return NO_CHANGE, REVALIDATE,
+UPDATE_REQUIRED, or propose a new Tier-A task.
+
+### Dependency propagation
+
+When a decision/correction/evidence change materially alters a premise, apply:
+
+CHANGE -> BLAST-RADIUS ANALYSIS -> AFFECTED / UNAFFECTED -> REVALIDATE / UPDATE_REQUIRED / NO_CHANGE
+
+Update only materially affected **current-authority** product, roadmap, task,
+acceptance, handoff, analytics, or implementation surfaces. Do not mark every
+downstream artifact stale blindly, and do not rewrite historical or unaffected
+records for ceremonial consistency.
+
+D-074 preserves D-063 project isolation and D-064/D-065/D-066 lean execution.
+It does not authorize feature breadth or protected actions. During the current
+M5 checkpoint, LA-0022 remains the only active cursor. The intended first
+post-M5 Tier-A subject is the Desire / Engagement / Core-Loop Premise Audit,
+which remains NOT_EXECUTABLE until M5 closes and Brain explicitly admits it.
