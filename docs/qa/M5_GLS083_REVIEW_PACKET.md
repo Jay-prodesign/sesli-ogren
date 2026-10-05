@@ -183,14 +183,15 @@ Include all findings, not only the highest severity. Do not merge, run release a
 
 ## Post-freeze validation-test hardening
 
-Runtime candidate remains `e576ca177ff8872cbbfc4f127eb016cefa7f611c`.
-Commit `f00df73dbf7851f48d7edf8e95ae463859c18bb4` changes only
-`server/db/tests/40_recall_learning_truth.sql`; it adds executable regression
-coverage for the already-frozen runtime semantics and does not alter
+Runtime candidate is `64579d48bcf9c33f4c709927a0e453349efb7c5b`.
+Commit `4c3d5bd428a45b0cd95cc5c668dbd201dbd5be9f` changes only
+`server/db/tests/40_recall_learning_truth.sql` after that runtime candidate;
+it adds/extends executable regression coverage for the frozen semantics,
+including v2 rule-version provenance. It does not alter
 `server/db/migrations` or `app/lib`.
 
-The independent reviewer should still review runtime semantics at the frozen
-candidate SHA. The stronger test is checkpoint evidence and remains PENDING
-execution in the single D-072 batch.
+The independent reviewer should review runtime semantics at the frozen candidate
+SHA. The stronger test remains checkpoint evidence and is PENDING execution in
+the single D-072 batch.
 
 Synthetic supplemental review: `docs/qa/M5_GLS083_SYNTHETIC_ADVERSARIAL_REVIEW_2026-10-05.md` — useful evidence, explicitly not independent.
