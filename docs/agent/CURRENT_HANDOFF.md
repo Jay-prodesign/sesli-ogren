@@ -165,3 +165,17 @@ Founder explicitly waives external independence.
 
 Synthetic adversarial review: `docs/qa/M5_GLS083_SYNTHETIC_ADVERSARIAL_REVIEW_2026-10-05.md`.
 
+
+
+## Founder disposition — M5 synthetic review accepted
+
+For LA-0022/M5 only, Founder has authorized the synthetic adversarial review as
+sufficient review evidence. External GLS-083 independence is waived for this
+checkpoint and is no longer a blocker.
+
+This is a bounded exception, not a project-wide repeal of independent review
+for future high-risk tasks.
+
+Next cursor inside LA-0022:
+Flutter 3.47.5 lockfile freeze -> one guarded D-072 final validation batch ->
+M5 verdict.
