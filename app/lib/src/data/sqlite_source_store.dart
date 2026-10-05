@@ -563,6 +563,17 @@ JOIN learner_evidence e
   }
 
   @override
+  Future<List<MaterialRecord>> activeMaterials({required AuthenticatedLearner learner}) async {
+    final rows = await _database.query(
+      'materials',
+      where: 'learner_id = ? AND lifecycle_status = ? AND deleted_at_utc IS NULL',
+      whereArgs: [learner.id.value, MaterialLifecycleStatus.active.name],
+      orderBy: 'updated_at_utc DESC, material_id ASC',
+    );
+    return rows.map(_materialFromRow).toList(growable: false);
+  }
+
+  @override
   Future<SourceVersionRecord?> currentSourceVersion({
     required AuthenticatedLearner learner,
     required MaterialId materialId,
