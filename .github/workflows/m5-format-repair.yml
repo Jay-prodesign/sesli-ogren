@@ -11,7 +11,7 @@ permissions:
   contents: write
 
 jobs:
-  format-two-tests:
+  format-bounded-tests:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -26,20 +26,21 @@ jobs:
           channel: stable
           cache: true
 
-      - name: Format only bounded test files
+      - name: Format bounded test files with app configuration
+        working-directory: app
         run: |
-          dart format app/test/app_smoke_test.dart app/test/_pdfrx_diagnostic_test.dart
+          dart format test/app_smoke_test.dart test/pdf_text_extractor_test.dart test/_pdfrx_diagnostic_test.dart
           git diff --check
-          git diff -- app/test/app_smoke_test.dart app/test/_pdfrx_diagnostic_test.dart
+          git diff -- test/app_smoke_test.dart test/pdf_text_extractor_test.dart test/_pdfrx_diagnostic_test.dart
 
       - name: Commit formatter-only changes
         run: |
-          if git diff --quiet -- app/test/app_smoke_test.dart app/test/_pdfrx_diagnostic_test.dart; then
+          if git diff --quiet -- app/test/app_smoke_test.dart app/test/pdf_text_extractor_test.dart app/test/_pdfrx_diagnostic_test.dart; then
             echo "No formatting changes needed."
             exit 0
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add app/test/app_smoke_test.dart app/test/_pdfrx_diagnostic_test.dart
-          git commit -m "style(m5): format bounded validation tests"
+          git add app/test/app_smoke_test.dart app/test/pdf_text_extractor_test.dart app/test/_pdfrx_diagnostic_test.dart
+          git commit -m "style(m5): apply app-configured Dart formatting"
           git push origin HEAD:feat/m5-golden-learning-slice
