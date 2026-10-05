@@ -10,6 +10,16 @@ Run only after:
 3. GLS-083 independent review findings that affect compilation/runtime semantics are resolved;
 4. exact branch/head to validate is recorded.
 
+
+## Existing workflow non-equivalence
+
+Do not use historical green workflows as substitutes for the M5 batch:
+- `.github/workflows/flutter-proof.yml` validates only `spike/architecture-proof/client`;
+- `.github/workflows/round7-p1-proof.yml` validates only `proof/round7-p1-runtime`;
+- `.github/workflows/bootstrap-validation.yml` validates only the repository control plane.
+
+None resolves `app/pubspec.lock`, runs the production-shaped `app/` tests/builds, validates the M5 Supabase-authenticated bootstrap, or executes the M5 server SQL delta. Historical success from those workflows is supporting lineage evidence only, never M5 checkpoint PASS evidence.
+
 ## Required environment
 
 - Repository: `Jay-prodesign/sesli-ogren`
