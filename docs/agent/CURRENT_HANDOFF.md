@@ -68,12 +68,12 @@ Physical iPhone + representative Android speech/audibility, accessibility, perfo
 - Use at most one bounded Actions validation batch at an applicable milestone/release evidence point, unless the Founder explicitly changes this rule.
 
 
-## Founder pause checkpoint — 2026-10-05
+## Founder resume checkpoint — 2026-10-05
 
-Work is intentionally **PAUSED BY FOUNDER**. Do not advance implementation until the Founder explicitly resumes.
+Founder explicitly **RESUMED** work in the Learning App conversation after the recorded pause. The prior pause checkpoint is historical/superseded as an execution stop, but remains a valid record of the cursor at pause time.
 
-Resume authority: `docs/agent/PAUSE_CHECKPOINT_2026-10-05.md`.
+Resume record: `docs/agent/PAUSE_CHECKPOINT_2026-10-05.md` now records the supersession.
 
-Current runtime candidate: `01670f42029ef228706c4a772594102e5656ebdf`.
+Current runtime candidate remains `01670f42029ef228706c4a772594102e5656ebdf`; later control-plane/documentation commits do not widen runtime feature scope.
 
-When resumed, fresh-read the control plane and continue LA-0022 from the first unresolved gate only: real Supabase authenticated learner evidence → Flutter 3.47.5 lockfile + single bounded D-072 validation batch (including server SQL) → GLS-083 independent review → M5 verdict. No new feature breadth before M5 closes.
+Continue LA-0022 from unresolved evidence gates only: real Supabase authenticated learner evidence → Flutter 3.47.5 lockfile + single bounded D-072 validation batch (including server SQL) → GLS-083 independent review → M5 verdict. No new feature breadth before M5 closes.
