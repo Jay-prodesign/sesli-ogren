@@ -1,3 +1,4 @@
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 
 import '../domain/learning_truth.dart';
@@ -130,6 +131,66 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
       setState(() {
         _phase = _SlicePhase.error;
         _inlineError = 'Devam kaydı kullanılamadı. Kaynaktan güvenli bir hatırlama yeniden başlatabiliriz.';
+      });
+    } finally {
+      _setBusy(false);
+    }
+  }
+
+  Future<void> _pickPdf() async {
+    if (_busy) return;
+    final file = await FilePicker.pickFile(
+      type: FileType.custom,
+      allowedExtensions: const ['pdf'],
+      dialogTitle: 'Çalışmak istediğin PDF’i seç',
+    );
+    if (file == null || !mounted) return;
+
+    final stopwatch = Stopwatch()..start();
+    await _recordEvent(
+      OperationalEvent(
+        type: OperationalEventType.sourceIngest,
+        phase: OperationalEventPhase.started,
+        materialId: AppRuntime.primaryMaterialId,
+        createdAt: DateTime.now().toUtc(),
+      ),
+    );
+    _setBusy(true);
+    try {
+      final bytes = await file.readAsBytes();
+      final ingestResult = await widget.runtime.ingest.ingestPdf(
+        learner: widget.runtime.learner,
+        materialId: AppRuntime.primaryMaterialId,
+        bytes: bytes,
+        originalName: file.name,
+      );
+      stopwatch.stop();
+      await _recordEvent(
+        OperationalEvent(
+          type: OperationalEventType.sourceIngest,
+          phase: OperationalEventPhase.completed,
+          materialId: AppRuntime.primaryMaterialId,
+          sourceVersionId: ingestResult.sourceVersion.identity.sourceVersionId,
+          durationMs: stopwatch.elapsedMilliseconds,
+          createdAt: DateTime.now().toUtc(),
+        ),
+      );
+      await _openRecall();
+    } catch (error) {
+      stopwatch.stop();
+      await _recordEvent(
+        OperationalEvent(
+          type: OperationalEventType.sourceIngest,
+          phase: OperationalEventPhase.failed,
+          materialId: AppRuntime.primaryMaterialId,
+          durationMs: stopwatch.elapsedMilliseconds,
+          errorClass: error.runtimeType.toString(),
+          createdAt: DateTime.now().toUtc(),
+        ),
+      );
+      if (!mounted) return;
+      setState(() {
+        _inlineError = 'PDF güvenli biçimde işlenemedi. Metin içeren başka bir PDF deneyebilirsin.';
       });
     } finally {
       _setBusy(false);
@@ -550,10 +611,19 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
         children: [
           Text('Çalışma materyalini ekle', style: Theme.of(context).textTheme.titleLarge),
           const SizedBox(height: 8),
-          const Text(
-            'Bu ilk dilimde metni doğrudan yapıştırıyoruz. Kaynak sürümü ve öğrenme kanıtı cihazda ayrı ve kalıcı tutulur.',
-          ),
+          const Text('PDF seçebilir veya metni doğrudan yapıştırabilirsin. Kaynak sürümü öğrenme kanıtından ayrı tutulur.'),
           const SizedBox(height: 18),
+          OutlinedButton.icon(
+            onPressed: _busy ? null : _pickPdf,
+            icon: const Icon(Icons.picture_as_pdf_outlined),
+            label: const Text('PDF seç'),
+          ),
+          const Padding(
+            padding: EdgeInsets.symmetric(vertical: 14),
+            child: Row(
+              children: [Expanded(child: Divider()), Padding(padding: EdgeInsets.symmetric(horizontal: 12), child: Text('veya')), Expanded(child: Divider())],
+            ),
+          ),
           TextField(
             controller: _sourceController,
             minLines: 7,
