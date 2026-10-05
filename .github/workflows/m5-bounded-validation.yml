@@ -50,6 +50,53 @@ jobs:
         working-directory: app
         run: flutter analyze
 
+      - name: Real PDF engine probe
+        working-directory: app
+        run: |
+          mkdir -p tool
+          trap 'rm -f tool/_m5_pdf_engine_probe.dart' EXIT
+          cat > tool/_m5_pdf_engine_probe.dart <<'DART'
+          import 'dart:io';
+
+          import 'package:pdfrx_engine/pdfrx_engine.dart';
+
+          Future<void> main() async {
+            await pdfrxInitialize();
+
+            PdfDocument? document;
+            try {
+              document = await PdfDocument.openFile(
+                'test/fixtures/two_page_text.pdf',
+              );
+
+              if (document.pages.length != 2) {
+                throw StateError(
+                  'Expected 2 PDF pages, got ${document.pages.length}.',
+                );
+              }
+
+              final first = (await document.pages[0].loadText())?.fullText ?? '';
+              final second = (await document.pages[1].loadText())?.fullText ?? '';
+
+              if (!first.contains('Learning evidence page one')) {
+                throw StateError('Expected page-one text was not extracted.');
+              }
+              if (!second.contains('Second page keeps provenance')) {
+                throw StateError('Expected page-two text was not extracted.');
+              }
+
+              stdout.writeln(
+                'PDF_ENGINE_PROBE PASS pages=${document.pages.length}',
+              );
+            } finally {
+              await document?.dispose();
+              await PdfrxEntryFunctions.instance.stopBackgroundWorker();
+            }
+          }
+          DART
+
+          timeout 180s dart run tool/_m5_pdf_engine_probe.dart
+
       - name: Test
         working-directory: app
         run: flutter test
@@ -58,6 +105,10 @@ jobs:
         working-directory: app
         run: flutter build apk --profile
 
-      - name: APK SHA-256
+      - name: Verify PDFium packaging and APK SHA-256
         working-directory: app
-        run: sha256sum build/app/outputs/flutter-apk/app-profile.apk
+        run: |
+          APK=build/app/outputs/flutter-apk/app-profile.apk
+          test -f "$APK"
+          unzip -l "$APK" | grep -q "libpdfium.so"
+          sha256sum "$APK"
