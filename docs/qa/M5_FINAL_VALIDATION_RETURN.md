@@ -5,7 +5,7 @@
 
 ## Identity
 
-- Runtime candidate reviewed by GLS-083: `e576ca177ff8872cbbfc4f127eb016cefa7f611c`
+- Runtime candidate reviewed by GLS-083: `64579d48bcf9c33f4c709927a0e453349efb7c5b`
 - GLS-083 disposition: PENDING
 - Final validation head: PENDING
 - Branch: `feat/m5-golden-learning-slice`
