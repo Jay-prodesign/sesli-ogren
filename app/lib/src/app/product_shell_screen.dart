@@ -5,6 +5,7 @@ import '../domain/learning_truth.dart';
 import 'app_runtime.dart';
 import 'companion_view.dart';
 import 'learning_slice_screen.dart';
+import 'listen_screen.dart';
 
 class ProductShellScreen extends StatefulWidget {
   const ProductShellScreen({required this.runtime, super.key});
@@ -63,6 +64,12 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
     setState(_refresh);
   }
 
+  Future<void> _openListen() async {
+    await Navigator.of(context).push<void>(
+      MaterialPageRoute(builder: (_) => ListenScreen(runtime: widget.runtime)),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -77,7 +84,7 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
             return IndexedStack(
               index: _index,
               children: [
-                _HomeSurface(data: data, onOpenLearning: _openLearning),
+                _HomeSurface(data: data, onOpenLearning: _openLearning, onOpenListen: _openListen),
                 _LibrarySurface(data: data, onOpenLearning: _openLearning),
               ],
             );
@@ -105,10 +112,11 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
 }
 
 class _HomeSurface extends StatelessWidget {
-  const _HomeSurface({required this.data, required this.onOpenLearning});
+  const _HomeSurface({required this.data, required this.onOpenLearning, required this.onOpenListen});
 
   final _HomeSnapshot data;
   final VoidCallback onOpenLearning;
+  final VoidCallback onOpenListen;
 
   @override
   Widget build(BuildContext context) {
@@ -160,7 +168,7 @@ class _HomeSurface extends StatelessWidget {
           const SizedBox(height: 10),
           _MaterialCard(data: data, onPressed: onOpenLearning),
           const SizedBox(height: 22),
-          _ContextRow(onRecall: onOpenLearning),
+          _ContextRow(onRecall: onOpenLearning, onListen: onOpenListen),
         ],
       ],
     );
@@ -216,9 +224,10 @@ class _LibrarySurface extends StatelessWidget {
 }
 
 class _ContextRow extends StatelessWidget {
-  const _ContextRow({required this.onRecall});
+  const _ContextRow({required this.onRecall, required this.onListen});
 
   final VoidCallback onRecall;
+  final VoidCallback onListen;
 
   @override
   Widget build(BuildContext context) {
@@ -233,11 +242,12 @@ class _ContextRow extends StatelessWidget {
           ),
         ),
         const SizedBox(width: 12),
-        const Expanded(
+        Expanded(
           child: _ContextCard(
             icon: Icons.headphones_rounded,
             title: 'Dinle',
-            body: 'Gerçek oynatıcı sıradaki ürün increment’ında.',
+            body: 'Kaynağını Türkçe dinle.',
+            onPressed: onListen,
           ),
         ),
       ],
