@@ -1,0 +1,63 @@
+name: m5-bounded-validation
+
+on:
+  push:
+    branches:
+      - feat/m5-golden-learning-slice
+    paths:
+      - "app/**"
+
+concurrency:
+  group: m5-bounded-validation
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  flutter-validation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Flutter 3.47.5
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: "3.47.5"
+          channel: "stable"
+          cache: true
+
+      - name: Verify toolchain
+        run: |
+          flutter --version
+          dart --version
+          test "$(cat .flutter-version)" = "3.47.5"
+
+      - name: Resolve locked dependencies
+        working-directory: app
+        run: |
+          flutter pub get
+          git diff --exit-code -- pubspec.lock
+
+      - name: Format check
+        working-directory: app
+        run: dart format --output=none --set-exit-if-changed .
+
+      - name: Analyze
+        working-directory: app
+        run: flutter analyze
+
+      - name: Test
+        working-directory: app
+        run: flutter test
+
+      - name: Android profile build
+        working-directory: app
+        run: flutter build apk --profile
+
+      - name: APK SHA-256
+        working-directory: app
+        run: sha256sum build/app/outputs/flutter-apk/app-profile.apk
