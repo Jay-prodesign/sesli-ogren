@@ -6,7 +6,7 @@
 - Mission: M5 Golden Learning Slice
 - Branch: `feat/m5-golden-learning-slice`
 - Frozen runtime implementation candidate: `e576ca177ff8872cbbfc4f127eb016cefa7f611c`
-- Later commits are checkpoint/control-plane documentation only unless the packet is explicitly refreshed again.
+- Later commits are checkpoint/control-plane documentation or M5 validation tooling only unless this packet is explicitly refreshed again. No `app/` or `server/` runtime code after the frozen SHA is in review scope.
 - Governing acceptance: `M5_GOLDEN_LEARNING_SLICE_ACCEPTANCE_CONTRACT_v0.1`
 - Review trigger: GLS-083
 - Reviewer mode: **read-only**
