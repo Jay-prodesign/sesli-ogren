@@ -15,7 +15,7 @@ This matrix does **not** declare M5 PASS by itself.
 
 - Repository: `Jay-prodesign/sesli-ogren`
 - Branch: `feat/m5-golden-learning-slice`
-- Frozen runtime implementation candidate: `e576ca177ff8872cbbfc4f127eb016cefa7f611c`
+- Frozen runtime implementation candidate: `64579d48bcf9c33f4c709927a0e453349efb7c5b`
 - Checkpoint-control-only reconciliation commits may follow this SHA; they do not widen runtime feature scope.
 - Flutter pin: `.flutter-version` = 3.47.5.
 - Routine GitHub Actions: OFF under D-072.
@@ -117,7 +117,7 @@ This matrix does **not** declare M5 PASS by itself.
 | GLS-080 | PENDING_BATCH | Exact final checkpoint head must be frozen after evidence-only fixes. |
 | GLS-081 | BLOCKED | `app/pubspec.lock` is absent and the current container has no Flutter/Dart toolchain. Generate/commit exact resolution in the single checkpoint batch. |
 | GLS-082 | STATIC_PASS / PENDING_BATCH | D-024 register records direct M5 dependencies/licenses; exact transitive resolution/notice evidence awaits lock generation. |
-| GLS-083 | READY_FOR_INDEPENDENT_EXECUTION | Read-only packet + exact reviewer command are committed for frozen candidate `e576ca17…`. Same Brain/static review stream is explicitly ineligible to self-grant independence. External independent reviewer return remains required before the single bounded validation batch. |
+| GLS-083 | SYNTHETIC_PASS / INDEPENDENT_PENDING | Synthetic adversarial review found S-003 HIGH rule-version provenance drift and it was corrected in `64579d48…`; no unresolved BLOCKER/HIGH remains synthetically. This is not an independence claim. External independent review remains required unless Founder explicitly waives that requirement. |
 | GLS-084 | PENDING | No known unresolved blocker other than the explicit GLS-081 reproducibility gap and required review/batch evidence. |
 
 ## Static checkpoint correction
@@ -127,6 +127,10 @@ Brain/static review found and corrected two material checkpoint defects: (S-001)
 ## Validation-test hardening
 
 Post-freeze commit `f00df73…` strengthens `server/db/tests/40_recall_learning_truth.sql` with real RPC-level assistance/idempotency/isolation regressions. It does not change runtime/migration semantics and therefore does not change the frozen GLS-083 runtime candidate. Execution remains part of the single bounded SQL batch.
+
+## Finding S-003 — RESOLVED / HIGH
+
+Synthetic adversarial review found that server 0004 introduced answer-exposure semantics while continuing to write new evidence/state as v1. This violated GLS-026 versioned-policy provenance. Commit `64579d48…` preserves historical v1 evidence, writes new server evidence as `recall-evidence-v2`, migrates current derived state to `recall-state-v2`, and writes new state as v2. Test `4c3d5bd…` asserts the provenance contract. SQL execution remains pending.
 
 ## Current checkpoint verdict
 
