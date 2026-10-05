@@ -179,3 +179,16 @@ Include all findings, not only the highest severity. Do not merge, run release a
 - Are only client-safe project URL/publishable-key values accepted at the Flutter boundary, with no service-role secret?
 - Does changing authenticated user result in a different learner-scoped local truth namespace?
 - Is anonymous authentication acceptable only as the bounded M5 account bootstrap, without being mistaken for final account/login UX?
+
+
+## Post-freeze validation-test hardening
+
+Runtime candidate remains `e576ca177ff8872cbbfc4f127eb016cefa7f611c`.
+Commit `f00df73dbf7851f48d7edf8e95ae463859c18bb4` changes only
+`server/db/tests/40_recall_learning_truth.sql`; it adds executable regression
+coverage for the already-frozen runtime semantics and does not alter
+`server/db/migrations` or `app/lib`.
+
+The independent reviewer should still review runtime semantics at the frozen
+candidate SHA. The stronger test is checkpoint evidence and remains PENDING
+execution in the single D-072 batch.
