@@ -142,3 +142,22 @@ reviewer runtime is available in the current tool environment.
 Do not spend the single D-072 runtime/build batch until the independent return
 is REVIEW_PASS. CHANGES_REQUIRED reopens only the material finding surface,
 followed by re-freeze + refreshed independent review.
+
+
+## GLS-083 review-only PR surface
+
+Review surface: PR #11 — `review/m5-gls083-e576ca17` against
+`feat/round7-companion-production-sequence-v2`.
+
+- Runtime under review remains exactly `e576ca177ff8872cbbfc4f127eb016cefa7f611c`.
+- The review branch has one extra `.github/copilot-instructions.md` metadata
+  commit only; no runtime code change.
+- The metadata commit uses `[skip ci]`; zero pull-request workflow runs were
+  observed for it, preserving D-072.
+- GitHub connector requests for Copilot review were attempted but did not
+  appear in requested-reviewers or submitted reviews. Therefore **no GLS-083
+  independent review has occurred yet**.
+- PR #11 is draft, REVIEW ONLY, and must not be merged.
+
+An actual independent reviewer may use PR #11 directly. Continue to lockfile +
+single bounded batch only after a real REVIEW_PASS return exists.
