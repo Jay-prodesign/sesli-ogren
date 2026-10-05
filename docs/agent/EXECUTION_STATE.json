@@ -271,5 +271,17 @@
     "guard": "Both runners require the accepted synthetic review artifact plus committed app/pubspec.lock before executing. Linux runner performs live auth, bootstrap checks, dependency reproducibility, format/analyze/tests, Android profile build and combined SQL suite; macOS runner performs lock reproducibility and iOS profile no-codesign build.",
     "execution_environment": "NO_GITHUB_ACTIONS. Current ChatGPT container has Java + Git but no Flutter/Dart/Android SDK/psql. Final validation must execute in a local/Codex/Claude machine environment with Flutter 3.47.5, Android toolchain, PostgreSQL/psql, and macOS/Xcode for iOS.",
     "actions_freeze_branch": "ABANDONED_HISTORICAL — freeze/m5-lockfile-64579d48; do not rerun or use as evidence."
+  },
+  "agent_cost_efficiency": {
+    "status": "ACTIVE_FOUNDER_RULE",
+    "rule": "Minimize Codex/Claude credit consumption. ChatGPT/Brain handles planning, research, reconciliation, review, documentation, task scoping, and command drafting whenever no local runtime is required. Codex/Claude are used only for bounded implementation, terminal/runtime execution, or repo-local verification that cannot be performed by Brain.",
+    "defaults": [
+      "Do not ask Codex/Claude to re-read broad project history when the exact current task can be supplied narrowly.",
+      "Do not request duplicate audits, explanations, summaries, evidence packets, or re-analysis of already-known context.",
+      "Batch adjacent terminal checks into one command/run when safe.",
+      "Prefer one narrow task with exact files/commands/stop condition over open-ended exploration.",
+      "Stop on the first controlling failure; do not spend credits continuing downstream checks that cannot change the outcome.",
+      "Return only decision-relevant evidence: command/result, changed files, blocker, exact next action."
+    ]
   }
 }
