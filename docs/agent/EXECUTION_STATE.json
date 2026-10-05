@@ -80,11 +80,10 @@
     "A real Supabase project/session must be configured and anonymous sign-in enabled to evidence the authenticated-learner M5 path; only client-safe project URL/publishable key are needed.",
     "Current ChatGPT execution container cannot reach GitHub over the network and has no established Flutter/Dart checkpoint environment; runtime/build validation remains PENDING_BATCH_VALIDATION under D-072.",
     "GLS-083 independent read-only review is PENDING; the refreshed packet targets candidate 01670f42… and must verify the corrected server assistance path.",
-    "Product Experience / Learning Experience / Creative Quality / accessibility checkpoint dispositions remain PENDING.",
-    "Physical device/mobile-readiness remains deferred under D-068 and is not claimed by the M5 checkpoint."
+    "Accessibility runtime evidence remains PENDING_BATCH; physical VoiceOver/TalkBack/device/orientation evidence remains deferred under D-068."
   ],
   "protected_gate": "Merge, release, deploy, paid providers, credentials/secrets, licensing posture, production mutation: Product Owner only",
-  "next_action": "Keep runtime scope frozen at candidate 01670f42… and close external/evidence gates only: real Supabase authenticated session; Flutter 3.47.5 pubspec.lock + single bounded analyze/test/Android+iOS build batch including server SQL harness; GLS-083 independent review; Product/Learning/Creative/accessibility dispositions; then issue the M5 verdict. Do not add feature breadth.",
+  "next_action": "Keep runtime scope frozen at candidate 01670f42… and close the remaining external/evidence gates only: real Supabase authenticated session; Flutter 3.47.5 pubspec.lock + single bounded analyze/test/Android+iOS build and server SQL batch; GLS-083 independent review; then issue the M5 verdict. Product/Learning/Creative bounded dispositions and static accessibility review are complete. Do not add feature breadth.",
   "canonical_source_refs": [
     "CURRENT_EXECUTION_STATE — Learning App",
     "D-070 — Founder Product/Visual PASS / D-Knot selected",
