@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import '../auth/supabase_learner_auth.dart';
 import 'app_runtime.dart';
 import 'companion_view.dart';
-import 'learning_slice_screen.dart';
+import 'product_shell_screen.dart';
 
 class SesliOgrenApp extends StatefulWidget {
   const SesliOgrenApp({super.key});
@@ -67,7 +67,7 @@ class _SesliOgrenAppState extends State<SesliOgrenApp> {
         future: _runtimeFuture,
         builder: (context, snapshot) {
           if (snapshot.hasData) {
-            return LearningSliceScreen(runtime: snapshot.data!);
+            return ProductShellScreen(runtime: snapshot.data!);
           }
           if (snapshot.hasError) {
             return _RuntimeErrorScreen(error: snapshot.error!, onRetry: _retryRuntime);
