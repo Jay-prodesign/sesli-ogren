@@ -9,13 +9,17 @@ import '../domain/learning_contracts.dart';
 import '../domain/learning_truth.dart';
 
 class RecallLearningService {
-  const RecallLearningService({required this._sourceStore, required this._learningStore, DateTime Function()? now})
-    : _now = now ?? DateTime.now;
+  const RecallLearningService({
+    required this._sourceStore,
+    required this._learningStore,
+    DateTime Function()? now,
+  }) : _now = now ?? DateTime.now;
 
   static const promptRuleVersion = 'recall-cloze-v1';
   static const evidenceRuleVersion = RecallTruthPolicy.evidenceRuleVersion;
   static const stateRuleVersion = RecallTruthPolicy.stateRuleVersion;
-  static const nextActionPolicyVersion = RecallTruthPolicy.nextActionPolicyVersion;
+  static const nextActionPolicyVersion =
+      RecallTruthPolicy.nextActionPolicyVersion;
 
   final SourceStore _sourceStore;
   final LearningTruthStore _learningStore;
@@ -25,16 +29,23 @@ class RecallLearningService {
     required AuthenticatedLearner learner,
     required MaterialId materialId,
   }) async {
-    final source = await _sourceStore.currentSourceVersion(learner: learner, materialId: materialId);
+    final source = await _sourceStore.currentSourceVersion(
+      learner: learner,
+      materialId: materialId,
+    );
     if (source == null) {
-      throw const RecallLearningException('No current authoritative source is available for recall.');
+      throw const RecallLearningException(
+        'No current authoritative source is available for recall.',
+      );
     }
     final extracted = await _sourceStore.extractedContentForSource(
       learner: learner,
       sourceVersionId: source.identity.sourceVersionId,
     );
     if (extracted == null || !extracted.isValid) {
-      throw const RecallLearningException('Current source has no valid extracted content for recall.');
+      throw const RecallLearningException(
+        'Current source has no valid extracted content for recall.',
+      );
     }
 
     final action = _buildAction(
@@ -43,7 +54,10 @@ class RecallLearningService {
       extracted: extracted,
       now: _now().toUtc(),
     );
-    final persisted = await _learningStore.persistRecallAction(learner: learner, action: action);
+    final persisted = await _learningStore.persistRecallAction(
+      learner: learner,
+      action: action,
+    );
     return persisted.toPrompt();
   }
 
@@ -66,7 +80,9 @@ class RecallLearningService {
           ),
         )
         .toString();
-    final proposedAttemptId = RecallAttemptId('attempt-${seed.substring(0, 32)}');
+    final proposedAttemptId = RecallAttemptId(
+      'attempt-${seed.substring(0, 32)}',
+    );
     final active = await _learningStore.openRecallAttempt(
       learner: learner,
       actionId: action.id,
@@ -95,7 +111,9 @@ class RecallLearningService {
       openedAt: _now().toUtc(),
     );
     if (active.attemptId != attemptId) {
-      throw const RecallLearningException('Recall support belongs to a different active attempt.');
+      throw const RecallLearningException(
+        'Recall support belongs to a different active attempt.',
+      );
     }
     final assistance = await _learningStore.registerAssistance(
       learner: learner,
@@ -126,7 +144,9 @@ class RecallLearningService {
       openedAt: _now().toUtc(),
     );
     if (active.attemptId != attemptId) {
-      throw const RecallLearningException('Recall support belongs to a different active attempt.');
+      throw const RecallLearningException(
+        'Recall support belongs to a different active attempt.',
+      );
     }
     final assistance = await _learningStore.registerAssistance(
       learner: learner,
@@ -135,7 +155,11 @@ class RecallLearningService {
       assistance: RecallAssistance.answerExposed,
       recordedAt: _now().toUtc(),
     );
-    return RecallSupport(kind: RecallSupportKind.answer, text: action.expectedAnswer, assistance: assistance);
+    return RecallSupport(
+      kind: RecallSupportKind.answer,
+      text: action.expectedAnswer,
+      assistance: assistance,
+    );
   }
 
   Future<RecallAttemptResult> submit({
@@ -152,11 +176,18 @@ class RecallLearningService {
       learner: learner,
       sourceVersionId: action.sourceVersionId,
     );
-    if (extracted == null || !extracted.isValid || extracted.id != action.extractedContentId) {
-      throw const RecallLearningException('Recall action provenance is no longer valid.');
+    if (extracted == null ||
+        !extracted.isValid ||
+        extracted.id != action.extractedContentId) {
+      throw const RecallLearningException(
+        'Recall action provenance is no longer valid.',
+      );
     }
 
-    final existingEvidence = await _learningStore.evidenceForAttempt(learner: learner, attemptId: attemptId);
+    final existingEvidence = await _learningStore.evidenceForAttempt(
+      learner: learner,
+      attemptId: attemptId,
+    );
     if (existingEvidence == null) {
       final active = await _learningStore.openRecallAttempt(
         learner: learner,
@@ -165,7 +196,9 @@ class RecallLearningService {
         openedAt: _now().toUtc(),
       );
       if (active.attemptId != attemptId) {
-        throw const RecallLearningException('Submission does not match the active Recall attempt.');
+        throw const RecallLearningException(
+          'Submission does not match the active Recall attempt.',
+        );
       }
     }
 
@@ -184,7 +217,9 @@ class RecallLearningService {
       assistance: assistance,
     );
 
-    final responseDigest = sha256.convert(utf8.encode(normalizedAnswer)).toString();
+    final responseDigest = sha256
+        .convert(utf8.encode(normalizedAnswer))
+        .toString();
     final evidenceIdDigest = sha256
         .convert(
           utf8.encode(
@@ -236,32 +271,57 @@ class RecallLearningService {
     );
   }
 
-  Future<RecallAction> _currentAction({required AuthenticatedLearner learner, required RecallActionId actionId}) async {
-    final action = await _learningStore.recallAction(learner: learner, actionId: actionId);
+  Future<RecallAction> _currentAction({
+    required AuthenticatedLearner learner,
+    required RecallActionId actionId,
+  }) async {
+    final action = await _learningStore.recallAction(
+      learner: learner,
+      actionId: actionId,
+    );
     if (action == null) {
-      throw const RecallLearningException('Recall action is missing or belongs to another learner.');
+      throw const RecallLearningException(
+        'Recall action is missing or belongs to another learner.',
+      );
     }
-    final currentSource = await _sourceStore.currentSourceVersion(learner: learner, materialId: action.materialId);
-    if (currentSource == null || currentSource.identity.sourceVersionId != action.sourceVersionId) {
-      throw const RecallLearningException('Recall action is stale because the authoritative source changed.');
+    final currentSource = await _sourceStore.currentSourceVersion(
+      learner: learner,
+      materialId: action.materialId,
+    );
+    if (currentSource == null ||
+        currentSource.identity.sourceVersionId != action.sourceVersionId) {
+      throw const RecallLearningException(
+        'Recall action is stale because the authoritative source changed.',
+      );
     }
     return action;
   }
 
-  static String _sourceExcerpt(ExtractedContentRecord extracted, SourceAnchor anchor) {
+  static String _sourceExcerpt(
+    ExtractedContentRecord extracted,
+    SourceAnchor anchor,
+  ) {
     if (anchor.startOffset < 0 ||
         anchor.endOffset <= anchor.startOffset ||
         anchor.endOffset > extracted.normalizedText.length) {
-      throw const RecallLearningException('Recall source anchor is outside current extracted content.');
+      throw const RecallLearningException(
+        'Recall source anchor is outside current extracted content.',
+      );
     }
-    return extracted.normalizedText.substring(anchor.startOffset, anchor.endOffset);
+    return extracted.normalizedText.substring(
+      anchor.startOffset,
+      anchor.endOffset,
+    );
   }
 
   Future<LearningContinuation?> repairContinuation({
     required AuthenticatedLearner learner,
     required MaterialId materialId,
   }) async {
-    final source = await _sourceStore.currentSourceVersion(learner: learner, materialId: materialId);
+    final source = await _sourceStore.currentSourceVersion(
+      learner: learner,
+      materialId: materialId,
+    );
     if (source == null) {
       return null;
     }
@@ -293,16 +353,32 @@ class RecallLearningService {
       createdAt: latest.createdAt,
     );
 
-    return _learningStore.repairDerivedProjection(learner: learner, state: state, nextAction: nextAction);
+    return _learningStore.repairDerivedProjection(
+      learner: learner,
+      state: state,
+      nextAction: nextAction,
+    );
   }
 
-  Future<LearningContinuation?> reopen({required AuthenticatedLearner learner, required MaterialId materialId}) async {
-    final source = await _sourceStore.currentSourceVersion(learner: learner, materialId: materialId);
+  Future<LearningContinuation?> reopen({
+    required AuthenticatedLearner learner,
+    required MaterialId materialId,
+  }) async {
+    final source = await _sourceStore.currentSourceVersion(
+      learner: learner,
+      materialId: materialId,
+    );
     if (source == null) {
       return null;
     }
-    final state = await _learningStore.learnerState(learner: learner, materialId: materialId);
-    final nextAction = await _learningStore.nextLearningAction(learner: learner, materialId: materialId);
+    final state = await _learningStore.learnerState(
+      learner: learner,
+      materialId: materialId,
+    );
+    final nextAction = await _learningStore.nextLearningAction(
+      learner: learner,
+      materialId: materialId,
+    );
     if (state == null && nextAction == null) {
       return null;
     }
@@ -311,7 +387,9 @@ class RecallLearningService {
         state.sourceVersionId != source.identity.sourceVersionId ||
         nextAction.sourceVersionId != source.identity.sourceVersionId ||
         nextAction.latestEvidenceId != state.latestEvidenceId) {
-      throw const RecallLearningException('Persisted learning continuation is incomplete or stale.');
+      throw const RecallLearningException(
+        'Persisted learning continuation is incomplete or stale.',
+      );
     }
     return LearningContinuation(state: state, nextAction: nextAction);
   }
@@ -324,18 +402,25 @@ class RecallLearningService {
   }) {
     final candidate = _findCandidate(extracted.normalizedText);
     if (candidate == null) {
-      throw const RecallLearningException('Source does not contain a suitable bounded recall prompt.');
+      throw const RecallLearningException(
+        'Source does not contain a suitable bounded recall prompt.',
+      );
     }
 
     SourceAnchor? sourceAnchor;
     for (final anchor in extracted.anchors) {
-      if (candidate.sentenceStart >= anchor.startOffset && candidate.sentenceStart < anchor.endOffset) {
+      if (candidate.sentenceStart >= anchor.startOffset &&
+          candidate.sentenceStart < anchor.endOffset) {
         sourceAnchor = anchor;
         break;
       }
     }
 
-    final prompt = candidate.sentence.replaceRange(candidate.wordStartInSentence, candidate.wordEndInSentence, '_____');
+    final prompt = candidate.sentence.replaceRange(
+      candidate.wordStartInSentence,
+      candidate.wordEndInSentence,
+      '_____',
+    );
     final actionDigest = sha256
         .convert(
           utf8.encode(
@@ -379,10 +464,14 @@ class RecallLearningService {
         continue;
       }
 
-      final matches = RegExp(r'[A-Za-zÇĞİÖŞÜçğıöşü]+').allMatches(sentence).where((match) {
-        final word = match.group(0)!;
-        return word.length >= 5 && !_stopWords.contains(RecallTruthPolicy.normalizeAnswer(word));
-      }).toList();
+      final matches = RegExp(r'[A-Za-zÇĞİÖŞÜçğıöşü]+')
+          .allMatches(sentence)
+          .where((match) {
+            final word = match.group(0)!;
+            return word.length >= 5 &&
+                !_stopWords.contains(RecallTruthPolicy.normalizeAnswer(word));
+          })
+          .toList();
 
       if (matches.isNotEmpty) {
         matches.sort((a, b) {
@@ -406,7 +495,9 @@ class RecallLearningService {
 
   static void _validateAttemptId(RecallAttemptId attemptId) {
     if (!RegExp(r'^[A-Za-z0-9_.:-]{8,128}$').hasMatch(attemptId.value)) {
-      throw const RecallLearningException('Attempt ID must be a stable 8-128 character identifier.');
+      throw const RecallLearningException(
+        'Attempt ID must be a stable 8-128 character identifier.',
+      );
     }
   }
 

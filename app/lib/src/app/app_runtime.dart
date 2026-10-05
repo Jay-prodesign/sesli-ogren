@@ -16,7 +16,9 @@ class AppRuntime {
   });
 
   /// Explicit M5 fixture only. It is not a production authentication claim.
-  static const localM5LearnerFixture = AuthenticatedLearner(id: LearnerId('m5-local-authenticated-learner'));
+  static const localM5LearnerFixture = AuthenticatedLearner(
+    id: LearnerId('m5-local-authenticated-learner'),
+  );
 
   static const primaryMaterialId = MaterialId('m5-primary-material');
 
@@ -26,10 +28,18 @@ class AppRuntime {
   final RecallLearningService recall;
   final OperationalTelemetry telemetry;
 
-  static Future<AppRuntime> open({required AuthenticatedLearner learner}) async {
+  static Future<AppRuntime> open({
+    required AuthenticatedLearner learner,
+  }) async {
     final store = await SqliteSourceStore.open();
-    final ingest = SourceIngestService(store: store, pdfTextExtractor: const PdfrxPdfTextExtractor());
-    final recall = RecallLearningService(sourceStore: store, learningStore: store.learningTruthStore());
+    final ingest = SourceIngestService(
+      store: store,
+      pdfTextExtractor: const PdfrxPdfTextExtractor(),
+    );
+    final recall = RecallLearningService(
+      sourceStore: store,
+      learningStore: store.learningTruthStore(),
+    );
     return AppRuntime(
       learner: learner,
       store: store,

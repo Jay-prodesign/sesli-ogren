@@ -34,12 +34,16 @@ class SourceIngestService {
       throw const SourceIngestException('Pasted text cannot be empty.');
     }
     if (text.length > maxTextCharacters) {
-      throw const SourceIngestException('Pasted text exceeds the bounded M5 source limit.');
+      throw const SourceIngestException(
+        'Pasted text exceeds the bounded M5 source limit.',
+      );
     }
 
     final normalized = _normalizeText(text);
     if (normalized.length > maxTextCharacters) {
-      throw const SourceIngestException('Normalized text exceeds the bounded M5 source limit.');
+      throw const SourceIngestException(
+        'Normalized text exceeds the bounded M5 source limit.',
+      );
     }
 
     final sourceBytes = utf8.encode(text);
@@ -71,13 +75,20 @@ class SourceIngestService {
       throw const SourceIngestException('PDF cannot be empty.');
     }
     if (bytes.length > maxPdfBytes) {
-      throw const SourceIngestException('PDF exceeds the bounded M5 byte safety limit.');
+      throw const SourceIngestException(
+        'PDF exceeds the bounded M5 byte safety limit.',
+      );
     }
     if (!_hasPdfHeader(bytes)) {
-      throw const SourceIngestException('Selected file is not a supported PDF source.');
+      throw const SourceIngestException(
+        'Selected file is not a supported PDF source.',
+      );
     }
 
-    final safeName = _validatedTitle(_safeFileName(originalName), fallback: 'document.pdf');
+    final safeName = _validatedTitle(
+      _safeFileName(originalName),
+      fallback: 'document.pdf',
+    );
     final ExtractedPdf extracted;
     try {
       extracted = await _pdfTextExtractor.extract(bytes, sourceName: safeName);
@@ -88,7 +99,9 @@ class SourceIngestService {
     }
 
     if (extracted.text.length > maxTextCharacters) {
-      throw const SourceIngestException('PDF extracted text exceeds the bounded M5 source limit.');
+      throw const SourceIngestException(
+        'PDF extracted text exceeds the bounded M5 source limit.',
+      );
     }
 
     final digest = sha256.convert(bytes).toString();
@@ -133,7 +146,9 @@ class SourceIngestService {
           ),
         )
         .toString();
-    final sourceVersionId = SourceVersionId('sv_${versionDigest.substring(0, 32)}');
+    final sourceVersionId = SourceVersionId(
+      'sv_${versionDigest.substring(0, 32)}',
+    );
     final extractionDigest = sha256
         .convert(
           utf8.encode(
@@ -191,7 +206,10 @@ class SourceIngestService {
     );
   }
 
-  static void _requireIdentity({required AuthenticatedLearner learner, required MaterialId materialId}) {
+  static void _requireIdentity({
+    required AuthenticatedLearner learner,
+    required MaterialId materialId,
+  }) {
     if (learner.id.value.trim().isEmpty) {
       throw const SourceIngestException('Learner identity cannot be empty.');
     }
@@ -217,13 +235,16 @@ class SourceIngestService {
     return false;
   }
 
-  static String _normalizeText(String text) => text.replaceAll('\r\n', '\n').replaceAll('\r', '\n').trim();
+  static String _normalizeText(String text) =>
+      text.replaceAll('\r\n', '\n').replaceAll('\r', '\n').trim();
 
   static String _validatedTitle(String value, {required String fallback}) {
     final trimmed = value.trim();
     final resolved = trimmed.isEmpty ? fallback : trimmed;
     if (resolved.length > 300) {
-      throw const SourceIngestException('Source title exceeds the bounded M5 title limit.');
+      throw const SourceIngestException(
+        'Source title exceeds the bounded M5 title limit.',
+      );
     }
     return resolved;
   }

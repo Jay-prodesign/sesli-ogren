@@ -5,7 +5,11 @@ import 'package:pdfrx/pdfrx.dart';
 import '../domain/learning_contracts.dart';
 
 class ExtractedPdf {
-  const ExtractedPdf({required this.text, required this.anchors, required this.pageCount});
+  const ExtractedPdf({
+    required this.text,
+    required this.anchors,
+    required this.pageCount,
+  });
 
   final String text;
   final List<SourceAnchor> anchors;
@@ -17,7 +21,10 @@ abstract interface class PdfTextExtractor {
 }
 
 class PdfrxPdfTextExtractor implements PdfTextExtractor {
-  const PdfrxPdfTextExtractor({this.maxPageCount = 500, this.maxExtractedCharacters = 200000});
+  const PdfrxPdfTextExtractor({
+    this.maxPageCount = 500,
+    this.maxExtractedCharacters = 200000,
+  });
 
   final int maxPageCount;
   final int maxExtractedCharacters;
@@ -29,13 +36,18 @@ class PdfrxPdfTextExtractor implements PdfTextExtractor {
   }
 
   @override
-  Future<ExtractedPdf> extract(Uint8List bytes, {required String sourceName}) async {
+  Future<ExtractedPdf> extract(
+    Uint8List bytes, {
+    required String sourceName,
+  }) async {
     PdfDocument? document;
     try {
       await _ensureInitialized();
       document = await PdfDocument.openData(bytes, sourceName: sourceName);
       if (document.pages.length > maxPageCount) {
-        throw const PdfTextExtractionException('PDF exceeds the bounded page safety limit.');
+        throw const PdfTextExtractionException(
+          'PDF exceeds the bounded page safety limit.',
+        );
       }
 
       final buffer = StringBuffer();
@@ -47,22 +59,37 @@ class PdfrxPdfTextExtractor implements PdfTextExtractor {
           continue;
         }
         final separatorLength = buffer.length == 0 ? 0 : 2;
-        if (buffer.length + separatorLength + pageText.length > maxExtractedCharacters) {
-          throw const PdfTextExtractionException('PDF extracted text exceeds the bounded safety limit.');
+        if (buffer.length + separatorLength + pageText.length >
+            maxExtractedCharacters) {
+          throw const PdfTextExtractionException(
+            'PDF extracted text exceeds the bounded safety limit.',
+          );
         }
         if (separatorLength > 0) {
           buffer.write('\n\n');
         }
         final start = buffer.length;
         buffer.write(pageText);
-        anchors.add(SourceAnchor(startOffset: start, endOffset: buffer.length, pageNumber: index + 1));
+        anchors.add(
+          SourceAnchor(
+            startOffset: start,
+            endOffset: buffer.length,
+            pageNumber: index + 1,
+          ),
+        );
       }
 
       final extracted = buffer.toString();
       if (extracted.isEmpty) {
-        throw const PdfTextExtractionException('PDF contains no extractable text. OCR is not enabled in M5.');
+        throw const PdfTextExtractionException(
+          'PDF contains no extractable text. OCR is not enabled in M5.',
+        );
       }
-      return ExtractedPdf(text: extracted, anchors: List.unmodifiable(anchors), pageCount: document.pages.length);
+      return ExtractedPdf(
+        text: extracted,
+        anchors: List.unmodifiable(anchors),
+        pageCount: document.pages.length,
+      );
     } on PdfTextExtractionException {
       rethrow;
     } catch (_) {
@@ -72,7 +99,8 @@ class PdfrxPdfTextExtractor implements PdfTextExtractor {
     }
   }
 
-  static String _normalize(String text) => text.replaceAll('\r\n', '\n').replaceAll('\r', '\n').trim();
+  static String _normalize(String text) =>
+      text.replaceAll('\r\n', '\n').replaceAll('\r', '\n').trim();
 }
 
 class PdfTextExtractionException implements Exception {

@@ -44,7 +44,10 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
 
   Future<void> _recordEvent(OperationalEvent event) async {
     try {
-      await widget.runtime.telemetry.record(learner: widget.runtime.learner, event: event);
+      await widget.runtime.telemetry.record(
+        learner: widget.runtime.learner,
+        event: event,
+      );
     } catch (_) {
       // Operational telemetry must never become learning-state authority
       // or block the learner's flow.
@@ -209,7 +212,10 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
         learner: widget.runtime.learner,
         materialId: AppRuntime.primaryMaterialId,
       );
-      final session = await widget.runtime.recall.openAttempt(learner: widget.runtime.learner, actionId: prompt.id);
+      final session = await widget.runtime.recall.openAttempt(
+        learner: widget.runtime.learner,
+        actionId: prompt.id,
+      );
       stopwatch.stop();
       await _recordEvent(
         OperationalEvent(
@@ -325,7 +331,9 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
         learner: widget.runtime.learner,
         actionId: prompt.id,
         attemptId: attemptId,
-        disposition: unknown ? RecallResponseDisposition.unknown : RecallResponseDisposition.answer,
+        disposition: unknown
+            ? RecallResponseDisposition.unknown
+            : RecallResponseDisposition.answer,
         answer: unknown ? '' : _answerController.text,
       );
       stopwatch.stop();
@@ -443,8 +451,7 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
     if (!mounted) return;
     setState(() {
       _phase = _SlicePhase.error;
-      _inlineError =
-          'Bu öğrenme adımı artık güncel kaynakla eşleşmiyor. Kaynaktan güvenli biçimde yeniden başlayabiliriz.';
+      _inlineError = 'Bu öğrenme adımı artık güncel kaynakla eşleşmiyor. Kaynaktan güvenli biçimde yeniden başlayabiliriz.';
     });
   }
 
@@ -456,7 +463,8 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
   CompanionVisualState get _companionState => switch (_phase) {
     _SlicePhase.loading => CompanionVisualState.think,
     _SlicePhase.source => CompanionVisualState.idle,
-    _SlicePhase.recall => _busy ? CompanionVisualState.think : CompanionVisualState.listen,
+    _SlicePhase.recall =>
+      _busy ? CompanionVisualState.think : CompanionVisualState.listen,
     _SlicePhase.result =>
       _result?.state.kind == RecallStateKind.retrievedOnce
           ? CompanionVisualState.success
@@ -472,7 +480,9 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final media = MediaQuery.maybeOf(context);
-    final reducedMotion = (media?.disableAnimations ?? false) || (media?.accessibleNavigation ?? false);
+    final reducedMotion =
+        (media?.disableAnimations ?? false) ||
+        (media?.accessibleNavigation ?? false);
     return Scaffold(
       body: SafeArea(
         child: DecoratedBox(
@@ -480,7 +490,10 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
             gradient: LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
-              colors: [theme.colorScheme.surface, theme.colorScheme.surfaceContainerLowest],
+              colors: [
+                theme.colorScheme.surface,
+                theme.colorScheme.surfaceContainerLowest,
+              ],
             ),
           ),
           child: Center(
@@ -497,20 +510,29 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
                   Text(
                     'Sesli Öğren',
                     textAlign: TextAlign.center,
-                    style: theme.textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.w700),
+                    style: theme.textTheme.headlineMedium?.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                   const SizedBox(height: 8),
                   Text(
                     _subtitle(),
                     textAlign: TextAlign.center,
-                    style: theme.textTheme.bodyLarge?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+                    style: theme.textTheme.bodyLarge?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
                   ),
                   const SizedBox(height: 28),
                   AnimatedSwitcher(
-                    duration: reducedMotion ? Duration.zero : const Duration(milliseconds: 220),
+                    duration: reducedMotion
+                        ? Duration.zero
+                        : const Duration(milliseconds: 220),
                     child: _phaseBody(context),
                   ),
-                  if (_busy) ...[const SizedBox(height: 20), const LinearProgressIndicator()],
+                  if (_busy) ...[
+                    const SizedBox(height: 20),
+                    const LinearProgressIndicator(),
+                  ],
                 ],
               ),
             ),
@@ -548,7 +570,10 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text('Çalışma materyalini ekle', style: Theme.of(context).textTheme.titleLarge),
+          Text(
+            'Çalışma materyalini ekle',
+            style: Theme.of(context).textTheme.titleLarge,
+          ),
           const SizedBox(height: 8),
           const Text(
             'Bu ilk dilimde metni doğrudan yapıştırıyoruz. Kaynak sürümü ve öğrenme kanıtı cihazda ayrı ve kalıcı tutulur.',
@@ -561,12 +586,16 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
             textCapitalization: TextCapitalization.sentences,
             decoration: const InputDecoration(
               labelText: 'Metin',
-              hintText: 'Notunu veya çalışmak istediğin bölümü buraya yapıştır.',
+              hintText:
+                  'Notunu veya çalışmak istediğin bölümü buraya yapıştır.',
               border: OutlineInputBorder(),
               alignLabelWithHint: true,
             ),
           ),
-          if (_inlineError != null) ...[const SizedBox(height: 12), _InlineNotice(text: _inlineError!)],
+          if (_inlineError != null) ...[
+            const SizedBox(height: 12),
+            _InlineNotice(text: _inlineError!),
+          ],
           const SizedBox(height: 18),
           FilledButton.icon(
             onPressed: _busy ? null : _saveSource,
@@ -590,28 +619,53 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
         children: [
           Text('Hatırla', style: Theme.of(context).textTheme.labelLarge),
           const SizedBox(height: 10),
-          Text(prompt.promptText, style: Theme.of(context).textTheme.titleLarge?.copyWith(height: 1.35)),
+          Text(
+            prompt.promptText,
+            style: Theme.of(context).textTheme.titleLarge
+                ?.copyWith(height: 1.35),
+          ),
           const SizedBox(height: 20),
           TextField(
             controller: _answerController,
             enabled: !_busy,
             textInputAction: TextInputAction.done,
             onSubmitted: (_) => _submit(),
-            decoration: const InputDecoration(labelText: 'Yanıtın', border: OutlineInputBorder()),
+            decoration: const InputDecoration(
+              labelText: 'Yanıtın',
+              border: OutlineInputBorder(),
+            ),
           ),
-          if (_supportText != null) ...[const SizedBox(height: 12), _InlineNotice(text: _supportText!)],
-          if (_inlineError != null) ...[const SizedBox(height: 12), _InlineNotice(text: _inlineError!)],
+          if (_supportText != null) ...[
+            const SizedBox(height: 12),
+            _InlineNotice(text: _supportText!),
+          ],
+          if (_inlineError != null) ...[
+            const SizedBox(height: 12),
+            _InlineNotice(text: _inlineError!),
+          ],
           const SizedBox(height: 18),
-          FilledButton(onPressed: _busy ? null : _submit, child: const Text('Yanıtla')),
+          FilledButton(
+            onPressed: _busy ? null : _submit,
+            child: const Text('Yanıtla'),
+          ),
           const SizedBox(height: 10),
           Wrap(
             spacing: 8,
             runSpacing: 8,
             alignment: WrapAlignment.center,
             children: [
-              OutlinedButton(onPressed: _busy ? null : _requestHint, child: const Text('İpucu')),
-              OutlinedButton(onPressed: _busy ? null : _revealAnswer, child: const Text('Yanıtı göster')),
-              TextButton(onPressed: _busy ? null : () => _submit(unknown: true), child: const Text('Bilmiyorum')),
+              OutlinedButton(
+                onPressed: _busy ? null : _requestHint,
+                child: const Text('İpucu'),
+              ),
+              OutlinedButton(
+                onPressed: _busy ? null : _revealAnswer,
+                child: const Text('Yanıtı göster'),
+              ),
+              TextButton(
+                onPressed: _busy ? null : () => _submit(unknown: true),
+                child: const Text('Bilmiyorum'),
+              ),
             ],
           ),
         ],
@@ -630,19 +684,29 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(isIndependent ? 'İpucusuz hatırladın' : 'Geri bildirim', style: theme.textTheme.titleLarge),
+          Text(
+            isIndependent ? 'İpucusuz hatırladın' : 'Geri bildirim',
+            style: theme.textTheme.titleLarge,
+          ),
           const SizedBox(height: 10),
           Text(_outcomeText(result.evidence.outcome)),
           const SizedBox(height: 18),
           Text('Doğru ifade', style: theme.textTheme.labelLarge),
           const SizedBox(height: 4),
-          Text(result.correctAnswer, style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700)),
+          Text(
+            result.correctAnswer,
+            style: theme.textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.w700,
+            ),
+          ),
           const SizedBox(height: 16),
           Text('Kaynak bağlamı', style: theme.textTheme.labelLarge),
           const SizedBox(height: 4),
           Text(
             result.sourceExcerpt,
-            style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
           ),
           const Divider(height: 32),
           Text('Sıradaki adım', style: theme.textTheme.labelLarge),
@@ -652,7 +716,10 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
           FilledButton(
             onPressed: () {
               setState(() {
-                _continuation = LearningContinuation(state: result.state, nextAction: result.nextAction);
+                _continuation = LearningContinuation(
+                  state: result.state,
+                  nextAction: result.nextAction,
+                );
                 _phase = _SlicePhase.continuation;
               });
             },
@@ -706,9 +773,14 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
         children: [
           Text('Güvenli devam', style: Theme.of(context).textTheme.titleLarge),
           const SizedBox(height: 10),
-          Text(_inlineError ?? 'Devam bilgisi eksik. Kaynaktan yeni bir Recall başlatabiliriz.'),
+          Text(
+            _inlineError ?? 'Devam bilgisi eksik. Kaynaktan yeni bir Recall başlatabiliriz.',
+          ),
           const SizedBox(height: 18),
-          FilledButton(onPressed: _busy ? null : _repairContinuation, child: const Text('Devamı onar')),
+          FilledButton(
+            onPressed: _busy ? null : _repairContinuation,
+            child: const Text('Devamı onar'),
+          ),
           const SizedBox(height: 8),
           TextButton(
             onPressed: _busy
@@ -726,18 +798,23 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
     );
   }
 
-  static String? _restoredSupportNotice(RecallAssistance assistance) => switch (assistance) {
-    RecallAssistance.none => null,
-    RecallAssistance.hint => 'Bu denemede daha önce ipucu kullandın. Sonuç bağımsız hatırlama sayılmayacak.',
-    RecallAssistance.answerExposed => 'Bu denemede yanıt daha önce gösterildi. Sonuç bağımsız hatırlama sayılmayacak.',
-  };
+  static String? _restoredSupportNotice(RecallAssistance assistance) =>
+      switch (assistance) {
+        RecallAssistance.none => null,
+        RecallAssistance.hint => 'Bu denemede daha önce ipucu kullandın. Sonuç bağımsız hatırlama sayılmayacak.',
+        RecallAssistance.answerExposed => 'Bu denemede yanıt daha önce gösterildi. Sonuç bağımsız hatırlama sayılmayacak.',
+      };
 
   static String _outcomeText(RecallOutcome outcome) => switch (outcome) {
     RecallOutcome.correct => 'Bu yanıtı yardım almadan geri çağırdın. Bunu tek başına ustalık olarak yorumlamıyoruz.',
-    RecallOutcome.helpedCorrect => 'Doğru yanıta ipucuyla ulaştın. Bu yüzden bağımsız hatırlama sayılmadı.',
-    RecallOutcome.answerExposed => 'Yanıtı gördün. Bu deneme geri çağırma başarısı olarak sayılmadı.',
-    RecallOutcome.partial => 'Yanıtın çok yaklaştı; kaynakla karşılaştırıp tekrar denemek daha doğru.',
-    RecallOutcome.incorrect => 'Bu kez eşleşmedi. Bu bir etiket değil; yalnızca bu denemenin sonucu.',
+    RecallOutcome.helpedCorrect =>
+      'Doğru yanıta ipucuyla ulaştın. Bu yüzden bağımsız hatırlama sayılmadı.',
+    RecallOutcome.answerExposed =>
+      'Yanıtı gördün. Bu deneme geri çağırma başarısı olarak sayılmadı.',
+    RecallOutcome.partial =>
+      'Yanıtın çok yaklaştı; kaynakla karşılaştırıp tekrar denemek daha doğru.',
+    RecallOutcome.incorrect =>
+      'Bu kez eşleşmedi. Bu bir etiket değil; yalnızca bu denemenin sonucu.',
     RecallOutcome.unknown => 'Bu denemede değerlendirilebilir bir yanıt yok. Durumun bilinmiyor olarak kaldı.',
   };
 }

@@ -6,7 +6,8 @@ class RecallActionId {
   final String value;
 
   @override
-  bool operator ==(Object other) => other is RecallActionId && other.value == value;
+  bool operator ==(Object other) =>
+      other is RecallActionId && other.value == value;
 
   @override
   int get hashCode => value.hashCode;
@@ -18,7 +19,8 @@ class RecallAttemptId {
   final String value;
 
   @override
-  bool operator ==(Object other) => other is RecallAttemptId && other.value == value;
+  bool operator ==(Object other) =>
+      other is RecallAttemptId && other.value == value;
 
   @override
   int get hashCode => value.hashCode;
@@ -53,7 +55,8 @@ class LearnerEvidenceId {
   final String value;
 
   @override
-  bool operator ==(Object other) => other is LearnerEvidenceId && other.value == value;
+  bool operator ==(Object other) =>
+      other is LearnerEvidenceId && other.value == value;
 
   @override
   int get hashCode => value.hashCode;
@@ -63,11 +66,22 @@ enum RecallResponseDisposition { answer, unknown }
 
 enum RecallAssistance { none, hint, answerExposed }
 
-enum RecallOutcome { correct, helpedCorrect, answerExposed, partial, incorrect, unknown }
+enum RecallOutcome {
+  correct,
+  helpedCorrect,
+  answerExposed,
+  partial,
+  incorrect,
+  unknown,
+}
 
 enum RecallStateKind { notAssessed, needsReview, developing, retrievedOnce }
 
-enum NextLearningActionKind { reviewSourceThenRecall, retryRecallWithoutHint, repeatRecallLater }
+enum NextLearningActionKind {
+  reviewSourceThenRecall,
+  retryRecallWithoutHint,
+  repeatRecallLater,
+}
 
 class RecallPrompt {
   const RecallPrompt({
@@ -205,7 +219,11 @@ class NextLearningAction {
 enum RecallSupportKind { hint, answer }
 
 class RecallSupport {
-  const RecallSupport({required this.kind, required this.text, required this.assistance});
+  const RecallSupport({
+    required this.kind,
+    required this.text,
+    required this.assistance,
+  });
 
   final RecallSupportKind kind;
   final String text;
@@ -242,7 +260,8 @@ class RecallTruthPolicy {
     required RecallAssistance assistance,
   }) {
     final normalizedAnswer = normalizeAnswer(response);
-    if (disposition == RecallResponseDisposition.unknown || normalizedAnswer.isEmpty) {
+    if (disposition == RecallResponseDisposition.unknown ||
+        normalizedAnswer.isEmpty) {
       return RecallOutcome.unknown;
     }
     if (assistance == RecallAssistance.answerExposed) {
@@ -251,9 +270,12 @@ class RecallTruthPolicy {
 
     final normalizedExpected = normalizeAnswer(expectedAnswer);
     if (normalizedAnswer == normalizedExpected) {
-      return assistance == RecallAssistance.hint ? RecallOutcome.helpedCorrect : RecallOutcome.correct;
+      return assistance == RecallAssistance.hint
+          ? RecallOutcome.helpedCorrect
+          : RecallOutcome.correct;
     }
-    if (normalizedExpected.length >= 5 && editDistance(normalizedAnswer, normalizedExpected) <= 1) {
+    if (normalizedExpected.length >= 5 &&
+        editDistance(normalizedAnswer, normalizedExpected) <= 1) {
       return RecallOutcome.partial;
     }
     return RecallOutcome.incorrect;
@@ -281,7 +303,11 @@ class RecallTruthPolicy {
         final substitution = previous[j] + (left[i] == right[j] ? 0 : 1);
         final insertion = current[j] + 1;
         final deletion = previous[j + 1] + 1;
-        current[j + 1] = [substitution, insertion, deletion].reduce((a, b) => a < b ? a : b);
+        current[j + 1] = [
+          substitution,
+          insertion,
+          deletion,
+        ].reduce((a, b) => a < b ? a : b);
       }
       previous = current;
     }
@@ -291,9 +317,11 @@ class RecallTruthPolicy {
   static RecallStateKind stateForOutcome(RecallOutcome outcome) {
     return switch (outcome) {
       RecallOutcome.correct => RecallStateKind.retrievedOnce,
-      RecallOutcome.helpedCorrect || RecallOutcome.partial => RecallStateKind.developing,
+      RecallOutcome.helpedCorrect ||
+      RecallOutcome.partial => RecallStateKind.developing,
       RecallOutcome.incorrect => RecallStateKind.needsReview,
-      RecallOutcome.answerExposed || RecallOutcome.unknown => RecallStateKind.notAssessed,
+      RecallOutcome.answerExposed ||
+      RecallOutcome.unknown => RecallStateKind.notAssessed,
     };
   }
 
@@ -348,7 +376,10 @@ class RecallTruthPolicy {
     );
   }
 
-  static bool sameNextAction(NextLearningAction left, NextLearningAction right) {
+  static bool sameNextAction(
+    NextLearningAction left,
+    NextLearningAction right,
+  ) {
     return left.materialId == right.materialId &&
         left.sourceVersionId == right.sourceVersionId &&
         left.latestEvidenceId == right.latestEvidenceId &&
