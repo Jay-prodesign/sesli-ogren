@@ -234,13 +234,13 @@ custom code, record it here with a concrete reason, as AGENTS.md §12 requires:
 | --- | --- |
 | Task ID | LA-0022 |
 | Upstream repository | https://github.com/supabase/supabase-flutter |
-| Exact tag / commit / version | supabase_flutter 2.17.2 exact-pinned in `app/pubspec.yaml`; lock/transitive resolution PASS in M5 bounded validation run 37334117375; live project auth evidence remains blocked only by missing client-safe project URL/publishable key |
+| Exact tag / commit / version | supabase_flutter 2.17.2 exact-pinned in `app/pubspec.yaml`; lock/transitive resolution PASS in M5 bounded validation run 37334117375; client-safe project configuration is external runtime evidence and does not alter the dependency audit |
 | License | MIT |
 | Reuse class | DEPENDENCY |
 | Dependency / files / modules used | Flutter client bootstrap + persisted Auth session + anonymous authenticated user creation only |
 | Material modifications | none |
 | Copyright / license / NOTICE obligations | Preserve MIT/package attribution through Flutter notice surface |
 | Security/config boundary | Project URL + publishable key supplied via Flutter `--dart-define`; no secret/service-role key in repository. Anonymous sign-in must be explicitly enabled in the selected Supabase project; public-release anti-abuse/captcha posture remains a later release gate. |
-| Audit status | APPROVED FOR M5 IMPLEMENTATION / LIVE PROJECT CONFIG PENDING |
+| Audit status | APPROVED |
 | Approving decision / task | D-024; canonical Supabase Auth direction; D-071 / LA-0022 |
 | Recorded | 2026-10-04 by ChatGPT (Brain delegate) |
