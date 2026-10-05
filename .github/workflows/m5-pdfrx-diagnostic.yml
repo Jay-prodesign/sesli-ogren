@@ -13,19 +13,67 @@ permissions:
 jobs:
   diagnose:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 8
     steps:
       - uses: actions/checkout@v4
         with:
           ref: feat/m5-golden-learning-slice
+
       - uses: subosito/flutter-action@v2
         with:
           flutter-version: "3.47.5"
           channel: "stable"
           cache: true
-      - name: Resolve dependencies
+
+      - name: Resolve locked dependencies
         working-directory: app
-        run: flutter pub get
-      - name: Direct pdfrx diagnostic
+        run: |
+          flutter pub get
+          git diff --exit-code -- pubspec.lock
+
+      - name: Pure Dart PDFium engine probe
         working-directory: app
-        run: timeout 180s flutter test test/_pdfrx_diagnostic_test.dart -r expanded
+        run: |
+          mkdir -p tool
+          cat > tool/_m5_pdf_engine_probe.dart <<'DART'
+          import 'dart:io';
+
+          import 'package:pdfrx_engine/pdfrx_engine.dart';
+
+          Future<void> main() async {
+            await pdfrxInitialize();
+
+            PdfDocument? document;
+            try {
+              document = await PdfDocument.openFile(
+                'test/fixtures/two_page_text.pdf',
+              );
+
+              if (document.pages.length != 2) {
+                throw StateError(
+                  'Expected 2 PDF pages, got ${document.pages.length}.',
+                );
+              }
+
+              final first = (await document.pages[0].loadText())?.fullText ?? '';
+              final second = (await document.pages[1].loadText())?.fullText ?? '';
+
+              if (!first.contains('Learning evidence page one')) {
+                throw StateError('Expected page-one text was not extracted.');
+              }
+              if (!second.contains('Second page keeps provenance')) {
+                throw StateError('Expected page-two text was not extracted.');
+              }
+
+              stdout.writeln(
+                'PDF_ENGINE_PROBE PASS pages=${document.pages.length}',
+              );
+            } finally {
+              await document?.dispose();
+              await PdfrxEntryFunctions.instance.stopBackgroundWorker();
+            }
+          }
+          DART
+
+          timeout 180s dart run tool/_m5_pdf_engine_probe.dart
+          rm tool/_m5_pdf_engine_probe.dart
