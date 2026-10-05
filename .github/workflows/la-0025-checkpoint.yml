@@ -40,7 +40,11 @@ jobs:
           cache: false
           pub-cache: false
       - run: flutter pub get --enforce-lockfile
-      - run: dart format --output=none --set-exit-if-changed .
+      - name: Strict canonical format
+        run: |
+          dart format .
+          git diff -- app
+          git diff --exit-code -- app
       - run: flutter analyze
       - run: flutter test
 
