@@ -6,6 +6,7 @@ import '../domain/authenticated_learner.dart';
 import '../domain/learning_contracts.dart';
 import '../learning/explain_back_gateway.dart';
 import '../learning/recall_learning_service.dart';
+import '../learning/supabase_explain_back_gateway.dart';
 import '../generation/grounded_explain_gateway.dart';
 import '../generation/supabase_grounded_explain_gateway.dart';
 
@@ -44,6 +45,7 @@ class AppRuntime {
       recall: recall,
       telemetry: store.operationalTelemetry(),
       explain: const SupabaseGroundedExplainGateway(),
+      explainBack: const SupabaseExplainBackGateway(),
     );
   }
 
