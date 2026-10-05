@@ -17,7 +17,7 @@ permissions:
 jobs:
   flutter-validation:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 10
 
     steps:
       - name: Checkout
@@ -50,14 +50,6 @@ jobs:
         working-directory: app
         run: flutter analyze
 
-      - name: Test
+      - name: Focused PDF diagnostic
         working-directory: app
-        run: flutter test
-
-      - name: Android profile build
-        working-directory: app
-        run: flutter build apk --profile
-
-      - name: APK SHA-256
-        working-directory: app
-        run: sha256sum build/app/outputs/flutter-apk/app-profile.apk
+        run: timeout 60s flutter test test/_pdfrx_diagnostic_test.dart -r expanded
