@@ -1,7 +1,7 @@
 # M5 Experience Dispositions — 2026-10-05
 
 - Task: LA-0022
-- Candidate: `01670f42029ef228706c4a772594102e5656ebdf`
+- Candidate: `e576ca177ff8872cbbfc4f127eb016cefa7f611c`
 - Scope: admitted M5 Golden Learning Slice only
 - Important boundary: these dispositions do **not** claim V0 product/visual completion, release readiness, physical-device readiness, speech readiness or final gameful/premium experience quality.
 
