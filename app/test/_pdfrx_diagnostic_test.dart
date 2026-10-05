@@ -39,5 +39,5 @@ void main() {
     } finally {
       await document?.dispose();
     }
-  }, timeout: const Timeout(Duration(seconds: 45)));
+  });
 }
