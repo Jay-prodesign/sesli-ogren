@@ -15,11 +15,11 @@ This matrix does **not** declare M5 PASS by itself.
 
 - Repository: `Jay-prodesign/sesli-ogren`
 - Branch: `feat/m5-golden-learning-slice`
-- Implementation closure head: `f583804e0bfe0c2565e86094850cfd979daf5ed1`
-- Checkpoint-control lineage begins after that head.
+- Frozen runtime implementation candidate: `ff7b36c0617b60e8b7bc275b89401b81bd7a1595`
+- Checkpoint-control-only reconciliation commits may follow this SHA; they do not widen runtime feature scope.
 - Flutter pin: `.flutter-version` = 3.47.5.
 - Routine GitHub Actions: OFF under D-072.
-- Current execution container: no Flutter/Dart toolchain; runtime/build evidence must come from one bounded checkpoint batch.
+- Current ChatGPT execution container cannot reach GitHub over the network and has no established Flutter/Dart checkpoint environment; runtime/build evidence must come from one bounded checkpoint batch in a supported environment.
 - Known reproducibility gap: `app/pubspec.lock` is currently absent for the new M5 dependencies and must be generated/committed before a PASS verdict.
 - Production learner bootstrap now requires a real Supabase Auth session before learner-scoped data opens; live project configuration/anonymous-auth enablement remains checkpoint evidence, not a repo secret.
 - Known authentication gap: production code now fails closed unless `SUPABASE_URL` + `SUPABASE_PUBLISHABLE_KEY` are provided and a real Supabase session can be established; live project/auth configuration evidence is still pending.
