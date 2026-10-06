@@ -75,7 +75,8 @@ flutter test
 Phone web preview is generated **on demand** with the free Cloudflare Quick Tunnel workflow; it is a visual/flow QA
 surface, not a substitute for final native-device validation.
 
-## Licensing
+## Licensing / source posture
 
-No repository-wide license has been granted. Existing third-party reuse/dependency obligations remain governed by the
-project provenance register and accepted architecture decisions.
+No open-source or repository-wide public license has been granted. First-party source and original product material are proprietary; see [PROPRIETARY_NOTICE.md](PROPRIETARY_NOTICE.md). Repository visibility is not a license grant.
+
+Third-party dependencies and incorporated material remain governed by their own licenses/terms. Release-time notices/SBOM or equivalent dependency evidence must be generated from the actual shipping dependency set; this repository notice does not override third-party rights.
