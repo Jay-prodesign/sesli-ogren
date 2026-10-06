@@ -51,6 +51,25 @@ void main() {
 
   tearDown(() => store.close());
 
+  test('active materials are learner scoped, newest first, and exclude deleted', () async {
+    const older = MaterialId('material-older');
+    const newer = MaterialId('material-newer');
+    await service.ingestPastedText(learner: learnerA, materialId: older, text: 'Older');
+    service = SourceIngestService(
+      store: store,
+      pdfTextExtractor: const _UnusedPdfExtractor(),
+      now: () => DateTime.utc(2026, 10, 4, 11),
+    );
+    await service.ingestPastedText(learner: learnerA, materialId: newer, text: 'Newer');
+    await service.ingestPastedText(learner: learnerB, materialId: const MaterialId('other-user'), text: 'Private');
+
+    expect((await store.activeMaterials(learner: learnerA)).map((item) => item.id), [newer, older]);
+    expect(await store.activeMaterials(learner: learnerB), hasLength(1));
+
+    await store.deleteMaterial(learner: learnerA, materialId: newer, deletedAt: DateTime.utc(2026, 10, 4, 12));
+    expect((await store.activeMaterials(learner: learnerA)).map((item) => item.id), [older]);
+  });
+
   test('same pasted source retry is idempotent', () async {
     const sourceText = '  İlk satır\r\nİkinci satır  ';
     final first = await service.ingestPastedText(learner: learnerA, materialId: material, text: sourceText);
