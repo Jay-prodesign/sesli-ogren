@@ -254,6 +254,42 @@ void main() {
     expect(find.text('Dinle'), findsOneWidget);
   });
 
+  testWidgets('Home resumes the most recently active material', (tester) async {
+    final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
+    addTearDown(store.close);
+    var now = DateTime.utc(2026, 10, 6, 9);
+    final ingest = SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor(), now: () => now);
+    final runtime = AppRuntime(
+      learner: AppRuntime.localM5LearnerFixture,
+      store: store,
+      ingest: ingest,
+      recall: RecallLearningService(sourceStore: store, learningStore: store.learningTruthStore()),
+      telemetry: store.operationalTelemetry(),
+    );
+
+    await ingest.ingestPastedText(
+      learner: runtime.learner,
+      materialId: const MaterialId('older-material'),
+      text: 'Eski materyal için yeterince uzun ve anlamlı bir çalışma metni.',
+      sourceName: 'Eski materyal',
+    );
+    now = DateTime.utc(2026, 10, 6, 10);
+    await ingest.ingestPastedText(
+      learner: runtime.learner,
+      materialId: const MaterialId('recent-material'),
+      text: 'Son çalışılan materyal için yeterince uzun ve anlamlı bir çalışma metni.',
+      sourceName: 'Son materyal',
+    );
+
+    await tester.pumpWidget(MaterialApp(home: ProductShellScreen(runtime: runtime)));
+    await pumpUntilFound(tester, find.text('Şimdi ne yapmalı?'));
+    await tapVisible(tester, find.text('Devam et'));
+    await pumpUntilFound(tester, find.text('Son materyal'));
+
+    expect(find.text('Son materyal'), findsOneWidget);
+    expect(find.text('Eski materyal'), findsNothing);
+  });
+
   testWidgets('Progress reports canonical unassessed state without invented mastery', (tester) async {
     final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
     addTearDown(store.close);
