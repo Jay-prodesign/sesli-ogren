@@ -1,6 +1,7 @@
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 
+import '../domain/learning_contracts.dart';
 import '../domain/learning_truth.dart';
 import '../domain/operational_event.dart';
 import 'app_runtime.dart';
@@ -9,9 +10,10 @@ import 'companion_view.dart';
 enum _SlicePhase { loading, source, recall, result, continuation, error }
 
 class LearningSliceScreen extends StatefulWidget {
-  const LearningSliceScreen({required this.runtime, super.key});
+  const LearningSliceScreen({required this.runtime, required this.materialId, super.key});
 
   final AppRuntime runtime;
+  final MaterialId materialId;
 
   @override
   State<LearningSliceScreen> createState() => _LearningSliceScreenState();
@@ -58,7 +60,7 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
       OperationalEvent(
         type: OperationalEventType.runtimeRestore,
         phase: OperationalEventPhase.started,
-        materialId: AppRuntime.primaryMaterialId,
+        materialId: widget.materialId,
         createdAt: DateTime.now().toUtc(),
       ),
     );
@@ -66,7 +68,7 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
     try {
       final material = await widget.runtime.store.material(
         learner: widget.runtime.learner,
-        materialId: AppRuntime.primaryMaterialId,
+        materialId: widget.materialId,
       );
       if (!mounted) return;
 
@@ -76,7 +78,7 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
           OperationalEvent(
             type: OperationalEventType.runtimeRestore,
             phase: OperationalEventPhase.completed,
-            materialId: AppRuntime.primaryMaterialId,
+            materialId: widget.materialId,
             durationMs: stopwatch.elapsedMilliseconds,
             createdAt: DateTime.now().toUtc(),
           ),
@@ -91,7 +93,7 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
 
       final continuation = await widget.runtime.recall.reopen(
         learner: widget.runtime.learner,
-        materialId: AppRuntime.primaryMaterialId,
+        materialId: widget.materialId,
       );
       if (!mounted) return;
 
@@ -110,7 +112,7 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
         OperationalEvent(
           type: OperationalEventType.runtimeRestore,
           phase: OperationalEventPhase.completed,
-          materialId: AppRuntime.primaryMaterialId,
+          materialId: widget.materialId,
           durationMs: stopwatch.elapsedMilliseconds,
           createdAt: DateTime.now().toUtc(),
         ),
@@ -121,7 +123,7 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
         OperationalEvent(
           type: OperationalEventType.runtimeRestore,
           phase: OperationalEventPhase.failed,
-          materialId: AppRuntime.primaryMaterialId,
+          materialId: widget.materialId,
           durationMs: stopwatch.elapsedMilliseconds,
           errorClass: error.runtimeType.toString(),
           createdAt: DateTime.now().toUtc(),
@@ -151,7 +153,7 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
       OperationalEvent(
         type: OperationalEventType.sourceIngest,
         phase: OperationalEventPhase.started,
-        materialId: AppRuntime.primaryMaterialId,
+        materialId: widget.materialId,
         createdAt: DateTime.now().toUtc(),
       ),
     );
@@ -160,7 +162,7 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
       final bytes = await file.readAsBytes();
       final ingestResult = await widget.runtime.ingest.ingestPdf(
         learner: widget.runtime.learner,
-        materialId: AppRuntime.primaryMaterialId,
+        materialId: widget.materialId,
         bytes: bytes,
         originalName: file.name,
       );
@@ -169,7 +171,7 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
         OperationalEvent(
           type: OperationalEventType.sourceIngest,
           phase: OperationalEventPhase.completed,
-          materialId: AppRuntime.primaryMaterialId,
+          materialId: widget.materialId,
           sourceVersionId: ingestResult.sourceVersion.identity.sourceVersionId,
           durationMs: stopwatch.elapsedMilliseconds,
           createdAt: DateTime.now().toUtc(),
@@ -183,7 +185,7 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
         OperationalEvent(
           type: OperationalEventType.sourceIngest,
           phase: OperationalEventPhase.failed,
-          materialId: AppRuntime.primaryMaterialId,
+          materialId: widget.materialId,
           durationMs: stopwatch.elapsedMilliseconds,
           errorClass: error.runtimeType.toString(),
           createdAt: DateTime.now().toUtc(),
@@ -210,7 +212,7 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
       OperationalEvent(
         type: OperationalEventType.sourceIngest,
         phase: OperationalEventPhase.started,
-        materialId: AppRuntime.primaryMaterialId,
+        materialId: widget.materialId,
         createdAt: DateTime.now().toUtc(),
       ),
     );
@@ -218,7 +220,7 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
     try {
       final ingestResult = await widget.runtime.ingest.ingestPastedText(
         learner: widget.runtime.learner,
-        materialId: AppRuntime.primaryMaterialId,
+        materialId: widget.materialId,
         text: text,
         sourceName: 'Çalışma materyalim',
       );
@@ -228,7 +230,7 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
         OperationalEvent(
           type: OperationalEventType.sourceIngest,
           phase: OperationalEventPhase.completed,
-          materialId: AppRuntime.primaryMaterialId,
+          materialId: widget.materialId,
           sourceVersionId: ingestResult.sourceVersion.identity.sourceVersionId,
           durationMs: stopwatch.elapsedMilliseconds,
           createdAt: DateTime.now().toUtc(),
@@ -242,7 +244,7 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
         OperationalEvent(
           type: OperationalEventType.sourceIngest,
           phase: OperationalEventPhase.failed,
-          materialId: AppRuntime.primaryMaterialId,
+          materialId: widget.materialId,
           durationMs: stopwatch.elapsedMilliseconds,
           errorClass: error.runtimeType.toString(),
           createdAt: DateTime.now().toUtc(),
@@ -263,14 +265,14 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
       OperationalEvent(
         type: OperationalEventType.recallPrompt,
         phase: OperationalEventPhase.started,
-        materialId: AppRuntime.primaryMaterialId,
+        materialId: widget.materialId,
         createdAt: DateTime.now().toUtc(),
       ),
     );
     try {
       final prompt = await widget.runtime.recall.createCurrentPrompt(
         learner: widget.runtime.learner,
-        materialId: AppRuntime.primaryMaterialId,
+        materialId: widget.materialId,
       );
       final session = await widget.runtime.recall.openAttempt(learner: widget.runtime.learner, actionId: prompt.id);
       stopwatch.stop();
@@ -304,7 +306,7 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
         OperationalEvent(
           type: OperationalEventType.recallPrompt,
           phase: OperationalEventPhase.failed,
-          materialId: AppRuntime.primaryMaterialId,
+          materialId: widget.materialId,
           durationMs: stopwatch.elapsedMilliseconds,
           errorClass: error.runtimeType.toString(),
           createdAt: DateTime.now().toUtc(),
@@ -444,7 +446,7 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
       OperationalEvent(
         type: OperationalEventType.continuationRepair,
         phase: OperationalEventPhase.started,
-        materialId: AppRuntime.primaryMaterialId,
+        materialId: widget.materialId,
         createdAt: DateTime.now().toUtc(),
       ),
     );
@@ -452,7 +454,7 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
     try {
       final repaired = await widget.runtime.recall.repairContinuation(
         learner: widget.runtime.learner,
-        materialId: AppRuntime.primaryMaterialId,
+        materialId: widget.materialId,
       );
       if (!mounted) return;
 
@@ -461,7 +463,7 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
         OperationalEvent(
           type: OperationalEventType.continuationRepair,
           phase: OperationalEventPhase.completed,
-          materialId: AppRuntime.primaryMaterialId,
+          materialId: widget.materialId,
           sourceVersionId: repaired?.state.sourceVersionId,
           evidenceId: repaired?.state.latestEvidenceId,
           ruleVersion: repaired?.state.ruleVersion,
@@ -486,7 +488,7 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
         OperationalEvent(
           type: OperationalEventType.continuationRepair,
           phase: OperationalEventPhase.failed,
-          materialId: AppRuntime.primaryMaterialId,
+          materialId: widget.materialId,
           durationMs: stopwatch.elapsedMilliseconds,
           errorClass: error.runtimeType.toString(),
           createdAt: DateTime.now().toUtc(),
