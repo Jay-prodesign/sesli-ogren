@@ -231,7 +231,8 @@ void main() {
     expect(find.text('Henüz ölçülmedi'), findsOneWidget);
     expect(find.text('Hızlı bakış'), findsOneWidget);
     expect(find.text('Açıkla'), findsOneWidget);
-    await tester.scrollUntilVisible(find.text('Odaklan').last, 160);
+    await tester.drag(find.byType(Scrollable).last, const Offset(0, -420));
+    await tester.pumpAndSettle();
     expect(find.text('Odaklan'), findsOneWidget);
     await tapVisible(tester, find.text('Odaklan').last);
     await pumpUntilFound(tester, find.text('Kısa odak oturumu'));
