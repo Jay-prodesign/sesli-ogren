@@ -193,6 +193,13 @@ class _WorkspaceBody extends StatelessWidget {
         ),
         const SizedBox(height: 10),
         _ActionCard(
+          icon: Icons.center_focus_strong_rounded,
+          title: 'Odaklan',
+          body: 'Kaynağa bağlı kısa çalışma: soru sor, ipucu veya doğrudan açıklama iste.',
+          onPressed: onFocus,
+        ),
+        const SizedBox(height: 10),
+        _ActionCard(
           icon: Icons.psychology_alt_outlined,
           title: 'Hatırla',
           body: 'Kaynağa bakmadan geri çağır; öğrenme durumunu güncelleyebilen aktif adım.',
