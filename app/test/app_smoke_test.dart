@@ -314,7 +314,7 @@ void main() {
       learner: learner,
       actionId: action.id,
       attemptId: session.attempt.attemptId,
-      disposition: RecallResponseDisposition.answered,
+      disposition: RecallResponseDisposition.answer,
       answer: action.expectedAnswer,
     );
     await store.close();
