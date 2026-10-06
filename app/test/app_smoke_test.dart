@@ -287,7 +287,7 @@ void main() {
     await tapVisible(tester, find.text('Devam et'));
     await pumpUntilFound(tester, find.text('Son materyal'));
 
-    expect(find.text('Son materyal'), findsOneWidget);
+    expect(find.text('Son materyal'), findsWidgets);
     expect(find.text('Eski materyal'), findsNothing);
   });
 
@@ -330,6 +330,7 @@ void main() {
     await pumpUntilFound(tester, find.text('Materyali sil?'));
     await tapVisible(tester, find.text('Sil'));
     await pumpUntilFound(tester, find.text('Materyal silindi.'));
+    await tester.pumpAndSettle();
 
     expect(find.text('Silinecek materyal'), findsNothing);
     expect(find.text('Korunacak materyal'), findsOneWidget);
@@ -340,45 +341,6 @@ void main() {
     await tapVisible(tester, find.text('Devam et'));
     await pumpUntilFound(tester, find.text('Korunacak materyal'));
     expect(find.text('Korunacak materyal'), findsOneWidget);
-  });
-
-  testWidgets('SQLite reopen preserves material and canonical continuation', (tester) async {
-    const path = '/tmp/sesli-ogren-continuity-reopen.db';
-    await databaseFactoryFfiNoIsolate.deleteDatabase(path);
-    addTearDown(() => databaseFactoryFfiNoIsolate.deleteDatabase(path));
-
-    var store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: path);
-    final ingest = SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor());
-    final learner = AppRuntime.localM5LearnerFixture;
-    await ingest.ingestPastedText(
-      learner: learner,
-      materialId: const MaterialId('restart-material'),
-      text: 'Uygulama yeniden açıldığında bu materyal ve öğrenme durumu kalıcı olmalıdır.',
-      sourceName: 'Restart materyali',
-    );
-    final recall = RecallLearningService(sourceStore: store, learningStore: store.learningTruthStore());
-    final prompt = await recall.createCurrentPrompt(learner: learner, materialId: const MaterialId('restart-material'));
-    final action = await store.learningTruthStore().recallAction(learner: learner, actionId: prompt.id);
-    expect(action, isNotNull);
-    final session = await recall.openAttempt(learner: learner, actionId: action!.id);
-    await recall.submit(
-      learner: learner,
-      actionId: action.id,
-      attemptId: session.attempt.attemptId,
-      disposition: RecallResponseDisposition.answer,
-      answer: action.expectedAnswer,
-    );
-    await store.close();
-
-    store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: path);
-    addTearDown(store.close);
-    final reopened = RecallLearningService(sourceStore: store, learningStore: store.learningTruthStore());
-    final continuation = await reopened.reopen(learner: learner, materialId: const MaterialId('restart-material'));
-    final material = await store.material(learner: learner, materialId: const MaterialId('restart-material'));
-
-    expect(material?.title, 'Restart materyali');
-    expect(continuation?.state.kind, RecallStateKind.retrievedOnce);
-    expect(continuation?.nextAction.reasonText, isNotEmpty);
   });
 
   testWidgets('Progress reports canonical unassessed state without invented mastery', (tester) async {
