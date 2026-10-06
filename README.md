@@ -2,18 +2,15 @@
 
 Engineering repository for **Sesli Öğren**, internally tracked as the **Learning App** project.
 
-> **Current state:** M0 Repository Bootstrap and M1 Architecture Proof are accepted. The active stacked branch
-> `feat/round7-companion-production-sequence-v2` / draft PR #8 carries a bounded **Round 7 companion/runtime evidence program**.
-> It contains a real Flutter proof with canonical D/Knot and E/Tilt assets, semantic companion motion,
-> product-local device TTS, Android/iOS build evidence, responsive phone QA and synthetic visual/motion QA.
-> **M2 / Golden Learning Slice implementation is still NOT_EXECUTABLE** until its controlling admission gates close.
+> **Current state:** M5 Golden Learning Slice has passed and the repository is now on the bounded post-M5 full-product implementation line. Draft PR #13 (`feat/full-product-shell-continuity`) carries the authenticated Home/Library shell, real material/continuation routing, and product-local Listen work. Release/deployment remain separately gated.
 
 ## Branch / evidence topology
 
 - `main` remains the untouched initial base.
 - PR #1 `chore/repository-bootstrap`: BOOTSTRAP_PASS, draft/unmerged.
 - PR #2 `spike/v0-architecture-proof`: ARCHITECTURE_PROOF_PASS / GO_ADAPT, draft/unmerged.
-- Round 7 proof branches are stacked evidence branches; the active companion branch is PR #8.
+- Round 7 proof branches remain historical/technical evidence; PR #8 is not the current product implementation selector.
+- PR #13 `feat/full-product-shell-continuity` is the current bounded post-M5 implementation line.
 - Merge, release and deployment remain Product Owner protected actions.
 
 ## Current Round 7 proof
@@ -46,7 +43,15 @@ and real-device smoothness. This gate cannot be truthfully closed by browser or 
 | Companion execution cursor | `docs/agent/ROUND7_COMPANION_CURRENT_CURSOR.json` |
 | Companion asset/runtime status | `docs/agent/ROUND7_COMPANION_ASSET_STATUS.json` |
 
-This repository is **public**. Private governance text is not copied here beyond approved titles / decision references.
+This repository is currently **public but unlicensed**; public visibility is not an open-source grant. Private governance text is not copied here beyond approved titles / decision references.
+
+## AKILTA first-party relationship
+
+Company canonical authority classifies Learning App / Sesli Öğren as **AKILTA_FIRST_PARTY (AKP-0002)**. AKILTA is the parent technology-company brand; product authority remains local to Learning App / Sesli Öğren. This does **not** make the product an AKILTA OS module and does not imply shared database, credentials, billing, identity, checkout, website, AI runtime, or release authority.
+
+The product inherits the current **AKILTA First-Party Product Contract** and **AKILTA IP, Licensing, Third-Party & Donor Reuse Policy** at company-policy level. Product-specific roadmap, architecture, execution state, data/authorization, release truth and repository decisions remain product-owned. Cross-product shared infrastructure is evidence-gated; product completion must not wait for hypothetical AKILTA integration.
+
+Source-visibility note: current AKILTA company policy defaults first-party engineering source to private/proprietary, but explicitly forbids silently changing existing public repositories or prior grants. This repository therefore remains in its existing public/unlicensed posture until a product-local, evidence-backed visibility/distribution decision is made; no license grant is created by this note.
 
 ## Validation
 
