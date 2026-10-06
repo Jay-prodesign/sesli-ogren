@@ -291,6 +291,60 @@ void main() {
     expect(find.text('Eski materyal'), findsNothing);
   });
 
+  testWidgets('Library deletion removes the selected material and Home falls back safely', (tester) async {
+    final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
+    addTearDown(store.close);
+    var now = DateTime.utc(2026, 10, 6, 11);
+    final ingest = SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor(), now: () => now);
+    final runtime = AppRuntime(
+      learner: AppRuntime.localM5LearnerFixture,
+      store: store,
+      ingest: ingest,
+      recall: RecallLearningService(sourceStore: store, learningStore: store.learningTruthStore()),
+      telemetry: store.operationalTelemetry(),
+    );
+
+    await ingest.ingestPastedText(
+      learner: runtime.learner,
+      materialId: const MaterialId('delete-older'),
+      text: 'Silme sonrası güvenli geri dönüş için eski materyal içeriği.',
+      sourceName: 'Korunacak materyal',
+    );
+    now = DateTime.utc(2026, 10, 6, 12);
+    await ingest.ingestPastedText(
+      learner: runtime.learner,
+      materialId: const MaterialId('delete-recent'),
+      text: 'Silinecek son materyal için yeterince uzun bir çalışma metni.',
+      sourceName: 'Silinecek materyal',
+    );
+
+    await tester.pumpWidget(MaterialApp(home: ProductShellScreen(runtime: runtime)));
+    await pumpUntilFound(tester, find.text('Kütüphane'));
+    await tapVisible(tester, find.text('Kütüphane').last);
+    await pumpUntilFound(tester, find.text('Silinecek materyal'));
+
+    final recentCard = find.ancestor(of: find.text('Silinecek materyal'), matching: find.byType(Card));
+    final deleteButton = find.descendant(of: recentCard, matching: find.byTooltip('Materyali sil'));
+    expect(deleteButton, findsOneWidget);
+    await tapVisible(tester, deleteButton);
+    await pumpUntilFound(tester, find.text('Materyali sil?'));
+    await tapVisible(tester, find.text('Sil'));
+    await pumpUntilFound(tester, find.text('Materyal silindi.'));
+
+    expect(find.text('Silinecek materyal'), findsNothing);
+    expect(find.text('Korunacak materyal'), findsOneWidget);
+    expect(
+      await store.material(learner: runtime.learner, materialId: const MaterialId('delete-recent')),
+      isNull,
+    );
+
+    await tapVisible(tester, find.text('Ana Sayfa').last);
+    await pumpUntilFound(tester, find.text('Şimdi ne yapmalı?'));
+    await tapVisible(tester, find.text('Devam et'));
+    await pumpUntilFound(tester, find.text('Korunacak materyal'));
+    expect(find.text('Korunacak materyal'), findsOneWidget);
+  });
+
   testWidgets('SQLite reopen preserves material and canonical continuation', (tester) async {
     const path = '/tmp/sesli-ogren-continuity-reopen.db';
     await databaseFactoryFfiNoIsolate.deleteDatabase(path);

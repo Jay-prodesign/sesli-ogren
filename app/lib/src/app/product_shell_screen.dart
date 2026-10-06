@@ -95,6 +95,42 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
     );
   }
 
+  Future<void> _deleteMaterial(MaterialRecord material) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Materyali sil?'),
+        content: Text(
+          '“${material.title}” Kütüphane’den kaldırılacak ve erişilebilir kaynak içeriği silinecek. '
+          'Bu işlem geri alınamaz.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: const Text('Vazgeç'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: const Text('Sil'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+
+    await widget.runtime.store.deleteMaterial(
+      learner: widget.runtime.learner,
+      materialId: material.id,
+      deletedAt: DateTime.now().toUtc(),
+    );
+    if (!mounted) return;
+
+    setState(_refresh);
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Materyal silindi.')),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -115,7 +151,12 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
                   onOpenListen: _openListen,
                   onOpenWorkspace: () => _openWorkspace(),
                 ),
-                _LibrarySurface(data: data, onOpenLearning: _openLearning, onOpenWorkspace: _openWorkspace),
+                _LibrarySurface(
+                  data: data,
+                  onOpenLearning: _openLearning,
+                  onOpenWorkspace: _openWorkspace,
+                  onDeleteMaterial: _deleteMaterial,
+                ),
                 ProgressSurface(items: data.progress, onOpenMaterial: _openWorkspace),
               ],
             );
@@ -231,11 +272,17 @@ class _HomeSurface extends StatelessWidget {
 }
 
 class _LibrarySurface extends StatelessWidget {
-  const _LibrarySurface({required this.data, required this.onOpenLearning, required this.onOpenWorkspace});
+  const _LibrarySurface({
+    required this.data,
+    required this.onOpenLearning,
+    required this.onOpenWorkspace,
+    required this.onDeleteMaterial,
+  });
 
   final _HomeSnapshot data;
   final VoidCallback onOpenLearning;
   final ValueChanged<MaterialId> onOpenWorkspace;
+  final ValueChanged<MaterialRecord> onDeleteMaterial;
 
   @override
   Widget build(BuildContext context) {
@@ -260,7 +307,11 @@ class _LibrarySurface extends StatelessWidget {
           )
         else
           for (final material in data.materials) ...[
-            _LibraryMaterialCard(material: material, onPressed: () => onOpenWorkspace(material.id)),
+            _LibraryMaterialCard(
+              material: material,
+              onPressed: () => onOpenWorkspace(material.id),
+              onDelete: () => onDeleteMaterial(material),
+            ),
             const SizedBox(height: 10),
           ],
       ],
@@ -269,9 +320,14 @@ class _LibrarySurface extends StatelessWidget {
 }
 
 class _LibraryMaterialCard extends StatelessWidget {
-  const _LibraryMaterialCard({required this.material, required this.onPressed});
+  const _LibraryMaterialCard({
+    required this.material,
+    required this.onPressed,
+    required this.onDelete,
+  });
   final MaterialRecord material;
   final VoidCallback onPressed;
+  final VoidCallback onDelete;
 
   @override
   Widget build(BuildContext context) {
@@ -283,7 +339,11 @@ class _LibraryMaterialCard extends StatelessWidget {
         onTap: onPressed,
         leading: Icon(material.mediaType == SourceMediaType.pdf ? Icons.picture_as_pdf_outlined : Icons.notes_rounded),
         title: Text(material.title, maxLines: 2, overflow: TextOverflow.ellipsis),
-        trailing: const Icon(Icons.chevron_right_rounded),
+        trailing: IconButton(
+          tooltip: 'Materyali sil',
+          onPressed: onDelete,
+          icon: const Icon(Icons.delete_outline_rounded),
+        ),
       ),
     );
   }

@@ -41,4 +41,5 @@ jobs:
       - run: flutter pub get
       - run: dart format --output=none --set-exit-if-changed .
       - run: flutter analyze
-      - run: flutter test
+      - name: Bounded expanded tests
+        run: timeout 240s flutter test --reporter expanded
