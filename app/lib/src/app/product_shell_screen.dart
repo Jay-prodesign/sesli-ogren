@@ -35,7 +35,9 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
   Future<_HomeSnapshot> _loadSnapshot() async {
     final materials = await widget.runtime.store.activeMaterials(learner: widget.runtime.learner);
     if (materials.isEmpty) return const _HomeSnapshot();
-    final material = materials.first;
+    final material = materials.reduce(
+      (current, candidate) => candidate.updatedAt.isAfter(current.updatedAt) ? candidate : current,
+    );
     final source = await widget.runtime.store.currentSourceVersion(
       learner: widget.runtime.learner,
       materialId: material.id,
