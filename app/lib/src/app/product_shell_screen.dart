@@ -7,6 +7,7 @@ import 'companion_view.dart';
 import 'learning_slice_screen.dart';
 import 'listen_screen.dart';
 import 'material_workspace_screen.dart';
+import 'progress_surface.dart';
 
 class ProductShellScreen extends StatefulWidget {
   const ProductShellScreen({required this.runtime, super.key});
@@ -40,7 +41,11 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
       materialId: material.id,
     );
     final continuation = await widget.runtime.recall.reopen(learner: widget.runtime.learner, materialId: material.id);
-    return _HomeSnapshot(material: material, source: source, continuation: continuation, materials: materials);
+    final progress = <ProgressItem>[];
+    for (final item in materials) {
+      progress.add(ProgressItem(material: item, continuation: await widget.runtime.recall.reopen(learner: widget.runtime.learner, materialId: item.id)));
+    }
+    return _HomeSnapshot(material: material, source: source, continuation: continuation, materials: materials, progress: progress);
   }
 
   Future<void> _openLearning() async {
@@ -98,6 +103,7 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
                   onOpenWorkspace: () => _openWorkspace(),
                 ),
                 _LibrarySurface(data: data, onOpenLearning: _openLearning, onOpenWorkspace: _openWorkspace),
+                ProgressSurface(items: data.progress, onOpenMaterial: _openWorkspace),
               ],
             );
           },
@@ -116,6 +122,11 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
             icon: Icon(Icons.library_books_outlined),
             selectedIcon: Icon(Icons.library_books_rounded),
             label: 'Kütüphane',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.insights_outlined),
+            selectedIcon: Icon(Icons.insights_rounded),
+            label: 'İlerleme',
           ),
         ],
       ),
@@ -423,10 +434,11 @@ class _PrimaryCard extends StatelessWidget {
 }
 
 class _HomeSnapshot {
-  const _HomeSnapshot({this.material, this.source, this.continuation, this.materials = const []});
+  const _HomeSnapshot({this.material, this.source, this.continuation, this.materials = const [], this.progress = const []});
 
   final MaterialRecord? material;
   final SourceVersionRecord? source;
   final LearningContinuation? continuation;
   final List<MaterialRecord> materials;
+  final List<ProgressItem> progress;
 }
