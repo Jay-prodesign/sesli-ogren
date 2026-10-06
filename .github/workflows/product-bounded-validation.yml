@@ -39,7 +39,11 @@ jobs:
           cache: false
           pub-cache: false
       - run: flutter pub get
-      - run: dart format --output=none --set-exit-if-changed .
+      - name: Show canonical format diff
+        run: |
+          dart format .
+          git diff -- lib/src/app/product_shell_screen.dart test/app_smoke_test.dart
+          exit 1
       - run: flutter analyze
       - name: Bounded expanded tests
         run: timeout 240s flutter test --reporter expanded
