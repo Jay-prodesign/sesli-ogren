@@ -103,6 +103,7 @@ class _MaterialWorkspaceScreenState extends State<MaterialWorkspaceScreen> {
               onRecall: _openRecall,
               onListen: _openListen,
               onExplain: () => _openExplain(snapshot.data!.source),
+              onFocus: () => _openFocus(snapshot.data!),
             );
           },
         ),
@@ -112,12 +113,13 @@ class _MaterialWorkspaceScreenState extends State<MaterialWorkspaceScreen> {
 }
 
 class _WorkspaceBody extends StatelessWidget {
-  const _WorkspaceBody({required this.data, required this.onRecall, required this.onListen, required this.onExplain});
+  const _WorkspaceBody({required this.data, required this.onRecall, required this.onListen, required this.onExplain, required this.onFocus});
 
   final _WorkspaceSnapshot data;
   final VoidCallback onRecall;
   final VoidCallback onListen;
   final VoidCallback onExplain;
+  final VoidCallback onFocus;
 
   @override
   Widget build(BuildContext context) {
