@@ -292,7 +292,7 @@ void main() {
   });
 
   testWidgets('SQLite reopen preserves material and canonical continuation', (tester) async {
-    final path = await databaseFactoryFfiNoIsolate.getDatabasePath('continuity-reopen.db');
+    const path = '/tmp/sesli-ogren-continuity-reopen.db';
     await databaseFactoryFfiNoIsolate.deleteDatabase(path);
     addTearDown(() => databaseFactoryFfiNoIsolate.deleteDatabase(path));
 
@@ -309,10 +309,13 @@ void main() {
     final prompt = await recall.createCurrentPrompt(learner: learner, materialId: const MaterialId('restart-material'));
     final action = await store.learningTruthStore().recallAction(learner: learner, actionId: prompt.id);
     expect(action, isNotNull);
-    await recall.submitResponse(
+    final session = await recall.openAttempt(learner: learner, actionId: action!.id);
+    await recall.submit(
       learner: learner,
-      materialId: const MaterialId('restart-material'),
-      response: action!.expectedAnswer,
+      actionId: action.id,
+      attemptId: session.attempt.attemptId,
+      disposition: RecallResponseDisposition.answered,
+      answer: action.expectedAnswer,
     );
     await store.close();
 
