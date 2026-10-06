@@ -21,7 +21,7 @@ Milestone numbering follows the program sequence in
 M1 = Architecture Proof, …). Drive lifecycle-stage labels use a different
 numbering: lifecycle "M3" is this M0, and lifecycle "M4" is this M1.
 
-Next unallocated ID: **LA-0028**.
+Next unallocated ID: **LA-0029**.
 
 ---
 
@@ -269,6 +269,15 @@ Next unallocated ID: **LA-0028**.
 - Executor: ChatGPT (bounded reversible engineering)
 - Verification: multiple learner-owned materials coexist; Library opens the selected material; Recall/Listen/Explain remain explicitly bound to that material and cannot leak evidence/state across materials.
 - Exec plan: [docs/exec-plans/LA-0027.md](docs/exec-plans/LA-0027.md)
+
+##### LA-0028 — Bounded Focus Session
+
+- Status: IN_PROGRESS
+- Depends on: LA-0027
+- Owner: Brain
+- Executor: ChatGPT (bounded reversible engineering)
+- Verification: exact selected-source Focus session; bounded interaction; hint/direct-help escape hatch; fail-closed semantic feedback; no passive mastery evidence.
+- Exec plan: [docs/exec-plans/LA-0028.md](docs/exec-plans/LA-0028.md)
 
 ## Milestone M3 — V0 Implementation Tranches
 
