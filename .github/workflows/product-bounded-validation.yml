@@ -1,0 +1,44 @@
+name: product-bounded-validation
+
+on:
+  pull_request:
+    paths:
+      - "app/**"
+      - ".flutter-version"
+      - ".github/workflows/product-bounded-validation.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: product-bounded-validation-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: app
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - id: flutter_pin
+        working-directory: .
+        shell: bash
+        run: |
+          version="$(tr -d '[:space:]' < .flutter-version)"
+          test -n "$version"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
+        with:
+          channel: stable
+          flutter-version: ${{ steps.flutter_pin.outputs.version }}
+          cache: false
+          pub-cache: false
+      - run: flutter pub get
+      - run: dart format --output=none --set-exit-if-changed .
+      - run: flutter analyze
+      - run: flutter test
