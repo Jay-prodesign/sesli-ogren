@@ -32,38 +32,43 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
   }
 
   Future<_HomeSnapshot> _loadSnapshot() async {
-    final material = await widget.runtime.store.material(
-      learner: widget.runtime.learner,
-      materialId: AppRuntime.primaryMaterialId,
-    );
-    if (material == null || !material.isActive) {
-      return const _HomeSnapshot();
-    }
-
+    final materials = await widget.runtime.store.activeMaterials(learner: widget.runtime.learner);
+    if (materials.isEmpty) return const _HomeSnapshot();
+    final material = materials.first;
     final source = await widget.runtime.store.currentSourceVersion(
       learner: widget.runtime.learner,
       materialId: material.id,
     );
-    final continuation = await widget.runtime.recall.reopen(learner: widget.runtime.learner, materialId: material.id);
-    return _HomeSnapshot(material: material, source: source, continuation: continuation);
+    final continuation = await widget.runtime.recall.reopen(
+      learner: widget.runtime.learner,
+      materialId: material.id,
+    );
+    return _HomeSnapshot(
+      material: material,
+      source: source,
+      continuation: continuation,
+      materials: materials,
+    );
   }
 
   Future<void> _openLearning() async {
     await Navigator.of(context)
-        .push<void>(MaterialPageRoute(builder: (_) => LearningSliceScreen(runtime: widget.runtime)));
+        .push<void>(MaterialPageRoute(builder: (_) => LearningSliceScreen(runtime: widget.runtime, materialId: AppRuntime.primaryMaterialId)));
     if (!mounted) return;
     setState(_refresh);
   }
 
-  Future<void> _openWorkspace() async {
+  Future<void> _openWorkspace([MaterialId? materialId]) async {
     await Navigator.of(context)
-        .push<void>(MaterialPageRoute(builder: (_) => MaterialWorkspaceScreen(runtime: widget.runtime)));
+        .push<void>(MaterialPageRoute(builder: (_) => MaterialWorkspaceScreen(runtime: widget.runtime, materialId: materialId ?? (await _snapshot).material!.id)));
     if (!mounted) return;
     setState(_refresh);
   }
 
   Future<void> _openListen() async {
-    await Navigator.of(context).push<void>(MaterialPageRoute(builder: (_) => ListenScreen(runtime: widget.runtime)));
+    final material = (await _snapshot).material;
+    if (material == null || !mounted) return;
+    await Navigator.of(context).push<void>(MaterialPageRoute(builder: (_) => ListenScreen(runtime: widget.runtime, materialId: material.id)));
   }
 
   @override
@@ -84,7 +89,7 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
                   data: data,
                   onOpenLearning: _openLearning,
                   onOpenListen: _openListen,
-                  onOpenWorkspace: _openWorkspace,
+                  onOpenWorkspace: () => _openWorkspace(),
                 ),
                 _LibrarySurface(data: data, onOpenLearning: _openLearning, onOpenWorkspace: _openWorkspace),
               ],
@@ -200,7 +205,7 @@ class _LibrarySurface extends StatelessWidget {
 
   final _HomeSnapshot data;
   final VoidCallback onOpenLearning;
-  final VoidCallback onOpenWorkspace;
+  final ValueChanged<MaterialId> onOpenWorkspace;
 
   @override
   Widget build(BuildContext context) {
@@ -215,7 +220,7 @@ class _LibrarySurface extends StatelessWidget {
           style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
         ),
         const SizedBox(height: 24),
-        if (data.material == null)
+        if (data.materials.isEmpty)
           _PrimaryCard(
             title: 'Henüz materyal yok',
             body: 'İlk kaynağını eklediğinde burada kaldığın yerden devam edebilirsin.',
@@ -224,8 +229,32 @@ class _LibrarySurface extends StatelessWidget {
             onPressed: onOpenLearning,
           )
         else
-          _MaterialCard(data: data, onPressed: onOpenWorkspace),
+          for (final material in data.materials) ...[
+            _LibraryMaterialCard(material: material, onPressed: () => onOpenWorkspace(material.id)),
+            const SizedBox(height: 10),
+          ],
       ],
+    );
+  }
+}
+
+class _LibraryMaterialCard extends StatelessWidget {
+  const _LibraryMaterialCard({required this.material, required this.onPressed});
+  final MaterialRecord material;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Card(
+      elevation: 0,
+      color: theme.colorScheme.surfaceContainerLow,
+      child: ListTile(
+        onTap: onPressed,
+        leading: Icon(material.mediaType == SourceMediaType.pdf ? Icons.picture_as_pdf_outlined : Icons.notes_rounded),
+        title: Text(material.title, maxLines: 2, overflow: TextOverflow.ellipsis),
+        trailing: const Icon(Icons.chevron_right_rounded),
+      ),
     );
   }
 }
@@ -388,9 +417,10 @@ class _PrimaryCard extends StatelessWidget {
 }
 
 class _HomeSnapshot {
-  const _HomeSnapshot({this.material, this.source, this.continuation});
+  const _HomeSnapshot({this.material, this.source, this.continuation, this.materials = const []});
 
   final MaterialRecord? material;
   final SourceVersionRecord? source;
   final LearningContinuation? continuation;
+  final List<MaterialRecord> materials;
 }
