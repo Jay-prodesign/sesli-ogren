@@ -8,6 +8,7 @@ void main() {
     sourceVersionId: SourceVersionId('source-v1'),
     contentDigest: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
     trustClass: SourceTrustClass.userProvided,
+    knowledgeClass: SourceKnowledgeClass.learnerOwned,
   );
 
   test('Focus help accepts only exact current source identity', () {
