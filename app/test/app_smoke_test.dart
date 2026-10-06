@@ -65,6 +65,16 @@ Future<void> tapVisible(WidgetTester tester, Finder finder) async {
   await tester.tap(finder);
 }
 
+Future<void> pumpUntilGone(WidgetTester tester, Finder finder, {int maxPumps = 100}) async {
+  for (var i = 0; i < maxPumps; i++) {
+    await tester.pump(const Duration(milliseconds: 20));
+    if (finder.evaluate().isEmpty) {
+      return;
+    }
+  }
+  fail('Expected widget did not disappear within bounded pumps.');
+}
+
 void main() {
   sqfliteFfiInit();
 
@@ -330,7 +340,7 @@ void main() {
     await pumpUntilFound(tester, find.text('Materyali sil?'));
     await tapVisible(tester, find.text('Sil'));
     await pumpUntilFound(tester, find.text('Materyal silindi.'));
-    await tester.pumpAndSettle();
+    await pumpUntilGone(tester, find.text('Silinecek materyal'));
 
     expect(find.text('Silinecek materyal'), findsNothing);
     expect(find.text('Korunacak materyal'), findsOneWidget);
