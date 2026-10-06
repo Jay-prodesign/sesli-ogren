@@ -8,9 +8,10 @@ import 'learning_slice_screen.dart';
 import 'listen_screen.dart';
 
 class MaterialWorkspaceScreen extends StatefulWidget {
-  const MaterialWorkspaceScreen({required this.runtime, super.key});
+  const MaterialWorkspaceScreen({required this.runtime, required this.materialId, super.key});
 
   final AppRuntime runtime;
+  final MaterialId materialId;
 
   @override
   State<MaterialWorkspaceScreen> createState() => _MaterialWorkspaceScreenState();
@@ -28,7 +29,7 @@ class _MaterialWorkspaceScreenState extends State<MaterialWorkspaceScreen> {
   Future<_WorkspaceSnapshot> _load() async {
     final material = await widget.runtime.store.material(
       learner: widget.runtime.learner,
-      materialId: AppRuntime.primaryMaterialId,
+      materialId: widget.materialId,
     );
     if (material == null || !material.isActive) {
       throw StateError('workspace_material_missing');
