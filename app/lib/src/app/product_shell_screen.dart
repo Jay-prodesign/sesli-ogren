@@ -52,7 +52,7 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
   }
 
   Future<void> _openLearning() async {
-    final materialId = (await _snapshot).material?.id ?? AppRuntime.primaryMaterialId;
+    final materialId = (await _snapshot).material?.id ?? widget.runtime.newMaterialId();
     if (!mounted) return;
     await Navigator.of(context)
         .push<void>(MaterialPageRoute(builder: (_) => LearningSliceScreen(runtime: widget.runtime, materialId: materialId)));
