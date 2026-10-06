@@ -13,6 +13,7 @@ import 'package:sesli_ogren/src/data/sqlite_source_store.dart';
 import 'package:sesli_ogren/src/learning/recall_learning_service.dart';
 import 'package:sesli_ogren/src/generation/grounded_explain_gateway.dart';
 import 'package:sesli_ogren/src/domain/learning_truth.dart';
+import 'package:sesli_ogren/src/domain/learning_contracts.dart';
 import 'package:sesli_ogren/src/domain/operational_event.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
@@ -288,6 +289,42 @@ void main() {
 
     expect(find.text('Son materyal'), findsOneWidget);
     expect(find.text('Eski materyal'), findsNothing);
+  });
+
+  testWidgets('SQLite reopen preserves material and canonical continuation', (tester) async {
+    final path = await databaseFactoryFfiNoIsolate.getDatabasePath('continuity-reopen.db');
+    await databaseFactoryFfiNoIsolate.deleteDatabase(path);
+    addTearDown(() => databaseFactoryFfiNoIsolate.deleteDatabase(path));
+
+    var store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: path);
+    final ingest = SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor());
+    final learner = AppRuntime.localM5LearnerFixture;
+    await ingest.ingestPastedText(
+      learner: learner,
+      materialId: const MaterialId('restart-material'),
+      text: 'Uygulama yeniden açıldığında bu materyal ve öğrenme durumu kalıcı olmalıdır.',
+      sourceName: 'Restart materyali',
+    );
+    final recall = RecallLearningService(sourceStore: store, learningStore: store.learningTruthStore());
+    final prompt = await recall.createCurrentPrompt(learner: learner, materialId: const MaterialId('restart-material'));
+    final action = await store.learningTruthStore().recallAction(learner: learner, actionId: prompt.id);
+    expect(action, isNotNull);
+    await recall.submitResponse(
+      learner: learner,
+      materialId: const MaterialId('restart-material'),
+      response: action!.expectedAnswer,
+    );
+    await store.close();
+
+    store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: path);
+    addTearDown(store.close);
+    final reopened = RecallLearningService(sourceStore: store, learningStore: store.learningTruthStore());
+    final continuation = await reopened.reopen(learner: learner, materialId: const MaterialId('restart-material'));
+    final material = await store.material(learner: learner, materialId: const MaterialId('restart-material'));
+
+    expect(material?.title, 'Restart materyali');
+    expect(continuation?.state.kind, RecallStateKind.retrievedOnce);
+    expect(continuation?.nextAction.reasonText, isNotEmpty);
   });
 
   testWidgets('Progress reports canonical unassessed state without invented mastery', (tester) async {
