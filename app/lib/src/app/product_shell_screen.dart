@@ -43,9 +43,20 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
     final continuation = await widget.runtime.recall.reopen(learner: widget.runtime.learner, materialId: material.id);
     final progress = <ProgressItem>[];
     for (final item in materials) {
-      progress.add(ProgressItem(material: item, continuation: await widget.runtime.recall.reopen(learner: widget.runtime.learner, materialId: item.id)));
+      progress.add(
+        ProgressItem(
+          material: item,
+          continuation: await widget.runtime.recall.reopen(learner: widget.runtime.learner, materialId: item.id),
+        ),
+      );
     }
-    return _HomeSnapshot(material: material, source: source, continuation: continuation, materials: materials, progress: progress);
+    return _HomeSnapshot(
+      material: material,
+      source: source,
+      continuation: continuation,
+      materials: materials,
+      progress: progress,
+    );
   }
 
   Future<void> _openLearning() async {
@@ -434,7 +445,13 @@ class _PrimaryCard extends StatelessWidget {
 }
 
 class _HomeSnapshot {
-  const _HomeSnapshot({this.material, this.source, this.continuation, this.materials = const [], this.progress = const []});
+  const _HomeSnapshot({
+    this.material,
+    this.source,
+    this.continuation,
+    this.materials = const [],
+    this.progress = const [],
+  });
 
   final MaterialRecord? material;
   final SourceVersionRecord? source;

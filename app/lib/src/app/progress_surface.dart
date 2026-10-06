@@ -31,7 +31,9 @@ class ProgressSurface extends StatelessWidget {
           const Card(
             child: Padding(
               padding: EdgeInsets.all(18),
-              child: Text('Henüz ölçülmüş bir öğrenme durumu yok. Bir materyalde Hatırla ile aktif olarak denediğinde burada görünür.'),
+              child: Text(
+                'Henüz ölçülmüş bir öğrenme durumu yok. Bir materyalde Hatırla ile aktif olarak denediğinde burada görünür.',
+              ),
             ),
           )
         else
@@ -66,11 +68,14 @@ class _ProgressCard extends StatelessWidget {
         title: Text(item.material.title, maxLines: 2, overflow: TextOverflow.ellipsis),
         subtitle: Padding(
           padding: const EdgeInsets.only(top: 6),
-          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text(label, style: const TextStyle(fontWeight: FontWeight.w700)),
-            const SizedBox(height: 3),
-            Text(reason, maxLines: 3, overflow: TextOverflow.ellipsis),
-          ]),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(label, style: const TextStyle(fontWeight: FontWeight.w700)),
+              const SizedBox(height: 3),
+              Text(reason, maxLines: 3, overflow: TextOverflow.ellipsis),
+            ],
+          ),
         ),
         trailing: const Icon(Icons.chevron_right_rounded),
       ),
