@@ -5,6 +5,7 @@ import '../data/sqlite_source_store.dart';
 import '../domain/authenticated_learner.dart';
 import '../domain/learning_contracts.dart';
 import '../learning/explain_back_gateway.dart';
+import '../learning/focus_help_gateway.dart';
 import '../learning/recall_learning_service.dart';
 import '../learning/supabase_explain_back_gateway.dart';
 import '../generation/grounded_explain_gateway.dart';
@@ -19,6 +20,7 @@ class AppRuntime {
     required this.telemetry,
     this.explain = const UnavailableGroundedExplainGateway(),
     this.explainBack = const UnavailableExplainBackGateway(),
+    this.focusHelp = const UnavailableFocusHelpGateway(),
   });
 
   /// Explicit M5 fixture only. It is not a production authentication claim.
@@ -36,6 +38,7 @@ class AppRuntime {
   final OperationalTelemetry telemetry;
   final GroundedExplainGateway explain;
   final ExplainBackGateway explainBack;
+  final FocusHelpGateway focusHelp;
 
   static Future<AppRuntime> open({required AuthenticatedLearner learner}) async {
     final store = await SqliteSourceStore.open();
