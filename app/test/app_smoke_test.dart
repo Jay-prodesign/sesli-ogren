@@ -231,6 +231,16 @@ void main() {
     expect(find.text('Henüz ölçülmedi'), findsOneWidget);
     expect(find.text('Hızlı bakış'), findsOneWidget);
     expect(find.text('Açıkla'), findsOneWidget);
+    expect(find.text('Odaklan'), findsOneWidget);
+    await tapVisible(tester, find.text('Odaklan'));
+    await pumpUntilFound(tester, find.text('Kısa odak oturumu'));
+    expect(find.text('İpucu ver'), findsOneWidget);
+    expect(find.text('Doğrudan açıkla'), findsOneWidget);
+    await tapVisible(tester, find.text('İpucu ver'));
+    await pumpUntilFound(tester, find.textContaining('henüz etkin değil'));
+    expect(find.textContaining('öğrenme kanıtı oluşturmaz'), findsOneWidget);
+    Navigator.of(tester.element(find.text('Kısa odak oturumu'))).pop();
+    await tester.pumpAndSettle();
     await tapVisible(tester, find.text('Açıkla'));
     await pumpUntilFound(tester, find.text('Açıklama henüz hazır değil'));
     expect(find.textContaining('yapay bir sonuç göstermiyoruz'), findsOneWidget);
