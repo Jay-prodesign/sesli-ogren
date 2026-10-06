@@ -56,10 +56,11 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
   }
 
   Future<void> _openWorkspace([MaterialId? materialId]) async {
+    final selected = materialId ?? (await _snapshot).material?.id;
+    if (selected == null || !mounted) return;
     await Navigator.of(context).push<void>(
       MaterialPageRoute(
-        builder: (_) =>
-            MaterialWorkspaceScreen(runtime: widget.runtime, materialId: materialId ?? (await _snapshot).material!.id),
+        builder: (_) => MaterialWorkspaceScreen(runtime: widget.runtime, materialId: selected),
       ),
     );
     if (!mounted) return;
