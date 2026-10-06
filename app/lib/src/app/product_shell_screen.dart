@@ -325,6 +325,7 @@ class _LibraryMaterialCard extends StatelessWidget {
     required this.onPressed,
     required this.onDelete,
   });
+
   final MaterialRecord material;
   final VoidCallback onPressed;
   final VoidCallback onDelete;
