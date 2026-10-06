@@ -243,6 +243,8 @@ void main() {
     expect(find.textContaining('öğrenme kanıtı oluşturmaz'), findsOneWidget);
     Navigator.of(tester.element(find.text('Kısa odak oturumu'))).pop();
     await tester.pumpAndSettle();
+    await tester.drag(find.byType(Scrollable).last, const Offset(0, 420));
+    await tester.pumpAndSettle();
     await tapVisible(tester, find.text('Açıkla'));
     await pumpUntilFound(tester, find.text('Açıklama henüz hazır değil'));
     expect(find.textContaining('yapay bir sonuç göstermiyoruz'), findsOneWidget);
