@@ -29,14 +29,16 @@ class _FocusScreenState extends State<FocusScreen> {
       busy = true;
       help = null;
     });
-    final result = await widget.runtime.focusHelp.help(FocusHelpRequest(
-      materialId: widget.source.identity.materialId,
-      sourceVersionId: widget.source.identity.sourceVersionId,
-      sourceContentDigest: widget.source.identity.contentDigest,
-      kind: kind,
-      outputLocale: 'tr-TR',
-      learnerQuestion: question.text.trim().isEmpty ? null : question.text.trim(),
-    ));
+    final result = await widget.runtime.focusHelp.help(
+      FocusHelpRequest(
+        materialId: widget.source.identity.materialId,
+        sourceVersionId: widget.source.identity.sourceVersionId,
+        sourceContentDigest: widget.source.identity.contentDigest,
+        kind: kind,
+        outputLocale: 'tr-TR',
+        learnerQuestion: question.text.trim().isEmpty ? null : question.text.trim(),
+      ),
+    );
     if (!mounted) return;
     setState(() {
       busy = false;
@@ -55,15 +57,29 @@ class _FocusScreenState extends State<FocusScreen> {
         const Text('Bu oturum güncel kaynağa bağlıdır. Yardım almak tek başına öğrenme kanıtı oluşturmaz.'),
         const SizedBox(height: 20),
         const Text('1 · Konuyu yeniden kur'),
-        Card(child: Padding(padding: const EdgeInsets.all(16), child: Text(widget.sourceText))),
+        Card(
+          child: Padding(padding: const EdgeInsets.all(16), child: Text(widget.sourceText)),
+        ),
         const SizedBox(height: 20),
         const Text('2 · Takıldığın noktayı sor'),
         TextField(controller: question, maxLength: 600, maxLines: 4),
-        Row(children: [
-          Expanded(child: OutlinedButton(onPressed: busy ? null : () => request(FocusHelpKind.hint), child: const Text('İpucu ver'))),
-          const SizedBox(width: 8),
-          Expanded(child: FilledButton(onPressed: busy ? null : () => request(FocusHelpKind.directExplanation), child: const Text('Doğrudan açıkla'))),
-        ]),
+        Row(
+          children: [
+            Expanded(
+              child: OutlinedButton(
+                onPressed: busy ? null : () => request(FocusHelpKind.hint),
+                child: const Text('İpucu ver'),
+              ),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: FilledButton(
+                onPressed: busy ? null : () => request(FocusHelpKind.directExplanation),
+                child: const Text('Doğrudan açıkla'),
+              ),
+            ),
+          ],
+        ),
         if (busy) const LinearProgressIndicator(),
         if (help case final FocusHelpReady ready)
           Text(ready.matches(widget.source.identity) ? ready.text : 'Kaynak değişti; eski yanıtı göstermiyoruz.'),

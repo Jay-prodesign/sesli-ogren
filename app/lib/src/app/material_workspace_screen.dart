@@ -68,11 +68,8 @@ class _MaterialWorkspaceScreenState extends State<MaterialWorkspaceScreen> {
 
   Future<void> _openFocus(_WorkspaceSnapshot data) => Navigator.of(context).push<void>(
     MaterialPageRoute(
-      builder: (_) => FocusScreen(
-        runtime: widget.runtime,
-        source: data.source,
-        sourceText: data.extracted?.normalizedText ?? '',
-      ),
+      builder: (_) =>
+          FocusScreen(runtime: widget.runtime, source: data.source, sourceText: data.extracted?.normalizedText ?? ''),
     ),
   );
 
@@ -113,7 +110,13 @@ class _MaterialWorkspaceScreenState extends State<MaterialWorkspaceScreen> {
 }
 
 class _WorkspaceBody extends StatelessWidget {
-  const _WorkspaceBody({required this.data, required this.onRecall, required this.onListen, required this.onExplain, required this.onFocus});
+  const _WorkspaceBody({
+    required this.data,
+    required this.onRecall,
+    required this.onListen,
+    required this.onExplain,
+    required this.onFocus,
+  });
 
   final _WorkspaceSnapshot data;
   final VoidCallback onRecall;

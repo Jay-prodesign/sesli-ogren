@@ -120,9 +120,11 @@ class _Ready extends StatelessWidget {
         ),
         const SizedBox(height: 10),
         FilledButton.icon(
-          onPressed: () =>
-              Navigator.of(context)
-                  .push<void>(MaterialPageRoute(builder: (_) => LearningSliceScreen(runtime: runtime, materialId: source.identity.materialId))),
+          onPressed: () => Navigator.of(context).push<void>(
+            MaterialPageRoute(
+              builder: (_) => LearningSliceScreen(runtime: runtime, materialId: source.identity.materialId),
+            ),
+          ),
           icon: const Icon(Icons.psychology_alt_outlined),
           label: const Text('Hatırla ile dene'),
         ),
