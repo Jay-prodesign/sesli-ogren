@@ -254,6 +254,34 @@ void main() {
     expect(find.text('Dinle'), findsOneWidget);
   });
 
+  testWidgets('Progress reports canonical unassessed state without invented mastery', (tester) async {
+    final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
+    addTearDown(store.close);
+    final ingest = SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor());
+    final runtime = AppRuntime(
+      learner: AppRuntime.localM5LearnerFixture,
+      store: store,
+      ingest: ingest,
+      recall: RecallLearningService(sourceStore: store, learningStore: store.learningTruthStore()),
+      telemetry: store.operationalTelemetry(),
+    );
+    await ingest.ingestPastedText(
+      learner: runtime.learner,
+      materialId: AppRuntime.primaryMaterialId,
+      text: 'Aktif kanıt oluşmadan ilerleme ustalık iddiası yapmamalıdır.',
+      sourceName: 'İlerleme notu',
+    );
+
+    await tester.pumpWidget(MaterialApp(home: ProductShellScreen(runtime: runtime)));
+    await pumpUntilFound(tester, find.text('İlerleme'));
+    await tapVisible(tester, find.text('İlerleme').last);
+    await pumpUntilFound(tester, find.text('Henüz ölçülmedi'));
+    expect(find.text('İlerleme notu'), findsOneWidget);
+    expect(find.text('Henüz ölçülmedi'), findsOneWidget);
+    expect(find.textContaining('yapay olarak artırmaz'), findsOneWidget);
+    expect(find.textContaining('%'), findsNothing);
+  });
+
   testWidgets('grounded Explain labels generated interpretation and preserves Recall as active step', (tester) async {
     final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
     addTearDown(store.close);
