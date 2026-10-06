@@ -50,14 +50,20 @@ class _MaterialWorkspaceScreenState extends State<MaterialWorkspaceScreen> {
   }
 
   Future<void> _openRecall() async {
-    await Navigator.of(context)
-        .push<void>(MaterialPageRoute(builder: (_) => LearningSliceScreen(runtime: widget.runtime, materialId: widget.materialId)));
+    await Navigator.of(context).push<void>(
+      MaterialPageRoute(
+        builder: (_) => LearningSliceScreen(runtime: widget.runtime, materialId: widget.materialId),
+      ),
+    );
     if (!mounted) return;
     setState(() => _snapshot = _load());
   }
 
-  Future<void> _openListen() =>
-      Navigator.of(context).push<void>(MaterialPageRoute(builder: (_) => ListenScreen(runtime: widget.runtime, materialId: widget.materialId)));
+  Future<void> _openListen() => Navigator.of(context).push<void>(
+    MaterialPageRoute(
+      builder: (_) => ListenScreen(runtime: widget.runtime, materialId: widget.materialId),
+    ),
+  );
 
   Future<void> _openExplain(SourceVersionRecord source) => Navigator.of(context).push<void>(
     MaterialPageRoute(

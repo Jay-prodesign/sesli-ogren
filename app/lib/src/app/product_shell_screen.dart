@@ -39,30 +39,29 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
       learner: widget.runtime.learner,
       materialId: material.id,
     );
-    final continuation = await widget.runtime.recall.reopen(
-      learner: widget.runtime.learner,
-      materialId: material.id,
-    );
-    return _HomeSnapshot(
-      material: material,
-      source: source,
-      continuation: continuation,
-      materials: materials,
-    );
+    final continuation = await widget.runtime.recall.reopen(learner: widget.runtime.learner, materialId: material.id);
+    return _HomeSnapshot(material: material, source: source, continuation: continuation, materials: materials);
   }
 
   Future<void> _openLearning() async {
     final materialId = (await _snapshot).material?.id ?? widget.runtime.newMaterialId();
     if (!mounted) return;
-    await Navigator.of(context)
-        .push<void>(MaterialPageRoute(builder: (_) => LearningSliceScreen(runtime: widget.runtime, materialId: materialId)));
+    await Navigator.of(context).push<void>(
+      MaterialPageRoute(
+        builder: (_) => LearningSliceScreen(runtime: widget.runtime, materialId: materialId),
+      ),
+    );
     if (!mounted) return;
     setState(_refresh);
   }
 
   Future<void> _openWorkspace([MaterialId? materialId]) async {
-    await Navigator.of(context)
-        .push<void>(MaterialPageRoute(builder: (_) => MaterialWorkspaceScreen(runtime: widget.runtime, materialId: materialId ?? (await _snapshot).material!.id)));
+    await Navigator.of(context).push<void>(
+      MaterialPageRoute(
+        builder: (_) =>
+            MaterialWorkspaceScreen(runtime: widget.runtime, materialId: materialId ?? (await _snapshot).material!.id),
+      ),
+    );
     if (!mounted) return;
     setState(_refresh);
   }
@@ -70,7 +69,11 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
   Future<void> _openListen() async {
     final material = (await _snapshot).material;
     if (material == null || !mounted) return;
-    await Navigator.of(context).push<void>(MaterialPageRoute(builder: (_) => ListenScreen(runtime: widget.runtime, materialId: material.id)));
+    await Navigator.of(context).push<void>(
+      MaterialPageRoute(
+        builder: (_) => ListenScreen(runtime: widget.runtime, materialId: material.id),
+      ),
+    );
   }
 
   @override

@@ -26,7 +26,8 @@ class AppRuntime {
 
   static const primaryMaterialId = MaterialId('m5-primary-material');
 
-  MaterialId newMaterialId() => MaterialId('material_${DateTime.now().toUtc().microsecondsSinceEpoch}_${learner.id.value.hashCode.abs()}');
+  MaterialId newMaterialId() =>
+      MaterialId('material_${DateTime.now().toUtc().microsecondsSinceEpoch}_${learner.id.value.hashCode.abs()}');
 
   final AuthenticatedLearner learner;
   final SqliteSourceStore store;
