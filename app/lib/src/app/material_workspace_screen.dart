@@ -66,6 +66,16 @@ class _MaterialWorkspaceScreenState extends State<MaterialWorkspaceScreen> {
     ),
   );
 
+  Future<void> _openFocus(_WorkspaceSnapshot data) => Navigator.of(context).push<void>(
+    MaterialPageRoute(
+      builder: (_) => FocusScreen(
+        runtime: widget.runtime,
+        source: data.source,
+        sourceText: data.extracted?.normalizedText ?? '',
+      ),
+    ),
+  );
+
   Future<void> _openExplain(SourceVersionRecord source) => Navigator.of(context).push<void>(
     MaterialPageRoute(
       builder: (_) => ExplainScreen(runtime: widget.runtime, source: source),
