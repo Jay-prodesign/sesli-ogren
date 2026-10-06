@@ -263,7 +263,7 @@ Next unallocated ID: **LA-0028**.
 
 ##### LA-0027 — Multi-material Library + selected-material continuity
 
-- Status: IN_PROGRESS
+- Status: DONE
 - Depends on: LA-0026
 - Owner: Brain
 - Executor: ChatGPT (bounded reversible engineering)
