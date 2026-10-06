@@ -1,0 +1,30 @@
+name: la-0028-checkpoint
+on:
+  push:
+    branches: [feat/full-product-shell-continuity]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  app:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with: {persist-credentials: false}
+      - id: flutter_pin
+        run: echo "version=$(tr -d '[:space:]' < .flutter-version)" >> "$GITHUB_OUTPUT"
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
+        with:
+          channel: stable
+          flutter-version: ${{ steps.flutter_pin.outputs.version }}
+          cache: false
+          pub-cache: false
+      - working-directory: app
+        run: flutter pub get
+      - working-directory: app
+        run: dart format --output=none --set-exit-if-changed .
+      - working-directory: app
+        run: flutter analyze
+      - working-directory: app
+        run: flutter test
