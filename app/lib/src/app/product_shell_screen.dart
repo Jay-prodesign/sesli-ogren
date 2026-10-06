@@ -105,14 +105,8 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
           'Bu işlem geri alınamaz.',
         ),
         actions: [
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: const Text('Vazgeç'),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.of(dialogContext).pop(true),
-            child: const Text('Sil'),
-          ),
+          TextButton(onPressed: () => Navigator.of(dialogContext).pop(false), child: const Text('Vazgeç')),
+          FilledButton(onPressed: () => Navigator.of(dialogContext).pop(true), child: const Text('Sil')),
         ],
       ),
     );
@@ -126,9 +120,7 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
     if (!mounted) return;
 
     setState(_refresh);
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Materyal silindi.')),
-    );
+    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Materyal silindi.')));
   }
 
   @override
@@ -320,11 +312,7 @@ class _LibrarySurface extends StatelessWidget {
 }
 
 class _LibraryMaterialCard extends StatelessWidget {
-  const _LibraryMaterialCard({
-    required this.material,
-    required this.onPressed,
-    required this.onDelete,
-  });
+  const _LibraryMaterialCard({required this.material, required this.onPressed, required this.onDelete});
 
   final MaterialRecord material;
   final VoidCallback onPressed;

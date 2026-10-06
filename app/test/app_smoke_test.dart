@@ -323,14 +323,8 @@ void main() {
     await tapVisible(tester, find.text('Kütüphane').last);
     await pumpUntilFound(tester, find.text('Silinecek materyal'));
 
-    final recentCard = find.ancestor(
-      of: find.text('Silinecek materyal'),
-      matching: find.byType(Card),
-    );
-    final deleteButton = find.descendant(
-      of: recentCard,
-      matching: find.byTooltip('Materyali sil'),
-    );
+    final recentCard = find.ancestor(of: find.text('Silinecek materyal'), matching: find.byType(Card));
+    final deleteButton = find.descendant(of: recentCard, matching: find.byTooltip('Materyali sil'));
     expect(deleteButton, findsOneWidget);
     await tapVisible(tester, deleteButton);
     await pumpUntilFound(tester, find.text('Materyali sil?'));
@@ -339,13 +333,7 @@ void main() {
 
     expect(find.text('Silinecek materyal'), findsNothing);
     expect(find.text('Korunacak materyal'), findsOneWidget);
-    expect(
-      await store.material(
-        learner: runtime.learner,
-        materialId: const MaterialId('delete-recent'),
-      ),
-      isNull,
-    );
+    expect(await store.material(learner: runtime.learner, materialId: const MaterialId('delete-recent')), isNull);
 
     await tapVisible(tester, find.text('Ana Sayfa').last);
     await pumpUntilFound(tester, find.text('Şimdi ne yapmalı?'));
