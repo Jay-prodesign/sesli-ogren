@@ -10,7 +10,7 @@ import 'companion_view.dart';
 enum _SlicePhase { loading, source, recall, result, continuation, error }
 
 class LearningSliceScreen extends StatefulWidget {
-  const LearningSliceScreen({required this.runtime, required this.materialId, super.key});
+  const LearningSliceScreen({required this.runtime, this.materialId = AppRuntime.primaryMaterialId, super.key});
 
   final AppRuntime runtime;
   final MaterialId materialId;
