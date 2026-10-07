@@ -50,10 +50,7 @@ void main() {
   });
 
   testWidgets('first-run onboarding explains learning truth and persists completion', (tester) async {
-    final store = await SqliteSourceStore.open(
-      factory: databaseFactoryFfiNoIsolate,
-      path: inMemoryDatabasePath,
-    );
+    final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
     addTearDown(store.close);
     final runtime = AppRuntime(
       learner: AppRuntime.localM5LearnerFixture,
