@@ -36,7 +36,7 @@ class SqliteSourceStore implements SourceStore {
     final database = await selectedFactory.openDatabase(
       databasePath,
       options: OpenDatabaseOptions(
-        version: 7,
+        version: 8,
         onConfigure: (db) => db.execute('PRAGMA foreign_keys = ON'),
         onUpgrade: (db, oldVersion, newVersion) async {
           if (oldVersion < 2) {
@@ -56,6 +56,9 @@ class SqliteSourceStore implements SourceStore {
           }
           if (oldVersion < 7) {
             await _upgradeListenProgressSchema(db);
+          }
+          if (oldVersion < 8) {
+            await _upgradeLearnerPreferencesSchema(db);
           }
         },
         onCreate: (db, version) async {
@@ -250,6 +253,14 @@ CREATE TABLE listen_progress (
 )
 ''');
           await db.execute('''
+CREATE TABLE learner_preferences (
+  learner_id TEXT PRIMARY KEY,
+  onboarding_completed INTEGER NOT NULL DEFAULT 0,
+  updated_at_utc TEXT NOT NULL,
+  CHECK (onboarding_completed IN (0, 1))
+)
+''');
+          await db.execute('''
 CREATE TABLE operational_events (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   learner_id TEXT NOT NULL,
@@ -340,6 +351,17 @@ CREATE TABLE IF NOT EXISTS listen_progress (
     REFERENCES source_versions (learner_id, source_version_id)
     ON DELETE CASCADE,
   CHECK (chunk_index >= 0)
+)
+''');
+  }
+
+  static Future<void> _upgradeLearnerPreferencesSchema(Database db) async {
+    await db.execute('''
+CREATE TABLE IF NOT EXISTS learner_preferences (
+  learner_id TEXT PRIMARY KEY,
+  onboarding_completed INTEGER NOT NULL DEFAULT 0,
+  updated_at_utc TEXT NOT NULL,
+  CHECK (onboarding_completed IN (0, 1))
 )
 ''');
   }
@@ -949,10 +971,38 @@ LIMIT 1
     });
   }
 
+  Future<bool> onboardingCompleted({required AuthenticatedLearner learner}) async {
+    final rows = await _database.query(
+      'learner_preferences',
+      columns: ['onboarding_completed'],
+      where: 'learner_id = ?',
+      whereArgs: [learner.id.value],
+      limit: 1,
+    );
+    if (rows.isEmpty) return false;
+    return rows.single['onboarding_completed'] == 1;
+  }
+
+  Future<void> markOnboardingCompleted({
+    required AuthenticatedLearner learner,
+    required DateTime updatedAt,
+  }) async {
+    await _database.insert(
+      'learner_preferences',
+      {
+        'learner_id': learner.id.value,
+        'onboarding_completed': 1,
+        'updated_at_utc': updatedAt.toUtc().toIso8601String(),
+      },
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
   @override
   Future<void> purgeLearnerData({required AuthenticatedLearner learner}) {
     return _database.transaction((transaction) async {
       final id = learner.id.value;
+      await transaction.delete('learner_preferences', where: 'learner_id = ?', whereArgs: [id]);
       await transaction.delete('active_recall_attempts', where: 'learner_id = ?', whereArgs: [id]);
       await transaction.delete('recall_attempt_support', where: 'learner_id = ?', whereArgs: [id]);
       await transaction.delete('next_learning_actions', where: 'learner_id = ?', whereArgs: [id]);
