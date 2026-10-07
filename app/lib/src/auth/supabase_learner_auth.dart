@@ -28,10 +28,7 @@ class SupabaseLearnerAuth {
     }
   }
 
-  static Future<AuthenticatedLearner> verifyEmailOtp({
-    required String email,
-    required String token,
-  }) async {
+  static Future<AuthenticatedLearner> verifyEmailOtp({required String email, required String token}) async {
     final normalized = _normalizedEmail(email);
     final normalizedToken = token.trim();
     if (!RegExp(r'^\d{6}$').hasMatch(normalizedToken)) {
@@ -40,17 +37,11 @@ class SupabaseLearnerAuth {
 
     final client = await _clientForConfiguredProject();
     try {
-      final response = await client.auth.verifyOTP(
-        email: normalized,
-        token: normalizedToken,
-        type: OtpType.email,
-      );
+      final response = await client.auth.verifyOTP(email: normalized, token: normalizedToken, type: OtpType.email);
       final user = response.user;
       final session = response.session;
       if (user == null || session == null) {
-        throw const LearnerAuthenticationException(
-          'Doğrulama tamamlandı ancak güvenli oturum açılamadı.',
-        );
+        throw const LearnerAuthenticationException('Doğrulama tamamlandı ancak güvenli oturum açılamadı.');
       }
       return AuthenticatedLearner(id: LearnerId(user.id));
     } on LearnerAuthenticationException {
@@ -60,14 +51,11 @@ class SupabaseLearnerAuth {
     }
   }
 
-  static Future<SupabaseClient> clientForAuthenticatedRuntime() =>
-      _clientForConfiguredProject();
+  static Future<SupabaseClient> clientForAuthenticatedRuntime() => _clientForConfiguredProject();
 
   static Future<SupabaseClient> _clientForConfiguredProject() async {
     if (_projectUrl.trim().isEmpty || _publishableKey.trim().isEmpty) {
-      throw const LearnerAuthConfigurationException(
-        'Supabase client configuration is missing.',
-      );
+      throw const LearnerAuthConfigurationException('Supabase client configuration is missing.');
     }
 
     final existing = _client;
@@ -89,9 +77,7 @@ class SupabaseLearnerAuth {
     final normalized = email.trim().toLowerCase();
     final emailPattern = RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$');
     if (!emailPattern.hasMatch(normalized) || normalized.length > 254) {
-      throw const LearnerAuthenticationException(
-        'Geçerli bir e-posta adresi gir.',
-      );
+      throw const LearnerAuthenticationException('Geçerli bir e-posta adresi gir.');
     }
     return normalized;
   }
@@ -101,9 +87,7 @@ class SupabaseLearnerAuth {
       await Supabase.initialize(url: _projectUrl, publishableKey: _publishableKey);
       return Supabase.instance.client;
     } catch (_) {
-      throw const LearnerAuthenticationException(
-        'Authentication service could not be initialized.',
-      );
+      throw const LearnerAuthenticationException('Authentication service could not be initialized.');
     }
   }
 }
