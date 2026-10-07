@@ -150,6 +150,7 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
                   onDeleteMaterial: _deleteMaterial,
                 ),
                 ProgressSurface(items: data.progress, onOpenMaterial: _openWorkspace),
+                ProfileSurface(runtime: widget.runtime),
               ],
             );
           },
