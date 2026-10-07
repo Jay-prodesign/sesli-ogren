@@ -488,10 +488,20 @@ class _LibrarySurface extends StatelessWidget {
     return ListView(
       padding: const EdgeInsets.fromLTRB(20, 24, 20, 32),
       children: [
-        Text('Kütüphane', style: theme.textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.w800)),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            Expanded(child: Text('Kütüphane', style: theme.textTheme.headlineMedium)),
+            if (data.materials.isNotEmpty)
+              Text(
+                '${data.materials.length} materyal',
+                style: theme.textTheme.labelMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+              ),
+          ],
+        ),
         const SizedBox(height: 6),
         Text(
-          'Kaynakların ve öğrenme devamın burada.',
+          'Kaynakların, kaldığın yer ve öğrenme devamın tek yerde.',
           style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
         ),
         const SizedBox(height: 24),
@@ -527,17 +537,47 @@ class _LibraryMaterialCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final mediaIcon = material.mediaType == SourceMediaType.pdf ? Icons.picture_as_pdf_rounded : Icons.notes_rounded;
+    final mediaLabel = material.mediaType == SourceMediaType.pdf ? 'PDF' : 'Metin';
     return Card(
-      elevation: 0,
-      color: theme.colorScheme.surfaceContainerLow,
-      child: ListTile(
+      child: InkWell(
         onTap: onPressed,
-        leading: Icon(material.mediaType == SourceMediaType.pdf ? Icons.picture_as_pdf_outlined : Icons.notes_rounded),
-        title: Text(material.title, maxLines: 2, overflow: TextOverflow.ellipsis),
-        trailing: IconButton(
-          tooltip: 'Materyali sil',
-          onPressed: onDelete,
-          icon: const Icon(Icons.delete_outline_rounded),
+        borderRadius: BorderRadius.circular(20),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 14, 8, 14),
+          child: Row(
+            children: [
+              DecoratedBox(
+                decoration: BoxDecoration(
+                  color: AppPalette.primarySoft,
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(11),
+                  child: Icon(mediaIcon, color: AppPalette.primary, size: 22),
+                ),
+              ),
+              const SizedBox(width: 13),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(material.title, maxLines: 2, overflow: TextOverflow.ellipsis, style: theme.textTheme.titleMedium),
+                    const SizedBox(height: 5),
+                    Text(
+                      '$mediaLabel · Çalışma alanını aç',
+                      style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+                    ),
+                  ],
+                ),
+              ),
+              IconButton(
+                tooltip: 'Materyali sil',
+                onPressed: onDelete,
+                icon: const Icon(Icons.delete_outline_rounded),
+              ),
+            ],
+          ),
         ),
       ),
     );
