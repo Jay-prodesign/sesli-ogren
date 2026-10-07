@@ -184,8 +184,7 @@ class _ProfileSurfaceState extends State<ProfileSurface> {
                   _ProfileTile(
                     icon: Icons.cloud_off_rounded,
                     title: 'Hesap bilgisi doğrulanamadı',
-                    subtitle:
-                        'Plan veya kullanım bilgisini tahmin etmiyoruz. Bağlantı geri geldiğinde yeniden deneyebilirsin.',
+                    subtitle: 'Plan veya kullanım bilgisini tahmin etmiyoruz. Bağlantı geri geldiğinde yeniden deneyebilirsin.',
                     iconBackground: AppPalette.attentionSoft,
                     iconForeground: AppPalette.attention,
                   ),
@@ -226,11 +225,7 @@ class _ProfileSurfaceState extends State<ProfileSurface> {
         const SizedBox(height: 10),
         _ProfilePanel(
           children: [
-            const _ProfileTile(
-              icon: Icons.language_rounded,
-              title: 'Öğrenme dili',
-              subtitle: 'Türkçe',
-            ),
+            const _ProfileTile(icon: Icons.language_rounded, title: 'Öğrenme dili', subtitle: 'Türkçe'),
             const Divider(height: 1),
             const _ProfileTile(
               icon: Icons.record_voice_over_outlined,
@@ -289,8 +284,7 @@ class _ProfileSurfaceState extends State<ProfileSurface> {
             const _ProfileTile(
               icon: Icons.privacy_tip_outlined,
               title: 'Gizlilik ve veriler',
-              subtitle:
-                  'Tek tek materyalleri Kütüphane’den silebilirsin. Hesap silme tüm hesap ve öğrenme verilerini kapsar.',
+              subtitle: 'Tek tek materyalleri Kütüphane’den silebilirsin. Hesap silme tüm hesap ve öğrenme verilerini kapsar.',
               iconBackground: Color(0xFFFDE7E5),
               iconForeground: AppPalette.destructive,
             ),
@@ -336,11 +330,7 @@ class _AccountOverviewCard extends StatelessWidget {
         color: AppPalette.primaryDark,
         borderRadius: BorderRadius.circular(26),
         boxShadow: [
-          BoxShadow(
-            color: AppPalette.primaryDark.withValues(alpha: 0.14),
-            blurRadius: 24,
-            offset: const Offset(0, 12),
-          ),
+          BoxShadow(color: AppPalette.primaryDark.withValues(alpha: 0.14), blurRadius: 24, offset: const Offset(0, 12)),
         ],
       ),
       child: Padding(
@@ -425,10 +415,7 @@ class _AccountOverviewCard extends StatelessWidget {
                           style: theme.textTheme.bodyMedium?.copyWith(color: Colors.white),
                         ),
                       ),
-                      Text(
-                        '${entry.consumed} işlem',
-                        style: theme.textTheme.labelLarge?.copyWith(color: Colors.white),
-                      ),
+                      Text('${entry.consumed} işlem', style: theme.textTheme.labelLarge?.copyWith(color: Colors.white)),
                     ],
                   ),
                 ),
@@ -519,10 +506,7 @@ class _ProfileTile extends StatelessWidget {
                 const SizedBox(height: 4),
                 Text(
                   subtitle,
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant,
-                    height: 1.4,
-                  ),
+                  style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant, height: 1.4),
                 ),
               ],
             ),
