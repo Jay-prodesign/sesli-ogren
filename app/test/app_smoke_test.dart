@@ -511,7 +511,7 @@ void main() {
     expect(find.textContaining('tr-TR'), findsOneWidget);
     expect(find.text('Cihazın Türkçe sesi'), findsOneWidget);
     await tester.drag(find.byType(Scrollable).last, const Offset(0, -520));
-    await tester.pumpAndSettle();
+    await tester.pump(const Duration(milliseconds: 300));
     expect(find.textContaining('Hesap silme ayrı güvenli akış'), findsOneWidget);
   });
 
