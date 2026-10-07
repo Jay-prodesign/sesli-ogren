@@ -1,57 +1,90 @@
 \set ON_ERROR_STOP on
 begin;
 
-select plan(10);
+create or replace function pg_temp.assert_true(condition boolean, msg text)
+returns void language plpgsql as $$
+begin
+  if condition is distinct from true then
+    raise exception 'explain_back_contract_assert_failed: %', msg;
+  end if;
+end $$;
 
-select has_table('public', 'explain_back_attempts', 'Explain-back attempt authority exists');
-select row_security_active('public.explain_back_attempts', 'Explain-back attempts use RLS');
-
-select has_function(
-  'public',
-  'open_explain_back_attempt',
-  array['text', 'uuid', 'text', 'text', 'integer'],
-  'authenticated client can open a bounded source-bound attempt'
-);
-select has_function(
-  'public',
-  'read_explain_back_attempt',
-  array['text'],
-  'authenticated client can read its attempt state'
+select pg_temp.assert_true(
+  to_regclass('public.explain_back_attempts') is not null,
+  'Explain-back attempt authority missing'
 );
 
-select function_privs_are(
-  'public', 'open_explain_back_attempt',
-  array['text', 'uuid', 'text', 'text', 'integer'],
-  'authenticated', array['EXECUTE'],
-  'authenticated may open Explain-back attempts'
-);
-select function_privs_are(
-  'public', 'open_explain_back_attempt',
-  array['text', 'uuid', 'text', 'text', 'integer'],
-  'anon', array[]::text[],
-  'anonymous cannot open Explain-back attempts'
-);
-select function_privs_are(
-  'public', 'read_explain_back_attempt',
-  array['text'],
-  'authenticated', array['EXECUTE'],
-  'authenticated may read its Explain-back attempt'
-);
-select function_privs_are(
-  'public', 'read_explain_back_attempt',
-  array['text'],
-  'anon', array[]::text[],
-  'anonymous cannot read Explain-back attempts'
+select pg_temp.assert_true(
+  coalesce((
+    select c.relrowsecurity and c.relforcerowsecurity
+    from pg_class c
+    join pg_namespace n on n.oid = c.relnamespace
+    where n.nspname = 'public' and c.relname = 'explain_back_attempts'
+  ), false),
+  'Explain-back attempts must use forced RLS'
 );
 
-select col_is_null(
-  'public', 'explain_back_attempts', 'evaluation_kind',
-  'new attempts may remain explicitly unevaluated'
+select pg_temp.assert_true(
+  to_regprocedure('public.open_explain_back_attempt(text,uuid,text,text,integer)') is not null,
+  'open_explain_back_attempt missing'
 );
-select col_is_null(
-  'public', 'explain_back_attempts', 'evaluated_at',
-  'unevaluated attempts do not pretend to have evaluation evidence'
+select pg_temp.assert_true(
+  to_regprocedure('public.read_explain_back_attempt(text)') is not null,
+  'read_explain_back_attempt missing'
 );
 
-select * from finish();
+select pg_temp.assert_true(
+  has_function_privilege(
+    'authenticated',
+    'public.open_explain_back_attempt(text,uuid,text,text,integer)',
+    'EXECUTE'
+  ),
+  'authenticated must execute open_explain_back_attempt'
+);
+select pg_temp.assert_true(
+  not has_function_privilege(
+    'anon',
+    'public.open_explain_back_attempt(text,uuid,text,text,integer)',
+    'EXECUTE'
+  ),
+  'anon must not execute open_explain_back_attempt'
+);
+select pg_temp.assert_true(
+  has_function_privilege(
+    'authenticated',
+    'public.read_explain_back_attempt(text)',
+    'EXECUTE'
+  ),
+  'authenticated must execute read_explain_back_attempt'
+);
+select pg_temp.assert_true(
+  not has_function_privilege(
+    'anon',
+    'public.read_explain_back_attempt(text)',
+    'EXECUTE'
+  ),
+  'anon must not execute read_explain_back_attempt'
+);
+
+select pg_temp.assert_true(
+  coalesce((
+    select is_nullable = 'YES'
+    from information_schema.columns
+    where table_schema = 'public'
+      and table_name = 'explain_back_attempts'
+      and column_name = 'evaluation_kind'
+  ), false),
+  'evaluation_kind must allow explicit unevaluated state'
+);
+select pg_temp.assert_true(
+  coalesce((
+    select is_nullable = 'YES'
+    from information_schema.columns
+    where table_schema = 'public'
+      and table_name = 'explain_back_attempts'
+      and column_name = 'evaluated_at'
+  ), false),
+  'evaluated_at must allow explicit unevaluated state'
+);
+
 rollback;
