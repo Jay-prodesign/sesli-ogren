@@ -100,9 +100,7 @@ class _SesliOgrenAppState extends State<SesliOgrenApp> {
           : FutureBuilder<AppRuntime?>(
               future: _runtimeFuture,
               builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.done &&
-                    !snapshot.hasError &&
-                    snapshot.data == null) {
+                if (snapshot.connectionState == ConnectionState.done && !snapshot.hasError && snapshot.data == null) {
                   return AccountEntryScreen(onAuthenticated: _handleAuthenticated);
                 }
                 if (snapshot.hasData) {
