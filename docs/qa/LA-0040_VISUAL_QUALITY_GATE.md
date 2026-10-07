@@ -123,11 +123,13 @@ It must not:
 
 Disposition must be KEEP / EVOLVE / REDESIGN / REMOVE.
 
-## Student-desire gate
-A student-facing treatment should feel:
-- current, not corporate;
-- alive, not noisy;
-- encouraging, not patronizing;
+## High-school student-desire gate
+Primary reviewer frame: Turkish high-school learner, grades 9–12 / approx. 14–18.
+
+A passing treatment should feel:
+- current and self-chosen, not school-admin/corporate;
+- alive enough for a tired teen to re-engage, not noisy;
+- encouraging and peer-respectful, not teacherly/patronizing;
 - premium, not luxury-formal;
 - focused, not sterile;
 - expressive, not toy-like.
