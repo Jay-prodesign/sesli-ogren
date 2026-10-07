@@ -36,6 +36,27 @@ Future<void> _tapVisible(WidgetTester tester, Finder finder) async {
 void main() {
   sqfliteFfiInit();
 
+
+  test('learner purge removes onboarding completion', () async {
+    final store = await SqliteSourceStore.open(
+      factory: databaseFactoryFfiNoIsolate,
+      path: inMemoryDatabasePath,
+    );
+    addTearDown(store.close);
+
+    final learner = AppRuntime.localM5LearnerFixture;
+    await store.markOnboardingCompleted(
+      learner: learner,
+      updatedAt: DateTime.utc(2026, 10, 7, 9, 32),
+    );
+    expect(await store.onboardingCompleted(learner: learner), isTrue);
+
+    await store.purgeLearnerData(learner: learner);
+
+    expect(await store.onboardingCompleted(learner: learner), isFalse);
+  });
+
+
   testWidgets('first-run onboarding explains learning truth and persists completion', (tester) async {
     final store = await SqliteSourceStore.open(
       factory: databaseFactoryFfiNoIsolate,
