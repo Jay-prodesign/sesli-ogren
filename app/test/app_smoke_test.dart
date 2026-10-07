@@ -53,13 +53,7 @@ class _ReadyAccountOverviewGateway implements AccountOverviewGateway {
     accountStatus: 'active',
     plan: 'free',
     entitlementStatus: 'active',
-    usage: [
-      AccountUsageEntry(
-        periodStart: DateTime.utc(2026, 10, 1),
-        capability: 'grounded_explain',
-        consumed: 3,
-      ),
-    ],
+    usage: [AccountUsageEntry(periodStart: DateTime.utc(2026, 10, 1), capability: 'grounded_explain', consumed: 3)],
   );
 }
 

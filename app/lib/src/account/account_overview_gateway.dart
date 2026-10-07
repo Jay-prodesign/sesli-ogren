@@ -21,11 +21,7 @@ class AccountOverview {
 }
 
 class AccountUsageEntry {
-  const AccountUsageEntry({
-    required this.periodStart,
-    required this.capability,
-    required this.consumed,
-  });
+  const AccountUsageEntry({required this.periodStart, required this.capability, required this.consumed});
 
   final DateTime periodStart;
   final String capability;

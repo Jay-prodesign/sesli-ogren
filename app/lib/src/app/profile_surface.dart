@@ -44,7 +44,9 @@ class _ProfileSurfaceState extends State<ProfileSurface> {
           future: _overview,
           builder: (context, snapshot) {
             if (snapshot.connectionState != ConnectionState.done) {
-              return const Center(child: Padding(padding: EdgeInsets.all(24), child: CircularProgressIndicator()));
+              return const Center(
+                child: Padding(padding: EdgeInsets.all(24), child: CircularProgressIndicator()),
+              );
             }
             final overview = snapshot.data;
             if (overview == null) {
@@ -80,11 +82,7 @@ class _ProfileSurfaceState extends State<ProfileSurface> {
           color: theme.colorScheme.surfaceContainerLow,
           child: const Column(
             children: [
-              ListTile(
-                leading: Icon(Icons.language_rounded),
-                title: Text('Öğrenme dili'),
-                subtitle: Text('Türkçe'),
-              ),
+              ListTile(leading: Icon(Icons.language_rounded), title: Text('Öğrenme dili'), subtitle: Text('Türkçe')),
               Divider(height: 1),
               ListTile(
                 leading: Icon(Icons.record_voice_over_outlined),
@@ -151,9 +149,7 @@ class _AccountOverviewCard extends StatelessWidget {
             Text(planLabel, style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800)),
             const SizedBox(height: 4),
             Text(
-              overview.entitlementStatus == 'active'
-                  ? 'Plan etkin'
-                  : 'Plan durumu: ' + overview.entitlementStatus,
+              overview.entitlementStatus == 'active' ? 'Plan etkin' : 'Plan durumu: ' + overview.entitlementStatus,
               style: theme.textTheme.bodyMedium,
             ),
             const SizedBox(height: 18),

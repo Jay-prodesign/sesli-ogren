@@ -11,11 +11,7 @@ class SupabaseAccountOverviewGateway implements AccountOverviewGateway {
   Future<AccountOverview?> load({required AuthenticatedLearner learner}) async {
     try {
       final client = await SupabaseLearnerAuth.clientForAuthenticatedRuntime();
-      final account = await client
-          .from('accounts')
-          .select('locale,status')
-          .eq('id', learner.id.value)
-          .maybeSingle();
+      final account = await client.from('accounts').select('locale,status').eq('id', learner.id.value).maybeSingle();
       final entitlement = await client
           .from('entitlements')
           .select('plan,status')
@@ -30,14 +26,16 @@ class SupabaseAccountOverviewGateway implements AccountOverviewGateway {
           .order('period_start', ascending: false)
           .limit(12);
 
-      final usage = rawUsage.map((row) {
-        final value = Map<String, dynamic>.from(row);
-        return AccountUsageEntry(
-          periodStart: DateTime.parse(value['period_start'] as String),
-          capability: value['capability'] as String,
-          consumed: value['consumed'] as int,
-        );
-      }).toList(growable: false);
+      final usage = rawUsage
+          .map((row) {
+            final value = Map<String, dynamic>.from(row);
+            return AccountUsageEntry(
+              periodStart: DateTime.parse(value['period_start'] as String),
+              capability: value['capability'] as String,
+              consumed: value['consumed'] as int,
+            );
+          })
+          .toList(growable: false);
 
       return AccountOverview(
         locale: account['locale'] as String? ?? 'tr-TR',
