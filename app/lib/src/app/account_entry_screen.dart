@@ -138,10 +138,7 @@ class _AccountEntryScreenState extends State<AccountEntryScreen> {
                       autofillHints: const [AutofillHints.email],
                       textInputAction: TextInputAction.done,
                       onSubmitted: (_) => _requestCode(),
-                      decoration: const InputDecoration(
-                        labelText: 'E-posta',
-                        hintText: 'ornek@eposta.com',
-                      ),
+                      decoration: const InputDecoration(labelText: 'E-posta', hintText: 'ornek@eposta.com'),
                     )
                   else
                     TextField(
