@@ -577,10 +577,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 100));
 
     expect(signOutCalls, 1);
-    expect(
-      await store.material(learner: runtime.learner, materialId: AppRuntime.primaryMaterialId),
-      isNotNull,
-    );
+    expect(await store.material(learner: runtime.learner, materialId: AppRuntime.primaryMaterialId), isNotNull);
   });
 
   testWidgets('account deletion requires explicit confirmation and purges local data after remote success', (
