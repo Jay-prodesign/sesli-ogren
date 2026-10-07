@@ -36,7 +36,7 @@ class SqliteSourceStore implements SourceStore {
     final database = await selectedFactory.openDatabase(
       databasePath,
       options: OpenDatabaseOptions(
-        version: 6,
+        version: 7,
         onConfigure: (db) => db.execute('PRAGMA foreign_keys = ON'),
         onUpgrade: (db, oldVersion, newVersion) async {
           if (oldVersion < 2) {
@@ -53,6 +53,9 @@ class SqliteSourceStore implements SourceStore {
           }
           if (oldVersion < 6) {
             await _upgradeActiveRecallAttemptSchema(db);
+          }
+          if (oldVersion < 7) {
+            await _upgradeListenProgressSchema(db);
           }
         },
         onCreate: (db, version) async {
@@ -233,6 +236,20 @@ CREATE TABLE active_recall_attempts (
 )
 ''');
           await db.execute('''
+CREATE TABLE listen_progress (
+  learner_id TEXT NOT NULL,
+  material_id TEXT NOT NULL,
+  source_version_id TEXT NOT NULL,
+  chunk_index INTEGER NOT NULL,
+  updated_at_utc TEXT NOT NULL,
+  PRIMARY KEY (learner_id, material_id),
+  FOREIGN KEY (learner_id, source_version_id)
+    REFERENCES source_versions (learner_id, source_version_id)
+    ON DELETE CASCADE,
+  CHECK (chunk_index >= 0)
+)
+''');
+          await db.execute('''
 CREATE TABLE operational_events (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   learner_id TEXT NOT NULL,
@@ -306,6 +323,23 @@ CREATE TABLE IF NOT EXISTS active_recall_attempts (
   FOREIGN KEY (learner_id, action_id)
     REFERENCES recall_actions (learner_id, action_id)
     ON DELETE CASCADE
+)
+''');
+  }
+
+  static Future<void> _upgradeListenProgressSchema(Database db) async {
+    await db.execute('''
+CREATE TABLE IF NOT EXISTS listen_progress (
+  learner_id TEXT NOT NULL,
+  material_id TEXT NOT NULL,
+  source_version_id TEXT NOT NULL,
+  chunk_index INTEGER NOT NULL,
+  updated_at_utc TEXT NOT NULL,
+  PRIMARY KEY (learner_id, material_id),
+  FOREIGN KEY (learner_id, source_version_id)
+    REFERENCES source_versions (learner_id, source_version_id)
+    ON DELETE CASCADE,
+  CHECK (chunk_index >= 0)
 )
 ''');
   }
@@ -642,6 +676,46 @@ LIMIT 1
   }
 
   @override
+  Future<int> listenResumeChunk({
+    required AuthenticatedLearner learner,
+    required MaterialId materialId,
+    required SourceVersionId sourceVersionId,
+  }) async {
+    final rows = await _database.query(
+      'listen_progress',
+      columns: ['chunk_index'],
+      where: 'learner_id = ? AND material_id = ? AND source_version_id = ?',
+      whereArgs: [learner.id.value, materialId.value, sourceVersionId.value],
+      limit: 1,
+    );
+    return rows.isEmpty ? 0 : rows.single['chunk_index']! as int;
+  }
+
+  @override
+  Future<void> saveListenResumeChunk({
+    required AuthenticatedLearner learner,
+    required MaterialId materialId,
+    required SourceVersionId sourceVersionId,
+    required int chunkIndex,
+    required DateTime updatedAt,
+  }) async {
+    if (chunkIndex < 0) {
+      throw ArgumentError.value(chunkIndex, 'chunkIndex', 'must be non-negative');
+    }
+    await _database.insert(
+      'listen_progress',
+      {
+        'learner_id': learner.id.value,
+        'material_id': materialId.value,
+        'source_version_id': sourceVersionId.value,
+        'chunk_index': chunkIndex,
+        'updated_at_utc': updatedAt.toUtc().toIso8601String(),
+      },
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  @override
   Future<SourceIngestResult> persistIngestResult({
     required AuthenticatedLearner learner,
     required MaterialRecord material,
@@ -835,6 +909,11 @@ LIMIT 1
 
       await transaction.delete(
         'active_recall_attempts',
+        where: 'learner_id = ? AND material_id = ?',
+        whereArgs: [learner.id.value, materialId.value],
+      );
+      await transaction.delete(
+        'listen_progress',
         where: 'learner_id = ? AND material_id = ?',
         whereArgs: [learner.id.value, materialId.value],
       );

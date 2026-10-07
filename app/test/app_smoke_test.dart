@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sesli_ogren/src/app/app_runtime.dart';
 import 'package:sesli_ogren/src/app/learning_slice_screen.dart';
+import 'package:sesli_ogren/src/app/listen_screen.dart';
 import 'package:sesli_ogren/src/app/product_shell_screen.dart';
 import 'package:sesli_ogren/src/app/sesli_ogren_app.dart';
 import 'package:sesli_ogren/src/auth/supabase_learner_auth.dart';
@@ -12,6 +13,7 @@ import 'package:sesli_ogren/src/data/source_ingest_service.dart';
 import 'package:sesli_ogren/src/data/sqlite_source_store.dart';
 import 'package:sesli_ogren/src/learning/recall_learning_service.dart';
 import 'package:sesli_ogren/src/generation/grounded_explain_gateway.dart';
+import 'package:sesli_ogren/src/speech/device_speech_output.dart';
 import 'package:sesli_ogren/src/domain/learning_truth.dart';
 import 'package:sesli_ogren/src/domain/learning_contracts.dart';
 import 'package:sesli_ogren/src/domain/operational_event.dart';
@@ -38,6 +40,36 @@ class _ReadyExplainGateway implements GroundedExplainGateway {
     language: 'tr-TR',
     executionRef: 'test:grounded-explain',
   );
+}
+
+class _FakeSpeechOutput implements SpeechOutput {
+  String? lastText;
+  VoidCallback? _onDone;
+
+  @override
+  Future<void> speak(
+    String text, {
+    required String locale,
+    required VoidCallback onStart,
+    required VoidCallback onDone,
+    required ValueChanged<Object> onError,
+  }) async {
+    lastText = text;
+    _onDone = onDone;
+    onStart();
+  }
+
+  void complete() {
+    final callback = _onDone;
+    _onDone = null;
+    callback?.call();
+  }
+
+  @override
+  Future<void> stop() async {}
+
+  @override
+  Future<void> dispose() async {}
 }
 
 Widget testShell(AppRuntime runtime) {
@@ -351,6 +383,66 @@ void main() {
     await tapVisible(tester, find.text('Devam et'));
     await pumpUntilFound(tester, find.text('Korunacak materyal'));
     expect(find.text('Korunacak materyal'), findsWidgets);
+  });
+
+  testWidgets('Listen resumes the exact current source from a durable chunk checkpoint', (tester) async {
+    final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
+    addTearDown(store.close);
+    final ingest = SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor());
+    final runtime = AppRuntime(
+      learner: AppRuntime.localM5LearnerFixture,
+      store: store,
+      ingest: ingest,
+      recall: RecallLearningService(sourceStore: store, learningStore: store.learningTruthStore()),
+      telemetry: store.operationalTelemetry(),
+    );
+    final text = List.generate(90, (index) => 'kelime$index').join(' ');
+    await ingest.ingestPastedText(
+      learner: runtime.learner,
+      materialId: const MaterialId('listen-resume'),
+      text: text,
+      sourceName: 'Dinleme devam notu',
+    );
+    final source = await store.currentSourceVersion(
+      learner: runtime.learner,
+      materialId: const MaterialId('listen-resume'),
+    );
+    expect(source, isNotNull);
+    await store.saveListenResumeChunk(
+      learner: runtime.learner,
+      materialId: const MaterialId('listen-resume'),
+      sourceVersionId: source!.identity.sourceVersionId,
+      chunkIndex: 1,
+      updatedAt: DateTime.utc(2026, 10, 7, 8),
+    );
+
+    final speech = _FakeSpeechOutput();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: ListenScreen(
+          runtime: runtime,
+          materialId: const MaterialId('listen-resume'),
+          speechOutput: speech,
+        ),
+      ),
+    );
+    await pumpUntilFound(tester, find.text('Kaldığın yerden dinle'));
+    expect(find.textContaining('bölüm 2 / 2'), findsOneWidget);
+
+    await tapVisible(tester, find.text('Kaldığın yerden dinle'));
+    await tester.pump();
+    expect(speech.lastText, isNotNull);
+
+    speech.complete();
+    await pumpUntilFound(tester, find.text('Dinlemeye başla'));
+    expect(
+      await store.listenResumeChunk(
+        learner: runtime.learner,
+        materialId: const MaterialId('listen-resume'),
+        sourceVersionId: source.identity.sourceVersionId,
+      ),
+      0,
+    );
   });
 
   testWidgets('Progress reports canonical unassessed state without invented mastery', (tester) async {

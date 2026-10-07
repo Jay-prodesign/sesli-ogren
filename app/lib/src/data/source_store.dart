@@ -36,6 +36,20 @@ abstract interface class SourceStore {
     Uint8List? rawSourceBytes,
   });
 
+  Future<int> listenResumeChunk({
+    required AuthenticatedLearner learner,
+    required MaterialId materialId,
+    required SourceVersionId sourceVersionId,
+  });
+
+  Future<void> saveListenResumeChunk({
+    required AuthenticatedLearner learner,
+    required MaterialId materialId,
+    required SourceVersionId sourceVersionId,
+    required int chunkIndex,
+    required DateTime updatedAt,
+  });
+
   Future<void> deleteMaterial({
     required AuthenticatedLearner learner,
     required MaterialId materialId,
