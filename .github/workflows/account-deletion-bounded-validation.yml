@@ -1,0 +1,51 @@
+name: account-deletion-bounded-validation
+
+on:
+  pull_request:
+    paths:
+      - "server/db/**"
+      - "supabase/functions/delete-account/**"
+      - "supabase/config.toml"
+      - "scripts/m5_validate_server_sql.sh"
+      - ".github/workflows/account-deletion-bounded-validation.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: account-deletion-bounded-validation-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    env:
+      DENO_VERSION: "2.9.7"
+      DENO_SHA256: "c6527f24f4b16031d3ae4fa9f658d5f11534c8d84ce7dc8502420280919c3490"
+      PGPORT: "54329"
+      PGADMIN: supabase_admin
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - name: Start disposable PostgreSQL 16 cluster
+        run: |
+          PGBIN=/usr/lib/postgresql/16/bin
+          export PGHOST="$RUNNER_TEMP/pg"
+          mkdir -p "$PGHOST"
+          "$PGBIN/initdb" -D "$RUNNER_TEMP/pgdata" -U supabase_admin -A trust >/dev/null
+          "$PGBIN/pg_ctl" -D "$RUNNER_TEMP/pgdata" -o "-p $PGPORT -k $PGHOST -c listen_addresses=''" -l "$RUNNER_TEMP/pg.log" -w start
+          echo "PGHOST=$PGHOST" >> "$GITHUB_ENV"
+      - name: Canonical server SQL suite
+        run: bash scripts/m5_validate_server_sql.sh "$RUNNER_TEMP/account-deletion-sql-report.txt"
+      - name: Install Deno
+        run: |
+          curl -fsSL -o "$RUNNER_TEMP/deno.zip" "https://dl.deno.land/release/v${DENO_VERSION}/deno-x86_64-unknown-linux-gnu.zip"
+          echo "${DENO_SHA256}  $RUNNER_TEMP/deno.zip" | sha256sum -c -
+          unzip -q -o "$RUNNER_TEMP/deno.zip" -d "$RUNNER_TEMP/deno"
+          echo "$RUNNER_TEMP/deno" >> "$GITHUB_PATH"
+      - name: Edge Function lint + type-check
+        run: |
+          deno lint supabase/functions/delete-account/index.ts
+          deno check supabase/functions/delete-account/index.ts

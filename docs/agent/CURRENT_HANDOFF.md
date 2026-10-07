@@ -3,13 +3,11 @@
 This section supersedes stale branch/cursor lines below where they conflict.
 
 - Active runnable product branch: `feat/full-product-shell-continuity` (PR #13).
-- Validated product head: `a785783e54441ef5231e7b53c751d36fd408838f`.
 - Repository `main` remains bootstrap-only and MUST NOT be treated as the runnable Sesli Öğren application source.
 - LA-0024…LA-0033 are completed post-M5 product-continuity tranches.
-- LA-0033 Profile + server-authoritative plan/usage: DONE.
-- Latest gates: bootstrap run `37597120112` PASS; product run `37597120046` PASS — canonical format, Flutter analyze, expanded Flutter tests.
-- Current cursor: open the next concrete first-commercial-V0 gap: secure account/data deletion. Keep destructive behavior isolated and fail-closed; do not invent billing/settings frameworks.
-- Local development/preview should track `feat/full-product-shell-continuity`, not `main`.
+- LA-0034 Secure account + data deletion: IN_PROGRESS.
+- Current cursor: complete server-authoritative account deletion + learner-scoped local purge; no client secret, no fake deletion success.
+- Connected hosted Supabase project currently has no public app tables/functions; do not mutate it until the canonical server substrate/deployment step is explicitly reached.
 
 ---
 
