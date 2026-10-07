@@ -238,7 +238,9 @@ class _HomeSurface extends StatelessWidget {
                   Text('Sesli Öğren', style: theme.textTheme.headlineSmall),
                   const SizedBox(height: 2),
                   Text(
-                    hasMaterial ? 'Materyalin hazır. Sıradaki anlamlı adıma geç.' : 'Kendi materyalini aktif öğrenmeye dönüştür.',
+                    hasMaterial
+                        ? 'Materyalin hazır. Sıradaki anlamlı adıma geç.'
+                        : 'Kendi materyalini aktif öğrenmeye dönüştür.',
                     style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
                   ),
                 ],
@@ -321,24 +323,15 @@ class _FirstMaterialHero extends StatelessWidget {
                 foreground: Colors.white.withValues(alpha: 0.78),
               ),
               const SizedBox(height: 20),
-              Text(
-                'İlk materyalini ekle',
-                style: theme.textTheme.headlineMedium?.copyWith(color: Colors.white),
-              ),
+              Text('İlk materyalini ekle', style: theme.textTheme.headlineMedium?.copyWith(color: Colors.white)),
               const SizedBox(height: 9),
               Text(
                 'PDF veya metnini ekle. Dinleme, hatırlama ve açıklama aynı kaynağa bağlı kalsın.',
-                style: theme.textTheme.bodyLarge?.copyWith(
-                  color: Colors.white.withValues(alpha: 0.82),
-                  height: 1.45,
-                ),
+                style: theme.textTheme.bodyLarge?.copyWith(color: Colors.white.withValues(alpha: 0.82), height: 1.45),
               ),
               const SizedBox(height: 22),
               FilledButton.icon(
-                style: FilledButton.styleFrom(
-                  backgroundColor: Colors.white,
-                  foregroundColor: AppPalette.primaryDark,
-                ),
+                style: FilledButton.styleFrom(backgroundColor: Colors.white, foregroundColor: AppPalette.primaryDark),
                 onPressed: onPressed,
                 icon: const Icon(Icons.add_rounded),
                 label: const Text('Materyal ekle'),
@@ -352,12 +345,7 @@ class _FirstMaterialHero extends StatelessWidget {
 }
 
 class _ContinueHero extends StatelessWidget {
-  const _ContinueHero({
-    required this.data,
-    required this.title,
-    required this.reason,
-    required this.onPressed,
-  });
+  const _ContinueHero({required this.data, required this.title, required this.reason, required this.onPressed});
 
   final _HomeSnapshot data;
   final String title;
@@ -433,30 +421,17 @@ class _ContinueHero extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(vertical: 20),
                 child: Divider(color: Colors.white.withValues(alpha: 0.16)),
               ),
-              _HeroLabel(
-                icon: Icons.bolt_rounded,
-                text: 'Şimdi ne yapmalı?',
-                foreground: const Color(0xFFAFC0FF),
-              ),
+              _HeroLabel(icon: Icons.bolt_rounded, text: 'Şimdi ne yapmalı?', foreground: const Color(0xFFAFC0FF)),
               const SizedBox(height: 10),
-              Text(
-                title,
-                style: theme.textTheme.headlineMedium?.copyWith(color: Colors.white),
-              ),
+              Text(title, style: theme.textTheme.headlineMedium?.copyWith(color: Colors.white)),
               const SizedBox(height: 8),
               Text(
                 reason,
-                style: theme.textTheme.bodyLarge?.copyWith(
-                  color: Colors.white.withValues(alpha: 0.82),
-                  height: 1.42,
-                ),
+                style: theme.textTheme.bodyLarge?.copyWith(color: Colors.white.withValues(alpha: 0.82), height: 1.42),
               ),
               const SizedBox(height: 22),
               FilledButton.icon(
-                style: FilledButton.styleFrom(
-                  backgroundColor: Colors.white,
-                  foregroundColor: AppPalette.primaryDark,
-                ),
+                style: FilledButton.styleFrom(backgroundColor: Colors.white, foregroundColor: AppPalette.primaryDark),
                 onPressed: onPressed,
                 icon: const Icon(Icons.arrow_forward_rounded),
                 label: const Text('Devam et'),
@@ -485,11 +460,8 @@ class _HeroLabel extends StatelessWidget {
         Expanded(
           child: Text(
             text,
-            style: Theme.of(context).textTheme.labelSmall?.copyWith(
-              color: foreground,
-              fontWeight: FontWeight.w800,
-              letterSpacing: 0.65,
-            ),
+            style: Theme.of(context).textTheme.labelSmall
+                ?.copyWith(color: foreground, fontWeight: FontWeight.w800, letterSpacing: 0.65),
           ),
         ),
       ],
@@ -636,11 +608,7 @@ class _ContextCard extends StatelessWidget {
                 ),
                 child: Padding(
                   padding: const EdgeInsets.all(9),
-                  child: Icon(
-                    icon,
-                    size: 20,
-                    color: title == 'Dinle' ? AppPalette.success : AppPalette.primary,
-                  ),
+                  child: Icon(icon, size: 20, color: title == 'Dinle' ? AppPalette.success : AppPalette.primary),
                 ),
               ),
               const SizedBox(height: 14),
