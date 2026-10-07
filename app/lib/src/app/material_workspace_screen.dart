@@ -329,10 +329,7 @@ class _LearningStatusCard extends StatelessWidget {
     };
 
     return DecoratedBox(
-      decoration: BoxDecoration(
-        color: AppPalette.primaryDark,
-        borderRadius: BorderRadius.circular(24),
-      ),
+      decoration: BoxDecoration(color: AppPalette.primaryDark, borderRadius: BorderRadius.circular(24)),
       child: Padding(
         padding: const EdgeInsets.fromLTRB(20, 20, 20, 18),
         child: Column(
@@ -356,7 +353,10 @@ class _LearningStatusCard extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Sıradaki aktif adım', style: theme.textTheme.labelMedium?.copyWith(color: const Color(0xFFAFC0FF))),
+                      Text(
+                        'Sıradaki aktif adım',
+                        style: theme.textTheme.labelMedium?.copyWith(color: const Color(0xFFAFC0FF)),
+                      ),
                       const SizedBox(height: 4),
                       Text(title, style: theme.textTheme.titleLarge?.copyWith(color: Colors.white)),
                     ],
@@ -411,11 +411,7 @@ class _ActionCard extends StatelessWidget {
                 ),
                 child: Padding(
                   padding: const EdgeInsets.all(9),
-                  child: Icon(
-                    icon,
-                    size: 21,
-                    color: title == 'Dinle' ? AppPalette.success : AppPalette.primary,
-                  ),
+                  child: Icon(icon, size: 21, color: title == 'Dinle' ? AppPalette.success : AppPalette.primary),
                 ),
               ),
               const SizedBox(width: 13),
