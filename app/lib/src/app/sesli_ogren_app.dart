@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import '../auth/supabase_learner_auth.dart';
 import 'app_runtime.dart';
 import 'companion_view.dart';
+import 'first_run_onboarding.dart';
 import 'product_shell_screen.dart';
 
 class SesliOgrenApp extends StatefulWidget {
@@ -85,7 +86,11 @@ class _SesliOgrenAppState extends State<SesliOgrenApp> {
               future: _runtimeFuture,
               builder: (context, snapshot) {
                 if (snapshot.hasData) {
-                  return ProductShellScreen(runtime: snapshot.data!, onAccountDeleted: _handleAccountDeleted);
+                  final runtime = snapshot.data!;
+                  return FirstRunOnboardingGate(
+                    runtime: runtime,
+                    child: ProductShellScreen(runtime: runtime, onAccountDeleted: _handleAccountDeleted),
+                  );
                 }
                 if (snapshot.hasError) {
                   return _RuntimeErrorScreen(error: snapshot.error!, onRetry: _retryRuntime);
