@@ -29,7 +29,9 @@ class _FirstRunOnboardingGateState extends State<FirstRunOnboardingGate> {
       updatedAt: DateTime.now().toUtc(),
     );
     if (!mounted) return;
-    setState(() => _completed = Future.value(true));
+    setState(() {
+      _completed = Future.value(true);
+    });
   }
 
   @override
