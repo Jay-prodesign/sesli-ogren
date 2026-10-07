@@ -1,6 +1,8 @@
+import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sesli_ogren/src/app/app_runtime.dart';
 import 'package:sesli_ogren/src/app/app_theme.dart';
@@ -32,10 +34,30 @@ Future<void> _pumpUntilFound(WidgetTester tester, Finder finder, {int maxPumps =
   fail('Expected visual-review widget was not reached within bounded pumps.');
 }
 
+Future<void> _loadReviewFonts() async {
+  final flutterRoot = Platform.environment['FLUTTER_ROOT'];
+  if (flutterRoot == null || flutterRoot.isEmpty) {
+    fail('FLUTTER_ROOT is required for deterministic LA-0039 visual review fonts.');
+  }
+
+  Future<ByteData> readFont(String fileName) async {
+    final bytes = await File('$flutterRoot/bin/cache/artifacts/material_fonts/$fileName').readAsBytes();
+    return ByteData.sublistView(bytes);
+  }
+
+  final roboto = FontLoader('Roboto')..addFont(readFont('Roboto-Regular.ttf'));
+  final materialIcons = FontLoader('MaterialIcons')..addFont(readFont('MaterialIcons-Regular.otf'));
+  await Future.wait([roboto.load(), materialIcons.load()]);
+}
+
 Widget _phoneFrame(Widget child) {
+  final baseTheme = SesliOgrenTheme.light();
   return MaterialApp(
     debugShowCheckedModeBanner: false,
-    theme: SesliOgrenTheme.light(),
+    theme: baseTheme.copyWith(
+      textTheme: baseTheme.textTheme.apply(fontFamily: 'Roboto'),
+      primaryTextTheme: baseTheme.primaryTextTheme.apply(fontFamily: 'Roboto'),
+    ),
     home: MediaQuery(
       data: const MediaQueryData(disableAnimations: true),
       child: child,
@@ -49,8 +71,10 @@ void main() {
   testWidgets(
     'capture LA-0039 representative Golden Product Slice',
     (tester) async {
-      tester.view.physicalSize = const Size(390, 844);
-      tester.view.devicePixelRatio = 1;
+      await _loadReviewFonts();
+
+      tester.view.physicalSize = const Size(780, 1688);
+      tester.view.devicePixelRatio = 2;
       addTearDown(tester.view.resetPhysicalSize);
       addTearDown(tester.view.resetDevicePixelRatio);
 
