@@ -391,14 +391,15 @@ Next unallocated ID: **LA-0041**.
 - Depends on: LA-0039 engineering baseline
 - Owner: Brain + Founder protected visual disposition
 - Executor: ChatGPT (research/audit/spec; reversible prototyping after treatment admission)
-- Verification: current-state audit, VQG-01, treatment tournament, companion reevaluation and Round-0 visual stress/red-team are present. Current LA-0039 treatment is FAIL / REDESIGN REQUIRED for the stated quality ambition because high-severity identity, Workspace repetition, show-don't-tell and student-desire gaps remain. Final visual direction and companion identity require representative prototype/runtime evidence and Founder disposition.
+- Verification: current-state audit, VQG-01, treatment tournament, companion reevaluation and Round-0 visual stress/red-team are present. Founder locked the primary audience to Turkish high-school students (9–12) and selected Visual Learning Studio × Student Momentum at concept level. Current LA-0039 treatment remains FAIL / REDESIGN REQUIRED for the stated quality ambition. The generated plush/cartoon companion treatment is explicitly rejected; companion form remains open under the new living-graphic/signal brief. Representative prototype/runtime evidence and final Founder visual disposition remain required.
 - Intent: find and validate a distinctive, student-relevant, premium, show-don't-tell visual direction; colors and D/Knot visual identity are explicitly reopened.
-- Current leader hypothesis: Visual Learning Studio × Student Momentum hybrid; not locked until comparable Golden Slice treatments are tested.
+- Founder-locked direction: **Visual Learning Studio × Student Momentum** for Turkish high-school students (9–12). Exact implementation still must pass VQG-01.
 - Quality authority: [docs/qa/LA-0040_VISUAL_QUALITY_GATE.md](docs/qa/LA-0040_VISUAL_QUALITY_GATE.md).
 - Stress/red-team: [docs/qa/LA-0040_VISUAL_STRESS_REDTEAM.md](docs/qa/LA-0040_VISUAL_STRESS_REDTEAM.md).
 - Current-state audit: [docs/research/LA-0040_CURRENT_VISUAL_AUDIT_2026-10-07.md](docs/research/LA-0040_CURRENT_VISUAL_AUDIT_2026-10-07.md).
 - Treatment tournament: [docs/design/LA-0040_VISUAL_TREATMENT_TOURNAMENT.md](docs/design/LA-0040_VISUAL_TREATMENT_TOURNAMENT.md).
 - Companion reevaluation: [docs/design/LA-0040_COMPANION_REEVALUATION.md](docs/design/LA-0040_COMPANION_REEVALUATION.md).
+- Audience/brand/visual lock: [docs/design/LA-0040_AUDIENCE_BRAND_VISUAL_DIRECTION_LOCK.md](docs/design/LA-0040_AUDIENCE_BRAND_VISUAL_DIRECTION_LOCK.md).
 - Exec plan: [docs/exec-plans/LA-0040.md](docs/exec-plans/LA-0040.md)
 
 
