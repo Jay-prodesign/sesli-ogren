@@ -2,6 +2,7 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:sesli_ogren/src/account/account_deletion_gateway.dart';
 import 'package:sesli_ogren/src/account/account_overview_gateway.dart';
 import 'package:sesli_ogren/src/app/app_runtime.dart';
 import 'package:sesli_ogren/src/app/learning_slice_screen.dart';
@@ -42,6 +43,24 @@ class _ReadyExplainGateway implements GroundedExplainGateway {
     language: 'tr-TR',
     executionRef: 'test:grounded-explain',
   );
+}
+
+class _RecordingAccountDeletionGateway implements AccountDeletionGateway {
+  int calls = 0;
+
+  @override
+  Future<void> deleteAccount({required AuthenticatedLearner learner}) async {
+    calls += 1;
+  }
+}
+
+class _FailingAccountDeletionGateway implements AccountDeletionGateway {
+  const _FailingAccountDeletionGateway();
+
+  @override
+  Future<void> deleteAccount({required AuthenticatedLearner learner}) {
+    throw const AccountDeletionException('test failure');
+  }
 }
 
 class _ReadyAccountOverviewGateway implements AccountOverviewGateway {
@@ -513,6 +532,77 @@ void main() {
     await tester.drag(find.byType(Scrollable).last, const Offset(0, -520));
     await tester.pump(const Duration(milliseconds: 300));
     expect(find.textContaining('Hesap silme ayrı güvenli akış'), findsOneWidget);
+  });
+
+  testWidgets('account deletion requires explicit confirmation and purges local data after remote success', (
+    tester,
+  ) async {
+    final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
+    addTearDown(store.close);
+    final ingest = SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor());
+    final deletion = _RecordingAccountDeletionGateway();
+    var deletedCallback = false;
+    final runtime = AppRuntime(
+      learner: AppRuntime.localM5LearnerFixture,
+      store: store,
+      ingest: ingest,
+      recall: RecallLearningService(sourceStore: store, learningStore: store.learningTruthStore()),
+      telemetry: store.operationalTelemetry(),
+      accountOverview: const _ReadyAccountOverviewGateway(),
+      accountDeletion: deletion,
+    );
+    await ingest.ingestPastedText(
+      learner: runtime.learner,
+      materialId: AppRuntime.primaryMaterialId,
+      text: 'Hesap silme sonrası bu yerel veri kalmamalıdır.',
+      sourceName: 'Silinecek hesap verisi',
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: ProductShellScreen(runtime: runtime, onAccountDeleted: () => deletedCallback = true),
+      ),
+    );
+    await pumpUntilFound(tester, find.text('Profil'));
+    await tapVisible(tester, find.text('Profil').last);
+    await pumpUntilFound(tester, find.text('Profil ve Ayarlar'));
+    await tester.drag(find.byType(Scrollable).last, const Offset(0, -720));
+    await tester.pump(const Duration(milliseconds: 300));
+    await tapVisible(tester, find.text('Hesabımı ve verilerimi sil'));
+    await pumpUntilFound(tester, find.text('Hesabı ve verileri sil?'));
+    await tapVisible(tester, find.text('Devam et'));
+    await pumpUntilFound(tester, find.text('Son onay'));
+    await tapVisible(tester, find.text('Kalıcı olarak sil'));
+
+    for (var i = 0; i < 20 && !deletedCallback; i++) {
+      await tester.pump(const Duration(milliseconds: 20));
+    }
+
+    expect(deletion.calls, 1);
+    expect(deletedCallback, isTrue);
+    expect(await store.activeMaterials(learner: runtime.learner), isEmpty);
+  });
+
+  test('failed remote account deletion preserves local learner data', () async {
+    final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
+    addTearDown(store.close);
+    final ingest = SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor());
+    final runtime = AppRuntime(
+      learner: AppRuntime.localM5LearnerFixture,
+      store: store,
+      ingest: ingest,
+      recall: RecallLearningService(sourceStore: store, learningStore: store.learningTruthStore()),
+      telemetry: store.operationalTelemetry(),
+      accountDeletion: const _FailingAccountDeletionGateway(),
+    );
+    await ingest.ingestPastedText(
+      learner: runtime.learner,
+      materialId: AppRuntime.primaryMaterialId,
+      text: 'Remote silme başarısızsa yerel veri korunmalıdır.',
+    );
+
+    await expectLater(runtime.deleteAccount(), throwsA(isA<AccountDeletionException>()));
+    expect(await store.material(learner: runtime.learner, materialId: AppRuntime.primaryMaterialId), isNotNull);
   });
 
   testWidgets('grounded Explain labels generated interpretation and preserves Recall as active step', (tester) async {
