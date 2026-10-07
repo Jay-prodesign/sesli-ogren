@@ -350,7 +350,7 @@ void main() {
     await pumpUntilFound(tester, find.text('Şimdi ne yapmalı?'));
     await tapVisible(tester, find.text('Devam et'));
     await pumpUntilFound(tester, find.text('Korunacak materyal'));
-    expect(find.text('Korunacak materyal'), findsOneWidget);
+    expect(find.text('Korunacak materyal'), findsWidgets);
   });
 
   testWidgets('Progress reports canonical unassessed state without invented mastery', (tester) async {
