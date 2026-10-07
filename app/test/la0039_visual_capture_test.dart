@@ -116,6 +116,6 @@ void main() {
       await tester.pump(const Duration(milliseconds: 200));
       await expectLater(find.byType(Scaffold).first, matchesGoldenFile('goldens/la0039_recall_payoff.png'));
     },
-    skip: _captureEnabled ? false : 'LA-0039 visual capture is an explicit QA-only run.',
+    skip: !_captureEnabled,
   );
 }
