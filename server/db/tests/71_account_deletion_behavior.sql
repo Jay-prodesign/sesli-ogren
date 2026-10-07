@@ -34,21 +34,22 @@ select public.request_account_deletion() as requested_at \gset
 select public.request_account_deletion() as requested_again_at \gset
 reset role;
 
-do $$
-declare
-  v_status text;
-  v_job_state text;
+create or replace function pg_temp.assert_true(condition boolean, msg text)
+returns void language plpgsql as $
 begin
-  select status into v_status from public.accounts where id = :user_a;
-  if v_status <> 'deletion_requested' then
-    raise exception 'account_delete_assert_failed: account status is %', v_status;
+  if condition is distinct from true then
+    raise exception 'account_delete_assert_failed: %', msg;
   end if;
+end $;
 
-  select state into v_job_state from public.generation_jobs where id = :'job_a';
-  if v_job_state <> 'CANCELLED' then
-    raise exception 'account_delete_assert_failed: queued job state is %', v_job_state;
-  end if;
-end $$;
+select pg_temp.assert_true(
+  coalesce((select status = 'deletion_requested' from public.accounts where id = :user_a), false),
+  'account status did not become deletion_requested'
+);
+select pg_temp.assert_true(
+  coalesce((select state = 'CANCELLED' from public.generation_jobs where id = :'job_a'), false),
+  'queued job was not cancelled'
+);
 
 select set_config('request.jwt.claim.sub', :user_a, false);
 set role authenticated;
@@ -59,13 +60,9 @@ select pg_temp.denied(
 );
 reset role;
 
-do $$
-declare v_status text;
-begin
-  select status into v_status from public.accounts where id = :user_b;
-  if v_status <> 'active' then
-    raise exception 'account_delete_assert_failed: other learner changed state';
-  end if;
-end $$;
+select pg_temp.assert_true(
+  coalesce((select status = 'active' from public.accounts where id = :user_b), false),
+  'other learner changed state'
+);
 
 rollback;
