@@ -550,12 +550,14 @@ void main() {
     String? copiedSupportEmail;
     await tester.pumpWidget(
       MaterialApp(
-        home: ProfileSurface(
-          runtime: runtime,
-          supportEmail: 'destek@example.com',
-          clipboardWriter: (value) async {
-            copiedSupportEmail = value;
-          },
+        home: Scaffold(
+          body: ProfileSurface(
+            runtime: runtime,
+            supportEmail: 'destek@example.com',
+            clipboardWriter: (value) async {
+              copiedSupportEmail = value;
+            },
+          ),
         ),
       ),
     );
