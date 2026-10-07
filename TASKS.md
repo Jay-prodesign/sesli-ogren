@@ -21,7 +21,7 @@ Milestone numbering follows the program sequence in
 M1 = Architecture Proof, …). Drive lifecycle-stage labels use a different
 numbering: lifecycle "M3" is this M0, and lifecycle "M4" is this M1.
 
-Next unallocated ID: **LA-0040**.
+Next unallocated ID: **LA-0041**.
 
 ---
 
@@ -377,13 +377,29 @@ Next unallocated ID: **LA-0040**.
 - Depends on: LA-0038
 - Owner: Brain
 - Executor: ChatGPT (bounded reversible engineering)
-- Verification: engineering checkpoint PASS at `1277cf44e3c2bec915442d5fdf13ea1b0f841862`: bootstrap `37637610659` PASS, account-deletion `37637610454` PASS, product-bounded `37637610321` PASS (canonical format, Flutter analyze, expanded tests). Representative Golden Product Slice visual/runtime review + Founder visual disposition are still required before DONE.
-- Intent: replace prototype/default-Material presentation with one coherent Premium Active Learning Studio experience while preserving learning truth, D/Knot identity, provenance/evidence semantics and current feature scope.
-- Selected treatment: T2 Premium Active Learning Studio from [docs/design/LA_VISUAL_TREATMENT_TOURNAMENT_R1.md](docs/design/LA_VISUAL_TREATMENT_TOURNAMENT_R1.md).
-- Quality authority: [docs/qa/LA-0039_WORLD_CLASS_EXPERIENCE_GATE.md](docs/qa/LA-0039_WORLD_CLASS_EXPERIENCE_GATE.md).
-- Research authority: [docs/research/LA_WORLD_CLASS_EXPERIENCE_AUDIT_2026-10-07.md](docs/research/LA_WORLD_CLASS_EXPERIENCE_AUDIT_2026-10-07.md).
-- Current cursor: representative current-head Home -> Workspace -> Recall/payoff runtime capture and Founder visual review; if a defect remains, iterate only the concrete BLOCKER/HIGH presentation issue.
+- Verification: engineering baseline is green at current branch checkpoints; representative Golden Product Slice capture exposed visual-quality gaps despite technical PASS. LA-0039 cannot close until LA-0040 resolves the reopened visual direction and Founder reviews the resulting treatment.
+- Intent: preserve the validated Golden Product Slice as an engineering baseline while LA-0040 reevaluates the visual system, student desirability and companion treatment. Learning truth, provenance/evidence semantics and current feature scope remain authoritative.
+- Prior treatment: T2 Premium Active Learning Studio is now a baseline/control, not a locked final treatment.
+- Quality authority: [docs/qa/LA-0039_WORLD_CLASS_EXPERIENCE_GATE.md](docs/qa/LA-0039_WORLD_CLASS_EXPERIENCE_GATE.md) + LA-0040 VQG-01.
+- Current cursor: WAITING ON / COUPLED TO LA-0040 visual-direction audit; do not mark DONE on engineering confidence alone.
 - Exec plan: [docs/exec-plans/LA-0039.md](docs/exec-plans/LA-0039.md)
+
+##### LA-0040 — Million-Dollar Visual Audit & Student Experience Elevation
+
+- Status: IN_PROGRESS
+- Tier: A — Founder-triggered visual/product decision
+- Depends on: LA-0039 engineering baseline
+- Owner: Brain + Founder protected visual disposition
+- Executor: ChatGPT (research/audit/spec; reversible prototyping after treatment admission)
+- Verification: current-state audit, VQG-01, treatment tournament, companion reevaluation and Round-0 visual stress/red-team are present. Current LA-0039 treatment is FAIL / REDESIGN REQUIRED for the stated quality ambition because high-severity identity, Workspace repetition, show-don't-tell and student-desire gaps remain. Final visual direction and companion identity require representative prototype/runtime evidence and Founder disposition.
+- Intent: find and validate a distinctive, student-relevant, premium, show-don't-tell visual direction; colors and D/Knot visual identity are explicitly reopened.
+- Current leader hypothesis: Visual Learning Studio × Student Momentum hybrid; not locked until comparable Golden Slice treatments are tested.
+- Quality authority: [docs/qa/LA-0040_VISUAL_QUALITY_GATE.md](docs/qa/LA-0040_VISUAL_QUALITY_GATE.md).
+- Stress/red-team: [docs/qa/LA-0040_VISUAL_STRESS_REDTEAM.md](docs/qa/LA-0040_VISUAL_STRESS_REDTEAM.md).
+- Current-state audit: [docs/research/LA-0040_CURRENT_VISUAL_AUDIT_2026-10-07.md](docs/research/LA-0040_CURRENT_VISUAL_AUDIT_2026-10-07.md).
+- Treatment tournament: [docs/design/LA-0040_VISUAL_TREATMENT_TOURNAMENT.md](docs/design/LA-0040_VISUAL_TREATMENT_TOURNAMENT.md).
+- Companion reevaluation: [docs/design/LA-0040_COMPANION_REEVALUATION.md](docs/design/LA-0040_COMPANION_REEVALUATION.md).
+- Exec plan: [docs/exec-plans/LA-0040.md](docs/exec-plans/LA-0040.md)
 
 
 ## Milestone M3 — V0 Implementation Tranches
