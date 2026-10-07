@@ -363,12 +363,26 @@ Next unallocated ID: **LA-0039**.
 
 ##### LA-0038 — Truthful support contact surface
 
-- Status: IN_PROGRESS
+- Status: DONE
 - Depends on: LA-0037
 - Owner: Brain
 - Executor: ChatGPT (bounded reversible engineering)
-- Verification: Profile exposes a release-configured client-safe support email when valid, allows copying it, and fails closed without inventing an address when configuration is absent/invalid. Product-bounded validation required before DONE; actual production support address remains release configuration.
+- Verification: Profile exposes a release-configured client-safe support email when valid, allows copying it, and fails closed without inventing an address when configuration is absent/invalid. At head 5ee9f4fa8ab30504c7761ca5f5c6e7ae4fddc075: bootstrap-validation 37617623288 PASS, account-deletion-bounded-validation 37617623323 PASS, product-bounded-validation 37617623345 PASS. Actual production support address remains release configuration.
 - Exec plan: [docs/exec-plans/LA-0038.md](docs/exec-plans/LA-0038.md)
+
+##### LA-0039 — World-Class Experience / Golden Product Slice
+
+- Status: IN_PROGRESS
+- Tier: A — Founder-triggered product experience correction
+- Depends on: LA-0038
+- Owner: Brain
+- Executor: ChatGPT (bounded reversible engineering)
+- Intent: replace prototype/default-Material presentation with one coherent Premium Active Learning Studio experience while preserving learning truth, D/Knot identity, provenance/evidence semantics and current feature scope.
+- Selected treatment: T2 Premium Active Learning Studio from [docs/design/LA_VISUAL_TREATMENT_TOURNAMENT_R1.md](docs/design/LA_VISUAL_TREATMENT_TOURNAMENT_R1.md).
+- Quality authority: [docs/qa/LA-0039_WORLD_CLASS_EXPERIENCE_GATE.md](docs/qa/LA-0039_WORLD_CLASS_EXPERIENCE_GATE.md).
+- Research authority: [docs/research/LA_WORLD_CLASS_EXPERIENCE_AUDIT_2026-10-07.md](docs/research/LA_WORLD_CLASS_EXPERIENCE_AUDIT_2026-10-07.md).
+- Current cursor: theme/tokens + Home/Continue/material identity foundation, then representative Workspace/active-learning payoff.
+- Exec plan: [docs/exec-plans/LA-0039.md](docs/exec-plans/LA-0039.md)
 
 
 ## Milestone M3 — V0 Implementation Tranches
