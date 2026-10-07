@@ -21,7 +21,7 @@ Milestone numbering follows the program sequence in
 M1 = Architecture Proof, …). Drive lifecycle-stage labels use a different
 numbering: lifecycle "M3" is this M0, and lifecycle "M4" is this M1.
 
-Next unallocated ID: **LA-0032**.
+Next unallocated ID: **LA-0033**.
 
 ---
 
@@ -305,6 +305,15 @@ Next unallocated ID: **LA-0032**.
 - Executor: ChatGPT (bounded reversible engineering)
 - Verification: Library exposes confirmed material deletion through the existing learner-scoped store semantics; deleting the most recent material removes accessible source/learning truth and Home safely falls back to the remaining material; bounded workflow `37585838940` passed canonical format, Flutter analyze and expanded Flutter tests at head `377c9ce238883fced4e3a7fa99a29ecead91780f`.
 - Exec plan: [docs/exec-plans/LA-0031.md](docs/exec-plans/LA-0031.md)
+
+##### LA-0032 — Durable Listen resume continuity
+
+- Status: IN_PROGRESS
+- Depends on: LA-0031
+- Owner: Brain
+- Executor: ChatGPT (bounded reversible engineering)
+- Verification: exact current SourceVersion owns the persisted Listen checkpoint; resume/restart controls remain evidence-neutral; v6→v7 additive migration and widget regression must pass strict format, Flutter analyze and bounded tests before DONE.
+- Exec plan: [docs/exec-plans/LA-0032.md](docs/exec-plans/LA-0032.md)
 
 ## Milestone M3 — V0 Implementation Tranches
 

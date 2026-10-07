@@ -47,13 +47,14 @@
     "LA-0028": "DONE",
     "LA-0029": "DONE",
     "LA-0030": "DONE",
-    "LA-0031": "DONE"
+    "LA-0031": "DONE",
+    "LA-0032": "IN_PROGRESS"
   },
   "git": {
     "branch": "feat/full-product-shell-continuity",
     "base_sha": "84e96dce5b3cc9f32af3f459d422b652d0e86624",
-    "head_sha": "377c9ce238883fced4e3a7fa99a29ecead91780f",
-    "head_sha_note": "Validated runnable product branch head. `main` remains bootstrap-only and is not the runnable application source.",
+    "head_sha": "88da52f04eb93d06daea7ccbc3fbde6dbad22214",
+    "head_sha_note": "LA-0032 runtime candidate: durable source-version-bound Listen resume continuity; bounded validation pending.",
     "pr_number": 13,
     "pr_url": "https://github.com/Jay-prodesign/sesli-ogren/pull/13",
     "merged": false,
@@ -81,14 +82,14 @@
     "status": "ACTIVE_EXECUTABLE",
     "admission": "Existing post-M5 full-product authority projected in TASKS/PR #13",
     "acceptance": "Current V0 product authority + bounded product validation",
-    "current_task": "NEXT_USER_VISIBLE_V0_GAP_SELECTION"
+    "current_task": "LA-0032"
   },
   "blockers": [
     "Live Supabase anonymous-auth evidence remains BLOCKED because GitHub protected client config is absent: SUPABASE_URL and SUPABASE_PUBLISHABLE_KEY are not configured for the validation environment. Only these client-safe values may be used; never service-role credentials.",
     "Physical iOS/Android speech/accessibility/performance/orientation checks remain deferred under D-068 and mandatory before release-candidate/public-release claims."
   ],
   "protected_gate": "Merge, release, deploy, paid providers, credentials/secrets, licensing posture, production mutation: Product Owner only",
-  "next_action": "Select and implement the next user-visible first-commercial-V0 gap on feat/full-product-shell-continuity. Keep work app-first and concrete; do not use bootstrap-only main as runnable source.",
+  "next_action": "Complete bounded validation for LA-0032 durable Listen resume continuity, fix only concrete failures, then close the task or record a real blocker.",
   "canonical_source_refs": [
     "CURRENT_EXECUTION_STATE — Learning App",
     "D-070 — Founder Product/Visual PASS / D-Knot selected",

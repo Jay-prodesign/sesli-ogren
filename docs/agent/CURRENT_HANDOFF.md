@@ -9,7 +9,7 @@ This section supersedes stale branch/cursor lines below where they conflict.
 - LA-0030 Durable Resume Continuity: DONE.
 - LA-0031 Material deletion + safe continuity: DONE.
 - Validation: GitHub Actions product-bounded-validation run `37585838940` PASS — canonical format, Flutter analyze, expanded Flutter tests.
-- Current cursor: choose the next user-visible first-commercial-V0 gap from current product authority; do not reopen standalone Summary/Key Concepts/Flashcards/full Quiz as mandatory navigation, and do not return to generic engine/framework work.
+- Current cursor: **LA-0032 — Durable Listen resume continuity**. Persist the exact current SourceVersion's bounded TTS chunk checkpoint, allow resume/restart, keep passive listening evidence-neutral, and do not expand into background media/cloud TTS/shared speech infrastructure.
 - Local development/preview should track `feat/full-product-shell-continuity`, not `main` or the historical iPhone review snapshot.
 
 ---
