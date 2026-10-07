@@ -3,18 +3,19 @@
 Status: FOUNDER DIRECTION LOCK — implementation/prototype proof still required
 Date: 2026-10-07
 
-## Primary audience lock
-**Primary audience: Turkish high-school students, grades 9–12 / approximately ages 14–18.**
+## Priority audience weighting
+**Sesli Öğren is not restricted to high-school students.** The product remains a broader learner-owned-material study product.
 
-Initial product design should optimize for:
-- everyday school study;
-- exam-period pressure and limited attention;
+For the initial commercial visual/UX optimization, **Turkish high-school students (grades 9–12 / approx. ages 14–18) are the priority-weighted audience segment**, not the exclusive target audience.
+
+The design should optimize strongly for:
+- everyday school study and exam-period pressure;
 - self-provided notes, PDFs and study material;
 - quick transitions between understanding, listening and active recall;
 - phone-first sessions;
-- students who reject both childish education products and sterile corporate productivity tools.
+- users who reject both childish education products and sterile corporate productivity tools.
 
-This does not make the product “for children.” The visual and verbal bar should respect a teenager as an intelligent, independent learner.
+The same system must remain credible and usable for adjacent learner groups rather than baking “high-school-only” assumptions into product truth, data model or brand identity.
 
 ## Product emotional target
 Sesli Öğren should feel:
@@ -113,35 +114,28 @@ Implementation font candidate must pass provenance/licensing/performance checks 
 - Success may use one bounded motion accent tied to actual evidence.
 - Reduced Motion preserves all meaning.
 
-## Companion decision
+## Companion authority correction
 
-### Rejected visual
-The generated round, plush, blue/purple humanoid mascot shown in the LA-0040 concept board is **explicitly REJECTED**.
-Do not reproduce it, approximate it or use its childlike/3D-plush language.
+### Canonical baseline
+**D/Knot remains the selected Learning App companion baseline under the prior Founder-reviewed Round-7 / D-070 work.** That work already established Founder reference authority, canonical source assets, minimum-size readability, six semantic states, bounded motion, Reduced Motion/fallback behavior and real Flutter integration.
 
-### Companion role
-A companion may remain, but it is not the visual protagonist.
+The newly generated round/plush blue-purple humanoid shown in the LA-0040 concept board is **REJECTED because it is not faithful to canonical D/Knot**. Its rejection must not be misread as rejection of D/Knot itself.
 
-### New companion brief
-Preferred direction: **living graphic guide / signal mark**, not a cute mascot.
+### Correct LA-0040 question
+Do **not** restart companion discovery from zero.
 
-Requirements:
-- abstract or highly simplified;
-- no animal;
-- no plush body;
-- no baby face;
-- no oversized cartoon eyes as the identity;
-- no arms/legs required;
-- 2D/vector-first;
-- recognizable at 24–48 px;
-- visually credible to a 16–18 year-old;
-- can express listening / thinking / success / support through geometry, posture, pulse or transformation;
-- shares Pulse Blue / Deep Focus / Signal Aqua / Volt Lime language;
-- sparse use: onboarding, thinking/loading, active guidance, result and recovery only.
+Evaluate how the selected D/Knot should integrate with the stronger product visual system:
+- placement/frequency;
+- scale;
+- surrounding color treatment;
+- background/surface pairing;
+- state emphasis;
+- whether minor production-safe styling adjustments are needed without identity drift.
 
-Working hypothesis:
-**D/Knot may evolve from “character” into a living knot/signal glyph.**
-Name/identity is not protected if prototype evidence supports a better solution.
+D/Knot appears only when it has a learning/feedback role. It should support material/action/payoff rather than become wallpaper.
+
+### Reopen rule
+A material identity redesign or companion removal is permitted only if representative product evidence shows canonical D/Knot itself creates a HIGH/BLOCKER user-visible failure that cannot be solved by integration, placement or bounded styling. New concept art alone is not sufficient evidence.
 
 ## Brand voice — how Sesli Öğren speaks
 
@@ -193,20 +187,20 @@ Default priority:
 
 ## Locked / open
 ### Locked now
-- primary audience: high-school students;
-- Visual Learning Studio × Student Momentum direction;
+- broad learner-owned-material product with high-school students as the **priority-weighted initial audience**, not exclusive audience;
 - material-first / show-don’t-tell principle;
-- core color direction;
-- brand voice;
-- rejection of plush/cartoon companion style;
-- companion is secondary to material/learning.
+- brand voice direction;
+- canonical D/Knot remains the companion baseline;
+- the generated non-canonical plush mascot is rejected;
+- companion is secondary to material/learning truth.
 
-### Still open until prototype evidence
+### Still open until prototype evidence / roadmap reconciliation
+- whether Visual Learning Studio × Student Momentum is the final treatment or a leading prototype lane;
+- exact palette values and whether Volt Lime survives real-product accessibility/brand tests;
 - exact typography family;
-- exact companion form/name;
+- D/Knot integration/placement and bounded styling only; identity remains baseline authority unless real evidence reopens it;
 - exact motion curves;
 - exact component compositions;
-- whether Volt Lime survives final accessibility/brand tests;
 - final dark-mode treatment.
 
 ## Gate
