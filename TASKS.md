@@ -345,11 +345,11 @@ Next unallocated ID: **LA-0037**.
 
 ##### LA-0036 — Passwordless account entry + session restore
 
-- Status: IN_PROGRESS
+- Status: DONE
 - Depends on: LA-0035
 - Owner: Brain
 - Executor: ChatGPT (bounded reversible engineering)
-- Verification: existing authenticated sessions restore without changing learner identity; no-session startup shows explicit passwordless email account entry instead of silently creating an anonymous user; successful OTP verification opens the verified learner runtime; missing Supabase client configuration still fails closed. Live email delivery/template configuration is deferred external release evidence.
+- Verification: existing authenticated sessions restore without changing learner identity; no-session startup shows explicit passwordless email account entry instead of silently creating an anonymous user; successful OTP verification opens the verified learner runtime; missing Supabase client configuration fails closed. Bootstrap run `37614578993` PASS, account-deletion run `37614579001` PASS, and product-bounded-validation run `37614578893` PASS (format, analyze, expanded tests) on `00933dc76ab5190299adf563ca716c8b7310382b`. Live email delivery/template configuration remains deferred external release evidence.
 - Exec plan: [docs/exec-plans/LA-0036.md](docs/exec-plans/LA-0036.md)
 
 

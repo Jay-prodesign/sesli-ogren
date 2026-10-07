@@ -3,12 +3,13 @@
 This section supersedes stale branch/cursor lines below where they conflict.
 
 - Active runnable product branch: `feat/full-product-shell-continuity` (PR #13).
-- Last validated product head: `f1390330b6f0a1d522d18d60bbcaf32ef21df96f`.
+- Validated product head: `00933dc76ab5190299adf563ca716c8b7310382b`.
 - Repository `main` remains bootstrap-only and MUST NOT be treated as the runnable Sesli Öğren application source.
-- LA-0024…LA-0035 are completed post-M5 full-product tranches.
-- LA-0036 Passwordless account entry + session restore: IN_PROGRESS.
-- Current cursor: validate existing-session restore + explicit email OTP account entry; no silent anonymous bootstrap.
-- Live OTP email template/delivery remains external release evidence. No hosted Supabase mutation, production credentials, SMTP activation or paid-provider action is authorized.
+- LA-0024…LA-0036 are completed post-M5 full-product tranches.
+- LA-0036 Passwordless account entry + session restore: DONE.
+- Latest gates: bootstrap `37614578993` PASS; account-deletion `37614579001` PASS; product `37614578893` PASS.
+- Current cursor: select the next concrete first-commercial-V0 account/settings gap from current product authority. Keep work user-visible, app-first and bounded.
+- Live OTP email template/delivery remains external release evidence. No hosted Supabase mutation, production secret or SMTP activation is authorized.
 - Local development/preview should track `feat/full-product-shell-continuity`, not `main`.
 
 ---
