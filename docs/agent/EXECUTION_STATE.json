@@ -54,13 +54,14 @@
     "LA-0035": "DONE",
     "LA-0036": "DONE",
     "LA-0037": "DONE",
-    "LA-0038": "IN_PROGRESS"
+    "LA-0038": "DONE",
+    "LA-0039": "IN_PROGRESS"
   },
   "git": {
     "branch": "feat/full-product-shell-continuity",
     "base_sha": "84e96dce5b3cc9f32af3f459d422b652d0e86624",
-    "head_sha": "5496dc346451c49dd7b789cc67a0ebe40976665f",
-    "head_sha_note": "Validated runnable product head after safe local sign-out. `main` remains bootstrap-only.",
+    "head_sha": "5ee9f4fa8ab30504c7761ca5f5c6e7ae4fddc075",
+    "head_sha_note": "Last validated runnable runtime head before LA-0039 product-experience authority/docs commits. Control-plane docs are ahead; no new runtime claim is implied.",
     "pr_number": 13,
     "pr_url": "https://github.com/Jay-prodesign/sesli-ogren/pull/13",
     "merged": false,
@@ -83,19 +84,19 @@
     "release_rule": "Physical iOS/Android speech/accessibility/performance/orientation checks remain mandatory before release-candidate/public-release claims."
   },
   "next_handoff": {
-    "id": "POST_M5_FULL_PRODUCT_CONTINUITY",
-    "title": "Post-M5 full-product continuity",
+    "id": "POST_M5_WORLD_CLASS_EXPERIENCE",
+    "title": "World-Class Experience / Golden Product Slice",
     "status": "ACTIVE_EXECUTABLE",
-    "admission": "Existing post-M5 full-product authority projected in TASKS/PR #13",
-    "acceptance": "Current V0 product authority + bounded product validation",
-    "current_task": "LA-0038"
+    "admission": "Founder visual/UX correction on 2026-10-07 + D-074 Tier-A governance",
+    "acceptance": "LA-0039 World-Class Experience Gate",
+    "current_task": "LA-0039"
   },
   "blockers": [
     "Live Supabase anonymous-auth evidence remains BLOCKED because GitHub protected client config is absent: SUPABASE_URL and SUPABASE_PUBLISHABLE_KEY are not configured for the validation environment. Only these client-safe values may be used; never service-role credentials.",
     "Physical iOS/Android speech/accessibility/performance/orientation checks remain deferred under D-068 and mandatory before release-candidate/public-release claims."
   ],
   "protected_gate": "Merge, release, deploy, paid providers, credentials/secrets, licensing posture, production mutation: Product Owner only",
-  "next_action": "Complete LA-0038 truthful support contact surface using client-safe SUPPORT_EMAIL config; fail closed when absent/invalid. Do not select a production support address or paid provider.",
+  "next_action": "Implement LA-0039 Phase B/C: product theme/tokens plus Home/Continue/material identity foundation on feat/full-product-shell-continuity; then representative Workspace/active-learning payoff. Preserve learning truth and D/Knot identity.",
   "canonical_source_refs": [
     "CURRENT_EXECUTION_STATE — Learning App",
     "D-070 — Founder Product/Visual PASS / D-Knot selected",
@@ -155,10 +156,37 @@
     "release_effect": "Physical iOS/Android device, speech, accessibility, performance and orientation checks remain mandatory before release-candidate/public-release claims."
   },
   "founder_visual_decision": {
-    "decision_id": "D-070",
-    "companion": "D_KNOT",
-    "product_visual": "PASS",
-    "e_tilt": "REJECTED_FINALIST_REFERENCE_ONLY"
+    "decision_id": "D-070 + Founder correction 2026-10-07",
+    "companion": "D/Knot only — selection remains locked",
+    "product_visual": "REOPENED_FOR_APP_SHELL_UI_UX",
+    "reason": "Founder explicitly judged current colors/appearance/UI/UX below competitive/world-class quality.",
+    "affected": [
+      "colors",
+      "typography",
+      "surface hierarchy",
+      "Home",
+      "Library presentation",
+      "Material Workspace",
+      "Listen presentation",
+      "active-learning surfaces",
+      "Progress presentation",
+      "navigation",
+      "microinteraction/motion",
+      "signature asset integration"
+    ],
+    "unaffected": [
+      "D/Knot identity",
+      "learning truth",
+      "source grounding/provenance",
+      "evidence semantics",
+      "account/data safety"
+    ],
+    "active_authority": [
+      "docs/research/LA_WORLD_CLASS_EXPERIENCE_AUDIT_2026-10-07.md",
+      "docs/design/LA_VISUAL_TREATMENT_TOURNAMENT_R1.md",
+      "docs/exec-plans/LA-0039.md",
+      "docs/qa/LA-0039_WORLD_CLASS_EXPERIENCE_GATE.md"
+    ]
   },
   "m5_admission": {
     "decision_id": "D-071",
@@ -213,8 +241,8 @@
       "before admission of a major new product/learning tranche"
     ],
     "propagation": "CHANGE -> BLAST-RADIUS ANALYSIS -> AFFECTED/UNAFFECTED -> REVALIDATE/UPDATE_REQUIRED/NO_CHANGE",
-    "current_effect": "No M5 cursor or feature-scope change. LA-0022 remains active.",
-    "post_m5_intent": "Desire / Engagement / Core-Loop Premise Audit is the intended first post-M5 Tier-A subject but remains NOT_EXECUTABLE until M5 closes and explicit admission occurs."
+    "current_effect": "Founder contradictory visual/UX evidence triggered the D-074 premise-audit path. LA-0039 is the active Tier-A product-experience correction; do not broaden unrelated feature scope.",
+    "post_m5_intent": "Superseded by active LA-0039 World-Class Experience / Golden Product Slice. Further premise audits remain trigger-based, not automatic bureaucracy."
   },
   "asset_governance_overlay": {
     "decision_id": "D-075",
@@ -243,7 +271,7 @@
       "tier_a": "Signature / behavior-critical assets use full D-075 path.",
       "tier_b": "Routine / commodity assets use lean existing-asset-check -> small spec -> prepare/generate -> integrate -> runtime/device QA when applicable -> done."
     },
-    "current_effect": "No new M5 asset breadth. D/Knot remains locked under D-070. LA-0022 remains active."
+    "current_effect": "LA-0039 may create a bounded production asset manifest for signature experience roles. D/Knot identity remains locked; no speculative asset-family expansion."
   },
   "gls083_review": {
     "status": "FOUNDER_WAIVER_SYNTHETIC_ACCEPTED",
@@ -346,10 +374,10 @@
   "product_branch_override": {
     "status": "ACTIVE",
     "runnable_branch": "feat/full-product-shell-continuity",
-    "validated_head_sha": "5496dc346451c49dd7b789cc67a0ebe40976665f",
-    "validation_run_id": 37615873688,
-    "bootstrap_validation_run_id": 37615873346,
-    "account_deletion_validation_run_id": 37615873382,
+    "validated_head_sha": "5ee9f4fa8ab30504c7761ca5f5c6e7ae4fddc075",
+    "validation_run_id": 37617623345,
+    "bootstrap_validation_run_id": 37617623288,
+    "account_deletion_validation_run_id": 37617623323,
     "main_role": "BOOTSTRAP_ONLY_NOT_RUNNABLE",
     "local_preview_rule": "VS Code / Android local checkout should track feat/full-product-shell-continuity."
   },
