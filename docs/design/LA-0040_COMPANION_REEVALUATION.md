@@ -1,9 +1,12 @@
 # LA-0040 Companion Reevaluation
 
-Status: OPEN — prior D/Knot visual lock is superseded for evaluation by Founder instruction on 2026-10-07.
+Status: OPEN FORM / LOCKED CONSTRAINTS — prior D/Knot visual lock is superseded; plush/cartoon mascot treatment is explicitly rejected by Founder.
+
+## Founder correction
+The round blue/purple plush humanoid companion shown in the generated LA-0040 comparison board is **REJECTED**. Do not reproduce or approximate that appearance.
 
 ## Question
-Should Sesli Öğren keep the current D/Knot visual, evolve it, redesign it materially, reduce its role, or remove a companion entirely?
+Should D/Knot evolve into a sparse living graphic/signal mark, be materially redesigned under that brief, or be removed?
 
 ## Current D/Knot strengths
 - memorable silhouette at medium size;
@@ -49,8 +52,7 @@ No mascot. Product identity comes entirely from material-led visual system.
 Round-0: valid control, not preferred until tested.
 
 ## Recommendation before visual prototyping
-Prototype **C2 + C4** first: evolve the visual and use it sparingly/functionally.
-Keep C3 and C5 as red-team escape routes.
+Prototype **C2 + C4** first, but with a stricter brief: 2D/vector-first, abstract/simplified, teen-credible, no animal/plush/baby-face/oversized-cartoon-eye identity, and used only at meaningful guidance/result moments. Keep C3 and C5 as escape routes.
 
 ## Companion quality requirements
 - recognizable at 32 px;
