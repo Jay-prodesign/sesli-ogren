@@ -1,6 +1,6 @@
 # LA-0040 Visual Treatment Tournament
 
-Status: FOUNDER DIRECTION LOCK — T5 Visual Learning Studio × Student Momentum selected at concept level; implementation proof still required.
+Status: LEADING PROTOTYPE LANE — T5 Visual Learning Studio × Student Momentum is the current leader, but final lock is deferred until prior roadmap/research authority is reconciled and representative runtime truth is preserved.
 
 ## Scoring
 Each lane is judged 1–5 on:
@@ -89,10 +89,10 @@ Risks:
 - requires real prototype comparison, not prose selection.
 
 Round-0 score: **45/50**
-Disposition: **FOUNDER-LOCKED DIRECTION.** Rebuild/prototype under the high-school audience, brand voice and color constraints in `LA-0040_AUDIENCE_BRAND_VISUAL_DIRECTION_LOCK.md`; visual PASS still requires VQG-01.
+Disposition: **ADVANCE AS LEADING PROTOTYPE.** Rebuild against the priority-weighted high-school audience, canonical D/Knot authority, prior gameful/living-learning roadmap intent and real implemented feature truth; visual PASS still requires VQG-01.
 
 ## Tournament disposition
-Founder selected T5 as the product direction after reviewing the first comparison. T1 and T2 remain reference/control evidence only. Do not spend implementation time polishing them. The selected direction must now be proven through the representative Golden Slice, VQG-01 and red team.
+T5 is the strongest current concept, but the first comparison was a direction sketch rather than an implementation-truth mockup. Do not treat it as final authority yet. Preserve earlier Learning App experience research and D/Knot decisions, then prototype T5 using only real/current product capabilities. T1/T2 remain controls; no need to fully implement them unless T5 fails a material gate.
 
 ## Required treatment proof
 For each finalist show:
