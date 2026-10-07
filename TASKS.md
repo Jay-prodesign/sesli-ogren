@@ -21,7 +21,7 @@ Milestone numbering follows the program sequence in
 M1 = Architecture Proof, …). Drive lifecycle-stage labels use a different
 numbering: lifecycle "M3" is this M0, and lifecycle "M4" is this M1.
 
-Next unallocated ID: **LA-0035**.
+Next unallocated ID: **LA-0036**.
 
 ---
 
@@ -332,6 +332,16 @@ Next unallocated ID: **LA-0035**.
 - Executor: ChatGPT (bounded reversible engineering)
 - Verification: authenticated deletion intent + server-only Storage/session/Auth cleanup; learner-scoped local purge; fail-closed destructive UI. Bootstrap run `37599984324` PASS, account-deletion bounded run `37599984408` PASS (PostgreSQL deletion slice + Deno lint/type-check), and product-bounded-validation run `37599984330` PASS (format, analyze, expanded Flutter tests) on `9010eed82eae067076629a1a1daca9d66486272b`. Hosted Supabase deployment remains intentionally deferred because the connected project has no canonical app schema/function deployment yet.
 - Exec plan: [docs/exec-plans/LA-0034.md](docs/exec-plans/LA-0034.md)
+
+##### LA-0035 — First-run product onboarding
+
+- Status: IN_PROGRESS
+- Depends on: LA-0034
+- Owner: Brain
+- Executor: ChatGPT (bounded reversible engineering)
+- Verification: first successful authenticated runtime shows a one-time onboarding before Product Shell; it explains material continuity, the passive-Listen vs active-learning evidence distinction, and implemented deletion control. Completion is learner-scoped in SQLite, survives reopen, and is purged with learner data.
+- Exec plan: [docs/exec-plans/LA-0035.md](docs/exec-plans/LA-0035.md)
+
 
 ## Milestone M3 — V0 Implementation Tranches
 
