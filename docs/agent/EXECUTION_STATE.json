@@ -50,13 +50,13 @@
     "LA-0031": "DONE",
     "LA-0032": "DONE",
     "LA-0033": "DONE",
-    "LA-0034": "IN_PROGRESS"
+    "LA-0034": "DONE"
   },
   "git": {
     "branch": "feat/full-product-shell-continuity",
     "base_sha": "84e96dce5b3cc9f32af3f459d422b652d0e86624",
-    "head_sha": "a785783e54441ef5231e7b53c751d36fd408838f",
-    "head_sha_note": "Validated runnable product head after Profile/plan/usage surface. `main` remains bootstrap-only.",
+    "head_sha": "9010eed82eae067076629a1a1daca9d66486272b",
+    "head_sha_note": "Validated runnable product head after secure account/data deletion. `main` remains bootstrap-only.",
     "pr_number": 13,
     "pr_url": "https://github.com/Jay-prodesign/sesli-ogren/pull/13",
     "merged": false,
@@ -83,15 +83,15 @@
     "title": "Post-M5 full-product continuity",
     "status": "ACTIVE_EXECUTABLE",
     "admission": "Existing post-M5 full-product authority projected in TASKS/PR #13",
-    "acceptance": "Current V0 product authority + security-sensitive bounded validation",
-    "current_task": "LA-0034"
+    "acceptance": "Current V0 product authority + bounded product validation",
+    "current_task": "NEXT_USER_VISIBLE_V0_GAP_SELECTION"
   },
   "blockers": [
     "Live Supabase anonymous-auth evidence remains BLOCKED because GitHub protected client config is absent: SUPABASE_URL and SUPABASE_PUBLISHABLE_KEY are not configured for the validation environment. Only these client-safe values may be used; never service-role credentials.",
     "Physical iOS/Android speech/accessibility/performance/orientation checks remain deferred under D-068 and mandatory before release-candidate/public-release claims."
   ],
   "protected_gate": "Merge, release, deploy, paid providers, credentials/secrets, licensing posture, production mutation: Product Owner only",
-  "next_action": "Complete LA-0034 secure account/data deletion: server deletion intent + server-only Edge Function + learner-scoped local purge + destructive UI; validate with disposable PostgreSQL, Deno and Flutter. Do not deploy against the currently empty hosted schema yet.",
+  "next_action": "Select the next concrete first-commercial-V0 completeness gap on feat/full-product-shell-continuity. Prioritize user-visible onboarding/account/settings/support/processing/commercial completeness over generic infrastructure. Do not deploy the empty hosted Supabase project yet.",
   "canonical_source_refs": [
     "CURRENT_EXECUTION_STATE — Learning App",
     "D-070 — Founder Product/Visual PASS / D-Knot selected",
@@ -342,10 +342,20 @@
   "product_branch_override": {
     "status": "ACTIVE",
     "runnable_branch": "feat/full-product-shell-continuity",
-    "validated_head_sha": "a785783e54441ef5231e7b53c751d36fd408838f",
-    "validation_run_id": 37597120046,
-    "bootstrap_validation_run_id": 37597120112,
+    "validated_head_sha": "9010eed82eae067076629a1a1daca9d66486272b",
+    "validation_run_id": 37599984330,
+    "bootstrap_validation_run_id": 37599984324,
+    "account_deletion_validation_run_id": 37599984408,
     "main_role": "BOOTSTRAP_ONLY_NOT_RUNNABLE",
     "local_preview_rule": "VS Code / Android local checkout should track feat/full-product-shell-continuity."
+  },
+  "hosted_supabase_state": {
+    "status": "EMPTY_SUBSTRATE_NO_DEPLOYMENT",
+    "project_ref": "detldfcvoxjuqstkaayd",
+    "observed_at": "2026-10-07",
+    "public_tables": 0,
+    "migrations": 0,
+    "edge_functions": 0,
+    "rule": "Read-only inspection only. Do not deploy/mutate until canonical server substrate deployment is explicitly admitted."
   }
 }
