@@ -19,6 +19,14 @@ begin
   raise exception 'account_delete_assert_failed: % (statement succeeded)', msg;
 end $$;
 
+create or replace function pg_temp.assert_eq(actual text, expected text, msg text)
+returns void language plpgsql as $$
+begin
+  if actual is distinct from expected then
+    raise exception 'account_delete_assert_failed: % (actual %, expected %)', msg, actual, expected;
+  end if;
+end $$;
+
 insert into auth.users (id, email) values
   (:user_a, 'delete-a@example.test'),
   (:user_b, 'delete-b@example.test');
@@ -34,21 +42,15 @@ select public.request_account_deletion() as requested_at \gset
 select public.request_account_deletion() as requested_again_at \gset
 reset role;
 
-create or replace function pg_temp.assert_true(condition boolean, msg text)
-returns void language plpgsql as $
-begin
-  if condition is distinct from true then
-    raise exception 'account_delete_assert_failed: %', msg;
-  end if;
-end $;
-
-select pg_temp.assert_true(
-  coalesce((select status = 'deletion_requested' from public.accounts where id = :user_a), false),
-  'account status did not become deletion_requested'
+select pg_temp.assert_eq(
+  (select status from public.accounts where id = :user_a),
+  'deletion_requested',
+  'request marks only caller account'
 );
-select pg_temp.assert_true(
-  coalesce((select state = 'CANCELLED' from public.generation_jobs where id = :'job_a'), false),
-  'queued job was not cancelled'
+select pg_temp.assert_eq(
+  (select state from public.generation_jobs where id = :'job_a'),
+  'CANCELLED',
+  'request cancels queued work'
 );
 
 select set_config('request.jwt.claim.sub', :user_a, false);
@@ -60,9 +62,10 @@ select pg_temp.denied(
 );
 reset role;
 
-select pg_temp.assert_true(
-  coalesce((select status = 'active' from public.accounts where id = :user_b), false),
-  'other learner changed state'
+select pg_temp.assert_eq(
+  (select status from public.accounts where id = :user_b),
+  'active',
+  'other learner remains active'
 );
 
 rollback;

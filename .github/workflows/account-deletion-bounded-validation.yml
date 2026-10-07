@@ -6,7 +6,6 @@ on:
       - "server/db/**"
       - "supabase/functions/delete-account/**"
       - "supabase/config.toml"
-      - "scripts/m5_validate_server_sql.sh"
       - ".github/workflows/account-deletion-bounded-validation.yml"
 
 permissions:
@@ -37,13 +36,20 @@ jobs:
           "$PGBIN/initdb" -D "$RUNNER_TEMP/pgdata" -U supabase_admin -A trust >/dev/null
           "$PGBIN/pg_ctl" -D "$RUNNER_TEMP/pgdata" -o "-p $PGPORT -k $PGHOST -c listen_addresses=''" -l "$RUNNER_TEMP/pg.log" -w start
           echo "PGHOST=$PGHOST" >> "$GITHUB_ENV"
-      - name: Canonical server SQL suite
+      - name: Account deletion SQL slice
         run: |
+          tmp="$(mktemp -d)"
+          mkdir -p "$tmp/migrations" "$tmp/tests"
+          cp spike/architecture-proof/db/migrations/*.sql "$tmp/migrations/"
+          cp server/db/migrations/*.sql "$tmp/migrations/"
+          cp server/db/tests/70_account_deletion.sql "$tmp/tests/"
+          cp server/db/tests/71_account_deletion_behavior.sql "$tmp/tests/"
           report="$RUNNER_TEMP/account-deletion-sql-report.txt"
-          if ! bash scripts/m5_validate_server_sql.sh "$report"; then
+          if ! bash spike/architecture-proof/db/run_sql_suite.sh account_deletion "$tmp/migrations" "$tmp/tests" "$report"; then
             cat "$report" || true
             exit 1
           fi
+          cat "$report"
       - name: Install Deno
         run: |
           curl -fsSL -o "$RUNNER_TEMP/deno.zip" "https://dl.deno.land/release/v${DENO_VERSION}/deno-x86_64-unknown-linux-gnu.zip"
