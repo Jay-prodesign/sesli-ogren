@@ -1,4 +1,5 @@
 import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -67,9 +68,7 @@ Widget _phoneFrame(Widget child) {
 
 Future<void> _precacheCompanion(WidgetTester tester) async {
   final context = tester.element(find.byType(MaterialApp));
-  await tester.runAsync(
-    () => precacheImage(const AssetImage('assets/companions/D_KNOT_128.webp'), context),
-  );
+  await tester.runAsync(() => precacheImage(const AssetImage('assets/companions/D_KNOT_128.webp'), context));
   await tester.pump(const Duration(milliseconds: 120));
 }
 
