@@ -1,12 +1,12 @@
 # LA-0040 Companion Reevaluation
 
-Status: OPEN FORM / LOCKED CONSTRAINTS — prior D/Knot visual lock is superseded; plush/cartoon mascot treatment is explicitly rejected by Founder.
+Status: CANONICAL D/KNOT BASELINE RESTORED — LA-0040 evaluates integration/presentation first; identity redesign/removal requires new HIGH/BLOCKER evidence.
 
-## Founder correction
-The round blue/purple plush humanoid companion shown in the generated LA-0040 comparison board is **REJECTED**. Do not reproduce or approximate that appearance.
+## Correction
+The round blue/purple plush humanoid shown in the generated LA-0040 comparison board is **REJECTED because it is not the canonical D/Knot**. This does not revoke the earlier Founder-reviewed D/Knot selection.
 
-## Question
-Should D/Knot evolve into a sparse living graphic/signal mark, be materially redesigned under that brief, or be removed?
+## Correct question
+How should canonical D/Knot be integrated into the stronger product visual language—placement, scale, surrounding surfaces, semantic state emphasis and bounded styling—without identity drift or decorative overuse?
 
 ## Current D/Knot strengths
 - memorable silhouette at medium size;
@@ -52,7 +52,7 @@ No mascot. Product identity comes entirely from material-led visual system.
 Round-0: valid control, not preferred until tested.
 
 ## Recommendation before visual prototyping
-Prototype **C2 + C4** first, but with a stricter brief: 2D/vector-first, abstract/simplified, teen-credible, no animal/plush/baby-face/oversized-cartoon-eye identity, and used only at meaningful guidance/result moments. Keep C3 and C5 as escape routes.
+Prototype **canonical D/Knot + sparse functional placement** first. Preserve the approved master identity and six semantic states. Only test bounded styling/integration changes that do not redraw the identity. Material redesign/removal is an escape route only if representative evidence shows an unresolved HIGH/BLOCKER.
 
 ## Companion quality requirements
 - recognizable at 32 px;
