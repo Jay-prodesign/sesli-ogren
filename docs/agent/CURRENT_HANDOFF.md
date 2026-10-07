@@ -3,13 +3,11 @@
 This section supersedes stale branch/cursor lines below where they conflict.
 
 - Active runnable product branch: `feat/full-product-shell-continuity` (PR #13).
-- Validated product head: `9010eed82eae067076629a1a1daca9d66486272b`.
 - Repository `main` remains bootstrap-only and MUST NOT be treated as the runnable Sesli Öğren application source.
 - LA-0024…LA-0034 are completed post-M5 full-product tranches.
-- LA-0034 Secure account + data deletion: DONE.
-- Latest gates: bootstrap `37599984324` PASS; account-deletion `37599984408` PASS; product validation `37599984330` PASS.
-- Hosted Supabase project is healthy but still has no canonical app tables/migrations/Edge Functions; no hosted deployment/mutation is authorized by this closure.
-- Current cursor: select the next concrete first-commercial-V0 completeness gap on this branch. Prioritize user-visible release completeness; no generic framework work and no return to mandatory standalone Summary/Flashcards/Quiz surfaces.
+- LA-0035 First-run product onboarding: IN_PROGRESS.
+- Current cursor: finish learner-scoped one-time onboarding, then run one bounded product validation.
+- Hosted Supabase project remains empty of canonical app schema/functions; no hosted deployment/mutation is authorized by LA-0035.
 - Local development/preview should track `feat/full-product-shell-continuity`, not `main`.
 
 ---
