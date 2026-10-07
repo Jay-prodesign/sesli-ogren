@@ -52,10 +52,7 @@ class _ProfileSurfaceState extends State<ProfileSurface> {
         content: const Text('Bu işlem geri alınamaz. Hesabını ve verilerini kalıcı olarak silmek istiyor musun?'),
         actions: [
           TextButton(onPressed: () => Navigator.of(dialogContext).pop(false), child: const Text('Vazgeç')),
-          FilledButton(
-            onPressed: () => Navigator.of(dialogContext).pop(true),
-            child: const Text('Kalıcı olarak sil'),
-          ),
+          FilledButton(onPressed: () => Navigator.of(dialogContext).pop(true), child: const Text('Kalıcı olarak sil')),
         ],
       ),
     );
@@ -73,9 +70,8 @@ class _ProfileSurfaceState extends State<ProfileSurface> {
       }
     } catch (_) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Hesap silinemedi. Verilerin korunuyor; tekrar deneyebilirsin.')),
-      );
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text('Hesap silinemedi. Verilerin korunuyor; tekrar deneyebilirsin.')));
     } finally {
       if (mounted) setState(() => _deleting = false);
     }
