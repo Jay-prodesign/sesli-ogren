@@ -28,36 +28,46 @@ class SupabaseLearnerAuth {
     }
   }
 
-  static Future<AuthenticatedLearner> verifyEmailOtp({required String email, required String token}) async {
+  static Future<AuthenticatedLearner> verifyEmailOtp({
+    required String email,
+    required String token,
+  }) async {
     final normalized = _normalizedEmail(email);
     final normalizedToken = token.trim();
-    if (!RegExp(r'^\d{6}
-    final client = await _clientForConfiguredProject();
-    final currentUser = client.auth.currentSession?.user;
-    if (currentUser != null) {
-      return AuthenticatedLearner(id: LearnerId(currentUser.id));
+    if (!RegExp(r'^\d{6}$').hasMatch(normalizedToken)) {
+      throw const LearnerAuthenticationException('Giriş kodu 6 haneli olmalı.');
     }
 
+    final client = await _clientForConfiguredProject();
     try {
-      final response = await client.auth.signInAnonymously();
+      final response = await client.auth.verifyOTP(
+        email: normalized,
+        token: normalizedToken,
+        type: OtpType.email,
+      );
       final user = response.user;
       final session = response.session;
       if (user == null || session == null) {
-        throw const LearnerAuthenticationException('Authentication completed without a durable session.');
+        throw const LearnerAuthenticationException(
+          'Doğrulama tamamlandı ancak güvenli oturum açılamadı.',
+        );
       }
       return AuthenticatedLearner(id: LearnerId(user.id));
     } on LearnerAuthenticationException {
       rethrow;
     } catch (_) {
-      throw const LearnerAuthenticationException('A learner session could not be established.');
+      throw const LearnerAuthenticationException('Giriş kodu doğrulanamadı.');
     }
   }
 
-  static Future<SupabaseClient> clientForAuthenticatedRuntime() => _clientForConfiguredProject();
+  static Future<SupabaseClient> clientForAuthenticatedRuntime() =>
+      _clientForConfiguredProject();
 
   static Future<SupabaseClient> _clientForConfiguredProject() async {
     if (_projectUrl.trim().isEmpty || _publishableKey.trim().isEmpty) {
-      throw const LearnerAuthConfigurationException('Supabase client configuration is missing.');
+      throw const LearnerAuthConfigurationException(
+        'Supabase client configuration is missing.',
+      );
     }
 
     final existing = _client;
@@ -77,106 +87,11 @@ class SupabaseLearnerAuth {
 
   static String _normalizedEmail(String email) {
     final normalized = email.trim().toLowerCase();
-    final emailPattern = RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+
-    try {
-      await Supabase.initialize(url: _projectUrl, publishableKey: _publishableKey);
-      return Supabase.instance.client;
-    } catch (_) {
-      throw const LearnerAuthenticationException('Authentication service could not be initialized.');
-    }
-  }
-}
-
-class LearnerAuthConfigurationException implements Exception {
-  const LearnerAuthConfigurationException(this.message);
-
-  final String message;
-
-  @override
-  String toString() => 'LearnerAuthConfigurationException: $message';
-}
-
-class LearnerAuthenticationException implements Exception {
-  const LearnerAuthenticationException(this.message);
-
-  final String message;
-
-  @override
-  String toString() => 'LearnerAuthenticationException: $message';
-}
-).hasMatch(normalizedToken)) {
-      throw const LearnerAuthenticationException('Giriş kodu 6 haneli olmalı.');
-    }
-
-    final client = await _clientForConfiguredProject();
-    try {
-      final response = await client.auth.verifyOTP(email: normalized, token: normalizedToken, type: OtpType.email);
-      final user = response.user;
-      final session = response.session;
-      if (user == null || session == null) {
-        throw const LearnerAuthenticationException('Doğrulama tamamlandı ancak güvenli oturum açılamadı.');
-      }
-      return AuthenticatedLearner(id: LearnerId(user.id));
-    } on LearnerAuthenticationException {
-      rethrow;
-    } catch (_) {
-      throw const LearnerAuthenticationException('Giriş kodu doğrulanamadı.');
-    }
-  }
-
-
-  static Future<SupabaseClient> clientForAuthenticatedRuntime() => _clientForConfiguredProject();
-
-  static Future<SupabaseClient> _clientForConfiguredProject() async {
-    if (_projectUrl.trim().isEmpty || _publishableKey.trim().isEmpty) {
-      throw const LearnerAuthConfigurationException('Supabase client configuration is missing.');
-    }
-
-    final existing = _client;
-    if (existing != null) {
-      return existing;
-    }
-
-    final initializing = _initializing ??= _initializeClient();
-    try {
-      final client = await initializing;
-      _client = client;
-      return client;
-    } finally {
-      _initializing = null;
-    }
-  }
-
-  static Future<SupabaseClient> _initializeClient() async {
-    try {
-      await Supabase.initialize(url: _projectUrl, publishableKey: _publishableKey);
-      return Supabase.instance.client;
-    } catch (_) {
-      throw const LearnerAuthenticationException('Authentication service could not be initialized.');
-    }
-  }
-}
-
-class LearnerAuthConfigurationException implements Exception {
-  const LearnerAuthConfigurationException(this.message);
-
-  final String message;
-
-  @override
-  String toString() => 'LearnerAuthConfigurationException: $message';
-}
-
-class LearnerAuthenticationException implements Exception {
-  const LearnerAuthenticationException(this.message);
-
-  final String message;
-
-  @override
-  String toString() => 'LearnerAuthenticationException: $message';
-}
-);
+    final emailPattern = RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$');
     if (!emailPattern.hasMatch(normalized) || normalized.length > 254) {
-      throw const LearnerAuthenticationException('Geçerli bir e-posta adresi gir.');
+      throw const LearnerAuthenticationException(
+        'Geçerli bir e-posta adresi gir.',
+      );
     }
     return normalized;
   }
@@ -186,98 +101,9 @@ class LearnerAuthenticationException implements Exception {
       await Supabase.initialize(url: _projectUrl, publishableKey: _publishableKey);
       return Supabase.instance.client;
     } catch (_) {
-      throw const LearnerAuthenticationException('Authentication service could not be initialized.');
-    }
-  }
-}
-
-class LearnerAuthConfigurationException implements Exception {
-  const LearnerAuthConfigurationException(this.message);
-
-  final String message;
-
-  @override
-  String toString() => 'LearnerAuthConfigurationException: $message';
-}
-
-class LearnerAuthenticationException implements Exception {
-  const LearnerAuthenticationException(this.message);
-
-  final String message;
-
-  @override
-  String toString() => 'LearnerAuthenticationException: $message';
-}
-).hasMatch(normalizedToken)) {
-      throw const LearnerAuthenticationException('Giriş kodu 6 haneli olmalı.');
-    }
-
-    final client = await _clientForConfiguredProject();
-    try {
-      final response = await client.auth.verifyOTP(email: normalized, token: normalizedToken, type: OtpType.email);
-      final user = response.user;
-      final session = response.session;
-      if (user == null || session == null) {
-        throw const LearnerAuthenticationException('Doğrulama tamamlandı ancak güvenli oturum açılamadı.');
-      }
-      return AuthenticatedLearner(id: LearnerId(user.id));
-    } on LearnerAuthenticationException {
-      rethrow;
-    } catch (_) {
-      throw const LearnerAuthenticationException('Giriş kodu doğrulanamadı.');
-    }
-  }
-
-  static Future<AuthenticatedLearner> authenticate() async {
-    final client = await _clientForConfiguredProject();
-    final currentUser = client.auth.currentSession?.user;
-    if (currentUser != null) {
-      return AuthenticatedLearner(id: LearnerId(currentUser.id));
-    }
-
-    try {
-      final response = await client.auth.signInAnonymously();
-      final user = response.user;
-      final session = response.session;
-      if (user == null || session == null) {
-        throw const LearnerAuthenticationException('Authentication completed without a durable session.');
-      }
-      return AuthenticatedLearner(id: LearnerId(user.id));
-    } on LearnerAuthenticationException {
-      rethrow;
-    } catch (_) {
-      throw const LearnerAuthenticationException('A learner session could not be established.');
-    }
-  }
-
-  static Future<SupabaseClient> clientForAuthenticatedRuntime() => _clientForConfiguredProject();
-
-  static Future<SupabaseClient> _clientForConfiguredProject() async {
-    if (_projectUrl.trim().isEmpty || _publishableKey.trim().isEmpty) {
-      throw const LearnerAuthConfigurationException('Supabase client configuration is missing.');
-    }
-
-    final existing = _client;
-    if (existing != null) {
-      return existing;
-    }
-
-    final initializing = _initializing ??= _initializeClient();
-    try {
-      final client = await initializing;
-      _client = client;
-      return client;
-    } finally {
-      _initializing = null;
-    }
-  }
-
-  static Future<SupabaseClient> _initializeClient() async {
-    try {
-      await Supabase.initialize(url: _projectUrl, publishableKey: _publishableKey);
-      return Supabase.instance.client;
-    } catch (_) {
-      throw const LearnerAuthenticationException('Authentication service could not be initialized.');
+      throw const LearnerAuthenticationException(
+        'Authentication service could not be initialized.',
+      );
     }
   }
 }
