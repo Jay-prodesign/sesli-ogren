@@ -82,7 +82,7 @@ abstract final class SesliOgrenTheme {
       ),
       titleLarge: base.textTheme.titleLarge?.copyWith(
         color: AppPalette.ink,
-        fontWeight: FontWeight.w750,
+        fontWeight: FontWeight.w700,
         height: 1.2,
       ),
       titleMedium: base.textTheme.titleMedium?.copyWith(
