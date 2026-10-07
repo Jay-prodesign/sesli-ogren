@@ -87,7 +87,7 @@
   "next_handoff": {
     "id": "LA0040_VISUAL_AUDIT",
     "title": "Million-Dollar Visual Audit & Student Experience Elevation",
-    "status": "IN_PROGRESS_CURRENT_TREATMENT_FAIL_REDIRECT",
+    "status": "IN_PROGRESS_DIRECTION_LOCKED_IMPLEMENTATION_PROOF_REQUIRED",
     "admission": "Founder explicit visual/companion reopen on 2026-10-07 + D-074 Tier-A governance",
     "acceptance": "LA-0040 VQG-01 + stress/red-team + Founder visual disposition",
     "current_task": "LA-0040"
@@ -97,7 +97,7 @@
     "Physical iOS/Android speech/accessibility/performance/orientation checks remain deferred under D-068 and mandatory before release-candidate/public-release claims."
   ],
   "protected_gate": "Merge, release, deploy, paid providers, credentials/secrets, licensing posture, production mutation: Product Owner only",
-  "next_action": "Create comparable Golden Product Slice treatments for the control, Energetic Student Momentum and Visual Learning Studio × Student Momentum hybrid; test evolved/sparse D-Knot against redesign/removal controls; rerun VQG-01 and visual red-team; present only the strongest evidence-backed treatment at the Founder visual gate. Physical-device release gate remains separate under D-068.",
+  "next_action": "Prototype the Founder-selected Visual Learning Studio × Student Momentum direction for Turkish high-school students across Home, Material Workspace, Recall prompt and Recall payoff. Use the locked material-first/show-don't-tell palette and brand voice; do not use the rejected plush/cartoon companion appearance. Prototype a sparse 2D living knot/signal guide only if it earns its role. Then rerun VQG-01, stress/red-team, accessibility and Founder visual review.",
   "canonical_source_refs": [
     "CURRENT_EXECUTION_STATE — Learning App",
     "Founder visual/companion correction — 2026-10-07 (supersedes D-070 companion visual lock for LA-0040 evaluation)",
@@ -160,9 +160,9 @@
   },
   "founder_visual_decision": {
     "decision_id": "D-070 + Founder visual/companion correction 2026-10-07",
-    "companion": "REOPENED_FOR_LA0040 — D/Knot may be recolored, evolved, materially redesigned, reduced or removed after tournament evidence",
-    "product_visual": "CURRENT_TREATMENT_FAIL_VQG01_LA0040_IN_PROGRESS",
-    "reason": "Founder states the current app remains visually weak for the intended student-weighted, standout commercial quality bar. Round-0 audit confirms high-severity identity, Workspace repetition, show-don't-tell and student-desire gaps despite a green engineering baseline.",
+    "companion": "PLUSH/CARTOON GENERATED TREATMENT REJECTED — exact companion form reopened; preferred prototype is sparse 2D/vector living knot/signal guide, with redesign/removal fallback",
+    "product_visual": "DIRECTION_LOCKED_LA0040_IMPLEMENTATION_PROOF_REQUIRED",
+    "reason": "Founder selected Turkish high-school students as the primary audience and locked Visual Learning Studio × Student Momentum at concept level. The prior LA-0039 visual baseline remains below target. Brand voice and color direction are locked for prototyping; final visual PASS still requires representative runtime proof.",
     "affected": [
       "colors",
       "typography",
@@ -193,7 +193,8 @@
       "docs/design/LA-0040_VISUAL_TREATMENT_TOURNAMENT.md",
       "docs/design/LA-0040_COMPANION_REEVALUATION.md",
       "docs/qa/LA-0040_VISUAL_QUALITY_GATE.md",
-      "docs/qa/LA-0040_VISUAL_STRESS_REDTEAM.md"
+      "docs/qa/LA-0040_VISUAL_STRESS_REDTEAM.md",
+      "docs/design/LA-0040_AUDIENCE_BRAND_VISUAL_DIRECTION_LOCK.md"
     ]
   },
   "m5_admission": {
@@ -414,5 +415,24 @@
       "attention semantic foreground tightened to AA-safe contrast against attentionSoft"
     ],
     "remaining_gate": "Founder representative runtime visual review; LA-0039 remains IN_PROGRESS until that review is accepted."
+  },
+  "audience_visual_lock": {
+    "status": "FOUNDER_LOCKED_DIRECTION",
+    "primary_audience": "Turkish high-school students, grades 9–12 / approx. ages 14–18",
+    "theme": "Visual Learning Studio × Student Momentum",
+    "voice": "smart study partner; direct, respectful, evidence-aware, calm under failure, energetic in action; informal singular Turkish 'sen'",
+    "signature_palette": {
+      "canvas": "#F7F8FC",
+      "ink": "#111827",
+      "pulse_blue": "#3657FF",
+      "deep_focus": "#14224A",
+      "signal_aqua": "#20BFA9",
+      "volt_lime": "#C9F45D",
+      "success": "#138A72",
+      "attention": "#E99024",
+      "error": "#D64550"
+    },
+    "companion": "Generated plush/round mascot rejected. Exact form open; preferred brief is sparse abstract 2D living knot/signal guide.",
+    "authority": "docs/design/LA-0040_AUDIENCE_BRAND_VISUAL_DIRECTION_LOCK.md"
   }
 }
