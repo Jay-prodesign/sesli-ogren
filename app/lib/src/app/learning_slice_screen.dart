@@ -758,10 +758,7 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
           ),
           const SizedBox(height: 20),
           DecoratedBox(
-            decoration: BoxDecoration(
-              color: AppPalette.primarySoft,
-              borderRadius: BorderRadius.circular(18),
-            ),
+            decoration: BoxDecoration(color: AppPalette.primarySoft, borderRadius: BorderRadius.circular(18)),
             child: Padding(
               padding: const EdgeInsets.all(16),
               child: Column(
