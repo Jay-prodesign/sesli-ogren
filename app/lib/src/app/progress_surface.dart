@@ -63,7 +63,11 @@ class _ProgressCard extends StatelessWidget {
     };
     final reason = item.continuation?.nextAction.reasonText ?? 'Aktif Recall henüz öğrenme kanıtı üretmedi.';
     final (accent, soft, icon) = switch (state) {
-      RecallStateKind.notAssessed => (AppPalette.inkMuted, AppPalette.surfaceMuted, Icons.radio_button_unchecked_rounded),
+      RecallStateKind.notAssessed => (
+        AppPalette.inkMuted,
+        AppPalette.surfaceMuted,
+        Icons.radio_button_unchecked_rounded,
+      ),
       RecallStateKind.developing => (AppPalette.primary, AppPalette.primarySoft, Icons.trending_up_rounded),
       RecallStateKind.retrievedOnce => (AppPalette.success, AppPalette.successSoft, Icons.check_circle_rounded),
       RecallStateKind.needsReview => (AppPalette.attention, AppPalette.attentionSoft, Icons.refresh_rounded),
@@ -89,26 +93,34 @@ class _ProgressCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(item.material.title, maxLines: 2, overflow: TextOverflow.ellipsis, style: theme.textTheme.titleMedium),
+                    Text(
+                      item.material.title,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.textTheme.titleMedium,
+                    ),
                     const SizedBox(height: 8),
                     DecoratedBox(
                       decoration: BoxDecoration(color: soft, borderRadius: BorderRadius.circular(999)),
                       child: Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                        child: Text(label, style: theme.textTheme.labelSmall?.copyWith(color: accent, fontWeight: FontWeight.w700)),
+                        child: Text(
+                          label,
+                          style: theme.textTheme.labelSmall?.copyWith(color: accent, fontWeight: FontWeight.w700),
+                        ),
                       ),
                     ),
                     const SizedBox(height: 10),
-                    Text('Sıradaki adım', style: theme.textTheme.labelSmall?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
+                    Text(
+                      'Sıradaki adım',
+                      style: theme.textTheme.labelSmall?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+                    ),
                     const SizedBox(height: 3),
                     Text(reason, maxLines: 3, overflow: TextOverflow.ellipsis),
                   ],
                 ),
               ),
-              const Padding(
-                padding: EdgeInsets.only(top: 8),
-                child: Icon(Icons.chevron_right_rounded),
-              ),
+              const Padding(padding: EdgeInsets.only(top: 8), child: Icon(Icons.chevron_right_rounded)),
             ],
           ),
         ),
