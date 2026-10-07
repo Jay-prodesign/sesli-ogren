@@ -51,6 +51,15 @@ class SupabaseLearnerAuth {
     }
   }
 
+  static Future<void> signOutCurrentSession() async {
+    final client = await _clientForConfiguredProject();
+    try {
+      await client.auth.signOut(scope: SignOutScope.local);
+    } catch (_) {
+      throw const LearnerAuthenticationException('Bu cihazdaki oturum kapatılamadı.');
+    }
+  }
+
   static Future<SupabaseClient> clientForAuthenticatedRuntime() => _clientForConfiguredProject();
 
   static Future<SupabaseClient> _clientForConfiguredProject() async {

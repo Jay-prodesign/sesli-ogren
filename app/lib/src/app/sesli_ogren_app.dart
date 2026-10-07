@@ -78,6 +78,18 @@ class _SesliOgrenAppState extends State<SesliOgrenApp> {
     setState(() => _accountDeleted = true);
   }
 
+  Future<void> _handleSignOut() async {
+    await SupabaseLearnerAuth.signOutCurrentSession();
+    final runtime = _runtime;
+    if (runtime != null) {
+      await runtime.close();
+    }
+    if (!mounted) return;
+    _runtime = null;
+    _accountDeleted = false;
+    setState(() => _runtimeFuture = Future.value(null));
+  }
+
   void _startFresh() {
     _accountDeleted = false;
     setState(_openRuntime);
@@ -107,7 +119,11 @@ class _SesliOgrenAppState extends State<SesliOgrenApp> {
                   final runtime = snapshot.data!;
                   return FirstRunOnboardingGate(
                     runtime: runtime,
-                    child: ProductShellScreen(runtime: runtime, onAccountDeleted: _handleAccountDeleted),
+                    child: ProductShellScreen(
+                      runtime: runtime,
+                      onAccountDeleted: _handleAccountDeleted,
+                      onSignOut: _handleSignOut,
+                    ),
                   );
                 }
                 if (snapshot.hasError) {

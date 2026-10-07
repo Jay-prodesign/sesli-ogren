@@ -534,6 +534,55 @@ void main() {
     expect(find.textContaining('Hesap silme tüm hesap ve öğrenme verilerini kapsar'), findsOneWidget);
   });
 
+  testWidgets('Profile sign out requires confirmation and preserves learner local data', (tester) async {
+    final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
+    addTearDown(store.close);
+    final ingest = SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor());
+    var signOutCalls = 0;
+    final runtime = AppRuntime(
+      learner: AppRuntime.localM5LearnerFixture,
+      store: store,
+      ingest: ingest,
+      recall: RecallLearningService(sourceStore: store, learningStore: store.learningTruthStore()),
+      telemetry: store.operationalTelemetry(),
+      accountOverview: const _ReadyAccountOverviewGateway(),
+    );
+    await ingest.ingestPastedText(
+      learner: runtime.learner,
+      materialId: AppRuntime.primaryMaterialId,
+      text: 'Çıkış yapmak bu learner verisini silmemelidir.',
+      sourceName: 'Korunacak oturum verisi',
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: ProductShellScreen(
+          runtime: runtime,
+          onSignOut: () async {
+            signOutCalls += 1;
+          },
+        ),
+      ),
+    );
+    await pumpUntilFound(tester, find.text('Profil'));
+    await tapVisible(tester, find.text('Profil').last);
+    await pumpUntilFound(tester, find.text('Profil ve Ayarlar'));
+    await tester.drag(find.byType(Scrollable).last, const Offset(0, -420));
+    await tester.pump(const Duration(milliseconds: 300));
+    await tapVisible(tester, find.text('Bu cihazda çıkış yap'));
+    await pumpUntilFound(tester, find.text('Bu cihazda çıkış yap?'));
+
+    expect(signOutCalls, 0);
+    await tapVisible(tester, find.text('Çıkış yap'));
+    await tester.pump(const Duration(milliseconds: 100));
+
+    expect(signOutCalls, 1);
+    expect(
+      await store.material(learner: runtime.learner, materialId: AppRuntime.primaryMaterialId),
+      isNotNull,
+    );
+  });
+
   testWidgets('account deletion requires explicit confirmation and purges local data after remote success', (
     tester,
   ) async {

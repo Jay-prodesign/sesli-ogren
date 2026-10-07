@@ -52,7 +52,8 @@
     "LA-0033": "DONE",
     "LA-0034": "DONE",
     "LA-0035": "DONE",
-    "LA-0036": "DONE"
+    "LA-0036": "DONE",
+    "LA-0037": "IN_PROGRESS"
   },
   "git": {
     "branch": "feat/full-product-shell-continuity",
@@ -86,14 +87,14 @@
     "status": "ACTIVE_EXECUTABLE",
     "admission": "Existing post-M5 full-product authority projected in TASKS/PR #13",
     "acceptance": "Current V0 product authority + bounded product validation",
-    "current_task": "NEXT_USER_VISIBLE_ACCOUNT_SETTINGS_GAP"
+    "current_task": "LA-0037"
   },
   "blockers": [
     "Live Supabase anonymous-auth evidence remains BLOCKED because GitHub protected client config is absent: SUPABASE_URL and SUPABASE_PUBLISHABLE_KEY are not configured for the validation environment. Only these client-safe values may be used; never service-role credentials.",
     "Physical iOS/Android speech/accessibility/performance/orientation checks remain deferred under D-068 and mandatory before release-candidate/public-release claims."
   ],
   "protected_gate": "Merge, release, deploy, paid providers, credentials/secrets, licensing posture, production mutation: Product Owner only",
-  "next_action": "Select the next user-visible first-commercial-V0 account/settings gap on feat/full-product-shell-continuity. Keep work concrete and app-first; no hosted Supabase mutation or release-only provider configuration.",
+  "next_action": "Complete LA-0037 safe local sign-out/account switching boundary. Preserve learner-scoped local data; route to account entry only after Supabase local sign-out succeeds.",
   "canonical_source_refs": [
     "CURRENT_EXECUTION_STATE — Learning App",
     "D-070 — Founder Product/Visual PASS / D-Knot selected",

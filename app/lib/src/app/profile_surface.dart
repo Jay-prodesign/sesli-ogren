@@ -4,10 +4,11 @@ import '../account/account_overview_gateway.dart';
 import 'app_runtime.dart';
 
 class ProfileSurface extends StatefulWidget {
-  const ProfileSurface({required this.runtime, this.onAccountDeleted, super.key});
+  const ProfileSurface({required this.runtime, this.onAccountDeleted, this.onSignOut, super.key});
 
   final AppRuntime runtime;
   final VoidCallback? onAccountDeleted;
+  final Future<void> Function()? onSignOut;
 
   @override
   State<ProfileSurface> createState() => _ProfileSurfaceState();
@@ -16,6 +17,7 @@ class ProfileSurface extends StatefulWidget {
 class _ProfileSurfaceState extends State<ProfileSurface> {
   late Future<AccountOverview?> _overview;
   bool _deleting = false;
+  bool _signingOut = false;
 
   @override
   void initState() {
@@ -27,6 +29,38 @@ class _ProfileSurfaceState extends State<ProfileSurface> {
     setState(() {
       _overview = widget.runtime.accountOverview.load(learner: widget.runtime.learner);
     });
+  }
+
+  Future<void> _signOut() async {
+    final callback = widget.onSignOut;
+    if (callback == null || _signingOut || _deleting) return;
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Bu cihazda çıkış yap?'),
+        content: const Text(
+          'Bu cihazdaki oturum kapanacak. Hesabın, materyallerin ve öğrenme verilerin silinmez.',
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.of(dialogContext).pop(false), child: const Text('Vazgeç')),
+          FilledButton(onPressed: () => Navigator.of(dialogContext).pop(true), child: const Text('Çıkış yap')),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+
+    setState(() => _signingOut = true);
+    try {
+      await callback();
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Oturum kapatılamadı. Hesabın açık kalıyor; tekrar deneyebilirsin.')),
+      );
+    } finally {
+      if (mounted) setState(() => _signingOut = false);
+    }
   }
 
   Future<void> _deleteAccount() async {
@@ -125,6 +159,33 @@ class _ProfileSurfaceState extends State<ProfileSurface> {
             }
             return _AccountOverviewCard(overview: overview);
           },
+        ),
+        const SizedBox(height: 14),
+        Card(
+          elevation: 0,
+          color: theme.colorScheme.surfaceContainerLow,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(8, 4, 8, 12),
+            child: Column(
+              children: [
+                const ListTile(
+                  leading: Icon(Icons.account_circle_outlined),
+                  title: Text('Hesap oturumu'),
+                  subtitle: Text('Çıkış yapmak hesabını veya öğrenme verilerini silmez.'),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  child: OutlinedButton.icon(
+                    onPressed: widget.onSignOut == null || _signingOut || _deleting ? null : _signOut,
+                    icon: _signingOut
+                        ? const SizedBox.square(dimension: 18, child: CircularProgressIndicator(strokeWidth: 2))
+                        : const Icon(Icons.logout_rounded),
+                    label: Text(_signingOut ? 'Çıkış yapılıyor…' : 'Bu cihazda çıkış yap'),
+                  ),
+                ),
+              ],
+            ),
+          ),
         ),
         const SizedBox(height: 14),
         Card(
