@@ -90,7 +90,7 @@ Noise, visual fatigue, gamification drift.
 
 ---
 
-## Treatment C — Visual Learning Studio × Student Momentum (leader)
+## Treatment C — Visual Learning Studio × Student Momentum (FOUNDER-SELECTED DIRECTION)
 
 ### Product feeling
 A modern visual studio for learning from your own material: focused but alive, expressive but trustworthy.
@@ -131,22 +131,17 @@ Companion supports moments of guidance/payoff rather than owning the whole scree
 - next action continues the same visual thread;
 - D/Knot reacts briefly and then yields visual priority to the learner’s result.
 
-### Color hypothesis
-- calm ivory/near-white reading canvas;
-- ink/navy for serious text;
-- signature cobalt-to-ultraviolet relationship for active learning;
-- cyan/mint for listening/success;
-- warm coral/amber only for emphasis/attention;
-- palette should support a redesigned D/Knot without forcing the entire UI blue-purple.
+### Locked color direction
+- Canvas / Cloud `#F7F8FC`;
+- Ink / Midnight `#111827`;
+- Pulse Blue `#3657FF` for primary/active learning;
+- Deep Focus `#14224A` for immersive focus surfaces;
+- Signal Aqua `#20BFA9` for listening/supportive positive states;
+- Volt Lime `#C9F45D` only as a bounded signature momentum cue;
+- no default purple/blue gradient brand treatment.
 
-### Companion hypothesis
-Use C2 + C4 from companion tournament:
-- evolve D/Knot visually;
-- simplify silhouette;
-- less plush/3D;
-- more graphic/editorial;
-- smaller routine footprint;
-- meaningful states only.
+### Companion constraint
+The previously generated round/plush humanoid mascot is rejected. If a companion is used, prototype a sparse 2D/vector-first living knot/signal guide: abstract/simplified, teen-credible, no animal/plush/baby-face/oversized-cartoon-eye identity, smaller routine footprint, meaningful states only.
 
 ### Signature visual primitives
 1. Material Object — reusable material identity surface.
