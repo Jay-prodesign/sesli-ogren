@@ -1,3 +1,3 @@
-822b9510b09a5a921536a6acc3e2fd26180032e0bfa40e77a7ca9fc18290c5d6  docs/qa/evidence/la0039/home.png
-6171549828a3a39af79299c041f5d4f6b4cfc73d5289984e773e605891340faf  docs/qa/evidence/la0039/recall-payoff.png
-a73b783df917663a05329410f8f25053e43cda235565b01788043c273ca7af65  docs/qa/evidence/la0039/workspace.png
+4afa3bbd831b6c5d28294d3cdc06b5eae5cdff5f9060d3d79f3e53e9c905e7c5  docs/qa/evidence/la0039/home.png
+ae2a46dcf6a8f3dbf561a8a100913d7180704d23a38bf684f9ede35f3143197b  docs/qa/evidence/la0039/recall-payoff.png
+2a97f565c69ad4ed4a58f5f2091893d3bca4ce568f64c0f5221af43252094aa9  docs/qa/evidence/la0039/workspace.png
