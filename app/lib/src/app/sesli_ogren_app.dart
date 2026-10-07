@@ -6,6 +6,7 @@ import '../auth/supabase_learner_auth.dart';
 import '../domain/authenticated_learner.dart';
 import 'account_entry_screen.dart';
 import 'app_runtime.dart';
+import 'app_theme.dart';
 import 'companion_view.dart';
 import 'first_run_onboarding.dart';
 import 'product_shell_screen.dart';
@@ -97,16 +98,10 @@ class _SesliOgrenAppState extends State<SesliOgrenApp> {
 
   @override
   Widget build(BuildContext context) {
-    final scheme = ColorScheme.fromSeed(seedColor: const Color(0xFF65558F), brightness: Brightness.light);
     return MaterialApp(
       title: 'Sesli Öğren',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        colorScheme: scheme,
-        useMaterial3: true,
-        inputDecorationTheme: const InputDecorationTheme(filled: true),
-        filledButtonTheme: FilledButtonThemeData(style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(48))),
-      ),
+      theme: SesliOgrenTheme.light(),
       home: _accountDeleted
           ? _AccountDeletedScreen(onStartFresh: _startFresh)
           : FutureBuilder<AppRuntime?>(
