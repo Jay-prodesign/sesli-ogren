@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../domain/learning_contracts.dart';
 import '../domain/learning_truth.dart';
 import 'app_runtime.dart';
+import 'app_theme.dart';
 import 'companion_view.dart';
 import 'learning_slice_screen.dart';
 import 'listen_screen.dart';
@@ -212,19 +213,32 @@ class _HomeSurface extends StatelessWidget {
     final hasMaterial = data.material != null;
 
     return ListView(
-      padding: const EdgeInsets.fromLTRB(20, 20, 20, 32),
+      key: const ValueKey('home-surface'),
+      padding: const EdgeInsets.fromLTRB(20, 22, 20, 36),
       children: [
         Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            const CompanionView(state: CompanionVisualState.idle, size: 64),
-            const SizedBox(width: 12),
+            DecoratedBox(
+              decoration: BoxDecoration(
+                color: AppPalette.primarySoft,
+                borderRadius: BorderRadius.circular(18),
+                border: Border.all(color: AppPalette.primary.withValues(alpha: 0.12)),
+              ),
+              child: const Padding(
+                padding: EdgeInsets.all(7),
+                child: CompanionView(state: CompanionVisualState.idle, size: 50),
+              ),
+            ),
+            const SizedBox(width: 13),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Sesli Öğren', style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w800)),
+                  Text('Sesli Öğren', style: theme.textTheme.headlineSmall),
+                  const SizedBox(height: 2),
                   Text(
-                    hasMaterial ? 'Kaldığın yerden devam et.' : 'Materyalini öğrenmeye dönüştür.',
+                    hasMaterial ? 'Materyalin hazır. Sıradaki anlamlı adıma geç.' : 'Kendi materyalini aktif öğrenmeye dönüştür.',
                     style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
                   ),
                 ],
@@ -232,30 +246,27 @@ class _HomeSurface extends StatelessWidget {
             ),
           ],
         ),
-        const SizedBox(height: 28),
+        const SizedBox(height: 26),
         if (!hasMaterial)
-          _PrimaryCard(
-            title: 'İlk materyalini ekle',
-            body: 'Metnini ekle; kaynağa bağlı bir öğrenme adımıyla hemen başla.',
-            buttonLabel: 'Materyal ekle',
-            icon: Icons.add_rounded,
-            onPressed: onOpenLearning,
-          )
+          _FirstMaterialHero(onPressed: onOpenLearning)
         else ...[
-          Text('Şimdi ne yapmalı?', style: theme.textTheme.labelLarge),
-          const SizedBox(height: 10),
-          _PrimaryCard(
+          _ContinueHero(
+            data: data,
             title: _nextTitle(data.continuation),
-            body: _nextReason(data.continuation),
-            buttonLabel: 'Devam et',
-            icon: Icons.arrow_forward_rounded,
+            reason: _nextReason(data.continuation),
             onPressed: onOpenWorkspace,
           ),
           const SizedBox(height: 22),
-          Text('Materyalin', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700)),
+          Row(
+            children: [
+              Expanded(child: Text('Çalışma yolları', style: theme.textTheme.titleMedium)),
+              Text(
+                'Aynı kaynakla',
+                style: theme.textTheme.labelMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+              ),
+            ],
+          ),
           const SizedBox(height: 10),
-          _MaterialCard(data: data, onPressed: onOpenWorkspace),
-          const SizedBox(height: 22),
           _ContextRow(onRecall: onOpenLearning, onListen: onOpenListen),
         ],
       ],
@@ -274,6 +285,216 @@ class _HomeSurface extends StatelessWidget {
 
   static String _nextReason(LearningContinuation? continuation) =>
       continuation?.nextAction.reasonText ?? 'Kaynağından kısa bir Recall ile ilk gerçek öğrenme kanıtını oluştur.';
+}
+
+class _FirstMaterialHero extends StatelessWidget {
+  const _FirstMaterialHero({required this.onPressed});
+
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Semantics(
+      container: true,
+      label: 'İlk materyalini ekle ve aktif öğrenmeye başla',
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: AppPalette.primaryDark,
+          borderRadius: BorderRadius.circular(28),
+          boxShadow: [
+            BoxShadow(
+              color: AppPalette.primaryDark.withValues(alpha: 0.16),
+              blurRadius: 28,
+              offset: const Offset(0, 14),
+            ),
+          ],
+        ),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(22, 24, 22, 22),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _HeroLabel(
+                icon: Icons.auto_stories_rounded,
+                text: 'KENDİ MATERYALİN · TEK ÖĞRENME AKIŞI',
+                foreground: Colors.white.withValues(alpha: 0.78),
+              ),
+              const SizedBox(height: 20),
+              Text(
+                'İlk materyalini ekle',
+                style: theme.textTheme.headlineMedium?.copyWith(color: Colors.white),
+              ),
+              const SizedBox(height: 9),
+              Text(
+                'PDF veya metnini ekle. Dinleme, hatırlama ve açıklama aynı kaynağa bağlı kalsın.',
+                style: theme.textTheme.bodyLarge?.copyWith(
+                  color: Colors.white.withValues(alpha: 0.82),
+                  height: 1.45,
+                ),
+              ),
+              const SizedBox(height: 22),
+              FilledButton.icon(
+                style: FilledButton.styleFrom(
+                  backgroundColor: Colors.white,
+                  foregroundColor: AppPalette.primaryDark,
+                ),
+                onPressed: onPressed,
+                icon: const Icon(Icons.add_rounded),
+                label: const Text('Materyal ekle'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _ContinueHero extends StatelessWidget {
+  const _ContinueHero({
+    required this.data,
+    required this.title,
+    required this.reason,
+    required this.onPressed,
+  });
+
+  final _HomeSnapshot data;
+  final String title;
+  final String reason;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final material = data.material!;
+    final theme = Theme.of(context);
+    final sourceName = data.source?.sourceName ?? 'Kaynak hazır';
+    final mediaIcon = material.mediaType == SourceMediaType.pdf ? Icons.picture_as_pdf_rounded : Icons.notes_rounded;
+
+    return Material(
+      color: AppPalette.primaryDark,
+      borderRadius: BorderRadius.circular(28),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        key: const ValueKey('home-continuation-hero'),
+        onTap: onPressed,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(22, 20, 22, 22),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Row(
+                children: [
+                  DecoratedBox(
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.11),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(9),
+                      child: Icon(mediaIcon, color: Colors.white, size: 20),
+                    ),
+                  ),
+                  const SizedBox(width: 11),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Materyalin',
+                          style: theme.textTheme.labelMedium?.copyWith(
+                            color: Colors.white.withValues(alpha: 0.68),
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          material.title,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: theme.textTheme.titleMedium?.copyWith(color: Colors.white),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const Icon(Icons.arrow_outward_rounded, color: Colors.white70, size: 20),
+                ],
+              ),
+              if (sourceName != material.title) ...[
+                const SizedBox(height: 7),
+                Text(
+                  sourceName,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: theme.textTheme.bodySmall?.copyWith(color: Colors.white.withValues(alpha: 0.62)),
+                ),
+              ],
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 20),
+                child: Divider(color: Colors.white.withValues(alpha: 0.16)),
+              ),
+              _HeroLabel(
+                icon: Icons.bolt_rounded,
+                text: 'Şimdi ne yapmalı?',
+                foreground: const Color(0xFFAFC0FF),
+              ),
+              const SizedBox(height: 10),
+              Text(
+                title,
+                style: theme.textTheme.headlineMedium?.copyWith(color: Colors.white),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                reason,
+                style: theme.textTheme.bodyLarge?.copyWith(
+                  color: Colors.white.withValues(alpha: 0.82),
+                  height: 1.42,
+                ),
+              ),
+              const SizedBox(height: 22),
+              FilledButton.icon(
+                style: FilledButton.styleFrom(
+                  backgroundColor: Colors.white,
+                  foregroundColor: AppPalette.primaryDark,
+                ),
+                onPressed: onPressed,
+                icon: const Icon(Icons.arrow_forward_rounded),
+                label: const Text('Devam et'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _HeroLabel extends StatelessWidget {
+  const _HeroLabel({required this.icon, required this.text, required this.foreground});
+
+  final IconData icon;
+  final String text;
+  final Color foreground;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Icon(icon, color: foreground, size: 16),
+        const SizedBox(width: 7),
+        Expanded(
+          child: Text(
+            text,
+            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+              color: foreground,
+              fontWeight: FontWeight.w800,
+              letterSpacing: 0.65,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
 }
 
 class _LibrarySurface extends StatelessWidget {
@@ -394,74 +615,41 @@ class _ContextCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return Card(
-      elevation: 0,
-      color: theme.colorScheme.surfaceContainerLow,
+    return Material(
+      color: AppPalette.surface,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+        side: const BorderSide(color: AppPalette.outline),
+      ),
+      clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: onPressed,
-        borderRadius: BorderRadius.circular(12),
         child: Padding(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.fromLTRB(16, 16, 14, 15),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Icon(icon),
-              const SizedBox(height: 12),
-              Text(title, style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700)),
+              DecoratedBox(
+                decoration: BoxDecoration(
+                  color: title == 'Dinle' ? AppPalette.successSoft : AppPalette.primarySoft,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(9),
+                  child: Icon(
+                    icon,
+                    size: 20,
+                    color: title == 'Dinle' ? AppPalette.success : AppPalette.primary,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 14),
+              Text(title, style: theme.textTheme.titleMedium),
               const SizedBox(height: 4),
-              Text(body, style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _MaterialCard extends StatelessWidget {
-  const _MaterialCard({required this.data, required this.onPressed});
-
-  final _HomeSnapshot data;
-  final VoidCallback onPressed;
-
-  @override
-  Widget build(BuildContext context) {
-    final material = data.material!;
-    final theme = Theme.of(context);
-    return Card(
-      elevation: 0,
-      color: theme.colorScheme.surfaceContainerLow,
-      child: InkWell(
-        onTap: onPressed,
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.all(18),
-          child: Row(
-            children: [
-              CircleAvatar(
-                backgroundColor: theme.colorScheme.primaryContainer,
-                child: Icon(
-                  material.mediaType == SourceMediaType.pdf ? Icons.picture_as_pdf_outlined : Icons.notes_rounded,
-                  color: theme.colorScheme.onPrimaryContainer,
-                ),
+              Text(
+                body,
+                style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant, height: 1.35),
               ),
-              const SizedBox(width: 14),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(material.title, style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700)),
-                    const SizedBox(height: 3),
-                    Text(
-                      data.source?.sourceName ?? 'Kaynak hazır',
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant),
-                    ),
-                  ],
-                ),
-              ),
-              const Icon(Icons.chevron_right_rounded),
             ],
           ),
         ),
