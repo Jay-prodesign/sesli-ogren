@@ -536,14 +536,14 @@ void main() {
     expect(find.text('3 işlem'), findsOneWidget);
     expect(find.textContaining('tr-TR'), findsOneWidget);
     await tester.scrollUntilVisible(find.text('Cihazın Türkçe sesi'), 260, scrollable: find.byType(Scrollable).last);
-    await tester.pumpAndSettle();
+    await tester.pump(const Duration(milliseconds: 300));
     expect(find.text('Cihazın Türkçe sesi'), findsOneWidget);
     await tester.scrollUntilVisible(
       find.textContaining('Hesap silme tüm hesap ve öğrenme verilerini kapsar'),
       260,
       scrollable: find.byType(Scrollable).last,
     );
-    await tester.pumpAndSettle();
+    await tester.pump(const Duration(milliseconds: 300));
     expect(find.textContaining('Hesap silme tüm hesap ve öğrenme verilerini kapsar'), findsOneWidget);
   });
 
