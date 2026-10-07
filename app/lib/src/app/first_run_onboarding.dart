@@ -64,20 +64,17 @@ class _FirstRunOnboardingState extends State<_FirstRunOnboarding> {
     _OnboardingStep(
       icon: Icons.auto_stories_outlined,
       title: 'Materyalinle başla',
-      body:
-          'PDF veya metnini ekle. Sesli Öğren aynı kaynağı dinleme ve aktif öğrenme adımlarında birlikte tutar.',
+      body: 'PDF veya metnini ekle. Sesli Öğren aynı kaynağı dinleme ve aktif öğrenme adımlarında birlikte tutar.',
     ),
     _OnboardingStep(
       icon: Icons.psychology_alt_outlined,
       title: 'Öğrenmeyi kanıtla',
-      body:
-          'Dinlemek faydalı olabilir ama tek başına öğrendiğin anlamına gelmez. Hatırlama ve açıklama gibi aktif adımlar ilerleme kanıtını oluşturur.',
+      body: 'Dinlemek faydalı olabilir ama tek başına öğrendiğin anlamına gelmez. Hatırlama ve açıklama gibi aktif adımlar ilerleme kanıtını oluşturur.',
     ),
     _OnboardingStep(
       icon: Icons.shield_outlined,
       title: 'Kontrol sende',
-      body:
-          'Neden bir sonraki adımı önerdiğimizi görebilir, materyallerini ayrı ayrı veya hesabını ve verilerini tamamen silebilirsin.',
+      body: 'Neden bir sonraki adımı önerdiğimizi görebilir, materyallerini ayrı ayrı veya hesabını ve verilerini tamamen silebilirsin.',
     ),
   ];
 
@@ -152,9 +149,7 @@ class _FirstRunOnboardingState extends State<_FirstRunOnboarding> {
                         height: 8,
                         margin: const EdgeInsets.symmetric(horizontal: 4),
                         decoration: BoxDecoration(
-                          color: index == _step
-                              ? theme.colorScheme.primary
-                              : theme.colorScheme.surfaceContainerHighest,
+                          color: index == _step ? theme.colorScheme.primary : theme.colorScheme.surfaceContainerHighest,
                           borderRadius: BorderRadius.circular(99),
                         ),
                       ),
@@ -162,10 +157,7 @@ class _FirstRunOnboardingState extends State<_FirstRunOnboarding> {
                   ),
                   const SizedBox(height: 24),
                   if (_step > 0)
-                    TextButton(
-                      onPressed: _saving ? null : () => setState(() => _step -= 1),
-                      child: const Text('Geri'),
-                    ),
+                    TextButton(onPressed: _saving ? null : () => setState(() => _step -= 1), child: const Text('Geri')),
                   const SizedBox(height: 4),
                   FilledButton(
                     onPressed: _saving ? null : _next,
