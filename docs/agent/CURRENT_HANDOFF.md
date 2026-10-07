@@ -9,8 +9,8 @@ This section supersedes stale branch/cursor/visual-pass/companion-lock lines bel
 - **LA-0040 — Million-Dollar Visual Audit & Student Experience Elevation: IN_PROGRESS / ACTIVE CURSOR.**
 - Current LA-0039 treatment (Premium Active Learning Studio) is now a baseline/control, not a locked final visual lane.
 - LA-0040 Round-0 VQG result: **FAIL / REDESIGN REQUIRED for the stated quality ambition**. High findings: generic-identity risk, prototype-like/repetitive Material Workspace, over-text/under-visual presentation, weak student-specific desire, and incomplete companion/UI integration.
-- Current treatment leader hypothesis: **Visual Learning Studio × Student Momentum hybrid**. It is NOT locked until comparable Golden Slice treatments are reviewed.
-- Companion leader hypothesis: **evolve D/Knot + use it more sparsely/functionally**; material redesign or removal remain valid tournament alternatives.
+- Founder-selected direction: **Visual Learning Studio × Student Momentum** for Turkish high-school students (9–12 / approx. 14–18). Direction is locked at concept level; implementation still requires VQG-01 proof.
+- Companion correction: the generated round/plush blue-purple mascot treatment is **REJECTED**. Preferred prototype is a sparse, 2D/vector-first living knot/signal guide; exact form/name remain open and removal remains a valid fallback.
 - Validated runtime baseline: `8caff368b653e0a3bae037903d581411dab9befa` — bootstrap `37641586921` PASS; account-deletion `37641586906` PASS; product-bounded `37641586870` PASS; visual capture `37641549582` PASS.
 - Current cursor: create comparable Golden Slice treatments (control + energetic + Visual Studio hybrid), test companion alternatives, rerun VQG-01 + visual stress/red-team, then present the strongest treatment at the protected Founder visual gate.
 - Physical-device release validation remains separate under D-068.
@@ -22,6 +22,7 @@ Authoritative LA-0040 artifacts:
 - docs/research/LA-0040_CURRENT_VISUAL_AUDIT_2026-10-07.md
 - docs/design/LA-0040_VISUAL_TREATMENT_TOURNAMENT.md
 - docs/design/LA-0040_COMPANION_REEVALUATION.md
+- docs/design/LA-0040_AUDIENCE_BRAND_VISUAL_DIRECTION_LOCK.md
 - docs/qa/LA-0040_VISUAL_QUALITY_GATE.md
 - docs/qa/LA-0040_VISUAL_STRESS_REDTEAM.md
 
