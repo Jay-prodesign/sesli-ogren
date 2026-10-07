@@ -38,7 +38,12 @@ jobs:
           "$PGBIN/pg_ctl" -D "$RUNNER_TEMP/pgdata" -o "-p $PGPORT -k $PGHOST -c listen_addresses=''" -l "$RUNNER_TEMP/pg.log" -w start
           echo "PGHOST=$PGHOST" >> "$GITHUB_ENV"
       - name: Canonical server SQL suite
-        run: bash scripts/m5_validate_server_sql.sh "$RUNNER_TEMP/account-deletion-sql-report.txt"
+        run: |
+          report="$RUNNER_TEMP/account-deletion-sql-report.txt"
+          if ! bash scripts/m5_validate_server_sql.sh "$report"; then
+            cat "$report" || true
+            exit 1
+          fi
       - name: Install Deno
         run: |
           curl -fsSL -o "$RUNNER_TEMP/deno.zip" "https://dl.deno.land/release/v${DENO_VERSION}/deno-x86_64-unknown-linux-gnu.zip"
