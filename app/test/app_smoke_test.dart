@@ -531,7 +531,7 @@ void main() {
     expect(find.text('Cihazın Türkçe sesi'), findsOneWidget);
     await tester.drag(find.byType(Scrollable).last, const Offset(0, -520));
     await tester.pump(const Duration(milliseconds: 300));
-    expect(find.textContaining('Hesap silme ayrı güvenli akış'), findsOneWidget);
+    expect(find.textContaining('Hesap silme tüm hesap ve öğrenme verilerini kapsar'), findsOneWidget);
   });
 
   testWidgets('account deletion requires explicit confirmation and purges local data after remote success', (
