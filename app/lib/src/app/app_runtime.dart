@@ -1,4 +1,6 @@
+import '../account/account_deletion_gateway.dart';
 import '../account/account_overview_gateway.dart';
+import '../account/supabase_account_deletion_gateway.dart';
 import '../account/supabase_account_overview_gateway.dart';
 import '../data/operational_telemetry.dart';
 import '../data/pdf_text_extractor.dart';
@@ -24,6 +26,7 @@ class AppRuntime {
     this.explainBack = const UnavailableExplainBackGateway(),
     this.focusHelp = const UnavailableFocusHelpGateway(),
     this.accountOverview = const UnavailableAccountOverviewGateway(),
+    this.accountDeletion = const UnavailableAccountDeletionGateway(),
   });
 
   /// Explicit M5 fixture only. It is not a production authentication claim.
@@ -43,6 +46,7 @@ class AppRuntime {
   final ExplainBackGateway explainBack;
   final FocusHelpGateway focusHelp;
   final AccountOverviewGateway accountOverview;
+  final AccountDeletionGateway accountDeletion;
 
   static Future<AppRuntime> open({required AuthenticatedLearner learner}) async {
     final store = await SqliteSourceStore.open();
@@ -57,7 +61,13 @@ class AppRuntime {
       explain: const SupabaseGroundedExplainGateway(),
       explainBack: const SupabaseExplainBackGateway(),
       accountOverview: const SupabaseAccountOverviewGateway(),
+      accountDeletion: const SupabaseAccountDeletionGateway(),
     );
+  }
+
+  Future<void> deleteAccount() async {
+    await accountDeletion.deleteAccount(learner: learner);
+    await store.purgeLearnerData(learner: learner);
   }
 
   Future<void> close() => store.close();
