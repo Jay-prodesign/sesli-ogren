@@ -326,11 +326,11 @@ Next unallocated ID: **LA-0035**.
 
 ##### LA-0034 — Secure account + data deletion
 
-- Status: IN_PROGRESS
+- Status: DONE
 - Depends on: LA-0033
 - Owner: Brain
 - Executor: ChatGPT (bounded reversible engineering)
-- Verification: authenticated deletion intent + server-only Storage/session/Auth cleanup; learner-scoped local purge; fail-closed destructive UI; disposable PostgreSQL, Edge Function and Flutter gates required before DONE.
+- Verification: authenticated deletion intent + server-only Storage/session/Auth cleanup; learner-scoped local purge; fail-closed destructive UI. Bootstrap run `37599984324` PASS, account-deletion bounded run `37599984408` PASS (PostgreSQL deletion slice + Deno lint/type-check), and product-bounded-validation run `37599984330` PASS (format, analyze, expanded Flutter tests) on `9010eed82eae067076629a1a1daca9d66486272b`. Hosted Supabase deployment remains intentionally deferred because the connected project has no canonical app schema/function deployment yet.
 - Exec plan: [docs/exec-plans/LA-0034.md](docs/exec-plans/LA-0034.md)
 
 ## Milestone M3 — V0 Implementation Tranches
