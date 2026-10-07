@@ -548,10 +548,7 @@ class _LibraryMaterialCard extends StatelessWidget {
           child: Row(
             children: [
               DecoratedBox(
-                decoration: BoxDecoration(
-                  color: AppPalette.primarySoft,
-                  borderRadius: BorderRadius.circular(14),
-                ),
+                decoration: BoxDecoration(color: AppPalette.primarySoft, borderRadius: BorderRadius.circular(14)),
                 child: Padding(
                   padding: const EdgeInsets.all(11),
                   child: Icon(mediaIcon, color: AppPalette.primary, size: 22),
@@ -562,7 +559,12 @@ class _LibraryMaterialCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(material.title, maxLines: 2, overflow: TextOverflow.ellipsis, style: theme.textTheme.titleMedium),
+                    Text(
+                      material.title,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.textTheme.titleMedium,
+                    ),
                     const SizedBox(height: 5),
                     Text(
                       '$mediaLabel · Çalışma alanını aç',
@@ -571,11 +573,7 @@ class _LibraryMaterialCard extends StatelessWidget {
                   ],
                 ),
               ),
-              IconButton(
-                tooltip: 'Materyali sil',
-                onPressed: onDelete,
-                icon: const Icon(Icons.delete_outline_rounded),
-              ),
+              IconButton(tooltip: 'Materyali sil', onPressed: onDelete, icon: const Icon(Icons.delete_outline_rounded)),
             ],
           ),
         ),
