@@ -3,6 +3,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 import '../auth/supabase_learner_auth.dart';
+import '../domain/authenticated_learner.dart';
+import 'account_entry_screen.dart';
 import 'app_runtime.dart';
 import 'companion_view.dart';
 import 'first_run_onboarding.dart';
@@ -16,7 +18,7 @@ class SesliOgrenApp extends StatefulWidget {
 }
 
 class _SesliOgrenAppState extends State<SesliOgrenApp> {
-  late Future<AppRuntime> _runtimeFuture;
+  late Future<AppRuntime?> _runtimeFuture;
   AppRuntime? _runtime;
   bool _accountDeleted = false;
 
@@ -27,12 +29,25 @@ class _SesliOgrenAppState extends State<SesliOgrenApp> {
   }
 
   void _openRuntime() {
-    _runtimeFuture = SupabaseLearnerAuth.authenticate().then((learner) => AppRuntime.open(learner: learner)).then((
-      runtime,
-    ) {
-      _runtime = runtime;
-      return runtime;
+    _runtimeFuture = SupabaseLearnerAuth.restoreSession().then((learner) async {
+      if (learner == null) return null;
+      return _openRuntimeForLearner(learner);
     });
+  }
+
+  Future<AppRuntime> _openRuntimeForLearner(AuthenticatedLearner learner) async {
+    final runtime = await AppRuntime.open(learner: learner);
+    _runtime = runtime;
+    return runtime;
+  }
+
+  Future<void> _handleAuthenticated(AuthenticatedLearner learner) async {
+    final runtime = await _openRuntimeForLearner(learner);
+    if (!mounted) {
+      await runtime.close();
+      return;
+    }
+    setState(() => _runtimeFuture = Future.value(runtime));
   }
 
   @override
@@ -82,9 +97,14 @@ class _SesliOgrenAppState extends State<SesliOgrenApp> {
       ),
       home: _accountDeleted
           ? _AccountDeletedScreen(onStartFresh: _startFresh)
-          : FutureBuilder<AppRuntime>(
+          : FutureBuilder<AppRuntime?>(
               future: _runtimeFuture,
               builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.done &&
+                    !snapshot.hasError &&
+                    snapshot.data == null) {
+                  return AccountEntryScreen(onAuthenticated: _handleAuthenticated);
+                }
                 if (snapshot.hasData) {
                   final runtime = snapshot.data!;
                   return FirstRunOnboardingGate(
