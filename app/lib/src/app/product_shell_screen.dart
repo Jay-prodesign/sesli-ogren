@@ -7,6 +7,7 @@ import 'companion_view.dart';
 import 'learning_slice_screen.dart';
 import 'listen_screen.dart';
 import 'material_workspace_screen.dart';
+import 'profile_surface.dart';
 import 'progress_surface.dart';
 
 class ProductShellScreen extends StatefulWidget {
