@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+
+import 'app_runtime.dart';
 
 class FirstRunOnboardingGate extends StatefulWidget {
-  const FirstRunOnboardingGate({required this.child, super.key});
+  const FirstRunOnboardingGate({required this.runtime, required this.child, super.key});
 
-  static const completionKey = 'sesli_ogren.onboarding.completed.v1';
-
+  final AppRuntime runtime;
   final Widget child;
 
   @override
@@ -21,15 +21,14 @@ class _FirstRunOnboardingGateState extends State<FirstRunOnboardingGate> {
     _completed = _load();
   }
 
-  Future<bool> _load() async {
-    final preferences = await SharedPreferences.getInstance();
-    return preferences.getBool(FirstRunOnboardingGate.completionKey) ?? false;
-  }
+  Future<bool> _load() => widget.runtime.store.onboardingCompleted(learner: widget.runtime.learner);
 
   Future<void> _complete() async {
-    final preferences = await SharedPreferences.getInstance();
-    final saved = await preferences.setBool(FirstRunOnboardingGate.completionKey, true);
-    if (!saved || !mounted) return;
+    await widget.runtime.store.markOnboardingCompleted(
+      learner: widget.runtime.learner,
+      updatedAt: DateTime.now().toUtc(),
+    );
+    if (!mounted) return;
     setState(() => _completed = Future.value(true));
   }
 
