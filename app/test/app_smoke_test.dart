@@ -422,8 +422,11 @@ void main() {
         home: ListenScreen(runtime: runtime, materialId: const MaterialId('listen-resume'), speechOutput: speech),
       ),
     );
-    await pumpUntilFound(tester, find.text('Kaldığın yerden dinle'));
+    await pumpUntilFound(tester, find.text('Dinleme devam notu'));
     expect(find.textContaining('bölüm 2 / 2'), findsOneWidget);
+    await tester.drag(find.byType(Scrollable).last, const Offset(0, -620));
+    await tester.pumpAndSettle();
+    await pumpUntilFound(tester, find.text('Kaldığın yerden dinle'));
 
     await tapVisible(tester, find.text('Kaldığın yerden dinle'));
     await tester.pump();
