@@ -21,7 +21,7 @@ Milestone numbering follows the program sequence in
 M1 = Architecture Proof, …). Drive lifecycle-stage labels use a different
 numbering: lifecycle "M3" is this M0, and lifecycle "M4" is this M1.
 
-Next unallocated ID: **LA-0039**.
+Next unallocated ID: **LA-0040**.
 
 ---
 
@@ -377,6 +377,7 @@ Next unallocated ID: **LA-0039**.
 - Depends on: LA-0038
 - Owner: Brain
 - Executor: ChatGPT (bounded reversible engineering)
+- Verification: LA-0039 World-Class Experience Gate + canonical bootstrap + Flutter format/analyze + expanded tests + representative Golden Product Slice visual/runtime review; Founder visual review required before DONE.
 - Intent: replace prototype/default-Material presentation with one coherent Premium Active Learning Studio experience while preserving learning truth, D/Knot identity, provenance/evidence semantics and current feature scope.
 - Selected treatment: T2 Premium Active Learning Studio from [docs/design/LA_VISUAL_TREATMENT_TOURNAMENT_R1.md](docs/design/LA_VISUAL_TREATMENT_TOURNAMENT_R1.md).
 - Quality authority: [docs/qa/LA-0039_WORLD_CLASS_EXPERIENCE_GATE.md](docs/qa/LA-0039_WORLD_CLASS_EXPERIENCE_GATE.md).
