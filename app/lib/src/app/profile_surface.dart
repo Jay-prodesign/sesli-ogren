@@ -12,6 +12,7 @@ class ProfileSurface extends StatefulWidget {
     this.onAccountDeleted,
     this.onSignOut,
     this.supportEmail = _configuredSupportEmail,
+    this.clipboardWriter,
     super.key,
   });
 
@@ -19,6 +20,7 @@ class ProfileSurface extends StatefulWidget {
   final VoidCallback? onAccountDeleted;
   final Future<void> Function()? onSignOut;
   final String supportEmail;
+  final Future<void> Function(String value)? clipboardWriter;
 
   @override
   State<ProfileSurface> createState() => _ProfileSurfaceState();
@@ -85,7 +87,12 @@ class _ProfileSurfaceState extends State<ProfileSurface> {
   Future<void> _copySupportEmail() async {
     final email = _supportEmail;
     if (email == null) return;
-    await Clipboard.setData(ClipboardData(text: email));
+    final writer = widget.clipboardWriter;
+    if (writer == null) {
+      await Clipboard.setData(ClipboardData(text: email));
+    } else {
+      await writer(email);
+    }
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Destek e-postası kopyalandı.')));
   }

@@ -547,9 +547,16 @@ void main() {
       accountOverview: const _ReadyAccountOverviewGateway(),
     );
 
+    String? copiedSupportEmail;
     await tester.pumpWidget(
       MaterialApp(
-        home: ProfileSurface(runtime: runtime, supportEmail: 'destek@example.com'),
+        home: ProfileSurface(
+          runtime: runtime,
+          supportEmail: 'destek@example.com',
+          clipboardWriter: (value) async {
+            copiedSupportEmail = value;
+          },
+        ),
       ),
     );
     await pumpUntilFound(tester, find.text('Profil ve Ayarlar'));
@@ -558,7 +565,9 @@ void main() {
 
     expect(find.text('destek@example.com'), findsOneWidget);
     await tapVisible(tester, find.text('Destek e-postasını kopyala'));
-    await pumpUntilFound(tester, find.text('Destek e-postası kopyalandı.'));
+    await tester.pump(const Duration(milliseconds: 100));
+
+    expect(copiedSupportEmail, 'destek@example.com');
   });
 
   testWidgets('Profile fails closed when support contact is not configured', (tester) async {
