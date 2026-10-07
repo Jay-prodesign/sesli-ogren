@@ -51,12 +51,18 @@ select public.request_grounded_explain(
 ) as job_replay \gset
 reset role;
 
-do $$
+create or replace function pg_temp.assert_true(condition boolean, msg text)
+returns void language plpgsql as $
 begin
-  if :'job_a' <> :'job_replay' then
-    raise exception 'explain_assert_failed: idempotent replay changed job';
+  if condition is distinct from true then
+    raise exception 'explain_assert_failed: %', msg;
   end if;
-end $$;
+end $;
+
+select pg_temp.assert_true(
+  :'job_a' = :'job_replay',
+  'idempotent replay changed job'
+);
 
 -- A stale digest must fail before a generation request can be accepted.
 select set_config('request.jwt.claim.sub', :user_a, false);
