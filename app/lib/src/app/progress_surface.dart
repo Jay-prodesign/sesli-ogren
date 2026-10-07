@@ -54,6 +54,7 @@ class _ProgressCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final state = item.continuation?.state.kind ?? RecallStateKind.notAssessed;
     final label = switch (state) {
       RecallStateKind.notAssessed => 'Henüz ölçülmedi',
