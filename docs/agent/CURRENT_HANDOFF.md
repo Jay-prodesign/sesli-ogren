@@ -10,7 +10,7 @@ This section supersedes stale branch/cursor lines below where they conflict.
 - LA-0031 Material deletion + safe continuity: DONE.
 - LA-0032 Durable Listen resume continuity: DONE.
 - Latest gates: bootstrap run `37587432418` PASS; product run `37587432428` PASS — canonical format, Flutter analyze, expanded Flutter tests.
-- Current cursor: select the next user-visible first-commercial-V0 gap from current product authority; do not reopen standalone Summary/Key Concepts/Flashcards/full Quiz as mandatory navigation, and do not return to generic engine/framework work.
+- Current cursor: **LA-0033 — Profile + server-authoritative plan/usage surface**. Read only existing RLS-protected account/entitlement/quota truth; fail closed when unavailable; do not expand into checkout or destructive account deletion in this task.
 - Local development/preview should track `feat/full-product-shell-continuity`, not `main` or historical review snapshots.
 
 ---

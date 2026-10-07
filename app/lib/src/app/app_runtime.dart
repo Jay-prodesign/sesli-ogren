@@ -1,3 +1,5 @@
+import '../account/account_overview_gateway.dart';
+import '../account/supabase_account_overview_gateway.dart';
 import '../data/operational_telemetry.dart';
 import '../data/pdf_text_extractor.dart';
 import '../data/source_ingest_service.dart';
@@ -21,6 +23,7 @@ class AppRuntime {
     this.explain = const UnavailableGroundedExplainGateway(),
     this.explainBack = const UnavailableExplainBackGateway(),
     this.focusHelp = const UnavailableFocusHelpGateway(),
+    this.accountOverview = const UnavailableAccountOverviewGateway(),
   });
 
   /// Explicit M5 fixture only. It is not a production authentication claim.
@@ -39,6 +42,7 @@ class AppRuntime {
   final GroundedExplainGateway explain;
   final ExplainBackGateway explainBack;
   final FocusHelpGateway focusHelp;
+  final AccountOverviewGateway accountOverview;
 
   static Future<AppRuntime> open({required AuthenticatedLearner learner}) async {
     final store = await SqliteSourceStore.open();
@@ -52,6 +56,7 @@ class AppRuntime {
       telemetry: store.operationalTelemetry(),
       explain: const SupabaseGroundedExplainGateway(),
       explainBack: const SupabaseExplainBackGateway(),
+      accountOverview: const SupabaseAccountOverviewGateway(),
     );
   }
 

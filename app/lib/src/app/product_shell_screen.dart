@@ -174,6 +174,11 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
             selectedIcon: Icon(Icons.insights_rounded),
             label: 'İlerleme',
           ),
+          NavigationDestination(
+            icon: Icon(Icons.person_outline_rounded),
+            selectedIcon: Icon(Icons.person_rounded),
+            label: 'Profil',
+          ),
         ],
       ),
     );

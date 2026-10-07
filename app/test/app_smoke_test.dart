@@ -2,6 +2,7 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:sesli_ogren/src/account/account_overview_gateway.dart';
 import 'package:sesli_ogren/src/app/app_runtime.dart';
 import 'package:sesli_ogren/src/app/learning_slice_screen.dart';
 import 'package:sesli_ogren/src/app/listen_screen.dart';
@@ -14,6 +15,7 @@ import 'package:sesli_ogren/src/data/sqlite_source_store.dart';
 import 'package:sesli_ogren/src/learning/recall_learning_service.dart';
 import 'package:sesli_ogren/src/generation/grounded_explain_gateway.dart';
 import 'package:sesli_ogren/src/speech/device_speech_output.dart';
+import 'package:sesli_ogren/src/domain/authenticated_learner.dart';
 import 'package:sesli_ogren/src/domain/learning_truth.dart';
 import 'package:sesli_ogren/src/domain/learning_contracts.dart';
 import 'package:sesli_ogren/src/domain/operational_event.dart';
@@ -39,6 +41,25 @@ class _ReadyExplainGateway implements GroundedExplainGateway {
     keyPoints: const ['Işık enerjisi kullanılır', 'Kimyasal enerji depolanır'],
     language: 'tr-TR',
     executionRef: 'test:grounded-explain',
+  );
+}
+
+class _ReadyAccountOverviewGateway implements AccountOverviewGateway {
+  const _ReadyAccountOverviewGateway();
+
+  @override
+  Future<AccountOverview?> load({required AuthenticatedLearner learner}) async => AccountOverview(
+    locale: 'tr-TR',
+    accountStatus: 'active',
+    plan: 'free',
+    entitlementStatus: 'active',
+    usage: [
+      AccountUsageEntry(
+        periodStart: DateTime.utc(2026, 10, 1),
+        capability: 'grounded_explain',
+        consumed: 3,
+      ),
+    ],
   );
 }
 
@@ -470,6 +491,32 @@ void main() {
     expect(find.text('Henüz ölçülmedi'), findsOneWidget);
     expect(find.textContaining('yapay olarak artırmaz'), findsOneWidget);
     expect(find.textContaining('%'), findsNothing);
+  });
+
+  testWidgets('Profile shows only verified plan and usage data', (tester) async {
+    final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
+    addTearDown(store.close);
+    final runtime = AppRuntime(
+      learner: AppRuntime.localM5LearnerFixture,
+      store: store,
+      ingest: SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor()),
+      recall: RecallLearningService(sourceStore: store, learningStore: store.learningTruthStore()),
+      telemetry: store.operationalTelemetry(),
+      accountOverview: const _ReadyAccountOverviewGateway(),
+    );
+
+    await tester.pumpWidget(MaterialApp(home: ProductShellScreen(runtime: runtime)));
+    await pumpUntilFound(tester, find.text('Profil'));
+    await tapVisible(tester, find.text('Profil').last);
+    await pumpUntilFound(tester, find.text('Profil ve Ayarlar'));
+
+    expect(find.text('Ücretsiz plan'), findsOneWidget);
+    expect(find.text('Plan etkin'), findsOneWidget);
+    expect(find.text('Kaynağa dayalı açıklama'), findsOneWidget);
+    expect(find.text('3 işlem'), findsOneWidget);
+    expect(find.textContaining('tr-TR'), findsOneWidget);
+    expect(find.text('Cihazın Türkçe sesi'), findsOneWidget);
+    expect(find.textContaining('Hesap silme ayrı güvenli akış'), findsOneWidget);
   });
 
   testWidgets('grounded Explain labels generated interpretation and preserves Recall as active step', (tester) async {
