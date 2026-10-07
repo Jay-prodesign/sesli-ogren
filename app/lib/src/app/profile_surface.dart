@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 
 import '../account/account_overview_gateway.dart';
 import 'app_runtime.dart';
+import 'app_theme.dart';
 
 const _configuredSupportEmail = String.fromEnvironment('SUPPORT_EMAIL');
 
@@ -149,9 +150,19 @@ class _ProfileSurfaceState extends State<ProfileSurface> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return ListView(
-      padding: const EdgeInsets.fromLTRB(20, 24, 20, 32),
+      key: const ValueKey('profile-surface'),
+      padding: const EdgeInsets.fromLTRB(20, 24, 20, 36),
       children: [
-        Text('Profil ve Ayarlar', style: theme.textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.w800)),
+        Text(
+          'HESAP VE AYARLAR',
+          style: theme.textTheme.labelSmall?.copyWith(
+            color: AppPalette.primary,
+            fontWeight: FontWeight.w800,
+            letterSpacing: 0.8,
+          ),
+        ),
+        const SizedBox(height: 7),
+        Text('Profil ve Ayarlar', style: theme.textTheme.headlineMedium),
         const SizedBox(height: 6),
         Text(
           'Hesap, plan ve doğrulanabilir kullanım bilgilerin.',
@@ -168,150 +179,136 @@ class _ProfileSurfaceState extends State<ProfileSurface> {
             }
             final overview = snapshot.data;
             if (overview == null) {
-              return Card(
-                elevation: 0,
-                color: theme.colorScheme.surfaceContainerLow,
-                child: Padding(
-                  padding: const EdgeInsets.all(18),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Text(
-                        'Hesap bilgisi doğrulanamadı',
-                        style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
-                      ),
-                      const SizedBox(height: 6),
-                      const Text(
+              return _ProfilePanel(
+                children: [
+                  _ProfileTile(
+                    icon: Icons.cloud_off_rounded,
+                    title: 'Hesap bilgisi doğrulanamadı',
+                    subtitle:
                         'Plan veya kullanım bilgisini tahmin etmiyoruz. Bağlantı geri geldiğinde yeniden deneyebilirsin.',
-                      ),
-                      const SizedBox(height: 12),
-                      OutlinedButton(onPressed: _retry, child: const Text('Yeniden dene')),
-                    ],
+                    iconBackground: AppPalette.attentionSoft,
+                    iconForeground: AppPalette.attention,
                   ),
-                ),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                    child: OutlinedButton(onPressed: _retry, child: const Text('Yeniden dene')),
+                  ),
+                ],
               );
             }
             return _AccountOverviewCard(overview: overview);
           },
         ),
-        const SizedBox(height: 14),
-        Card(
-          elevation: 0,
-          color: theme.colorScheme.surfaceContainerLow,
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(8, 4, 8, 12),
-            child: Column(
-              children: [
-                const ListTile(
-                  leading: Icon(Icons.account_circle_outlined),
-                  title: Text('Hesap oturumu'),
-                  subtitle: Text('Çıkış yapmak hesabını veya öğrenme verilerini silmez.'),
-                ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8),
-                  child: OutlinedButton.icon(
-                    onPressed: widget.onSignOut == null || _signingOut || _deleting ? null : _signOut,
-                    icon: _signingOut
-                        ? const SizedBox.square(dimension: 18, child: CircularProgressIndicator(strokeWidth: 2))
-                        : const Icon(Icons.logout_rounded),
-                    label: Text(_signingOut ? 'Çıkış yapılıyor…' : 'Bu cihazda çıkış yap'),
-                  ),
-                ),
-              ],
+        const SizedBox(height: 26),
+        const _ProfileSectionLabel('Hesap'),
+        const SizedBox(height: 10),
+        _ProfilePanel(
+          children: [
+            const _ProfileTile(
+              icon: Icons.account_circle_outlined,
+              title: 'Hesap oturumu',
+              subtitle: 'Çıkış yapmak hesabını veya öğrenme verilerini silmez.',
             ),
-          ),
-        ),
-        const SizedBox(height: 14),
-        Card(
-          elevation: 0,
-          color: theme.colorScheme.surfaceContainerLow,
-          child: const Column(
-            children: [
-              ListTile(leading: Icon(Icons.language_rounded), title: Text('Öğrenme dili'), subtitle: Text('Türkçe')),
-              Divider(height: 1),
-              ListTile(
-                leading: Icon(Icons.record_voice_over_outlined),
-                title: Text('Dinleme sesi'),
-                subtitle: Text('Cihazın Türkçe sesi'),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+              child: OutlinedButton.icon(
+                onPressed: widget.onSignOut == null || _signingOut || _deleting ? null : _signOut,
+                icon: _signingOut
+                    ? const SizedBox.square(dimension: 18, child: CircularProgressIndicator(strokeWidth: 2))
+                    : const Icon(Icons.logout_rounded),
+                label: Text(_signingOut ? 'Çıkış yapılıyor…' : 'Bu cihazda çıkış yap'),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
-        const SizedBox(height: 14),
-        Card(
-          elevation: 0,
-          color: theme.colorScheme.surfaceContainerLow,
-          child: ListTile(
-            leading: const Icon(Icons.accessibility_new_rounded),
-            title: const Text('Hareket tercihi'),
-            subtitle: Text(
-              MediaQuery.disableAnimationsOf(context)
+        const SizedBox(height: 24),
+        const _ProfileSectionLabel('Tercihler'),
+        const SizedBox(height: 10),
+        _ProfilePanel(
+          children: [
+            const _ProfileTile(
+              icon: Icons.language_rounded,
+              title: 'Öğrenme dili',
+              subtitle: 'Türkçe',
+            ),
+            const Divider(height: 1),
+            const _ProfileTile(
+              icon: Icons.record_voice_over_outlined,
+              title: 'Dinleme sesi',
+              subtitle: 'Cihazın Türkçe sesi',
+              iconBackground: AppPalette.successSoft,
+              iconForeground: AppPalette.success,
+            ),
+            const Divider(height: 1),
+            _ProfileTile(
+              icon: Icons.accessibility_new_rounded,
+              title: 'Hareket tercihi',
+              subtitle: MediaQuery.disableAnimationsOf(context)
                   ? 'Sistemde azaltılmış hareket açık'
                   : 'Sistemin hareket tercihi kullanılıyor',
+              iconBackground: AppPalette.attentionSoft,
+              iconForeground: AppPalette.attention,
             ),
-          ),
+          ],
         ),
-        const SizedBox(height: 14),
-        Card(
-          elevation: 0,
-          color: theme.colorScheme.surfaceContainerLow,
-          child: _supportEmail == null
-              ? const ListTile(
-                  leading: Icon(Icons.support_agent_rounded),
-                  title: Text('Destek'),
-                  subtitle: Text(
-                    'Destek iletişim kanalı henüz yapılandırılmadı. Uygulama sahte bir adres göstermiyor.',
-                  ),
-                )
-              : Padding(
-                  padding: const EdgeInsets.fromLTRB(8, 4, 8, 12),
-                  child: Column(
-                    children: [
-                      ListTile(
-                        leading: const Icon(Icons.support_agent_rounded),
-                        title: const Text('Destek'),
-                        subtitle: Text(_supportEmail!),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 8),
-                        child: OutlinedButton.icon(
-                          onPressed: _copySupportEmail,
-                          icon: const Icon(Icons.copy_rounded),
-                          label: const Text('Destek e-postasını kopyala'),
-                        ),
-                      ),
-                    ],
-                  ),
+        const SizedBox(height: 24),
+        const _ProfileSectionLabel('Destek'),
+        const SizedBox(height: 10),
+        _ProfilePanel(
+          children: [
+            if (_supportEmail == null)
+              const _ProfileTile(
+                icon: Icons.support_agent_rounded,
+                title: 'Destek',
+                subtitle: 'Destek iletişim kanalı henüz yapılandırılmadı. Uygulama sahte bir adres göstermiyor.',
+              )
+            else ...[
+              _ProfileTile(
+                icon: Icons.support_agent_rounded,
+                title: 'Destek',
+                subtitle: _supportEmail!,
+                iconBackground: AppPalette.successSoft,
+                iconForeground: AppPalette.success,
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                child: OutlinedButton.icon(
+                  onPressed: _copySupportEmail,
+                  icon: const Icon(Icons.copy_rounded),
+                  label: const Text('Destek e-postasını kopyala'),
                 ),
+              ),
+            ],
+          ],
         ),
-        const SizedBox(height: 14),
-        Card(
-          elevation: 0,
-          color: theme.colorScheme.surfaceContainerLow,
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(8, 4, 8, 12),
-            child: Column(
-              children: [
-                const ListTile(
-                  leading: Icon(Icons.privacy_tip_outlined),
-                  title: Text('Gizlilik ve veriler'),
-                  subtitle: Text(
-                    'Tek tek materyalleri Kütüphane’den silebilirsin. Hesap silme tüm hesap ve öğrenme verilerini kapsar.',
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8),
-                  child: OutlinedButton.icon(
-                    onPressed: _deleting ? null : _deleteAccount,
-                    icon: _deleting
-                        ? const SizedBox.square(dimension: 18, child: CircularProgressIndicator(strokeWidth: 2))
-                        : const Icon(Icons.delete_forever_outlined),
-                    label: Text(_deleting ? 'Siliniyor…' : 'Hesabımı ve verilerimi sil'),
-                  ),
-                ),
-              ],
+        const SizedBox(height: 24),
+        const _ProfileSectionLabel('Verilerin'),
+        const SizedBox(height: 10),
+        _ProfilePanel(
+          children: [
+            const _ProfileTile(
+              icon: Icons.privacy_tip_outlined,
+              title: 'Gizlilik ve veriler',
+              subtitle:
+                  'Tek tek materyalleri Kütüphane’den silebilirsin. Hesap silme tüm hesap ve öğrenme verilerini kapsar.',
+              iconBackground: Color(0xFFFDE7E5),
+              iconForeground: AppPalette.destructive,
             ),
-          ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+              child: OutlinedButton.icon(
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: AppPalette.destructive,
+                  side: const BorderSide(color: Color(0xFFE7B8B4)),
+                ),
+                onPressed: _deleting ? null : _deleteAccount,
+                icon: _deleting
+                    ? const SizedBox.square(dimension: 18, child: CircularProgressIndicator(strokeWidth: 2))
+                    : const Icon(Icons.delete_forever_outlined),
+                label: Text(_deleting ? 'Siliniyor…' : 'Hesabımı ve verilerimi sil'),
+              ),
+            ),
+          ],
         ),
       ],
     );
@@ -332,41 +329,113 @@ class _AccountOverviewCard extends StatelessWidget {
       'tester' => 'Test planı',
       _ => 'Plan doğrulanamadı',
     };
+    final active = overview.entitlementStatus == 'active';
 
-    return Card(
-      elevation: 0,
-      color: theme.colorScheme.primaryContainer.withValues(alpha: 0.45),
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: AppPalette.primaryDark,
+        borderRadius: BorderRadius.circular(26),
+        boxShadow: [
+          BoxShadow(
+            color: AppPalette.primaryDark.withValues(alpha: 0.14),
+            blurRadius: 24,
+            offset: const Offset(0, 12),
+          ),
+        ],
+      ),
       child: Padding(
-        padding: const EdgeInsets.all(18),
+        padding: const EdgeInsets.fromLTRB(20, 20, 20, 18),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text(planLabel, style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800)),
-            const SizedBox(height: 4),
-            Text(
-              overview.entitlementStatus == 'active' ? 'Plan etkin' : 'Plan durumu: ${overview.entitlementStatus}',
-              style: theme.textTheme.bodyMedium,
-            ),
-            const SizedBox(height: 18),
-            Text('Kullanım', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700)),
-            const SizedBox(height: 8),
-            if (overview.usage.isEmpty)
-              const Text('Bu hesap için sunucu kullanım kaydı henüz oluşmadı.')
-            else
-              for (final entry in overview.usage.take(4))
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 6),
-                  child: Row(
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(13),
+                  ),
+                  child: const Padding(
+                    padding: EdgeInsets.all(10),
+                    child: Icon(Icons.workspace_premium_outlined, color: Colors.white),
+                  ),
+                ),
+                const SizedBox(width: 13),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Expanded(child: Text(_capabilityLabel(entry.capability))),
-                      Text('${entry.consumed} işlem', style: const TextStyle(fontWeight: FontWeight.w700)),
+                      Text(planLabel, style: theme.textTheme.titleLarge?.copyWith(color: Colors.white)),
+                      const SizedBox(height: 4),
+                      Text(
+                        active ? 'Plan etkin' : 'Plan durumu: ${overview.entitlementStatus}',
+                        style: theme.textTheme.bodyMedium?.copyWith(color: Colors.white.withValues(alpha: 0.76)),
+                      ),
                     ],
                   ),
                 ),
-            const SizedBox(height: 12),
+                DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: active
+                        ? const Color(0xFFB8F1E2).withValues(alpha: 0.18)
+                        : Colors.white.withValues(alpha: 0.10),
+                    borderRadius: BorderRadius.circular(999),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                    child: Text(
+                      active ? 'AKTİF' : 'DURUM',
+                      style: theme.textTheme.labelSmall?.copyWith(
+                        color: active ? const Color(0xFFB8F1E2) : Colors.white70,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 18),
+            Divider(color: Colors.white.withValues(alpha: 0.15)),
+            const SizedBox(height: 16),
+            Text(
+              'KULLANIM',
+              style: theme.textTheme.labelSmall?.copyWith(
+                color: const Color(0xFFAFC0FF),
+                fontWeight: FontWeight.w800,
+                letterSpacing: 0.7,
+              ),
+            ),
+            const SizedBox(height: 10),
+            if (overview.usage.isEmpty)
+              Text(
+                'Bu hesap için sunucu kullanım kaydı henüz oluşmadı.',
+                style: theme.textTheme.bodyMedium?.copyWith(color: Colors.white.withValues(alpha: 0.78)),
+              )
+            else
+              for (final entry in overview.usage.take(4))
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 8),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          _capabilityLabel(entry.capability),
+                          style: theme.textTheme.bodyMedium?.copyWith(color: Colors.white),
+                        ),
+                      ),
+                      Text(
+                        '${entry.consumed} işlem',
+                        style: theme.textTheme.labelLarge?.copyWith(color: Colors.white),
+                      ),
+                    ],
+                  ),
+                ),
+            const SizedBox(height: 8),
             Text(
               'Dil: ${overview.locale}',
-              style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+              style: theme.textTheme.bodySmall?.copyWith(color: Colors.white.withValues(alpha: 0.60)),
             ),
           ],
         ),
@@ -380,4 +449,86 @@ class _AccountOverviewCard extends StatelessWidget {
     'explain_back' => 'Anlatım değerlendirme',
     _ => capability.replaceAll('_', ' '),
   };
+}
+
+class _ProfileSectionLabel extends StatelessWidget {
+  const _ProfileSectionLabel(this.text);
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(text, style: Theme.of(context).textTheme.titleMedium);
+  }
+}
+
+class _ProfilePanel extends StatelessWidget {
+  const _ProfilePanel({required this.children});
+
+  final List<Widget> children;
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: AppPalette.surface,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: AppPalette.outline),
+      ),
+      child: Column(children: children),
+    );
+  }
+}
+
+class _ProfileTile extends StatelessWidget {
+  const _ProfileTile({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    this.iconBackground = AppPalette.primarySoft,
+    this.iconForeground = AppPalette.primary,
+  });
+
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final Color iconBackground;
+  final Color iconForeground;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 15, 16, 14),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          DecoratedBox(
+            decoration: BoxDecoration(color: iconBackground, borderRadius: BorderRadius.circular(12)),
+            child: Padding(
+              padding: const EdgeInsets.all(9),
+              child: Icon(icon, color: iconForeground, size: 20),
+            ),
+          ),
+          const SizedBox(width: 13),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(title, style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700)),
+                const SizedBox(height: 4),
+                Text(
+                  subtitle,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                    height: 1.4,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }
