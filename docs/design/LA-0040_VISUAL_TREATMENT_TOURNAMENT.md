@@ -1,6 +1,6 @@
 # LA-0040 Visual Treatment Tournament
 
-Status: ROUND 0 — HYPOTHESES ADMITTED; MOCKUP/RUNTIME ROUND REQUIRED BEFORE LOCK.
+Status: FOUNDER DIRECTION LOCK — T5 Visual Learning Studio × Student Momentum selected at concept level; implementation proof still required.
 
 ## Scoring
 Each lane is judged 1–5 on:
@@ -89,10 +89,10 @@ Risks:
 - requires real prototype comparison, not prose selection.
 
 Round-0 score: **45/50**
-Disposition: **ADVANCE — RECOMMENDED MOCKUP LEADER.**
+Disposition: **FOUNDER-LOCKED DIRECTION.** Rebuild/prototype under the high-school audience, brand voice and color constraints in `LA-0040_AUDIENCE_BRAND_VISUAL_DIRECTION_LOCK.md`; visual PASS still requires VQG-01.
 
-## Tournament rule
-Do not lock T5 from this paper score. Create comparable Golden Slice treatments for at least T1(control), T2 and T5, then rerun VQG-01 and red team.
+## Tournament disposition
+Founder selected T5 as the product direction after reviewing the first comparison. T1 and T2 remain reference/control evidence only. Do not spend implementation time polishing them. The selected direction must now be proven through the representative Golden Slice, VQG-01 and red team.
 
 ## Required treatment proof
 For each finalist show:
