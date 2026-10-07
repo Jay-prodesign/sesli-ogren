@@ -116,7 +116,6 @@ CREATE TABLE sentinel (
     }
   });
 
-
   test('v7 database upgrades learner onboarding preferences without reset', () async {
     final temp = await Directory.systemTemp.createTemp('sesli-ogren-v7-upgrade-');
     final path = '${temp.path}/upgrade.db';
@@ -158,7 +157,6 @@ CREATE TABLE sentinel (
       await temp.delete(recursive: true);
     }
   });
-
 
   test('v5 database upgrades active Recall attempt schema without reset', () async {
     final temp = await Directory.systemTemp.createTemp('sesli-ogren-v5-upgrade-');
