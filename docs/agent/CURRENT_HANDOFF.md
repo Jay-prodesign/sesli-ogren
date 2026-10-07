@@ -1,13 +1,23 @@
 # CURRENT EXECUTION OVERRIDE — 2026-10-07
 
-This section supersedes stale branch/cursor lines below where they conflict.
+This section supersedes stale branch/cursor/visual-pass lines below where they conflict.
 
-- Active runnable product branch: `feat/full-product-shell-continuity` (PR #13).
-- Repository `main` remains bootstrap-only and MUST NOT be treated as the runnable Sesli Öğren application source.
-- LA-0024…LA-0037 are completed post-M5 full-product tranches.
-- LA-0038 Truthful support contact surface: IN_PROGRESS.
-- Current cursor: expose only a release-configured client-safe support contact; fail closed if absent/invalid; do not invent a public support address.
-- No hosted Supabase mutation, paid support provider or production secret is authorized.
+- Active runnable product branch: feat/full-product-shell-continuity (PR #13).
+- Repository main remains bootstrap-only and MUST NOT be treated as the runnable Sesli Öğren application source.
+- LA-0024…LA-0038 are completed post-M5 full-product tranches.
+- LA-0038 Truthful support contact surface: DONE at validated runtime head 5ee9f4fa; bootstrap/account-deletion/product-bounded workflows PASS.
+- Founder visual correction on 2026-10-07 REOPENS the app-shell Product/Visual PASS. D/Knot identity remains selected/locked; the shell/colors/typography/navigation/surface hierarchy/motion/product presentation do not.
+- LA-0039 World-Class Experience / Golden Product Slice: ACTIVE / EXECUTABLE Tier-A tranche.
+- Selected visual lane: Premium Active Learning Studio.
+- Current cursor: theme/tokens and Home/Continue/material identity foundation -> Workspace/active-learning result/payoff -> Listen continuity -> remaining golden-slice coherence.
+- Game Engine / corebreak-game is authorized as READ-ONLY methodology reference only for LA-0039. No cross-project product decision, code, asset, lifecycle state or implementation authority is imported.
+- No merge, release, deploy, paid provider, production secret or cross-project mutation is authorized.
+
+Authoritative LA-0039 artifacts:
+- docs/research/LA_WORLD_CLASS_EXPERIENCE_AUDIT_2026-10-07.md
+- docs/design/LA_VISUAL_TREATMENT_TOURNAMENT_R1.md
+- docs/exec-plans/LA-0039.md
+- docs/qa/LA-0039_WORLD_CLASS_EXPERIENCE_GATE.md
 
 ---
 
