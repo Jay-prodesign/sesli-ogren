@@ -308,7 +308,7 @@ Next unallocated ID: **LA-0033**.
 
 ##### LA-0032 — Durable Listen resume continuity
 
-- Status: IN_PROGRESS
+- Status: DONE
 - Depends on: LA-0031
 - Owner: Brain
 - Executor: ChatGPT (bounded reversible engineering)
