@@ -1,3 +1,19 @@
+# CURRENT EXECUTION OVERRIDE — 2026-10-07
+
+This section supersedes stale branch/cursor lines below where they conflict.
+
+- Active runnable product branch: `feat/full-product-shell-continuity` (PR #13).
+- Validated product head: `377c9ce238883fced4e3a7fa99a29ecead91780f`.
+- Repository `main` remains the intentionally empty/bootstrap-only initial line and MUST NOT be treated as the runnable Sesli Öğren application source.
+- LA-0024…LA-0031 are completed post-M5 product-continuity tranches on the active branch.
+- LA-0030 Durable Resume Continuity: DONE.
+- LA-0031 Material deletion + safe continuity: DONE.
+- Validation: GitHub Actions product-bounded-validation run `37585838940` PASS — canonical format, Flutter analyze, expanded Flutter tests.
+- Current cursor: choose the next user-visible first-commercial-V0 gap from current product authority; do not reopen standalone Summary/Key Concepts/Flashcards/full Quiz as mandatory navigation, and do not return to generic engine/framework work.
+- Local development/preview should track `feat/full-product-shell-continuity`, not `main` or the historical iPhone review snapshot.
+
+---
+
 # CURRENT HANDOFF
 
 ## Active mission

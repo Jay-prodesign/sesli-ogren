@@ -21,7 +21,7 @@ Milestone numbering follows the program sequence in
 M1 = Architecture Proof, …). Drive lifecycle-stage labels use a different
 numbering: lifecycle "M3" is this M0, and lifecycle "M4" is this M1.
 
-Next unallocated ID: **LA-0030**.
+Next unallocated ID: **LA-0032**.
 
 ---
 
@@ -287,6 +287,24 @@ Next unallocated ID: **LA-0030**.
 - Executor: ChatGPT (bounded reversible engineering)
 - Verification: learner-scoped canonical state only; no invented percentage/mastery; passive activity evidence-neutral; selected material can continue from Progress.
 - Exec plan: [docs/exec-plans/LA-0029.md](docs/exec-plans/LA-0029.md)
+
+##### LA-0030 — Durable Resume Continuity
+
+- Status: DONE
+- Depends on: LA-0029
+- Owner: Brain
+- Executor: ChatGPT (bounded reversible engineering)
+- Verification: Home selects the most recently updated active material; SQLite close/reopen preserves material plus canonical Recall state/next action; bounded workflow `37585838940` passed canonical format, Flutter analyze and expanded Flutter tests at head `377c9ce238883fced4e3a7fa99a29ecead91780f`.
+- Exec plan: [docs/exec-plans/LA-0030.md](docs/exec-plans/LA-0030.md)
+
+##### LA-0031 — Material deletion + safe continuity
+
+- Status: DONE
+- Depends on: LA-0030
+- Owner: Brain
+- Executor: ChatGPT (bounded reversible engineering)
+- Verification: Library exposes confirmed material deletion through the existing learner-scoped store semantics; deleting the most recent material removes accessible source/learning truth and Home safely falls back to the remaining material; bounded workflow `37585838940` passed canonical format, Flutter analyze and expanded Flutter tests at head `377c9ce238883fced4e3a7fa99a29ecead91780f`.
+- Exec plan: [docs/exec-plans/LA-0031.md](docs/exec-plans/LA-0031.md)
 
 ## Milestone M3 — V0 Implementation Tranches
 
