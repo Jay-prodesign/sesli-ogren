@@ -983,19 +983,12 @@ LIMIT 1
     return rows.single['onboarding_completed'] == 1;
   }
 
-  Future<void> markOnboardingCompleted({
-    required AuthenticatedLearner learner,
-    required DateTime updatedAt,
-  }) async {
-    await _database.insert(
-      'learner_preferences',
-      {
-        'learner_id': learner.id.value,
-        'onboarding_completed': 1,
-        'updated_at_utc': updatedAt.toUtc().toIso8601String(),
-      },
-      conflictAlgorithm: ConflictAlgorithm.replace,
-    );
+  Future<void> markOnboardingCompleted({required AuthenticatedLearner learner, required DateTime updatedAt}) async {
+    await _database.insert('learner_preferences', {
+      'learner_id': learner.id.value,
+      'onboarding_completed': 1,
+      'updated_at_utc': updatedAt.toUtc().toIso8601String(),
+    }, conflictAlgorithm: ConflictAlgorithm.replace);
   }
 
   @override
