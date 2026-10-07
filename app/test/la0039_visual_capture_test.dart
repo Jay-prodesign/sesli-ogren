@@ -57,9 +57,22 @@ Widget _phoneFrame(Widget child) {
     theme: baseTheme.copyWith(
       textTheme: baseTheme.textTheme.apply(fontFamily: 'Roboto'),
       primaryTextTheme: baseTheme.primaryTextTheme.apply(fontFamily: 'Roboto'),
+      filledButtonTheme: FilledButtonThemeData(
+        style: baseTheme.filledButtonTheme.style?.copyWith(
+          textStyle: const WidgetStatePropertyAll(TextStyle(fontFamily: 'Roboto', fontWeight: FontWeight.w700)),
+        ),
+      ),
     ),
     home: MediaQuery(data: const MediaQueryData(disableAnimations: true), child: child),
   );
+}
+
+Future<void> _precacheCompanion(WidgetTester tester) async {
+  final context = tester.element(find.byType(MaterialApp));
+  await tester.runAsync(
+    () => precacheImage(const AssetImage('assets/companions/D_KNOT_128.webp'), context),
+  );
+  await tester.pump(const Duration(milliseconds: 120));
 }
 
 void main() {
@@ -105,6 +118,7 @@ void main() {
 
     await tester.pumpWidget(_phoneFrame(ProductShellScreen(runtime: runtime)));
     await _pumpUntilFound(tester, find.text('Şimdi ne yapmalı?'));
+    await _precacheCompanion(tester);
     await tester.pump(const Duration(milliseconds: 200));
     await expectLater(find.byType(Scaffold).first, matchesGoldenFile('goldens/la0039_home.png'));
 
