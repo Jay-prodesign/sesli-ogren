@@ -548,7 +548,9 @@ void main() {
     );
 
     await tester.pumpWidget(
-      MaterialApp(home: ProfileSurface(runtime: runtime, supportEmail: 'destek@example.com')),
+      MaterialApp(
+        home: ProfileSurface(runtime: runtime, supportEmail: 'destek@example.com'),
+      ),
     );
     await pumpUntilFound(tester, find.text('Profil ve Ayarlar'));
     await tester.drag(find.byType(Scrollable).last, const Offset(0, -900));
@@ -571,7 +573,11 @@ void main() {
       accountOverview: const _ReadyAccountOverviewGateway(),
     );
 
-    await tester.pumpWidget(MaterialApp(home: ProfileSurface(runtime: runtime, supportEmail: '')));
+    await tester.pumpWidget(
+      MaterialApp(
+        home: ProfileSurface(runtime: runtime, supportEmail: ''),
+      ),
+    );
     await pumpUntilFound(tester, find.text('Profil ve Ayarlar'));
     await tester.drag(find.byType(Scrollable).last, const Offset(0, -900));
     await tester.pump(const Duration(milliseconds: 300));
