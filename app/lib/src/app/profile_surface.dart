@@ -149,7 +149,7 @@ class _AccountOverviewCard extends StatelessWidget {
             Text(planLabel, style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800)),
             const SizedBox(height: 4),
             Text(
-              overview.entitlementStatus == 'active' ? 'Plan etkin' : 'Plan durumu: ' + overview.entitlementStatus,
+              overview.entitlementStatus == 'active' ? 'Plan etkin' : 'Plan durumu: ${overview.entitlementStatus}',
               style: theme.textTheme.bodyMedium,
             ),
             const SizedBox(height: 18),
@@ -164,13 +164,13 @@ class _AccountOverviewCard extends StatelessWidget {
                   child: Row(
                     children: [
                       Expanded(child: Text(_capabilityLabel(entry.capability))),
-                      Text(entry.consumed.toString() + ' işlem', style: const TextStyle(fontWeight: FontWeight.w700)),
+                      Text('${entry.consumed} işlem', style: const TextStyle(fontWeight: FontWeight.w700)),
                     ],
                   ),
                 ),
             const SizedBox(height: 12),
             Text(
-              'Dil: ' + overview.locale,
+              'Dil: ${overview.locale}',
               style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant),
             ),
           ],
