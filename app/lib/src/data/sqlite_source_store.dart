@@ -950,6 +950,24 @@ LIMIT 1
   }
 
   @override
+  Future<void> purgeLearnerData({required AuthenticatedLearner learner}) {
+    return _database.transaction((transaction) async {
+      final id = learner.id.value;
+      await transaction.delete('active_recall_attempts', where: 'learner_id = ?', whereArgs: [id]);
+      await transaction.delete('recall_attempt_support', where: 'learner_id = ?', whereArgs: [id]);
+      await transaction.delete('next_learning_actions', where: 'learner_id = ?', whereArgs: [id]);
+      await transaction.delete('learner_states', where: 'learner_id = ?', whereArgs: [id]);
+      await transaction.delete('learner_evidence', where: 'learner_id = ?', whereArgs: [id]);
+      await transaction.delete('recall_actions', where: 'learner_id = ?', whereArgs: [id]);
+      await transaction.delete('listen_progress', where: 'learner_id = ?', whereArgs: [id]);
+      await transaction.delete('extracted_contents', where: 'learner_id = ?', whereArgs: [id]);
+      await transaction.delete('source_versions', where: 'learner_id = ?', whereArgs: [id]);
+      await transaction.delete('materials', where: 'learner_id = ?', whereArgs: [id]);
+      await transaction.delete('operational_events', where: 'learner_id = ?', whereArgs: [id]);
+    });
+  }
+
+  @override
   Future<void> close() => _database.close();
 
   static void _assertRelationships({

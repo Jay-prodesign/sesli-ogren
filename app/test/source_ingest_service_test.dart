@@ -170,6 +170,26 @@ void main() {
     );
   });
 
+  test('learner purge removes only the selected learner local data', () async {
+    const sharedMaterial = MaterialId('shared-local-material');
+    await service.ingestPastedText(
+      learner: learnerA,
+      materialId: sharedMaterial,
+      text: 'Learner A local data must be purged.',
+    );
+    await service.ingestPastedText(
+      learner: learnerB,
+      materialId: sharedMaterial,
+      text: 'Learner B local data must remain.',
+    );
+
+    await store.purgeLearnerData(learner: learnerA);
+
+    expect(await store.material(learner: learnerA, materialId: sharedMaterial), isNull);
+    expect(await store.activeMaterials(learner: learnerA), isEmpty);
+    expect(await store.material(learner: learnerB, materialId: sharedMaterial), isNotNull);
+  });
+
   test('oversized pasted text fails before persistence', () async {
     final bounded = SourceIngestService(
       store: store,

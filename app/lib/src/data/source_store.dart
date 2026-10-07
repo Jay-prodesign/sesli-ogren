@@ -56,5 +56,7 @@ abstract interface class SourceStore {
     required DateTime deletedAt,
   });
 
+  Future<void> purgeLearnerData({required AuthenticatedLearner learner});
+
   Future<void> close();
 }
