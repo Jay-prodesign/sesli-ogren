@@ -21,7 +21,7 @@ Milestone numbering follows the program sequence in
 M1 = Architecture Proof, …). Drive lifecycle-stage labels use a different
 numbering: lifecycle "M3" is this M0, and lifecycle "M4" is this M1.
 
-Next unallocated ID: **LA-0038**.
+Next unallocated ID: **LA-0039**.
 
 ---
 
@@ -360,6 +360,15 @@ Next unallocated ID: **LA-0038**.
 - Executor: ChatGPT (bounded reversible engineering)
 - Verification: confirmed local-session sign-out returns the root app to account entry only after Supabase sign-out succeeds; local learner data is preserved and remains learner-scoped; sign-out failure keeps the authenticated runtime open. Bootstrap run `37615873346` PASS, account-deletion run `37615873382` PASS, and product-bounded-validation run `37615873688` PASS (format, analyze, expanded tests) on `5496dc346451c49dd7b789cc67a0ebe40976665f`.
 - Exec plan: [docs/exec-plans/LA-0037.md](docs/exec-plans/LA-0037.md)
+
+##### LA-0038 — Truthful support contact surface
+
+- Status: IN_PROGRESS
+- Depends on: LA-0037
+- Owner: Brain
+- Executor: ChatGPT (bounded reversible engineering)
+- Verification: Profile exposes a release-configured client-safe support email when valid, allows copying it, and fails closed without inventing an address when configuration is absent/invalid. Product-bounded validation required before DONE; actual production support address remains release configuration.
+- Exec plan: [docs/exec-plans/LA-0038.md](docs/exec-plans/LA-0038.md)
 
 
 ## Milestone M3 — V0 Implementation Tranches

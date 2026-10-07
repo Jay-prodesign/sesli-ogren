@@ -3,13 +3,11 @@
 This section supersedes stale branch/cursor lines below where they conflict.
 
 - Active runnable product branch: `feat/full-product-shell-continuity` (PR #13).
-- Validated product head: `5496dc346451c49dd7b789cc67a0ebe40976665f`.
 - Repository `main` remains bootstrap-only and MUST NOT be treated as the runnable Sesli Öğren application source.
 - LA-0024…LA-0037 are completed post-M5 full-product tranches.
-- LA-0037 Safe local sign-out + account switching boundary: DONE.
-- Latest gates: bootstrap `37615873346` PASS; account-deletion `37615873382` PASS; product `37615873688` PASS.
-- Current cursor: next concrete Profile / Settings V0 gap — support access. Do not invent a support address; use a release-configured client-safe support contact and fail closed when absent.
-- No hosted Supabase mutation or production secret is authorized.
+- LA-0038 Truthful support contact surface: IN_PROGRESS.
+- Current cursor: expose only a release-configured client-safe support contact; fail closed if absent/invalid; do not invent a public support address.
+- No hosted Supabase mutation, paid support provider or production secret is authorized.
 
 ---
 
