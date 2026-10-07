@@ -201,7 +201,10 @@ class _ListenScreenState extends State<ListenScreen> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text('AYNI MATERYAL · DİNLEME', style: theme.textTheme.labelSmall?.copyWith(color: AppPalette.success)),
+                              Text(
+                                'AYNI MATERYAL · DİNLEME',
+                                style: theme.textTheme.labelSmall?.copyWith(color: AppPalette.success),
+                              ),
                               const SizedBox(height: 5),
                               Text(source.name, style: theme.textTheme.titleLarge),
                               const SizedBox(height: 5),
@@ -218,10 +221,7 @@ class _ListenScreenState extends State<ListenScreen> {
                 ),
                 const SizedBox(height: 12),
                 DecoratedBox(
-                  decoration: BoxDecoration(
-                    color: AppPalette.attentionSoft,
-                    borderRadius: BorderRadius.circular(14),
-                  ),
+                  decoration: BoxDecoration(color: AppPalette.attentionSoft, borderRadius: BorderRadius.circular(14)),
                   child: Padding(
                     padding: const EdgeInsets.all(12),
                     child: Text(
