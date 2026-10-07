@@ -156,9 +156,9 @@ Library represents material identity without fake decorative covers.
 Progress reports evidence-backed states and next-action reasons rather than gamified percentages.
 
 ### 8. Profile / Settings
-Disposition: IMPLEMENTED; current-head CI required before final engineering close.
+Disposition: PASS.
 
-Profile now uses the same semantic surface/icon hierarchy and retains all account, support, accessibility and destructive-action truth contracts.
+Profile now uses the same semantic surface/icon hierarchy and retains all account, support, accessibility and destructive-action truth contracts. The validated checkpoint also disables hidden-tab tickers, preventing D/Knot animation from consuming motion/CPU while another shell tab is active.
 
 ### 9. Accessibility / resilience
 Disposition: ENGINEERING PASS / PHYSICAL DEVICE DEFERRED.
@@ -170,7 +170,8 @@ Observed/covered:
 - Turkish copy;
 - safe-area based structure;
 - destructive confirmations;
-- no essential state encoded only by D/Knot pose or color.
+- no essential state encoded only by D/Knot pose or color;
+- attention foreground contrast tightened to an AA-safe token against the attention-soft surface.
 
 Still mandatory later under D-068:
 - real Android/iOS text-scale, speech, orientation, performance and device accessibility validation before release-candidate/public-release claims.
@@ -212,7 +213,7 @@ Component/asset scalability: PASS for V0; intentionally product-local, not prema
 
 ## Current disposition
 
-ENGINEERING: PASS once current Profile head completes bounded validation.
+ENGINEERING: PASS at validated runtime head `1277cf44e3c2bec915442d5fdf13ea1b0f841862` — bootstrap `37637610659`, account-deletion `37637610454`, and product-bounded `37637610321` all PASS.
 
 PRODUCT SYSTEM / COUPLING: PASS.
 
@@ -224,8 +225,6 @@ Do not reopen the selected direction merely because final visual review is pendi
 
 ## Remaining exit evidence
 
-1. Current Profile head product-bounded validation PASS.
-2. Representative runtime/screenshots reviewed by Founder.
-3. No BLOCKER/HIGH visual defect from that review.
-4. Canonical state updated to the validated LA-0039 head.
-5. Physical-device gate remains separate under D-068 and is not claimed here.
+1. Representative runtime/screenshots reviewed by Founder.
+2. No BLOCKER/HIGH visual defect from that review.
+3. Physical-device gate remains separate under D-068 and is not claimed here.

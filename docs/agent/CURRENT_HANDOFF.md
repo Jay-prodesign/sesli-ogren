@@ -7,9 +7,11 @@ This section supersedes stale branch/cursor/visual-pass lines below where they c
 - LA-0024…LA-0038 are completed post-M5 full-product tranches.
 - LA-0038 Truthful support contact surface: DONE at validated runtime head 5ee9f4fa; bootstrap/account-deletion/product-bounded workflows PASS.
 - Founder visual correction on 2026-10-07 REOPENS the app-shell Product/Visual PASS. D/Knot identity remains selected/locked; the shell/colors/typography/navigation/surface hierarchy/motion/product presentation do not.
-- LA-0039 World-Class Experience / Golden Product Slice: ACTIVE / EXECUTABLE Tier-A tranche.
+- LA-0039 World-Class Experience / Golden Product Slice: ENGINEERING PASS / FOUNDER VISUAL REVIEW PENDING; task remains IN_PROGRESS until representative runtime review is accepted.
 - Selected visual lane: Premium Active Learning Studio.
-- Current cursor: theme/tokens and Home/Continue/material identity foundation -> Workspace/active-learning result/payoff -> Listen continuity -> remaining golden-slice coherence.
+- Validated runtime checkpoint: `1277cf44e3c2bec915442d5fdf13ea1b0f841862` — bootstrap `37637610659` PASS; account-deletion `37637610454` PASS; product-bounded `37637610321` PASS (format, analyze, expanded tests).
+- Final engineering polish at the checkpoint pauses hidden-tab tickers with TickerMode and tightens the amber attention foreground to AA-safe contrast.
+- Current cursor: capture representative current-head Home -> Workspace -> Recall/payoff runtime visuals -> Founder visual review -> iterate only any concrete BLOCKER/HIGH defect. Physical device release validation remains separate under D-068.
 - Game Engine / corebreak-game is authorized as READ-ONLY methodology reference only for LA-0039. No cross-project product decision, code, asset, lifecycle state or implementation authority is imported.
 - No merge, release, deploy, paid provider, production secret or cross-project mutation is authorized.
 

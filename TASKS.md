@@ -377,12 +377,12 @@ Next unallocated ID: **LA-0040**.
 - Depends on: LA-0038
 - Owner: Brain
 - Executor: ChatGPT (bounded reversible engineering)
-- Verification: LA-0039 World-Class Experience Gate + canonical bootstrap + Flutter format/analyze + expanded tests + representative Golden Product Slice visual/runtime review; Founder visual review required before DONE.
+- Verification: engineering checkpoint PASS at `1277cf44e3c2bec915442d5fdf13ea1b0f841862`: bootstrap `37637610659` PASS, account-deletion `37637610454` PASS, product-bounded `37637610321` PASS (canonical format, Flutter analyze, expanded tests). Representative Golden Product Slice visual/runtime review + Founder visual disposition are still required before DONE.
 - Intent: replace prototype/default-Material presentation with one coherent Premium Active Learning Studio experience while preserving learning truth, D/Knot identity, provenance/evidence semantics and current feature scope.
 - Selected treatment: T2 Premium Active Learning Studio from [docs/design/LA_VISUAL_TREATMENT_TOURNAMENT_R1.md](docs/design/LA_VISUAL_TREATMENT_TOURNAMENT_R1.md).
 - Quality authority: [docs/qa/LA-0039_WORLD_CLASS_EXPERIENCE_GATE.md](docs/qa/LA-0039_WORLD_CLASS_EXPERIENCE_GATE.md).
 - Research authority: [docs/research/LA_WORLD_CLASS_EXPERIENCE_AUDIT_2026-10-07.md](docs/research/LA_WORLD_CLASS_EXPERIENCE_AUDIT_2026-10-07.md).
-- Current cursor: theme/tokens + Home/Continue/material identity foundation, then representative Workspace/active-learning payoff.
+- Current cursor: representative current-head Home -> Workspace -> Recall/payoff runtime capture and Founder visual review; if a defect remains, iterate only the concrete BLOCKER/HIGH presentation issue.
 - Exec plan: [docs/exec-plans/LA-0039.md](docs/exec-plans/LA-0039.md)
 
 
