@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../domain/learning_contracts.dart';
 import '../domain/learning_truth.dart';
 import 'app_runtime.dart';
+import 'app_theme.dart';
 import 'explain_screen.dart';
 import 'focus_screen.dart';
 import 'learning_slice_screen.dart';
@@ -160,33 +161,12 @@ class _WorkspaceBody extends StatelessWidget {
             ),
           ],
         ),
-        const SizedBox(height: 26),
-        if (data.extracted != null && data.extracted!.normalizedText.trim().isNotEmpty) ...[
-          Text('Hızlı bakış', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700)),
-          const SizedBox(height: 6),
-          Text(
-            'AI özeti değil; yüklediğin kaynağın başlangıcından doğrudan bir görünüm.',
-            style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant),
-          ),
-          const SizedBox(height: 10),
-          Card(
-            elevation: 0,
-            color: theme.colorScheme.surfaceContainerLow,
-            child: Padding(
-              padding: const EdgeInsets.all(18),
-              child: Text(
-                _orientationText(data.extracted!.normalizedText),
-                style: theme.textTheme.bodyLarge?.copyWith(height: 1.5),
-              ),
-            ),
-          ),
-          const SizedBox(height: 22),
-        ],
-        Text('Öğrenme durumu', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700)),
+        const SizedBox(height: 24),
+        Text('Öğrenme durumu', style: theme.textTheme.titleMedium),
         const SizedBox(height: 10),
-        _LearningStatusCard(continuation: data.continuation),
-        const SizedBox(height: 22),
-        Text('Çalış', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700)),
+        _LearningStatusCard(continuation: data.continuation, onRecall: onRecall),
+        const SizedBox(height: 24),
+        Text('Çalış', style: theme.textTheme.titleMedium),
         const SizedBox(height: 10),
         _ActionCard(
           icon: Icons.auto_awesome_outlined,
@@ -215,8 +195,32 @@ class _WorkspaceBody extends StatelessWidget {
           body: 'Kaynak metnini cihazın Türkçe sesiyle dinle.',
           onPressed: onListen,
         ),
-        const SizedBox(height: 22),
-        Text('Kaynak', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700)),
+        if (data.extracted != null && data.extracted!.normalizedText.trim().isNotEmpty) ...[
+          const SizedBox(height: 24),
+          Text('Hızlı bakış', style: theme.textTheme.titleMedium),
+          const SizedBox(height: 6),
+          Text(
+            'AI özeti değil; yüklediğin kaynağın başlangıcından doğrudan bir görünüm.',
+            style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+          ),
+          const SizedBox(height: 10),
+          DecoratedBox(
+            decoration: BoxDecoration(
+              color: AppPalette.surface,
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: AppPalette.outline),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(18),
+              child: Text(
+                _orientationText(data.extracted!.normalizedText),
+                style: theme.textTheme.bodyLarge?.copyWith(height: 1.5),
+              ),
+            ),
+          ),
+        ],
+        const SizedBox(height: 24),
+        Text('Kaynak', style: theme.textTheme.titleMedium),
         const SizedBox(height: 10),
         Card(
           elevation: 0,
@@ -292,9 +296,10 @@ class _WorkspaceBody extends StatelessWidget {
 }
 
 class _LearningStatusCard extends StatelessWidget {
-  const _LearningStatusCard({required this.continuation});
+  const _LearningStatusCard({required this.continuation, required this.onRecall});
 
   final LearningContinuation? continuation;
+  final VoidCallback onRecall;
 
   @override
   Widget build(BuildContext context) {
@@ -323,25 +328,50 @@ class _LearningStatusCard extends StatelessWidget {
       ),
     };
 
-    return Card(
-      elevation: 0,
-      color: theme.colorScheme.secondaryContainer.withValues(alpha: 0.5),
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: AppPalette.primaryDark,
+        borderRadius: BorderRadius.circular(24),
+      ),
       child: Padding(
-        padding: const EdgeInsets.all(18),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        padding: const EdgeInsets.fromLTRB(20, 20, 20, 18),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Icon(icon),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(title, style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700)),
-                  const SizedBox(height: 4),
-                  Text(body),
-                ],
-              ),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(9),
+                    child: Icon(icon, color: Colors.white, size: 21),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Sıradaki aktif adım', style: theme.textTheme.labelMedium?.copyWith(color: const Color(0xFFAFC0FF))),
+                      const SizedBox(height: 4),
+                      Text(title, style: theme.textTheme.titleLarge?.copyWith(color: Colors.white)),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Text(body, style: theme.textTheme.bodyMedium?.copyWith(color: Colors.white.withValues(alpha: 0.80))),
+            const SizedBox(height: 18),
+            FilledButton.icon(
+              style: FilledButton.styleFrom(backgroundColor: Colors.white, foregroundColor: AppPalette.primaryDark),
+              onPressed: onRecall,
+              icon: const Icon(Icons.psychology_alt_rounded),
+              label: const Text('Hatırla ile devam'),
             ),
           ],
         ),
@@ -361,18 +391,34 @@ class _ActionCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return Card(
-      elevation: 0,
-      color: theme.colorScheme.surfaceContainerLow,
+    return Material(
+      color: AppPalette.surface,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(18),
+        side: const BorderSide(color: AppPalette.outline),
+      ),
+      clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: onPressed,
-        borderRadius: BorderRadius.circular(12),
         child: Padding(
-          padding: const EdgeInsets.all(18),
+          padding: const EdgeInsets.all(16),
           child: Row(
             children: [
-              Icon(icon, size: 28),
-              const SizedBox(width: 14),
+              DecoratedBox(
+                decoration: BoxDecoration(
+                  color: title == 'Dinle' ? AppPalette.successSoft : AppPalette.primarySoft,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(9),
+                  child: Icon(
+                    icon,
+                    size: 21,
+                    color: title == 'Dinle' ? AppPalette.success : AppPalette.primary,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 13),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,

@@ -105,11 +105,19 @@ abstract final class SesliOgrenTheme {
           side: const BorderSide(color: AppPalette.outline),
         ),
       ),
+      appBarTheme: const AppBarTheme(
+        backgroundColor: AppPalette.canvas,
+        foregroundColor: AppPalette.ink,
+        surfaceTintColor: Colors.transparent,
+        elevation: 0,
+        centerTitle: false,
+      ),
       navigationBarTheme: const NavigationBarThemeData(
         backgroundColor: AppPalette.surface,
         indicatorColor: AppPalette.primarySoft,
         elevation: 0,
         height: 72,
+        labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
       ),
       filledButtonTheme: FilledButtonThemeData(
         style: FilledButton.styleFrom(

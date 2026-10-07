@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import '../domain/learning_contracts.dart';
 import '../speech/device_speech_output.dart';
 import 'app_runtime.dart';
+import 'app_theme.dart';
 import 'companion_view.dart';
 
 class ListenScreen extends StatefulWidget {
@@ -181,25 +182,55 @@ class _ListenScreenState extends State<ListenScreen> {
             return ListView(
               padding: const EdgeInsets.fromLTRB(20, 16, 20, 36),
               children: [
-                Center(
-                  child: CompanionView(
-                    state: _speaking ? CompanionVisualState.speak : CompanionVisualState.idle,
-                    size: 108,
+                DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: AppPalette.successSoft,
+                    borderRadius: BorderRadius.circular(24),
+                    border: Border.all(color: AppPalette.success.withValues(alpha: 0.18)),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(18, 16, 18, 18),
+                    child: Row(
+                      children: [
+                        CompanionView(
+                          state: _speaking ? CompanionVisualState.speak : CompanionVisualState.idle,
+                          size: 76,
+                        ),
+                        const SizedBox(width: 14),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text('AYNI MATERYAL · DİNLEME', style: theme.textTheme.labelSmall?.copyWith(color: AppPalette.success)),
+                              const SizedBox(height: 5),
+                              Text(source.name, style: theme.textTheme.titleLarge),
+                              const SizedBox(height: 5),
+                              Text(
+                                'Dinleme konumu: bölüm ${visibleChunk + 1} / ${source.chunks.length}',
+                                style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-                const SizedBox(height: 16),
-                Text(source.name, style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w800)),
-                const SizedBox(height: 6),
-                Text(
-                  'Dinlemek maruziyettir; tek başına öğrenme başarısı olarak sayılmaz.',
-                  style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+                const SizedBox(height: 12),
+                DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: AppPalette.attentionSoft,
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(12),
+                    child: Text(
+                      'Dinlemek maruziyettir; tek başına öğrenme başarısı olarak sayılmaz.',
+                      style: theme.textTheme.bodySmall?.copyWith(color: AppPalette.ink),
+                    ),
+                  ),
                 ),
-                const SizedBox(height: 10),
-                Text(
-                  'Dinleme konumu: bölüm ${visibleChunk + 1} / ${source.chunks.length}',
-                  style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant),
-                ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 18),
                 Card(
                   elevation: 0,
                   color: theme.colorScheme.surfaceContainerLow,

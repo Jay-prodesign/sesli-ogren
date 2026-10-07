@@ -5,6 +5,7 @@ import '../domain/learning_contracts.dart';
 import '../domain/learning_truth.dart';
 import '../domain/operational_event.dart';
 import 'app_runtime.dart';
+import 'app_theme.dart';
 import 'companion_view.dart';
 
 enum _SlicePhase { loading, source, recall, result, continuation, error }
@@ -710,11 +711,42 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(isIndependent ? 'İpucusuz hatırladın' : 'Geri bildirim', style: theme.textTheme.titleLarge),
-          const SizedBox(height: 10),
-          Text(_outcomeText(result.evidence.outcome)),
-          const SizedBox(height: 18),
-          Text('Doğru ifade', style: theme.textTheme.labelLarge),
+          DecoratedBox(
+            decoration: BoxDecoration(
+              color: isIndependent ? AppPalette.successSoft : AppPalette.attentionSoft,
+              borderRadius: BorderRadius.circular(18),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Icon(
+                    isIndependent ? Icons.check_circle_rounded : Icons.lightbulb_outline_rounded,
+                    color: isIndependent ? AppPalette.success : AppPalette.attention,
+                  ),
+                  const SizedBox(width: 11),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          isIndependent ? 'İpucusuz hatırladın' : 'Geri bildirim',
+                          style: theme.textTheme.titleLarge,
+                        ),
+                        const SizedBox(height: 5),
+                        Text(_outcomeText(result.evidence.outcome)),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 20),
+          Text('Kaynakla karşılaştır', style: theme.textTheme.labelLarge),
+          const SizedBox(height: 12),
+          Text('Doğru ifade', style: theme.textTheme.labelMedium),
           const SizedBox(height: 4),
           Text(result.correctAnswer, style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700)),
           const SizedBox(height: 16),
@@ -724,10 +756,24 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
             result.sourceExcerpt,
             style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
           ),
-          const Divider(height: 32),
-          Text('Sıradaki adım', style: theme.textTheme.labelLarge),
-          const SizedBox(height: 6),
-          Text(result.nextAction.reasonText),
+          const SizedBox(height: 20),
+          DecoratedBox(
+            decoration: BoxDecoration(
+              color: AppPalette.primarySoft,
+              borderRadius: BorderRadius.circular(18),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Sıradaki adım', style: theme.textTheme.labelLarge?.copyWith(color: AppPalette.primaryDark)),
+                  const SizedBox(height: 6),
+                  Text(result.nextAction.reasonText),
+                ],
+              ),
+            ),
+          ),
           const SizedBox(height: 18),
           FilledButton(
             onPressed: () {
