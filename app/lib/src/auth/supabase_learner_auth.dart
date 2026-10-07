@@ -124,27 +124,6 @@ class LearnerAuthenticationException implements Exception {
     }
   }
 
-  static Future<AuthenticatedLearner> authenticate() async {
-    final client = await _clientForConfiguredProject();
-    final currentUser = client.auth.currentSession?.user;
-    if (currentUser != null) {
-      return AuthenticatedLearner(id: LearnerId(currentUser.id));
-    }
-
-    try {
-      final response = await client.auth.signInAnonymously();
-      final user = response.user;
-      final session = response.session;
-      if (user == null || session == null) {
-        throw const LearnerAuthenticationException('Authentication completed without a durable session.');
-      }
-      return AuthenticatedLearner(id: LearnerId(user.id));
-    } on LearnerAuthenticationException {
-      rethrow;
-    } catch (_) {
-      throw const LearnerAuthenticationException('A learner session could not be established.');
-    }
-  }
 
   static Future<SupabaseClient> clientForAuthenticatedRuntime() => _clientForConfiguredProject();
 
