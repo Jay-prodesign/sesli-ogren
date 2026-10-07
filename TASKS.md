@@ -335,11 +335,11 @@ Next unallocated ID: **LA-0036**.
 
 ##### LA-0035 — First-run product onboarding
 
-- Status: IN_PROGRESS
+- Status: DONE
 - Depends on: LA-0034
 - Owner: Brain
 - Executor: ChatGPT (bounded reversible engineering)
-- Verification: first successful authenticated runtime shows a one-time onboarding before Product Shell; it explains material continuity, the passive-Listen vs active-learning evidence distinction, and implemented deletion control. Completion is learner-scoped in SQLite, survives reopen, and is purged with learner data.
+- Verification: first successful authenticated runtime shows a one-time onboarding before Product Shell; it explains material continuity, the passive-Listen vs active-learning evidence distinction, and implemented deletion control. Completion is learner-scoped in SQLite, survives reopen, is covered by additive v7→v8 migration, and is purged with learner data. Bootstrap run `37612556528` PASS, account-deletion run `37612556551` PASS, and product-bounded-validation run `37612556549` PASS (format, analyze, expanded tests) on `f1390330b6f0a1d522d18d60bbcaf32ef21df96f`.
 - Exec plan: [docs/exec-plans/LA-0035.md](docs/exec-plans/LA-0035.md)
 
 
