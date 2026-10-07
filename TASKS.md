@@ -21,7 +21,7 @@ Milestone numbering follows the program sequence in
 M1 = Architecture Proof, …). Drive lifecycle-stage labels use a different
 numbering: lifecycle "M3" is this M0, and lifecycle "M4" is this M1.
 
-Next unallocated ID: **LA-0036**.
+Next unallocated ID: **LA-0037**.
 
 ---
 
@@ -341,6 +341,16 @@ Next unallocated ID: **LA-0036**.
 - Executor: ChatGPT (bounded reversible engineering)
 - Verification: first successful authenticated runtime shows a one-time onboarding before Product Shell; it explains material continuity, the passive-Listen vs active-learning evidence distinction, and implemented deletion control. Completion is learner-scoped in SQLite, survives reopen, is covered by additive v7→v8 migration, and is purged with learner data. Bootstrap run `37612556528` PASS, account-deletion run `37612556551` PASS, and product-bounded-validation run `37612556549` PASS (format, analyze, expanded tests) on `f1390330b6f0a1d522d18d60bbcaf32ef21df96f`.
 - Exec plan: [docs/exec-plans/LA-0035.md](docs/exec-plans/LA-0035.md)
+
+
+##### LA-0036 — Passwordless account entry + session restore
+
+- Status: IN_PROGRESS
+- Depends on: LA-0035
+- Owner: Brain
+- Executor: ChatGPT (bounded reversible engineering)
+- Verification: existing authenticated sessions restore without changing learner identity; no-session startup shows explicit passwordless email account entry instead of silently creating an anonymous user; successful OTP verification opens the verified learner runtime; missing Supabase client configuration still fails closed. Live email delivery/template configuration is deferred external release evidence.
+- Exec plan: [docs/exec-plans/LA-0036.md](docs/exec-plans/LA-0036.md)
 
 
 ## Milestone M3 — V0 Implementation Tranches
