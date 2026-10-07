@@ -354,11 +354,11 @@ Next unallocated ID: **LA-0038**.
 
 ##### LA-0037 — Safe local sign-out + account switching boundary
 
-- Status: IN_PROGRESS
+- Status: DONE
 - Depends on: LA-0036
 - Owner: Brain
 - Executor: ChatGPT (bounded reversible engineering)
-- Verification: confirmed local-session sign-out returns the root app to account entry only after Supabase sign-out succeeds; local learner data is preserved and remains learner-scoped; sign-out failure keeps the authenticated runtime open. Product-bounded validation required before DONE.
+- Verification: confirmed local-session sign-out returns the root app to account entry only after Supabase sign-out succeeds; local learner data is preserved and remains learner-scoped; sign-out failure keeps the authenticated runtime open. Bootstrap run `37615873346` PASS, account-deletion run `37615873382` PASS, and product-bounded-validation run `37615873688` PASS (format, analyze, expanded tests) on `5496dc346451c49dd7b789cc67a0ebe40976665f`.
 - Exec plan: [docs/exec-plans/LA-0037.md](docs/exec-plans/LA-0037.md)
 
 
