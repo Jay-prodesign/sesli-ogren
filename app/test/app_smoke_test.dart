@@ -535,11 +535,7 @@ void main() {
     expect(find.text('Kaynağa dayalı açıklama'), findsOneWidget);
     expect(find.text('3 işlem'), findsOneWidget);
     expect(find.textContaining('tr-TR'), findsOneWidget);
-    await tester.scrollUntilVisible(
-      find.text('Cihazın Türkçe sesi'),
-      260,
-      scrollable: find.byType(Scrollable).last,
-    );
+    await tester.scrollUntilVisible(find.text('Cihazın Türkçe sesi'), 260, scrollable: find.byType(Scrollable).last);
     await tester.pumpAndSettle();
     expect(find.text('Cihazın Türkçe sesi'), findsOneWidget);
     await tester.scrollUntilVisible(
