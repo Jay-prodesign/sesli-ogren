@@ -539,6 +539,7 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
     final theme = Theme.of(context);
     final media = MediaQuery.maybeOf(context);
     final reducedMotion = (media?.disableAnimations ?? false) || (media?.accessibleNavigation ?? false);
+    final compactResultHeader = _phase == _SlicePhase.result;
     return Scaffold(
       body: SafeArea(
         child: DecoratedBox(
@@ -557,13 +558,15 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
                 children: [
                   Align(
                     alignment: Alignment.center,
-                    child: CompanionView(state: _companionState, size: 124),
+                    child: CompanionView(state: _companionState, size: compactResultHeader ? 88 : 124),
                   ),
-                  const SizedBox(height: 18),
+                  SizedBox(height: compactResultHeader ? 12 : 18),
                   Text(
-                    'Sesli Öğren',
+                    compactResultHeader ? 'Hatırlama sonucu' : 'Sesli Öğren',
                     textAlign: TextAlign.center,
-                    style: theme.textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.w700),
+                    style: compactResultHeader
+                        ? theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w800)
+                        : theme.textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.w700),
                   ),
                   const SizedBox(height: 8),
                   Text(
@@ -571,7 +574,7 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
                     textAlign: TextAlign.center,
                     style: theme.textTheme.bodyLarge?.copyWith(color: theme.colorScheme.onSurfaceVariant),
                   ),
-                  const SizedBox(height: 28),
+                  SizedBox(height: compactResultHeader ? 20 : 28),
                   AnimatedSwitcher(
                     duration: reducedMotion ? Duration.zero : const Duration(milliseconds: 220),
                     child: _phaseBody(context),
