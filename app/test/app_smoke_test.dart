@@ -313,7 +313,6 @@ void main() {
 
     await tester.scrollUntilVisible(find.text('Odaklan'), 260, scrollable: find.byType(Scrollable).last);
     await tester.pumpAndSettle();
-    expect(find.text('Açıkla'), findsOneWidget);
     expect(find.text('Odaklan'), findsOneWidget);
     await tapVisible(tester, find.text('Odaklan').last);
     await pumpUntilFound(tester, find.text('Kısa odak oturumu'));
@@ -329,6 +328,7 @@ void main() {
     expect(find.text('Hızlı bakış'), findsOneWidget);
     await tester.scrollUntilVisible(find.text('Açıkla'), -260, scrollable: find.byType(Scrollable).last);
     await tester.pumpAndSettle();
+    expect(find.text('Açıkla'), findsOneWidget);
     await tapVisible(tester, find.text('Açıkla'));
     await pumpUntilFound(tester, find.text('Açıklama henüz hazır değil'));
     expect(find.textContaining('yapay bir sonuç göstermiyoruz'), findsOneWidget);
