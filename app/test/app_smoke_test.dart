@@ -144,8 +144,8 @@ Future<void> pumpUntilGone(WidgetTester tester, Finder finder, {int maxPumps = 1
 void main() {
   sqfliteFfiInit();
 
-  test('production auth fails closed when Supabase config is absent', () async {
-    await expectLater(SupabaseLearnerAuth.authenticate(), throwsA(isA<LearnerAuthConfigurationException>()));
+  test('production auth restore fails closed when Supabase config is absent', () async {
+    await expectLater(SupabaseLearnerAuth.restoreSession(), throwsA(isA<LearnerAuthConfigurationException>()));
   });
 
   testWidgets('production app does not open learner data without auth config', (tester) async {
