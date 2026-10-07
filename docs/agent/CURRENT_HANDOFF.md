@@ -1,25 +1,29 @@
-# CURRENT EXECUTION OVERRIDE — 2026-10-07
+# CURRENT EXECUTION OVERRIDE — 2026-10-07 / LA-0040
 
-This section supersedes stale branch/cursor/visual-pass lines below where they conflict.
+This section supersedes stale branch/cursor/visual-pass/companion-lock lines below where they conflict.
 
-- Active runnable product branch: feat/full-product-shell-continuity (PR #13).
-- Repository main remains bootstrap-only and MUST NOT be treated as the runnable Sesli Öğren application source.
+- Active runnable product branch: `feat/full-product-shell-continuity` (PR #13). Repository `main` remains bootstrap-only.
 - LA-0024…LA-0038 are completed post-M5 full-product tranches.
-- LA-0038 Truthful support contact surface: DONE at validated runtime head 5ee9f4fa; bootstrap/account-deletion/product-bounded workflows PASS.
-- Founder visual correction on 2026-10-07 REOPENS the app-shell Product/Visual PASS. D/Knot identity remains selected/locked; the shell/colors/typography/navigation/surface hierarchy/motion/product presentation do not.
-- LA-0039 World-Class Experience / Golden Product Slice: ENGINEERING PASS / FOUNDER VISUAL REVIEW PENDING; task remains IN_PROGRESS until representative runtime review is accepted.
-- Selected visual lane: Premium Active Learning Studio.
-- Validated runtime checkpoint: `1277cf44e3c2bec915442d5fdf13ea1b0f841862` — bootstrap `37637610659` PASS; account-deletion `37637610454` PASS; product-bounded `37637610321` PASS (format, analyze, expanded tests).
-- Final engineering polish at the checkpoint pauses hidden-tab tickers with TickerMode and tightens the amber attention foreground to AA-safe contrast.
-- Current cursor: capture representative current-head Home -> Workspace -> Recall/payoff runtime visuals -> Founder visual review -> iterate only any concrete BLOCKER/HIGH defect. Physical device release validation remains separate under D-068.
-- Game Engine / corebreak-game is authorized as READ-ONLY methodology reference only for LA-0039. No cross-project product decision, code, asset, lifecycle state or implementation authority is imported.
+- LA-0039 remains IN_PROGRESS as the validated Golden Product Slice engineering baseline; it MUST NOT be closed on technical confidence alone.
+- Founder visual correction on 2026-10-07 is expanded: **colors, visual system and D/Knot visual identity are all reopened.** D-070’s prior companion visual lock is superseded for current visual-direction evaluation. Learning truth, source/provenance, evidence semantics and account/data safety are not reopened.
+- **LA-0040 — Million-Dollar Visual Audit & Student Experience Elevation: IN_PROGRESS / ACTIVE CURSOR.**
+- Current LA-0039 treatment (Premium Active Learning Studio) is now a baseline/control, not a locked final visual lane.
+- LA-0040 Round-0 VQG result: **FAIL / REDESIGN REQUIRED for the stated quality ambition**. High findings: generic-identity risk, prototype-like/repetitive Material Workspace, over-text/under-visual presentation, weak student-specific desire, and incomplete companion/UI integration.
+- Current treatment leader hypothesis: **Visual Learning Studio × Student Momentum hybrid**. It is NOT locked until comparable Golden Slice treatments are reviewed.
+- Companion leader hypothesis: **evolve D/Knot + use it more sparsely/functionally**; material redesign or removal remain valid tournament alternatives.
+- Validated runtime baseline: `8caff368b653e0a3bae037903d581411dab9befa` — bootstrap `37641586921` PASS; account-deletion `37641586906` PASS; product-bounded `37641586870` PASS; visual capture `37641549582` PASS.
+- Current cursor: create comparable Golden Slice treatments (control + energetic + Visual Studio hybrid), test companion alternatives, rerun VQG-01 + visual stress/red-team, then present the strongest treatment at the protected Founder visual gate.
+- Physical-device release validation remains separate under D-068.
+- Game Engine / corebreak-game remains READ-ONLY methodology reference only. No cross-project product decision, code or asset authority is imported.
 - No merge, release, deploy, paid provider, production secret or cross-project mutation is authorized.
 
-Authoritative LA-0039 artifacts:
-- docs/research/LA_WORLD_CLASS_EXPERIENCE_AUDIT_2026-10-07.md
-- docs/design/LA_VISUAL_TREATMENT_TOURNAMENT_R1.md
-- docs/exec-plans/LA-0039.md
-- docs/qa/LA-0039_WORLD_CLASS_EXPERIENCE_GATE.md
+Authoritative LA-0040 artifacts:
+- docs/exec-plans/LA-0040.md
+- docs/research/LA-0040_CURRENT_VISUAL_AUDIT_2026-10-07.md
+- docs/design/LA-0040_VISUAL_TREATMENT_TOURNAMENT.md
+- docs/design/LA-0040_COMPANION_REEVALUATION.md
+- docs/qa/LA-0040_VISUAL_QUALITY_GATE.md
+- docs/qa/LA-0040_VISUAL_STRESS_REDTEAM.md
 
 ---
 
