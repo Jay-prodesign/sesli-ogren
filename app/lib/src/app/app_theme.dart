@@ -28,10 +28,7 @@ abstract final class AppPalette {
 abstract final class SesliOgrenTheme {
   static ThemeData light() {
     final base = ThemeData(useMaterial3: true, brightness: Brightness.light);
-    final scheme = ColorScheme.fromSeed(
-      seedColor: AppPalette.primary,
-      brightness: Brightness.light,
-    ).copyWith(
+    final scheme = ColorScheme.fromSeed(seedColor: AppPalette.primary, brightness: Brightness.light).copyWith(
       primary: AppPalette.primary,
       onPrimary: Colors.white,
       primaryContainer: AppPalette.primarySoft,
@@ -80,24 +77,14 @@ abstract final class SesliOgrenTheme {
         letterSpacing: -0.25,
         height: 1.16,
       ),
-      titleLarge: base.textTheme.titleLarge?.copyWith(
-        color: AppPalette.ink,
-        fontWeight: FontWeight.w700,
-        height: 1.2,
-      ),
+      titleLarge: base.textTheme.titleLarge?.copyWith(color: AppPalette.ink, fontWeight: FontWeight.w700, height: 1.2),
       titleMedium: base.textTheme.titleMedium?.copyWith(
         color: AppPalette.ink,
         fontWeight: FontWeight.w700,
         height: 1.25,
       ),
-      bodyLarge: base.textTheme.bodyLarge?.copyWith(
-        color: AppPalette.ink,
-        height: 1.48,
-      ),
-      bodyMedium: base.textTheme.bodyMedium?.copyWith(
-        color: AppPalette.ink,
-        height: 1.45,
-      ),
+      bodyLarge: base.textTheme.bodyLarge?.copyWith(color: AppPalette.ink, height: 1.48),
+      bodyMedium: base.textTheme.bodyMedium?.copyWith(color: AppPalette.ink, height: 1.45),
       labelLarge: base.textTheme.labelLarge?.copyWith(
         color: AppPalette.ink,
         fontWeight: FontWeight.w700,
@@ -158,11 +145,7 @@ abstract final class SesliOgrenTheme {
           borderSide: const BorderSide(color: AppPalette.primary, width: 2),
         ),
       ),
-      dividerTheme: const DividerThemeData(
-        color: AppPalette.outline,
-        thickness: 1,
-        space: 1,
-      ),
+      dividerTheme: const DividerThemeData(color: AppPalette.outline, thickness: 1, space: 1),
     );
   }
 }
