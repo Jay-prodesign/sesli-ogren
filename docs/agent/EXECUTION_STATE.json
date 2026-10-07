@@ -16,7 +16,7 @@
   },
   "lifecycle_stage": "M5 Golden Learning Slice — ADMITTED / EXECUTABLE under D-071; physical mobile-readiness deferred to final gate under D-068",
   "status": "IN_PROGRESS",
-  "active_milestone": "Repository M2 post-M5 full-product continuity — active product branch",
+  "active_milestone": "Repository M2 post-M5 full-product continuity — LA-0040 visual audit",
   "architecture_proof": {
     "disposition": "ARCHITECTURE_PROOF_PASS / GO_ADAPT",
     "reviewed_head_sha": "0327d2e5b854df1c9923c65ed88f77151cfe9eed",
@@ -55,13 +55,14 @@
     "LA-0036": "DONE",
     "LA-0037": "DONE",
     "LA-0038": "DONE",
-    "LA-0039": "IN_PROGRESS"
+    "LA-0039": "IN_PROGRESS",
+    "LA-0040": "IN_PROGRESS"
   },
   "git": {
     "branch": "feat/full-product-shell-continuity",
     "base_sha": "84e96dce5b3cc9f32af3f459d422b652d0e86624",
-    "head_sha": "1277cf44e3c2bec915442d5fdf13ea1b0f841862",
-    "head_sha_note": "Validated LA-0039 runtime checkpoint. bootstrap-validation 37637610659 PASS; account-deletion-bounded-validation 37637610454 PASS; product-bounded-validation 37637610321 PASS (canonical format, flutter analyze, expanded Flutter tests). Control-plane/visual-evidence-only commits may sit above this runtime SHA.",
+    "head_sha": "8caff368b653e0a3bae037903d581411dab9befa",
+    "head_sha_note": "Validated LA-0039/LA-0040 visual-audit runtime baseline. bootstrap-validation 37641586921 PASS; account-deletion-bounded-validation 37641586906 PASS; product-bounded-validation 37641586870 PASS; la0039-visual-capture 37641549582 PASS. LA-0040 audit/control-plane commits may sit above this runtime SHA.",
     "pr_number": 13,
     "pr_url": "https://github.com/Jay-prodesign/sesli-ogren/pull/13",
     "merged": false,
@@ -84,26 +85,28 @@
     "release_rule": "Physical iOS/Android speech/accessibility/performance/orientation checks remain mandatory before release-candidate/public-release claims."
   },
   "next_handoff": {
-    "id": "POST_M5_WORLD_CLASS_EXPERIENCE",
-    "title": "World-Class Experience / Golden Product Slice",
-    "status": "ENGINEERING_PASS_FOUNDER_VISUAL_REVIEW_PENDING",
-    "admission": "Founder visual/UX correction on 2026-10-07 + D-074 Tier-A governance",
-    "acceptance": "LA-0039 World-Class Experience Gate",
-    "current_task": "LA-0039"
+    "id": "LA0040_VISUAL_AUDIT",
+    "title": "Million-Dollar Visual Audit & Student Experience Elevation",
+    "status": "IN_PROGRESS_CURRENT_TREATMENT_FAIL_REDIRECT",
+    "admission": "Founder explicit visual/companion reopen on 2026-10-07 + D-074 Tier-A governance",
+    "acceptance": "LA-0040 VQG-01 + stress/red-team + Founder visual disposition",
+    "current_task": "LA-0040"
   },
   "blockers": [
     "Live Supabase anonymous-auth evidence remains BLOCKED because GitHub protected client config is absent: SUPABASE_URL and SUPABASE_PUBLISHABLE_KEY are not configured for the validation environment. Only these client-safe values may be used; never service-role credentials.",
     "Physical iOS/Android speech/accessibility/performance/orientation checks remain deferred under D-068 and mandatory before release-candidate/public-release claims."
   ],
   "protected_gate": "Merge, release, deploy, paid providers, credentials/secrets, licensing posture, production mutation: Product Owner only",
-  "next_action": "Capture representative current-head Golden Product Slice runtime screenshots and present them for Founder visual review. If no BLOCKER/HIGH visual defect is found, record Founder visual disposition; otherwise iterate only the concrete defect. Physical-device release gate remains separate under D-068.",
+  "next_action": "Create comparable Golden Product Slice treatments for the control, Energetic Student Momentum and Visual Learning Studio × Student Momentum hybrid; test evolved/sparse D-Knot against redesign/removal controls; rerun VQG-01 and visual red-team; present only the strongest evidence-backed treatment at the Founder visual gate. Physical-device release gate remains separate under D-068.",
   "canonical_source_refs": [
     "CURRENT_EXECUTION_STATE — Learning App",
-    "D-070 — Founder Product/Visual PASS / D-Knot selected",
+    "Founder visual/companion correction — 2026-10-07 (supersedes D-070 companion visual lock for LA-0040 evaluation)",
+    "LA-0040 — Million-Dollar Visual Audit & Student Experience Elevation",
+    "docs/qa/LA-0040_VISUAL_QUALITY_GATE.md",
+    "docs/research/LA-0040_CURRENT_VISUAL_AUDIT_2026-10-07.md",
+    "docs/design/LA-0040_VISUAL_TREATMENT_TOURNAMENT.md",
+    "docs/design/LA-0040_COMPANION_REEVALUATION.md",
     "D-071 — M5 Golden Learning Slice explicit admission",
-    "M5_GOLDEN_LEARNING_SLICE_ACCEPTANCE_CONTRACT_v0.1 — Learning App",
-    "D-053 / D-054 / V0_PRODUCT_SCOPE_v2.0",
-    "M4_ARCHITECTURE_PROOF_BRAIN_REVIEW_004 — ARCHITECTURE_PROOF_PASS / GO_ADAPT",
     "D-068 — Final Install After Implementation / Physical Device Gate Bounded",
     "D-074 — Adaptive Task Governance / Premise Audit / Dependency Propagation",
     "D-075 — Asset Necessity / Experience Role / Sustainable Production Pipeline"
@@ -156,10 +159,10 @@
     "release_effect": "Physical iOS/Android device, speech, accessibility, performance and orientation checks remain mandatory before release-candidate/public-release claims."
   },
   "founder_visual_decision": {
-    "decision_id": "D-070 + Founder correction 2026-10-07",
-    "companion": "D/Knot only — selection remains locked",
-    "product_visual": "ENGINEERING_PASS_FOUNDER_VISUAL_REVIEW_PENDING",
-    "reason": "Founder reopened shell UI/UX quality; Premium Active Learning Studio implementation now has a fully green engineering checkpoint, but final world-class visual quality still requires representative runtime review.",
+    "decision_id": "D-070 + Founder visual/companion correction 2026-10-07",
+    "companion": "REOPENED_FOR_LA0040 — D/Knot may be recolored, evolved, materially redesigned, reduced or removed after tournament evidence",
+    "product_visual": "CURRENT_TREATMENT_FAIL_VQG01_LA0040_IN_PROGRESS",
+    "reason": "Founder states the current app remains visually weak for the intended student-weighted, standout commercial quality bar. Round-0 audit confirms high-severity identity, Workspace repetition, show-don't-tell and student-desire gaps despite a green engineering baseline.",
     "affected": [
       "colors",
       "typography",
@@ -172,20 +175,25 @@
       "Progress presentation",
       "navigation",
       "microinteraction/motion",
-      "signature asset integration"
+      "signature asset integration",
+      "D/Knot palette",
+      "D/Knot form/rendering",
+      "companion placement/frequency",
+      "companion identity if evidence supports redesign/removal"
     ],
     "unaffected": [
-      "D/Knot identity",
       "learning truth",
       "source grounding/provenance",
       "evidence semantics",
       "account/data safety"
     ],
     "active_authority": [
-      "docs/research/LA_WORLD_CLASS_EXPERIENCE_AUDIT_2026-10-07.md",
-      "docs/design/LA_VISUAL_TREATMENT_TOURNAMENT_R1.md",
-      "docs/exec-plans/LA-0039.md",
-      "docs/qa/LA-0039_WORLD_CLASS_EXPERIENCE_GATE.md"
+      "docs/exec-plans/LA-0040.md",
+      "docs/research/LA-0040_CURRENT_VISUAL_AUDIT_2026-10-07.md",
+      "docs/design/LA-0040_VISUAL_TREATMENT_TOURNAMENT.md",
+      "docs/design/LA-0040_COMPANION_REEVALUATION.md",
+      "docs/qa/LA-0040_VISUAL_QUALITY_GATE.md",
+      "docs/qa/LA-0040_VISUAL_STRESS_REDTEAM.md"
     ]
   },
   "m5_admission": {
