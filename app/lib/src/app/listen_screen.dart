@@ -8,12 +8,7 @@ import 'app_runtime.dart';
 import 'companion_view.dart';
 
 class ListenScreen extends StatefulWidget {
-  const ListenScreen({
-    required this.runtime,
-    required this.materialId,
-    this.speechOutput,
-    super.key,
-  });
+  const ListenScreen({required this.runtime, required this.materialId, this.speechOutput, super.key});
 
   final AppRuntime runtime;
   final MaterialId materialId;

@@ -702,17 +702,13 @@ LIMIT 1
     if (chunkIndex < 0) {
       throw ArgumentError.value(chunkIndex, 'chunkIndex', 'must be non-negative');
     }
-    await _database.insert(
-      'listen_progress',
-      {
-        'learner_id': learner.id.value,
-        'material_id': materialId.value,
-        'source_version_id': sourceVersionId.value,
-        'chunk_index': chunkIndex,
-        'updated_at_utc': updatedAt.toUtc().toIso8601String(),
-      },
-      conflictAlgorithm: ConflictAlgorithm.replace,
-    );
+    await _database.insert('listen_progress', {
+      'learner_id': learner.id.value,
+      'material_id': materialId.value,
+      'source_version_id': sourceVersionId.value,
+      'chunk_index': chunkIndex,
+      'updated_at_utc': updatedAt.toUtc().toIso8601String(),
+    }, conflictAlgorithm: ConflictAlgorithm.replace);
   }
 
   @override

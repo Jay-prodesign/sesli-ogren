@@ -419,11 +419,7 @@ void main() {
     final speech = _FakeSpeechOutput();
     await tester.pumpWidget(
       MaterialApp(
-        home: ListenScreen(
-          runtime: runtime,
-          materialId: const MaterialId('listen-resume'),
-          speechOutput: speech,
-        ),
+        home: ListenScreen(runtime: runtime, materialId: const MaterialId('listen-resume'), speechOutput: speech),
       ),
     );
     await pumpUntilFound(tester, find.text('Kaldığın yerden dinle'));
