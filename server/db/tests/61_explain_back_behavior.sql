@@ -54,15 +54,30 @@ select public.open_explain_back_attempt(
 select * from public.read_explain_back_attempt('explain-back-attempt-0001') \gset
 reset role;
 
-do $$
+create or replace function pg_temp.assert_true(condition boolean, msg text)
+returns void language plpgsql as $
 begin
-  if :'attempt_a' <> :'attempt_replay' then
-    raise exception 'explain_back_assert_failed: idempotent replay changed attempt';
+  if condition is distinct from true then
+    raise exception 'explain_back_assert_failed: %', msg;
   end if;
-  if :'evaluation_kind' <> '' or :'evaluator_ref' <> '' then
-    raise exception 'explain_back_assert_failed: unevaluated attempt pretended to have evidence';
-  end if;
-end $$;
+end $;
+
+select pg_temp.assert_true(
+  :'attempt_a' = :'attempt_replay',
+  'idempotent replay changed attempt'
+);
+select pg_temp.assert_true(
+  exists (
+    select 1
+    from public.explain_back_attempts
+    where account_id = :user_a
+      and attempt_id = 'explain-back-attempt-0001'
+      and evaluation_kind is null
+      and evaluator_ref is null
+      and evaluated_at is null
+  ),
+  'unevaluated attempt pretended to have evidence'
+);
 
 -- Same attempt id with changed response is a conflicting replay.
 select set_config('request.jwt.claim.sub', :user_a, false);
@@ -109,11 +124,9 @@ select count(*) as cross_read_count
 from public.read_explain_back_attempt('explain-back-attempt-0001') \gset
 reset role;
 
-do $$
-begin
-  if :'cross_read_count'::integer <> 0 then
-    raise exception 'explain_back_assert_failed: cross-account read returned rows';
-  end if;
-end $$;
+select pg_temp.assert_true(
+  :cross_read_count::integer = 0,
+  'cross-account read returned rows'
+);
 
 rollback;
