@@ -1,29 +1,30 @@
 \set ON_ERROR_STOP on
 begin;
 
-select plan(4);
+create or replace function pg_temp.assert_true(condition boolean, msg text)
+returns void language plpgsql as $$
+begin
+  if condition is distinct from true then
+    raise exception 'account_delete_contract_assert_failed: %', msg;
+  end if;
+end $$;
 
-select has_function(
-  'public',
-  'request_account_deletion',
-  array[]::text[],
-  'authenticated deletion intent boundary exists'
+select pg_temp.assert_true(
+  to_regprocedure('public.request_account_deletion()') is not null,
+  'authenticated deletion intent boundary missing'
 );
-select function_privs_are(
-  'public', 'request_account_deletion', array[]::text[],
-  'authenticated', array['EXECUTE'],
-  'authenticated may request deletion for its own session'
+select pg_temp.assert_true(
+  has_function_privilege('authenticated', 'public.request_account_deletion()', 'EXECUTE'),
+  'authenticated must execute request_account_deletion'
 );
-select function_privs_are(
-  'public', 'request_account_deletion', array[]::text[],
-  'anon', array[]::text[],
-  'anonymous cannot request account deletion'
+select pg_temp.assert_true(
+  not has_function_privilege('anon', 'public.request_account_deletion()', 'EXECUTE'),
+  'anon must not execute request_account_deletion'
 );
-select function_returns(
-  'public', 'request_account_deletion', array[]::text[],
-  'timestamp with time zone',
-  'deletion intent returns its server timestamp'
+select pg_temp.assert_true(
+  pg_get_function_result('public.request_account_deletion()'::regprocedure)
+    = 'timestamp with time zone',
+  'request_account_deletion must return server timestamp'
 );
 
-select * from finish();
 rollback;
