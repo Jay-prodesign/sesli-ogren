@@ -4,9 +4,10 @@ import '../account/account_overview_gateway.dart';
 import 'app_runtime.dart';
 
 class ProfileSurface extends StatefulWidget {
-  const ProfileSurface({required this.runtime, super.key});
+  const ProfileSurface({required this.runtime, this.onAccountDeleted, super.key});
 
   final AppRuntime runtime;
+  final VoidCallback? onAccountDeleted;
 
   @override
   State<ProfileSurface> createState() => _ProfileSurfaceState();
@@ -14,6 +15,7 @@ class ProfileSurface extends StatefulWidget {
 
 class _ProfileSurfaceState extends State<ProfileSurface> {
   late Future<AccountOverview?> _overview;
+  bool _deleting = false;
 
   @override
   void initState() {
@@ -25,6 +27,58 @@ class _ProfileSurfaceState extends State<ProfileSurface> {
     setState(() {
       _overview = widget.runtime.accountOverview.load(learner: widget.runtime.learner);
     });
+  }
+
+  Future<void> _deleteAccount() async {
+    final firstConfirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Hesabı ve verileri sil?'),
+        content: const Text(
+          'Sunucudaki hesabın, öğrenme verilerin ve yüklediğin kaynak dosyaları kalıcı olarak silinecek.',
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.of(dialogContext).pop(false), child: const Text('Vazgeç')),
+          FilledButton(onPressed: () => Navigator.of(dialogContext).pop(true), child: const Text('Devam et')),
+        ],
+      ),
+    );
+    if (firstConfirmed != true || !mounted) return;
+
+    final finalConfirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Son onay'),
+        content: const Text('Bu işlem geri alınamaz. Hesabını ve verilerini kalıcı olarak silmek istiyor musun?'),
+        actions: [
+          TextButton(onPressed: () => Navigator.of(dialogContext).pop(false), child: const Text('Vazgeç')),
+          FilledButton(
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: const Text('Kalıcı olarak sil'),
+          ),
+        ],
+      ),
+    );
+    if (finalConfirmed != true || !mounted) return;
+
+    setState(() => _deleting = true);
+    try {
+      await widget.runtime.deleteAccount();
+      if (!mounted) return;
+      final callback = widget.onAccountDeleted;
+      if (callback != null) {
+        callback();
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Hesap ve veriler silindi.')));
+      }
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Hesap silinemedi. Verilerin korunuyor; tekrar deneyebilirsin.')),
+      );
+    } finally {
+      if (mounted) setState(() => _deleting = false);
+    }
   }
 
   @override
@@ -110,11 +164,28 @@ class _ProfileSurfaceState extends State<ProfileSurface> {
         Card(
           elevation: 0,
           color: theme.colorScheme.surfaceContainerLow,
-          child: const ListTile(
-            leading: Icon(Icons.privacy_tip_outlined),
-            title: Text('Gizlilik ve veriler'),
-            subtitle: Text(
-              'Materyallerini Kütüphane’den silebilirsin. Hesap silme ayrı güvenli akış olarak tamamlanacak.',
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(8, 4, 8, 12),
+            child: Column(
+              children: [
+                const ListTile(
+                  leading: Icon(Icons.privacy_tip_outlined),
+                  title: Text('Gizlilik ve veriler'),
+                  subtitle: Text(
+                    'Tek tek materyalleri Kütüphane’den silebilirsin. Hesap silme tüm hesap ve öğrenme verilerini kapsar.',
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  child: OutlinedButton.icon(
+                    onPressed: _deleting ? null : _deleteAccount,
+                    icon: _deleting
+                        ? const SizedBox.square(dimension: 18, child: CircularProgressIndicator(strokeWidth: 2))
+                        : const Icon(Icons.delete_forever_outlined),
+                    label: Text(_deleting ? 'Siliniyor…' : 'Hesabımı ve verilerimi sil'),
+                  ),
+                ),
+              ],
             ),
           ),
         ),

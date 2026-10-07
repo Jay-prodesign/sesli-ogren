@@ -17,6 +17,7 @@ class SesliOgrenApp extends StatefulWidget {
 class _SesliOgrenAppState extends State<SesliOgrenApp> {
   late Future<AppRuntime> _runtimeFuture;
   AppRuntime? _runtime;
+  bool _accountDeleted = false;
 
   @override
   void initState() {
@@ -48,6 +49,21 @@ class _SesliOgrenAppState extends State<SesliOgrenApp> {
       unawaited(runtime.close());
     }
     _runtime = null;
+    _accountDeleted = false;
+    setState(_openRuntime);
+  }
+
+  void _handleAccountDeleted() {
+    final runtime = _runtime;
+    _runtime = null;
+    if (runtime != null) {
+      unawaited(runtime.close());
+    }
+    setState(() => _accountDeleted = true);
+  }
+
+  void _startFresh() {
+    _accountDeleted = false;
     setState(_openRuntime);
   }
 
@@ -63,17 +79,60 @@ class _SesliOgrenAppState extends State<SesliOgrenApp> {
         inputDecorationTheme: const InputDecorationTheme(filled: true),
         filledButtonTheme: FilledButtonThemeData(style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(48))),
       ),
-      home: FutureBuilder<AppRuntime>(
-        future: _runtimeFuture,
-        builder: (context, snapshot) {
-          if (snapshot.hasData) {
-            return ProductShellScreen(runtime: snapshot.data!);
-          }
-          if (snapshot.hasError) {
-            return _RuntimeErrorScreen(error: snapshot.error!, onRetry: _retryRuntime);
-          }
-          return const _RuntimeLoadingScreen();
-        },
+      home: _accountDeleted
+          ? _AccountDeletedScreen(onStartFresh: _startFresh)
+          : FutureBuilder<AppRuntime>(
+              future: _runtimeFuture,
+              builder: (context, snapshot) {
+                if (snapshot.hasData) {
+                  return ProductShellScreen(runtime: snapshot.data!, onAccountDeleted: _handleAccountDeleted);
+                }
+                if (snapshot.hasError) {
+                  return _RuntimeErrorScreen(error: snapshot.error!, onRetry: _retryRuntime);
+                }
+                return const _RuntimeLoadingScreen();
+              },
+            ),
+    );
+  }
+}
+
+class _AccountDeletedScreen extends StatelessWidget {
+  const _AccountDeletedScreen({required this.onStartFresh});
+
+  final VoidCallback onStartFresh;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: SafeArea(
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 440),
+            child: Padding(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(Icons.check_circle_outline_rounded, size: 72),
+                  const SizedBox(height: 18),
+                  Text(
+                    'Hesabın ve verilerin silindi.',
+                    style: Theme.of(context).textTheme.headlineSmall,
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 10),
+                  const Text(
+                    'Yeni bir öğrenme alanı oluşturmak istersen sıfırdan başlayabilirsin.',
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 20),
+                  FilledButton(onPressed: onStartFresh, child: const Text('Yeni öğrenme alanı oluştur')),
+                ],
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }
