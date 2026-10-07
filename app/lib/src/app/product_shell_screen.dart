@@ -141,23 +141,35 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
             return IndexedStack(
               index: _index,
               children: [
-                _HomeSurface(
-                  data: data,
-                  onOpenLearning: _openLearning,
-                  onOpenListen: _openListen,
-                  onOpenWorkspace: () => _openWorkspace(),
+                TickerMode(
+                  enabled: _index == 0,
+                  child: _HomeSurface(
+                    data: data,
+                    onOpenLearning: _openLearning,
+                    onOpenListen: _openListen,
+                    onOpenWorkspace: () => _openWorkspace(),
+                  ),
                 ),
-                _LibrarySurface(
-                  data: data,
-                  onOpenLearning: _openLearning,
-                  onOpenWorkspace: _openWorkspace,
-                  onDeleteMaterial: _deleteMaterial,
+                TickerMode(
+                  enabled: _index == 1,
+                  child: _LibrarySurface(
+                    data: data,
+                    onOpenLearning: _openLearning,
+                    onOpenWorkspace: _openWorkspace,
+                    onDeleteMaterial: _deleteMaterial,
+                  ),
                 ),
-                ProgressSurface(items: data.progress, onOpenMaterial: _openWorkspace),
-                ProfileSurface(
-                  runtime: widget.runtime,
-                  onAccountDeleted: widget.onAccountDeleted,
-                  onSignOut: widget.onSignOut,
+                TickerMode(
+                  enabled: _index == 2,
+                  child: ProgressSurface(items: data.progress, onOpenMaterial: _openWorkspace),
+                ),
+                TickerMode(
+                  enabled: _index == 3,
+                  child: ProfileSurface(
+                    runtime: widget.runtime,
+                    onAccountDeleted: widget.onAccountDeleted,
+                    onSignOut: widget.onSignOut,
+                  ),
                 ),
               ],
             );

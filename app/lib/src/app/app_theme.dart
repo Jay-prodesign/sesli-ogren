@@ -18,7 +18,7 @@ abstract final class AppPalette {
   static const success = Color(0xFF167C6A);
   static const successSoft = Color(0xFFDFF7F0);
 
-  static const attention = Color(0xFFB45309);
+  static const attention = Color(0xFFAC4F08);
   static const attentionSoft = Color(0xFFFFEFD8);
 
   static const destructive = Color(0xFFB42318);
