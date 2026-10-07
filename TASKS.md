@@ -317,11 +317,11 @@ Next unallocated ID: **LA-0034**.
 
 ##### LA-0033 — Profile + server-authoritative plan/usage surface
 
-- Status: IN_PROGRESS
+- Status: DONE
 - Depends on: LA-0032
 - Owner: Brain
 - Executor: ChatGPT (bounded reversible engineering)
-- Verification: Profile reads only the authenticated learner's RLS-protected accounts/entitlements/quota_ledger rows; unavailable server truth fails closed instead of inventing plan/usage; language/voice/accessibility/privacy copy reflects implemented behavior; widget regression + bounded validation required before DONE.
+- Verification: Profile reads only authenticated learner account/entitlement/quota truth; unavailable server truth fails closed; language/device-TTS/accessibility/privacy state is truthful; bootstrap run `37597120112` PASS and product-bounded-validation run `37597120046` PASS (format, analyze, expanded tests) on `a785783e54441ef5231e7b53c751d36fd408838f`.
 - Exec plan: [docs/exec-plans/LA-0033.md](docs/exec-plans/LA-0033.md)
 
 ## Milestone M3 — V0 Implementation Tranches

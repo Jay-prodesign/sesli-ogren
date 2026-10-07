@@ -3,15 +3,13 @@
 This section supersedes stale branch/cursor lines below where they conflict.
 
 - Active runnable product branch: `feat/full-product-shell-continuity` (PR #13).
-- Validated product head: `5cec4d4ce69a05049b7e3b1c37f06f70d9147e6a`.
+- Validated product head: `a785783e54441ef5231e7b53c751d36fd408838f`.
 - Repository `main` remains bootstrap-only and MUST NOT be treated as the runnable Sesli Öğren application source.
-- LA-0024…LA-0032 are completed post-M5 product-continuity tranches.
-- LA-0030 Durable Resume Continuity: DONE.
-- LA-0031 Material deletion + safe continuity: DONE.
-- LA-0032 Durable Listen resume continuity: DONE.
-- Latest gates: bootstrap run `37587432418` PASS; product run `37587432428` PASS — canonical format, Flutter analyze, expanded Flutter tests.
-- Current cursor: **LA-0033 — Profile + server-authoritative plan/usage surface**. Read only existing RLS-protected account/entitlement/quota truth; fail closed when unavailable; do not expand into checkout or destructive account deletion in this task.
-- Local development/preview should track `feat/full-product-shell-continuity`, not `main` or historical review snapshots.
+- LA-0024…LA-0033 are completed post-M5 product-continuity tranches.
+- LA-0033 Profile + server-authoritative plan/usage: DONE.
+- Latest gates: bootstrap run `37597120112` PASS; product run `37597120046` PASS — canonical format, Flutter analyze, expanded Flutter tests.
+- Current cursor: open the next concrete first-commercial-V0 gap: secure account/data deletion. Keep destructive behavior isolated and fail-closed; do not invent billing/settings frameworks.
+- Local development/preview should track `feat/full-product-shell-continuity`, not `main`.
 
 ---
 
