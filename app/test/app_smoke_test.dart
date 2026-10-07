@@ -510,6 +510,8 @@ void main() {
     expect(find.text('3 işlem'), findsOneWidget);
     expect(find.textContaining('tr-TR'), findsOneWidget);
     expect(find.text('Cihazın Türkçe sesi'), findsOneWidget);
+    await tester.drag(find.byType(Scrollable).last, const Offset(0, -520));
+    await tester.pumpAndSettle();
     expect(find.textContaining('Hesap silme ayrı güvenli akış'), findsOneWidget);
   });
 
