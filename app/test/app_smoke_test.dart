@@ -299,6 +299,7 @@ void main() {
     await pumpUntilFound(tester, find.text('Şimdi ne yapmalı?'));
 
     expect(find.text('Kütüphane'), findsOneWidget);
+    expect(find.byKey(const ValueKey('home-continuation-hero')), findsOneWidget);
     expect(find.text('Materyalin'), findsOneWidget);
     expect(find.text('Fotosentez çalışma notu'), findsWidgets);
 
@@ -307,10 +308,16 @@ void main() {
 
     expect(find.text('Öğrenme durumu'), findsOneWidget);
     expect(find.text('Henüz ölçülmedi'), findsOneWidget);
-    expect(find.text('Hızlı bakış'), findsOneWidget);
-    expect(find.text('Açıkla'), findsOneWidget);
-    await tester.drag(find.byType(Scrollable).last, const Offset(0, -420));
+    expect(find.text('Sıradaki aktif adım'), findsOneWidget);
+    expect(find.text('Hatırla ile devam'), findsOneWidget);
+
+    await tester.scrollUntilVisible(
+      find.text('Odaklan'),
+      260,
+      scrollable: find.byType(Scrollable).last,
+    );
     await tester.pumpAndSettle();
+    expect(find.text('Açıkla'), findsOneWidget);
     expect(find.text('Odaklan'), findsOneWidget);
     await tapVisible(tester, find.text('Odaklan').last);
     await pumpUntilFound(tester, find.text('Kısa odak oturumu'));
@@ -321,7 +328,18 @@ void main() {
     expect(find.textContaining('öğrenme kanıtı oluşturmaz'), findsOneWidget);
     Navigator.of(tester.element(find.text('Kısa odak oturumu'))).pop();
     await tester.pumpAndSettle();
-    await tester.drag(find.byType(Scrollable).last, const Offset(0, 420));
+    await tester.scrollUntilVisible(
+      find.text('Hızlı bakış'),
+      260,
+      scrollable: find.byType(Scrollable).last,
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('Hızlı bakış'), findsOneWidget);
+    await tester.scrollUntilVisible(
+      find.text('Açıkla'),
+      -260,
+      scrollable: find.byType(Scrollable).last,
+    );
     await tester.pumpAndSettle();
     await tapVisible(tester, find.text('Açıkla'));
     await pumpUntilFound(tester, find.text('Açıklama henüz hazır değil'));
