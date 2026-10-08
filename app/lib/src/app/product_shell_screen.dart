@@ -250,9 +250,7 @@ class _HomeSurface extends StatelessWidget {
                   Text('Sesli Öğren', style: theme.textTheme.headlineSmall),
                   const SizedBox(height: 2),
                   Text(
-                    hasMaterial
-                        ? _headerLine(data.continuation)
-                        : 'Kendi materyalini aktif öğrenmeye dönüştür.',
+                    hasMaterial ? _headerLine(data.continuation) : 'Kendi materyalini aktif öğrenmeye dönüştür.',
                     style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
                   ),
                 ],
