@@ -178,7 +178,7 @@ class LearningTreatmentStage extends StatelessWidget {
     final isStudio = lane == LearningVisualTreatment.studio;
     final colorForSmall = isStudio ? const Color(0xFFE2F3AB) : c.accent;
     return ColoredBox(
-      key: ValueKey('la0040-' + stage + '-' + lane.name),
+      key: ValueKey('la0040-${stage}-${lane.name}'),
       color: c.paper,
       child: ListView(
         shrinkWrap: isResult,
@@ -188,7 +188,7 @@ class LearningTreatmentStage extends StatelessWidget {
         children: [
           if (lane == LearningVisualTreatment.editorial) ...[
             Text(
-              'SESLİ ÖĞREN  /  ' + stage.toUpperCase(),
+              'SESLİ ÖĞREN  /  ${stage.toUpperCase()}',
               style: TextStyle(color: c.accent, fontWeight: FontWeight.w800, fontSize: 11, letterSpacing: 1.55),
             ),
             const SizedBox(height: 30),
@@ -226,7 +226,7 @@ class LearningTreatmentStage extends StatelessWidget {
             Row(
               children: [
                 Text(
-                  'SESLİ ÖĞREN  /  ' + stage.toUpperCase(),
+                  'SESLİ ÖĞREN  /  ${stage.toUpperCase()}',
                   style: TextStyle(color: c.ink, fontSize: 11, fontWeight: FontWeight.w900, letterSpacing: 1.2),
                 ),
                 const Spacer(),
@@ -399,7 +399,7 @@ class LearningTreatmentResult extends StatelessWidget {
     label: _outcome(result),
     headline: _outcome(result),
     sourceLabel: 'Doğru ifade / kaynak dayanağı',
-    sourceText: result.correctAnswer + '\n\n' + result.sourceExcerpt,
+    sourceText: '${result.correctAnswer}\n\n${result.sourceExcerpt}',
     nextReason: result.nextAction.reasonText,
     primaryLabel: 'Sıradaki adıma geç',
     onPrimary: onContinue,
@@ -440,7 +440,7 @@ class LearningTreatmentRecallPrompt extends StatelessWidget {
     final c = _Colors.of(lane);
     final studio = lane == LearningVisualTreatment.studio;
     return ColoredBox(
-      key: ValueKey('la0040-prompt-' + lane.name),
+      key: ValueKey('la0040-prompt-${lane.name}'),
       color: c.paper,
       child: Padding(
         padding: const EdgeInsets.fromLTRB(20, 20, 20, 22),
