@@ -625,6 +625,7 @@ class _LibrarySurface extends StatelessWidget {
           for (final material in data.materials) ...[
             _LibraryMaterialCard(
               material: material,
+              continuation: _continuationFor(material.id),
               onPressed: () => onOpenWorkspace(material.id),
               onDelete: () => onDeleteMaterial(material),
             ),
@@ -633,12 +634,25 @@ class _LibrarySurface extends StatelessWidget {
       ],
     );
   }
+
+  LearningContinuation? _continuationFor(MaterialId materialId) {
+    for (final item in data.progress) {
+      if (item.material.id == materialId) return item.continuation;
+    }
+    return null;
+  }
 }
 
 class _LibraryMaterialCard extends StatelessWidget {
-  const _LibraryMaterialCard({required this.material, required this.onPressed, required this.onDelete});
+  const _LibraryMaterialCard({
+    required this.material,
+    required this.continuation,
+    required this.onPressed,
+    required this.onDelete,
+  });
 
   final MaterialRecord material;
+  final LearningContinuation? continuation;
   final VoidCallback onPressed;
   final VoidCallback onDelete;
 
@@ -647,6 +661,15 @@ class _LibraryMaterialCard extends StatelessWidget {
     final theme = Theme.of(context);
     final mediaIcon = material.mediaType == SourceMediaType.pdf ? Icons.picture_as_pdf_rounded : Icons.notes_rounded;
     final mediaLabel = material.mediaType == SourceMediaType.pdf ? 'PDF' : 'Metin';
+    final state = continuation?.state.kind ?? RecallStateKind.notAssessed;
+    final (stateLabel, stateSoft, stateAccent) = switch (state) {
+      RecallStateKind.notAssessed => ('Henüz ölçülmedi', AppPalette.surfaceMuted, AppPalette.inkMuted),
+      RecallStateKind.developing => ('Gelişiyor', AppPalette.primarySoft, AppPalette.primary),
+      RecallStateKind.retrievedOnce => ('Bir kez bağımsız hatırlandı', AppPalette.successSoft, AppPalette.success),
+      RecallStateKind.needsReview => ('Tekrar gerekiyor', AppPalette.attentionSoft, AppPalette.attention),
+    };
+    final nextReason =
+        continuation?.nextAction.reasonText ?? 'İlk aktif hatırlama denemesi öğrenme durumunu görünür kılar.';
 
     return Card(
       child: InkWell(
@@ -693,19 +716,19 @@ class _LibraryMaterialCard extends StatelessWidget {
                           overflow: TextOverflow.ellipsis,
                           style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
                         ),
-                        const SizedBox(height: 8),
-                        Row(
-                          children: [
-                            const Icon(Icons.arrow_forward_rounded, size: 16, color: AppPalette.primary),
-                            const SizedBox(width: 6),
-                            Text(
-                              'Çalışma alanını aç',
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                color: AppPalette.primary,
-                                fontWeight: FontWeight.w700,
+                        const SizedBox(height: 9),
+                        DecoratedBox(
+                          decoration: BoxDecoration(color: stateSoft, borderRadius: BorderRadius.circular(999)),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
+                            child: Text(
+                              stateLabel,
+                              style: theme.textTheme.labelSmall?.copyWith(
+                                color: stateAccent,
+                                fontWeight: FontWeight.w800,
                               ),
                             ),
-                          ],
+                          ),
                         ),
                       ],
                     ),
@@ -716,6 +739,49 @@ class _LibraryMaterialCard extends StatelessWidget {
                     icon: const Icon(Icons.delete_outline_rounded),
                   ),
                 ],
+              ),
+            ),
+            DecoratedBox(
+              decoration: const BoxDecoration(
+                color: AppPalette.primaryDark,
+                borderRadius: BorderRadius.vertical(bottom: Radius.circular(18)),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(15, 12, 15, 13),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    DecoratedBox(
+                      decoration: BoxDecoration(color: AppPalette.momentum, borderRadius: BorderRadius.circular(999)),
+                      child: const Padding(
+                        padding: EdgeInsets.all(6),
+                        child: Icon(Icons.arrow_forward_rounded, color: AppPalette.momentumInk, size: 16),
+                      ),
+                    ),
+                    const SizedBox(width: 9),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Kaldığın yer',
+                            style: theme.textTheme.labelSmall?.copyWith(
+                              color: Colors.white.withValues(alpha: 0.68),
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                          const SizedBox(height: 3),
+                          Text(
+                            nextReason,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: theme.textTheme.bodySmall?.copyWith(color: Colors.white, height: 1.4),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ],
