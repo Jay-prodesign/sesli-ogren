@@ -212,6 +212,7 @@ class LearningTreatmentStage extends StatelessWidget {
     final c = _Colors.of(lane);
     final source = sourceText.trim().isEmpty ? 'Kaynak hazır' : sourceText.trim();
     final isResult = stage == 'result';
+    final isHome = stage == 'home';
     final isStudio = lane == LearningVisualTreatment.studio;
     final colorForSmall = isStudio ? const Color(0xFFE2F3AB) : c.accent;
     return ColoredBox(
@@ -266,14 +267,7 @@ class LearningTreatmentStage extends StatelessWidget {
                   'SESLİ ÖĞREN  /  ${stage.toUpperCase()}',
                   style: TextStyle(color: c.ink, fontSize: 11, fontWeight: FontWeight.w900, letterSpacing: 1.2),
                 ),
-                const Spacer(),
-                if (isResult)
-                  CompanionView(
-                    state: outcomeIndependent ? CompanionVisualState.success : CompanionVisualState.correct,
-                    size: 48,
-                  )
-                else
-                  const CompanionView(state: CompanionVisualState.think, size: 48),
+
               ],
             ),
             const SizedBox(height: 20),
@@ -283,26 +277,42 @@ class LearningTreatmentStage extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    label.toUpperCase(),
-                    style: TextStyle(
-                      color: colorForSmall,
-                      fontSize: 11,
-                      letterSpacing: 1.2,
-                      fontWeight: FontWeight.w800,
-                    ),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          isHome ? 'ÜZERİNDE ÇALIŞTIĞIN KAYNAK' : label.toUpperCase(),
+                          style: TextStyle(
+                            color: colorForSmall,
+                            fontSize: 11,
+                            letterSpacing: 1.2,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                      ),
+                      const CompanionView(state: CompanionVisualState.think, size: 69),
+                    ],
                   ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 18),
                   Text(
-                    headline,
+                    isHome ? source : headline,
+                    maxLines: 3,
+                    overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
                       color: Colors.white,
-                      fontSize: 35,
+                      fontSize: 32,
                       height: 1.08,
                       fontWeight: FontWeight.w800,
                     ),
                   ),
-                  const SizedBox(height: 17),
+                  if (isHome) ...[
+                    const SizedBox(height: 20),
+                    Text(
+                      headline,
+                      style: TextStyle(color: colorForSmall, fontSize: 18, fontWeight: FontWeight.w800),
+                    ),
+                  ],
+                  const SizedBox(height: 14),
                   Text(nextReason, style: const TextStyle(color: Color(0xFFD0E2DE), fontSize: 15, height: 1.42)),
                   const SizedBox(height: 27),
                   _Action(label: primaryLabel, onTap: onPrimary, dark: true),
@@ -311,12 +321,12 @@ class LearningTreatmentStage extends StatelessWidget {
             ),
             const SizedBox(height: 29),
             Text(
-              sourceLabel.toUpperCase(),
+              isHome ? 'ÖĞRENME DURUMU' : sourceLabel.toUpperCase(),
               style: TextStyle(color: c.support, fontSize: 11, fontWeight: FontWeight.w800, letterSpacing: 1.1),
             ),
             const SizedBox(height: 12),
             Text(
-              source,
+              isHome ? label : source,
               maxLines: 7,
               overflow: TextOverflow.ellipsis,
               style: TextStyle(color: c.ink, fontSize: 17, fontWeight: FontWeight.w600, height: 1.4),
