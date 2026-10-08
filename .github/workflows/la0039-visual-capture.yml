@@ -106,4 +106,19 @@ jobs:
             exit 0
           fi
           git commit -m "test: capture LA-0039 visual review [skip ci]"
-          git push origin "HEAD:${GITHUB_REF_NAME}"
+          if git push origin "HEAD:${GITHUB_REF_NAME}"; then
+            exit 0
+          fi
+
+          echo "Branch advanced while visual evidence was being captured; retrying on top of current branch."
+          git fetch origin "${GITHUB_REF_NAME}"
+          if git rebase "origin/${GITHUB_REF_NAME}"; then
+            if git push origin "HEAD:${GITHUB_REF_NAME}"; then
+              exit 0
+            fi
+          else
+            git rebase --abort || true
+          fi
+
+          echo "::warning::Repository evidence commit skipped because the branch advanced concurrently. The uploaded visual artifact remains authoritative for this run."
+          exit 0
