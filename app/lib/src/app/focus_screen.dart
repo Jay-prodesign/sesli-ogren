@@ -63,16 +63,10 @@ class _FocusScreenState extends State<FocusScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               DecoratedBox(
-                decoration: BoxDecoration(
-                  color: AppPalette.momentum,
-                  borderRadius: BorderRadius.circular(16),
-                ),
+                decoration: BoxDecoration(color: AppPalette.momentum, borderRadius: BorderRadius.circular(16)),
                 child: Padding(
                   padding: const EdgeInsets.all(6),
-                  child: CompanionView(
-                    state: busy ? CompanionVisualState.think : CompanionVisualState.idle,
-                    size: 56,
-                  ),
+                  child: CompanionView(state: busy ? CompanionVisualState.think : CompanionVisualState.idle, size: 56),
                 ),
               ),
               const SizedBox(width: 13),
@@ -109,15 +103,10 @@ class _FocusScreenState extends State<FocusScreen> {
           ),
           const SizedBox(height: 14),
           DecoratedBox(
-            decoration: BoxDecoration(
-              color: AppPalette.signalSoft,
-              borderRadius: BorderRadius.circular(14),
-            ),
+            decoration: BoxDecoration(color: AppPalette.signalSoft, borderRadius: BorderRadius.circular(14)),
             child: const Padding(
               padding: EdgeInsets.symmetric(horizontal: 13, vertical: 11),
-              child: Text(
-                'Bu oturum güncel kaynağa bağlıdır. Yardım almak tek başına öğrenme kanıtı oluşturmaz.',
-              ),
+              child: Text('Bu oturum güncel kaynağa bağlıdır. Yardım almak tek başına öğrenme kanıtı oluşturmaz.'),
             ),
           ),
           const SizedBox(height: 22),
@@ -160,9 +149,7 @@ class _FocusScreenState extends State<FocusScreen> {
             controller: question,
             maxLength: 600,
             maxLines: 4,
-            decoration: const InputDecoration(
-              hintText: 'Neyi netleştirmek istiyorsun?',
-            ),
+            decoration: const InputDecoration(hintText: 'Neyi netleştirmek istiyorsun?'),
           ),
           Row(
             children: [
@@ -183,17 +170,11 @@ class _FocusScreenState extends State<FocusScreen> {
               ),
             ],
           ),
-          if (busy) ...[
-            const SizedBox(height: 12),
-            const LinearProgressIndicator(),
-          ],
+          if (busy) ...[const SizedBox(height: 12), const LinearProgressIndicator()],
           if (readyHelp != null) ...[
             const SizedBox(height: 16),
             DecoratedBox(
-              decoration: BoxDecoration(
-                color: AppPalette.primarySoft,
-                borderRadius: BorderRadius.circular(18),
-              ),
+              decoration: BoxDecoration(color: AppPalette.primarySoft, borderRadius: BorderRadius.circular(18)),
               child: Padding(
                 padding: const EdgeInsets.all(15),
                 child: Text(
@@ -207,10 +188,7 @@ class _FocusScreenState extends State<FocusScreen> {
           if (unavailable != null) ...[
             const SizedBox(height: 16),
             DecoratedBox(
-              decoration: BoxDecoration(
-                color: AppPalette.attentionSoft,
-                borderRadius: BorderRadius.circular(18),
-              ),
+              decoration: BoxDecoration(color: AppPalette.attentionSoft, borderRadius: BorderRadius.circular(18)),
               child: Padding(
                 padding: const EdgeInsets.all(15),
                 child: Row(
@@ -226,20 +204,14 @@ class _FocusScreenState extends State<FocusScreen> {
           ],
           const SizedBox(height: 22),
           DecoratedBox(
-            decoration: BoxDecoration(
-              color: AppPalette.primaryDark,
-              borderRadius: BorderRadius.circular(18),
-            ),
+            decoration: BoxDecoration(color: AppPalette.primaryDark, borderRadius: BorderRadius.circular(18)),
             child: Padding(
               padding: const EdgeInsets.all(15),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   DecoratedBox(
-                    decoration: BoxDecoration(
-                      color: AppPalette.momentum,
-                      borderRadius: BorderRadius.circular(999),
-                    ),
+                    decoration: BoxDecoration(color: AppPalette.momentum, borderRadius: BorderRadius.circular(999)),
                     child: const Padding(
                       padding: EdgeInsets.all(7),
                       child: Icon(Icons.arrow_forward_rounded, color: AppPalette.momentumInk, size: 17),
@@ -249,10 +221,7 @@ class _FocusScreenState extends State<FocusScreen> {
                   Expanded(
                     child: Text(
                       '3 · Hatırla veya kendi cümlelerinle anlat ile aktif olarak doğrula.',
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w700,
-                      ),
+                      style: theme.textTheme.bodyMedium?.copyWith(color: Colors.white, fontWeight: FontWeight.w700),
                     ),
                   ),
                 ],
