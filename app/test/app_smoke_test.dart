@@ -323,7 +323,7 @@ void main() {
     expect(find.textContaining('öğrenme kanıtı oluşturmaz'), findsOneWidget);
     Navigator.of(tester.element(find.textContaining('öğrenme kanıtı oluşturmaz'))).pop();
     await tester.pumpAndSettle();
-    await pumpUntilFound(tester, find.text('Öğrenme durumu'));
+    await pumpUntilFound(tester, find.byType(MaterialWorkspaceScreen));
     await tester.scrollUntilVisible(find.text('Kaynağa hızlı bakış'), 260, scrollable: find.byType(ListView));
     await tester.pumpAndSettle();
     expect(find.text('Kaynağa hızlı bakış'), findsOneWidget);
