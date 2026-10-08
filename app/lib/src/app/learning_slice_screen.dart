@@ -691,19 +691,13 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
           Row(
             children: [
               DecoratedBox(
-                decoration: BoxDecoration(
-                  color: AppPalette.primarySoft,
-                  borderRadius: BorderRadius.circular(999),
-                ),
+                decoration: BoxDecoration(color: AppPalette.primarySoft, borderRadius: BorderRadius.circular(999)),
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                   child: Text(
                     'KAYNAĞA BAKMADAN',
-                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                      color: AppPalette.primary,
-                      fontWeight: FontWeight.w900,
-                      letterSpacing: 0.45,
-                    ),
+                    style: Theme.of(context).textTheme.labelSmall
+                        ?.copyWith(color: AppPalette.primary, fontWeight: FontWeight.w900, letterSpacing: 0.45),
                   ),
                 ),
               ),
@@ -791,10 +785,7 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
             children: [
               Expanded(child: Text('Kaynakla karşılaştır', style: theme.textTheme.titleMedium)),
               DecoratedBox(
-                decoration: BoxDecoration(
-                  color: AppPalette.signalSoft,
-                  borderRadius: BorderRadius.circular(999),
-                ),
+                decoration: BoxDecoration(color: AppPalette.signalSoft, borderRadius: BorderRadius.circular(999)),
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
                   child: Text(
@@ -823,10 +814,7 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
                 children: [
                   Text('Doğru ifade', style: theme.textTheme.labelMedium?.copyWith(color: AppPalette.inkMuted)),
                   const SizedBox(height: 6),
-                  Text(
-                    result.correctAnswer,
-                    style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
-                  ),
+                  Text(result.correctAnswer, style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800)),
                   const SizedBox(height: 14),
                   Container(height: 1, color: AppPalette.outline),
                   const SizedBox(height: 13),
@@ -852,10 +840,7 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   DecoratedBox(
-                    decoration: BoxDecoration(
-                      color: AppPalette.momentum,
-                      borderRadius: BorderRadius.circular(999),
-                    ),
+                    decoration: BoxDecoration(color: AppPalette.momentum, borderRadius: BorderRadius.circular(999)),
                     child: const Padding(
                       padding: EdgeInsets.all(7),
                       child: Icon(Icons.arrow_forward_rounded, color: AppPalette.momentumInk, size: 17),
@@ -866,16 +851,11 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          'Sıradaki adım',
-                          style: theme.textTheme.labelLarge?.copyWith(color: Colors.white),
-                        ),
+                        Text('Sıradaki adım', style: theme.textTheme.labelLarge?.copyWith(color: Colors.white)),
                         const SizedBox(height: 5),
                         Text(
                           result.nextAction.reasonText,
-                          style: theme.textTheme.bodyMedium?.copyWith(
-                            color: Colors.white.withValues(alpha: 0.82),
-                          ),
+                          style: theme.textTheme.bodyMedium?.copyWith(color: Colors.white.withValues(alpha: 0.82)),
                         ),
                       ],
                     ),
