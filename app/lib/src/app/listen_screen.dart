@@ -184,35 +184,79 @@ class _ListenScreenState extends State<ListenScreen> {
               children: [
                 DecoratedBox(
                   decoration: BoxDecoration(
-                    color: AppPalette.successSoft,
+                    color: AppPalette.primaryDark,
                     borderRadius: BorderRadius.circular(24),
-                    border: Border.all(color: AppPalette.success.withValues(alpha: 0.18)),
                   ),
                   child: Padding(
                     padding: const EdgeInsets.fromLTRB(18, 16, 18, 18),
-                    child: Row(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        CompanionView(
-                          state: _speaking ? CompanionVisualState.speak : CompanionVisualState.idle,
-                          size: 76,
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            DecoratedBox(
+                              decoration: BoxDecoration(
+                                color: AppPalette.signalSoft,
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              child: Padding(
+                                padding: const EdgeInsets.all(5),
+                                child: CompanionView(
+                                  state: _speaking ? CompanionVisualState.speak : CompanionVisualState.listen,
+                                  size: 64,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 13),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  DecoratedBox(
+                                    decoration: BoxDecoration(
+                                      color: AppPalette.signal,
+                                      borderRadius: BorderRadius.circular(999),
+                                    ),
+                                    child: Padding(
+                                      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
+                                      child: Text(
+                                        _speaking ? 'ŞİMDİ DİNLİYORSUN' : 'DİNLEME',
+                                        style: theme.textTheme.labelSmall?.copyWith(
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.w900,
+                                          letterSpacing: 0.4,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 9),
+                                  Text(
+                                    source.name,
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: theme.textTheme.titleLarge?.copyWith(color: Colors.white),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
                         ),
-                        const SizedBox(width: 14),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'AYNI MATERYAL · DİNLEME',
-                                style: theme.textTheme.labelSmall?.copyWith(color: AppPalette.success),
-                              ),
-                              const SizedBox(height: 5),
-                              Text(source.name, style: theme.textTheme.titleLarge),
-                              const SizedBox(height: 5),
-                              Text(
-                                'Dinleme konumu: bölüm ${visibleChunk + 1} / ${source.chunks.length}',
-                                style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant),
-                              ),
-                            ],
+                        const SizedBox(height: 16),
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(999),
+                          child: LinearProgressIndicator(
+                            minHeight: 6,
+                            value: (visibleChunk + 1) / source.chunks.length,
+                            backgroundColor: Colors.white.withValues(alpha: 0.12),
+                            color: AppPalette.signal,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          'Dinleme konumu: bölüm ${visibleChunk + 1} / ${source.chunks.length}',
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: Colors.white.withValues(alpha: 0.72),
                           ),
                         ),
                       ],
@@ -221,22 +265,56 @@ class _ListenScreenState extends State<ListenScreen> {
                 ),
                 const SizedBox(height: 12),
                 DecoratedBox(
-                  decoration: BoxDecoration(color: AppPalette.attentionSoft, borderRadius: BorderRadius.circular(14)),
+                  decoration: BoxDecoration(
+                    color: AppPalette.attentionSoft,
+                    borderRadius: BorderRadius.circular(14),
+                  ),
                   child: Padding(
-                    padding: const EdgeInsets.all(12),
-                    child: Text(
-                      'Dinlemek maruziyettir; tek başına öğrenme başarısı olarak sayılmaz.',
-                      style: theme.textTheme.bodySmall?.copyWith(color: AppPalette.ink),
+                    padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 11),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Icon(Icons.info_outline_rounded, color: AppPalette.attention, size: 19),
+                        const SizedBox(width: 9),
+                        Expanded(
+                          child: Text(
+                            'Dinlemek öğrenme kanıtı oluşturmaz. Hatırlamayı denediğinde öğrenme durumun güncellenebilir.',
+                            style: theme.textTheme.bodySmall?.copyWith(color: AppPalette.ink),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ),
                 const SizedBox(height: 18),
-                Card(
-                  elevation: 0,
-                  color: theme.colorScheme.surfaceContainerLow,
+                DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: AppPalette.surface,
+                    borderRadius: BorderRadius.circular(18),
+                    border: Border.all(color: AppPalette.outline),
+                  ),
                   child: Padding(
-                    padding: const EdgeInsets.all(18),
-                    child: Text(source.text, style: theme.textTheme.bodyLarge?.copyWith(height: 1.55)),
+                    padding: const EdgeInsets.fromLTRB(18, 17, 18, 18),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            const Icon(Icons.article_outlined, color: AppPalette.signal, size: 18),
+                            const SizedBox(width: 7),
+                            Text(
+                              'Kaynak metni',
+                              style: theme.textTheme.labelMedium?.copyWith(
+                                color: AppPalette.signal,
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 12),
+                        Text(source.text, style: theme.textTheme.bodyLarge?.copyWith(height: 1.58)),
+                      ],
+                    ),
                   ),
                 ),
                 if (_error != null) ...[
