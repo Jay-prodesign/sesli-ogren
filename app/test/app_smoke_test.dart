@@ -773,11 +773,7 @@ void main() {
     expect(find.textContaining('öğrenme kanıtı olarak kaydetmiyoruz'), findsOneWidget);
     await tester.pageBack();
     await tester.pumpAndSettle();
-    await tester.scrollUntilVisible(
-      find.text('Hatırla ile dene'),
-      260,
-      scrollable: find.byType(Scrollable).last,
-    );
+    await tester.scrollUntilVisible(find.text('Hatırla ile dene'), 260, scrollable: find.byType(Scrollable).last);
     await tester.pumpAndSettle();
     await tapVisible(tester, find.text('Hatırla ile dene'));
     await pumpUntilFound(tester, find.byType(LearningSliceScreen));
