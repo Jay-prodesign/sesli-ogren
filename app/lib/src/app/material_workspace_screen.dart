@@ -4,6 +4,7 @@ import '../domain/learning_contracts.dart';
 import '../domain/learning_truth.dart';
 import 'app_runtime.dart';
 import 'app_theme.dart';
+import 'companion_view.dart';
 import 'explain_screen.dart';
 import 'focus_screen.dart';
 import 'learning_slice_screen.dart';
@@ -166,55 +167,114 @@ class _WorkspaceBody extends StatelessWidget {
         const SizedBox(height: 10),
         _LearningStatusCard(continuation: data.continuation, onRecall: onRecall),
         const SizedBox(height: 24),
-        Text('Çalış', style: theme.textTheme.titleMedium),
-        const SizedBox(height: 10),
-        _ActionCard(
-          icon: Icons.auto_awesome_outlined,
-          title: 'Açıkla',
-          body: 'Kaynağına bağlı, kaynak metinden açıkça ayrılan öğretici açıklama.',
-          onPressed: onExplain,
+        Row(
+          children: [
+            Expanded(child: Text('Çalışma yolları', style: theme.textTheme.titleMedium)),
+            Text(
+              'Aynı kaynakla',
+              style: theme.textTheme.labelMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+            ),
+          ],
         ),
         const SizedBox(height: 10),
-        _ActionCard(
-          icon: Icons.center_focus_strong_rounded,
-          title: 'Odaklan',
-          body: 'Kaynağa bağlı kısa çalışma: soru sor, ipucu veya doğrudan açıklama iste.',
-          onPressed: onFocus,
-        ),
-        const SizedBox(height: 10),
-        _ActionCard(
-          icon: Icons.psychology_alt_outlined,
-          title: 'Hatırla',
-          body: 'Kaynağa bakmadan geri çağır; öğrenme durumunu güncelleyebilen aktif adım.',
-          onPressed: onRecall,
-        ),
-        const SizedBox(height: 10),
-        _ActionCard(
-          icon: Icons.headphones_rounded,
-          title: 'Dinle',
-          body: 'Kaynak metnini cihazın Türkçe sesiyle dinle.',
-          onPressed: onListen,
+        LayoutBuilder(
+          builder: (context, constraints) {
+            final tileWidth = (constraints.maxWidth - 10) / 2;
+            return Wrap(
+              spacing: 10,
+              runSpacing: 10,
+              children: [
+                SizedBox(
+                  width: tileWidth,
+                  child: _StudyToolTile(
+                    icon: Icons.psychology_alt_outlined,
+                    title: 'Hatırla',
+                    body: 'Kaynağa bakmadan geri çağır.',
+                    tone: _StudyToolTone.primary,
+                    onPressed: onRecall,
+                  ),
+                ),
+                SizedBox(
+                  width: tileWidth,
+                  child: _StudyToolTile(
+                    icon: Icons.headphones_rounded,
+                    title: 'Dinle',
+                    body: 'Metni sesli olarak takip et.',
+                    tone: _StudyToolTone.signal,
+                    onPressed: onListen,
+                  ),
+                ),
+                SizedBox(
+                  width: tileWidth,
+                  child: _StudyToolTile(
+                    icon: Icons.auto_awesome_outlined,
+                    title: 'Açıkla',
+                    body: 'Kaynağa bağlı açıklama al.',
+                    tone: _StudyToolTone.warm,
+                    onPressed: onExplain,
+                  ),
+                ),
+                SizedBox(
+                  width: tileWidth,
+                  child: _StudyToolTile(
+                    icon: Icons.center_focus_strong_rounded,
+                    title: 'Odaklan',
+                    body: 'Takıldığın noktayı netleştir.',
+                    tone: _StudyToolTone.momentum,
+                    onPressed: onFocus,
+                  ),
+                ),
+              ],
+            );
+          },
         ),
         if (data.extracted != null && data.extracted!.normalizedText.trim().isNotEmpty) ...[
           const SizedBox(height: 24),
-          Text('Hızlı bakış', style: theme.textTheme.titleMedium),
-          const SizedBox(height: 6),
-          Text(
-            'AI özeti değil; yüklediğin kaynağın başlangıcından doğrudan bir görünüm.',
-            style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+          Row(
+            children: [
+              Expanded(child: Text('Kaynağa hızlı bakış', style: theme.textTheme.titleMedium)),
+              DecoratedBox(
+                decoration: BoxDecoration(
+                  color: AppPalette.signalSoft,
+                  borderRadius: BorderRadius.circular(999),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                  child: Text(
+                    'Kaynak metni',
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      color: AppPalette.signal,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
           const SizedBox(height: 10),
           DecoratedBox(
             decoration: BoxDecoration(
               color: AppPalette.surface,
-              borderRadius: BorderRadius.circular(20),
+              borderRadius: BorderRadius.circular(18),
               border: Border.all(color: AppPalette.outline),
             ),
             child: Padding(
-              padding: const EdgeInsets.all(18),
-              child: Text(
-                _orientationText(data.extracted!.normalizedText),
-                style: theme.textTheme.bodyLarge?.copyWith(height: 1.5),
+              padding: const EdgeInsets.fromLTRB(17, 15, 17, 16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Yüklediğin içeriğin başlangıcı',
+                    style: theme.textTheme.labelMedium?.copyWith(color: AppPalette.inkMuted),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    _orientationText(data.extracted!.normalizedText),
+                    maxLines: 7,
+                    overflow: TextOverflow.ellipsis,
+                    style: theme.textTheme.bodyLarge?.copyWith(height: 1.48),
+                  ),
+                ],
               ),
             ),
           ),
@@ -262,8 +322,10 @@ class _WorkspaceBody extends StatelessWidget {
 
   static String _sourceLabel(_WorkspaceSnapshot data) {
     final kind = data.material.mediaType == SourceMediaType.pdf ? 'PDF' : 'Metin';
-    final chars = data.extracted?.normalizedText.length;
-    return chars == null ? kind : '$kind • $chars karakter';
+    final text = data.extracted?.normalizedText.trim();
+    if (text == null || text.isEmpty) return kind;
+    final words = text.split(RegExp(r'\\s+')).where((part) => part.isNotEmpty).length;
+    return '$kind • $words kelime';
   }
 
   static Future<void> _showSource(BuildContext context, String text) => showModalBottomSheet<void>(
@@ -323,7 +385,7 @@ class _LearningStatusCard extends StatelessWidget {
       ),
       RecallStateKind.notAssessed || null => (
         'Henüz ölçülmedi',
-        'İlk Recall denemesi gerçek öğrenme durumunu görünür kılar.',
+        'İlk hatırlama denemesi öğrenme durumunu görünür kılar.',
         Icons.radio_button_unchecked_rounded,
       ),
     };
@@ -338,30 +400,38 @@ class _LearningStatusCard extends StatelessWidget {
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                DecoratedBox(
-                  decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(9),
-                    child: Icon(icon, color: Colors.white, size: 21),
-                  ),
-                ),
-                const SizedBox(width: 12),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        'Sıradaki aktif adım',
-                        style: theme.textTheme.labelMedium?.copyWith(color: const Color(0xFFAFC0FF)),
+                      Row(
+                        children: [
+                          DecoratedBox(
+                            decoration: BoxDecoration(
+                              color: AppPalette.momentum,
+                              borderRadius: BorderRadius.circular(999),
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
+                              child: Text(
+                                'SIRADAKİ ADIM',
+                                style: theme.textTheme.labelSmall?.copyWith(
+                                  color: AppPalette.momentumInk,
+                                  fontWeight: FontWeight.w900,
+                                  letterSpacing: 0.4,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
-                      const SizedBox(height: 4),
+                      const SizedBox(height: 10),
                       Text(title, style: theme.textTheme.titleLarge?.copyWith(color: Colors.white)),
                     ],
                   ),
                 ),
+                const SizedBox(width: 12),
+                CompanionView(state: _companionState(state), size: 58),
               ],
             ),
             const SizedBox(height: 12),
@@ -380,17 +450,33 @@ class _LearningStatusCard extends StatelessWidget {
   }
 }
 
-class _ActionCard extends StatelessWidget {
-  const _ActionCard({required this.icon, required this.title, required this.body, required this.onPressed});
+enum _StudyToolTone { primary, signal, warm, momentum }
+
+class _StudyToolTile extends StatelessWidget {
+  const _StudyToolTile({
+    required this.icon,
+    required this.title,
+    required this.body,
+    required this.tone,
+    required this.onPressed,
+  });
 
   final IconData icon;
   final String title;
   final String body;
+  final _StudyToolTone tone;
   final VoidCallback onPressed;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final (soft, accent) = switch (tone) {
+      _StudyToolTone.primary => (AppPalette.primarySoft, AppPalette.primary),
+      _StudyToolTone.signal => (AppPalette.signalSoft, AppPalette.signal),
+      _StudyToolTone.warm => (AppPalette.attentionSoft, AppPalette.attention),
+      _StudyToolTone.momentum => (const Color(0xFFF0F9D7), AppPalette.momentumInk),
+    };
+
     return Material(
       color: AppPalette.surface,
       shape: RoundedRectangleBorder(
@@ -400,39 +486,51 @@ class _ActionCard extends StatelessWidget {
       clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: onPressed,
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Row(
-            children: [
-              DecoratedBox(
-                decoration: BoxDecoration(
-                  color: title == 'Dinle' ? AppPalette.successSoft : AppPalette.primarySoft,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(9),
-                  child: Icon(icon, size: 21, color: title == 'Dinle' ? AppPalette.success : AppPalette.primary),
-                ),
-              ),
-              const SizedBox(width: 13),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(minHeight: 138),
+          child: Padding(
+            padding: const EdgeInsets.all(15),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
                   children: [
-                    Text(title, style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700)),
-                    const SizedBox(height: 4),
-                    Text(body, style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
+                    DecoratedBox(
+                      decoration: BoxDecoration(color: soft, borderRadius: BorderRadius.circular(12)),
+                      child: Padding(
+                        padding: const EdgeInsets.all(8),
+                        child: Icon(icon, size: 20, color: accent),
+                      ),
+                    ),
+                    const Spacer(),
+                    Icon(Icons.arrow_outward_rounded, size: 18, color: theme.colorScheme.onSurfaceVariant),
                   ],
                 ),
-              ),
-              const Icon(Icons.chevron_right_rounded),
-            ],
+                const SizedBox(height: 15),
+                Text(title, style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800)),
+                const SizedBox(height: 5),
+                Text(
+                  body,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                    height: 1.35,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
     );
   }
 }
+
+CompanionVisualState _companionState(RecallStateKind? state) => switch (state) {
+  RecallStateKind.retrievedOnce => CompanionVisualState.success,
+  RecallStateKind.developing => CompanionVisualState.idle,
+  RecallStateKind.needsReview => CompanionVisualState.correct,
+  RecallStateKind.notAssessed || null => CompanionVisualState.listen,
+};
 
 class _WorkspaceSnapshot {
   const _WorkspaceSnapshot({
