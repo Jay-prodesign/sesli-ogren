@@ -387,7 +387,7 @@ Next unallocated ID: **LA-0041**.
 ##### LA-0040 — Million-Dollar Visual Audit & Student Experience Elevation
 
 - Status: IN_PROGRESS
-- Gate: **VQG-01 PASS / FOUNDER VISUAL REVIEW PENDING**
+- Gate: **FOUNDER VISUAL FAIL / CHANGES_REQUIRED (2026-10-08)** — prior VQG-01 PASS was internal pre-Founder evidence only; no Founder acceptance.
 - Tier: A — Founder-triggered visual/product decision
 - Depends on: LA-0039 engineering baseline
 - Owner: Brain + Founder protected visual disposition
@@ -405,7 +405,7 @@ Next unallocated ID: **LA-0041**.
 - Stress/red-team: [docs/qa/LA-0040_VISUAL_STRESS_REDTEAM.md](docs/qa/LA-0040_VISUAL_STRESS_REDTEAM.md).
 - Round-1 retest: [docs/qa/LA-0040_VQG_ROUND1_RETEST_2026-10-08.md](docs/qa/LA-0040_VQG_ROUND1_RETEST_2026-10-08.md).
 - Prior research/roadmap reconciliation: [docs/design/LA-0040_PRIOR_RESEARCH_ROADMAP_RECONCILIATION.md](docs/design/LA-0040_PRIOR_RESEARCH_ROADMAP_RECONCILIATION.md).
-- Current cursor: **protected Founder visual review**. Do not restart visual discovery or add speculative polish while no concrete HIGH/BLOCKER or Founder change request exists.
+- Current cursor: **CMD-0002 Founder visual FAIL corrective execution**. Reuse existing work; fix grounded visual hierarchy, production-fidelity and signature-payoff failures with three comparable real Flutter treatments. Founder must approve revised representative runtime before closure.
 - Exec plan: [docs/exec-plans/LA-0040.md](docs/exec-plans/LA-0040.md)
 
 
