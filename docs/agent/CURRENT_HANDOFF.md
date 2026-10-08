@@ -1,3 +1,13 @@
+# CURRENT ART-DIRECTION DELIVERABLE — 2026-10-08 / V3 AUTHENTIC D-KNOT
+
+One corrected art-direction board for Sesli Öğren has been built in the CURRENT conversation as `la0040-real-dknot-material-in-motion-board-v3.png`. Its actual D/Knot placement uses the canonical repository image `app/assets/companions/D_KNOT_128.webp`, not generated replacement characters or empty circles. Same identity on Home / Recall / grounded Result; Source/Listen remains reader-led. Palette studies C1/C2 are conceptual recolors of the canonical raster only, NOT authorized new character assets. All document/source/answer text is explicitly DEMO. No fake mastery, XP, question counters or fabricated source data claims.
+
+Current status: **INSPIRATION / ART DIRECTION CANDIDATE — REVIEW REQUIRED; NOT LOCKED; LA-0040 VISUAL FAIL persists pending Founder decision.** Current task is to critically assess the actual four-screen visual family, D/Knot feel, premium craft and authentic behavior before high-fidelity Flutter design or new production assets. Do not start new mascot selection, reopen product strategy, or paint further generic Flutter card layouts. Next (only if visual direction is accepted): per-screen hi-fi spec → authentic high-res/stateful character art and prep → reversible Flutter UI → screenshot, accessibility and device QA.
+
+Design-source details: `docs/design/LA-0040_ART_DIRECTION_CANDIDATE_V1_MATERIAL_IN_MOTION.md`. Previous claims of V2 real-character integration are withdrawn; this V3 visual does contain the actual asset, though the image file is an output in the conversation and is NOT yet checked into GitHub. Do not falsely cite it as a repository file.
+
+---
+
 # CURRENT CLARIFICATION — 2026-10-08 — NO NEW COMPANION SELECTION
 
 Founder flags visual-direction drift. CORRECTION: A/B/C mascot inspiration is reference material ONLY. Prior assistant recommendation of B/Living Glyph as a new mascot selection is WITHDRAWN; there has been no Founder approval to replace canonical D/Knot. Only D/Knot color/finish/integration MAY be tested with genuine canonical source art, with identity/silhouette unchanged unless a separate evidenced Founder gate reopens it.
