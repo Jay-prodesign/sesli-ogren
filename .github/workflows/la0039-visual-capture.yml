@@ -69,6 +69,9 @@ jobs:
           test -s test/goldens/la0040_stress_narrow_home.png
           test -s test/goldens/la0040_stress_text130_workspace.png
           test -s test/goldens/la0040_stress_text150_recall.png
+          for state in empty populated narrow scale150; do
+            test -s "test/goldens/la0040_living_home_${state}.png"
+          done
 
       - name: Stage review evidence
         run: |
@@ -98,6 +101,11 @@ jobs:
             done
           done
           sha256sum docs/qa/evidence/la0040-treatments/*.png | tee docs/qa/evidence/la0040-treatments/SHA256SUMS.txt
+          mkdir -p docs/qa/evidence/la0040-living-home
+          for state in empty populated narrow scale150; do
+            cp "app/test/goldens/la0040_living_home_${state}.png" "docs/qa/evidence/la0040-living-home/${state}.png"
+          done
+          sha256sum docs/qa/evidence/la0040-living-home/*.png | tee docs/qa/evidence/la0040-living-home/SHA256SUMS.txt
 
       - name: Upload review evidence
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
@@ -106,5 +114,6 @@ jobs:
           path: |
             docs/qa/evidence/la0039
             docs/qa/evidence/la0040-treatments
+            docs/qa/evidence/la0040-living-home
           if-no-files-found: error
           retention-days: 7
