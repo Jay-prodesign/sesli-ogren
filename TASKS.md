@@ -386,7 +386,8 @@ Next unallocated ID: **LA-0041**.
 
 ##### LA-0040 — Million-Dollar Visual Audit & Student Experience Elevation
 
-- Status: IN_PROGRESS — **VQG-01 PASS / FOUNDER VISUAL REVIEW PENDING**
+- Status: IN_PROGRESS
+- Gate: **VQG-01 PASS / FOUNDER VISUAL REVIEW PENDING**
 - Tier: A — Founder-triggered visual/product decision
 - Depends on: LA-0039 engineering baseline
 - Owner: Brain + Founder protected visual disposition
