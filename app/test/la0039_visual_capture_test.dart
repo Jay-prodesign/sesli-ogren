@@ -96,7 +96,10 @@ Widget _phoneFrame(Widget child, {TextScaler textScaler = TextScaler.noScaling})
         ),
       ),
     ),
-    home: MediaQuery(data: MediaQueryData(disableAnimations: true, textScaler: textScaler), child: child),
+    home: MediaQuery(
+      data: MediaQueryData(disableAnimations: true, textScaler: textScaler),
+      child: child,
+    ),
   );
 }
 
@@ -267,10 +270,7 @@ void main() {
     );
     await _pumpUntilFound(tester, find.text('SIRADAKİ ADIM'));
     await tester.pump(const Duration(milliseconds: 200));
-    await expectLater(
-      find.byType(Scaffold).first,
-      matchesGoldenFile('goldens/la0040_stress_text130_workspace.png'),
-    );
+    await expectLater(find.byType(Scaffold).first, matchesGoldenFile('goldens/la0040_stress_text130_workspace.png'));
 
     await stressRecall.createCurrentPrompt(learner: stressRuntime.learner, materialId: stressMaterialId);
     await tester.pumpWidget(
@@ -281,9 +281,6 @@ void main() {
     );
     await _pumpUntilFound(tester, find.text('Hatırla'));
     await tester.pump(const Duration(milliseconds: 200));
-    await expectLater(
-      find.byType(Scaffold).first,
-      matchesGoldenFile('goldens/la0040_stress_text150_recall.png'),
-    );
+    await expectLater(find.byType(Scaffold).first, matchesGoldenFile('goldens/la0040_stress_text150_recall.png'));
   }, skip: !_captureEnabled);
 }
