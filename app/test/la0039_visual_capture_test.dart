@@ -563,6 +563,8 @@ void main() {
     await tester.ensureVisible(find.text('Bilmiyorum'));
     await tester.tap(find.text('Bilmiyorum'));
     await _pumpUntilFound(tester, find.byKey(const ValueKey('la0040-atelier-result')));
+    // AnimatedSwitcher retains the prior result for a short exit transition.
+    await tester.pump(const Duration(milliseconds: 300));
     expect(find.text('Bu kez bilmiyorum dedin'), findsOneWidget);
     expect(find.text('Bir kez bağımsız hatırladın'), findsNothing);
     await tester.pump(const Duration(milliseconds: 160));
@@ -580,6 +582,7 @@ void main() {
     await tester.ensureVisible(find.byKey(const ValueKey('la0040-atelier-submit')));
     await tester.tap(find.byKey(const ValueKey('la0040-atelier-submit')));
     await _pumpUntilFound(tester, find.byKey(const ValueKey('la0040-atelier-result')));
+    await tester.pump(const Duration(milliseconds: 300));
     expect(find.text('İpucuyla doğru yanıt'), findsOneWidget);
     expect(find.text('Bir kez bağımsız hatırladın'), findsNothing);
     await tester.pump(const Duration(milliseconds: 160));
