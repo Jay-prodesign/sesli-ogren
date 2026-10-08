@@ -11,11 +11,7 @@ enum LearningVisualTreatment { editorial, studio, knowledge }
 /// Keeps each visual experiment coherent across chrome, navigation and routes
 /// without changing the production app theme when this scope is absent.
 class LearningVisualTreatmentScope extends StatelessWidget {
-  const LearningVisualTreatmentScope({
-    required this.treatment,
-    required this.child,
-    super.key,
-  });
+  const LearningVisualTreatmentScope({required this.treatment, required this.child, super.key});
 
   final LearningVisualTreatment treatment;
   final Widget child;
@@ -430,12 +426,7 @@ class LearningTreatmentWorkspace extends StatelessWidget {
 
 /// Real, version-bound answer/provenance reveal. No generated relation.
 class _GroundedExcerpt extends StatelessWidget {
-  const _GroundedExcerpt({
-    required this.answer,
-    required this.excerpt,
-    required this.ink,
-    required this.accent,
-  });
+  const _GroundedExcerpt({required this.answer, required this.excerpt, required this.ink, required this.accent});
 
   final String answer;
   final String excerpt;
@@ -454,11 +445,7 @@ class _GroundedExcerpt extends StatelessWidget {
       spans.add(
         TextSpan(
           text: excerpt.substring(at, at + needle.length),
-          style: TextStyle(
-            color: ink,
-            fontWeight: FontWeight.w900,
-            backgroundColor: accent.withValues(alpha: 0.45),
-          ),
+          style: TextStyle(color: ink, fontWeight: FontWeight.w900, backgroundColor: accent.withValues(alpha: 0.45)),
         ),
       );
       spans.add(TextSpan(text: excerpt.substring(at + needle.length)));
@@ -473,12 +460,7 @@ class _GroundedExcerpt extends StatelessWidget {
 }
 
 class LearningTreatmentResult extends StatelessWidget {
-  const LearningTreatmentResult({
-    required this.lane,
-    required this.result,
-    required this.onContinue,
-    super.key,
-  });
+  const LearningTreatmentResult({required this.lane, required this.result, required this.onContinue, super.key});
 
   final LearningVisualTreatment lane;
   final RecallAttemptResult result;
@@ -488,8 +470,8 @@ class LearningTreatmentResult extends StatelessWidget {
   Widget build(BuildContext context) {
     final c = _Colors.of(lane);
     final outcome = _outcome(result);
-    final independent = result.evidence.outcome == RecallOutcome.correct &&
-        result.evidence.assistance == RecallAssistance.none;
+    final independent =
+        result.evidence.outcome == RecallOutcome.correct && result.evidence.assistance == RecallAssistance.none;
     final studio = lane == LearningVisualTreatment.studio;
     final knowledge = lane == LearningVisualTreatment.knowledge;
     return ColoredBox(
@@ -549,28 +531,16 @@ class LearningTreatmentResult extends StatelessWidget {
             else ...[
               Text(
                 knowledge ? 'KAYNAKTAN KANITA' : 'YANITIN / KAYITLI SONUÇ',
-                style: TextStyle(
-                  color: c.accent,
-                  letterSpacing: 1.3,
-                  fontWeight: FontWeight.w800,
-                  fontSize: 11,
-                ),
+                style: TextStyle(color: c.accent, letterSpacing: 1.3, fontWeight: FontWeight.w800, fontSize: 11),
               ),
               const SizedBox(height: 18),
               Text(
                 outcome,
-                style: TextStyle(
-                  color: c.ink,
-                  fontSize: 34,
-                  height: 1.1,
-                  fontWeight: FontWeight.w800,
-                ),
+                style: TextStyle(color: c.ink, fontSize: 34, height: 1.1, fontWeight: FontWeight.w800),
               ),
               const SizedBox(height: 12),
               Text(
-                independent
-                    ? 'Bir kez bağımsız hatırlama; henüz ustalık değil.'
-                    : 'Bu denemenin kayda geçen sonucu.',
+                independent ? 'Bir kez bağımsız hatırlama; henüz ustalık değil.' : 'Bu denemenin kayda geçen sonucu.',
                 style: TextStyle(color: c.support, fontSize: 14, height: 1.4),
               ),
             ],
@@ -585,52 +555,27 @@ class LearningTreatmentResult extends StatelessWidget {
             else ...[
               Text(
                 'DOĞRU İFADE',
-                style: TextStyle(
-                  color: c.support,
-                  fontSize: 11,
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: 1,
-                ),
+                style: TextStyle(color: c.support, fontSize: 11, fontWeight: FontWeight.w800, letterSpacing: 1),
               ),
               const SizedBox(height: 10),
               Text(
                 result.correctAnswer,
-                style: TextStyle(
-                  color: c.ink,
-                  fontSize: 27,
-                  height: 1.12,
-                  fontWeight: FontWeight.w800,
-                ),
+                style: TextStyle(color: c.ink, fontSize: 27, height: 1.12, fontWeight: FontWeight.w800),
               ),
             ],
             const SizedBox(height: 16),
             Text(
               'KAYNAKTAKİ YERİ',
-              style: TextStyle(
-                color: c.support,
-                fontSize: 11,
-                fontWeight: FontWeight.w800,
-                letterSpacing: 1,
-              ),
+              style: TextStyle(color: c.support, fontSize: 11, fontWeight: FontWeight.w800, letterSpacing: 1),
             ),
             const SizedBox(height: 12),
-            _GroundedExcerpt(
-              answer: result.correctAnswer,
-              excerpt: result.sourceExcerpt,
-              ink: c.ink,
-              accent: c.accent,
-            ),
+            _GroundedExcerpt(answer: result.correctAnswer, excerpt: result.sourceExcerpt, ink: c.ink, accent: c.accent),
             const SizedBox(height: 28),
             Divider(color: c.support.withValues(alpha: 0.35)),
             const SizedBox(height: 15),
             Text(
               'ŞİMDİ NE YAPMALI?',
-              style: TextStyle(
-                color: c.accent,
-                fontSize: 11,
-                fontWeight: FontWeight.w800,
-                letterSpacing: 1,
-              ),
+              style: TextStyle(color: c.accent, fontSize: 11, fontWeight: FontWeight.w800, letterSpacing: 1),
             ),
             const SizedBox(height: 10),
             Text(
