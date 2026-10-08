@@ -8,6 +8,8 @@ import 'app_runtime.dart';
 import 'app_theme.dart';
 import 'companion_view.dart';
 import 'la0040_visual_treatments.dart';
+import 'living_study_desk_home.dart';
+import 'atelier_learning_surfaces.dart';
 
 enum _SlicePhase { loading, source, recall, result, continuation, error }
 
@@ -542,15 +544,20 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
     final reducedMotion = (media?.disableAnimations ?? false) || (media?.accessibleNavigation ?? false);
     final compactResultHeader = _phase == _SlicePhase.result;
     final candidate = LearningVisualTreatmentScope.maybeOf(context);
-    final reviewFocus = candidate != null && (_phase == _SlicePhase.recall || _phase == _SlicePhase.result);
+    final living = LivingDeskReviewScope.active(context);
+    final reviewFocus = (candidate != null || living) &&
+        (_phase == _SlicePhase.recall || _phase == _SlicePhase.result);
     return Scaffold(
+      backgroundColor: living ? AtelierStyle.canvas : null,
       body: SafeArea(
         child: DecoratedBox(
           decoration: BoxDecoration(
             gradient: LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
-              colors: [theme.colorScheme.surface, theme.colorScheme.surfaceContainerLowest],
+              colors: living
+                  ? [AtelierStyle.canvas, AtelierStyle.canvas]
+                  : [theme.colorScheme.surface, theme.colorScheme.surfaceContainerLowest],
             ),
           ),
           child: Center(
@@ -715,6 +722,19 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
       return _errorCard(context);
     }
     final candidate = LearningVisualTreatmentScope.maybeOf(context);
+    if (LivingDeskReviewScope.active(context)) {
+      return AtelierRecall(
+        prompt: prompt,
+        controller: _answerController,
+        busy: _busy,
+        onSubmit: _submit,
+        onHint: _requestHint,
+        onReveal: _revealAnswer,
+        onUnknown: () => _submit(unknown: true),
+        support: _supportText,
+        error: _inlineError,
+      );
+    }
     if (candidate != null) {
       return LearningTreatmentRecallPrompt(
         lane: candidate,
@@ -787,6 +807,18 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
     final result = _result;
     if (result == null) return _errorCard(context);
     final candidate = LearningVisualTreatmentScope.maybeOf(context);
+    if (LivingDeskReviewScope.active(context)) {
+      return AtelierResult(
+        result: result,
+        answerInMemory: _answerController.text,
+        onContinue: () {
+          setState(() {
+            _continuation = LearningContinuation(state: result.state, nextAction: result.nextAction);
+            _phase = _SlicePhase.continuation;
+          });
+        },
+      );
+    }
     if (candidate != null) {
       return LearningTreatmentResult(
         lane: candidate,
