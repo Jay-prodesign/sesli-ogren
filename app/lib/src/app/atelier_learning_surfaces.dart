@@ -547,6 +547,24 @@ class AtelierResult extends StatelessWidget {
             ),
           ),
         ),
+        const SizedBox(height: 18),
+        const Row(
+          children: [
+            Icon(Icons.route_outlined, color: AtelierStyle.teal, size: 20),
+            SizedBox(width: 8),
+            Text(
+              'ÖĞRENME YOLCULUĞUN',
+              style: TextStyle(color: AtelierStyle.teal, fontWeight: FontWeight.w900, fontSize: 11, letterSpacing: 1),
+            ),
+          ],
+        ),
+        const SizedBox(height: 10),
+        Text(
+          independent
+              ? 'Bir kez kendi başına hatırladın. Bilginin kalıcı olup olmadığını sonraki denemeler gösterecek.'
+              : 'Bu deneme kaydedildi. Kaynağı ve kendi yanıtını karşılaştırarak bir sonraki adımına hazırlan.',
+          style: const TextStyle(color: AtelierStyle.muted, fontSize: 14, height: 1.45),
+        ),
         const SizedBox(height: 13),
         const Text(
           'SIRADAKİ GERÇEK ADIM',
