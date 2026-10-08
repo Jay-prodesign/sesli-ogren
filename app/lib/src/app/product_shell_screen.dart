@@ -298,7 +298,8 @@ class _HomeSurface extends StatelessWidget {
   }
 
   static String _nextReason(LearningContinuation? continuation) =>
-      continuation?.nextAction.reasonText ?? 'Kaynağından kısa bir hatırlama denemesiyle ilk gerçek öğrenme kanıtını oluştur.';
+      continuation?.nextAction.reasonText ??
+      'Kaynağından kısa bir hatırlama denemesiyle ilk gerçek öğrenme kanıtını oluştur.';
 }
 
 class _FirstMaterialHero extends StatelessWidget {
