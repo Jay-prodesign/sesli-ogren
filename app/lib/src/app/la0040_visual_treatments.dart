@@ -38,7 +38,7 @@ class LearningVisualTreatmentScope extends StatelessWidget {
         ),
         navigationBarTheme: NavigationBarThemeData(
           backgroundColor: c.paper,
-          indicatorColor: c.accent.withValues(alpha: 0.18),
+          indicatorColor: (treatment == LearningVisualTreatment.studio ? c.ink : c.accent).withValues(alpha: 0.15),
         ),
       ),
       child: _TreatmentInherited(treatment: treatment, child: child),
@@ -575,7 +575,7 @@ class LearningTreatmentResult extends StatelessWidget {
             const SizedBox(height: 15),
             Text(
               'ŞİMDİ NE YAPMALI?',
-              style: TextStyle(color: c.accent, fontSize: 11, fontWeight: FontWeight.w800, letterSpacing: 1),
+              style: TextStyle(color: studio ? c.ink : c.accent, fontSize: 11, fontWeight: FontWeight.w800, letterSpacing: 1),
             ),
             const SizedBox(height: 10),
             Text(
