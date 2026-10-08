@@ -321,7 +321,8 @@ void main() {
     await tapVisible(tester, find.text('İpucu ver'));
     await pumpUntilFound(tester, find.textContaining('henüz etkin değil'));
     expect(find.textContaining('öğrenme kanıtı oluşturmaz'), findsOneWidget);
-    await tester.pageBack();
+    Navigator.of(tester.element(find.textContaining('öğrenme kanıtı oluşturmaz'))).pop();
+    await tester.pumpAndSettle();
     await pumpUntilFound(tester, find.text('Öğrenme durumu'));
     await tester.scrollUntilVisible(find.text('Kaynağa hızlı bakış'), 260, scrollable: find.byType(ListView));
     await tester.pumpAndSettle();
@@ -771,7 +772,7 @@ void main() {
     await tapVisible(tester, find.text('Anlatımımı değerlendir'));
     await pumpUntilFound(tester, find.text('Henüz güvenilir değerlendirme yok'));
     expect(find.textContaining('öğrenme kanıtı olarak kaydetmiyoruz'), findsOneWidget);
-    await tester.pageBack();
+    Navigator.of(tester.element(find.text('Henüz güvenilir değerlendirme yok'))).pop();
     await tester.pumpAndSettle();
     await tester.scrollUntilVisible(find.text('Hatırla ile dene'), 260, scrollable: find.byType(Scrollable).last);
     await tester.pumpAndSettle();
