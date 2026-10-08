@@ -182,7 +182,7 @@ class AtelierRecall extends StatelessWidget {
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
       const Text(
-        'KAYNAK ŞİMDİ GİZLİ',
+        'KAYNAK GİZLENDİ · ŞİMDİ SEN',
         style: TextStyle(color: AtelierStyle.teal, fontWeight: FontWeight.w900, fontSize: 11, letterSpacing: 1),
       ),
       const SizedBox(height: 12),
@@ -191,11 +191,11 @@ class AtelierRecall extends StatelessWidget {
         children: [
           Expanded(
             child: Text(
-              'Şimdi sen hatırla.',
+              'Hatırlama sırası sende.',
               style: TextStyle(color: AtelierStyle.ink, fontSize: 28, height: 1.15, fontWeight: FontWeight.w900),
             ),
           ),
-          CompanionView(state: CompanionVisualState.think, size: 60),
+          CompanionView(state: CompanionVisualState.think, size: 100),
         ],
       ),
       const SizedBox(height: 17),
@@ -347,7 +347,7 @@ class AtelierResult extends StatelessWidget {
                   : result.evidence.outcome == RecallOutcome.helpedCorrect
                   ? CompanionVisualState.correct
                   : CompanionVisualState.think,
-              size: 62,
+              size: 100,
             ),
           ],
         ),
