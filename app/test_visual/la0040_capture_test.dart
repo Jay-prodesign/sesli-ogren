@@ -50,10 +50,7 @@ void main() {
         ),
       );
       await tester.pump(const Duration(milliseconds: 100));
-      await expectLater(
-        find.byType(Scaffold),
-        matchesGoldenFile('goldens/la0040_companion_${state.name}_390x844.png'),
-      );
+      await expectLater(find.byType(Scaffold), matchesGoldenFile('goldens/la0040_companion_${state.name}_390x844.png'));
     });
   }
 }
