@@ -1,3 +1,5 @@
+> **CURRENT FOUNDER FAIL OVERRIDE (2026-10-08):** Founder rejected the actual LA-0040 runtime screenshot packet. Historical internal PASS remains a record, not visual sign-off. Current external/product gate = **FAIL / CHANGES_REQUIRED**. To repair, apply the explicit acceptance matrix in [LA-0040_FOUNDER_FAIL_REWORK_SPEC.md](../exec-plans/LA-0040_FOUNDER_FAIL_REWORK_SPEC.md), and the rework evidence additions below. No repeat internal score can overrule Founder FAIL.
+
 # LA-0040 Visual Quality Gate (VQG-01)
 
 Status: ACTIVE
@@ -144,3 +146,21 @@ A passing treatment should feel:
 - Founder visual disposition.
 
 Founder visual approval is protected and required before DONE.
+
+## 2026-10-08 corrective runtime quality gates
+
+**Q0 — Specification admission:** Every material Learning App task and subtask must have an implementation-ready spec (objective, boundaries, dependencies, exact acceptance criteria, error paths and QA/evidence plan) *before* broader coding. Existing task specs may be extended; never open empty tasks or duplicate QA layers for optics. LA-0040 current rework spec is linked above.
+
+**Q1 — Engineering (hard gate):** Flutter format and analyze, focused widget tests on exact head, 12 real runtime comparison renders (editorial/studio/knowledge × Home/Workspace/Recall prompt/Result), same viewport and exact same learner/source/answer, correct callbacks and source/evidence immutability. Any error = FAIL regardless of visuals. No source code inspection alone passes it.
+
+**Q2 — Truth (hard gate):** initial null/not-assessed state, independent correct, hint-correct, answer-exposed, unknown, incorrect and partial outcomes produce appropriate non-mastery feedback; nextAction.reasonText is the canonical stored text. No fabricated diagrams, source content, counts, percentages, navigation or learning events. PASS requires behavior-level assertions, not copy review.
+
+**Q3 — Real visual distinction:** A/B/C must differ in composition/typographic architecture/relationship of source-to-action-to-payoff, not primarily palette. Score identical screen captures without product name. Repeated nested cards, text wall, generic component kits, unrelated mascot sticker, weak causal payoff or lack of primary hierarchy are automatic HIGH returns even with aggregate score ≥4.
+
+**Q4 — Accessibility, stress and interaction:** 320/390 logical-pixel width, long Turkish titles, 1.3×/1.5× scaling, focused input/keyboard and scroll-to-CTA, touch target reachability, semantics/contrast, Reduced Motion; fail on clipped control, sole-color learning meaning or inaccessible reading order. D-068 physical-device evidence remains a separate release gate.
+
+**Q5 — Founder perceptual lock:** exact-head screenshots plus actual runtime interaction/motion review; Founder explicitly chooses/rejects treatment and companion integration. User evidence may inform; internal VQG PASS or automated screenshot generation is **not** Founder PASS. LA-0040/LA-0039 remain IN_PROGRESS until resolved.
+
+**Q6 — Real users + commercial readiness (later):** uncoached n=5–8 initial small-sample user observation, 3–5s comprehension, first action, prepared-source 60s value, honest result interpretation, spontaneous next action and replacement reason, plus real phone/platform QA before release. No simulated users or screenshots treated as empirical retention/revenue proof.
+
+**QA disposition ledger:** Q0=SPECIFIED; Q1=UNVERIFIED until current exact-head tests; Q2=UNVERIFIED; Q3=UNVERIFIED; Q4=UNVERIFIED; Q5=FOUNDER FAIL; Q6=NOT EXECUTED. Do not mark any gate PASS absent actual evidence. Preserve previous technical PASS independently as previous-head history.
