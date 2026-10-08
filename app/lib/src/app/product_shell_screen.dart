@@ -48,7 +48,10 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
       learner: widget.runtime.learner,
       materialId: material.id,
     );
-    final extracted = source == null
+    // A preview requires extra source I/O; keep the unscoped product path unchanged.
+    // This read-only ancestor lookup is safe during initState (unlike dependOnInheritedWidgetOfExactType).
+    final livingReview = context.getElementForInheritedWidgetOfExactType<LivingDeskReviewScope>() != null;
+    final extracted = source == null || !livingReview
         ? null
         : await widget.runtime.store.extractedContentForSource(
             learner: widget.runtime.learner,
