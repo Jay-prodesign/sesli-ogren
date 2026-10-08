@@ -339,6 +339,8 @@ void main() {
         matchesGoldenFile('goldens/la0040_treatment_' + lane.name + '_home.png'),
       );
 
+      await tester.ensureVisible(find.text('Materyalle devam et'));
+      await tester.pump(const Duration(milliseconds: 80));
       await tester.tap(find.text('Materyalle devam et'));
       // Capture the real pushed route, preserving the chosen visual treatment.
       await _pumpUntilFound(tester, find.byKey(ValueKey('la0040-workspace-' + lane.name)));
@@ -355,6 +357,8 @@ void main() {
       final action = await store.learningTruthStore().recallAction(learner: runtime.learner, actionId: prompt.id);
       expect(action, isNotNull);
 
+      await tester.ensureVisible(find.text('Kaynaktan hatırla'));
+      await tester.pump(const Duration(milliseconds: 80));
       await tester.tap(find.text('Kaynaktan hatırla'));
       // The Recall route must inherit the same lane and persist its own attempt.
       await _pumpUntilFound(tester, find.byKey(ValueKey('la0040-prompt-' + lane.name)));
@@ -364,7 +368,9 @@ void main() {
         matchesGoldenFile('goldens/la0040_treatment_' + lane.name + '_prompt.png'),
       );
 
+      await tester.ensureVisible(find.byType(TextField));
       await tester.enterText(find.byType(TextField), action!.expectedAnswer);
+      await tester.ensureVisible(find.text('Yanıtla'));
       await tester.tap(find.text('Yanıtla'));
       await _pumpUntilFound(tester, find.byKey(ValueKey('la0040-result-' + lane.name)));
       expect(find.text('Sıradaki adıma geç'), findsOneWidget);
