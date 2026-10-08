@@ -1,3 +1,5 @@
+> **CURRENT SECOND FOUNDER FAIL / EXPERIENCE OVERRIDE — 2026-10-08:** Editorial, Studio and Knowledge were rejected as fundamentally generic text/card-based interfaces. The prior A/B/C treatment descriptions below are preserved as unsuccessful design experiments, **not active implementation requirements or winners**. Preserve the causal learning contract, 3–5/30/60-second aims, source truth and provenance. Active design work must invent a *product-local, concrete*, source-led interaction model that makes studying, recalling, comparing and continuing visibly tangible inside a coherent mobile environment. Do not merely recolor/rearrange headings and panels or enlarge D/Knot as a sticker. Runtime visual approval rests with Founder; consult [second-FAIL corrective task spec](../exec-plans/LA-0040_FOUNDER_FAIL_REWORK_SPEC.md) for active S1–S7 acceptance.
+
 # LA-0040 — Experience Fidelity Contract (visual rework)
 
 Status: ACTIVE — design hypotheses and executable review rules, **not Founder approval**
