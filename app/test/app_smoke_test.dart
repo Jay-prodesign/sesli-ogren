@@ -223,7 +223,7 @@ void main() {
 
     expect(find.text('İpucusuz hatırladın'), findsOneWidget);
     expect(find.text('Sıradaki adım'), findsOneWidget);
-    await tapVisible(tester, find.text('Devam et'));
+    await tapVisible(tester, find.text('Sıradaki adıma geç'));
     await pumpUntilFound(tester, find.text('Devam noktası'));
     expect(find.text('Devam noktası'), findsOneWidget);
 
