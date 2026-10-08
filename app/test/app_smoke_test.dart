@@ -323,9 +323,9 @@ void main() {
     expect(find.textContaining('öğrenme kanıtı oluşturmaz'), findsOneWidget);
     Navigator.of(tester.element(find.text('Kısa odak oturumu'))).pop();
     await tester.pumpAndSettle();
-    await tester.scrollUntilVisible(find.text('Hızlı bakış'), 260, scrollable: find.byType(Scrollable).last);
+    await tester.scrollUntilVisible(find.text('Kaynağa hızlı bakış'), 260, scrollable: find.byType(Scrollable).last);
     await tester.pumpAndSettle();
-    expect(find.text('Hızlı bakış'), findsOneWidget);
+    expect(find.text('Kaynağa hızlı bakış'), findsOneWidget);
     await tester.scrollUntilVisible(find.text('Açıkla'), -260, scrollable: find.byType(Scrollable).last);
     await tester.pumpAndSettle();
     expect(find.text('Açıkla'), findsOneWidget);
