@@ -149,31 +149,31 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
 
 
   Widget _buildNavigationBar() => NavigationBar(
-        selectedIndex: _index,
-        onDestinationSelected: (value) => setState(() => _index = value),
-        destinations: const [
-          NavigationDestination(
-            icon: Icon(Icons.home_outlined),
-            selectedIcon: Icon(Icons.home_rounded),
-            label: 'Ana Sayfa',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.library_books_outlined),
-            selectedIcon: Icon(Icons.library_books_rounded),
-            label: 'Kütüphane',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.insights_outlined),
-            selectedIcon: Icon(Icons.insights_rounded),
-            label: 'İlerleme',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.person_outline_rounded),
-            selectedIcon: Icon(Icons.person_rounded),
-            label: 'Profil',
-          ),
-        ],
-      );
+    selectedIndex: _index,
+    onDestinationSelected: (value) => setState(() => _index = value),
+    destinations: const [
+      NavigationDestination(
+        icon: Icon(Icons.home_outlined),
+        selectedIcon: Icon(Icons.home_rounded),
+        label: 'Ana Sayfa',
+      ),
+      NavigationDestination(
+        icon: Icon(Icons.library_books_outlined),
+        selectedIcon: Icon(Icons.library_books_rounded),
+        label: 'Kütüphane',
+      ),
+      NavigationDestination(
+        icon: Icon(Icons.insights_outlined),
+        selectedIcon: Icon(Icons.insights_rounded),
+        label: 'İlerleme',
+      ),
+      NavigationDestination(
+        icon: Icon(Icons.person_outline_rounded),
+        selectedIcon: Icon(Icons.person_rounded),
+        label: 'Profil',
+      ),
+    ],
+  );
 
   @override
   Widget build(BuildContext context) {
