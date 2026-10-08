@@ -6,6 +6,8 @@ import 'package:flutter/material.dart';
 import '../domain/learning_contracts.dart';
 import '../learning/explain_back_gateway.dart';
 import 'app_runtime.dart';
+import 'app_theme.dart';
+import 'companion_view.dart';
 
 class ExplainBackScreen extends StatefulWidget {
   const ExplainBackScreen({required this.runtime, required this.source, super.key});
@@ -74,12 +76,64 @@ class _ExplainBackScreenState extends State<ExplainBackScreen> {
         child: ListView(
           padding: const EdgeInsets.fromLTRB(20, 18, 20, 36),
           children: [
-            Text(
-              'Kaynağa bakmadan, anladığını kendi cümlelerinle açıkla.',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: AppPalette.primarySoft,
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: const Padding(
+                    padding: EdgeInsets.all(6),
+                    child: CompanionView(state: CompanionVisualState.listen, size: 54),
+                  ),
+                ),
+                const SizedBox(width: 13),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      DecoratedBox(
+                        decoration: BoxDecoration(
+                          color: AppPalette.primarySoft,
+                          borderRadius: BorderRadius.circular(999),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
+                          child: Text(
+                            'KAYNAĞA BAKMADAN',
+                            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                              color: AppPalette.primary,
+                              fontWeight: FontWeight.w900,
+                              letterSpacing: 0.4,
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 9),
+                      Text(
+                        'Anladığını kendi cümlelerinle açıkla.',
+                        style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(height: 8),
-            const Text('Bu aktif deneme değerlendirilmeden öğrenme kanıtı veya ustalık iddiası oluşturmaz.'),
+            const SizedBox(height: 14),
+            DecoratedBox(
+              decoration: BoxDecoration(
+                color: AppPalette.signalSoft,
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 13, vertical: 11),
+                child: Text(
+                  'Bu aktif deneme değerlendirilmeden öğrenme kanıtı veya ustalık iddiası oluşturmaz.',
+                ),
+              ),
+            ),
             const SizedBox(height: 18),
             TextField(
               controller: _controller,
@@ -114,13 +168,28 @@ class _UnavailableResult extends StatelessWidget {
   final VoidCallback onRetry;
 
   @override
-  Widget build(BuildContext context) => Card(
+  Widget build(BuildContext context) => DecoratedBox(
+    decoration: BoxDecoration(
+      color: AppPalette.attentionSoft,
+      borderRadius: BorderRadius.circular(18),
+    ),
     child: Padding(
       padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Henüz güvenilir değerlendirme yok', style: Theme.of(context).textTheme.titleMedium),
+          const Row(
+            children: [
+              Icon(Icons.shield_outlined, color: AppPalette.attention, size: 20),
+              SizedBox(width: 9),
+              CompanionView(state: CompanionVisualState.correct, size: 42),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Text(
+            'Henüz güvenilir değerlendirme yok',
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
+          ),
           const SizedBox(height: 8),
           Text(reason),
           const SizedBox(height: 8),
@@ -140,26 +209,61 @@ class _EvaluatedResult extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final title = switch (result.kind) {
       ExplainBackEvaluationKind.sufficient => 'Anlatımında temel fikirler görünüyor',
       ExplainBackEvaluationKind.gapDetected => 'Bir noktayı güçlendirebiliriz',
       ExplainBackEvaluationKind.notEvaluable => 'Bu yanıttan güvenilir sonuç çıkaramıyoruz',
       ExplainBackEvaluationKind.unavailable => 'Değerlendirme kullanılamıyor',
     };
-    return Card(
+    final isStrong = result.kind == ExplainBackEvaluationKind.sufficient;
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: isStrong ? AppPalette.successSoft : AppPalette.attentionSoft,
+        borderRadius: BorderRadius.circular(18),
+      ),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(title, style: Theme.of(context).textTheme.titleMedium),
-            const SizedBox(height: 8),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                CompanionView(
+                  state: isStrong ? CompanionVisualState.success : CompanionVisualState.correct,
+                  size: 48,
+                ),
+                const SizedBox(width: 11),
+                Expanded(
+                  child: Text(
+                    title,
+                    style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
             Text(result.feedback),
             if (result.targetedRepair.isNotEmpty) ...[
               const SizedBox(height: 14),
-              const Text('Hedefli düzeltme', style: TextStyle(fontWeight: FontWeight.w700)),
-              const SizedBox(height: 6),
-              Text(result.targetedRepair),
+              DecoratedBox(
+                decoration: BoxDecoration(
+                  color: AppPalette.surface.withValues(alpha: 0.72),
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(13),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text('Hedefli düzeltme', style: TextStyle(fontWeight: FontWeight.w800)),
+                      const SizedBox(height: 6),
+                      Text(result.targetedRepair),
+                    ],
+                  ),
+                ),
+              ),
             ],
             const SizedBox(height: 14),
             FilledButton.tonal(onPressed: onRetry, child: const Text('Tekrar kendi cümlelerimle anlat')),
