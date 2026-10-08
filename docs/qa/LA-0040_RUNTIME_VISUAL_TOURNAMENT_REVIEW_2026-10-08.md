@@ -39,3 +39,14 @@ The comparison **does not** justify declaring any lane world-class or Founder ap
 
 **Scope and provenance:** No Visual Intelligence source code, assets, project decision authority, or protected expression was copied. Only reusable experience methodology influenced the locally implemented comparison. No speculative engine, provider or new commercial dependency introduced.
 
+## 2026-10-08 — Follow-up exact-head validation and design correction
+
+Later implementation HEAD: `dacbad3014` (same PR #13 / isolated visual review scope). This follow-up supersedes the previous review HEAD for current engineering status, not the earlier observation history.
+
+- **Material-first Studio Home:** dark active-learning stage now presents the learner's actual material title first, its next learning action, and truthful not-yet-measured state. D/Knot gains a larger context-specific placement. No new lesson content, badges, model data or mastery claim.
+- **Payoff / answer proof:** independent Recall feedback retains its bounded not-mastery statement, shows canonical correct answer inside the stored source excerpt when exact text matches, and carries persisted next-action reason. Other outcomes are not given the unaided-success label.
+- **Color QA correction:** tiny result-action labels previously used pale lime on near-white Studio paper (inaccessible). Studio now uses dark ink on light; Editorial/Knowledge small-label accents were darkened. The screenshot test checks >=4.5:1 contrast using actual widget foreground and inherited scaffold color.
+- **Flutter golden review:** [visual capture run 37747143673](https://github.com/Jay-prodesign/sesli-ogren/actions/runs/37747143673) **SUCCESS**; identical actual source, 3 layouts x 4 stages, with unknown and hint-assisted adversarial navigation. [product bounded run 37747148883](https://github.com/Jay-prodesign/sesli-ogren/actions/runs/37747148883) **SUCCESS**; [bootstrap run 37747148888](https://github.com/Jay-prodesign/sesli-ogren/actions/runs/37747148888) **SUCCESS**; [account-deletion run 37747148909](https://github.com/Jay-prodesign/sesli-ogren/actions/runs/37747148909) **SUCCESS**. These results are associated with the same `dacbad3014` commit.
+- **Current disposition:** exact-head engineering/review-suite PASS; **visual product quality still CHANGES_REQUIRED**. Studio is the source-first refinement lead, not an approved/selected production treatment. Candidate-specific 320px/1.5x, longer authentic study source, Reduced Motion, fresh-user comprehension and real-phone release gates remain unverified.
+
+No repo merge, app deployment or protected Founder decision was performed. Previous `6884a301` success remains historical evidence.
