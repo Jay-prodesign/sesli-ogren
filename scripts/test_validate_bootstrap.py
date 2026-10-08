@@ -279,8 +279,12 @@ class ValidatorNegativeTests(unittest.TestCase):
         self.assertFailsWith(r"invalid command file name 'cmd-2\.md'")
 
     def test_command_id_gap(self) -> None:
-        self.write("docs/agent/commands/CMD-0003.md", valid_cmd(3))
-        self.set_state(last_command_id="CMD-0003", command_processing_status="UNREAD")
+        # Keep this negative test valid when real command IDs advance.
+        # Inject a later command without the immediately next command ID.
+        missing = self.next_cmd_num()
+        gap = missing + 1
+        self.write(f"docs/agent/commands/CMD-{gap:04d}.md", valid_cmd(gap))
+        self.set_state(last_command_id=f"CMD-{gap:04d}", command_processing_status="UNREAD")
         self.assertFailsWith(r"CMD IDs must be contiguous")
 
     def test_command_pointer_drift(self) -> None:
