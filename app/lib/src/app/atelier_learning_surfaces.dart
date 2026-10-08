@@ -318,7 +318,8 @@ class AtelierResult extends StatelessWidget {
               ),
             ),
             CompanionView(
-              state: result.evidence.outcome == RecallOutcome.correct &&
+              state:
+                  result.evidence.outcome == RecallOutcome.correct &&
                       result.evidence.assistance == RecallAssistance.none
                   ? CompanionVisualState.success
                   : result.evidence.outcome == RecallOutcome.unknown
@@ -380,18 +381,12 @@ class AtelierResult extends StatelessWidget {
               : const Duration(milliseconds: 240),
           builder: (context, progress, child) => Opacity(
             opacity: progress,
-            child: Transform.translate(
-              offset: Offset(0, 12 * (1 - progress)),
-              child: child,
-            ),
+            child: Transform.translate(offset: Offset(0, 12 * (1 - progress)), child: child),
           ),
           child: Container(
             width: double.infinity,
             padding: const EdgeInsets.fromLTRB(20, 21, 20, 23),
-            decoration: BoxDecoration(
-              color: AtelierStyle.ink,
-              borderRadius: BorderRadius.circular(21),
-            ),
+            decoration: BoxDecoration(color: AtelierStyle.ink, borderRadius: BorderRadius.circular(21)),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -415,12 +410,7 @@ class AtelierResult extends StatelessWidget {
                 const SizedBox(height: 14),
                 Text(
                   result.correctAnswer,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 25,
-                    height: 1.2,
-                    fontWeight: FontWeight.w900,
-                  ),
+                  style: const TextStyle(color: Colors.white, fontSize: 25, height: 1.2, fontWeight: FontWeight.w900),
                 ),
                 const SizedBox(height: 15),
                 const Divider(color: Color(0xFF486068), height: 1),
