@@ -1,3 +1,13 @@
+# ACTIVE LA-0040 DESIGN CURSOR — FOUR-SCREEN SOURCE↔RECALL VISUAL STUDY (2026-10-08)
+
+Latest art-direction candidate is **Canlı Kaynak Atölyesi V3**: Home, actual-source Reader/Listen, deliberately source-hidden Recall, and grounded attempt↔source Result. The full rendered four-phone screen, four crops, narrow-width variants and self-contained HTML prototype are in the CURRENT chat, not on main: `la0040_canli_kaynak_atolyesi_v3_four_screens.png` and `la0040_canli_kaynak_atolyesi_v3_four_screens.html`. Screen-specific implementation and exact honest QA findings are at `docs/design/LA-0040_LIVING_SOURCE_ATELIER_V3_FOUR_SCREEN_VISUAL_REVIEW_2026-10-08.md`. THIS CURRENT SECTION supersedes prior V2-as-current descriptions, but keeps old records as history.
+
+**Current verdict: REVIEW/REWORK; NOT Founder approved; NOT Flutter.** Existing V2 Home and Reader visual direction retained. New Recall centralizes one actual question with the source hidden; Result links transient learner response to the actual literal source phrase, WITHOUT inventing success/classification/XP. D/Knot original 128px raster remains byte-identical, no new mascot. Example content is clearly a DEMO. Chromium tests verified scroll/dock separation and no horizontal content overflow at 320/390 and forced 1.5x type test, but 1.5x Turkish question word-breaking remains aesthetically deficient and real Flutter accessibility/outcomes are NOT TESTED.
+
+**NEXT, no new theme or marketing research:** Resolve one-screen craft issues (particularly 1.5x long question), add honest empty Home and assisted/unknown source-result visual variants, then obtain a protected Founder direction judgment. Until the direction is accepted, do not spread this to production Flutter/asset pipeline. PR #13 remains unmerged/unreleased, runtime source/evidence contracts unchanged.
+
+---
+
 # CURRENT LA-0040 ART CURSOR — TWO-SCREEN V2 REVISED, GATE OPEN (2026-10-08)
 
 A new reviewable two-screen **Canlı Kaynak Atölyesi V2** static HTML visual and PNG were created in the Learning App conversation (`la0040_canli_kaynak_atolyesi_v2.html`, `la0040_canli_kaynak_atolyesi_v2.png`; individual Home/Reader images as `la0040_v2_home_screen.png`, `la0040_v2_reader_screen.png`). Canonical blue/purple D/Knot embedded byte-identically; no replacement mascot or theme. Home now has a single active-material title inside folio, source-led CTA, contextual smaller D/Knot and scrollable material library with pinned shell nav; Reader uses scrollable source plane + non-obscuring fixed audio entry dock and child-route Back (no inappropriate nested bottom tabs). This is not Flutter or actual audio, and browser QA is not user acceptance.
