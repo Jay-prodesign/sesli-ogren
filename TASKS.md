@@ -400,6 +400,7 @@ Next unallocated ID: **LA-0041**.
 - Treatment tournament: [docs/design/LA-0040_VISUAL_TREATMENT_TOURNAMENT.md](docs/design/LA-0040_VISUAL_TREATMENT_TOURNAMENT.md).
 - Companion reevaluation: [docs/design/LA-0040_COMPANION_REEVALUATION.md](docs/design/LA-0040_COMPANION_REEVALUATION.md).
 - Audience/brand/visual lock: [docs/design/LA-0040_AUDIENCE_BRAND_VISUAL_DIRECTION_LOCK.md](docs/design/LA-0040_AUDIENCE_BRAND_VISUAL_DIRECTION_LOCK.md).
+- Prior research/roadmap reconciliation: [docs/design/LA-0040_PRIOR_RESEARCH_ROADMAP_RECONCILIATION.md](docs/design/LA-0040_PRIOR_RESEARCH_ROADMAP_RECONCILIATION.md).
 - Exec plan: [docs/exec-plans/LA-0040.md](docs/exec-plans/LA-0040.md)
 
 
