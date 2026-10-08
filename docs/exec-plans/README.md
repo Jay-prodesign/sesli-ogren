@@ -1,3 +1,11 @@
+## Founder execution-cadence correction — 2026-10-08
+
+**Apply across Learning App, risk-proportionately:** Admit one cohesive user-visible deliverable as the work unit (not every minor UI element). Once task spec and main constraints are clear, carry out implementation continuously and autonomously to a meaningful milestone. Commit/push related edits together rather than making a new git commit/CI run for each cosmetic adjustment; use exact read/compile feedback during development where justified. A task's required QA gate is a **milestone/phase boundary**, not an instruction to run its entire test suite after every sub-edit. Material risk to security/privacy, canonical learning truth/source provenance, data integrity, runtime stability or a blocked build requires immediate focused verification.
+
+For visually driven tasks, **stabilize one declared primary viewport and the COMPLETE connected flow first**, critically review authentic runtime at that reference and obtain protected Founder visual-direction approval when required; only then run the responsive/dynamic-type adaptation batch and its matrix QA. Preserve device QA and independent acceptance at release; this changes staging, not quality requirements. Do not mistake CI PASS for human visual preference, or hand off dozens of tiny reviews. LA-0040 currently uses **390×844 primary → Founder art lock → 320/360/390/430 with 1.3×/1.5× → D-068 device/release**, as detailed in its task spec and visual QA gate.
+
+---
+
 # Execution Plans
 
 One file per active task: `LA-####.md`. A task in `TASKS.md` is only executable

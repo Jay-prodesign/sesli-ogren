@@ -1,3 +1,36 @@
+# ACTIVE LA-0040 EXECUTION SPEC OVERRIDE — ONE BATCH, ONE PRIMARY VIEWPORT, PHASED QA (2026-10-08)
+
+Founder workflow correction supersedes older instructions in this document that require responsive passes, multiple screenshot sets or full QA at each cosmetic iteration. No new task ID, platform architecture, product scope or mascot choice. Goal: **finish a coherent excellent real-Flutter learning product**, not a series of disconnected tickets.
+
+## B1 — Primary-screen implementation batch (CURRENT)
+- **Reference and ONLY design-iteration viewport:** portrait **390×844 logical pixels**, default text scale; safe areas and tappable controls must be functional. Work across Home empty/populated, full real-source Reader/Listen, Recall before commit, and honest correct/unknown/hinted/exposed Result/next action as ONE continuous visual experience.
+- Define visual craft concretely: instantly understandable product value, learner's material as hero, purposeful canonical D/Knot, source→attempt→literal-source-evidence signature reveal, professional hierarchy/typography/spacing/motion; differentiate without copying external project expression.
+- Preserve canonical `MaterialRecord`, `ExtractedContentRecord`, `LearningContinuation`, `RecallAttemptResult`; never reveal answer before commit, invent mastery/XP/timers or save raw answers that should stay transient.
+- Integrate and polish the entire 390×844 experience before committing/pushing a cosmetic series or asking the Founder to judge. Avoid new concept boards, theme tournaments, feature engines and per-widget governance/docs.
+- Acceptance B1: one coherent real Flutter route visually legible at the first glance, meaningful material, real choices, clear answer/source relation, negative states. Freeze internal design candidate only when credible.
+
+## B1 milestone gate — once per cohesive batch
+- One grouped format/analyze/targeted widget/learning-state check plus real 390×844 Flutter screenshot-and-interaction packet covering primary four screens, empty Home and honest negative outcomes.
+- Assess screenshot sequence / 3–5s promise and next action / material, D/Knot, reader+player, source reveal, screen-family coherence. Critique and correct **meaningful** flaws in this milestone round, not separate CI for every color/button.
+- Explicit Founder visual approval is a protected gate; internal review may reject/rework, never self-approve premium visual readiness. A passing compile/test is not a visual approval.
+- **No premature viewport QA matrix** while B1 art direction remains under review. Maintain basic functional safety and accessibility by construction. Catch serious clipping if observed, but defer systematic 320/430/dynamic-scale optimization.
+
+## B2 — Responsive/accessibility batch (AFTER B1 visual direction approval)
+- Adapt the accepted compositional language as one whole-app task for **320/360/390/430 logical widths**, **1.3× and 1.5× text**, long Turkish words/title/source, scrolling/keyboard, touch targets, safe areas, screen reader and Reduced Motion.
+- Run one cumulative matrix after B2, compare with locked reference to prevent identity drift. Fix matrix failures together; affected-check re-runs only.
+
+## B3 — Release verification (AFTER B2)
+- Run product-level real-device iOS/Android D-068 plus final truthful-learning, stability/security, performance, production asset rights and visual approval gates. Do not merge/publish until protected conditions are met.
+
+## Batching and interruption rule
+- Work autonomously on accepted scope; do not request 'devam' for each item. Group cohesive related code changes in a single commit/work unit rather than pushing a cosmetic micro-commit that fires CI repeatedly. Local compile/syntax feedback is fine inside a batch.
+- **Immediate exception:** a security/privacy, false-learner-evidence, source-integrity, data-loss, runtime crash or blocked compile issue must be fixed and narrowly checked as discovered; this is not an excuse for full visual/device matrix on every edit.
+- **Evidence:** record a short milestone acceptance/REWORK decision, plus remaining risks, not dozens of micro evidence documents. Historical checks below remain history and cannot force early responsive rework.
+
+**Exact current baseline:** GitHub `0fc69f7ae70b90fea452090ca30b5e0a3c20ed4e` has successful bounded product/bootstrap/account/visual CI, NOT Founder visual lock. The new B1 art-direction completion remains IN PROGRESS; PR #13 unmerged.
+
+---
+
 > **CURRENT 2026-10-08 ART-DIRECTION-LOCK PREREQUISITE:** Founder requires an inspiration-level board and visually unified art-direction decision BEFORE further aesthetic Flutter screen production. The current single design hypothesis, color/typography/companion alternatives, screen anatomy and AD-01..AD-09 gate are in [MATERIAL IN MOTION — Art Direction Candidate v1](../design/LA-0040_ART_DIRECTION_CANDIDATE_V1_MATERIAL_IN_MOTION.md). This is PROPOSED, not Founder-locked; the prior instruction to immediately continue aesthetic implementation of Living Desk Home is superseded. Fixing current code correctness/formatting is separate and allowed. Maintain one LA-0040 task; no new task IDs.
 
 > **FOUNDER SCOPE CORRECTION — 2026-10-08:** The competitor-research workstream is **strictly comparative visual/UI/UX design research**. Examine actual screens of major learning and audio/reader/book-summary apps: palettes, typography, layouts, visual hierarchy, navigation, cards, players, feature presentation, characters, illustrations, animation and assets. Extract clear **Learning App-specific superior original visual choices**, not competitor revenue/download strategies, positioning, monetization, retention plans or general feature parity. Apply **VBM-01…VBM-06** in [LA-0040_VISUAL_QUALITY_GATE.md](../qa/LA-0040_VISUAL_QUALITY_GATE.md). The prior broad “market/competitive value” interpretation is superseded *for this research*. Existing product experience and learning-truth gates remain independently applicable to the actual app; they must not derail this visual study. Current UI designs are still rejected. No visual winner or screenshot evidence PASS is declared.

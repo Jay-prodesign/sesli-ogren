@@ -1,3 +1,19 @@
+# CURRENT QA CADENCE AND VIEWPORT AUTHORITY — FOUNDER WORKFLOW CORRECTION (2026-10-08)
+
+**Critical distinction:** The project's existing layered QA gates stay binding, but the **order and frequency** of their execution are corrected. Earlier requirements to repeat 320px/1.3×/1.5× and a complete Flutter screenshot matrix after each tiny visual change are SUPERSEDED for the current LA-0040 visual-development phase.
+
+| Phase | Viewport and verification | Promotion rule |
+| --- | --- | --- |
+| **B1 — primary visual design (active)** | **390×844 logical portrait**, default font; one **complete Home → Reader/Listen → Recall → truthful Result + empty/hinted/unknown** Flutter experience. Lightweight targeted safety checks as needed *inside the batch*. | At B1 milestone, ONE combined format/analyze/learning-truth/widget test plus real screen/short interaction review. Visual FAIL ⇒ rework the coherent design, not broad device matrix. Require Founder direction review for art lock. |
+| **B2 — adaptation (after B1 protected visual approval)** | Accepted design at **320/360/390/430**, text **1.3×/1.5×**, keyboard, long source, touch/screen reader/Reduced Motion/safe area. | ONE whole-flow responsive/accessibility QA cycle, fix affected findings and re-run only relevant checks. |
+| **B3 — release** | App-wide cumulative regression and **real Android + iOS** device checks / D-068, production asset/licensing/security/truth. | No merge/store release if any protected/high-risk gate remains open. |
+
+**No micro-QA:** do not create a separate gate/commit/repeated full GitHub workflows for icon/spacing/palette/rounded-card changes; batch visual work then inspect at the milestone. Only material safety/source truth/compile/navigation/privacy failures require immediate targeted checks. One genuine final milestone screenshot set is better than many unreviewed repetitive screenshots. CI green proves software checks only, not beautiful UI or 3–5s desire.
+
+**Current factual technical baseline** (before this process correction): `0fc69f7ae70b90fea452090ca30b5e0a3c20ed4e` passed [product 37777528968](https://github.com/Jay-prodesign/sesli-ogren/actions/runs/37777528968), [bootstrap 37777528932](https://github.com/Jay-prodesign/sesli-ogren/actions/runs/37777528932), [account deletion 37777529019](https://github.com/Jay-prodesign/sesli-ogren/actions/runs/37777529019), and [visual capture 37777523490](https://github.com/Jay-prodesign/sesli-ogren/actions/runs/37777523490). **Current commercial visual gate remains REWORK; Founder direction approval, broader responsive and device QA still NOT complete.** Historical test results below are not a mandate to repeatedly regenerate screenshots before the primary design is satisfactory.
+
+---
+
 # CURRENT REAL FLUTTER QA — 2026-10-08 / ff6ca982
 
 Scoped real-app Source Atelier visual implementation is no longer just a concept. Four exact-head CI suites [product](https://github.com/Jay-prodesign/sesli-ogren/actions/runs/37775177464), [bootstrap](https://github.com/Jay-prodesign/sesli-ogren/actions/runs/37775177462), [account deletion](https://github.com/Jay-prodesign/sesli-ogren/actions/runs/37775177948) and [real visual capture](https://github.com/Jay-prodesign/sesli-ogren/actions/runs/37775170110) passed. Real source, prompt, answer and next-action paths were exercised; known `AnimatedSwitcher` ghost-text defect fixed and clean screenshot recapture validated. The review artifact contains populated/empty/narrow/text-scaled Home, Reader, Recall, independent, unknown and hinted Result screenshots.
