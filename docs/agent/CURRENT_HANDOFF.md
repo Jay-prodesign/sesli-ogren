@@ -1,3 +1,15 @@
+# CURRENT IMPLEMENTATION CHECKPOINT — 2026-10-08 / LA-0040 VISUAL REWORK
+
+**Current cursor: Studio source-first refinement + longer real material / stress, NOT redoing the completed A/B/C comparison.** This checkpoint updates implementation progress under existing CMD-0002; it does not acknowledge the command on Claude's behalf, approve a winner, or change LA-0039/0040 from IN_PROGRESS.
+
+- Three actual Flutter treatments (Editorial, Studio, Knowledge) are implemented under an opt-in review scope, with real navigable Home → Workspace → Recall prompt → Result and unchanged unscoped product UI. All twelve 390×844 review screenshots are available in [visual capture run 37747143673](https://github.com/Jay-prodesign/sesli-ogren/actions/runs/37747143673).
+- Exact app-code validation at `dacbad3014970b31e8f496b98f41ff2b01dbd388`: product-bounded `37747148883` PASS, bootstrap `37747148888` PASS, account deletion `37747148909` PASS, visual capture `37747143673` PASS. Source-highlight result, truthful independent/unknown/hinted outcomes, transition identity, and readable 4.5:1 small-label contrast were exercised by scoped QA. Subsequent documentation-only changes do not modify the tested app code.
+- **Visual quality remains FAIL / CHANGES_REQUIRED**, with Studio only the strongest *refinement hypothesis*, not Founder-selected or production-approved. Current reviewer evidence and concrete limitations: `docs/qa/LA-0040_RUNTIME_VISUAL_TOURNAMENT_REVIEW_2026-10-08.md`. Keep its initial-exact-head and later Studio checkpoint distinct.
+- **Next smallest implementation work:** source-first Studio signature moment fidelity, longer authentic source and title, candidate-specific 320px / 1.3× / 1.5× / Reduced Motion, full assistance/unknown/error integrity and present revised actual runtime for protected Founder visual decision. After that, conditionally extend chosen visual language to remaining product surfaces and do small fresh-user observation. No fake mastery, asset-copying, broad architecture, app-store release or physical-phone task before the existing D-068 gate.
+- Task spec: `docs/exec-plans/LA-0040_FOUNDER_FAIL_REWORK_SPEC.md`; fidelity: `docs/design/LA-0040_EXPERIENCE_FIDELITY_CONTRACT.md`; quality gate: `docs/qa/LA-0040_VISUAL_QUALITY_GATE.md`. Do not create new task IDs for these admitted LA-0040 steps. Founder remains the authority for final public visual/companion disposition.
+
+---
+
 # CURRENT EXECUTION OVERRIDE — 2026-10-08 / FOUNDER VISUAL FAIL — CMD-0002
 
 This Founder disposition supersedes older acceptance-status wording below, including earlier `VQG-01 PASS / FOUNDER VISUAL REVIEW PENDING` as a *current* cursor. Prior tests/captures remain valid historical technical/internal evidence; they are **not** Founder visual acceptance.
