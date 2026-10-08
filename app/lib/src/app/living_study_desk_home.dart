@@ -214,9 +214,9 @@ class LivingStudyDeskHome extends StatelessWidget {
             ),
           ],
         ),
-        Center(
-          child: Container(key: const ValueKey('la0040-source-to-recall-thread'), width: 2, height: 14, color: _accent),
-        ),
+        const SizedBox(height: 12),
+        _LearningJourney(continuation: continuation),
+        const SizedBox(height: 12),
         Material(
           color: _paper,
           borderRadius: BorderRadius.circular(18),
@@ -408,6 +408,96 @@ class LivingStudyDeskHome extends StatelessWidget {
       const Center(
         child: Text('PDF veya kendi metnin', style: TextStyle(color: _sub, fontSize: 13)),
       ),
+    ],
+  );
+}
+
+ 
+/// A truthful learning-path visualization: only recorded recall evidence can
+/// mark the last stage as reached. Listening is an action, not a claimed result.
+class _LearningJourney extends StatelessWidget {
+  const _LearningJourney({required this.continuation});
+
+  final LearningContinuation? continuation;
+
+  @override
+  Widget build(BuildContext context) {
+    final hasRecallEvidence = continuation != null &&
+        continuation!.state.kind != RecallStateKind.notAssessed;
+    const deep = Color(0xFF203D48);
+    const mint = Color(0xFFBDEBD5);
+    return Semantics(
+      label: hasRecallEvidence
+          ? 'Öğrenme yolculuğu: kaynak hazır, hatırlama denemesi kaydedildi.'
+          : 'Öğrenme yolculuğu: kaynak hazır, hatırlama denemesi bekleniyor.',
+      child: Container(
+        key: const ValueKey('la0040-learning-journey'),
+        width: double.infinity,
+        padding: const EdgeInsets.fromLTRB(18, 17, 18, 15),
+        decoration: BoxDecoration(
+          color: deep,
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'ÖĞRENME YOLCULUĞUN',
+              style: TextStyle(
+                color: mint,
+                fontSize: 10,
+                fontWeight: FontWeight.w900,
+                letterSpacing: 1,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                _step(Icons.menu_book_rounded, 'Kaynak', true),
+                _connector(),
+                _step(Icons.headphones_rounded, 'Dinle', false),
+                _connector(),
+                _step(Icons.psychology_alt_rounded, 'Hatırla', hasRecallEvidence),
+              ],
+            ),
+            const SizedBox(height: 13),
+            Text(
+              hasRecallEvidence
+                  ? 'Hatırlama denemen kaydedildi. Sonraki adımını aşağıda gör.'
+                  : 'Kaynağın hazır. Dinleyebilir veya hatırlamayı deneyebilirsin.',
+              style: const TextStyle(color: Color(0xFFD9E9E4), fontSize: 12, height: 1.45),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _connector() => const Expanded(
+    child: Padding(
+      padding: EdgeInsets.fromLTRB(7, 0, 7, 18),
+      child: Divider(color: Color(0xFF78918F), height: 1),
+    ),
+  );
+
+  Widget _step(IconData icon, String label, bool completed) => Column(
+    children: [
+      Container(
+        width: 42,
+        height: 42,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: completed ? const Color(0xFFBDEBD5) : const Color(0xFF365660),
+          border: Border.all(color: const Color(0xFF78918F)),
+        ),
+        child: Icon(
+          icon,
+          size: 20,
+          color: completed ? const Color(0xFF203D48) : const Color(0xFFD9E9E4),
+        ),
+      ),
+      const SizedBox(height: 7),
+      Text(label, style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.w700)),
     ],
   );
 }
