@@ -72,7 +72,7 @@ Future<void> _loadReviewFonts() async {
   await Future.wait([roboto.load(), materialIcons.load()]);
 }
 
-Widget _phoneFrame(Widget child) {
+Widget _phoneFrame(Widget child, {TextScaler textScaler = TextScaler.noScaling}) {
   final baseTheme = SesliOgrenTheme.light();
   return MaterialApp(
     debugShowCheckedModeBanner: false,
@@ -95,7 +95,7 @@ Widget _phoneFrame(Widget child) {
         ),
       ),
     ),
-    home: MediaQuery(data: const MediaQueryData(disableAnimations: true), child: child),
+    home: MediaQuery(data: MediaQueryData(disableAnimations: true, textScaler: textScaler), child: child),
   );
 }
 
@@ -171,6 +171,11 @@ void main() {
     await tester.pump(const Duration(milliseconds: 200));
     await expectLater(find.byType(Scaffold).first, matchesGoldenFile('goldens/la0040_progress.png'));
 
+    await tester.tap(find.byIcon(Icons.person_outline_rounded));
+    await _pumpUntilFound(tester, find.text('Profil ve Ayarlar'));
+    await tester.pump(const Duration(milliseconds: 200));
+    await expectLater(find.byType(Scaffold).first, matchesGoldenFile('goldens/la0040_profile.png'));
+
     await tester.pumpWidget(
       _phoneFrame(MaterialWorkspaceScreen(runtime: runtime, materialId: AppRuntime.primaryMaterialId)),
     );
@@ -216,5 +221,68 @@ void main() {
     await _pumpUntilFound(tester, find.text('İpucusuz hatırladın'));
     await tester.pump(const Duration(milliseconds: 200));
     await expectLater(find.byType(Scaffold).first, matchesGoldenFile('goldens/la0039_recall_payoff.png'));
+
+    const stressMaterialId = MaterialId('la0040-visual-stress');
+    final stressIngest = SourceIngestService(
+      store: store,
+      pdfTextExtractor: const _UnusedPdfExtractor(),
+      now: () => DateTime.utc(2026, 10, 7, 13),
+    );
+    final stressRecall = RecallLearningService(
+      sourceStore: store,
+      learningStore: store.learningTruthStore(),
+      now: () => DateTime.utc(2026, 10, 7, 13, 1),
+    );
+    final stressRuntime = AppRuntime(
+      learner: runtime.learner,
+      store: store,
+      ingest: stressIngest,
+      recall: stressRecall,
+      telemetry: store.operationalTelemetry(),
+      explain: const _ReadyExplainGateway(),
+    );
+
+    await stressIngest.ingestPastedText(
+      learner: stressRuntime.learner,
+      materialId: stressMaterialId,
+      text:
+          'Fotosentez, hücresel enerji dönüşümleri ve bitkilerde ışığa bağlı tepkimeler bu uzun çalışma notunda '
+          'birlikte ele alınır. Klorofil ışık enerjisinin kimyasal enerjiye dönüşümünde rol alır.',
+      sourceName: 'Biyoloji — Fotosentez ve Hücresel Enerji Dönüşümleri Uzun Çalışma Notları',
+    );
+
+    tester.view.physicalSize = const Size(640, 1400);
+    await tester.pumpWidget(_phoneFrame(ProductShellScreen(runtime: stressRuntime)));
+    await _pumpUntilFound(tester, find.textContaining('Fotosentez ve Hücresel Enerji'));
+    await tester.pump(const Duration(milliseconds: 200));
+    await expectLater(find.byType(Scaffold).first, matchesGoldenFile('goldens/la0040_stress_narrow_home.png'));
+
+    tester.view.physicalSize = const Size(780, 1688);
+    await tester.pumpWidget(
+      _phoneFrame(
+        MaterialWorkspaceScreen(runtime: stressRuntime, materialId: stressMaterialId),
+        textScaler: TextScaler.linear(1.3),
+      ),
+    );
+    await _pumpUntilFound(tester, find.text('SIRADAKİ ADIM'));
+    await tester.pump(const Duration(milliseconds: 200));
+    await expectLater(
+      find.byType(Scaffold).first,
+      matchesGoldenFile('goldens/la0040_stress_text130_workspace.png'),
+    );
+
+    await stressRecall.createCurrentPrompt(learner: stressRuntime.learner, materialId: stressMaterialId);
+    await tester.pumpWidget(
+      _phoneFrame(
+        LearningSliceScreen(runtime: stressRuntime, materialId: stressMaterialId),
+        textScaler: TextScaler.linear(1.5),
+      ),
+    );
+    await _pumpUntilFound(tester, find.text('Hatırla'));
+    await tester.pump(const Duration(milliseconds: 200));
+    await expectLater(
+      find.byType(Scaffold).first,
+      matchesGoldenFile('goldens/la0040_stress_text150_recall.png'),
+    );
   }, skip: !_captureEnabled);
 }
