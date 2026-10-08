@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../domain/learning_contracts.dart';
 import '../domain/learning_truth.dart';
 import 'companion_view.dart';
@@ -40,12 +41,24 @@ class _Colors {
   final Color accent;
   final Color support;
   static _Colors of(LearningVisualTreatment lane) => switch (lane) {
-    LearningVisualTreatment.editorial => const _Colors(Color(0xFFF8F3E9), Color(0xFF292B26),
-        Color(0xFFB95636), Color(0xFF676D62)),
-    LearningVisualTreatment.studio => const _Colors(Color(0xFFF4F2ED), Color(0xFF173139),
-        Color(0xFFE2F3AB), Color(0xFF587077)),
-    LearningVisualTreatment.knowledge => const _Colors(Color(0xFFF0F5F1), Color(0xFF1B4037),
-        Color(0xFF167F67), Color(0xFF5F786F)),
+    LearningVisualTreatment.editorial => const _Colors(
+      Color(0xFFF8F3E9),
+      Color(0xFF292B26),
+      Color(0xFFB95636),
+      Color(0xFF676D62),
+    ),
+    LearningVisualTreatment.studio => const _Colors(
+      Color(0xFFF4F2ED),
+      Color(0xFF173139),
+      Color(0xFFE2F3AB),
+      Color(0xFF587077),
+    ),
+    LearningVisualTreatment.knowledge => const _Colors(
+      Color(0xFFF0F5F1),
+      Color(0xFF1B4037),
+      Color(0xFF167F67),
+      Color(0xFF5F786F),
+    ),
   };
 }
 
@@ -63,7 +76,8 @@ class _Action extends StatelessWidget {
         backgroundColor: dark ? const Color(0xFFE2F3AB) : const Color(0xFF255447),
         foregroundColor: dark ? const Color(0xFF173139) : Colors.white,
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      ),
       onPressed: enabled ? onTap : null,
       icon: const Icon(Icons.arrow_forward_rounded),
       label: Text(label),
@@ -76,7 +90,8 @@ class _Secondary extends StatelessWidget {
   final List<(String, IconData, VoidCallback)> actions;
   @override
   Widget build(BuildContext context) => Wrap(
-    spacing: 5, runSpacing: 2,
+    spacing: 5,
+    runSpacing: 2,
     children: [
       for (final action in actions)
         TextButton.icon(onPressed: action.$3, icon: Icon(action.$2), label: Text(action.$1)),
@@ -91,30 +106,57 @@ class _ThreadRow extends StatelessWidget {
   final Color ink;
   final Color accent;
   @override
-  Widget build(BuildContext context) => Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-    Container(height: 60, width: 3, color: accent),
-    const SizedBox(width: 15),
-    Expanded(child: Padding(
-      padding: const EdgeInsets.only(bottom: 23),
-      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Text(label.toUpperCase(), style: TextStyle(color: ink.withValues(alpha: 0.62),
-          fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 1)),
-        const SizedBox(height: 7),
-        Text(value, maxLines: 3, overflow: TextOverflow.ellipsis,
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, height: 1.3, color: ink)),
-      ]),
-    )),
-  ]);
+  Widget build(BuildContext context) => Row(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Container(height: 60, width: 3, color: accent),
+      const SizedBox(width: 15),
+      Expanded(
+        child: Padding(
+          padding: const EdgeInsets.only(bottom: 23),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                label.toUpperCase(),
+                style: TextStyle(
+                  color: ink.withValues(alpha: 0.62),
+                  fontSize: 11,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 1,
+                ),
+              ),
+              const SizedBox(height: 7),
+              Text(
+                value,
+                maxLines: 3,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, height: 1.3, color: ink),
+              ),
+            ],
+          ),
+        ),
+      ),
+    ],
+  );
 }
 
 /// Real Material/Continuation/Result become distinct compositions; these are
 /// not fake status fixtures or palette-only CSS variants.
 class LearningTreatmentStage extends StatelessWidget {
   const LearningTreatmentStage({
-    required this.lane, required this.stage, required this.label,
-    required this.headline, required this.sourceLabel, required this.sourceText,
-    required this.nextReason, required this.primaryLabel, required this.onPrimary,
-    this.secondary = const [], this.outcomeIndependent = false, super.key,
+    required this.lane,
+    required this.stage,
+    required this.label,
+    required this.headline,
+    required this.sourceLabel,
+    required this.sourceText,
+    required this.nextReason,
+    required this.primaryLabel,
+    required this.onPrimary,
+    this.secondary = const [],
+    this.outcomeIndependent = false,
+    super.key,
   });
   final LearningVisualTreatment lane;
   final String stage;
@@ -145,65 +187,113 @@ class LearningTreatmentStage extends StatelessWidget {
         padding: const EdgeInsets.fromLTRB(22, 24, 22, 42),
         children: [
           if (lane == LearningVisualTreatment.editorial) ...[
-            Text('SESLİ ÖĞREN  /  ' + stage.toUpperCase(),
-                style: TextStyle(color: c.accent, fontWeight: FontWeight.w800,
-                  fontSize: 11, letterSpacing: 1.55)),
+            Text(
+              'SESLİ ÖĞREN  /  ' + stage.toUpperCase(),
+              style: TextStyle(color: c.accent, fontWeight: FontWeight.w800, fontSize: 11, letterSpacing: 1.55),
+            ),
             const SizedBox(height: 30),
-            Text(headline, style: TextStyle(color: c.ink, fontSize: 35,
-                height: 1.08, fontWeight: FontWeight.w700, letterSpacing: -1.1)),
+            Text(
+              headline,
+              style: TextStyle(
+                color: c.ink,
+                fontSize: 35,
+                height: 1.08,
+                fontWeight: FontWeight.w700,
+                letterSpacing: -1.1,
+              ),
+            ),
             const SizedBox(height: 16),
             Text(label, style: TextStyle(color: c.support, fontSize: 15)),
             const SizedBox(height: 24),
             Divider(color: c.support.withValues(alpha: 0.5)),
             const SizedBox(height: 18),
-            Text(sourceLabel.toUpperCase(), style: TextStyle(color: c.accent,
-              letterSpacing: 1.1, fontWeight: FontWeight.bold, fontSize: 11)),
+            Text(
+              sourceLabel.toUpperCase(),
+              style: TextStyle(color: c.accent, letterSpacing: 1.1, fontWeight: FontWeight.bold, fontSize: 11),
+            ),
             const SizedBox(height: 11),
-            Text(source, maxLines: 7, overflow: TextOverflow.ellipsis,
-                style: TextStyle(color: c.ink, fontSize: 17, height: 1.45)),
+            Text(
+              source,
+              maxLines: 7,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(color: c.ink, fontSize: 17, height: 1.45),
+            ),
             const SizedBox(height: 28),
             Text(nextReason, style: TextStyle(color: c.ink, fontSize: 18, height: 1.4)),
             const SizedBox(height: 22),
             _Action(label: primaryLabel, onTap: onPrimary, dark: false),
           ] else if (isStudio) ...[
-            Row(children: [
-              Text('SESLİ ÖĞREN  /  ' + stage.toUpperCase(), style: TextStyle(
-                color: c.ink, fontSize: 11, fontWeight: FontWeight.w900, letterSpacing: 1.2)),
-              const Spacer(),
-              if (isResult)
-                CompanionView(state: outcomeIndependent
-                    ? CompanionVisualState.success : CompanionVisualState.correct, size: 48)
-              else
-                const CompanionView(state: CompanionVisualState.think, size: 48),
-            ]),
+            Row(
+              children: [
+                Text(
+                  'SESLİ ÖĞREN  /  ' + stage.toUpperCase(),
+                  style: TextStyle(color: c.ink, fontSize: 11, fontWeight: FontWeight.w900, letterSpacing: 1.2),
+                ),
+                const Spacer(),
+                if (isResult)
+                  CompanionView(
+                    state: outcomeIndependent ? CompanionVisualState.success : CompanionVisualState.correct,
+                    size: 48,
+                  )
+                else
+                  const CompanionView(state: CompanionVisualState.think, size: 48),
+              ],
+            ),
             const SizedBox(height: 20),
             Container(
               padding: const EdgeInsets.fromLTRB(23, 26, 23, 24),
               decoration: BoxDecoration(color: c.ink, borderRadius: BorderRadius.circular(29)),
-              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                Text(label.toUpperCase(), style: TextStyle(color: colorForSmall,
-                    fontSize: 11, letterSpacing: 1.2, fontWeight: FontWeight.w800)),
-                const SizedBox(height: 20),
-                Text(headline, style: const TextStyle(color: Colors.white, fontSize: 35,
-                    height: 1.08, fontWeight: FontWeight.w800)),
-                const SizedBox(height: 17),
-                Text(nextReason, style: const TextStyle(color: Color(0xFFD0E2DE), fontSize: 15, height: 1.42)),
-                const SizedBox(height: 27),
-                _Action(label: primaryLabel, onTap: onPrimary, dark: true),
-              ]),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    label.toUpperCase(),
+                    style: TextStyle(
+                      color: colorForSmall,
+                      fontSize: 11,
+                      letterSpacing: 1.2,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  Text(
+                    headline,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 35,
+                      height: 1.08,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                  const SizedBox(height: 17),
+                  Text(nextReason, style: const TextStyle(color: Color(0xFFD0E2DE), fontSize: 15, height: 1.42)),
+                  const SizedBox(height: 27),
+                  _Action(label: primaryLabel, onTap: onPrimary, dark: true),
+                ],
+              ),
             ),
             const SizedBox(height: 29),
-            Text(sourceLabel.toUpperCase(), style: TextStyle(color: c.support, fontSize: 11,
-                fontWeight: FontWeight.w800, letterSpacing: 1.1)),
+            Text(
+              sourceLabel.toUpperCase(),
+              style: TextStyle(color: c.support, fontSize: 11, fontWeight: FontWeight.w800, letterSpacing: 1.1),
+            ),
             const SizedBox(height: 12),
-            Text(source, maxLines: 7, overflow: TextOverflow.ellipsis, style: TextStyle(
-                color: c.ink, fontSize: 17, fontWeight: FontWeight.w600, height: 1.4)),
+            Text(
+              source,
+              maxLines: 7,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(color: c.ink, fontSize: 17, fontWeight: FontWeight.w600, height: 1.4),
+            ),
           ] else ...[
-            Text('SESLİ ÖĞREN  /  KAYNAK İZİ', style: TextStyle(color: c.accent,
-                fontSize: 11, letterSpacing: 1.4, fontWeight: FontWeight.w800)),
+            Text(
+              'SESLİ ÖĞREN  /  KAYNAK İZİ',
+              style: TextStyle(color: c.accent, fontSize: 11, letterSpacing: 1.4, fontWeight: FontWeight.w800),
+            ),
             const SizedBox(height: 18),
-            Text(headline, style: TextStyle(color: c.ink, fontSize: 31,
-                fontWeight: FontWeight.w800, letterSpacing: -0.8)),
+            Text(
+              headline,
+              style: TextStyle(color: c.ink, fontSize: 31, fontWeight: FontWeight.w800, letterSpacing: -0.8),
+            ),
             const SizedBox(height: 28),
             _ThreadRow(label: sourceLabel, value: source, ink: c.ink, accent: c.accent),
             _ThreadRow(label: 'Öğrenme / sonuç durumu', value: label, ink: c.ink, accent: c.accent),
@@ -225,9 +315,15 @@ class LearningTreatmentStage extends StatelessWidget {
 
 class LearningTreatmentHome extends StatelessWidget {
   const LearningTreatmentHome({
-    required this.lane, required this.material, required this.continuation,
-    required this.nextTitle, required this.nextReason,
-    required this.onWorkspace, required this.onRecall, required this.onListen, super.key,
+    required this.lane,
+    required this.material,
+    required this.continuation,
+    required this.nextTitle,
+    required this.nextReason,
+    required this.onWorkspace,
+    required this.onRecall,
+    required this.onListen,
+    super.key,
   });
   final LearningVisualTreatment lane;
   final MaterialRecord material;
@@ -239,19 +335,30 @@ class LearningTreatmentHome extends StatelessWidget {
   final VoidCallback onListen;
   @override
   Widget build(BuildContext context) => LearningTreatmentStage(
-    lane: lane, stage: 'home', label: _status(continuation),
-    headline: nextTitle, sourceLabel: 'Kaldığın materyal', sourceText: material.title,
-    nextReason: nextReason, primaryLabel: 'Materyalle devam et', onPrimary: onWorkspace,
-    secondary: [('Hatırla', Icons.psychology_alt_outlined, onRecall),
-      ('Dinle', Icons.headphones_outlined, onListen)],
+    lane: lane,
+    stage: 'home',
+    label: _status(continuation),
+    headline: nextTitle,
+    sourceLabel: 'Kaldığın materyal',
+    sourceText: material.title,
+    nextReason: nextReason,
+    primaryLabel: 'Materyalle devam et',
+    onPrimary: onWorkspace,
+    secondary: [('Hatırla', Icons.psychology_alt_outlined, onRecall), ('Dinle', Icons.headphones_outlined, onListen)],
   );
 }
 
 class LearningTreatmentWorkspace extends StatelessWidget {
   const LearningTreatmentWorkspace({
-    required this.lane, required this.material, required this.excerpt,
-    required this.continuation, required this.onRecall, required this.onListen,
-    required this.onExplain, required this.onFocus, super.key,
+    required this.lane,
+    required this.material,
+    required this.excerpt,
+    required this.continuation,
+    required this.onRecall,
+    required this.onListen,
+    required this.onExplain,
+    required this.onFocus,
+    super.key,
   });
   final LearningVisualTreatment lane;
   final MaterialRecord material;
@@ -263,11 +370,15 @@ class LearningTreatmentWorkspace extends StatelessWidget {
   final VoidCallback onFocus;
   @override
   Widget build(BuildContext context) => LearningTreatmentStage(
-    lane: lane, stage: 'workspace', label: _status(continuation),
+    lane: lane,
+    stage: 'workspace',
+    label: _status(continuation),
     headline: material.title,
-    sourceLabel: 'Gerçek kaynak metninden', sourceText: excerpt,
+    sourceLabel: 'Gerçek kaynak metninden',
+    sourceText: excerpt,
     nextReason: continuation?.nextAction.reasonText ?? 'İlk hatırlama denemesiyle öğrenme durumunu gör.',
-    primaryLabel: 'Kaynaktan hatırla', onPrimary: onRecall,
+    primaryLabel: 'Kaynaktan hatırla',
+    onPrimary: onRecall,
     secondary: [
       ('Dinle', Icons.headphones_outlined, onListen),
       ('Açıkla', Icons.menu_book_outlined, onExplain),
@@ -277,27 +388,26 @@ class LearningTreatmentWorkspace extends StatelessWidget {
 }
 
 class LearningTreatmentResult extends StatelessWidget {
-  const LearningTreatmentResult({
-    required this.lane, required this.result, required this.onContinue, super.key,
-  });
+  const LearningTreatmentResult({required this.lane, required this.result, required this.onContinue, super.key});
   final LearningVisualTreatment lane;
   final RecallAttemptResult result;
   final VoidCallback onContinue;
   @override
   Widget build(BuildContext context) => LearningTreatmentStage(
-    lane: lane, stage: 'result',
+    lane: lane,
+    stage: 'result',
     label: _outcome(result),
     headline: _outcome(result),
     sourceLabel: 'Doğru ifade / kaynak dayanağı',
     sourceText: result.correctAnswer + '\n\n' + result.sourceExcerpt,
     nextReason: result.nextAction.reasonText,
-    primaryLabel: 'Sıradaki adıma geç', onPrimary: onContinue,
-    outcomeIndependent: result.evidence.outcome == RecallOutcome.correct &&
-        result.evidence.assistance == RecallAssistance.none,
+    primaryLabel: 'Sıradaki adıma geç',
+    onPrimary: onContinue,
+    outcomeIndependent:
+        result.evidence.outcome == RecallOutcome.correct && result.evidence.assistance == RecallAssistance.none,
   );
 }
 
- 
 /// The actual RecallPrompt from the active SourceVersion drives this stage;
 /// no answer, source hint, or expected outcome is created by the visual lane.
 class LearningTreatmentRecallPrompt extends StatelessWidget {
@@ -340,28 +450,31 @@ class LearningTreatmentRecallPrompt extends StatelessWidget {
             if (studio)
               Container(
                 padding: const EdgeInsets.all(21),
-                decoration: BoxDecoration(
-                  color: c.ink,
-                  borderRadius: BorderRadius.circular(24),
-                ),
+                decoration: BoxDecoration(color: c.ink, borderRadius: BorderRadius.circular(24)),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const Row(
                       children: [
                         Expanded(
-                          child: Text('KAYNAĞA BAKMADAN',
-                              style: TextStyle(color: Color(0xFFE2F3AB),
-                                  fontSize: 11, letterSpacing: 1.1)),
+                          child: Text(
+                            'KAYNAĞA BAKMADAN',
+                            style: TextStyle(color: Color(0xFFE2F3AB), fontSize: 11, letterSpacing: 1.1),
+                          ),
                         ),
                         CompanionView(state: CompanionVisualState.think, size: 48),
                       ],
                     ),
                     const SizedBox(height: 14),
-                    Text(prompt.promptText,
-                        style: const TextStyle(color: Colors.white,
-                            fontSize: 24, height: 1.25,
-                            fontWeight: FontWeight.w700)),
+                    Text(
+                      prompt.promptText,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 24,
+                        height: 1.25,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
                   ],
                 ),
               )
@@ -369,20 +482,21 @@ class LearningTreatmentRecallPrompt extends StatelessWidget {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('HATIRLA / AÇIK KİTAP YOK',
-                      style: TextStyle(color: c.accent, fontSize: 11,
-                          letterSpacing: 1.1, fontWeight: FontWeight.w800)),
+                  Text(
+                    'HATIRLA / AÇIK KİTAP YOK',
+                    style: TextStyle(color: c.accent, fontSize: 11, letterSpacing: 1.1, fontWeight: FontWeight.w800),
+                  ),
                   const SizedBox(height: 20),
-                  Text(prompt.promptText,
-                      style: TextStyle(color: c.ink, fontSize: 26,
-                          height: 1.22, fontWeight: FontWeight.w700)),
+                  Text(
+                    prompt.promptText,
+                    style: TextStyle(color: c.ink, fontSize: 26, height: 1.22, fontWeight: FontWeight.w700),
+                  ),
                   const SizedBox(height: 20),
                   Divider(color: c.support.withValues(alpha: 0.45)),
                 ],
               )
             else
-              _ThreadRow(label: 'Kaynaktan geri çağır',
-                  value: prompt.promptText, ink: c.ink, accent: c.accent),
+              _ThreadRow(label: 'Kaynaktan geri çağır', value: prompt.promptText, ink: c.ink, accent: c.accent),
             const SizedBox(height: 22),
             TextField(
               controller: controller,
@@ -391,10 +505,7 @@ class LearningTreatmentRecallPrompt extends StatelessWidget {
               onSubmitted: (_) => onSubmit(),
               maxLines: 3,
               minLines: 2,
-              decoration: const InputDecoration(
-                labelText: 'Kendi yanıtın',
-                border: OutlineInputBorder(),
-              ),
+              decoration: const InputDecoration(labelText: 'Kendi yanıtın', border: OutlineInputBorder()),
             ),
             if (supportText != null) ...[
               const SizedBox(height: 9),
@@ -407,11 +518,15 @@ class LearningTreatmentRecallPrompt extends StatelessWidget {
             const SizedBox(height: 18),
             _Action(label: 'Yanıtla', onTap: onSubmit, dark: false, enabled: !busy),
             const SizedBox(height: 13),
-            Wrap(spacing: 6, runSpacing: 4, children: [
-              OutlinedButton(onPressed: busy ? null : onHint, child: const Text('İpucu')),
-              OutlinedButton(onPressed: busy ? null : onReveal, child: const Text('Yanıtı göster')),
-              TextButton(onPressed: busy ? null : onUnknown, child: const Text('Bilmiyorum')),
-            ]),
+            Wrap(
+              spacing: 6,
+              runSpacing: 4,
+              children: [
+                OutlinedButton(onPressed: busy ? null : onHint, child: const Text('İpucu')),
+                OutlinedButton(onPressed: busy ? null : onReveal, child: const Text('Yanıtı göster')),
+                TextButton(onPressed: busy ? null : onUnknown, child: const Text('Bilmiyorum')),
+              ],
+            ),
           ],
         ),
       ),
