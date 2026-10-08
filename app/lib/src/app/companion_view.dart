@@ -111,13 +111,36 @@ class _CompanionViewState extends State<CompanionView> with SingleTickerProvider
                 ),
               );
             },
-            child: Image.asset(
-              'assets/companions/D_KNOT_128.webp',
-              fit: BoxFit.contain,
-              filterQuality: FilterQuality.high,
-              gaplessPlayback: true,
-              errorBuilder: (context, error, stackTrace) =>
-                  Center(child: Text('Düğüm', style: Theme.of(context).textTheme.titleMedium)),
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                Positioned.fill(
+                  child: Padding(
+                    padding: EdgeInsets.all(widget.size * 0.13),
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: switch (widget.state) {
+                          CompanionVisualState.success => const Color(0xFFE1F2C9),
+                          CompanionVisualState.correct => const Color(0xFFFFE8CF),
+                          CompanionVisualState.listen => const Color(0xFFDCEFF2),
+                          CompanionVisualState.think => const Color(0xFFE8E4F5),
+                          CompanionVisualState.speak => const Color(0xFFE3EFFB),
+                          CompanionVisualState.idle => const Color(0xFFE7F0E9),
+                        },
+                      ),
+                    ),
+                  ),
+                ),
+                Image.asset(
+                  'assets/companions/D_KNOT_128.webp',
+                  fit: BoxFit.contain,
+                  filterQuality: FilterQuality.high,
+                  gaplessPlayback: true,
+                  errorBuilder: (context, error, stackTrace) =>
+                      Center(child: Text('Düğüm', style: Theme.of(context).textTheme.titleMedium)),
+                ),
+              ],
             ),
           ),
         ),
