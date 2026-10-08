@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../domain/learning_contracts.dart';
 import '../generation/grounded_explain_gateway.dart';
 import 'app_runtime.dart';
+import 'app_theme.dart';
 import 'explain_back_screen.dart';
 import 'learning_slice_screen.dart';
 
@@ -73,60 +74,167 @@ class _Ready extends StatelessWidget {
     return ListView(
       padding: const EdgeInsets.fromLTRB(20, 16, 20, 36),
       children: [
-        Text('Kaynağına dayalı açıklama', style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w800)),
-        const SizedBox(height: 6),
-        Text(
-          'Bu bölüm kaynak metnin kendisi değil; kaynağına bağlı üretilmiş bir açıklamadır.',
-          style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
-        ),
-        const SizedBox(height: 20),
-        Text(result.explanation, style: theme.textTheme.bodyLarge?.copyWith(height: 1.55)),
-        if (result.keyPoints.isNotEmpty) ...[
-          const SizedBox(height: 24),
-          Text('Önemli noktalar', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700)),
-          const SizedBox(height: 8),
-          for (final point in result.keyPoints)
-            Padding(
-              padding: const EdgeInsets.only(bottom: 8),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text('•  '),
-                  Expanded(child: Text(point)),
-                ],
+        Row(
+          children: [
+            DecoratedBox(
+              decoration: BoxDecoration(
+                color: AppPalette.attentionSoft,
+                borderRadius: BorderRadius.circular(999),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                child: Text(
+                  'ÜRETİLMİŞ AÇIKLAMA',
+                  style: theme.textTheme.labelSmall?.copyWith(
+                    color: AppPalette.attention,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 0.4,
+                  ),
+                ),
               ),
             ),
-        ],
-        const SizedBox(height: 24),
-        Card(
-          elevation: 0,
-          color: theme.colorScheme.secondaryContainer.withValues(alpha: 0.45),
-          child: const Padding(
-            padding: EdgeInsets.all(16),
-            child: Text(
-              'Açıklamayı okumak öğrenme kanıtı oluşturmaz. Hazır olduğunda kendi cümlelerinle anlat veya Hatırla ile aktif olarak dene.',
-            ),
-          ),
+            const Spacer(),
+            const Icon(Icons.auto_awesome_outlined, color: AppPalette.attention, size: 20),
+          ],
         ),
         const SizedBox(height: 14),
-        FilledButton.icon(
-          onPressed: () => Navigator.of(context).push<void>(
-            MaterialPageRoute(
-              builder: (_) => ExplainBackScreen(runtime: runtime, source: source),
-            ),
-          ),
-          icon: const Icon(Icons.record_voice_over_outlined),
-          label: const Text('Kendi cümlelerinle anlat'),
+        Text(
+          'Kaynağına dayalı açıklama',
+          style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w800),
         ),
-        const SizedBox(height: 10),
-        FilledButton.icon(
-          onPressed: () => Navigator.of(context).push<void>(
-            MaterialPageRoute(
-              builder: (_) => LearningSliceScreen(runtime: runtime, materialId: source.identity.materialId),
+        const SizedBox(height: 6),
+        Text(
+          source.sourceName,
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+          style: theme.textTheme.bodyMedium?.copyWith(
+            color: theme.colorScheme.onSurfaceVariant,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        const SizedBox(height: 18),
+        DecoratedBox(
+          decoration: BoxDecoration(
+            color: AppPalette.surface,
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: AppPalette.outline),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(18),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Bu bölüm kaynak metnin kendisi değil; kaynağına bağlı üretilmiş bir açıklamadır.',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: AppPalette.inkMuted,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: 14),
+                Text(result.explanation, style: theme.textTheme.bodyLarge?.copyWith(height: 1.55)),
+              ],
             ),
           ),
-          icon: const Icon(Icons.psychology_alt_outlined),
-          label: const Text('Hatırla ile dene'),
+        ),
+        if (result.keyPoints.isNotEmpty) ...[
+          const SizedBox(height: 24),
+          Text('Önemli noktalar', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800)),
+          const SizedBox(height: 10),
+          for (final point in result.keyPoints) ...[
+            DecoratedBox(
+              decoration: BoxDecoration(
+                color: AppPalette.primarySoft,
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 11),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Icon(Icons.bolt_rounded, color: AppPalette.primary, size: 18),
+                    const SizedBox(width: 9),
+                    Expanded(child: Text(point)),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 8),
+          ],
+        ],
+        const SizedBox(height: 16),
+        DecoratedBox(
+          decoration: BoxDecoration(
+            color: AppPalette.signalSoft,
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: const Padding(
+            padding: EdgeInsets.all(14),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Icon(Icons.verified_outlined, color: AppPalette.signal, size: 20),
+                SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    'Açıklamayı okumak öğrenme kanıtı oluşturmaz. Hazır olduğunda kendi cümlelerinle anlat veya Hatırla ile aktif olarak dene.',
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(height: 18),
+        DecoratedBox(
+          decoration: BoxDecoration(
+            color: AppPalette.primaryDark,
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(
+                  'Şimdi aktif olarak dene',
+                  style: theme.textTheme.titleMedium?.copyWith(color: Colors.white, fontWeight: FontWeight.w800),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  'Okuduğunu kendi cümlelerinle kur veya kaynağa bakmadan hatırla.',
+                  style: theme.textTheme.bodySmall?.copyWith(color: Colors.white.withValues(alpha: 0.76)),
+                ),
+                const SizedBox(height: 14),
+                FilledButton.icon(
+                  style: FilledButton.styleFrom(
+                    backgroundColor: Colors.white,
+                    foregroundColor: AppPalette.primaryDark,
+                  ),
+                  onPressed: () => Navigator.of(context).push<void>(
+                    MaterialPageRoute(
+                      builder: (_) => ExplainBackScreen(runtime: runtime, source: source),
+                    ),
+                  ),
+                  icon: const Icon(Icons.record_voice_over_outlined),
+                  label: const Text('Kendi cümlelerinle anlat'),
+                ),
+                const SizedBox(height: 8),
+                OutlinedButton.icon(
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: Colors.white,
+                    side: BorderSide(color: Colors.white.withValues(alpha: 0.28)),
+                  ),
+                  onPressed: () => Navigator.of(context).push<void>(
+                    MaterialPageRoute(
+                      builder: (_) => LearningSliceScreen(runtime: runtime, materialId: source.identity.materialId),
+                    ),
+                  ),
+                  icon: const Icon(Icons.psychology_alt_outlined),
+                  label: const Text('Hatırla ile dene'),
+                ),
+              ],
+            ),
+          ),
         ),
       ],
     );
