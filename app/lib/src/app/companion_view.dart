@@ -38,7 +38,7 @@ class _CompanionViewState extends State<CompanionView> with SingleTickerProvider
   void didChangeDependencies() {
     super.didChangeDependencies();
     final media = MediaQuery.maybeOf(context);
-    final reduced = (media?.disableAnimations ?? false) || (media?.accessibleNavigation ?? false);
+    final reduced = (media?.disableAnimations ?? false) || (media?.accessibleNavigation ?? false) || !TickerMode.of(context);
     if (reduced == _reducedMotion) {
       return;
     }
@@ -115,6 +115,17 @@ class _CompanionViewState extends State<CompanionView> with SingleTickerProvider
               alignment: Alignment.center,
               children: [
                 Positioned.fill(
+                  child: AnimatedContainer(
+                    duration: _reducedMotion ? Duration.zero : const Duration(milliseconds: 320),
+                    curve: Curves.easeOutCubic,
+                    margin: EdgeInsets.all(widget.size * 0.025),
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(color: _haloColor(widget.state), width: widget.size * 0.018),
+                    ),
+                  ),
+                ),
+                Positioned.fill(
                   child: Padding(
                     padding: EdgeInsets.all(widget.size * 0.13),
                     child: DecoratedBox(
@@ -148,9 +159,18 @@ class _CompanionViewState extends State<CompanionView> with SingleTickerProvider
     );
   }
 
+  static Color _haloColor(CompanionVisualState state) => switch (state) {
+    CompanionVisualState.idle => const Color(0xFFBEDDD0),
+    CompanionVisualState.listen => const Color(0xFF89C9DA),
+    CompanionVisualState.think => const Color(0xFFB4A3DB),
+    CompanionVisualState.speak => const Color(0xFF94B8E8),
+    CompanionVisualState.correct => const Color(0xFFE8B980),
+    CompanionVisualState.success => const Color(0xFF9DCB74),
+  };
+
   static String _semanticLabel(CompanionVisualState state) => switch (state) {
     CompanionVisualState.idle => 'Düğüm hazır',
-    CompanionVisualState.listen => 'Düğüm seni dinliyor',
+    CompanionVisualState.listen => 'Düğüm dinleme modunda',
     CompanionVisualState.think => 'Düğüm düşünüyor',
     CompanionVisualState.speak => 'Düğüm konuşuyor',
     CompanionVisualState.correct => 'Düğüm destek oluyor',
