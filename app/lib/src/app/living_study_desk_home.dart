@@ -249,12 +249,7 @@ class LivingStudyDeskHome extends StatelessWidget {
                   children: [
                     const Text(
                       'SIRADAKİ GERÇEK ADIM',
-                      style: TextStyle(
-                        color: _accent,
-                        fontSize: 10,
-                        fontWeight: FontWeight.w900,
-                        letterSpacing: 1,
-                      ),
+                      style: TextStyle(color: _accent, fontSize: 10, fontWeight: FontWeight.w900, letterSpacing: 1),
                     ),
                     const SizedBox(height: 4),
                     Text(
