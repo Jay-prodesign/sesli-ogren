@@ -77,10 +77,7 @@ class _Ready extends StatelessWidget {
         Row(
           children: [
             DecoratedBox(
-              decoration: BoxDecoration(
-                color: AppPalette.attentionSoft,
-                borderRadius: BorderRadius.circular(999),
-              ),
+              decoration: BoxDecoration(color: AppPalette.attentionSoft, borderRadius: BorderRadius.circular(999)),
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                 child: Text(
@@ -98,10 +95,7 @@ class _Ready extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 14),
-        Text(
-          'Kaynağına dayalı açıklama',
-          style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w800),
-        ),
+        Text('Kaynağına dayalı açıklama', style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w800)),
         const SizedBox(height: 6),
         Text(
           source.sourceName,
@@ -126,10 +120,7 @@ class _Ready extends StatelessWidget {
               children: [
                 Text(
                   'Bu bölüm kaynak metnin kendisi değil; kaynağına bağlı üretilmiş bir açıklamadır.',
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: AppPalette.inkMuted,
-                    fontWeight: FontWeight.w600,
-                  ),
+                  style: theme.textTheme.bodySmall?.copyWith(color: AppPalette.inkMuted, fontWeight: FontWeight.w600),
                 ),
                 const SizedBox(height: 14),
                 Text(result.explanation, style: theme.textTheme.bodyLarge?.copyWith(height: 1.55)),
@@ -143,10 +134,7 @@ class _Ready extends StatelessWidget {
           const SizedBox(height: 10),
           for (final point in result.keyPoints) ...[
             DecoratedBox(
-              decoration: BoxDecoration(
-                color: AppPalette.primarySoft,
-                borderRadius: BorderRadius.circular(14),
-              ),
+              decoration: BoxDecoration(color: AppPalette.primarySoft, borderRadius: BorderRadius.circular(14)),
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 11),
                 child: Row(
@@ -164,10 +152,7 @@ class _Ready extends StatelessWidget {
         ],
         const SizedBox(height: 16),
         DecoratedBox(
-          decoration: BoxDecoration(
-            color: AppPalette.signalSoft,
-            borderRadius: BorderRadius.circular(16),
-          ),
+          decoration: BoxDecoration(color: AppPalette.signalSoft, borderRadius: BorderRadius.circular(16)),
           child: const Padding(
             padding: EdgeInsets.all(14),
             child: Row(
@@ -186,10 +171,7 @@ class _Ready extends StatelessWidget {
         ),
         const SizedBox(height: 18),
         DecoratedBox(
-          decoration: BoxDecoration(
-            color: AppPalette.primaryDark,
-            borderRadius: BorderRadius.circular(20),
-          ),
+          decoration: BoxDecoration(color: AppPalette.primaryDark, borderRadius: BorderRadius.circular(20)),
           child: Padding(
             padding: const EdgeInsets.all(16),
             child: Column(
@@ -206,10 +188,7 @@ class _Ready extends StatelessWidget {
                 ),
                 const SizedBox(height: 14),
                 FilledButton.icon(
-                  style: FilledButton.styleFrom(
-                    backgroundColor: Colors.white,
-                    foregroundColor: AppPalette.primaryDark,
-                  ),
+                  style: FilledButton.styleFrom(backgroundColor: Colors.white, foregroundColor: AppPalette.primaryDark),
                   onPressed: () => Navigator.of(context).push<void>(
                     MaterialPageRoute(
                       builder: (_) => ExplainBackScreen(runtime: runtime, source: source),
