@@ -55,6 +55,13 @@ jobs:
           test -s test/goldens/la0039_home.png
           test -s test/goldens/la0039_workspace.png
           test -s test/goldens/la0039_recall_payoff.png
+          test -s test/goldens/la0040_library.png
+          test -s test/goldens/la0040_progress.png
+          test -s test/goldens/la0040_listen.png
+          test -s test/goldens/la0040_focus.png
+          test -s test/goldens/la0040_explain.png
+          test -s test/goldens/la0040_explain_back.png
+          test -s test/goldens/la0040_recall_prompt.png
 
       - name: Stage review evidence
         run: |
@@ -63,6 +70,13 @@ jobs:
           cp app/test/goldens/la0039_home.png docs/qa/evidence/la0039/home.png
           cp app/test/goldens/la0039_workspace.png docs/qa/evidence/la0039/workspace.png
           cp app/test/goldens/la0039_recall_payoff.png docs/qa/evidence/la0039/recall-payoff.png
+          cp app/test/goldens/la0040_library.png docs/qa/evidence/la0039/library.png
+          cp app/test/goldens/la0040_progress.png docs/qa/evidence/la0039/progress.png
+          cp app/test/goldens/la0040_listen.png docs/qa/evidence/la0039/listen.png
+          cp app/test/goldens/la0040_focus.png docs/qa/evidence/la0039/focus.png
+          cp app/test/goldens/la0040_explain.png docs/qa/evidence/la0039/explain.png
+          cp app/test/goldens/la0040_explain_back.png docs/qa/evidence/la0039/explain-back.png
+          cp app/test/goldens/la0040_recall_prompt.png docs/qa/evidence/la0039/recall-prompt.png
           sha256sum docs/qa/evidence/la0039/*.png | tee docs/qa/evidence/la0039/SHA256SUMS.txt
 
       - name: Upload review evidence
