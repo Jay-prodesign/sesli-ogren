@@ -139,6 +139,8 @@ class LearningTreatmentStage extends StatelessWidget {
       key: ValueKey('la0040-' + stage + '-' + lane.name),
       color: c.paper,
       child: ListView(
+        shrinkWrap: isResult,
+        physics: isResult ? const NeverScrollableScrollPhysics() : null,
         key: stage == 'home' ? const ValueKey('home-surface') : null,
         padding: const EdgeInsets.fromLTRB(22, 24, 22, 42),
         children: [
