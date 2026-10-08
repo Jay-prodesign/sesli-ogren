@@ -16,7 +16,7 @@
   },
   "lifecycle_stage": "M5 Golden Learning Slice — ADMITTED / EXECUTABLE under D-071; physical mobile-readiness deferred to final gate under D-068",
   "status": "IN_PROGRESS",
-  "active_milestone": "Repository M2 post-M5 full-product continuity — LA-0040 FOUNDER VISUAL FAIL / REWORK",
+  "active_milestone": "Repository M2 post-M5 continuity — LA-0040 SECOND FOUNDER VISUAL FAIL / ALL THREE UI TREATMENTS REJECTED",
   "architecture_proof": {
     "disposition": "ARCHITECTURE_PROOF_PASS / GO_ADAPT",
     "reviewed_head_sha": "0327d2e5b854df1c9923c65ed88f77151cfe9eed",
@@ -89,7 +89,7 @@
     "title": "Million-Dollar Visual Audit & Student Experience Elevation",
     "status": "FOUNDER_VISUAL_FAIL_REWORK",
     "admission": "Founder visual-quality correction + D-074 Tier-A governance",
-    "acceptance": "Founder rejected the 2026-10-08 visual packet; LA-0040 visual treatment correction and new explicit Founder PASS required",
+    "acceptance": "Founder rejected both the original and revised 2026-10-08 Flutter visual packets; Editorial/Studio/Knowledge have no accepted product design direction. Rebuild one coherent source-centered learning interaction within LA-0040 and require explicit new Founder visual PASS.",
     "current_task": "LA-0040"
   },
   "blockers": [
