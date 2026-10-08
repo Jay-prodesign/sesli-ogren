@@ -16,7 +16,7 @@
   },
   "lifecycle_stage": "M5 Golden Learning Slice — ADMITTED / EXECUTABLE under D-071; physical mobile-readiness deferred to final gate under D-068",
   "status": "IN_PROGRESS",
-  "active_milestone": "Repository M2 post-M5 full-product continuity — LA-0040 VQG PASS / Founder visual review",
+  "active_milestone": "Repository M2 post-M5 full-product continuity — LA-0040 FOUNDER VISUAL FAIL / REWORK",
   "architecture_proof": {
     "disposition": "ARCHITECTURE_PROOF_PASS / GO_ADAPT",
     "reviewed_head_sha": "0327d2e5b854df1c9923c65ed88f77151cfe9eed",
@@ -87,9 +87,9 @@
   "next_handoff": {
     "id": "LA0040_VISUAL_AUDIT",
     "title": "Million-Dollar Visual Audit & Student Experience Elevation",
-    "status": "VQG_PASS_FOUNDER_VISUAL_REVIEW_PENDING",
+    "status": "FOUNDER_VISUAL_FAIL_REWORK",
     "admission": "Founder visual-quality correction + D-074 Tier-A governance",
-    "acceptance": "VQG-01 PASS + protected Founder visual disposition",
+    "acceptance": "Founder rejected the 2026-10-08 visual packet; LA-0040 visual treatment correction and new explicit Founder PASS required",
     "current_task": "LA-0040"
   },
   "blockers": [
@@ -97,7 +97,7 @@
     "Physical iOS/Android speech/accessibility/performance/orientation checks remain deferred under D-068 and mandatory before release-candidate/public-release claims."
   ],
   "protected_gate": "Merge, release, deploy, paid providers, credentials/secrets, licensing posture, production mutation: Product Owner only",
-  "next_action": "Present the current full-product visual packet to Founder for protected visual disposition. Do not add speculative visual treatment changes while no BLOCKER/HIGH remains. If Founder passes, close LA-0040 and reconcile LA-0039 closure; if Founder requests change, reopen only that concrete failing dimension. D-068 physical-device release validation remains separate.",
+  "next_action": "Execute CMD-0002 Founder visual FAIL corrective cursor: reconcile LA-0039/LA-0040 current state, write compact Experience Fidelity Contract, compare 3 real Flutter visual treatments on identical source/truth, implement one signature payoff anchor and seek explicit Founder review. Do not mark visual DONE, merge, deploy or release.",
   "canonical_source_refs": [
     "CURRENT_EXECUTION_STATE — Learning App",
     "Founder visual/companion correction — 2026-10-07 (supersedes D-070 companion visual lock for LA-0040 evaluation)",
@@ -109,7 +109,8 @@
     "D-071 — M5 Golden Learning Slice explicit admission",
     "D-068 — Final Install After Implementation / Physical Device Gate Bounded",
     "D-074 — Adaptive Task Governance / Premise Audit / Dependency Propagation",
-    "D-075 — Asset Necessity / Experience Role / Sustainable Production Pipeline"
+    "D-075 — Asset Necessity / Experience Role / Sustainable Production Pipeline",
+    "CMD-0002 — Founder Visual FAIL and Visual Intelligence READ-ONLY Methodology Gap Correction"
   ],
   "updated_at": "2026-10-08",
   "auto_agent_bridge": {
@@ -126,10 +127,10 @@
       "Founder: grant the Brain (ChatGPT) GitHub connector issue/PR comment write (currently 403), or accept Drive-to-engineer transcription"
     ]
   },
-  "last_command_id": "CMD-0001",
+  "last_command_id": "CMD-0002",
   "last_acknowledged_command_id": "CMD-0001",
   "last_return_id": "RET-0001",
-  "command_processing_status": "ANSWERED",
+  "command_processing_status": "UNREAD",
   "command_ledger": {
     "CMD-0001": {
       "status": "ANSWERED",
