@@ -65,6 +65,44 @@ class AtelierWorkspace extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 17),
+              if (sourceText.trim().isNotEmpty) ...[
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.fromLTRB(16, 15, 16, 15),
+                  decoration: BoxDecoration(
+                    color: AtelierStyle.mint,
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  child: const Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Icon(Icons.lightbulb_outline_rounded, color: AtelierStyle.teal, size: 22),
+                      SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Okurken bir şeyi yakala',
+                              style: TextStyle(
+                                color: AtelierStyle.ink,
+                                fontWeight: FontWeight.w900,
+                                fontSize: 16,
+                              ),
+                            ),
+                            SizedBox(height: 5),
+                            Text(
+                              'Bu metnin en önemli fikri ne? Birazdan kaynağı kapatıp kendi sözlerinle hatırlayacaksın.',
+                              style: TextStyle(color: AtelierStyle.muted, fontSize: 14, height: 1.4),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 18),
+              ],
               const Divider(color: AtelierStyle.line),
               const SizedBox(height: 14),
               if (sourceText.trim().isEmpty)
