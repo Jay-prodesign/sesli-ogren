@@ -76,11 +76,18 @@ Deno.serve(async (request) => {
         if (typeof content?.summary === "string" && content.summary.trim().length > 0 && content.summary.length <= 20000 &&
           typeof content?.language === "string" && content.language.length > 0 && Array.isArray(content.key_points) &&
           content.key_points.length <= 30 && content.key_points.every((x: unknown) => typeof x === "string" && x.trim().length > 0)) {
-          await rpc("complete_generation_attempt", {
-            p_attempt_id: attempt, p_lease_token: lease, p_content: content,
-            p_provider_ref: providerRef ?? "unknown", p_usage: { total_tokens: Number(body?.usage?.total_tokens ?? 0), cost_class: "metered" },
-            p_latency_ms: Math.round(performance.now() - started)
-          });
+          // Database completion errors are not provider transport failures.
+          // Never convert an RPC failure into an ambiguous provider failure.
+          try {
+            await rpc("complete_generation_attempt", {
+              p_attempt_id: attempt, p_lease_token: lease, p_content: content,
+              p_provider_ref: providerRef ?? "unknown", p_usage: { total_tokens: Number(body?.usage?.total_tokens ?? 0), cost_class: "metered" },
+              p_latency_ms: Math.round(performance.now() - started)
+            });
+          } catch (error) {
+            console.error("generation-worker:completion_rpc_failed");
+            return reply(502, "completion_not_confirmed");
+          }
           return reply(200, "succeeded");
         }
         failure = "final";
