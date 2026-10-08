@@ -267,7 +267,6 @@ class LearningTreatmentStage extends StatelessWidget {
                   'SESLİ ÖĞREN  /  ${stage.toUpperCase()}',
                   style: TextStyle(color: c.ink, fontSize: 11, fontWeight: FontWeight.w900, letterSpacing: 1.2),
                 ),
-
               ],
             ),
             const SizedBox(height: 20),
@@ -585,7 +584,12 @@ class LearningTreatmentResult extends StatelessWidget {
             const SizedBox(height: 15),
             Text(
               'ŞİMDİ NE YAPMALI?',
-              style: TextStyle(color: studio ? c.ink : c.accent, fontSize: 11, fontWeight: FontWeight.w800, letterSpacing: 1),
+              style: TextStyle(
+                color: studio ? c.ink : c.accent,
+                fontSize: 11,
+                fontWeight: FontWeight.w800,
+                letterSpacing: 1,
+              ),
             ),
             const SizedBox(height: 10),
             Text(
