@@ -1,3 +1,7 @@
+> **2026-10-08 SECOND FOUNDER OVERRIDE / REJECTED DESIGN EXPERIMENT:** After examining the latest actual 12-screen packet, Founder explicitly rejected the entire visual direction and called the interface very poor. Prior qualitative "STUDIO PRIMARY REFINEMENT LEAD" was an erroneous positive product recommendation and is **WITHDRAWN**. Editorial/Studio/Knowledge are all FAILED UX approaches, not candidate winners. What remains valid is their exact-head technical pass (code/captures/true learner outcomes), not their design. New execution cursor: experience-first LA-0040 rework spec; no incremental Studio color/card/mascot polish. `docs/exec-plans/LA-0040_FOUNDER_FAIL_REWORK_SPEC.md`.
+
+---
+
 # LA-0040 — Actual Flutter Runtime Treatment Review (2026-10-08)
 
 **Status:** TECHNICAL REVIEW PACK PASS / VISUAL CHANGES_REQUIRED; LA-0039 and LA-0040 remain IN_PROGRESS. No Founder visual sign-off, merge, deploy, release or production treatment selection.
