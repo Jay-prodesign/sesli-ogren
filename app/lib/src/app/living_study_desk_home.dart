@@ -62,7 +62,7 @@ class LivingStudyDeskHome extends StatelessWidget {
   String get _preview {
     final source = sourceText?.trim() ?? '';
     if (source.isEmpty) return 'Bu materyalin metin önizlemesi henüz hazır değil.';
-    return source.replaceAll(RegExp(r'\\s+'), ' ');
+    return source.replaceAll(RegExp(r'\s+'), ' ');
   }
 
   String _type(MaterialRecord m) =>
