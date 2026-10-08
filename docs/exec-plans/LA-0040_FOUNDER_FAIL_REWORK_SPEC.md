@@ -1,3 +1,32 @@
+# LA-0040 ACTIVE CORRECTION — SECOND FOUNDER VISUAL FAIL (2026-10-08)
+
+**Controlling status: DESIGN FAIL / REJECT ALL THREE INITIAL TREATMENTS.** Founder rejected actual Flutter screenshots of Editorial, Studio and Knowledge and specifically described the UI as very poor. The earlier A/B/C experiment and Studio-led refinement route below are **COMPLETED AS FAILED EXPERIMENTS / NON-EXECUTABLE DESIGN DIRECTION**, not an obligation to continue. Preserve technical results as regression baselines only; LA-0040 remains the active task, no new task ID. No winner and no approved visual identity.
+
+## Concrete product-level problem to solve
+The 12 screens have essentially one composition: stacked text, cards and buttons; the user does not experience a distinctive process of reading/acting on their own material and seeing learning evidence emerge. The screen can be mistaken for a generic notes utility. There is no sufficiently clear visual transformation from material → personal recall action → grounded correction → meaningful continuation. D/Knot behaves like a small appended sticker instead of intentional product behavior. Empty space and dense blocks coexist without an attention narrative. Changing colors, type size, panel radii, illustration volume or label wording alone cannot fix this.
+
+## Revised bounded execution (experience FIRST)
+1. **Trace the real use in motion, not a screen-mockup contest.** Establish one concrete, source-grounded learner story: opens material → sees what is unfinished and why → acts on visible source with one meaningful tap → performs one independent Recall attempt → sees an honest side-by-side/spatial answer↔source comparison and next action → resumes. Map gestures, focus changes, source visibility, keyboard, errors, waiting and exit/reentry. The current fixture is too short to judge real reading; add a longer legitimate first-party/source-owned fixture for stress without inventing learner facts.
+2. **Define one coherent, memorable interaction model** from that journey, not a "new card skin." Source should be the primary visual object, with authentic visual states the user can inspect or manipulate. Clear response composition (not the same vertical list for home/workspace/prompt/result), visible cause→effect, bounded visual payoff and spatial continuity. Avoid fabricating concept graphs, skill scores, textbook diagrams or gamified mastery.
+3. **Character design gate:** audit the canonical D/Knot asset's native quality and whether it performs a meaningful contextual action in the interaction. If it is merely pasted decor, omit it from that moment rather than enlarging or redrawing without authorization. Reuse only Learning App-authorized character assets.
+4. **Build one real Flutter vertical experience** on the existing source/evidence/runtime contracts, preserving original actions, real navigation, honest outcomes and rollback by removal of opt-in review wiring. Build the actual smallest usable slice; don't build a design-system factory, three new arbitrary themes, generalized motion engine or speculative components.
+5. **Evaluate visibly, then improve or reject.** Use 390×844 plus 320 width, 1.3×/1.5× scale, long Turkish material/source, keyboard, reduced motion and error/unknown/hint/reveal/incorrect/partial paths. Compare in motion and real screenshots against rejected 12-screen controls. Show the material/source, task and feedback with 3–5s clarity and a prepared-source 60s payoff; no self-scored aesthetics PASS.
+6. **Review gate.** Present the actual coherent Flutter runtime plus a clear explanation of why its interaction architecture—not its palette—solves each observed failure. Founder acceptance is mandatory. If the screens still read as a templated card/document app, return to design before introducing further polish. Only then develop full asset fidelity, relevant surface extension and fresh 5–8 learner observation.
+
+## Required spec/quality assertions
+- **S1 Material focus:** the real, current version of learner material is legible as the central study object, not a secondary caption under a marketing headline. Scrolling/interaction demonstrate genuine document/source work.
+- **S2 Interaction:** a real, discoverable, meaningful step connects source exploration to Recall, rather than mere page-to-page CTA navigation.
+- **S3 Payoff:** compare own answer with the canonical source; visually explain the specific attempted retrieval and bounded evidence without invented mastery. Assistance/unknown paths cannot present unaided success.
+- **S4 Identity/craft:** one recognizable Learning App experience is present without any title/logo; no repeating colored card skeleton. D/Knot contributes intentionally if shown.
+- **S5 Ergonomics and trust:** primary gestures/keyboard/scroll work under the test matrix; no text clipping/overflow, minimum applicable contrast, meaningful semantics, reduced-motion equivalent and safe recovery.
+- **S6 Provenance:** use local Learning App code and cleared/authorized assets only. No project-content import; no incompatible donor.
+- **S7 Proof:** exactly-scoped widget/navigation/source/evidence tests plus real Flutter captures and recorded human/Founder disposition. CI PASS alone cannot satisfy S2/S3/S4. Any missing evidence = UNVERIFIED.
+- **DONE boundary:** Studio/Editorial/Knowledge rejected as finished designs. Task cannot close until a truly different coherent runtime experience earns protected Founder visual acceptance and required technical/usability gates; no publication before separate D-068 device gate.
+
+No extra documentation loops or broad generic app redesign. The implementation cursor is a single product-specific experience experiment with concrete failure gates and a reversible PR.
+
+---
+
 # LA-0040 / LA-0039 — Founder FAIL Rework Task Specification
 
 Status: ACTIVE / IN_PROGRESS / PRE-FOUNDER FAIL. This is a controlling extension of LA-0040, **not a new task ID**.
