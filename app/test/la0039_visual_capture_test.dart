@@ -114,7 +114,7 @@ void main() {
     );
 
     await tester.pumpWidget(_phoneFrame(ProductShellScreen(runtime: runtime)));
-    await _pumpUntilFound(tester, find.text('Şimdi ne yapmalı?'));
+    await _pumpUntilFound(tester, find.text('KALDIĞIN MATERYAL'));
     await _precacheCompanion(tester);
     await tester.pump(const Duration(milliseconds: 200));
     await expectLater(find.byType(Scaffold).first, matchesGoldenFile('goldens/la0039_home.png'));
