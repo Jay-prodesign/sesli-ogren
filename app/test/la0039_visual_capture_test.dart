@@ -471,24 +471,20 @@ void main() {
       explain: const _ReadyExplainGateway(),
     );
 
-    await tester.pumpWidget(
-      _phoneFrame(LivingDeskReviewScope(child: ProductShellScreen(runtime: runtime))),
-    );
+    await tester.pumpWidget(_phoneFrame(LivingDeskReviewScope(child: ProductShellScreen(runtime: runtime))));
     await _pumpUntilFound(tester, find.byKey(const ValueKey('la0040-living-home-empty')));
     expect(find.text('İlk materyalini ekle'), findsOneWidget);
     expect(find.text('Biyoloji — Fotosentez Notları'), findsNothing);
     await tester.pump(const Duration(milliseconds: 180));
-    await expectLater(
-      find.byType(Scaffold).first,
-      matchesGoldenFile('goldens/la0040_living_home_empty.png'),
-    );
+    await expectLater(find.byType(Scaffold).first, matchesGoldenFile('goldens/la0040_living_home_empty.png'));
 
     // Reset the mounted Home so its real Future snapshot reloads after ingest.
     await tester.pumpWidget(const SizedBox());
     await ingest.ingestPastedText(
       learner: runtime.learner,
       materialId: AppRuntime.primaryMaterialId,
-      text: 'Fotosentez sırasında klorofil ışık enerjisini kimyasal enerjiye '
+      text:
+          'Fotosentez sırasında klorofil ışık enerjisini kimyasal enerjiye '
           'dönüştürmeye yardımcı olur. Bitkiler karbondioksit ve suyu kullanır; '
           'süreç sonunda kimyasal enerji depolanır. '
           'Yapraklardaki klorofil ışığı yakalayarak bu dönüşümün başlamasına '
@@ -500,30 +496,23 @@ void main() {
           'Bu özgün test notu öğrenciye ait gerçek materyal akışını örnekler.',
       sourceName: 'Biyoloji — Fotosentez Notları',
     );
-    await tester.pumpWidget(
-      _phoneFrame(LivingDeskReviewScope(child: ProductShellScreen(runtime: runtime))),
-    );
+    await tester.pumpWidget(_phoneFrame(LivingDeskReviewScope(child: ProductShellScreen(runtime: runtime))));
     await _pumpUntilFound(tester, find.byKey(const ValueKey('la0040-living-home-populated')));
     expect(find.text('Biyoloji — Fotosentez Notları'), findsOneWidget);
     expect(find.text('Çalışmaya devam et'), findsOneWidget);
     expect(find.byKey(const ValueKey('la0040-living-material-open')), findsOneWidget);
     await tester.pump(const Duration(milliseconds: 180));
-    await expectLater(
-      find.byType(Scaffold).first,
-      matchesGoldenFile('goldens/la0040_living_home_populated.png'),
-    );
+    await expectLater(find.byType(Scaffold).first, matchesGoldenFile('goldens/la0040_living_home_populated.png'));
 
     // Narrow and scaled layouts must keep the real actions reachable.
     tester.view.physicalSize = const Size(640, 1400);
     await tester.pump(const Duration(milliseconds: 150));
-    await expectLater(
-      find.byType(Scaffold).first,
-      matchesGoldenFile('goldens/la0040_living_home_narrow.png'),
-    );
+    await expectLater(find.byType(Scaffold).first, matchesGoldenFile('goldens/la0040_living_home_narrow.png'));
     await tester.ensureVisible(find.byKey(const ValueKey('la0040-living-continue')));
     await tester.pump(const Duration(milliseconds: 120));
     expect(find.byKey(const ValueKey('la0040-living-continue')), findsOneWidget);
 
+    await tester.pumpWidget(const SizedBox());
     tester.view.physicalSize = const Size(780, 1688);
     await tester.pumpWidget(
       _phoneFrame(
@@ -533,15 +522,11 @@ void main() {
     );
     await _pumpUntilFound(tester, find.byKey(const ValueKey('la0040-living-home-populated')));
     await tester.pump(const Duration(milliseconds: 120));
-    await expectLater(
-      find.byType(Scaffold).first,
-      matchesGoldenFile('goldens/la0040_living_home_scale150.png'),
-    );
+    await expectLater(find.byType(Scaffold).first, matchesGoldenFile('goldens/la0040_living_home_scale150.png'));
     await tester.ensureVisible(find.byKey(const ValueKey('la0040-living-continue')));
     await tester.tap(find.byKey(const ValueKey('la0040-living-continue')));
     await _pumpUntilFound(tester, find.text('Materyal'));
     await tester.pumpWidget(const SizedBox());
     await store.close();
   }, skip: !_captureEnabled);
-
 }
