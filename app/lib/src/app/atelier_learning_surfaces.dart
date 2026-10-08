@@ -73,15 +73,26 @@ class AtelierWorkspace extends StatelessWidget {
                   style: TextStyle(color: AtelierStyle.muted, fontSize: 16),
                 )
               else
-                SelectableText(sourceText, style: const TextStyle(color: AtelierStyle.ink, fontSize: 17, height: 1.65)),
+                Container(
+                  padding: const EdgeInsets.fromLTRB(20, 21, 20, 25),
+                  decoration: BoxDecoration(
+                    color: AtelierStyle.paper,
+                    border: Border.all(color: AtelierStyle.line),
+                    borderRadius: BorderRadius.circular(19),
+                  ),
+                  child: SelectableText(
+                    sourceText,
+                    style: const TextStyle(color: AtelierStyle.ink, fontSize: 17, height: 1.62),
+                  ),
+                ),
             ],
           ),
         ),
         Container(
           padding: const EdgeInsets.fromLTRB(17, 10, 17, 14),
           decoration: const BoxDecoration(
-            color: AtelierStyle.paper,
-            border: Border(top: BorderSide(color: AtelierStyle.line)),
+            color: AtelierStyle.ink,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(21)),
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -90,15 +101,15 @@ class AtelierWorkspace extends StatelessWidget {
                 children: [
                   const Expanded(
                     child: Text(
-                      'Bu kaynakla devam et',
-                      style: TextStyle(color: AtelierStyle.ink, fontWeight: FontWeight.w800),
+                      'Kaynağınla devam et',
+                      style: TextStyle(color: Colors.white, fontWeight: FontWeight.w800),
                     ),
                   ),
-                  TextButton(onPressed: onExplain, child: const Text('Açıkla')),
+                  TextButton(onPressed: onExplain, style: TextButton.styleFrom(foregroundColor: Colors.white), child: const Text('Açıkla')),
                   IconButton(
                     onPressed: onFocus,
                     tooltip: 'Odaklan',
-                    icon: const Icon(Icons.center_focus_strong, color: AtelierStyle.teal),
+                    icon: const Icon(Icons.center_focus_strong, color: Colors.white),
                   ),
                 ],
               ),
@@ -109,6 +120,7 @@ class AtelierWorkspace extends StatelessWidget {
                       onPressed: onListen,
                       icon: const Icon(Icons.headphones_rounded),
                       label: const Text('Dinle'),
+                      style: OutlinedButton.styleFrom(foregroundColor: Colors.white, side: const BorderSide(color: Color(0xFF8EA9A3))),
                     ),
                   ),
                   const SizedBox(width: 9),
@@ -116,7 +128,7 @@ class AtelierWorkspace extends StatelessWidget {
                     child: FilledButton.icon(
                       key: const ValueKey('la0040-atelier-workspace-recall'),
                       onPressed: onRecall,
-                      style: FilledButton.styleFrom(backgroundColor: AtelierStyle.teal, foregroundColor: Colors.white),
+                      style: FilledButton.styleFrom(backgroundColor: AtelierStyle.mark, foregroundColor: AtelierStyle.ink),
                       icon: const Icon(Icons.psychology_alt_outlined),
                       label: const Text('Hatırla'),
                     ),
@@ -160,7 +172,7 @@ class AtelierRecall extends StatelessWidget {
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
       const Text(
-        'KAYNAĞA BAKMADAN',
+        'KAYNAK ŞİMDİ GİZLİ',
         style: TextStyle(color: AtelierStyle.teal, fontWeight: FontWeight.w900, fontSize: 11, letterSpacing: 1),
       ),
       const SizedBox(height: 12),
@@ -181,14 +193,14 @@ class AtelierRecall extends StatelessWidget {
         width: double.infinity,
         padding: const EdgeInsets.all(19),
         decoration: BoxDecoration(
-          color: AtelierStyle.paper,
-          borderRadius: BorderRadius.circular(18),
+          color: AtelierStyle.ink,
+          borderRadius: BorderRadius.circular(21),
           border: Border.all(color: AtelierStyle.line),
         ),
         child: Text(
           prompt.promptText,
           softWrap: true,
-          style: const TextStyle(color: AtelierStyle.ink, fontSize: 22, height: 1.36, fontWeight: FontWeight.w800),
+          style: const TextStyle(color: Colors.white, fontSize: 23, height: 1.34, fontWeight: FontWeight.w800),
         ),
       ),
       const SizedBox(height: 20),
@@ -204,7 +216,7 @@ class AtelierRecall extends StatelessWidget {
         textInputAction: TextInputAction.done,
         onSubmitted: (_) => onSubmit(),
         decoration: InputDecoration(
-          hintText: 'Hatırladığını yaz…',
+          hintText: 'Kaynağa bakmadan hatırladığını yaz…',
           filled: true,
           fillColor: AtelierStyle.paper,
           border: OutlineInputBorder(borderRadius: BorderRadius.circular(13)),
@@ -235,7 +247,7 @@ class AtelierRecall extends StatelessWidget {
             foregroundColor: Colors.white,
             minimumSize: const Size.fromHeight(52),
           ),
-          child: const Text('Yanıtla'),
+          child: const Text('Yanıtı karşılaştır'),
         ),
       ),
       const SizedBox(height: 9),
@@ -336,9 +348,9 @@ class AtelierResult extends StatelessWidget {
               : 'Bu sonuç denemeni ve varsa aldığın yardımı yansıtır.',
           style: const TextStyle(color: AtelierStyle.muted, fontSize: 14, height: 1.42),
         ),
-        const SizedBox(height: 22),
+        const SizedBox(height: 13),
         const Text(
-          'SENİN DENEMEN',
+          'ÖNCE SENİN YANITIN',
           style: TextStyle(color: AtelierStyle.muted, fontSize: 11, fontWeight: FontWeight.w900, letterSpacing: 1),
         ),
         const SizedBox(height: 8),
@@ -351,7 +363,7 @@ class AtelierResult extends StatelessWidget {
             style: const TextStyle(color: AtelierStyle.ink, fontSize: 16, height: 1.45, fontWeight: FontWeight.w700),
           ),
         ),
-        const SizedBox(height: 22),
+        const SizedBox(height: 13),
         Center(
           child: Padding(
             padding: const EdgeInsets.symmetric(vertical: 15),
@@ -361,7 +373,7 @@ class AtelierResult extends StatelessWidget {
                 const Icon(Icons.arrow_downward_rounded, color: AtelierStyle.teal, size: 20),
                 const SizedBox(width: 8),
                 const Text(
-                  'KAYNAĞINDAKİ KARŞILIĞI',
+                  'ŞİMDİ KAYNAĞINDAKİ KANIT',
                   style: TextStyle(
                     color: AtelierStyle.teal,
                     fontSize: 11,
@@ -430,7 +442,7 @@ class AtelierResult extends StatelessWidget {
             ),
           ),
         ),
-        const SizedBox(height: 22),
+        const SizedBox(height: 13),
         const Text(
           'SIRADAKİ GERÇEK ADIM',
           style: TextStyle(color: AtelierStyle.teal, fontWeight: FontWeight.w900, fontSize: 11, letterSpacing: 1),
@@ -440,7 +452,7 @@ class AtelierResult extends StatelessWidget {
           result.nextAction.reasonText,
           style: const TextStyle(color: AtelierStyle.ink, fontSize: 16, height: 1.44, fontWeight: FontWeight.w700),
         ),
-        const SizedBox(height: 19),
+        const SizedBox(height: 13),
         SizedBox(
           width: double.infinity,
           child: FilledButton.icon(

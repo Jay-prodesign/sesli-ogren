@@ -146,11 +146,11 @@ class LivingStudyDeskHome extends StatelessWidget {
             ],
           ),
           key: ValueKey('la0040-atelier-home-promise'),
-          style: TextStyle(fontSize: 30, fontWeight: FontWeight.w900, height: 1.13, letterSpacing: -1.2),
+          style: TextStyle(fontSize: 28, fontWeight: FontWeight.w900, height: 1.13, letterSpacing: -1.2),
         ),
         const SizedBox(height: 11),
         const Text(
-          'Oku, hatırlamayı dene, cevabını kendi notunda gör.',
+          'Kendi materyalinle çalış; yanıtını kaynağında gör.',
           style: TextStyle(color: _sub, fontSize: 15, height: 1.42),
         ),
         const SizedBox(height: 24),
@@ -175,7 +175,7 @@ class LivingStudyDeskHome extends StatelessWidget {
                   key: const ValueKey('la0040-living-material-open'),
                   onTap: onOpenWorkspace,
                   child: Padding(
-                    padding: const EdgeInsets.fromLTRB(23, 22, 22, 27),
+                    padding: const EdgeInsets.fromLTRB(22, 18, 20, 18),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -221,7 +221,7 @@ class LivingStudyDeskHome extends StatelessWidget {
                         const SizedBox(height: 15),
                         Text(
                           _preview,
-                          maxLines: 4,
+                          maxLines: 3,
                           overflow: TextOverflow.ellipsis,
                           style: const TextStyle(fontSize: 15, color: _sub, height: 1.52),
                         ),
@@ -249,38 +249,55 @@ class LivingStudyDeskHome extends StatelessWidget {
             ),
           ],
         ),
-        const SizedBox(height: 10),
-        Padding(
-          padding: const EdgeInsets.only(left: 26),
-          child: Container(key: const ValueKey('la0040-source-to-recall-thread'), width: 2, height: 22, color: _accent),
+        Center(
+          child: Container(
+            key: const ValueKey('la0040-source-to-recall-thread'),
+            width: 2,
+            height: 14,
+            color: _accent,
+          ),
         ),
-        const SizedBox(height: 5),
-        Row(
-          children: [
-            const CompanionView(state: CompanionVisualState.idle, size: 68),
-            const SizedBox(width: 10),
-            const Expanded(
-              child: Text(
-                'SIRADAKİ GERÇEK ADIM',
-                style: TextStyle(color: _accent, fontWeight: FontWeight.w900, letterSpacing: 1, fontSize: 11),
+        Container(
+          decoration: BoxDecoration(color: _ink, borderRadius: BorderRadius.circular(18)),
+          padding: const EdgeInsets.fromLTRB(14, 11, 16, 13),
+          child: Row(
+            children: [
+              const CompanionView(state: CompanionVisualState.idle, size: 64),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'SIRADAKİ GERÇEK ADIM',
+                      style: TextStyle(
+                        color: Color(0xFFB5DAD1),
+                        fontSize: 10,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: 1,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      _nextStep,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(color: Colors.white, fontSize: 17, fontWeight: FontWeight.w900),
+                    ),
+                    const SizedBox(height: 3),
+                    Text(
+                      _why,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(color: Color(0xFFD4E6E2), fontSize: 12, height: 1.3),
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
-        const SizedBox(height: 8),
-        Text(
-          _nextStep,
-          style: const TextStyle(fontSize: 21, fontWeight: FontWeight.w800, color: _ink, height: 1.2),
-        ),
-        const SizedBox(height: 7),
-        Text(
-          _why,
-          maxLines: 3,
-          overflow: TextOverflow.ellipsis,
-          style: const TextStyle(color: _sub, fontSize: 14, height: 1.38),
-        ),
-        const SizedBox(height: 18),
-        const SizedBox(height: 22),
+        const SizedBox(height: 14),
         const Divider(color: _line),
         const SizedBox(height: 12),
         Row(
@@ -343,7 +360,20 @@ class LivingStudyDeskHome extends StatelessWidget {
         'Bir PDF ya da metin ekle. Okumaya, dinlemeye ve hatırlamaya aynı yerden başla.',
         style: TextStyle(fontSize: 16, color: _sub, height: 1.48),
       ),
-      const SizedBox(height: 30),
+      const SizedBox(height: 18),
+      Row(
+        children: [
+          const CompanionView(state: CompanionVisualState.idle, size: 76),
+          const SizedBox(width: 12),
+          const Expanded(
+            child: Text(
+              'D/Knot yanında. İlk kaynağınla başlaman yeterli.',
+              style: TextStyle(color: _sub, fontSize: 14, height: 1.4),
+            ),
+          ),
+        ],
+      ),
+      const SizedBox(height: 18),
       Container(
         width: double.infinity,
         padding: const EdgeInsets.fromLTRB(24, 23, 24, 29),
