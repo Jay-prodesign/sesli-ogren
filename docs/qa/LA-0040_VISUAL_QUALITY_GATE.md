@@ -1,3 +1,21 @@
+# CURRENT BENCHMARK GATE — LA-0040 LEARNING + AUDIO + SUMMARY COMPETITORS (2026-10-08)
+
+**Mandatory reference:** [Current 2026-10-08 market/visual UX benchmark](../research/LA-0040_PUBLIC_LEARNING_AUDIO_SUMMARY_UX_BENCHMARK_2026-10-08.md). Founder requires the first visual direction be tested against high-install education leaders (Duolingo, Photomath, Quizlet, Khan Academy, Brilliant) AND reader/audio/summary experiences (Speechify, NaturalReader, ElevenReader, NotebookLM, Blinkist, Headway, kitUP, Voiser). Ranking based solely on download counts or visual taste is invalid.
+
+### BM-01–BM-07 — required before a visual-direction lock
+
+- **BM-01 — Comparator authenticity / evidence scope:** capture source URL, visible screenshot date/format (official listing/current or old public), and OBSERVED_PUBLIC / INSTALL_VERIFIED / NOT_VERIFIED for 5 closest UX benchmarks: **Quizlet, Brilliant, NotebookLM, Speechify, Blinkist**. Google Play threshold is a coarse Android listing bin, not exact users/retention/revenue. Do not mistake marketing images for fully tested installed flows. Generic broad-app reach does not equal relevant UX leadership.
+- **BM-02 — 3–5 second side-by-side:** compare the new Flutter Home/Material viewer with relevant public benchmark on legible current source, one active task and meaningful value. Use actual user observation for PASS; internal researcher preference is preliminary only.
+- **BM-03 — First-minute time to grounded result:** with comparable prepared-source scenarios, uncoached learner starts reading→commits an unaided/hinted/unknown Recall→understands source-backed feedback. No fabricated times. Brilliant and Duolingo provide interaction/feedback *grammar*, not a fake same-job PDF speed comparison.
+- **BM-04 — Premium execution/craft:** blind screenshots and real transition test vs comparator quality bar for typography, intentional hierarchy, character integration, source evidence, touch/readability, error/empty state and a coherent mobile layout. Generic Flutter template appearance is HIGH/FAIL even when CI green.
+- **BM-05 — Reader/audio fidelity:** compare document text/scroll/audio-control and route continuity patterns to Speechify/ElevenReader/NaturalReader. No claim of word synchronization, premium AI voices, full-PDF page fidelity, external catalog or original summary content if these are not actually implemented.
+- **BM-06 — Desire and substitution:** real students can explain a **specific reason to choose Sesli Öğren** over their existing Quizlet/NotebookLM/reader habit for a real note/document; assess first try, voluntary follow-up and truthful return, not just an attractive screen or an invented 5-star score.
+- **BM-07 — Donor/IP/commercial integrity:** borrow general verified UI patterns/interaction grammars; independently implement Learning App expression. Do not import copyrighted screenshot/UI assets, cloned branding/companions, book summaries, unclear-license code, fake mastery/metrics or invented paid features.
+
+**Blocking disposition:** The public benchmark research phase is **RECORDED / DESKTOP-ONLY**, not an install-tested UX or user-proven superiority PASS. For any visual-direction ACCEPT decision, BM-01 comparator evidence must be honest; BM-02…BM-06 require inspected real Flutter screens, accountable comparison and uncoached human observations; BM-07 must PASS. If user desire/craft/first-minute outcome loses or is unverified, direction remains REWORK / UNVERIFIED, independent of technical CI. This stage does not bar a small reversible experiment but bars claiming “better than competitors.”
+
+---
+
 # EXPERIENCE VALUE GATES — FOUNDER REFERENCE TRANSLATED TO LEARNING APP (2026-10-08)
 
 **Controlling addition to LA-0040.** The Founder supplied eight criteria from a separate project's visual-direction evaluation as an explicit *methodological reference*. Adapt them to Sesli Öğren, **without importing that project's product/visual decisions**. All eight must be considered in visual-direction selection; **P** = blocking prototype/perceptual direction, **C** = blocking commercial/free-paid decision, **R** = blocking real retention claims. Q0 requires specifying how each will be evaluated; no gate can be silently omitted. Screenshot quality or Flutter CI is not a substitute for user observation.
