@@ -110,8 +110,14 @@ class LivingStudyDeskHome extends StatelessWidget {
         const Text.rich(
           TextSpan(
             children: [
-              TextSpan(text: 'Kendi kaynağın.\n', style: TextStyle(color: _ink)),
-              TextSpan(text: 'Gerçek hatırlama.', style: TextStyle(color: _accent)),
+              TextSpan(
+                text: 'Kendi kaynağın.\n',
+                style: TextStyle(color: _ink),
+              ),
+              TextSpan(
+                text: 'Gerçek hatırlama.',
+                style: TextStyle(color: _accent),
+              ),
             ],
           ),
           key: ValueKey('la0040-atelier-home-promise'),
@@ -170,10 +176,7 @@ class LivingStudyDeskHome extends StatelessWidget {
                         Container(
                           width: 76,
                           height: 4,
-                          decoration: BoxDecoration(
-                            color: _accent,
-                            borderRadius: BorderRadius.circular(3),
-                          ),
+                          decoration: BoxDecoration(color: _accent, borderRadius: BorderRadius.circular(3)),
                         ),
                         const SizedBox(height: 14),
                         Text(
@@ -224,12 +227,7 @@ class LivingStudyDeskHome extends StatelessWidget {
         const SizedBox(height: 10),
         Padding(
           padding: const EdgeInsets.only(left: 26),
-          child: Container(
-            key: const ValueKey('la0040-source-to-recall-thread'),
-            width: 2,
-            height: 22,
-            color: _accent,
-          ),
+          child: Container(key: const ValueKey('la0040-source-to-recall-thread'), width: 2, height: 22, color: _accent),
         ),
         const SizedBox(height: 5),
         Row(
