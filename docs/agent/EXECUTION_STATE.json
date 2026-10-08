@@ -16,7 +16,7 @@
   },
   "lifecycle_stage": "M5 Golden Learning Slice — ADMITTED / EXECUTABLE under D-071; physical mobile-readiness deferred to final gate under D-068",
   "status": "IN_PROGRESS",
-  "active_milestone": "Repository M2 post-M5 full-product continuity — LA-0040 visual audit",
+  "active_milestone": "Repository M2 post-M5 full-product continuity — LA-0040 VQG PASS / Founder visual review",
   "architecture_proof": {
     "disposition": "ARCHITECTURE_PROOF_PASS / GO_ADAPT",
     "reviewed_head_sha": "0327d2e5b854df1c9923c65ed88f77151cfe9eed",
@@ -61,8 +61,8 @@
   "git": {
     "branch": "feat/full-product-shell-continuity",
     "base_sha": "84e96dce5b3cc9f32af3f459d422b652d0e86624",
-    "head_sha": "e14b98f2ef26c6a18c818695da907d57e73cd0d2",
-    "head_sha_note": "Validated LA-0040 grounded Golden Slice runtime checkpoint. bootstrap-validation 37728851631 PASS; account-deletion-bounded-validation 37728851629 PASS; product-bounded-validation 37728851623 PASS (canonical format, flutter analyze, expanded tests). Visual capture run 37728364553 PASS at UI-equivalent head 74fc6bab..., artifact 11528344389. Documentation-only commits may sit above this runtime SHA.",
+    "head_sha": "93cd80be370e7a08f29358f175831a53bc474403",
+    "head_sha_note": "Validated runtime head for LA-0040 final pre-Founder gate: bootstrap 37737380112 PASS; account-deletion 37737380121 PASS; product-bounded 37737380119 PASS. Full visual capture 37737373695 PASS; artifact 11532626337.",
     "pr_number": 13,
     "pr_url": "https://github.com/Jay-prodesign/sesli-ogren/pull/13",
     "merged": false,
@@ -87,9 +87,9 @@
   "next_handoff": {
     "id": "LA0040_VISUAL_AUDIT",
     "title": "Million-Dollar Visual Audit & Student Experience Elevation",
-    "status": "IN_PROGRESS_GOLDEN_SLICE_CONDITIONAL_PASS_FULL_PRODUCT_VISUAL_ROLLOUT",
-    "admission": "Founder explicit visual/companion reopen on 2026-10-07 + D-074 Tier-A governance",
-    "acceptance": "LA-0040 VQG-01 + stress/red-team + Founder visual disposition",
+    "status": "VQG_PASS_FOUNDER_VISUAL_REVIEW_PENDING",
+    "admission": "Founder visual-quality correction + D-074 Tier-A governance",
+    "acceptance": "VQG-01 PASS + protected Founder visual disposition",
     "current_task": "LA-0040"
   },
   "blockers": [
@@ -97,7 +97,7 @@
     "Physical iOS/Android speech/accessibility/performance/orientation checks remain deferred under D-068 and mandatory before release-candidate/public-release claims."
   ],
   "protected_gate": "Merge, release, deploy, paid providers, credentials/secrets, licensing posture, production mutation: Product Owner only",
-  "next_action": "Apply the grounded Living Visual Learning Studio grammar to remaining real product surfaces in order: Listen; Explain/Explain-Back; Focus; Library/Progress; then Profile/common states as needed. Preserve canonical D/Knot and current product truth. After rollout, capture a broader representative packet and rerun VQG-01 + stress/red-team before Founder visual lock.",
+  "next_action": "Present the current full-product visual packet to Founder for protected visual disposition. Do not add speculative visual treatment changes while no BLOCKER/HIGH remains. If Founder passes, close LA-0040 and reconcile LA-0039 closure; if Founder requests change, reopen only that concrete failing dimension. D-068 physical-device release validation remains separate.",
   "canonical_source_refs": [
     "CURRENT_EXECUTION_STATE — Learning App",
     "Founder visual/companion correction — 2026-10-07 (supersedes D-070 companion visual lock for LA-0040 evaluation)",
@@ -160,9 +160,9 @@
   },
   "founder_visual_decision": {
     "decision_id": "D-070 + Founder visual/companion correction 2026-10-07",
-    "companion": "CANONICAL D/KNOT RESTORED AS SELECTED BASELINE — reject only the generated non-canonical plush concept; integration/placement/bounded styling may evolve; redesign/removal requires new HIGH/BLOCKER evidence",
-    "product_visual": "GOLDEN_SLICE_CONDITIONAL_PASS__FULL_PRODUCT_VISUAL_ROLLOUT_REQUIRED",
-    "reason": "The reconciled, current-feature-only Golden Slice materially closes the prior structural visual failures while preserving learning truth and canonical D/Knot. Final world-class visual lock is deferred until the same grammar is coherent across the remaining product surfaces.",
+    "companion": "KEEP CANONICAL D/KNOT — full-packet evidence supports stateful/sparse integration; no HIGH/BLOCKER redesign/removal trigger remains",
+    "product_visual": "VQG_PASS__FOUNDER_VISUAL_LOCK_PENDING",
+    "reason": "The full current-feature visual packet passes VQG-01 with no visual BLOCKER/HIGH, including narrow/long-title/text-scale stress. Internal evidence supports commercial-quality coherence but cannot substitute for the protected Founder taste/lock or real-user love evidence.",
     "affected": [
       "colors",
       "typography",
@@ -189,14 +189,14 @@
     ],
     "active_authority": [
       "docs/exec-plans/LA-0040.md",
-      "docs/research/LA-0040_CURRENT_VISUAL_AUDIT_2026-10-07.md",
-      "docs/design/LA-0040_VISUAL_TREATMENT_TOURNAMENT.md",
+      "docs/design/LA-0040_PRIOR_RESEARCH_ROADMAP_RECONCILIATION.md",
+      "docs/design/LA-0040_AUDIENCE_BRAND_VISUAL_DIRECTION_LOCK.md",
       "docs/design/LA-0040_COMPANION_REEVALUATION.md",
       "docs/qa/LA-0040_VISUAL_QUALITY_GATE.md",
       "docs/qa/LA-0040_VISUAL_STRESS_REDTEAM.md",
-      "docs/design/LA-0040_AUDIENCE_BRAND_VISUAL_DIRECTION_LOCK.md",
-      "docs/design/LA-0040_PRIOR_RESEARCH_ROADMAP_RECONCILIATION.md",
-      "docs/qa/LA-0040_GROUNDED_GOLDEN_SLICE_AUDIT_2026-10-08.md"
+      "docs/qa/LA-0040_VQG_ROUND1_RETEST_2026-10-08.md",
+      "docs/qa/LA-0040_GROUNDED_GOLDEN_SLICE_AUDIT_2026-10-08.md",
+      "docs/qa/LA-0040_VQG_FINAL_PRE_FOUNDER_2026-10-08.md"
     ]
   },
   "m5_admission": {
@@ -419,9 +419,9 @@
     "remaining_gate": "Founder representative runtime visual review; LA-0039 remains IN_PROGRESS until that review is accepted."
   },
   "audience_visual_lock": {
-    "status": "PRIORITY_WEIGHTED_AUDIENCE__LEADING_VISUAL_LANE_NOT_FINAL_LOCK",
-    "primary_audience": "Broad learner-owned-material product; Turkish high-school students (grades 9–12 / approx. ages 14–18) are the priority-weighted initial audience segment, not exclusive target",
-    "theme": "Visual Learning Studio × Student Momentum — leading prototype lane, not final lock until roadmap/research reconciliation + runtime-truth VQG proof",
+    "status": "VQG_PASS_FOUNDER_VISUAL_LOCK_PENDING",
+    "primary_audience": "Broad learner-owned-material product; Turkish high-school students (grades 9–12 / approx. ages 14–18) are the priority-weighted initial commercial segment, not the exclusive target",
+    "theme": "Living Visual Learning Studio / Student Momentum — VQG-01 PASS; Founder visual lock pending",
     "voice": "smart study partner; direct, respectful, evidence-aware, calm under failure, energetic in action; informal singular Turkish 'sen'",
     "signature_palette": {
       "canvas": "#F7F8FC",
@@ -434,7 +434,7 @@
       "attention": "#E99024",
       "error": "#D64550"
     },
-    "companion": "Canonical D/Knot remains selected baseline. Generated non-canonical plush concept rejected. Integration/placement/bounded styling first; redesign/removal only on new HIGH/BLOCKER evidence.",
+    "companion": "KEEP canonical D/Knot. Generated non-canonical plush concept rejected; current evidence supports stateful/sparse integration rather than identity redesign/removal.",
     "authority": "docs/design/LA-0040_AUDIENCE_BRAND_VISUAL_DIRECTION_LOCK.md"
   }
 }

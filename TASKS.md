@@ -386,22 +386,25 @@ Next unallocated ID: **LA-0041**.
 
 ##### LA-0040 — Million-Dollar Visual Audit & Student Experience Elevation
 
-- Status: IN_PROGRESS
+- Status: IN_PROGRESS — **VQG-01 PASS / FOUNDER VISUAL REVIEW PENDING**
 - Tier: A — Founder-triggered visual/product decision
 - Depends on: LA-0039 engineering baseline
 - Owner: Brain + Founder protected visual disposition
-- Executor: ChatGPT (research/audit/spec; reversible prototyping after treatment admission)
-- Verification: current-state audit, VQG-01, treatment tournament, companion reevaluation and Round-0 visual stress/red-team are present. Founder locked the primary audience to Turkish high-school students (9–12) and selected Visual Learning Studio × Student Momentum at concept level. Current LA-0039 treatment remains FAIL / REDESIGN REQUIRED for the stated quality ambition. The generated non-canonical plush/cartoon companion treatment is rejected; canonical D/Knot remains the selected companion baseline. LA-0040 may adjust integration/placement/bounded styling first; identity redesign/removal requires new HIGH/BLOCKER evidence. Representative prototype/runtime evidence and final Founder visual disposition remain required.
-- Intent: find and validate a distinctive, student-relevant, premium, show-don't-tell visual direction; colors and D/Knot visual identity are explicitly reopened.
-- Current direction: **Living Visual Learning Studio / Student Momentum** grounded in the prior roadmap and current product truth. Sesli Öğren remains broader than high school; Turkish high-school students are the priority-weighted initial segment. Golden Slice = CONDITIONAL PASS; final visual lock awaits remaining-surface coherence + VQG-01 rerun + Founder review.
-- Quality authority: [docs/qa/LA-0040_VISUAL_QUALITY_GATE.md](docs/qa/LA-0040_VISUAL_QUALITY_GATE.md).
+- Executor: ChatGPT (research/audit/spec + reversible product polish)
+- Verification: full-product visual packet and engineering gates are green at validated runtime head `93cd80be370e7a08f29358f175831a53bc474403`: bootstrap `37737380112` PASS, account-deletion `37737380121` PASS, product-bounded `37737380119` PASS (canonical format + Flutter analyze + bounded expanded tests). Final full visual capture `37737373695` PASS; artifact `11532626337` (`sha256:990e9494cef15d67b17fc5183ab50558cffe7818ab4cd7e13d138eb108eef748`) contains Home, Workspace, Recall prompt/payoff, Listen, Explain, Explain-Back, Focus, Library, Progress, Profile and narrow/text-scale stress evidence.
+- Intent: validate a distinctive, premium, show-don't-tell Learning App experience without inventing learner state or discarding prior Learning App research.
+- Audience: Sesli Öğren remains a broad learner-owned-material product; Turkish high-school students are the **priority-weighted initial commercial segment**, not the exclusive target.
+- Current direction: **Living Visual Learning Studio / Student Momentum**. VQG-01 = PASS, not PASS+. No current visual BLOCKER/HIGH remains in the reviewed product packet.
+- Companion: **KEEP canonical D/Knot**. The generated non-canonical plush mascot is rejected; current evidence supports stateful/sparse integration, not identity redesign/removal.
+- Palette/system: retain the current Cloud / Deep Focus / Pulse Blue / Signal Aqua / bounded Volt Lime language unless device/accessibility evidence later requires token adjustment.
+- Stress result: narrow Home + long Turkish title + 1.3× Workspace + 1.5× Recall captured without observed overflow/clip blocker; Reduced Motion remains separately covered.
+- Why not PASS+: internal visual evidence supports commercial-quality coherence, but standout memorability/desire is not yet proven with real target users and final Founder taste/disposition is still protected.
+- Final VQG authority: [docs/qa/LA-0040_VQG_FINAL_PRE_FOUNDER_2026-10-08.md](docs/qa/LA-0040_VQG_FINAL_PRE_FOUNDER_2026-10-08.md).
+- Quality gate: [docs/qa/LA-0040_VISUAL_QUALITY_GATE.md](docs/qa/LA-0040_VISUAL_QUALITY_GATE.md).
 - Stress/red-team: [docs/qa/LA-0040_VISUAL_STRESS_REDTEAM.md](docs/qa/LA-0040_VISUAL_STRESS_REDTEAM.md).
-- Current-state audit: [docs/research/LA-0040_CURRENT_VISUAL_AUDIT_2026-10-07.md](docs/research/LA-0040_CURRENT_VISUAL_AUDIT_2026-10-07.md).
-- Treatment tournament: [docs/design/LA-0040_VISUAL_TREATMENT_TOURNAMENT.md](docs/design/LA-0040_VISUAL_TREATMENT_TOURNAMENT.md).
-- Companion reevaluation: [docs/design/LA-0040_COMPANION_REEVALUATION.md](docs/design/LA-0040_COMPANION_REEVALUATION.md).
-- Audience/brand/visual lock: [docs/design/LA-0040_AUDIENCE_BRAND_VISUAL_DIRECTION_LOCK.md](docs/design/LA-0040_AUDIENCE_BRAND_VISUAL_DIRECTION_LOCK.md).
+- Round-1 retest: [docs/qa/LA-0040_VQG_ROUND1_RETEST_2026-10-08.md](docs/qa/LA-0040_VQG_ROUND1_RETEST_2026-10-08.md).
 - Prior research/roadmap reconciliation: [docs/design/LA-0040_PRIOR_RESEARCH_ROADMAP_RECONCILIATION.md](docs/design/LA-0040_PRIOR_RESEARCH_ROADMAP_RECONCILIATION.md).
-- Grounded Golden Slice audit: [docs/qa/LA-0040_GROUNDED_GOLDEN_SLICE_AUDIT_2026-10-08.md](docs/qa/LA-0040_GROUNDED_GOLDEN_SLICE_AUDIT_2026-10-08.md).
+- Current cursor: **protected Founder visual review**. Do not restart visual discovery or add speculative polish while no concrete HIGH/BLOCKER or Founder change request exists.
 - Exec plan: [docs/exec-plans/LA-0040.md](docs/exec-plans/LA-0040.md)
 
 

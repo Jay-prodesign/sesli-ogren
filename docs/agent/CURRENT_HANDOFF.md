@@ -1,31 +1,36 @@
-# CURRENT EXECUTION OVERRIDE — 2026-10-07 / LA-0040
+# CURRENT EXECUTION OVERRIDE — 2026-10-08 / LA-0040 FINAL PRE-FOUNDER GATE
 
-This section supersedes stale branch/cursor/visual-pass/companion-lock lines below where they conflict.
+This section supersedes stale visual/cursor/companion/audience lines below where they conflict.
 
 - Active runnable product branch: `feat/full-product-shell-continuity` (PR #13). Repository `main` remains bootstrap-only.
-- LA-0024…LA-0038 are completed post-M5 full-product tranches.
-- LA-0039 remains IN_PROGRESS as the validated Golden Product Slice engineering baseline; it MUST NOT be closed on technical confidence alone.
-- Founder visual correction on 2026-10-07 is expanded: **colors, visual system and D/Knot visual identity are all reopened.** D-070’s prior companion visual lock is superseded for current visual-direction evaluation. Learning truth, source/provenance, evidence semantics and account/data safety are not reopened.
-- **LA-0040 — Million-Dollar Visual Audit & Student Experience Elevation: IN_PROGRESS / ACTIVE CURSOR.**
-- Current LA-0039 treatment (Premium Active Learning Studio) is now a baseline/control, not a locked final visual lane.
-- LA-0040 grounded Golden Slice VQG result: **CONDITIONAL PASS**. The prior automatic FAILs (prototype-like Workspace, over-text structural dependence, weak payoff/continuation, companion mismatch) are closed in the representative slice. Final identity / priority-audience desire / whole-product coherence remain open.
-- Current leading prototype lane: **Visual Learning Studio × Student Momentum**. Sesli Öğren remains broader than high school; Turkish high-school students (9–12 / approx. 14–18) are the priority-weighted initial audience segment. Final visual lock waits for prior-roadmap/research reconciliation + implementation-truth prototype + VQG-01.
-- Companion correction: the generated round/plush blue-purple concept mascot is **REJECTED because it is not canonical D/Knot**. Canonical D/Knot remains the selected baseline from the prior Founder-reviewed Round-7/D-070 work; first adjust integration, placement and bounded styling. Redesign/removal requires new HIGH/BLOCKER evidence.
-- Validated runtime baseline: `8caff368b653e0a3bae037903d581411dab9befa` — bootstrap `37641586921` PASS; account-deletion `37641586906` PASS; product-bounded `37641586870` PASS; visual capture `37641549582` PASS.
-- Prior research/roadmap reconciliation and grounded Golden Slice proof are complete. Validated runtime head: `e14b98f2ef26c6a18c818695da907d57e73cd0d2` — bootstrap `37728851631` PASS; account-deletion `37728851629` PASS; product-bounded `37728851623` PASS. Representative visual capture: run `37728364553` PASS, artifact `11528344389`. Current cursor: roll the grounded Living Visual Learning Studio grammar into **Listen -> Explain/Explain-Back -> Focus -> Library/Progress -> Profile/common states**, then recapture and rerun full VQG-01 before Founder lock.
-- Physical-device release validation remains separate under D-068.
-- Game Engine / corebreak-game remains READ-ONLY methodology reference only. No cross-project product decision, code or asset authority is imported.
+- LA-0039 remains IN_PROGRESS pending the same protected Founder visual disposition; engineering/visual gate confidence alone must not impersonate Founder approval.
+- **LA-0040 — Million-Dollar Visual Audit & Student Experience Elevation: IN_PROGRESS — VQG-01 PASS / FOUNDER VISUAL REVIEW PENDING.**
+- Sesli Öğren remains a broad learner-owned-material product. Turkish high-school students are the **priority-weighted initial commercial segment**, not the exclusive target.
+- Final current direction: **Living Visual Learning Studio / Student Momentum**.
+- Canonical D/Knot remains selected. Runtime evidence supports stateful/sparse integration; no redesign/removal trigger remains.
+- Current visual grammar: Cloud canvas + Deep Focus continuation surfaces + Pulse Blue active identity + Signal Aqua source/listen semantics + bounded Volt Lime continuation cue.
+- Full-product visual packet now covers Home, Workspace, Recall prompt/payoff, Listen, Explain, Explain-Back, Focus, Library, Progress, Profile plus narrow/text-scale stress.
+- **VQG-01 final pre-Founder disposition: PASS, not PASS+.** No current visual BLOCKER/HIGH remains in the reviewed packet.
+- Validated runtime head: `93cd80be370e7a08f29358f175831a53bc474403`.
+- Engineering evidence: bootstrap `37737380112` PASS; account-deletion `37737380121` PASS; product-bounded `37737380119` PASS.
+- Visual evidence: run `37737373695` PASS; artifact `11532626337`; digest `sha256:990e9494cef15d67b17fc5183ab50558cffe7818ab4cd7e13d138eb108eef748`.
+- Stress evidence: narrow Home + long title + 1.3× Workspace + 1.5× Recall show no observed overflow/clip blocker. Reduced Motion foundation remains covered.
+- Why not PASS+: real-user love/memorability and Founder taste cannot be inferred from internal capture alone; D-068 physical device release validation also remains separate.
+- **Current cursor: protected Founder visual review.** Do not add more speculative visual polish unless Founder feedback or concrete new evidence identifies a failing dimension.
+- Game Engine / corebreak-game remains READ-ONLY methodology reference only; no cross-project code/assets/product authority imported.
 - No merge, release, deploy, paid provider, production secret or cross-project mutation is authorized.
+- Physical iOS/Android release validation remains mandatory later under D-068.
 
 Authoritative LA-0040 artifacts:
 - docs/exec-plans/LA-0040.md
-- docs/research/LA-0040_CURRENT_VISUAL_AUDIT_2026-10-07.md
-- docs/design/LA-0040_VISUAL_TREATMENT_TOURNAMENT.md
-- docs/design/LA-0040_COMPANION_REEVALUATION.md
+- docs/design/LA-0040_PRIOR_RESEARCH_ROADMAP_RECONCILIATION.md
 - docs/design/LA-0040_AUDIENCE_BRAND_VISUAL_DIRECTION_LOCK.md
+- docs/design/LA-0040_COMPANION_REEVALUATION.md
 - docs/qa/LA-0040_VISUAL_QUALITY_GATE.md
 - docs/qa/LA-0040_VISUAL_STRESS_REDTEAM.md
+- docs/qa/LA-0040_VQG_ROUND1_RETEST_2026-10-08.md
 - docs/qa/LA-0040_GROUNDED_GOLDEN_SLICE_AUDIT_2026-10-08.md
+- docs/qa/LA-0040_VQG_FINAL_PRE_FOUNDER_2026-10-08.md
 
 ---
 
