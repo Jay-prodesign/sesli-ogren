@@ -178,7 +178,7 @@ class LearningTreatmentStage extends StatelessWidget {
     final isStudio = lane == LearningVisualTreatment.studio;
     final colorForSmall = isStudio ? const Color(0xFFE2F3AB) : c.accent;
     return ColoredBox(
-      key: ValueKey('la0040-${stage}-${lane.name}'),
+      key: ValueKey('la0040-$stage-${lane.name}'),
       color: c.paper,
       child: ListView(
         shrinkWrap: isResult,
