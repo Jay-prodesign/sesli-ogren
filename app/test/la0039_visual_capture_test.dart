@@ -5,12 +5,17 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sesli_ogren/src/app/app_runtime.dart';
 import 'package:sesli_ogren/src/app/app_theme.dart';
+import 'package:sesli_ogren/src/app/explain_back_screen.dart';
+import 'package:sesli_ogren/src/app/explain_screen.dart';
+import 'package:sesli_ogren/src/app/focus_screen.dart';
 import 'package:sesli_ogren/src/app/learning_slice_screen.dart';
+import 'package:sesli_ogren/src/app/listen_screen.dart';
 import 'package:sesli_ogren/src/app/material_workspace_screen.dart';
 import 'package:sesli_ogren/src/app/product_shell_screen.dart';
 import 'package:sesli_ogren/src/data/pdf_text_extractor.dart';
 import 'package:sesli_ogren/src/data/source_ingest_service.dart';
 import 'package:sesli_ogren/src/data/sqlite_source_store.dart';
+import 'package:sesli_ogren/src/generation/grounded_explain_gateway.dart';
 import 'package:sesli_ogren/src/learning/recall_learning_service.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
@@ -23,6 +28,25 @@ class _UnusedPdfExtractor implements PdfTextExtractor {
   Future<ExtractedPdf> extract(Uint8List bytes, {required String sourceName}) {
     throw UnimplementedError();
   }
+}
+
+class _ReadyExplainGateway implements GroundedExplainGateway {
+  const _ReadyExplainGateway();
+
+  @override
+  Future<GroundedExplainResult> explain(GroundedExplainRequest request) async => GroundedExplainReady(
+    sourceVersionId: request.sourceVersionId,
+    sourceContentDigest: request.sourceContentDigest,
+    explanation:
+        'Fotosentezde bitki, ışık enerjisini kullanarak su ve karbondioksitten kimyasal enerji depolayan moleküller üretir.',
+    keyPoints: const [
+      'Işık enerjisi süreci başlatır.',
+      'Karbondioksit ve su kaynak olarak kullanılır.',
+      'Enerji kimyasal biçimde depolanır.',
+    ],
+    language: 'tr-TR',
+    executionRef: 'visual-review:grounded-explain',
+  );
 }
 
 Future<void> _pumpUntilFound(WidgetTester tester, Finder finder, {int maxPumps = 120}) async {
@@ -102,6 +126,7 @@ void main() {
       ingest: ingest,
       recall: recall,
       telemetry: store.operationalTelemetry(),
+      explain: const _ReadyExplainGateway(),
     );
 
     await ingest.ingestPastedText(
@@ -113,11 +138,32 @@ void main() {
       sourceName: 'Biyoloji — Fotosentez Notları',
     );
 
+    final source = await store.currentSourceVersion(
+      learner: runtime.learner,
+      materialId: AppRuntime.primaryMaterialId,
+    );
+    final extracted = source == null
+        ? null
+        : await store.extractedContentForSource(
+            learner: runtime.learner,
+            sourceVersionId: source.identity.sourceVersionId,
+          );
+    expect(source, isNotNull);
+    expect(extracted, isNotNull);
+
     await tester.pumpWidget(_phoneFrame(ProductShellScreen(runtime: runtime)));
     await _pumpUntilFound(tester, find.text('KALDIĞIN MATERYAL'));
     await _precacheCompanion(tester);
     await tester.pump(const Duration(milliseconds: 200));
     await expectLater(find.byType(Scaffold).first, matchesGoldenFile('goldens/la0039_home.png'));
+
+    await tester.tap(find.byIcon(Icons.library_books_outlined));
+    await tester.pump(const Duration(milliseconds: 200));
+    await expectLater(find.byType(Scaffold).first, matchesGoldenFile('goldens/la0040_library.png'));
+
+    await tester.tap(find.byIcon(Icons.insights_outlined));
+    await tester.pump(const Duration(milliseconds: 200));
+    await expectLater(find.byType(Scaffold).first, matchesGoldenFile('goldens/la0040_progress.png'));
 
     await tester.pumpWidget(
       _phoneFrame(MaterialWorkspaceScreen(runtime: runtime, materialId: AppRuntime.primaryMaterialId)),
@@ -125,6 +171,36 @@ void main() {
     await _pumpUntilFound(tester, find.text('SIRADAKİ ADIM'));
     await tester.pump(const Duration(milliseconds: 200));
     await expectLater(find.byType(Scaffold).first, matchesGoldenFile('goldens/la0039_workspace.png'));
+
+    await tester.pumpWidget(
+      _phoneFrame(ListenScreen(runtime: runtime, materialId: AppRuntime.primaryMaterialId)),
+    );
+    await _pumpUntilFound(tester, find.text('DİNLEME'));
+    await tester.pump(const Duration(milliseconds: 200));
+    await expectLater(find.byType(Scaffold).first, matchesGoldenFile('goldens/la0040_listen.png'));
+
+    await tester.pumpWidget(
+      _phoneFrame(
+        FocusScreen(
+          runtime: runtime,
+          source: source!,
+          sourceText: extracted!.normalizedText,
+        ),
+      ),
+    );
+    await _pumpUntilFound(tester, find.text('Kısa odak oturumu'));
+    await tester.pump(const Duration(milliseconds: 200));
+    await expectLater(find.byType(Scaffold).first, matchesGoldenFile('goldens/la0040_focus.png'));
+
+    await tester.pumpWidget(_phoneFrame(ExplainScreen(runtime: runtime, source: source)));
+    await _pumpUntilFound(tester, find.text('Kaynağına dayalı açıklama'));
+    await tester.pump(const Duration(milliseconds: 200));
+    await expectLater(find.byType(Scaffold).first, matchesGoldenFile('goldens/la0040_explain.png'));
+
+    await tester.pumpWidget(_phoneFrame(ExplainBackScreen(runtime: runtime, source: source)));
+    await _pumpUntilFound(tester, find.text('Anlatımımı değerlendir'));
+    await tester.pump(const Duration(milliseconds: 200));
+    await expectLater(find.byType(Scaffold).first, matchesGoldenFile('goldens/la0040_explain_back.png'));
 
     final prompt = await recall.createCurrentPrompt(learner: runtime.learner, materialId: AppRuntime.primaryMaterialId);
     final action = await store.learningTruthStore().recallAction(learner: runtime.learner, actionId: prompt.id);
@@ -134,6 +210,9 @@ void main() {
       _phoneFrame(LearningSliceScreen(runtime: runtime, materialId: AppRuntime.primaryMaterialId)),
     );
     await _pumpUntilFound(tester, find.text('Hatırla'));
+    await tester.pump(const Duration(milliseconds: 200));
+    await expectLater(find.byType(Scaffold).first, matchesGoldenFile('goldens/la0040_recall_prompt.png'));
+
     await tester.enterText(find.byType(TextField), action!.expectedAnswer);
     await tester.tap(find.text('Yanıtla'));
     await _pumpUntilFound(tester, find.text('İpucusuz hatırladın'));
