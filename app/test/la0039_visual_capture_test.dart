@@ -223,6 +223,7 @@ void main() {
     await tester.enterText(find.byType(TextField), action!.expectedAnswer);
     await tester.tap(find.text('Yanıtla'));
     await _pumpUntilFound(tester, find.text('İpucusuz hatırladın'));
+    expect(find.text('Sıradaki adıma geç'), findsOneWidget);
     await tester.pump(const Duration(milliseconds: 200));
     await expectLater(find.byType(Scaffold).first, matchesGoldenFile('goldens/la0039_recall_payoff.png'));
 
