@@ -1,3 +1,13 @@
+# ART DIRECTION FIRST — FOUNDER PROCESS UPDATE (2026-10-08)
+
+CURRENT CURSOR: review the inspiration board and the one Material in Motion art-direction candidate BEFORE further Flutter visual changes. Prior commands to iterate Living Desk visuals immediately are superseded. See docs/design/LA-0040_ART_DIRECTION_CANDIDATE_V1_MATERIAL_IN_MOTION.md for palette, character colorway study, screen compositions and AD-01 to AD-09 review criteria.
+
+Inspiration board is concept art, not actual product screens, a production asset or Founder approval. Canonical D/Knot identity remains; Founder permits examining colorway improvements without changing the character's silhouette. Colorway C0/C1/C2 requires authentic character art and visual decision before integration.
+
+Founder art-direction review status: PENDING. LA-0040 visual status: FAIL / IN_PROGRESS. No merge, release or further aesthetic Flutter expansion before a protected visual direction decision. Technical formatting or correctness issues may still be repaired as needed.
+
+---
+
 # SINGLE CURRENT UI IMPLEMENTATION CURSOR — 2026-10-08
 
 Stop cycling research/themes. Previous Learning App visual research and rejected Flutter treatments are reconciled into ONE concrete, bounded candidate: **CANLI ÇALIŞMA MASASI / Living Study Desk Home + SOURCE STAGE Workspace/Recall/Result**, as specified screen-by-screen in `docs/design/LA-0040_SOURCE_STAGE_INTERACTION_IMPLEMENTATION_CONTRACT.md`. Preserve playful/living/companion ambitions with source/evidence truth and D/Knot canonical identity; do NOT resurrect giant dark Studio cards, four equal tool tiles or fictitious course maps.
