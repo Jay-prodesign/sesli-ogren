@@ -542,8 +542,7 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
     final reducedMotion = (media?.disableAnimations ?? false) || (media?.accessibleNavigation ?? false);
     final compactResultHeader = _phase == _SlicePhase.result;
     final candidate = LearningVisualTreatmentScope.maybeOf(context);
-    final reviewFocus = candidate != null &&
-        (_phase == _SlicePhase.recall || _phase == _SlicePhase.result);
+    final reviewFocus = candidate != null && (_phase == _SlicePhase.recall || _phase == _SlicePhase.result);
     return Scaffold(
       body: SafeArea(
         child: DecoratedBox(
@@ -580,47 +579,45 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
                         ),
                         Text(
                           compactResultHeader ? 'SONUÇ' : 'HATIRLA',
-                          style: theme.textTheme.labelSmall?.copyWith(
-                            fontWeight: FontWeight.w800,
-                          ),
+                          style: theme.textTheme.labelSmall?.copyWith(fontWeight: FontWeight.w800),
                         ),
                       ],
                     )
                   else
                     Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      DecoratedBox(
-                        decoration: BoxDecoration(
-                          color: compactResultHeader ? AppPalette.successSoft : AppPalette.primarySoft,
-                          borderRadius: BorderRadius.circular(18),
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        DecoratedBox(
+                          decoration: BoxDecoration(
+                            color: compactResultHeader ? AppPalette.successSoft : AppPalette.primarySoft,
+                            borderRadius: BorderRadius.circular(18),
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.all(6),
+                            child: CompanionView(state: _companionState, size: compactResultHeader ? 58 : 66),
+                          ),
                         ),
-                        child: Padding(
-                          padding: const EdgeInsets.all(6),
-                          child: CompanionView(state: _companionState, size: compactResultHeader ? 58 : 66),
+                        const SizedBox(width: 14),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                compactResultHeader ? 'Hatırlama sonucu' : 'Sesli Öğren',
+                                style: compactResultHeader
+                                    ? theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w800)
+                                    : theme.textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.w800),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                _subtitle(),
+                                style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
-                      const SizedBox(width: 14),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              compactResultHeader ? 'Hatırlama sonucu' : 'Sesli Öğren',
-                              style: compactResultHeader
-                                  ? theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w800)
-                                  : theme.textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.w800),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              _subtitle(),
-                              style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
+                      ],
+                    ),
                   SizedBox(height: reviewFocus ? 10 : (compactResultHeader ? 18 : 24)),
                   AnimatedSwitcher(
                     duration: reducedMotion ? Duration.zero : const Duration(milliseconds: 220),
