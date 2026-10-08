@@ -76,4 +76,37 @@ void main() {
       await expectLater(find.byType(Scaffold), matchesGoldenFile('goldens/la0040_companion_${state.name}_390x844.png'));
     });
   }
+
+  testWidgets('D/Knot honors reduced motion and exposes the correct state', (tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: MediaQuery(
+          data: MediaQueryData(disableAnimations: true),
+          child: Scaffold(
+            body: CompanionView(state: CompanionVisualState.think),
+          ),
+        ),
+      ),
+    );
+    expect(find.bySemanticsLabel('Düğüm düşünüyor'), findsOneWidget);
+    await tester.pump(const Duration(seconds: 3));
+    expect(tester.binding.transientCallbackCount, 0);
+  });
+
+  testWidgets('D/Knot stops its motion when the scene is inactive', (tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: TickerMode(
+          enabled: false,
+          child: Scaffold(
+            body: CompanionView(state: CompanionVisualState.idle),
+          ),
+        ),
+      ),
+    );
+    expect(find.bySemanticsLabel('Düğüm hazır'), findsOneWidget);
+    await tester.pump(const Duration(seconds: 3));
+    expect(tester.binding.transientCallbackCount, 0);
+  });
+
 }
