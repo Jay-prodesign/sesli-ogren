@@ -375,6 +375,19 @@ void main() {
       await tester.tap(find.text('Yanıtla'));
       await _pumpUntilFound(tester, find.byKey(ValueKey('la0040-result-${lane.name}')));
       expect(find.text('Sıradaki adıma geç'), findsOneWidget);
+      // Small-label contrast must remain readable under each candidate
+      // surface (4.5:1 for regular text, not a subjective color-only check).
+      final nextActionLabel = find.text('ŞİMDİ NE YAPMALI?');
+      expect(nextActionLabel, findsOneWidget);
+      final foreground = tester.widget<Text>(nextActionLabel).style!.color!;
+      final background = Theme.of(tester.element(nextActionLabel)).scaffoldBackgroundColor;
+      final lighter = foreground.computeLuminance() > background.computeLuminance()
+          ? foreground.computeLuminance()
+          : background.computeLuminance();
+      final darker = foreground.computeLuminance() < background.computeLuminance()
+          ? foreground.computeLuminance()
+          : background.computeLuminance();
+      expect((lighter + 0.05) / (darker + 0.05), greaterThanOrEqualTo(4.5));
       await tester.pump(const Duration(milliseconds: 200));
       await expectLater(
         find.byType(Scaffold).last,
