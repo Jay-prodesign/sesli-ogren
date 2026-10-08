@@ -173,7 +173,7 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
             label: 'Profil',
           ),
         ],
-      ),;
+      );
 
   @override
   Widget build(BuildContext context) {
