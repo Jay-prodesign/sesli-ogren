@@ -222,16 +222,41 @@ class AtelierRecall extends StatelessWidget {
       const SizedBox(height: 17),
       Container(
         width: double.infinity,
-        padding: const EdgeInsets.all(19),
+        padding: const EdgeInsets.fromLTRB(19, 19, 19, 23),
         decoration: BoxDecoration(
           color: AtelierStyle.ink,
           borderRadius: BorderRadius.circular(21),
-          border: Border.all(color: AtelierStyle.line),
         ),
-        child: Text(
-          prompt.promptText,
-          softWrap: true,
-          style: const TextStyle(color: Colors.white, fontSize: 23, height: 1.34, fontWeight: FontWeight.w800),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Row(
+              children: [
+                Icon(Icons.visibility_off_outlined, color: AtelierStyle.mark, size: 17),
+                SizedBox(width: 8),
+                Text(
+                  'KAYNAĞA BAKMADAN',
+                  style: TextStyle(
+                    color: AtelierStyle.mark,
+                    fontSize: 10,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 1,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 17),
+            Text(
+              prompt.promptText,
+              softWrap: true,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 23,
+                height: 1.34,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+          ],
         ),
       ),
       const SizedBox(height: 20),
@@ -440,7 +465,8 @@ class AtelierResult extends StatelessWidget {
         TweenAnimationBuilder<double>(
           key: const ValueKey('la0040-source-evidence-reveal'),
           tween: Tween<double>(begin: 0, end: 1),
-          duration: (MediaQuery.maybeOf(context)?.disableAnimations ?? false)
+          duration: ((MediaQuery.maybeOf(context)?.disableAnimations ?? false) ||
+                  (MediaQuery.maybeOf(context)?.accessibleNavigation ?? false))
               ? Duration.zero
               : const Duration(milliseconds: 240),
           builder: (context, progress, child) => Opacity(
