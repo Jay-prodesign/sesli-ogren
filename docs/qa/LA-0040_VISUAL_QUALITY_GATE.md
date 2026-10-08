@@ -1,3 +1,9 @@
+# CONTROLLING V3 CHARACTER/AUTHENTICITY FAIL — 2026-10-08
+
+V3 alleged “actual canonical D/Knot directly embedded” but the generated character does not match `app/assets/companions/D_KNOT_128.webp`. White robot with leaf/antenna appendages ≠ blue-purple knot with light face. **AD-05 BLOCKER / AD-09 NOT APPROVED.** Do not auto-PASS character fidelity based on image-generation claims; require **pixel/compositing provenance using the real asset**, shape/face consistency at intended size, and no unapproved costume or body/leaf additions. Biology-specific image wallpaper or fabricated learner metrics fails visual/truth gate, regardless of aesthetics. Previous V3 appraisal is rejected; visual inspiration remains **REWORK**. Previous test-suite PASS is separate technical correctness only.
+
+---
+
 # ART-DIRECTION GATE BEFORE FLUTTER UI — 2026-10-08
 
 Founder corrected sequence: existing research → real inspiration board → coherent art direction → visual critique → protected Founder direction decision → asset preparation → Flutter production UI. Prior instructions to keep polishing card-based Living Desk Flutter before selecting the visual identity are superseded.
