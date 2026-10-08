@@ -6,6 +6,7 @@ import 'app_runtime.dart';
 import 'app_theme.dart';
 import 'companion_view.dart';
 import 'learning_slice_screen.dart';
+import 'la0040_visual_treatments.dart';
 import 'listen_screen.dart';
 import 'material_workspace_screen.dart';
 import 'profile_surface.dart';
@@ -223,6 +224,19 @@ class _HomeSurface extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final hasMaterial = data.material != null;
+    final candidate = LearningVisualTreatmentScope.maybeOf(context);
+    if (hasMaterial && candidate != null) {
+      return LearningTreatmentHome(
+        lane: candidate,
+        material: data.material!,
+        continuation: data.continuation,
+        nextTitle: _nextTitle(data.continuation),
+        nextReason: _nextReason(data.continuation),
+        onWorkspace: onOpenWorkspace,
+        onRecall: onOpenLearning,
+        onListen: onOpenListen,
+      );
+    }
 
     return ListView(
       key: const ValueKey('home-surface'),
