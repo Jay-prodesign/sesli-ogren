@@ -234,18 +234,12 @@ class _WorkspaceBody extends StatelessWidget {
             children: [
               Expanded(child: Text('Kaynağa hızlı bakış', style: theme.textTheme.titleMedium)),
               DecoratedBox(
-                decoration: BoxDecoration(
-                  color: AppPalette.signalSoft,
-                  borderRadius: BorderRadius.circular(999),
-                ),
+                decoration: BoxDecoration(color: AppPalette.signalSoft, borderRadius: BorderRadius.circular(999)),
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                   child: Text(
                     'Kaynak metni',
-                    style: theme.textTheme.labelSmall?.copyWith(
-                      color: AppPalette.signal,
-                      fontWeight: FontWeight.w800,
-                    ),
+                    style: theme.textTheme.labelSmall?.copyWith(color: AppPalette.signal, fontWeight: FontWeight.w800),
                   ),
                 ),
               ),
@@ -380,10 +374,8 @@ class _LearningStatusCard extends StatelessWidget {
         'Tekrar gerekli',
         continuation?.nextAction.reasonText ?? 'Kaynağı kısaca gözden geçirip yeniden dene.',
       ),
-      RecallStateKind.notAssessed || null => (
-        'Henüz ölçülmedi',
-        'İlk hatırlama denemesi öğrenme durumunu görünür kılar.',
-      ),
+      RecallStateKind.notAssessed ||
+      null => ('Henüz ölçülmedi', 'İlk hatırlama denemesi öğrenme durumunu görünür kılar.'),
     };
 
     return DecoratedBox(
@@ -507,10 +499,7 @@ class _StudyToolTile extends StatelessWidget {
                 const SizedBox(height: 5),
                 Text(
                   body,
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant,
-                    height: 1.35,
-                  ),
+                  style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant, height: 1.35),
                 ),
               ],
             ),
