@@ -1,3 +1,11 @@
+# CURRENT LA-0040 ART CURSOR — TWO-SCREEN V2 REVISED, GATE OPEN (2026-10-08)
+
+A new reviewable two-screen **Canlı Kaynak Atölyesi V2** static HTML visual and PNG were created in the Learning App conversation (`la0040_canli_kaynak_atolyesi_v2.html`, `la0040_canli_kaynak_atolyesi_v2.png`; individual Home/Reader images as `la0040_v2_home_screen.png`, `la0040_v2_reader_screen.png`). Canonical blue/purple D/Knot embedded byte-identically; no replacement mascot or theme. Home now has a single active-material title inside folio, source-led CTA, contextual smaller D/Knot and scrollable material library with pinned shell nav; Reader uses scrollable source plane + non-obscuring fixed audio entry dock and child-route Back (no inappropriate nested bottom tabs). This is not Flutter or actual audio, and browser QA is not user acceptance.
+
+Design spec with revision evidence: `docs/design/LA-0040_LIVING_SOURCE_ATELIER_TWO_SCREEN_DIRECTION_2026-10-08.md`. First acceptance: source-scroll/dock geometry and canonical mascot byte-match confirmed; **Founder approval and visually distinctive premium PASS remain pending.** Prior V1, 4-phone concept iterations and rejected editorial/studio/knowledge directions remain history; do not resurrect theme comparison. Next art task: inspect V2 quality, decide whether it merits protected Founder direction acceptance, then specify truthful empty Home/long-source/responsive screens before real Flutter implementation. Do not claim DONE. PR #13 unmerged/unreleased.
+
+---
+
 # CURRENT LA-0040 UI ART CURSOR — TWO-SCREEN VISUAL DIRECTION (2026-10-08)
 
 A single new **CANLI KAYNAK ATÖLYESİ / Living Source Atelier** concept now shows exactly **Home + Material/Reader & Listen** as a coherent visual family before broad Flutter styling. Artifacts in the present conversation: `la0040_canli_kaynak_atolyesi_two_screen.png`, `la0040_home_screen_direction.png`, `la0040_reader_screen_direction.png` and editable concept-only `la0040_canli_kaynak_atolyesi_two_screen.html`. Controlling new design spec and AD-01…AD-09 candidate-level assessment: `docs/design/LA-0040_LIVING_SOURCE_ATELIER_TWO_SCREEN_DIRECTION_2026-10-08.md`.
