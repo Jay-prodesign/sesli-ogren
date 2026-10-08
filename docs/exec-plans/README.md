@@ -32,3 +32,20 @@ order:
 For tasks that implement a non-differentiating capability, `In scope` must also
 name the approved reuse candidate(s) with their D-024 class, or state
 `NO_APPROVED_CANDIDATE` ([`AGENTS.md` §12](../../AGENTS.md#12-open-source-reuse-d-024)).
+
+## Founder-mandated task specification and QA admission — 2026-10-08
+
+**No material task is executable merely because it has a title.** Before starting each newly admitted or materially expanded task, make its implementation contract sufficient for an engineer to work without guessing and for an independent reviewer to give an evidence-grounded PASS/FAIL:
+
+1. **Outcome/why:** concrete user/runtime need and what materially changes when solved.
+2. **Scope and exclusions:** exact affected screens, code/data contracts, dependencies, source-of-truth and non-goals.
+3. **Behaviors:** representative nominal path, invalid/missing/boundary input, interrupted/retry/restore paths and truth/security/privacy constraints proportionate to risk.
+4. **Acceptance:** observable assertions and a clear DONE boundary, including what remains deliberately deferred.
+5. **Quality gate:** specify relevant focused unit/widget/integration/device/human/perceptual checks, the expected result evidence, automatic FAIL/RETURN conditions and what an unverified result must be labeled.
+6. **Release/rollback:** protect users and proven product truth; identify reversible versus protected operations.
+
+**Tier A:** High-risk user/product/learning/visual commitments need decision-grade detail, explicit quality/spec gate before substantive implementation, risk-based QA and an independent/Founder disposition where required. **Tier B:** Reversible low-risk work gets a small but *real* spec and focused QA inside its existing execution plan; do not create a separate document or bureaucracy merely to satisfy a template.
+
+Do not mark task DONE from source review, passing internal tests when real-device/UX proof is required, or an average score hiding a HIGH/BLOCKER. No automated/internal score substitutes for a protected Founder product decision. Record PASS / FAIL / BLOCKED / DEFERRED with the tested SHA or evidence where applicable. Reuse existing QA contracts rather than duplicating gates.
+
+For currently active visual rework see LA-0040_FOUNDER_FAIL_REWORK_SPEC.md and the existing LA-0040_VISUAL_QUALITY_GATE.md; no new task ID is created by that corrective scope.
