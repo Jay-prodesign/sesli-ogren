@@ -503,6 +503,9 @@ void main() {
     expect(find.byKey(const ValueKey('la0040-atelier-home-promise')), findsOneWidget);
     expect(find.byKey(const ValueKey('la0040-source-to-recall-thread')), findsOneWidget);
     expect(find.byKey(const ValueKey('la0040-living-material-open')), findsOneWidget);
+    final continueRect = tester.getRect(find.byKey(const ValueKey('la0040-living-continue')));
+    final navigationRect = tester.getRect(find.byType(NavigationBar));
+    expect(continueRect.bottom, lessThanOrEqualTo(navigationRect.top));
     await tester.pump(const Duration(milliseconds: 180));
     await expectLater(find.byType(Scaffold).first, matchesGoldenFile('goldens/la0040_living_home_populated.png'));
 
@@ -533,13 +536,11 @@ void main() {
     await expectLater(find.byType(Scaffold).first, matchesGoldenFile('goldens/la0040_atelier_home_320_text150.png'));
     tester.view.physicalSize = const Size(780, 1688);
     await tester.pump(const Duration(milliseconds: 140));
-    await tester.dragUntilVisible(
-      find.byKey(const ValueKey('la0040-living-continue')),
-      find.byType(Scrollable).first,
-      const Offset(0, -180),
-      maxIteration: 12,
-    );
-    // The canonical D/Knot continuously animates; pumpAndSettle never settles.
+    // The primary action remains visible even when large text causes the
+    // source document to scroll; never hide it behind the tab navigation.
+    final scaledButton = tester.getRect(find.byKey(const ValueKey('la0040-living-continue')));
+    final scaledNavigation = tester.getRect(find.byType(NavigationBar));
+    expect(scaledButton.bottom, lessThanOrEqualTo(scaledNavigation.top));
     await tester.pump(const Duration(milliseconds: 180));
     await tester.tap(find.byKey(const ValueKey('la0040-living-continue')));
     await _pumpUntilFound(tester, find.byKey(const ValueKey('la0040-atelier-workspace')));
