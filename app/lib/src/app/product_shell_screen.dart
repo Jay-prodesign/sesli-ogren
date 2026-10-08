@@ -147,6 +147,34 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Materyal silindi.')));
   }
 
+
+  Widget _buildNavigationBar() => NavigationBar(
+        selectedIndex: _index,
+        onDestinationSelected: (value) => setState(() => _index = value),
+        destinations: const [
+          NavigationDestination(
+            icon: Icon(Icons.home_outlined),
+            selectedIcon: Icon(Icons.home_rounded),
+            label: 'Ana Sayfa',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.library_books_outlined),
+            selectedIcon: Icon(Icons.library_books_rounded),
+            label: 'Kütüphane',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.insights_outlined),
+            selectedIcon: Icon(Icons.insights_rounded),
+            label: 'İlerleme',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.person_outline_rounded),
+            selectedIcon: Icon(Icons.person_rounded),
+            label: 'Profil',
+          ),
+        ],
+      ),;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -197,32 +225,25 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
           },
         ),
       ),
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: _index,
-        onDestinationSelected: (value) => setState(() => _index = value),
-        destinations: const [
-          NavigationDestination(
-            icon: Icon(Icons.home_outlined),
-            selectedIcon: Icon(Icons.home_rounded),
-            label: 'Ana Sayfa',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.library_books_outlined),
-            selectedIcon: Icon(Icons.library_books_rounded),
-            label: 'Kütüphane',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.insights_outlined),
-            selectedIcon: Icon(Icons.insights_rounded),
-            label: 'İlerleme',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.person_outline_rounded),
-            selectedIcon: Icon(Icons.person_rounded),
-            label: 'Profil',
-          ),
-        ],
-      ),
+      bottomNavigationBar: LivingDeskReviewScope.active(context)
+          ? NavigationBarTheme(
+              data: NavigationBarThemeData(
+                backgroundColor: const Color(0xFFF5F4F0),
+                indicatorColor: const Color(0xFFDCEAE1),
+                labelTextStyle: const WidgetStatePropertyAll(
+                  TextStyle(color: Color(0xFF1C292B), fontSize: 12),
+                ),
+                iconTheme: WidgetStateProperty.resolveWith(
+                  (states) => IconThemeData(
+                    color: states.contains(WidgetState.selected)
+                        ? const Color(0xFF236B63)
+                        : const Color(0xFF58696A),
+                  ),
+                ),
+              ),
+              child: _buildNavigationBar(),
+            )
+          : _buildNavigationBar(),
     );
   }
 }
