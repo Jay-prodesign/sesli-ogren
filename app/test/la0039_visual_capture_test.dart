@@ -122,7 +122,7 @@ void main() {
     await tester.pumpWidget(
       _phoneFrame(MaterialWorkspaceScreen(runtime: runtime, materialId: AppRuntime.primaryMaterialId)),
     );
-    await _pumpUntilFound(tester, find.text('Sıradaki aktif adım'));
+    await _pumpUntilFound(tester, find.text('SIRADAKİ ADIM'));
     await tester.pump(const Duration(milliseconds: 200));
     await expectLater(find.byType(Scaffold).first, matchesGoldenFile('goldens/la0039_workspace.png'));
 
