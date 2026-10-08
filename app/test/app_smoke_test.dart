@@ -322,11 +322,11 @@ void main() {
     await pumpUntilFound(tester, find.textContaining('henüz etkin değil'));
     expect(find.textContaining('öğrenme kanıtı oluşturmaz'), findsOneWidget);
     await tester.pageBack();
-    await tester.pumpAndSettle();
-    await tester.scrollUntilVisible(find.text('Kaynağa hızlı bakış'), 260, scrollable: find.byType(Scrollable).last);
+    await pumpUntilFound(tester, find.text('Öğrenme durumu'));
+    await tester.scrollUntilVisible(find.text('Kaynağa hızlı bakış'), 260, scrollable: find.byType(ListView));
     await tester.pumpAndSettle();
     expect(find.text('Kaynağa hızlı bakış'), findsOneWidget);
-    await tester.scrollUntilVisible(find.text('Açıkla'), -260, scrollable: find.byType(Scrollable).last);
+    await tester.scrollUntilVisible(find.text('Açıkla'), -260, scrollable: find.byType(ListView));
     await tester.pumpAndSettle();
     expect(find.text('Açıkla'), findsOneWidget);
     await tapVisible(tester, find.text('Açıkla'));
