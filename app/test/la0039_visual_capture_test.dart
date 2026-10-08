@@ -10,6 +10,7 @@ import 'package:sesli_ogren/src/app/explain_screen.dart';
 import 'package:sesli_ogren/src/app/focus_screen.dart';
 import 'package:sesli_ogren/src/app/learning_slice_screen.dart';
 import 'package:sesli_ogren/src/app/la0040_visual_treatments.dart';
+import 'package:sesli_ogren/src/app/living_study_desk_home.dart';
 import 'package:sesli_ogren/src/app/listen_screen.dart';
 import 'package:sesli_ogren/src/app/material_workspace_screen.dart';
 import 'package:sesli_ogren/src/app/product_shell_screen.dart';
@@ -442,4 +443,105 @@ void main() {
       await store.close();
     }
   }, skip: !_captureEnabled);
+
+  testWidgets('capture living study desk actual empty and owned material Home', (tester) async {
+    await tester.runAsync(_loadReviewFonts);
+    tester.view.physicalSize = const Size(780, 1688);
+    tester.view.devicePixelRatio = 2;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
+    final ingest = SourceIngestService(
+      store: store,
+      pdfTextExtractor: const _UnusedPdfExtractor(),
+      now: () => DateTime.utc(2026, 10, 8, 12),
+    );
+    final recall = RecallLearningService(
+      sourceStore: store,
+      learningStore: store.learningTruthStore(),
+      now: () => DateTime.utc(2026, 10, 8, 12, 1),
+    );
+    final runtime = AppRuntime(
+      learner: AppRuntime.localM5LearnerFixture,
+      store: store,
+      ingest: ingest,
+      recall: recall,
+      telemetry: store.operationalTelemetry(),
+      explain: const _ReadyExplainGateway(),
+    );
+
+    await tester.pumpWidget(
+      _phoneFrame(LivingDeskReviewScope(child: ProductShellScreen(runtime: runtime))),
+    );
+    await _pumpUntilFound(tester, find.byKey(const ValueKey('la0040-living-home-empty')));
+    expect(find.text('İlk materyalini ekle'), findsOneWidget);
+    expect(find.text('Biyoloji — Fotosentez Notları'), findsNothing);
+    await tester.pump(const Duration(milliseconds: 180));
+    await expectLater(
+      find.byType(Scaffold).first,
+      matchesGoldenFile('goldens/la0040_living_home_empty.png'),
+    );
+
+    // Reset the mounted Home so its real Future snapshot reloads after ingest.
+    await tester.pumpWidget(const SizedBox());
+    await ingest.ingestPastedText(
+      learner: runtime.learner,
+      materialId: AppRuntime.primaryMaterialId,
+      text: 'Fotosentez sırasında klorofil ışık enerjisini kimyasal enerjiye '
+          'dönüştürmeye yardımcı olur. Bitkiler karbondioksit ve suyu kullanır; '
+          'süreç sonunda kimyasal enerji depolanır. '
+          'Yapraklardaki klorofil ışığı yakalayarak bu dönüşümün başlamasına '
+          'yardımcı olur. Fotosentez yalnızca karbondioksit tüketimi olarak '
+          'düşünülmemelidir; enerji dönüşümü ve madde kullanımı aynı sürecin '
+          'parçalarıdır. Farklı çevre koşullarında ışık miktarı bu sürecin '
+          'hızını etkileyebilir. Bitkinin yaptığı madde dönüşümü ile '
+          'ışığın sağladığı enerji birbirinden ayrılmalıdır. '
+          'Bu özgün test notu öğrenciye ait gerçek materyal akışını örnekler.',
+      sourceName: 'Biyoloji — Fotosentez Notları',
+    );
+    await tester.pumpWidget(
+      _phoneFrame(LivingDeskReviewScope(child: ProductShellScreen(runtime: runtime))),
+    );
+    await _pumpUntilFound(tester, find.byKey(const ValueKey('la0040-living-home-populated')));
+    expect(find.text('Biyoloji — Fotosentez Notları'), findsOneWidget);
+    expect(find.text('Çalışmaya devam et'), findsOneWidget);
+    expect(find.byKey(const ValueKey('la0040-living-material-open')), findsOneWidget);
+    await tester.pump(const Duration(milliseconds: 180));
+    await expectLater(
+      find.byType(Scaffold).first,
+      matchesGoldenFile('goldens/la0040_living_home_populated.png'),
+    );
+
+    // Narrow and scaled layouts must keep the real actions reachable.
+    tester.view.physicalSize = const Size(640, 1400);
+    await tester.pump(const Duration(milliseconds: 150));
+    await expectLater(
+      find.byType(Scaffold).first,
+      matchesGoldenFile('goldens/la0040_living_home_narrow.png'),
+    );
+    await tester.ensureVisible(find.byKey(const ValueKey('la0040-living-continue')));
+    await tester.pump(const Duration(milliseconds: 120));
+    expect(find.byKey(const ValueKey('la0040-living-continue')), findsOneWidget);
+
+    tester.view.physicalSize = const Size(780, 1688);
+    await tester.pumpWidget(
+      _phoneFrame(
+        LivingDeskReviewScope(child: ProductShellScreen(runtime: runtime)),
+        textScaler: const TextScaler.linear(1.5),
+      ),
+    );
+    await _pumpUntilFound(tester, find.byKey(const ValueKey('la0040-living-home-populated')));
+    await tester.pump(const Duration(milliseconds: 120));
+    await expectLater(
+      find.byType(Scaffold).first,
+      matchesGoldenFile('goldens/la0040_living_home_scale150.png'),
+    );
+    await tester.ensureVisible(find.byKey(const ValueKey('la0040-living-continue')));
+    await tester.tap(find.byKey(const ValueKey('la0040-living-continue')));
+    await _pumpUntilFound(tester, find.text('Materyal'));
+    await tester.pumpWidget(const SizedBox());
+    await store.close();
+  }, skip: !_captureEnabled);
+
 }
