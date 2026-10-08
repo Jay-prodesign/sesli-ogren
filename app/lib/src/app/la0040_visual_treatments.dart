@@ -81,7 +81,7 @@ class _Colors {
     LearningVisualTreatment.editorial => const _Colors(
       Color(0xFFF8F3E9),
       Color(0xFF292B26),
-      Color(0xFFB95636),
+      Color(0xFFAE5032),
       Color(0xFF676D62),
     ),
     LearningVisualTreatment.studio => const _Colors(
@@ -93,7 +93,7 @@ class _Colors {
     LearningVisualTreatment.knowledge => const _Colors(
       Color(0xFFF0F5F1),
       Color(0xFF1B4037),
-      Color(0xFF167F67),
+      Color(0xFF14765F),
       Color(0xFF5F786F),
     ),
   };
