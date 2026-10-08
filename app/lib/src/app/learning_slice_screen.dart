@@ -556,25 +556,41 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
               child: ListView(
                 padding: const EdgeInsets.fromLTRB(24, 28, 24, 40),
                 children: [
-                  Align(
-                    alignment: Alignment.center,
-                    child: CompanionView(state: _companionState, size: compactResultHeader ? 88 : 124),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      DecoratedBox(
+                        decoration: BoxDecoration(
+                          color: compactResultHeader ? AppPalette.successSoft : AppPalette.primarySoft,
+                          borderRadius: BorderRadius.circular(18),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(6),
+                          child: CompanionView(state: _companionState, size: compactResultHeader ? 58 : 66),
+                        ),
+                      ),
+                      const SizedBox(width: 14),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              compactResultHeader ? 'Hatırlama sonucu' : 'Sesli Öğren',
+                              style: compactResultHeader
+                                  ? theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w800)
+                                  : theme.textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.w800),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              _subtitle(),
+                              style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
-                  SizedBox(height: compactResultHeader ? 12 : 18),
-                  Text(
-                    compactResultHeader ? 'Hatırlama sonucu' : 'Sesli Öğren',
-                    textAlign: TextAlign.center,
-                    style: compactResultHeader
-                        ? theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w800)
-                        : theme.textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.w700),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    _subtitle(),
-                    textAlign: TextAlign.center,
-                    style: theme.textTheme.bodyLarge?.copyWith(color: theme.colorScheme.onSurfaceVariant),
-                  ),
-                  SizedBox(height: compactResultHeader ? 20 : 28),
+                  SizedBox(height: compactResultHeader ? 18 : 24),
                   AnimatedSwitcher(
                     duration: reducedMotion ? Duration.zero : const Duration(milliseconds: 220),
                     child: _phaseBody(context),
@@ -672,8 +688,32 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          Row(
+            children: [
+              DecoratedBox(
+                decoration: BoxDecoration(
+                  color: AppPalette.primarySoft,
+                  borderRadius: BorderRadius.circular(999),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  child: Text(
+                    'KAYNAĞA BAKMADAN',
+                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                      color: AppPalette.primary,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: 0.45,
+                    ),
+                  ),
+                ),
+              ),
+              const Spacer(),
+              const Icon(Icons.psychology_alt_outlined, color: AppPalette.primary, size: 20),
+            ],
+          ),
+          const SizedBox(height: 14),
           Text('Hatırla', style: Theme.of(context).textTheme.labelLarge),
-          const SizedBox(height: 10),
+          const SizedBox(height: 8),
           Text(prompt.promptText, style: Theme.of(context).textTheme.titleLarge?.copyWith(height: 1.35)),
           const SizedBox(height: 20),
           TextField(
@@ -747,29 +787,99 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
             ),
           ),
           const SizedBox(height: 20),
-          Text('Kaynakla karşılaştır', style: theme.textTheme.labelLarge),
-          const SizedBox(height: 12),
-          Text('Doğru ifade', style: theme.textTheme.labelMedium),
-          const SizedBox(height: 4),
-          Text(result.correctAnswer, style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700)),
-          const SizedBox(height: 16),
-          Text('Kaynak bağlamı', style: theme.textTheme.labelLarge),
-          const SizedBox(height: 4),
-          Text(
-            result.sourceExcerpt,
-            style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+          Row(
+            children: [
+              Expanded(child: Text('Kaynakla karşılaştır', style: theme.textTheme.titleMedium)),
+              DecoratedBox(
+                decoration: BoxDecoration(
+                  color: AppPalette.signalSoft,
+                  borderRadius: BorderRadius.circular(999),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
+                  child: Text(
+                    'KAYNAK',
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      color: AppPalette.signal,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: 0.4,
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 10),
           DecoratedBox(
-            decoration: BoxDecoration(color: AppPalette.primarySoft, borderRadius: BorderRadius.circular(18)),
+            decoration: BoxDecoration(
+              color: AppPalette.surfaceMuted,
+              borderRadius: BorderRadius.circular(18),
+              border: Border.all(color: AppPalette.outline),
+            ),
             child: Padding(
               padding: const EdgeInsets.all(16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Sıradaki adım', style: theme.textTheme.labelLarge?.copyWith(color: AppPalette.primaryDark)),
+                  Text('Doğru ifade', style: theme.textTheme.labelMedium?.copyWith(color: AppPalette.inkMuted)),
                   const SizedBox(height: 6),
-                  Text(result.nextAction.reasonText),
+                  Text(
+                    result.correctAnswer,
+                    style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
+                  ),
+                  const SizedBox(height: 14),
+                  Container(height: 1, color: AppPalette.outline),
+                  const SizedBox(height: 13),
+                  Text('Kaynak bağlamı', style: theme.textTheme.labelMedium?.copyWith(color: AppPalette.inkMuted)),
+                  const SizedBox(height: 5),
+                  Text(
+                    result.sourceExcerpt,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                      height: 1.45,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 20),
+          DecoratedBox(
+            decoration: BoxDecoration(color: AppPalette.primaryDark, borderRadius: BorderRadius.circular(18)),
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  DecoratedBox(
+                    decoration: BoxDecoration(
+                      color: AppPalette.momentum,
+                      borderRadius: BorderRadius.circular(999),
+                    ),
+                    child: const Padding(
+                      padding: EdgeInsets.all(7),
+                      child: Icon(Icons.arrow_forward_rounded, color: AppPalette.momentumInk, size: 17),
+                    ),
+                  ),
+                  const SizedBox(width: 11),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Sıradaki adım',
+                          style: theme.textTheme.labelLarge?.copyWith(color: Colors.white),
+                        ),
+                        const SizedBox(height: 5),
+                        Text(
+                          result.nextAction.reasonText,
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            color: Colors.white.withValues(alpha: 0.82),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 ],
               ),
             ),
