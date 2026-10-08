@@ -387,6 +387,7 @@ Next unallocated ID: **LA-0041**.
 ##### LA-0040 — Million-Dollar Visual Audit & Student Experience Elevation
 
 - Status: IN_PROGRESS
+- **LATEST FOUNDER OVERRIDE (second visual FAIL, 2026-10-08):** actual 12-screen Editorial/Studio/Knowledge treatment comparison is rejected as a whole; **NO Studio lead, NO accepted visual direction**. Stop incremental restyling of these controls. The active same-task scope is a product-local, source-centered interaction-first learning journey with real Flutter evidence, genuine Recall feedback, 320/390px and accessibility checks and explicit Founder visual acceptance. Consult [second-FAIL rework spec](docs/exec-plans/LA-0040_FOUNDER_FAIL_REWORK_SPEC.md), [QA gate](docs/qa/LA-0040_VISUAL_QUALITY_GATE.md), and [current handoff](docs/agent/CURRENT_HANDOFF.md). Existing CI PASS demonstrates technical functioning only, not UX quality.
 - Gate: **FOUNDER VISUAL FAIL / CHANGES_REQUIRED (2026-10-08)** — prior VQG-01 PASS was internal pre-Founder evidence only; no Founder acceptance.
 - Tier: A — Founder-triggered visual/product decision
 - Depends on: LA-0039 engineering baseline
