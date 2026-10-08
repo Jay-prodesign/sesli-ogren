@@ -324,7 +324,7 @@ class _WorkspaceBody extends StatelessWidget {
     final kind = data.material.mediaType == SourceMediaType.pdf ? 'PDF' : 'Metin';
     final text = data.extracted?.normalizedText.trim();
     if (text == null || text.isEmpty) return kind;
-    final words = text.split(RegExp(r'\\s+')).where((part) => part.isNotEmpty).length;
+    final words = text.split(RegExp(r'\s+')).where((part) => part.isNotEmpty).length;
     return '$kind • $words kelime';
   }
 
@@ -367,26 +367,22 @@ class _LearningStatusCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final state = continuation?.state.kind;
-    final (title, body, icon) = switch (state) {
+    final (title, body) = switch (state) {
       RecallStateKind.retrievedOnce => (
         'Bir kez bağımsız hatırlandı',
         'Bu güçlü bir sinyal, ancak henüz ustalık iddiası değil.',
-        Icons.check_circle_outline_rounded,
       ),
       RecallStateKind.developing => (
         'Gelişiyor',
         continuation?.nextAction.reasonText ?? 'Bir sonraki aktif deneme hazır.',
-        Icons.trending_up_rounded,
       ),
       RecallStateKind.needsReview => (
         'Tekrar gerekli',
         continuation?.nextAction.reasonText ?? 'Kaynağı kısaca gözden geçirip yeniden dene.',
-        Icons.refresh_rounded,
       ),
       RecallStateKind.notAssessed || null => (
         'Henüz ölçülmedi',
         'İlk hatırlama denemesi öğrenme durumunu görünür kılar.',
-        Icons.radio_button_unchecked_rounded,
       ),
     };
 
