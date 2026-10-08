@@ -294,10 +294,7 @@ void main() {
     addTearDown(tester.view.resetDevicePixelRatio);
 
     for (final lane in LearningVisualTreatment.values) {
-      final store = await SqliteSourceStore.open(
-        factory: databaseFactoryFfiNoIsolate,
-        path: inMemoryDatabasePath,
-      );
+      final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
       final ingest = SourceIngestService(
         store: store,
         pdfTextExtractor: const _UnusedPdfExtractor(),
@@ -319,55 +316,75 @@ void main() {
       await ingest.ingestPastedText(
         learner: runtime.learner,
         materialId: AppRuntime.primaryMaterialId,
-        text: 'Fotosentez sırasında klorofil ışık enerjisini kimyasal enerjiye '
+        text:
+            'Fotosentez sırasında klorofil ışık enerjisini kimyasal enerjiye '
             'dönüştürmeye yardımcı olur. Bitkiler karbondioksit ve suyu kullanır; '
             'süreç sonunda kimyasal enerji depolanır.',
         sourceName: 'Biyoloji — Fotosentez Notları',
       );
 
-      await tester.pumpWidget(_phoneFrame(LearningVisualTreatmentScope(
-        treatment: lane,
-        child: ProductShellScreen(runtime: runtime),
-      )));
+      await tester.pumpWidget(
+        _phoneFrame(
+          LearningVisualTreatmentScope(
+            treatment: lane,
+            child: ProductShellScreen(runtime: runtime),
+          ),
+        ),
+      );
       await _pumpUntilFound(tester, find.byKey(ValueKey('la0040-home-' + lane.name)));
       await _precacheCompanion(tester);
       await tester.pump(const Duration(milliseconds: 200));
-      await expectLater(find.byType(Scaffold).first,
-          matchesGoldenFile('goldens/la0040_treatment_' + lane.name + '_home.png'));
+      await expectLater(
+        find.byType(Scaffold).first,
+        matchesGoldenFile('goldens/la0040_treatment_' + lane.name + '_home.png'),
+      );
 
-      await tester.pumpWidget(_phoneFrame(LearningVisualTreatmentScope(
-        treatment: lane,
-        child: MaterialWorkspaceScreen(
-          runtime: runtime, materialId: AppRuntime.primaryMaterialId),
-      )));
+      await tester.pumpWidget(
+        _phoneFrame(
+          LearningVisualTreatmentScope(
+            treatment: lane,
+            child: MaterialWorkspaceScreen(runtime: runtime, materialId: AppRuntime.primaryMaterialId),
+          ),
+        ),
+      );
       await _pumpUntilFound(tester, find.byKey(ValueKey('la0040-workspace-' + lane.name)));
       await tester.pump(const Duration(milliseconds: 200));
-      await expectLater(find.byType(Scaffold).first,
-          matchesGoldenFile('goldens/la0040_treatment_' + lane.name + '_workspace.png'));
+      await expectLater(
+        find.byType(Scaffold).first,
+        matchesGoldenFile('goldens/la0040_treatment_' + lane.name + '_workspace.png'),
+      );
 
       final prompt = await recall.createCurrentPrompt(
-        learner: runtime.learner, materialId: AppRuntime.primaryMaterialId);
-      final action = await store.learningTruthStore().recallAction(
-        learner: runtime.learner, actionId: prompt.id);
+        learner: runtime.learner,
+        materialId: AppRuntime.primaryMaterialId,
+      );
+      final action = await store.learningTruthStore().recallAction(learner: runtime.learner, actionId: prompt.id);
       expect(action, isNotNull);
 
-      await tester.pumpWidget(_phoneFrame(LearningVisualTreatmentScope(
-        treatment: lane,
-        child: LearningSliceScreen(runtime: runtime,
-          materialId: AppRuntime.primaryMaterialId),
-      )));
+      await tester.pumpWidget(
+        _phoneFrame(
+          LearningVisualTreatmentScope(
+            treatment: lane,
+            child: LearningSliceScreen(runtime: runtime, materialId: AppRuntime.primaryMaterialId),
+          ),
+        ),
+      );
       await _pumpUntilFound(tester, find.byKey(ValueKey('la0040-prompt-' + lane.name)));
       await tester.pump(const Duration(milliseconds: 200));
-      await expectLater(find.byType(Scaffold).first,
-          matchesGoldenFile('goldens/la0040_treatment_' + lane.name + '_prompt.png'));
+      await expectLater(
+        find.byType(Scaffold).first,
+        matchesGoldenFile('goldens/la0040_treatment_' + lane.name + '_prompt.png'),
+      );
 
       await tester.enterText(find.byType(TextField), action!.expectedAnswer);
       await tester.tap(find.text('Yanıtla'));
       await _pumpUntilFound(tester, find.byKey(ValueKey('la0040-result-' + lane.name)));
       expect(find.text('Sıradaki adıma geç'), findsOneWidget);
       await tester.pump(const Duration(milliseconds: 200));
-      await expectLater(find.byType(Scaffold).first,
-          matchesGoldenFile('goldens/la0040_treatment_' + lane.name + '_result.png'));
+      await expectLater(
+        find.byType(Scaffold).first,
+        matchesGoldenFile('goldens/la0040_treatment_' + lane.name + '_result.png'),
+      );
 
       await tester.pumpWidget(const SizedBox());
       await store.close();
