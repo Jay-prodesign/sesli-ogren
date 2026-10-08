@@ -69,10 +69,7 @@ class AtelierWorkspace extends StatelessWidget {
                 Container(
                   width: double.infinity,
                   padding: const EdgeInsets.fromLTRB(16, 15, 16, 15),
-                  decoration: BoxDecoration(
-                    color: AtelierStyle.mint,
-                    borderRadius: BorderRadius.circular(14),
-                  ),
+                  decoration: BoxDecoration(color: AtelierStyle.mint, borderRadius: BorderRadius.circular(14)),
                   child: const Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -84,11 +81,7 @@ class AtelierWorkspace extends StatelessWidget {
                           children: [
                             Text(
                               'Okurken bir şeyi yakala',
-                              style: TextStyle(
-                                color: AtelierStyle.ink,
-                                fontWeight: FontWeight.w900,
-                                fontSize: 16,
-                              ),
+                              style: TextStyle(color: AtelierStyle.ink, fontWeight: FontWeight.w900, fontSize: 16),
                             ),
                             SizedBox(height: 5),
                             Text(
