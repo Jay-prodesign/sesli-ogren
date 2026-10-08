@@ -80,7 +80,17 @@ Widget _phoneFrame(Widget child) {
       textTheme: baseTheme.textTheme.apply(fontFamily: 'Roboto'),
       primaryTextTheme: baseTheme.primaryTextTheme.apply(fontFamily: 'Roboto'),
       filledButtonTheme: FilledButtonThemeData(
-        style: baseTheme.filledButtonTheme.style?.copyWith(
+        style: (baseTheme.filledButtonTheme.style ?? const ButtonStyle()).copyWith(
+          textStyle: const WidgetStatePropertyAll(TextStyle(fontFamily: 'Roboto', fontWeight: FontWeight.w700)),
+        ),
+      ),
+      outlinedButtonTheme: OutlinedButtonThemeData(
+        style: (baseTheme.outlinedButtonTheme.style ?? const ButtonStyle()).copyWith(
+          textStyle: const WidgetStatePropertyAll(TextStyle(fontFamily: 'Roboto', fontWeight: FontWeight.w700)),
+        ),
+      ),
+      textButtonTheme: TextButtonThemeData(
+        style: (baseTheme.textButtonTheme.style ?? const ButtonStyle()).copyWith(
           textStyle: const WidgetStatePropertyAll(TextStyle(fontFamily: 'Roboto', fontWeight: FontWeight.w700)),
         ),
       ),
