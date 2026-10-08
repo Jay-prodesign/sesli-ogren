@@ -500,6 +500,8 @@ void main() {
     await _pumpUntilFound(tester, find.byKey(const ValueKey('la0040-living-home-populated')));
     expect(find.text('Biyoloji — Fotosentez Notları'), findsOneWidget);
     expect(find.text('Çalışmaya devam et'), findsOneWidget);
+    expect(find.byKey(const ValueKey('la0040-atelier-home-promise')), findsOneWidget);
+    expect(find.byKey(const ValueKey('la0040-source-to-recall-thread')), findsOneWidget);
     expect(find.byKey(const ValueKey('la0040-living-material-open')), findsOneWidget);
     await tester.pump(const Duration(milliseconds: 180));
     await expectLater(find.byType(Scaffold).first, matchesGoldenFile('goldens/la0040_living_home_populated.png'));
@@ -523,6 +525,15 @@ void main() {
     await _pumpUntilFound(tester, find.byKey(const ValueKey('la0040-living-home-populated')));
     await tester.pump(const Duration(milliseconds: 120));
     await expectLater(find.byType(Scaffold).first, matchesGoldenFile('goldens/la0040_living_home_scale150.png'));
+
+    // Cross-app visual design must survive BOTH narrow and large type together.
+    tester.view.physicalSize = const Size(640, 1400);
+    await tester.pump(const Duration(milliseconds: 140));
+    expect(tester.takeException(), isNull);
+    await expectLater(find.byType(Scaffold).first,
+        matchesGoldenFile('goldens/la0040_atelier_home_320_text150.png'));
+    tester.view.physicalSize = const Size(780, 1688);
+    await tester.pump(const Duration(milliseconds: 140));
     await tester.dragUntilVisible(
       find.byKey(const ValueKey('la0040-living-continue')),
       find.byType(Scrollable).first,
@@ -544,6 +555,7 @@ void main() {
     await tester.tap(find.byKey(const ValueKey('la0040-atelier-workspace-recall')));
     await _pumpUntilFound(tester, find.byKey(const ValueKey('la0040-atelier-recall')));
     expect(find.text(action!.expectedAnswer), findsNothing);
+    expect(find.byKey(const ValueKey('la0040-source-evidence-reveal')), findsNothing);
     await tester.pump(const Duration(milliseconds: 160));
     await expectLater(find.byType(Scaffold).last, matchesGoldenFile('goldens/la0040_atelier_recall.png'));
 
@@ -552,8 +564,17 @@ void main() {
     await tester.tap(find.byKey(const ValueKey('la0040-atelier-submit')));
     await _pumpUntilFound(tester, find.byKey(const ValueKey('la0040-atelier-result')));
     expect(find.text('Bir kez bağımsız hatırladın'), findsOneWidget);
-    await tester.pump(const Duration(milliseconds: 160));
+    expect(find.byKey(const ValueKey('la0040-source-evidence-reveal')), findsOneWidget);
+    await tester.pump(const Duration(milliseconds: 300));
     await expectLater(find.byType(Scaffold).last, matchesGoldenFile('goldens/la0040_atelier_result.png'));
+
+    tester.view.physicalSize = const Size(640, 1400);
+    await tester.pump(const Duration(milliseconds: 160));
+    expect(tester.takeException(), isNull);
+    await expectLater(find.byType(Scaffold).last,
+        matchesGoldenFile('goldens/la0040_atelier_result_320_text150.png'));
+    tester.view.physicalSize = const Size(780, 1688);
+    await tester.pump(const Duration(milliseconds: 120));
 
     await tester.ensureVisible(find.byKey(const ValueKey('la0040-atelier-next')));
     await tester.tap(find.byKey(const ValueKey('la0040-atelier-next')));
@@ -567,6 +588,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 300));
     expect(find.text('Bu kez bilmiyorum dedin'), findsOneWidget);
     expect(find.text('Bir kez bağımsız hatırladın'), findsNothing);
+    expect(find.byKey(const ValueKey('la0040-source-evidence-reveal')), findsOneWidget);
     await tester.pump(const Duration(milliseconds: 160));
     await expectLater(find.byType(Scaffold).last, matchesGoldenFile('goldens/la0040_atelier_unknown.png'));
 
@@ -585,6 +607,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 300));
     expect(find.text('İpucuyla doğru yanıt'), findsOneWidget);
     expect(find.text('Bir kez bağımsız hatırladın'), findsNothing);
+    expect(find.byKey(const ValueKey('la0040-source-evidence-reveal')), findsOneWidget);
     await tester.pump(const Duration(milliseconds: 160));
     await expectLater(find.byType(Scaffold).last, matchesGoldenFile('goldens/la0040_atelier_hinted.png'));
 
