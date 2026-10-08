@@ -1,3 +1,15 @@
+# CURRENT V4 STATE & RESPONSIVE QA RESULT — 2026-10-08
+
+**New browser concept evidence** (NOT real Flutter) extends the same LA-0040 Canlı Kaynak Atölyesi art direction with three specific states: genuinely empty Home, unknown/“Bilmiyorum” Result, and hinted (assistance-explicit) Result. Source identity/quote is displayed as labeled DEMO only. The same exact canonical D/Knot original file is embedded; no new character or invented progress.
+
+**A11y/layout scope actually run:** 390px normal, 320px normal, 320px simulated 1.5× main typography across the four-screen concept and three new state screens = SIX browser scenario checks. All tested scroll regions lacked horizontal overflow; scroll-to-bottom exposed the honest next-action explanation on both Result variants. The Recall question was refined to wrap at 33px at 320px/1.5× without clipping the word. Screenshots, HTML and test-results JSON are in the current conversation `la0040_canli_kaynak_atolyesi_v4_review_pack.zip`.
+
+**Gate disposition:** Source/assistance copy truth = PROTOTYPE SPECIFIED, **Flutter runtime UNTESTED**; phone geometry = BROWSER BOUNDED PASS, real Flutter/native dynamic type and keyboard = UNTESTED; D/Knot exact source = VERIFIED, production high-res/state animation/visual integration = OPEN; premium distinction and desirability = REWORK/UNTESTED; Founder art direction decision = **PENDING / NO LOCK**. Do not claim that simulated 1.5× is an OS accessibility PASS, or that scroll reachability alone equals an approved product UI. Keep prior Founder failures as historical evidence.
+
+Next step: actual Founder direction review of the now extended honest visual family; if conditionally accepted, production art states, Flutter truth integration and device QA. No new theme tournament, invented learned metrics or unrelated engine work.
+
+---
+
 # CURRENT V3 FOUR-SCREEN ART-DIRECTION CHECK — 2026-10-08
 
 **Controlling visual review:** [V3 source-led four-screen review](../design/LA-0040_LIVING_SOURCE_ATELIER_V3_FOUR_SCREEN_VISUAL_REVIEW_2026-10-08.md). V2 Home+Reader is now incorporated into one V3 four-screen composition with source-hidden Recall and source-linked Result; no new mascot, no fake question counters or outcome badges. The final screenshot is a browser-rendered concept only and NOT the actual running Flutter app.
