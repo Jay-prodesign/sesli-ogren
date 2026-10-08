@@ -75,7 +75,7 @@ class AtelierWorkspace extends StatelessWidget {
                   ),
                   child: const Row(
                     children: [
-                      CompanionView(state: CompanionVisualState.listen, size: 96),
+                      CompanionView(state: CompanionVisualState.idle, size: 96),
                       SizedBox(width: 12),
                       Expanded(
                         child: Column(
