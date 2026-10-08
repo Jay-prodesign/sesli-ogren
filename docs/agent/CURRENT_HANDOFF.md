@@ -1,3 +1,13 @@
+# CURRENT LA-0040 UI ART CURSOR — TWO-SCREEN VISUAL DIRECTION (2026-10-08)
+
+A single new **CANLI KAYNAK ATÖLYESİ / Living Source Atelier** concept now shows exactly **Home + Material/Reader & Listen** as a coherent visual family before broad Flutter styling. Artifacts in the present conversation: `la0040_canli_kaynak_atolyesi_two_screen.png`, `la0040_home_screen_direction.png`, `la0040_reader_screen_direction.png` and editable concept-only `la0040_canli_kaynak_atolyesi_two_screen.html`. Controlling new design spec and AD-01…AD-09 candidate-level assessment: `docs/design/LA-0040_LIVING_SOURCE_ATELIER_TWO_SCREEN_DIRECTION_2026-10-08.md`.
+
+Public screenshot principles used ONLY as visual reference: Quizlet quick return, Speechify source+player, Brilliant focused learning action. No market/growth expansion and no copied competitor expressions/assets. The concept uses an unchanged, byte-verified original `D_KNOT_128.webp`; **no new mascot selection or character redesign**. Example source is explicitly DEMO; no invented scores/page counts/progress. The generated abstract paper motif is concept visual only.
+
+STATUS: TWO SCREEN VISUAL CANDIDATE CREATED, **FOUNDER VISUAL DECISION PENDING**; AD-01/02/04 partial, AD-03/08 untested, AD-05 canonical source verified but experience integration pending, AD-07 asset feasibility pending. Do not promote to Flutter production or claim PASS. Review visual craft for Home/Reader, then explicitly decide direction; if accepted, produce exact screen/asset specs + implementation and real-phone QA. Retain prior Founder FAIL history, all source/learner truth, and protected D-068 gate. PR #13 remains unmerged/unreleased.
+
+---
+
 # LA-0040 DESIGN REVIEW — AUTHENTIC D/KNOT COMPOSITION V4 (2026-10-08)
 
 The previous V3 generated "D/Knot" robot was rejected as non-canonical. A NEW art-direction concept board is available in the current conversation as `la0040-authentic-dknot-design-direction-v4.png`. Unlike generated robot concepts, **this board is deterministically composited from the exact existing 128×128 repo asset** `app/assets/companions/D_KNOT_128.webp` using a drawing script; it does not generate/replace the character. Four concept screens depict Home, own-source Reader/Listen, source-hidden Recall and grounded Result. Two D/Knot palette alternatives are *study tints* of the same canonical raster, not authorized production assets. The current original is default.
