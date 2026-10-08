@@ -1,3 +1,13 @@
+# ACTIVE LA-0040 ART-DIRECTION VERDICT — V3 FAIL (2026-10-08)
+
+The actual canonical Flutter asset `app/assets/companions/D_KNOT_128.webp` has a blue-purple knot silhouette with a light human-like face. The V3 AI concept board instead depicts a white-bodied blue-faced leaf/antenna robot. Those are NOT the same character. The previous claim that V3 faithfully/unchanged embedded the canonical asset is **FALSE AND WITHDRAWN**. Generated imagery was mistaken for authentic character source. V3 must NOT be used as product-art authority or visual PASS. It also relies on biology-specific foliage, decorative card-heavy UI, and unsupported percentages/question counts.
+
+**Next true design cursor:** keep existing Learning App material-first Visual Learning Studio experience authority and canonical D/Knot. Redesign the *actual* Home/source/Recall/result **visual composition** using the genuine source asset (compositing rather than re-generating the character), with educational-neutral visual motifs, actual verified learning state, and editorial-quality UI hierarchy. Perform quality/perceptual gate BEFORE shipping art/Flutter styling. Recolor is optional to evaluate on authentic approved source; no new mascot search. Direction lock remains BLOCKED. Existing Flutter technical tests unrelated to art direction may continue.
+
+Historical V3 AUTHENTIC D-KNOT claims below are expressly superseded; keep only as a record of the error. No merge/release.
+
+---
+
 # CURRENT ART-DIRECTION DELIVERABLE — 2026-10-08 / V3 AUTHENTIC D-KNOT
 
 One corrected art-direction board for Sesli Öğren has been built in the CURRENT conversation as `la0040-real-dknot-material-in-motion-board-v3.png`. Its actual D/Knot placement uses the canonical repository image `app/assets/companions/D_KNOT_128.webp`, not generated replacement characters or empty circles. Same identity on Home / Recall / grounded Result; Source/Listen remains reader-led. Palette studies C1/C2 are conceptual recolors of the canonical raster only, NOT authorized new character assets. All document/source/answer text is explicitly DEMO. No fake mastery, XP, question counters or fabricated source data claims.
