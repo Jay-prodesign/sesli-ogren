@@ -531,7 +531,65 @@ void main() {
     );
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const ValueKey('la0040-living-continue')));
-    await _pumpUntilFound(tester, find.byType(MaterialWorkspaceScreen));
+    await _pumpUntilFound(tester, find.byKey(const ValueKey('la0040-atelier-workspace')));
+    await tester.pump(const Duration(milliseconds: 160));
+    await expectLater(find.byType(Scaffold).last, matchesGoldenFile('goldens/la0040_atelier_workspace.png'));
+
+    // Real learner-owned source flows through the same route and persisted
+    // Recall engine. No decorative mock answers or invented success metrics.
+    final prompt = await recall.createCurrentPrompt(
+      learner: runtime.learner,
+      materialId: AppRuntime.primaryMaterialId,
+    );
+    final action = await store.learningTruthStore().recallAction(
+      learner: runtime.learner,
+      actionId: prompt.id,
+    );
+    expect(action, isNotNull);
+    await tester.tap(find.byKey(const ValueKey('la0040-atelier-workspace-recall')));
+    await _pumpUntilFound(tester, find.byKey(const ValueKey('la0040-atelier-recall')));
+    expect(find.text(action!.expectedAnswer), findsNothing);
+    await tester.pump(const Duration(milliseconds: 160));
+    await expectLater(find.byType(Scaffold).last, matchesGoldenFile('goldens/la0040_atelier_recall.png'));
+
+    await tester.enterText(find.byKey(const ValueKey('la0040-atelier-answer')), action.expectedAnswer);
+    await tester.ensureVisible(find.byKey(const ValueKey('la0040-atelier-submit')));
+    await tester.tap(find.byKey(const ValueKey('la0040-atelier-submit')));
+    await _pumpUntilFound(tester, find.byKey(const ValueKey('la0040-atelier-result')));
+    expect(find.text('Bir kez bağımsız hatırladın'), findsOneWidget);
+    await tester.pump(const Duration(milliseconds: 160));
+    await expectLater(find.byType(Scaffold).last, matchesGoldenFile('goldens/la0040_atelier_result.png'));
+
+    await tester.ensureVisible(find.byKey(const ValueKey('la0040-atelier-next')));
+    await tester.tap(find.byKey(const ValueKey('la0040-atelier-next')));
+    await _pumpUntilFound(tester, find.text('Hatırlamaya dön'));
+    await tester.tap(find.text('Hatırlamaya dön'));
+    await _pumpUntilFound(tester, find.byKey(const ValueKey('la0040-atelier-recall')));
+    await tester.ensureVisible(find.text('Bilmiyorum'));
+    await tester.tap(find.text('Bilmiyorum'));
+    await _pumpUntilFound(tester, find.byKey(const ValueKey('la0040-atelier-result')));
+    expect(find.text('Bu kez bilmiyorum dedin'), findsOneWidget);
+    expect(find.text('Bir kez bağımsız hatırladın'), findsNothing);
+    await tester.pump(const Duration(milliseconds: 160));
+    await expectLater(find.byType(Scaffold).last, matchesGoldenFile('goldens/la0040_atelier_unknown.png'));
+
+    await tester.ensureVisible(find.byKey(const ValueKey('la0040-atelier-next')));
+    await tester.tap(find.byKey(const ValueKey('la0040-atelier-next')));
+    await _pumpUntilFound(tester, find.text('Hatırlamaya dön'));
+    await tester.tap(find.text('Hatırlamaya dön'));
+    await _pumpUntilFound(tester, find.byKey(const ValueKey('la0040-atelier-recall')));
+    await tester.ensureVisible(find.text('İpucu'));
+    await tester.tap(find.text('İpucu'));
+    await tester.pump(const Duration(milliseconds: 100));
+    await tester.enterText(find.byKey(const ValueKey('la0040-atelier-answer')), action.expectedAnswer);
+    await tester.ensureVisible(find.byKey(const ValueKey('la0040-atelier-submit')));
+    await tester.tap(find.byKey(const ValueKey('la0040-atelier-submit')));
+    await _pumpUntilFound(tester, find.byKey(const ValueKey('la0040-atelier-result')));
+    expect(find.text('İpucuyla doğru yanıt'), findsOneWidget);
+    expect(find.text('Bir kez bağımsız hatırladın'), findsNothing);
+    await tester.pump(const Duration(milliseconds: 160));
+    await expectLater(find.byType(Scaffold).last, matchesGoldenFile('goldens/la0040_atelier_hinted.png'));
+
     await tester.pumpWidget(const SizedBox());
     await store.close();
   }, skip: !_captureEnabled);
