@@ -39,6 +39,9 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
   }
 
   Future<_HomeSnapshot> _loadSnapshot() async {
+    // A preview requires extra source I/O; keep the unscoped product path unchanged.
+    // This read-only ancestor lookup is safe during initState (unlike dependOnInheritedWidgetOfExactType).
+    final livingReview = context.getElementForInheritedWidgetOfExactType<LivingDeskReviewScope>() != null;
     final materials = await widget.runtime.store.activeMaterials(learner: widget.runtime.learner);
     if (materials.isEmpty) return const _HomeSnapshot();
     final material = materials.reduce(
@@ -48,9 +51,6 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
       learner: widget.runtime.learner,
       materialId: material.id,
     );
-    // A preview requires extra source I/O; keep the unscoped product path unchanged.
-    // This read-only ancestor lookup is safe during initState (unlike dependOnInheritedWidgetOfExactType).
-    final livingReview = context.getElementForInheritedWidgetOfExactType<LivingDeskReviewScope>() != null;
     final extracted = source == null || !livingReview
         ? null
         : await widget.runtime.store.extractedContentForSource(
