@@ -92,7 +92,10 @@ class _MaterialWorkspaceScreenState extends State<MaterialWorkspaceScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Materyal'), backgroundColor: LivingDeskReviewScope.active(context) ? AtelierStyle.canvas : null),
+      appBar: AppBar(
+        title: const Text('Materyal'),
+        backgroundColor: LivingDeskReviewScope.active(context) ? AtelierStyle.canvas : null,
+      ),
       body: SafeArea(
         child: FutureBuilder<_WorkspaceSnapshot>(
           future: _snapshot,
