@@ -132,28 +132,12 @@ class LivingStudyDeskHome extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text.rich(
-          TextSpan(
-            children: [
-              TextSpan(
-                text: 'Kendi kaynağın.\n',
-                style: TextStyle(color: _ink),
-              ),
-              TextSpan(
-                text: 'Gerçek hatırlama.',
-                style: TextStyle(color: _accent),
-              ),
-            ],
-          ),
-          key: ValueKey('la0040-atelier-home-promise'),
-          style: TextStyle(fontSize: 28, fontWeight: FontWeight.w900, height: 1.13, letterSpacing: -1.2),
-        ),
-        const SizedBox(height: 11),
         const Text(
-          'Kendi materyalinle çalış; yanıtını kaynağında gör.',
-          style: TextStyle(color: _sub, fontSize: 15, height: 1.42),
+          'ŞU AN ÇALIŞTIĞIN KAYNAK',
+          key: ValueKey('la0040-atelier-home-promise'),
+          style: TextStyle(color: _accent, fontSize: 11, fontWeight: FontWeight.w900, letterSpacing: 1.1),
         ),
-        const SizedBox(height: 24),
+        const SizedBox(height: 13),
         Stack(
           children: [
             Positioned.fill(
@@ -347,7 +331,7 @@ class LivingStudyDeskHome extends StatelessWidget {
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
       const Text(
-        'Her şey kendi\nnotlarınla başlar.',
+        'Kendi kaynağını\ncanlandıralım.',
         style: TextStyle(color: _ink, fontSize: 35, height: 1.12, fontWeight: FontWeight.w800, letterSpacing: -1.3),
       ),
       const SizedBox(height: 13),
