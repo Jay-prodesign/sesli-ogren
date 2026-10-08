@@ -231,8 +231,8 @@ class _ProfileSurfaceState extends State<ProfileSurface> {
               icon: Icons.record_voice_over_outlined,
               title: 'Dinleme sesi',
               subtitle: 'Cihazın Türkçe sesi',
-              iconBackground: AppPalette.successSoft,
-              iconForeground: AppPalette.success,
+              iconBackground: AppPalette.signalSoft,
+              iconForeground: AppPalette.signal,
             ),
             const Divider(height: 1),
             _ProfileTile(
@@ -262,8 +262,8 @@ class _ProfileSurfaceState extends State<ProfileSurface> {
                 icon: Icons.support_agent_rounded,
                 title: 'Destek',
                 subtitle: _supportEmail!,
-                iconBackground: AppPalette.successSoft,
-                iconForeground: AppPalette.success,
+                iconBackground: AppPalette.signalSoft,
+                iconForeground: AppPalette.signal,
               ),
               Padding(
                 padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
