@@ -331,23 +331,23 @@ void main() {
           ),
         ),
       );
-      await _pumpUntilFound(tester, find.byKey(ValueKey('la0040-home-' + lane.name)));
+      await _pumpUntilFound(tester, find.byKey(ValueKey('la0040-home-${lane.name}')));
       await _precacheCompanion(tester);
       await tester.pump(const Duration(milliseconds: 200));
       await expectLater(
         find.byType(Scaffold).first,
-        matchesGoldenFile('goldens/la0040_treatment_' + lane.name + '_home.png'),
+        matchesGoldenFile('goldens/la0040_treatment_${lane.name}_home.png'),
       );
 
       await tester.ensureVisible(find.text('Materyalle devam et'));
       await tester.pump(const Duration(milliseconds: 80));
       await tester.tap(find.text('Materyalle devam et'));
       // Capture the real pushed route, preserving the chosen visual treatment.
-      await _pumpUntilFound(tester, find.byKey(ValueKey('la0040-workspace-' + lane.name)));
+      await _pumpUntilFound(tester, find.byKey(ValueKey('la0040-workspace-${lane.name}')));
       await tester.pump(const Duration(milliseconds: 200));
       await expectLater(
         find.byType(Scaffold).last,
-        matchesGoldenFile('goldens/la0040_treatment_' + lane.name + '_workspace.png'),
+        matchesGoldenFile('goldens/la0040_treatment_${lane.name}_workspace.png'),
       );
 
       final prompt = await recall.createCurrentPrompt(
@@ -361,23 +361,23 @@ void main() {
       await tester.pump(const Duration(milliseconds: 80));
       await tester.tap(find.text('Kaynaktan hatırla'));
       // The Recall route must inherit the same lane and persist its own attempt.
-      await _pumpUntilFound(tester, find.byKey(ValueKey('la0040-prompt-' + lane.name)));
+      await _pumpUntilFound(tester, find.byKey(ValueKey('la0040-prompt-${lane.name}')));
       await tester.pump(const Duration(milliseconds: 200));
       await expectLater(
         find.byType(Scaffold).last,
-        matchesGoldenFile('goldens/la0040_treatment_' + lane.name + '_prompt.png'),
+        matchesGoldenFile('goldens/la0040_treatment_${lane.name}_prompt.png'),
       );
 
       await tester.ensureVisible(find.byType(TextField));
       await tester.enterText(find.byType(TextField), action!.expectedAnswer);
       await tester.ensureVisible(find.text('Yanıtla'));
       await tester.tap(find.text('Yanıtla'));
-      await _pumpUntilFound(tester, find.byKey(ValueKey('la0040-result-' + lane.name)));
+      await _pumpUntilFound(tester, find.byKey(ValueKey('la0040-result-${lane.name}')));
       expect(find.text('Sıradaki adıma geç'), findsOneWidget);
       await tester.pump(const Duration(milliseconds: 200));
       await expectLater(
         find.byType(Scaffold).last,
-        matchesGoldenFile('goldens/la0040_treatment_' + lane.name + '_result.png'),
+        matchesGoldenFile('goldens/la0040_treatment_${lane.name}_result.png'),
       );
 
       await tester.pumpWidget(const SizedBox());
