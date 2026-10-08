@@ -308,7 +308,7 @@ void main() {
 
     expect(find.text('Öğrenme durumu'), findsOneWidget);
     expect(find.text('Henüz ölçülmedi'), findsOneWidget);
-    expect(find.text('Sıradaki aktif adım'), findsOneWidget);
+    expect(find.text('SIRADAKİ ADIM'), findsOneWidget);
     expect(find.text('Hatırla ile devam'), findsOneWidget);
 
     await tester.scrollUntilVisible(find.text('Odaklan'), 260, scrollable: find.byType(Scrollable).last);
