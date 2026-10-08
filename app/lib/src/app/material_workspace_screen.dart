@@ -9,6 +9,8 @@ import 'explain_screen.dart';
 import 'focus_screen.dart';
 import 'learning_slice_screen.dart';
 import 'la0040_visual_treatments.dart';
+import 'living_study_desk_home.dart';
+import 'atelier_learning_surfaces.dart';
 import 'listen_screen.dart';
 
 class MaterialWorkspaceScreen extends StatefulWidget {
@@ -59,7 +61,8 @@ class _MaterialWorkspaceScreenState extends State<MaterialWorkspaceScreen> {
       MaterialPageRoute(
         builder: (_) {
           final screen = LearningSliceScreen(runtime: widget.runtime, materialId: widget.materialId);
-          return treatment == null ? screen : LearningVisualTreatmentScope(treatment: treatment, child: screen);
+          if (treatment != null) return LearningVisualTreatmentScope(treatment: treatment, child: screen);
+          return LivingDeskReviewScope.active(context) ? LivingDeskReviewScope(child: screen) : screen;
         },
       ),
     );
@@ -89,7 +92,7 @@ class _MaterialWorkspaceScreenState extends State<MaterialWorkspaceScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Materyal')),
+      appBar: AppBar(title: const Text('Materyal'), backgroundColor: LivingDeskReviewScope.active(context) ? AtelierStyle.canvas : null),
       body: SafeArea(
         child: FutureBuilder<_WorkspaceSnapshot>(
           future: _snapshot,
@@ -135,6 +138,16 @@ class _WorkspaceBody extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final candidate = LearningVisualTreatmentScope.maybeOf(context);
+    if (LivingDeskReviewScope.active(context)) {
+      return AtelierWorkspace(
+        material: data.material,
+        sourceText: data.extracted?.normalizedText ?? '',
+        onRecall: onRecall,
+        onListen: onListen,
+        onExplain: onExplain,
+        onFocus: onFocus,
+      );
+    }
     if (candidate != null) {
       return LearningTreatmentWorkspace(
         lane: candidate,
