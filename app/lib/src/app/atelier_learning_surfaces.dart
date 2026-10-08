@@ -223,10 +223,7 @@ class AtelierRecall extends StatelessWidget {
       Container(
         width: double.infinity,
         padding: const EdgeInsets.fromLTRB(19, 19, 19, 23),
-        decoration: BoxDecoration(
-          color: AtelierStyle.ink,
-          borderRadius: BorderRadius.circular(21),
-        ),
+        decoration: BoxDecoration(color: AtelierStyle.ink, borderRadius: BorderRadius.circular(21)),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -249,12 +246,7 @@ class AtelierRecall extends StatelessWidget {
             Text(
               prompt.promptText,
               softWrap: true,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 23,
-                height: 1.34,
-                fontWeight: FontWeight.w800,
-              ),
+              style: const TextStyle(color: Colors.white, fontSize: 23, height: 1.34, fontWeight: FontWeight.w800),
             ),
           ],
         ),
@@ -465,7 +457,8 @@ class AtelierResult extends StatelessWidget {
         TweenAnimationBuilder<double>(
           key: const ValueKey('la0040-source-evidence-reveal'),
           tween: Tween<double>(begin: 0, end: 1),
-          duration: ((MediaQuery.maybeOf(context)?.disableAnimations ?? false) ||
+          duration:
+              ((MediaQuery.maybeOf(context)?.disableAnimations ?? false) ||
                   (MediaQuery.maybeOf(context)?.accessibleNavigation ?? false))
               ? Duration.zero
               : const Duration(milliseconds: 240),
