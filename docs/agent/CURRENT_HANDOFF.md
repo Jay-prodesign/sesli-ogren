@@ -1,3 +1,16 @@
+# CURRENT EXECUTION OVERRIDE — 2026-10-08 / FOUNDER VISUAL FAIL — CMD-0002
+
+This Founder disposition supersedes older acceptance-status wording below, including earlier `VQG-01 PASS / FOUNDER VISUAL REVIEW PENDING` as a *current* cursor. Prior tests/captures remain valid historical technical/internal evidence; they are **not** Founder visual acceptance.
+
+- **Founder visual review on 2026-10-08: FAIL / CHANGES_REQUIRED.** LA-0040 and coupled LA-0039 remain **IN_PROGRESS**, not DONE. The internal VQG-01 PASS is overridden for final visual acceptance, not retroactively relabeled as a failed technical test.
+- The 2026-10-08 capture packet visibly fails the intended commercial-grade design bar: repetitive nested cards, generic blue/aqua/lime grammar, excessive explanatory copy versus learning interaction, weak signature payoff and Companion visual integration.
+- **Active corrective instruction: `docs/agent/commands/CMD-0002.md`.** Reuse existing LA-0039/LA-0040 visual/audience/asset/gate research instead of repeating discovery from zero. Build a compact Experience Fidelity Contract and comparable **real Flutter runtime** treatment tournament around the same truthful Home → Workspace → Recall → Result path.
+- `Jay-prodesign/visual-intelligence-engine` was consulted at the Founder's explicit request as **READ-ONLY methodology reference** (fidelity, scaffold-expiry, signature-payoff, asset-anchor, trace, competitive and fresh-user QA). No product decisions/code/assets from that repository are imported.
+- Learning premise, canonical LearnerEvidence / LearnerState, source-grounding, release/device constraints and D/Knot identity authority remain unchanged; any material character redesign or final winner still needs Founder decision.
+- PR #13 / `feat/full-product-shell-continuity` remains the only active product implementation line. No merge/release/deploy/provider spend/secret/production mutation authorized.
+
+---
+
 # CURRENT EXECUTION OVERRIDE — 2026-10-08 / LA-0040 FINAL PRE-FOUNDER GATE
 
 This section supersedes stale visual/cursor/companion/audience lines below where they conflict.
