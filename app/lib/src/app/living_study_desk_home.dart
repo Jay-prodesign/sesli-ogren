@@ -71,8 +71,11 @@ class LivingStudyDeskHome extends StatelessWidget {
     final hasMaterial = material != null;
     return ColoredBox(
       color: _canvas,
-      child: ListView(
-        key: ValueKey(hasMaterial ? 'la0040-living-home-populated' : 'la0040-living-home-empty'),
+      child: Column(
+        children: [
+          Expanded(
+            child: ListView(
+              key: ValueKey(hasMaterial ? 'la0040-living-home-populated' : 'la0040-living-home-empty'),
         padding: const EdgeInsets.fromLTRB(20, 18, 20, 34),
         children: [
           Row(
@@ -97,6 +100,28 @@ class LivingStudyDeskHome extends StatelessWidget {
           ),
           const SizedBox(height: 32),
           if (hasMaterial) _populated(context) else _empty(context),
+        ],
+            ),
+          ),
+          if (hasMaterial)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 8, 20, 12),
+              child: SizedBox(
+                width: double.infinity,
+                child: FilledButton.icon(
+                  key: const ValueKey('la0040-living-continue'),
+                  onPressed: onOpenWorkspace,
+                  icon: const Icon(Icons.arrow_forward_rounded, size: 20),
+                  label: const Text('Çalışmaya devam et'),
+                  style: FilledButton.styleFrom(
+                    backgroundColor: _ink,
+                    foregroundColor: Colors.white,
+                    minimumSize: const Size.fromHeight(53),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                  ),
+                ),
+              ),
+            ),
         ],
       ),
     );
@@ -254,22 +279,7 @@ class LivingStudyDeskHome extends StatelessWidget {
           overflow: TextOverflow.ellipsis,
           style: const TextStyle(color: _sub, fontSize: 14, height: 1.38),
         ),
-        const SizedBox(height: 17),
-        SizedBox(
-          width: double.infinity,
-          child: FilledButton.icon(
-            key: const ValueKey('la0040-living-continue'),
-            onPressed: onOpenWorkspace,
-            icon: const Icon(Icons.arrow_forward_rounded, size: 20),
-            label: const Text('Çalışmaya devam et'),
-            style: FilledButton.styleFrom(
-              backgroundColor: _ink,
-              foregroundColor: Colors.white,
-              minimumSize: const Size.fromHeight(53),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-            ),
-          ),
-        ),
+        const SizedBox(height: 18),
         const SizedBox(height: 22),
         const Divider(color: _line),
         const SizedBox(height: 12),
