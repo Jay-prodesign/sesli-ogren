@@ -183,10 +183,7 @@ class _ListenScreenState extends State<ListenScreen> {
               padding: const EdgeInsets.fromLTRB(20, 16, 20, 36),
               children: [
                 DecoratedBox(
-                  decoration: BoxDecoration(
-                    color: AppPalette.primaryDark,
-                    borderRadius: BorderRadius.circular(24),
-                  ),
+                  decoration: BoxDecoration(color: AppPalette.primaryDark, borderRadius: BorderRadius.circular(24)),
                   child: Padding(
                     padding: const EdgeInsets.fromLTRB(18, 16, 18, 18),
                     child: Column(
@@ -255,9 +252,7 @@ class _ListenScreenState extends State<ListenScreen> {
                         const SizedBox(height: 8),
                         Text(
                           'Dinleme konumu: bölüm ${visibleChunk + 1} / ${source.chunks.length}',
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: Colors.white.withValues(alpha: 0.72),
-                          ),
+                          style: theme.textTheme.bodySmall?.copyWith(color: Colors.white.withValues(alpha: 0.72)),
                         ),
                       ],
                     ),
@@ -265,10 +260,7 @@ class _ListenScreenState extends State<ListenScreen> {
                 ),
                 const SizedBox(height: 12),
                 DecoratedBox(
-                  decoration: BoxDecoration(
-                    color: AppPalette.attentionSoft,
-                    borderRadius: BorderRadius.circular(14),
-                  ),
+                  decoration: BoxDecoration(color: AppPalette.attentionSoft, borderRadius: BorderRadius.circular(14)),
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 11),
                     child: Row(
