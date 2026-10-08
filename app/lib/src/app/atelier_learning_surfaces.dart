@@ -216,7 +216,7 @@ class AtelierRecall extends StatelessWidget {
               style: TextStyle(color: AtelierStyle.ink, fontSize: 28, height: 1.15, fontWeight: FontWeight.w900),
             ),
           ),
-          CompanionView(state: CompanionVisualState.think, size: 100),
+          CompanionView(state: CompanionVisualState.think, size: 128),
         ],
       ),
       const SizedBox(height: 17),
@@ -393,7 +393,7 @@ class AtelierResult extends StatelessWidget {
                   : result.evidence.outcome == RecallOutcome.helpedCorrect
                   ? CompanionVisualState.correct
                   : CompanionVisualState.think,
-              size: 100,
+              size: 128,
             ),
           ],
         ),
