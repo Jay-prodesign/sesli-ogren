@@ -72,6 +72,9 @@ jobs:
           for state in empty populated narrow scale150; do
             test -s "test/goldens/la0040_living_home_${state}.png"
           done
+          for state in workspace recall result unknown hinted; do
+            test -s "test/goldens/la0040_atelier_${state}.png"
+          done
 
       - name: Stage review evidence
         run: |
@@ -106,6 +109,11 @@ jobs:
             cp "app/test/goldens/la0040_living_home_${state}.png" "docs/qa/evidence/la0040-living-home/${state}.png"
           done
           sha256sum docs/qa/evidence/la0040-living-home/*.png | tee docs/qa/evidence/la0040-living-home/SHA256SUMS.txt
+          mkdir -p docs/qa/evidence/la0040-atelier
+          for state in workspace recall result unknown hinted; do
+            cp "app/test/goldens/la0040_atelier_${state}.png" "docs/qa/evidence/la0040-atelier/${state}.png"
+          done
+          sha256sum docs/qa/evidence/la0040-atelier/*.png | tee docs/qa/evidence/la0040-atelier/SHA256SUMS.txt
           # Carry the EXISTING canonical D/Knot reference into the visual-review
           # packet so art-direction work never invents/replaces the character.
           mkdir -p docs/qa/evidence/la0040-companion
@@ -120,6 +128,7 @@ jobs:
             docs/qa/evidence/la0039
             docs/qa/evidence/la0040-treatments
             docs/qa/evidence/la0040-living-home
+            docs/qa/evidence/la0040-atelier
             docs/qa/evidence/la0040-companion
           if-no-files-found: error
           retention-days: 7
