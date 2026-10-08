@@ -21,10 +21,19 @@ class SupabaseGroundedExplainGateway implements GroundedExplainGateway {
         },
       );
 
-      final rows = await client.rpc<List<dynamic>>(
-        'read_grounded_explain',
-        params: {'p_material_id': request.materialId.value, 'p_source_content_hash': request.sourceContentDigest},
-      );
+      // Generation is asynchronous. A newly queued summary will not exist on
+      // the first read; give the worker a bounded window before showing Retry.
+      List<dynamic> rows = <dynamic>[];
+      for (var attempt = 0; attempt < 6; attempt++) {
+        if (attempt > 0) {
+          await Future<void>.delayed(const Duration(seconds: 2));
+        }
+        rows = await client.rpc<List<dynamic>>(
+          'read_grounded_explain',
+          params: {'p_material_id': request.materialId.value, 'p_source_content_hash': request.sourceContentDigest},
+        );
+        if (rows.isNotEmpty) break;
+      }
       if (rows.isEmpty) {
         return const GroundedExplainUnavailable(reason: GroundedExplainUnavailableReason.temporaryFailure);
       }
