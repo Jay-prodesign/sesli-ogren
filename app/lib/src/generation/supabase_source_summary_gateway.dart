@@ -9,9 +9,7 @@ import '../domain/learning_contracts.dart';
 class SupabaseSourceSummaryGateway {
   const SupabaseSourceSummaryGateway();
 
-  Future<ServerSummarySubmission> submit({
-    required SourceIngestResult source,
-  }) async {
+  Future<ServerSummarySubmission> submit({required SourceIngestResult source}) async {
     final normalizedText = source.extractedContent.normalizedText.trim();
     if (normalizedText.isEmpty || normalizedText.length > 200000) {
       throw const ServerSummarySubmissionException('Source text is empty or too large.');
@@ -23,10 +21,7 @@ class SupabaseSourceSummaryGateway {
     }
     final serverMaterialId = await client.rpc<String>(
       'create_text_material',
-      params: {
-        'p_title': source.material.title,
-        'p_text': normalizedText,
-      },
+      params: {'p_title': source.material.title, 'p_text': normalizedText},
     );
     if (serverMaterialId.isEmpty) {
       throw const ServerSummarySubmissionException('Server material was not created.');

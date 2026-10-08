@@ -412,7 +412,6 @@ class LivingStudyDeskHome extends StatelessWidget {
   );
 }
 
- 
 /// A truthful learning-path visualization: only recorded recall evidence can
 /// mark the last stage as reached. Listening is an action, not a claimed result.
 class _LearningJourney extends StatelessWidget {
@@ -422,8 +421,7 @@ class _LearningJourney extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final hasRecallEvidence = continuation != null &&
-        continuation!.state.kind != RecallStateKind.notAssessed;
+    final hasRecallEvidence = continuation != null && continuation!.state.kind != RecallStateKind.notAssessed;
     const deep = Color(0xFF203D48);
     const mint = Color(0xFFBDEBD5);
     return Semantics(
@@ -434,21 +432,13 @@ class _LearningJourney extends StatelessWidget {
         key: const ValueKey('la0040-learning-journey'),
         width: double.infinity,
         padding: const EdgeInsets.fromLTRB(18, 17, 18, 15),
-        decoration: BoxDecoration(
-          color: deep,
-          borderRadius: BorderRadius.circular(20),
-        ),
+        decoration: BoxDecoration(color: deep, borderRadius: BorderRadius.circular(20)),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text(
               'ÖĞRENME YOLCULUĞUN',
-              style: TextStyle(
-                color: mint,
-                fontSize: 10,
-                fontWeight: FontWeight.w900,
-                letterSpacing: 1,
-              ),
+              style: TextStyle(color: mint, fontSize: 10, fontWeight: FontWeight.w900, letterSpacing: 1),
             ),
             const SizedBox(height: 16),
             Row(
@@ -490,14 +480,13 @@ class _LearningJourney extends StatelessWidget {
           color: completed ? const Color(0xFFBDEBD5) : const Color(0xFF365660),
           border: Border.all(color: const Color(0xFF78918F)),
         ),
-        child: Icon(
-          icon,
-          size: 20,
-          color: completed ? const Color(0xFF203D48) : const Color(0xFFD9E9E4),
-        ),
+        child: Icon(icon, size: 20, color: completed ? const Color(0xFF203D48) : const Color(0xFFD9E9E4)),
       ),
       const SizedBox(height: 7),
-      Text(label, style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.w700)),
+      Text(
+        label,
+        style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.w700),
+      ),
     ],
   );
 }
