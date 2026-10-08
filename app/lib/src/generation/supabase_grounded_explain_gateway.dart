@@ -10,10 +10,10 @@ class SupabaseGroundedExplainGateway implements GroundedExplainGateway {
 
   @override
   Future<GroundedExplainResult> explain(GroundedExplainRequest request) async {
-    // The server contract takes a UUID. Local-only material IDs are not
-    // server identities; do not send them as if the source had been uploaded.
+    // Local SQLite identifiers are not server UUIDs.
     final serverMaterialId = request.materialId.value;
-    if (!RegExp(r'^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}\
+    final uuidPattern = RegExp(
+      r'^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}' + r'\
       final client = await SupabaseLearnerAuth.clientForAuthenticatedRuntime();
       await client.rpc<Object?>(
         'request_grounded_explain',
@@ -83,8 +83,9 @@ class SupabaseGroundedExplainGateway implements GroundedExplainGateway {
     return 'explain:${request.materialId.value}:$digest';
   }
 }
-)
-        .hasMatch(serverMaterialId)) {
+,
+    );
+    if (!uuidPattern.hasMatch(serverMaterialId)) {
       return const GroundedExplainUnavailable(
         reason: GroundedExplainUnavailableReason.sourceUnavailable,
       );
