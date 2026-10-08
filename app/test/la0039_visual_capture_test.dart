@@ -339,18 +339,12 @@ void main() {
         matchesGoldenFile('goldens/la0040_treatment_' + lane.name + '_home.png'),
       );
 
-      await tester.pumpWidget(
-        _phoneFrame(
-          LearningVisualTreatmentScope(
-            treatment: lane,
-            child: MaterialWorkspaceScreen(runtime: runtime, materialId: AppRuntime.primaryMaterialId),
-          ),
-        ),
-      );
+      await tester.tap(find.text('Materyalle devam et'));
+      // Capture the real pushed route, preserving the chosen visual treatment.
       await _pumpUntilFound(tester, find.byKey(ValueKey('la0040-workspace-' + lane.name)));
       await tester.pump(const Duration(milliseconds: 200));
       await expectLater(
-        find.byType(Scaffold).first,
+        find.byType(Scaffold).last,
         matchesGoldenFile('goldens/la0040_treatment_' + lane.name + '_workspace.png'),
       );
 
@@ -361,18 +355,12 @@ void main() {
       final action = await store.learningTruthStore().recallAction(learner: runtime.learner, actionId: prompt.id);
       expect(action, isNotNull);
 
-      await tester.pumpWidget(
-        _phoneFrame(
-          LearningVisualTreatmentScope(
-            treatment: lane,
-            child: LearningSliceScreen(runtime: runtime, materialId: AppRuntime.primaryMaterialId),
-          ),
-        ),
-      );
+      await tester.tap(find.text('Kaynaktan hatırla'));
+      // The Recall route must inherit the same lane and persist its own attempt.
       await _pumpUntilFound(tester, find.byKey(ValueKey('la0040-prompt-' + lane.name)));
       await tester.pump(const Duration(milliseconds: 200));
       await expectLater(
-        find.byType(Scaffold).first,
+        find.byType(Scaffold).last,
         matchesGoldenFile('goldens/la0040_treatment_' + lane.name + '_prompt.png'),
       );
 
@@ -382,7 +370,7 @@ void main() {
       expect(find.text('Sıradaki adıma geç'), findsOneWidget);
       await tester.pump(const Duration(milliseconds: 200));
       await expectLater(
-        find.byType(Scaffold).first,
+        find.byType(Scaffold).last,
         matchesGoldenFile('goldens/la0040_treatment_' + lane.name + '_result.png'),
       );
 
