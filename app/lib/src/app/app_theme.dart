@@ -127,9 +127,8 @@ abstract final class SesliOgrenTheme {
         height: 72,
         labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
         iconTheme: WidgetStateProperty.resolveWith(
-          (states) => IconThemeData(
-            color: states.contains(WidgetState.selected) ? AppPalette.primary : AppPalette.inkMuted,
-          ),
+          (states) =>
+              IconThemeData(color: states.contains(WidgetState.selected) ? AppPalette.primary : AppPalette.inkMuted),
         ),
         labelTextStyle: WidgetStateProperty.resolveWith(
           (states) => TextStyle(
