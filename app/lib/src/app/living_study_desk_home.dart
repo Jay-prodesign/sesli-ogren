@@ -99,6 +99,10 @@ class LivingStudyDeskHome extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: 18),
+                if (hasMaterial) ...[
+                  const _LivingCompanionHero(),
+                  const SizedBox(height: 21),
+                ],
                 if (hasMaterial) _populated(context) else _empty(context),
               ],
             ),
@@ -488,5 +492,56 @@ class _LearningJourney extends StatelessWidget {
         style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.w700),
       ),
     ],
+  );
+}
+
+class _LivingCompanionHero extends StatelessWidget {
+  const _LivingCompanionHero();
+
+  @override
+  Widget build(BuildContext context) => Container(
+    key: const ValueKey('la0040-living-companion-hero'),
+    padding: const EdgeInsets.fromLTRB(15, 15, 15, 15),
+    decoration: BoxDecoration(
+      color: const Color(0xFFE7F2EA),
+      borderRadius: BorderRadius.circular(22),
+    ),
+    child: Row(
+      children: [
+        const CompanionView(state: CompanionVisualState.idle, size: 108),
+        const SizedBox(width: 12),
+        const Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'D/KNOT İLE DEVAM ET',
+                style: TextStyle(
+                  color: Color(0xFF0A716A),
+                  fontSize: 10,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: 0.8,
+                ),
+              ),
+              SizedBox(height: 7),
+              Text(
+                'Bugün neyi gerçekten hatırlayacaksın?',
+                style: TextStyle(
+                  color: Color(0xFF15313A),
+                  fontSize: 20,
+                  height: 1.2,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+              SizedBox(height: 7),
+              Text(
+                'Kaynağın hazır. Birlikte ilerleyelim.',
+                style: TextStyle(color: Color(0xFF52696B), fontSize: 12, height: 1.4),
+              ),
+            ],
+          ),
+        ),
+      ],
+    ),
   );
 }
