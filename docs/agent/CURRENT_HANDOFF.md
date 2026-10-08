@@ -1,3 +1,13 @@
+# CURRENT CLARIFICATION — 2026-10-08 — NO NEW COMPANION SELECTION
+
+Founder flags visual-direction drift. CORRECTION: A/B/C mascot inspiration is reference material ONLY. Prior assistant recommendation of B/Living Glyph as a new mascot selection is WITHDRAWN; there has been no Founder approval to replace canonical D/Knot. Only D/Knot color/finish/integration MAY be tested with genuine canonical source art, with identity/silhouette unchanged unless a separate evidenced Founder gate reopens it.
+
+The generated V2 "canonical D/Knot" board showed empty circular placeholders, NOT an accurately integrated canonical mascot, so previous claims of a fixed character-integrated board are INVALID. No board is approved, no visual direction is finally selected, and the proposed Material in Motion palette is a candidate only. Existing Founder-approved Learning App experience concept remains Visual Learning Studio / Student Momentum with genuine learner-owned source and true source-bound learning evidence.
+
+NEXT STEP: reconcile ONE truthful, character-authentic art-direction representation for the existing experience without restarting mascot discovery, adding a new visual family, or coding more cosmetic Home designs. If the canonical asset cannot be reliably placed, show a labeled placeholder honestly and keep AD-05 FAIL. Founder visual-direction decision is protected; never claim PASS from generated art alone. No merge, deploy or release.
+
+---
+
 # ART DIRECTION FIRST — FOUNDER PROCESS UPDATE (2026-10-08)
 
 CURRENT CURSOR: review the inspiration board and the one Material in Motion art-direction candidate BEFORE further Flutter visual changes. Prior commands to iterate Living Desk visuals immediately are superseded. See docs/design/LA-0040_ART_DIRECTION_CANDIDATE_V1_MATERIAL_IN_MOTION.md for palette, character colorway study, screen compositions and AD-01 to AD-09 review criteria.
