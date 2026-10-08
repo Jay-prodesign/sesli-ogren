@@ -1,3 +1,13 @@
+# LA-0040 DESIGN REVIEW — AUTHENTIC D/KNOT COMPOSITION V4 (2026-10-08)
+
+The previous V3 generated "D/Knot" robot was rejected as non-canonical. A NEW art-direction concept board is available in the current conversation as `la0040-authentic-dknot-design-direction-v4.png`. Unlike generated robot concepts, **this board is deterministically composited from the exact existing 128×128 repo asset** `app/assets/companions/D_KNOT_128.webp` using a drawing script; it does not generate/replace the character. Four concept screens depict Home, own-source Reader/Listen, source-hidden Recall and grounded Result. Two D/Knot palette alternatives are *study tints* of the same canonical raster, not authorized production assets. The current original is default.
+
+STATUS: **CONCEPT ART / NOT A REAL FLUTTER BUILD / NOT FOUNDER-LOCKED**. Artistic bar remains REWORK: main Home lacks sufficient bespoke signature, card-like geometry is still prominent, 128px original does not prove crisp production-size character at large scale, and animations/real UI behavior are not shown. Example source and answer on this artwork are explicitly DEMO, and no invented progress/quiz counts or mastery are authorized. Do NOT claim product quality PASS from this composition.
+
+NEXT ART TASK: critically refine Home composition and coherent source/Recall/result treatment against AD-01–AD-09, with same verified D/Knot; present actual approved visual direction before widening cosmetic Flutter implementation. Preserve product source/evidence/Flutter runtime. This V4 asset currently exists as a conversation-generated file, NOT as a GitHub binary. No merge/release.
+
+---
+
 # ACTIVE LA-0040 ART-DIRECTION VERDICT — V3 FAIL (2026-10-08)
 
 The actual canonical Flutter asset `app/assets/companions/D_KNOT_128.webp` has a blue-purple knot silhouette with a light human-like face. The V3 AI concept board instead depicts a white-bodied blue-faced leaf/antenna robot. Those are NOT the same character. The previous claim that V3 faithfully/unchanged embedded the canonical asset is **FALSE AND WITHDRAWN**. Generated imagery was mistaken for authentic character source. V3 must NOT be used as product-art authority or visual PASS. It also relies on biology-specific foliage, decorative card-heavy UI, and unsupported percentages/question counts.
