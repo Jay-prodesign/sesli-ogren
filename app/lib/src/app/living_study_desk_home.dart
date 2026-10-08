@@ -250,12 +250,7 @@ class LivingStudyDeskHome extends StatelessWidget {
           ],
         ),
         Center(
-          child: Container(
-            key: const ValueKey('la0040-source-to-recall-thread'),
-            width: 2,
-            height: 14,
-            color: _accent,
-          ),
+          child: Container(key: const ValueKey('la0040-source-to-recall-thread'), width: 2, height: 14, color: _accent),
         ),
         Container(
           decoration: BoxDecoration(color: _ink, borderRadius: BorderRadius.circular(18)),

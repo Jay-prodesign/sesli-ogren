@@ -105,7 +105,11 @@ class AtelierWorkspace extends StatelessWidget {
                       style: TextStyle(color: Colors.white, fontWeight: FontWeight.w800),
                     ),
                   ),
-                  TextButton(onPressed: onExplain, style: TextButton.styleFrom(foregroundColor: Colors.white), child: const Text('Açıkla')),
+                  TextButton(
+                    onPressed: onExplain,
+                    style: TextButton.styleFrom(foregroundColor: Colors.white),
+                    child: const Text('Açıkla'),
+                  ),
                   IconButton(
                     onPressed: onFocus,
                     tooltip: 'Odaklan',
@@ -120,7 +124,10 @@ class AtelierWorkspace extends StatelessWidget {
                       onPressed: onListen,
                       icon: const Icon(Icons.headphones_rounded),
                       label: const Text('Dinle'),
-                      style: OutlinedButton.styleFrom(foregroundColor: Colors.white, side: const BorderSide(color: Color(0xFF8EA9A3))),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: Colors.white,
+                        side: const BorderSide(color: Color(0xFF8EA9A3)),
+                      ),
                     ),
                   ),
                   const SizedBox(width: 9),
@@ -128,7 +135,10 @@ class AtelierWorkspace extends StatelessWidget {
                     child: FilledButton.icon(
                       key: const ValueKey('la0040-atelier-workspace-recall'),
                       onPressed: onRecall,
-                      style: FilledButton.styleFrom(backgroundColor: AtelierStyle.mark, foregroundColor: AtelierStyle.ink),
+                      style: FilledButton.styleFrom(
+                        backgroundColor: AtelierStyle.mark,
+                        foregroundColor: AtelierStyle.ink,
+                      ),
                       icon: const Icon(Icons.psychology_alt_outlined),
                       label: const Text('Hatırla'),
                     ),
