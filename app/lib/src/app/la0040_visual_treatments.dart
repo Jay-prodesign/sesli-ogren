@@ -387,25 +387,222 @@ class LearningTreatmentWorkspace extends StatelessWidget {
   );
 }
 
+/// Real, version-bound answer/provenance reveal. No generated relation.
+class _GroundedExcerpt extends StatelessWidget {
+  const _GroundedExcerpt({
+    required this.answer,
+    required this.excerpt,
+    required this.ink,
+    required this.accent,
+  });
+
+  final String answer;
+  final String excerpt;
+  final Color ink;
+  final Color accent;
+
+  @override
+  Widget build(BuildContext context) {
+    final needle = answer.trim();
+    final at = needle.isEmpty ? -1 : excerpt.toLowerCase().indexOf(needle.toLowerCase());
+    final spans = <TextSpan>[];
+    if (at < 0) {
+      spans.add(TextSpan(text: excerpt));
+    } else {
+      spans.add(TextSpan(text: excerpt.substring(0, at)));
+      spans.add(
+        TextSpan(
+          text: excerpt.substring(at, at + needle.length),
+          style: TextStyle(
+            color: ink,
+            fontWeight: FontWeight.w900,
+            backgroundColor: accent.withValues(alpha: 0.45),
+          ),
+        ),
+      );
+      spans.add(TextSpan(text: excerpt.substring(at + needle.length)));
+    }
+    return Text.rich(
+      TextSpan(children: spans),
+      maxLines: 8,
+      overflow: TextOverflow.ellipsis,
+      style: TextStyle(color: ink, fontSize: 16, height: 1.5),
+    );
+  }
+}
+
 class LearningTreatmentResult extends StatelessWidget {
-  const LearningTreatmentResult({required this.lane, required this.result, required this.onContinue, super.key});
+  const LearningTreatmentResult({
+    required this.lane,
+    required this.result,
+    required this.onContinue,
+    super.key,
+  });
+
   final LearningVisualTreatment lane;
   final RecallAttemptResult result;
   final VoidCallback onContinue;
+
   @override
-  Widget build(BuildContext context) => LearningTreatmentStage(
-    lane: lane,
-    stage: 'result',
-    label: _outcome(result),
-    headline: _outcome(result),
-    sourceLabel: 'Doğru ifade / kaynak dayanağı',
-    sourceText: '${result.correctAnswer}\n\n${result.sourceExcerpt}',
-    nextReason: result.nextAction.reasonText,
-    primaryLabel: 'Sıradaki adıma geç',
-    onPrimary: onContinue,
-    outcomeIndependent:
-        result.evidence.outcome == RecallOutcome.correct && result.evidence.assistance == RecallAssistance.none,
-  );
+  Widget build(BuildContext context) {
+    final c = _Colors.of(lane);
+    final outcome = _outcome(result);
+    final independent = result.evidence.outcome == RecallOutcome.correct &&
+        result.evidence.assistance == RecallAssistance.none;
+    final studio = lane == LearningVisualTreatment.studio;
+    final knowledge = lane == LearningVisualTreatment.knowledge;
+    return ColoredBox(
+      key: ValueKey('la0040-result-${lane.name}'),
+      color: c.paper,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(22, 20, 22, 30),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (studio)
+              Container(
+                padding: const EdgeInsets.fromLTRB(23, 21, 23, 25),
+                decoration: BoxDecoration(color: c.ink, borderRadius: BorderRadius.circular(25)),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        const Expanded(
+                          child: Text(
+                            'HATIRLAMA / SONUÇ',
+                            style: TextStyle(
+                              color: Color(0xFFE2F3AB),
+                              fontSize: 11,
+                              fontWeight: FontWeight.w800,
+                              letterSpacing: 1.2,
+                            ),
+                          ),
+                        ),
+                        CompanionView(
+                          state: independent ? CompanionVisualState.success : CompanionVisualState.correct,
+                          size: 56,
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      outcome,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 34,
+                        height: 1.08,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                    const SizedBox(height: 14),
+                    Text(
+                      independent
+                          ? 'Bu kavramı bir kez bağımsız hatırladın. Ustalık henüz ölçülmedi.'
+                          : 'Denemenin sonucu kaydedildi. Kaynağınla karşılaştır.',
+                      style: const TextStyle(color: Color(0xFFD0E2DE), fontSize: 14, height: 1.42),
+                    ),
+                  ],
+                ),
+              )
+            else ...[
+              Text(
+                knowledge ? 'KAYNAKTAN KANITA' : 'YANITIN / KAYITLI SONUÇ',
+                style: TextStyle(
+                  color: c.accent,
+                  letterSpacing: 1.3,
+                  fontWeight: FontWeight.w800,
+                  fontSize: 11,
+                ),
+              ),
+              const SizedBox(height: 18),
+              Text(
+                outcome,
+                style: TextStyle(
+                  color: c.ink,
+                  fontSize: 34,
+                  height: 1.1,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                independent
+                    ? 'Bir kez bağımsız hatırlama; henüz ustalık değil.'
+                    : 'Bu denemenin kayda geçen sonucu.',
+                style: TextStyle(color: c.support, fontSize: 14, height: 1.4),
+              ),
+            ],
+            const SizedBox(height: 29),
+            if (knowledge)
+              _ThreadRow(
+                label: 'Kaynağa dayalı geri bildirim',
+                value: result.correctAnswer,
+                ink: c.ink,
+                accent: c.accent,
+              )
+            else ...[
+              Text(
+                'DOĞRU İFADE',
+                style: TextStyle(
+                  color: c.support,
+                  fontSize: 11,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: 1,
+                ),
+              ),
+              const SizedBox(height: 10),
+              Text(
+                result.correctAnswer,
+                style: TextStyle(
+                  color: c.ink,
+                  fontSize: 27,
+                  height: 1.12,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+            ],
+            const SizedBox(height: 16),
+            Text(
+              'KAYNAKTAKİ YERİ',
+              style: TextStyle(
+                color: c.support,
+                fontSize: 11,
+                fontWeight: FontWeight.w800,
+                letterSpacing: 1,
+              ),
+            ),
+            const SizedBox(height: 12),
+            _GroundedExcerpt(
+              answer: result.correctAnswer,
+              excerpt: result.sourceExcerpt,
+              ink: c.ink,
+              accent: c.accent,
+            ),
+            const SizedBox(height: 28),
+            Divider(color: c.support.withValues(alpha: 0.35)),
+            const SizedBox(height: 15),
+            Text(
+              'ŞİMDİ NE YAPMALI?',
+              style: TextStyle(
+                color: c.accent,
+                fontSize: 11,
+                fontWeight: FontWeight.w800,
+                letterSpacing: 1,
+              ),
+            ),
+            const SizedBox(height: 10),
+            Text(
+              result.nextAction.reasonText,
+              style: TextStyle(color: c.ink, fontSize: 17, height: 1.35, fontWeight: FontWeight.w600),
+            ),
+            const SizedBox(height: 20),
+            _Action(label: 'Sıradaki adıma geç', onTap: onContinue, dark: false),
+          ],
+        ),
+      ),
+    );
+  }
 }
 
 /// The actual RecallPrompt from the active SourceVersion drives this stage;
