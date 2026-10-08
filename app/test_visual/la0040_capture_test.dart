@@ -49,6 +49,9 @@ void main() {
         ),
       ),
     );
+    await tester.runAsync(() async {
+      await Future<void>.delayed(const Duration(milliseconds: 250));
+    });
     await tester.pump(const Duration(milliseconds: 100));
     await expectLater(find.byType(Scaffold), matchesGoldenFile('goldens/la0040_home_empty_390x844.png'));
   });
