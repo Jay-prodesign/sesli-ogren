@@ -1,3 +1,13 @@
+# TWO-SCREEN ART-DIRECTION CANDIDATE — REVIEW CHECKPOINT 2026-10-08
+
+Exact design and assessment: [LA-0040 Living Source Atelier Home + Reader](../design/LA-0040_LIVING_SOURCE_ATELIER_TWO_SCREEN_DIRECTION_2026-10-08.md). This is a **VISUAL CONCEPT**, not a running Flutter production screen and not Founder-locked. The canonical D/Knot original is included unchanged and verified byte-identical, avoiding V3's counterfeit character failure. Public Quizlet/Speechify/Brilliant designs were referenced for UI principles only.
+
+AD-01 source hierarchy = PARTIAL; AD-02 production-level craft = PARTIAL; AD-03 first 3–5s human comprehension = NOT RUN; AD-04 reader/listen/Recall link = PARTIAL (Recall/Result not this iteration); AD-05 exact mascot file = VERIFIED but perceived fit/state assets = PENDING; AD-06 no fictional learning counters = CONCEPT CHECK ONLY; AD-07 production art licensing and quality = PENDING; AD-08 mobile type/keyboard/reduced motion = NOT RUN; AD-09 Founder = PENDING. **DIRECTION LOCK FAIL-CLOSED until review.**
+
+Next visual task: assess specific Home source-object and Reader source/dock composition, D/Knot's intentional role and 128px resolution, cross-subject look, not another palette hunt. If candidate survives, define hi-fi empty state + real long source/keyboard and source-bound Recall/Result continuity before application styling. UI-specific Flutter QA then mandatory; no passing tests retroactively approve art.
+
+---
+
 # CONTROLLING V3 CHARACTER/AUTHENTICITY FAIL — 2026-10-08
 
 V3 alleged “actual canonical D/Knot directly embedded” but the generated character does not match `app/assets/companions/D_KNOT_128.webp`. White robot with leaf/antenna appendages ≠ blue-purple knot with light face. **AD-05 BLOCKER / AD-09 NOT APPROVED.** Do not auto-PASS character fidelity based on image-generation claims; require **pixel/compositing provenance using the real asset**, shape/face consistency at intended size, and no unapproved costume or body/leaf additions. Biology-specific image wallpaper or fabricated learner metrics fails visual/truth gate, regardless of aesthetics. Previous V3 appraisal is rejected; visual inspiration remains **REWORK**. Previous test-suite PASS is separate technical correctness only.
