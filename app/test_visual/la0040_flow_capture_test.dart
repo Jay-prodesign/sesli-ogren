@@ -12,7 +12,8 @@ void main() {
   const materialId = MaterialId('visual-fixture');
   const versionId = SourceVersionId('visual-version');
   const evidenceId = LearnerEvidenceId('visual-evidence');
-  const source = 'Fotosentez sırasında bitkiler ışık enerjisini kimyasal enerjiye dönüştürür. Klorofil ışığın soğurulmasında görev alır. Bu süreçte karbondioksit ve su kullanılır.';
+  const source =
+      'Fotosentez sırasında bitkiler ışık enerjisini kimyasal enerjiye dönüştürür. Klorofil ışığın soğurulmasında görev alır. Bu süreçte karbondioksit ve su kullanılır.';
   final material = MaterialRecord(
     id: materialId,
     title: 'Fotosentez: ışık ve enerji',
@@ -64,14 +65,7 @@ void main() {
   Future<void> capture(WidgetTester tester, String name, Widget child) async {
     tester.view.physicalSize = const Size(390, 844);
     tester.view.devicePixelRatio = 1;
-    await tester.pumpWidget(
-      MaterialApp(
-        debugShowCheckedModeBanner: false,
-        home: Scaffold(
-          body: child,
-        ),
-      ),
-    );
+    await tester.pumpWidget(MaterialApp(debugShowCheckedModeBanner: false, home: Scaffold(body: child)));
     await tester.pump(const Duration(milliseconds: 300));
     await expectLater(find.byType(Scaffold), matchesGoldenFile('goldens/$name.png'));
     tester.view.resetPhysicalSize();
@@ -144,11 +138,7 @@ void main() {
       'la0040_result_390x844',
       SingleChildScrollView(
         padding: const EdgeInsets.all(20),
-        child: AtelierResult(
-          result: result,
-          answerInMemory: 'Klorofil',
-          onContinue: () {},
-        ),
+        child: AtelierResult(result: result, answerInMemory: 'Klorofil', onContinue: () {}),
       ),
     );
   });
