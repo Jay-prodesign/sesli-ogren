@@ -266,12 +266,7 @@ class AtelierRecall extends StatelessWidget {
             Expanded(
               child: Text(
                 'D/Knot: Acele etme. Hatırladığın kadarıyla anlat; takıldığında ipucu isteyebilirsin.',
-                style: TextStyle(
-                  color: AtelierStyle.ink,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                  height: 1.4,
-                ),
+                style: TextStyle(color: AtelierStyle.ink, fontSize: 14, fontWeight: FontWeight.w600, height: 1.4),
               ),
             ),
           ],
@@ -482,10 +477,7 @@ class AtelierResult extends StatelessWidget {
         Container(
           key: const ValueKey('la0040-result-companion-reflection'),
           padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 13),
-          decoration: BoxDecoration(
-            color: AtelierStyle.mint,
-            borderRadius: BorderRadius.circular(17),
-          ),
+          decoration: BoxDecoration(color: AtelierStyle.mint, borderRadius: BorderRadius.circular(17)),
           child: Row(
             children: [
               const Icon(Icons.auto_awesome_outlined, color: AtelierStyle.teal, size: 20),

@@ -99,10 +99,7 @@ class LivingStudyDeskHome extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: 18),
-                if (hasMaterial) ...[
-                  const _LivingCompanionHero(),
-                  const SizedBox(height: 21),
-                ],
+                if (hasMaterial) ...[const _LivingCompanionHero(), const SizedBox(height: 21)],
                 if (hasMaterial) _populated(context) else _empty(context),
               ],
             ),
@@ -502,10 +499,7 @@ class _LivingCompanionHero extends StatelessWidget {
   Widget build(BuildContext context) => Container(
     key: const ValueKey('la0040-living-companion-hero'),
     padding: const EdgeInsets.fromLTRB(15, 15, 15, 15),
-    decoration: BoxDecoration(
-      color: const Color(0xFFE7F2EA),
-      borderRadius: BorderRadius.circular(22),
-    ),
+    decoration: BoxDecoration(color: const Color(0xFFE7F2EA), borderRadius: BorderRadius.circular(22)),
     child: Row(
       children: [
         const CompanionView(state: CompanionVisualState.idle, size: 108),
@@ -526,12 +520,7 @@ class _LivingCompanionHero extends StatelessWidget {
               SizedBox(height: 7),
               Text(
                 'Bugün neyi gerçekten hatırlayacaksın?',
-                style: TextStyle(
-                  color: Color(0xFF15313A),
-                  fontSize: 20,
-                  height: 1.2,
-                  fontWeight: FontWeight.w900,
-                ),
+                style: TextStyle(color: Color(0xFF15313A), fontSize: 20, height: 1.2, fontWeight: FontWeight.w900),
               ),
               SizedBox(height: 7),
               Text(
