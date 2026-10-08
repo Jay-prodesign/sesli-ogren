@@ -10,6 +10,7 @@ import 'app_theme.dart';
 import 'companion_view.dart';
 import 'first_run_onboarding.dart';
 import 'product_shell_screen.dart';
+import 'living_study_desk_home.dart';
 
 class SesliOgrenApp extends StatefulWidget {
   const SesliOgrenApp({super.key});
@@ -114,11 +115,19 @@ class _SesliOgrenAppState extends State<SesliOgrenApp> {
                   final runtime = snapshot.data!;
                   return FirstRunOnboardingGate(
                     runtime: runtime,
-                    child: ProductShellScreen(
-                      runtime: runtime,
-                      onAccountDeleted: _handleAccountDeleted,
-                      onSignOut: _handleSignOut,
-                    ),
+                    child: const bool.fromEnvironment('LA0040_ATELIER_PREVIEW', defaultValue: false)
+                        ? LivingDeskReviewScope(
+                            child: ProductShellScreen(
+                              runtime: runtime,
+                              onAccountDeleted: _handleAccountDeleted,
+                              onSignOut: _handleSignOut,
+                            ),
+                          )
+                        : ProductShellScreen(
+                            runtime: runtime,
+                            onAccountDeleted: _handleAccountDeleted,
+                            onSignOut: _handleSignOut,
+                          ),
                   );
                 }
                 if (snapshot.hasError) {
