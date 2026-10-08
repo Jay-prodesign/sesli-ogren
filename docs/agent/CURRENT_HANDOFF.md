@@ -1,3 +1,17 @@
+# CURRENT FOUNDER OVERRIDE — 2026-10-08 / LA-0040 SECOND VISUAL FAIL — ALL THREE TREATMENTS REJECTED
+
+**Decision authority: Founder reviewed the latest actual 12-screen Flutter packet and explicitly judged the interface bad / overall visual direction FAIL.** This supersedes the previous "Studio primary refinement lead" and every instruction to continue Studio polishing or choose Editorial/Knowledge. **NO visual treatment winner, NO accepted visual direction.** LA-0039/LA-0040 remain IN_PROGRESS / DESIGN FAIL. The validated Flutter code is engineering evidence only, NOT commercial UX acceptance.
+
+**Immediate work cursor:** retain validated source/version/Recall/learner evidence logic and working optional review-scope branches as reversible historical controls. STOP incremental palette/card/mascot fixes to those three variants. Under the existing LA-0040 task (no new ID), work from the real learner's session and decide how material, active attempt, feedback and continuation should be perceived and manipulated *on screen*. First produce one coherent interaction-first, material-grounded mobile vertical experience and review it at real Flutter runtime before expanding. Do not carry forward a giant dark Studio card as a locked component or force reuse of three previous layouts.
+
+**Observed grounds for Founder rejection:** 12 screens largely share the same heading/text/card/CTA skeleton; three skins are not three competing UX systems. Static, text-heavy, generic layouts, unbalanced whitespace, oversized shallow CTA containers, tiny pasted-on D/Knot, poor learning visualization and weak earned payoff. Source-grounded highlight was a technical truth improvement but is not by itself a distinctive or enjoyable learning experience. A 390×844 capture and passing tests cannot negate these failures.
+
+**Next step specification and gate:** `docs/exec-plans/LA-0040_FOUNDER_FAIL_REWORK_SPEC.md` current second-FAIL override; `docs/qa/LA-0040_VISUAL_QUALITY_GATE.md` interactive perception gate. Evidence should be actual meaningful before/after/source-grounded user interactions, not a fourth arbitrary palette. Require true structural difference from the rejected screen skeleton and a clear learning visual signature before asking Founder to review again. Preserve D/Knot canonical identity/asset authority; no new character or cross-project code/assets.
+
+**Protected actions:** no PR merge, app release, deployment, or Founder PASS; keep PR #13 isolated. Existing CI successes (`dacbad3014`, 4 workflows) remain valid *technical* regression history, not a quality endorsement.
+
+---
+
 # CURRENT IMPLEMENTATION CHECKPOINT — 2026-10-08 / LA-0040 VISUAL REWORK
 
 **Current cursor: Studio source-first refinement + longer real material / stress, NOT redoing the completed A/B/C comparison.** This checkpoint updates implementation progress under existing CMD-0002; it does not acknowledge the command on Claude's behalf, approve a winner, or change LA-0039/0040 from IN_PROGRESS.
