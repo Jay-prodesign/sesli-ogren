@@ -529,7 +529,8 @@ void main() {
       const Offset(0, -180),
       maxIteration: 12,
     );
-    await tester.pumpAndSettle();
+    // The canonical D/Knot continuously animates; pumpAndSettle never settles.
+    await tester.pump(const Duration(milliseconds: 180));
     await tester.tap(find.byKey(const ValueKey('la0040-living-continue')));
     await _pumpUntilFound(tester, find.byKey(const ValueKey('la0040-atelier-workspace')));
     await tester.pump(const Duration(milliseconds: 160));
