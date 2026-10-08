@@ -1,3 +1,51 @@
+# CURRENT ONE-DIRECTION EXECUTION DECISION — LIVING STUDY DESK (2026-10-08)
+
+**WHY THIS IS NECESSARY:** Previous Learning App research already established the intended **Living Visual Learning Studio / Student Momentum**, and D/Knot. We failed by interpreting it as successive generic card themes. The Founder rejected every actual Flutter Editorial/Studio/Knowledge design. Research is now an implementation reference, **NOT a reason to hold another wide design-tournament**.
+
+**SINGLE BOUNDED DESIGN DIRECTION FOR THE NEXT REAL FLUTTER EXPERIMENT:** **CANLI ÇALIŞMA MASASI / LIVING STUDY DESK** for Home and overall visual hierarchy; **SOURCE STAGE / KAYNAK SAHNESİ** for the material reader / Recall / honest result. The names identify *one joined user experience*, not new V0 learning features, separate engines, or two competing themes. This is a working DESIGN DECISION TO TEST, NOT Founder visual approval, brand lock, product release or visual PASS.
+
+## Exactly what each screen should LOOK and BEHAVE like
+
+**Home — one personalized working destination, not an AI-tool dashboard**
+- **Top 10%:** compact Sesli Öğren identity, optional contextual D/Knot only when asset is integrated convincingly; no oversized greeting with generic inspirational text.
+- **Dominant first-viewport object:** a visually distinctive **live material surface** with genuine learner title, actual source-type and excerpt/preview when legitimately available. Treat the material like an active physical/digital study object (edge, paper/ink, layered reading depth) rather than a big flat color card. No fabricated lesson thumbnails, chapter counts or generated subject-specific illustrations.
+- **One visible real next action** on the same material, driven by persisted `LearningContinuation.nextAction`: open, review, or attempt Recall as genuinely supported; no decorative "daily mission" semantics or invented progress/streak. Give this action most prominence, without a gigantic dark hero slab.
+- **Secondary affordances** for actual `Dinle | Hatırla | Açıkla | Odaklan` appear as compact but distinct *tool affordances / in-context action strip*, not four equal white tiles with prose. Modes depend on valid source/learner context and truthful loading/error states.
+- **Below the fold:** real recent materials from the library with type/recency and convenient re-entry. Use mixed spatial rhythm and one row/rail rather than endless repeated card containers.
+- **Bottom navigation:** retain existing Home / Kütüphane / İlerleme / Profil mapping; integrate style only, no invented categories or account features.
+- **Empty Home:** show one compelling, truthful PDF/text intake composition and first action; do not present a fictional personal study dashboard.
+
+**Workspace — the learner's source becomes the visual stage**
+- Use existing authorized `ExtractedContentRecord.normalizedText` as the actual readable/scrollable/selectable page. Authentic headings only when present in source, not AI-fabricated extracted diagrams or page fidelity.
+- Compact persistent source masthead, stable document plane and accessible bottom/inline study tool rail. When `Dinle` runs, preserve a coherent visible relationship between source and playable transport; use current player capabilities, do not claim word-sync.
+- Avoid four equal feature cards or making source text an incidental caption. Long source is the dominant visual content; inactive tools do not obscure reading.
+
+**Recall — one focused learning challenge**
+- Source identity persists but source answer is hidden until attempt commitment. Real `RecallPrompt` occupies the focal area; clear answer interaction, meaningful support actions, no fake progress rings / quiz length / timer.
+- D/Knot may orient or acknowledge canonical assistance state *only* when actual approved art/state is suitable; no sticker on every screen. Motion focuses on source → question transition and obeys Reduced Motion.
+
+**Result — signature truth-first visual payoff**
+- Visually arrange **your attempt (transient)** → **original source with real matching answer highlight** → **actual outcome/assistance** → **reason-coded next action** in a coherent spatial composition. In narrow phones, vertical relational layers beat two cramped columns.
+- Meaningful visual transform/continuation thread, not another "correct" paragraph in a white rectangle. No fake mastery, invented color-coded knowledge map or generic confetti. After interruption never reconstruct raw answer from a digest.
+- D/Knot only if contextually meaningful; if the visual artwork clashes, omit from the specific moment.
+
+**Surface style — concrete candidate tokens to evaluate, not locked colors**
+- Visually comfortable warm/light **reading paper** + near-ink dark typography, ONE energetic focus/action accent and a quiet support/listen tone. An asymmetric material-workspace layout with few full-bleed panels and very few cards. A focused/immersive dark region is possible at the actual active challenge, never the default all-screen wrapper.
+- Distinct strong source/heading/action typography; large enough for students but not childish; color never carries learning evidence alone. Use actual canonical D/Knot as a **functional motion layer**, otherwise suppress; no unrelated blue/purple gradients or random lime chips.
+- The **first screenshot** must look like a desirable living educational product because of material identity and composition, not like a generic paperwork app or color variation. Exact palette/font/icon/image assets are **implementation candidates requiring visual comparison and rights QA**, not currently signed off.
+
+## Design-to-build order (NO MORE RESEARCH TOURNAMENT)
+
+1. **Freeze this one executable hypothesis and make the Home real-data visual composition first.** Produce an actual 390×844 Flutter capture for populated and empty Home. Do not spend time implementing three more themes. Use the prior Living Learning Map/D-054 reconciliation and competitor screen references already gathered.
+2. **Complete the SAME material's Workspace → Recall → Result → re-entry.** Use existing runtime contracts/learning evidence; a signature source↔answer payoff must be legible in still images and state transitions. Listen/player consistency is the same visual family, not a new speech backend.
+3. **Run strict perceptual FAIL gate BEFORE extension:** material/next action visible in 3–5s; no repeated generic cards/text walls; D/Knot integrated or absent; source/result relationship understandable; professional type/spacing/contrast; proper 320/390px, 1.3×/1.5× and keyboard; then present real captures and actual interactions for Founder visual disposition.
+4. **Only after the first real screen set is judged visually worth continuing** extend visual system to Library/Progress/Profile and strengthen assets; validate small uncoached real learner sample, and preserve D-068 release device gate. If rejected, change material-stage composition/interaction, not colors and labels.
+5. **No extra tasks or abstract frameworks:** all work remains LA-0040. If actual current source/audio/evidence API cannot fulfill a UI affordance, honestly simplify/remove it. Current default runtime remains unchanged until protected visual approval.
+
+**DESIGN GATE STATUS:** Unimplemented hypothesis / VISUAL FAIL persists. Prior Flutter CI successes prove correctness of rejected candidates only. Founder visual acceptance is not inferred. This design decision is an EXECUTION CURSOR, not an unreviewable final product lock.
+
+---
+
 > **FOUNDER DESIGN RESEARCH SCOPE FIX (2026-10-08):** Competitor benchmarking for this task must focus **only on visible UI/UX craft**, not market positioning, paywalls, retention economics, acquisition or feature-parity claims. Actual UI screenshots/recordings and screen anatomy must inform an original palette, type hierarchy, material-reader layout, audio player, Recall/result visual composition, navigation, artwork and D/Knot role. [VBM-01…VBM-06](../qa/LA-0040_VISUAL_QUALITY_GATE.md) supersedes the prior broad BM benchmark mandate. Source Stage remains a hypothesis and may be changed based on grounded *visual evidence*; it is not locked or approved.
 
 > **2026-10-08 COMPETITOR CHALLENGE / DESIGN REQUIREMENT:** [Market+visual UX benchmark](../research/LA-0040_PUBLIC_LEARNING_AUDIO_SUMMARY_UX_BENCHMARK_2026-10-08.md) plus [BM-01…BM-07 QA gate](../qa/LA-0040_VISUAL_QUALITY_GATE.md) control acceptance of Source Stage. **NotebookLM already offers own-source audio and quiz/flashcards**, Quizlet offers short active retrieval, and Speechify/ElevenReader provide mature listen+read controls. Therefore “load PDF, listen, answer one question” is not assumed a differentiated/commercially compelling design. Source Stage must prove a faster-to-understand and more personally meaningful *honest learner evidence+source return* loop in actual uncoached user comparison, not from aesthetic self-scoring. Keep this as a FALSIFIABLE hypothesis; no visual lock, new paid/provider contract or copied UI.
