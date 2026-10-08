@@ -624,7 +624,10 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
                   SizedBox(height: reviewFocus ? 10 : (compactResultHeader ? 18 : 24)),
                   AnimatedSwitcher(
                     duration: reducedMotion ? Duration.zero : const Duration(milliseconds: 220),
-                    child: _phaseBody(context),
+                    child: KeyedSubtree(
+                      key: ValueKey('${_phase.name}-${_activeAttemptId?.value ?? 'unopened'}'),
+                      child: _phaseBody(context),
+                    ),
                   ),
                   if (_busy) ...[const SizedBox(height: 20), const LinearProgressIndicator()],
                 ],
