@@ -1,3 +1,13 @@
+# ART-DIRECTION GATE BEFORE FLUTTER UI — 2026-10-08
+
+Founder corrected sequence: existing research → real inspiration board → coherent art direction → visual critique → protected Founder direction decision → asset preparation → Flutter production UI. Prior instructions to keep polishing card-based Living Desk Flutter before selecting the visual identity are superseded.
+
+Current art-direction candidate: [MATERIAL IN MOTION / Living Learning Studio](../design/LA-0040_ART_DIRECTION_CANDIDATE_V1_MATERIAL_IN_MOTION.md), which defines AD-01 through AD-09: source-led identity, premium craft, 3–5s clarity, visible learning interaction, canonical D/Knot/colorway fit, source truth, asset feasibility, readability/access and Founder visual approval.
+
+GATE STATUS: Board PROPOSED; art direction NOT LOCKED; authentic D/Knot color comparison NOT RUN; Founder visual acceptance PENDING; code experiments remain visual FAIL. Inspiration image is not runtime proof or approved mascot art. Fixing unrelated Flutter correctness failures is permitted; creating more cosmetic UI before visual-direction approval is on hold.
+
+---
+
 # CURRENT SCOPE CORRECTION — COMPETITOR VISUAL/UI STUDY ONLY (2026-10-08)
 
 Founder clarified that the requested competitor research is **only for choosing and improving Sesli Öğren's visual UI/UX direction**. This explicitly supersedes the earlier market/business/substitution framing of BM-01–BM-07 below. No download-market analysis, revenue, acquisition, paywall, monetization, retention measurement, feature-parity roadmap or growth thesis belongs to THIS competitor design audit. Existing independent project-level EV and release QA requirements remain separate; do not invoke them as required outputs of the competitor *visual audit*.
