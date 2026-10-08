@@ -1,0 +1,295 @@
+import 'package:flutter/material.dart';
+import '../domain/learning_contracts.dart';
+import '../domain/learning_truth.dart';
+import 'companion_view.dart';
+
+/// LA-0040 candidate visuals only. The live app keeps its current UI until a
+/// reviewer explicitly installs a treatment scope in the widget tree.
+enum LearningVisualTreatment { editorial, studio, knowledge }
+
+class LearningVisualTreatmentScope extends InheritedWidget {
+  const LearningVisualTreatmentScope({required this.treatment, required super.child, super.key});
+  final LearningVisualTreatment treatment;
+  static LearningVisualTreatment? maybeOf(BuildContext context) =>
+      context.dependOnInheritedWidgetOfExactType<LearningVisualTreatmentScope>()?.treatment;
+  @override
+  bool updateShouldNotify(LearningVisualTreatmentScope oldWidget) => treatment != oldWidget.treatment;
+}
+
+String _status(LearningContinuation? c) => switch (c?.state.kind) {
+  RecallStateKind.retrievedOnce => 'Bir kez bağımsız hatırlandı',
+  RecallStateKind.developing => 'Gelişiyor',
+  RecallStateKind.needsReview => 'Tekrar gerekli',
+  _ => 'Henüz ölçülmedi',
+};
+
+String _outcome(RecallAttemptResult r) => switch (r.evidence.outcome) {
+  RecallOutcome.correct when r.evidence.assistance == RecallAssistance.none => 'İpucusuz hatırladın',
+  RecallOutcome.helpedCorrect => 'Destekle doğru yanıt',
+  RecallOutcome.answerExposed => 'Yanıt gösterildi',
+  RecallOutcome.partial => 'Kısmen hatırlandı',
+  RecallOutcome.incorrect => 'Tekrar denemen gerekiyor',
+  RecallOutcome.unknown => 'Henüz yanıt veremedin',
+  _ => 'Yanıtın değerlendirildi',
+};
+
+class _Colors {
+  const _Colors(this.paper, this.ink, this.accent, this.support);
+  final Color paper;
+  final Color ink;
+  final Color accent;
+  final Color support;
+  static _Colors of(LearningVisualTreatment lane) => switch (lane) {
+    LearningVisualTreatment.editorial => const _Colors(Color(0xFFF8F3E9), Color(0xFF292B26),
+        Color(0xFFB95636), Color(0xFF676D62)),
+    LearningVisualTreatment.studio => const _Colors(Color(0xFFF4F2ED), Color(0xFF173139),
+        Color(0xFFE2F3AB), Color(0xFF587077)),
+    LearningVisualTreatment.knowledge => const _Colors(Color(0xFFF0F5F1), Color(0xFF1B4037),
+        Color(0xFF167F67), Color(0xFF5F786F)),
+  };
+}
+
+class _Action extends StatelessWidget {
+  const _Action({required this.label, required this.onTap, required this.dark});
+  final String label;
+  final VoidCallback onTap;
+  final bool dark;
+  @override
+  Widget build(BuildContext context) => SizedBox(
+    width: double.infinity,
+    child: FilledButton.icon(
+      style: FilledButton.styleFrom(
+        backgroundColor: dark ? const Color(0xFFE2F3AB) : const Color(0xFF255447),
+        foregroundColor: dark ? const Color(0xFF173139) : Colors.white,
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
+      onPressed: onTap,
+      icon: const Icon(Icons.arrow_forward_rounded),
+      label: Text(label),
+    ),
+  );
+}
+
+class _Secondary extends StatelessWidget {
+  const _Secondary({required this.actions});
+  final List<(String, IconData, VoidCallback)> actions;
+  @override
+  Widget build(BuildContext context) => Wrap(
+    spacing: 5, runSpacing: 2,
+    children: [
+      for (final action in actions)
+        TextButton.icon(onPressed: action.$3, icon: Icon(action.$2), label: Text(action.$1)),
+    ],
+  );
+}
+
+class _ThreadRow extends StatelessWidget {
+  const _ThreadRow({required this.label, required this.value, required this.ink, required this.accent});
+  final String label;
+  final String value;
+  final Color ink;
+  final Color accent;
+  @override
+  Widget build(BuildContext context) => Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+    Container(height: 60, width: 3, color: accent),
+    const SizedBox(width: 15),
+    Expanded(child: Padding(
+      padding: const EdgeInsets.only(bottom: 23),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Text(label.toUpperCase(), style: TextStyle(color: ink.withValues(alpha: 0.62),
+          fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 1)),
+        const SizedBox(height: 7),
+        Text(value, maxLines: 3, overflow: TextOverflow.ellipsis,
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, height: 1.3, color: ink)),
+      ]),
+    )),
+  ]);
+}
+
+/// Real Material/Continuation/Result become distinct compositions; these are
+/// not fake status fixtures or palette-only CSS variants.
+class LearningTreatmentStage extends StatelessWidget {
+  const LearningTreatmentStage({
+    required this.lane, required this.stage, required this.label,
+    required this.headline, required this.sourceLabel, required this.sourceText,
+    required this.nextReason, required this.primaryLabel, required this.onPrimary,
+    this.secondary = const [], this.outcomeIndependent = false, super.key,
+  });
+  final LearningVisualTreatment lane;
+  final String stage;
+  final String label;
+  final String headline;
+  final String sourceLabel;
+  final String sourceText;
+  final String nextReason;
+  final String primaryLabel;
+  final VoidCallback onPrimary;
+  final List<(String, IconData, VoidCallback)> secondary;
+  final bool outcomeIndependent;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = _Colors.of(lane);
+    final source = sourceText.trim().isEmpty ? 'Kaynak hazır' : sourceText.trim();
+    final isResult = stage == 'result';
+    final isStudio = lane == LearningVisualTreatment.studio;
+    final colorForSmall = isStudio ? const Color(0xFFE2F3AB) : c.accent;
+    return ColoredBox(
+      key: ValueKey('la0040-' + stage + '-' + lane.name),
+      color: c.paper,
+      child: ListView(
+        key: stage == 'home' ? const ValueKey('home-surface') : null,
+        padding: const EdgeInsets.fromLTRB(22, 24, 22, 42),
+        children: [
+          if (lane == LearningVisualTreatment.editorial) ...[
+            Text('SESLİ ÖĞREN  /  ' + stage.toUpperCase(),
+                style: TextStyle(color: c.accent, fontWeight: FontWeight.w800,
+                  fontSize: 11, letterSpacing: 1.55)),
+            const SizedBox(height: 30),
+            Text(headline, style: TextStyle(color: c.ink, fontSize: 35,
+                height: 1.08, fontWeight: FontWeight.w700, letterSpacing: -1.1)),
+            const SizedBox(height: 16),
+            Text(label, style: TextStyle(color: c.support, fontSize: 15)),
+            const SizedBox(height: 24),
+            Divider(color: c.support.withValues(alpha: 0.5)),
+            const SizedBox(height: 18),
+            Text(sourceLabel.toUpperCase(), style: TextStyle(color: c.accent,
+              letterSpacing: 1.1, fontWeight: FontWeight.bold, fontSize: 11)),
+            const SizedBox(height: 11),
+            Text(source, maxLines: 7, overflow: TextOverflow.ellipsis,
+                style: TextStyle(color: c.ink, fontSize: 17, height: 1.45)),
+            const SizedBox(height: 28),
+            Text(nextReason, style: TextStyle(color: c.ink, fontSize: 18, height: 1.4)),
+            const SizedBox(height: 22),
+            _Action(label: primaryLabel, onTap: onPrimary, dark: false),
+          ] else if (isStudio) ...[
+            Row(children: [
+              Text('SESLİ ÖĞREN  /  ' + stage.toUpperCase(), style: TextStyle(
+                color: c.ink, fontSize: 11, fontWeight: FontWeight.w900, letterSpacing: 1.2)),
+              const Spacer(),
+              if (isResult)
+                CompanionView(state: outcomeIndependent
+                    ? CompanionVisualState.success : CompanionVisualState.correct, size: 48)
+              else
+                const CompanionView(state: CompanionVisualState.think, size: 48),
+            ]),
+            const SizedBox(height: 20),
+            Container(
+              padding: const EdgeInsets.fromLTRB(23, 26, 23, 24),
+              decoration: BoxDecoration(color: c.ink, borderRadius: BorderRadius.circular(29)),
+              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Text(label.toUpperCase(), style: TextStyle(color: colorForSmall,
+                    fontSize: 11, letterSpacing: 1.2, fontWeight: FontWeight.w800)),
+                const SizedBox(height: 20),
+                Text(headline, style: const TextStyle(color: Colors.white, fontSize: 35,
+                    height: 1.08, fontWeight: FontWeight.w800)),
+                const SizedBox(height: 17),
+                Text(nextReason, style: const TextStyle(color: Color(0xFFD0E2DE), fontSize: 15, height: 1.42)),
+                const SizedBox(height: 27),
+                _Action(label: primaryLabel, onTap: onPrimary, dark: true),
+              ]),
+            ),
+            const SizedBox(height: 29),
+            Text(sourceLabel.toUpperCase(), style: TextStyle(color: c.support, fontSize: 11,
+                fontWeight: FontWeight.w800, letterSpacing: 1.1)),
+            const SizedBox(height: 12),
+            Text(source, maxLines: 7, overflow: TextOverflow.ellipsis, style: TextStyle(
+                color: c.ink, fontSize: 17, fontWeight: FontWeight.w600, height: 1.4)),
+          ] else ...[
+            Text('SESLİ ÖĞREN  /  KAYNAK İZİ', style: TextStyle(color: c.accent,
+                fontSize: 11, letterSpacing: 1.4, fontWeight: FontWeight.w800)),
+            const SizedBox(height: 18),
+            Text(headline, style: TextStyle(color: c.ink, fontSize: 31,
+                fontWeight: FontWeight.w800, letterSpacing: -0.8)),
+            const SizedBox(height: 28),
+            _ThreadRow(label: sourceLabel, value: source, ink: c.ink, accent: c.accent),
+            _ThreadRow(label: 'Öğrenme / sonuç durumu', value: label, ink: c.ink, accent: c.accent),
+            _ThreadRow(label: 'Bir sonraki eylemin nedeni', value: nextReason, ink: c.ink, accent: c.accent),
+            const SizedBox(height: 8),
+            _Action(label: primaryLabel, onTap: onPrimary, dark: false),
+          ],
+          if (secondary.isNotEmpty) ...[
+            const SizedBox(height: 24),
+            Divider(color: c.support.withValues(alpha: 0.28)),
+            const SizedBox(height: 8),
+            _Secondary(actions: secondary),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class LearningTreatmentHome extends StatelessWidget {
+  const LearningTreatmentHome({
+    required this.lane, required this.material, required this.continuation,
+    required this.nextTitle, required this.nextReason,
+    required this.onWorkspace, required this.onRecall, required this.onListen, super.key,
+  });
+  final LearningVisualTreatment lane;
+  final MaterialRecord material;
+  final LearningContinuation? continuation;
+  final String nextTitle;
+  final String nextReason;
+  final VoidCallback onWorkspace;
+  final VoidCallback onRecall;
+  final VoidCallback onListen;
+  @override
+  Widget build(BuildContext context) => LearningTreatmentStage(
+    lane: lane, stage: 'home', label: _status(continuation),
+    headline: nextTitle, sourceLabel: 'Kaldığın materyal', sourceText: material.title,
+    nextReason: nextReason, primaryLabel: 'Materyalle devam et', onPrimary: onWorkspace,
+    secondary: [('Hatırla', Icons.psychology_alt_outlined, onRecall),
+      ('Dinle', Icons.headphones_outlined, onListen)],
+  );
+}
+
+class LearningTreatmentWorkspace extends StatelessWidget {
+  const LearningTreatmentWorkspace({
+    required this.lane, required this.material, required this.excerpt,
+    required this.continuation, required this.onRecall, required this.onListen,
+    required this.onExplain, required this.onFocus, super.key,
+  });
+  final LearningVisualTreatment lane;
+  final MaterialRecord material;
+  final String excerpt;
+  final LearningContinuation? continuation;
+  final VoidCallback onRecall;
+  final VoidCallback onListen;
+  final VoidCallback onExplain;
+  final VoidCallback onFocus;
+  @override
+  Widget build(BuildContext context) => LearningTreatmentStage(
+    lane: lane, stage: 'workspace', label: _status(continuation),
+    headline: material.title,
+    sourceLabel: 'Gerçek kaynak metninden', sourceText: excerpt,
+    nextReason: continuation?.nextAction.reasonText ?? 'İlk hatırlama denemesiyle öğrenme durumunu gör.',
+    primaryLabel: 'Kaynaktan hatırla', onPrimary: onRecall,
+    secondary: [
+      ('Dinle', Icons.headphones_outlined, onListen),
+      ('Açıkla', Icons.menu_book_outlined, onExplain),
+      ('Odaklan', Icons.center_focus_strong_outlined, onFocus),
+    ],
+  );
+}
+
+class LearningTreatmentResult extends StatelessWidget {
+  const LearningTreatmentResult({
+    required this.lane, required this.result, required this.onContinue, super.key,
+  });
+  final LearningVisualTreatment lane;
+  final RecallAttemptResult result;
+  final VoidCallback onContinue;
+  @override
+  Widget build(BuildContext context) => LearningTreatmentStage(
+    lane: lane, stage: 'result',
+    label: _outcome(result),
+    headline: _outcome(result),
+    sourceLabel: 'Doğru ifade / kaynak dayanağı',
+    sourceText: result.correctAnswer + '\n\n' + result.sourceExcerpt,
+    nextReason: result.nextAction.reasonText,
+    primaryLabel: 'Sıradaki adıma geç', onPrimary: onContinue,
+    outcomeIndependent: result.evidence.outcome == RecallOutcome.correct &&
+        result.evidence.assistance == RecallAssistance.none,
+  );
+}
