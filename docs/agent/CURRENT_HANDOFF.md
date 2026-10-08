@@ -1,3 +1,13 @@
+# LA-0040 current review cursor — visual V4 states (2026-10-08)
+
+The existing Canlı Kaynak Atölyesi four-screen concept now has three additional static visual states: empty Home, unknown Recall result and hint-assisted Recall result. Visual artifacts in this chat: la0040_canli_kaynak_atolyesi_v4_states.png, the corresponding HTML and la0040_canli_kaynak_atolyesi_v4_review_pack.zip. A browser-only correction to narrow 1.5x Turkish Recall question typography is also included.
+
+Six bounded browser geometry checks passed without horizontal scrolling, and the next-action explanation can be scrolled into view. D/Knot is the unchanged canonical 128px asset. These are DEMO visual studies only, not validated Flutter screens or real learner data. Current LA-0040 status remains VISUAL REWORK, Founder art-direction decision PENDING. The evidence and remaining release gates are documented at docs/design/LA-0040_LIVING_SOURCE_ATELIER_V3_FOUR_SCREEN_VISUAL_REVIEW_2026-10-08.md and docs/qa/LA-0040_VISUAL_QUALITY_GATE.md.
+
+Next: review actual art quality, then seek Founder direction decision before high-fidelity Flutter/asset implementation. Do not create another theme, replace D/Knot, merge PR #13 or release.
+
+---
+
 # ACTIVE LA-0040 DESIGN CURSOR — FOUR-SCREEN SOURCE↔RECALL VISUAL STUDY (2026-10-08)
 
 Latest art-direction candidate is **Canlı Kaynak Atölyesi V3**: Home, actual-source Reader/Listen, deliberately source-hidden Recall, and grounded attempt↔source Result. The full rendered four-phone screen, four crops, narrow-width variants and self-contained HTML prototype are in the CURRENT chat, not on main: `la0040_canli_kaynak_atolyesi_v3_four_screens.png` and `la0040_canli_kaynak_atolyesi_v3_four_screens.html`. Screen-specific implementation and exact honest QA findings are at `docs/design/LA-0040_LIVING_SOURCE_ATELIER_V3_FOUR_SCREEN_VISUAL_REVIEW_2026-10-08.md`. THIS CURRENT SECTION supersedes prior V2-as-current descriptions, but keeps old records as history.
