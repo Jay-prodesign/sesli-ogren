@@ -320,13 +320,24 @@ class LivingStudyDeskHome extends StatelessWidget {
       ),
       const SizedBox(height: 18),
       Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          const CompanionView(state: CompanionVisualState.idle, size: 128),
-          const SizedBox(width: 12),
+          const CompanionView(state: CompanionVisualState.idle, size: 148),
+          const SizedBox(width: 8),
           const Expanded(
-            child: Text(
-              'D/Knot yanında. İlk kaynağınla başlaman yeterli.',
-              style: TextStyle(color: _sub, fontSize: 14, height: 1.4),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Merhaba, ben D/Knot.',
+                  style: TextStyle(color: _ink, fontSize: 18, fontWeight: FontWeight.w900),
+                ),
+                SizedBox(height: 7),
+                Text(
+                  'Kaynağını birlikte keşfedelim. Sonra ne kadarını hatırladığını göreceğiz.',
+                  style: TextStyle(color: _sub, fontSize: 14, height: 1.4),
+                ),
+              ],
             ),
           ),
         ],
