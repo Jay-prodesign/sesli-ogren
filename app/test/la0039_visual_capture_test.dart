@@ -530,8 +530,7 @@ void main() {
     tester.view.physicalSize = const Size(640, 1400);
     await tester.pump(const Duration(milliseconds: 140));
     expect(tester.takeException(), isNull);
-    await expectLater(find.byType(Scaffold).first,
-        matchesGoldenFile('goldens/la0040_atelier_home_320_text150.png'));
+    await expectLater(find.byType(Scaffold).first, matchesGoldenFile('goldens/la0040_atelier_home_320_text150.png'));
     tester.view.physicalSize = const Size(780, 1688);
     await tester.pump(const Duration(milliseconds: 140));
     await tester.dragUntilVisible(
@@ -571,8 +570,7 @@ void main() {
     tester.view.physicalSize = const Size(640, 1400);
     await tester.pump(const Duration(milliseconds: 160));
     expect(tester.takeException(), isNull);
-    await expectLater(find.byType(Scaffold).last,
-        matchesGoldenFile('goldens/la0040_atelier_result_320_text150.png'));
+    await expectLater(find.byType(Scaffold).last, matchesGoldenFile('goldens/la0040_atelier_result_320_text150.png'));
     tester.view.physicalSize = const Size(780, 1688);
     await tester.pump(const Duration(milliseconds: 120));
 
