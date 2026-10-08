@@ -80,10 +80,7 @@ class _ExplainBackScreenState extends State<ExplainBackScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 DecoratedBox(
-                  decoration: BoxDecoration(
-                    color: AppPalette.primarySoft,
-                    borderRadius: BorderRadius.circular(16),
-                  ),
+                  decoration: BoxDecoration(color: AppPalette.primarySoft, borderRadius: BorderRadius.circular(16)),
                   child: const Padding(
                     padding: EdgeInsets.all(6),
                     child: CompanionView(state: CompanionVisualState.listen, size: 54),
@@ -103,11 +100,8 @@ class _ExplainBackScreenState extends State<ExplainBackScreen> {
                           padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
                           child: Text(
                             'KAYNAĞA BAKMADAN',
-                            style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                              color: AppPalette.primary,
-                              fontWeight: FontWeight.w900,
-                              letterSpacing: 0.4,
-                            ),
+                            style: Theme.of(context).textTheme.labelSmall
+                                ?.copyWith(color: AppPalette.primary, fontWeight: FontWeight.w900, letterSpacing: 0.4),
                           ),
                         ),
                       ),
@@ -123,15 +117,10 @@ class _ExplainBackScreenState extends State<ExplainBackScreen> {
             ),
             const SizedBox(height: 14),
             DecoratedBox(
-              decoration: BoxDecoration(
-                color: AppPalette.signalSoft,
-                borderRadius: BorderRadius.circular(14),
-              ),
+              decoration: BoxDecoration(color: AppPalette.signalSoft, borderRadius: BorderRadius.circular(14)),
               child: const Padding(
                 padding: EdgeInsets.symmetric(horizontal: 13, vertical: 11),
-                child: Text(
-                  'Bu aktif deneme değerlendirilmeden öğrenme kanıtı veya ustalık iddiası oluşturmaz.',
-                ),
+                child: Text('Bu aktif deneme değerlendirilmeden öğrenme kanıtı veya ustalık iddiası oluşturmaz.'),
               ),
             ),
             const SizedBox(height: 18),
@@ -169,10 +158,7 @@ class _UnavailableResult extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => DecoratedBox(
-    decoration: BoxDecoration(
-      color: AppPalette.attentionSoft,
-      borderRadius: BorderRadius.circular(18),
-    ),
+    decoration: BoxDecoration(color: AppPalette.attentionSoft, borderRadius: BorderRadius.circular(18)),
     child: Padding(
       padding: const EdgeInsets.all(16),
       child: Column(
@@ -230,16 +216,10 @@ class _EvaluatedResult extends StatelessWidget {
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                CompanionView(
-                  state: isStrong ? CompanionVisualState.success : CompanionVisualState.correct,
-                  size: 48,
-                ),
+                CompanionView(state: isStrong ? CompanionVisualState.success : CompanionVisualState.correct, size: 48),
                 const SizedBox(width: 11),
                 Expanded(
-                  child: Text(
-                    title,
-                    style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
-                  ),
+                  child: Text(title, style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800)),
                 ),
               ],
             ),
