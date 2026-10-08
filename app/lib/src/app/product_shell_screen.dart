@@ -667,10 +667,7 @@ class _LibraryMaterialCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   DecoratedBox(
-                    decoration: BoxDecoration(
-                      color: AppPalette.primarySoft,
-                      borderRadius: BorderRadius.circular(14),
-                    ),
+                    decoration: BoxDecoration(color: AppPalette.primarySoft, borderRadius: BorderRadius.circular(14)),
                     child: Padding(
                       padding: const EdgeInsets.all(11),
                       child: Icon(mediaIcon, color: AppPalette.primary, size: 22),
