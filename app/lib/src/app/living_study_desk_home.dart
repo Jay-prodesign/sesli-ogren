@@ -103,7 +103,6 @@ class LivingStudyDeskHome extends StatelessWidget {
               ],
             ),
           ),
-
         ],
       ),
     );
