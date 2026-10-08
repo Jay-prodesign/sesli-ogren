@@ -69,9 +69,13 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
   Future<void> _openLearning() async {
     final materialId = (await _snapshot).material?.id ?? widget.runtime.newMaterialId();
     if (!mounted) return;
+    final treatment = LearningVisualTreatmentScope.maybeOf(context);
     await Navigator.of(context).push<void>(
       MaterialPageRoute(
-        builder: (_) => LearningSliceScreen(runtime: widget.runtime, materialId: materialId),
+        builder: (_) {
+          final screen = LearningSliceScreen(runtime: widget.runtime, materialId: materialId);
+          return treatment == null ? screen : LearningVisualTreatmentScope(treatment: treatment, child: screen);
+        },
       ),
     );
     if (!mounted) return;
@@ -81,9 +85,13 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
   Future<void> _openWorkspace([MaterialId? materialId]) async {
     final selected = materialId ?? (await _snapshot).material?.id;
     if (selected == null || !mounted) return;
+    final treatment = LearningVisualTreatmentScope.maybeOf(context);
     await Navigator.of(context).push<void>(
       MaterialPageRoute(
-        builder: (_) => MaterialWorkspaceScreen(runtime: widget.runtime, materialId: selected),
+        builder: (_) {
+          final screen = MaterialWorkspaceScreen(runtime: widget.runtime, materialId: selected);
+          return treatment == null ? screen : LearningVisualTreatmentScope(treatment: treatment, child: screen);
+        },
       ),
     );
     if (!mounted) return;
