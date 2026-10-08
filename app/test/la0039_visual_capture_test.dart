@@ -523,9 +523,15 @@ void main() {
     await _pumpUntilFound(tester, find.byKey(const ValueKey('la0040-living-home-populated')));
     await tester.pump(const Duration(milliseconds: 120));
     await expectLater(find.byType(Scaffold).first, matchesGoldenFile('goldens/la0040_living_home_scale150.png'));
-    await tester.ensureVisible(find.byKey(const ValueKey('la0040-living-continue')));
+    await tester.dragUntilVisible(
+      find.byKey(const ValueKey('la0040-living-continue')),
+      find.byType(Scrollable).first,
+      const Offset(0, -180),
+      maxIteration: 12,
+    );
+    await tester.pumpAndSettle();
     await tester.tap(find.byKey(const ValueKey('la0040-living-continue')));
-    await _pumpUntilFound(tester, find.text('Materyal'));
+    await _pumpUntilFound(tester, find.byType(MaterialWorkspaceScreen));
     await tester.pumpWidget(const SizedBox());
     await store.close();
   }, skip: !_captureEnabled);
