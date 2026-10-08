@@ -393,7 +393,7 @@ Next unallocated ID: **LA-0041**.
 - Executor: ChatGPT (research/audit/spec; reversible prototyping after treatment admission)
 - Verification: current-state audit, VQG-01, treatment tournament, companion reevaluation and Round-0 visual stress/red-team are present. Founder locked the primary audience to Turkish high-school students (9–12) and selected Visual Learning Studio × Student Momentum at concept level. Current LA-0039 treatment remains FAIL / REDESIGN REQUIRED for the stated quality ambition. The generated non-canonical plush/cartoon companion treatment is rejected; canonical D/Knot remains the selected companion baseline. LA-0040 may adjust integration/placement/bounded styling first; identity redesign/removal requires new HIGH/BLOCKER evidence. Representative prototype/runtime evidence and final Founder visual disposition remain required.
 - Intent: find and validate a distinctive, student-relevant, premium, show-don't-tell visual direction; colors and D/Knot visual identity are explicitly reopened.
-- Current leading prototype direction: **Visual Learning Studio × Student Momentum**. Sesli Öğren remains a broader learner-owned-material product; Turkish high-school students (9–12) are the priority-weighted initial segment, not the exclusive target. Final visual lock awaits roadmap/research reconciliation + runtime-truth prototype + VQG-01.
+- Current direction: **Living Visual Learning Studio / Student Momentum** grounded in the prior roadmap and current product truth. Sesli Öğren remains broader than high school; Turkish high-school students are the priority-weighted initial segment. Golden Slice = CONDITIONAL PASS; final visual lock awaits remaining-surface coherence + VQG-01 rerun + Founder review.
 - Quality authority: [docs/qa/LA-0040_VISUAL_QUALITY_GATE.md](docs/qa/LA-0040_VISUAL_QUALITY_GATE.md).
 - Stress/red-team: [docs/qa/LA-0040_VISUAL_STRESS_REDTEAM.md](docs/qa/LA-0040_VISUAL_STRESS_REDTEAM.md).
 - Current-state audit: [docs/research/LA-0040_CURRENT_VISUAL_AUDIT_2026-10-07.md](docs/research/LA-0040_CURRENT_VISUAL_AUDIT_2026-10-07.md).
@@ -401,6 +401,7 @@ Next unallocated ID: **LA-0041**.
 - Companion reevaluation: [docs/design/LA-0040_COMPANION_REEVALUATION.md](docs/design/LA-0040_COMPANION_REEVALUATION.md).
 - Audience/brand/visual lock: [docs/design/LA-0040_AUDIENCE_BRAND_VISUAL_DIRECTION_LOCK.md](docs/design/LA-0040_AUDIENCE_BRAND_VISUAL_DIRECTION_LOCK.md).
 - Prior research/roadmap reconciliation: [docs/design/LA-0040_PRIOR_RESEARCH_ROADMAP_RECONCILIATION.md](docs/design/LA-0040_PRIOR_RESEARCH_ROADMAP_RECONCILIATION.md).
+- Grounded Golden Slice audit: [docs/qa/LA-0040_GROUNDED_GOLDEN_SLICE_AUDIT_2026-10-08.md](docs/qa/LA-0040_GROUNDED_GOLDEN_SLICE_AUDIT_2026-10-08.md).
 - Exec plan: [docs/exec-plans/LA-0040.md](docs/exec-plans/LA-0040.md)
 
 
