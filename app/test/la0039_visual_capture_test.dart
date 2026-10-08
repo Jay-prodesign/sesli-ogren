@@ -537,14 +537,8 @@ void main() {
 
     // Real learner-owned source flows through the same route and persisted
     // Recall engine. No decorative mock answers or invented success metrics.
-    final prompt = await recall.createCurrentPrompt(
-      learner: runtime.learner,
-      materialId: AppRuntime.primaryMaterialId,
-    );
-    final action = await store.learningTruthStore().recallAction(
-      learner: runtime.learner,
-      actionId: prompt.id,
-    );
+    final prompt = await recall.createCurrentPrompt(learner: runtime.learner, materialId: AppRuntime.primaryMaterialId);
+    final action = await store.learningTruthStore().recallAction(learner: runtime.learner, actionId: prompt.id);
     expect(action, isNotNull);
     await tester.tap(find.byKey(const ValueKey('la0040-atelier-workspace-recall')));
     await _pumpUntilFound(tester, find.byKey(const ValueKey('la0040-atelier-recall')));
