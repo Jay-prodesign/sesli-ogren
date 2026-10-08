@@ -55,9 +55,7 @@ class LivingStudyDeskHome extends StatelessWidget {
     };
   }
 
-  String get _why =>
-      continuation?.nextAction.reasonText ??
-      'Kaynağından bir hatırlama denemesiyle ne bildiğini gör.';
+  String get _why => continuation?.nextAction.reasonText ?? 'Kaynağından bir hatırlama denemesiyle ne bildiğini gör.';
 
   String get _preview {
     final source = sourceText?.trim() ?? '';
@@ -65,8 +63,7 @@ class LivingStudyDeskHome extends StatelessWidget {
     return source.replaceAll(RegExp(r'\s+'), ' ');
   }
 
-  String _type(MaterialRecord m) =>
-      m.mediaType == SourceMediaType.pdf ? 'PDF KAYNAĞI' : 'METİN NOTU';
+  String _type(MaterialRecord m) => m.mediaType == SourceMediaType.pdf ? 'PDF KAYNAĞI' : 'METİN NOTU';
 
   @override
   Widget build(BuildContext context) {
@@ -88,12 +85,7 @@ class LivingStudyDeskHome extends StatelessWidget {
               const Expanded(
                 child: Text(
                   'sesli öğren',
-                  style: TextStyle(
-                    fontSize: 19,
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: -0.9,
-                    color: _ink,
-                  ),
+                  style: TextStyle(fontSize: 19, fontWeight: FontWeight.w800, letterSpacing: -0.9, color: _ink),
                 ),
               ),
               const Text(
@@ -116,19 +108,10 @@ class LivingStudyDeskHome extends StatelessWidget {
       children: [
         const Text(
           'Kaldığın yer',
-          style: TextStyle(
-            color: _ink,
-            fontSize: 32,
-            fontWeight: FontWeight.w800,
-            height: 1.08,
-            letterSpacing: -1.2,
-          ),
+          style: TextStyle(color: _ink, fontSize: 32, fontWeight: FontWeight.w800, height: 1.08, letterSpacing: -1.2),
         ),
         const SizedBox(height: 9),
-        const Text(
-          'Kendi notlarınla, kaldığın noktadan.',
-          style: TextStyle(color: _sub, fontSize: 15, height: 1.35),
-        ),
+        const Text('Kendi notlarınla, kaldığın noktadan.', style: TextStyle(color: _sub, fontSize: 15, height: 1.35)),
         const SizedBox(height: 24),
         Stack(
           children: [
@@ -136,10 +119,7 @@ class LivingStudyDeskHome extends StatelessWidget {
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(9, 10, 0, 0),
                 child: DecoratedBox(
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFE5EAE4),
-                    borderRadius: BorderRadius.circular(17),
-                  ),
+                  decoration: BoxDecoration(color: const Color(0xFFE5EAE4), borderRadius: BorderRadius.circular(17)),
                 ),
               ),
             ),
@@ -311,13 +291,7 @@ class LivingStudyDeskHome extends StatelessWidget {
     children: [
       const Text(
         'Her şey kendi\nnotlarınla başlar.',
-        style: TextStyle(
-          color: _ink,
-          fontSize: 35,
-          height: 1.12,
-          fontWeight: FontWeight.w800,
-          letterSpacing: -1.3,
-        ),
+        style: TextStyle(color: _ink, fontSize: 35, height: 1.12, fontWeight: FontWeight.w800, letterSpacing: -1.3),
       ),
       const SizedBox(height: 13),
       const Text(
@@ -342,12 +316,7 @@ class LivingStudyDeskHome extends StatelessWidget {
                 SizedBox(width: 9),
                 Text(
                   'SENİN ÇALIŞMA SAYFAN',
-                  style: TextStyle(
-                    color: _accent,
-                    fontSize: 11,
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: 0.9,
-                  ),
+                  style: TextStyle(color: _accent, fontSize: 11, fontWeight: FontWeight.w800, letterSpacing: 0.9),
                 ),
               ],
             ),
