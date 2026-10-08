@@ -67,6 +67,47 @@ class AtelierWorkspace extends StatelessWidget {
               const SizedBox(height: 17),
               if (sourceText.trim().isNotEmpty) ...[
                 Container(
+                  key: const ValueKey('la0040-reader-companion-scene'),
+                  padding: const EdgeInsets.fromLTRB(12, 12, 16, 12),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFE7F2EA),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: const Row(
+                    children: [
+                      CompanionView(state: CompanionVisualState.listen, size: 96),
+                      SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'BİRLİKTE KEŞFEDELİM',
+                              style: TextStyle(
+                                color: AtelierStyle.teal,
+                                fontSize: 10,
+                                fontWeight: FontWeight.w900,
+                                letterSpacing: 0.8,
+                              ),
+                            ),
+                            SizedBox(height: 7),
+                            Text(
+                              'Önce oku, sonra kendi sözlerinle anlat.',
+                              style: TextStyle(
+                                color: AtelierStyle.ink,
+                                fontSize: 17,
+                                height: 1.24,
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 15),
+                Container(
                   width: double.infinity,
                   padding: const EdgeInsets.fromLTRB(16, 15, 16, 15),
                   decoration: BoxDecoration(color: AtelierStyle.mint, borderRadius: BorderRadius.circular(14)),
