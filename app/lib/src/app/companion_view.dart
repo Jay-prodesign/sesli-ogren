@@ -38,7 +38,8 @@ class _CompanionViewState extends State<CompanionView> with SingleTickerProvider
   void didChangeDependencies() {
     super.didChangeDependencies();
     final media = MediaQuery.maybeOf(context);
-    final reduced = (media?.disableAnimations ?? false) || (media?.accessibleNavigation ?? false) || !TickerMode.of(context);
+    final reduced =
+        (media?.disableAnimations ?? false) || (media?.accessibleNavigation ?? false) || !TickerMode.of(context);
     if (reduced == _reducedMotion) {
       return;
     }

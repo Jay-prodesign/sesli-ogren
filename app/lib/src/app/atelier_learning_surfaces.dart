@@ -69,10 +69,7 @@ class AtelierWorkspace extends StatelessWidget {
                 Container(
                   key: const ValueKey('la0040-reader-companion-scene'),
                   padding: const EdgeInsets.fromLTRB(12, 12, 16, 12),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFE7F2EA),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
+                  decoration: BoxDecoration(color: const Color(0xFFE7F2EA), borderRadius: BorderRadius.circular(20)),
                   child: const Row(
                     children: [
                       CompanionView(state: CompanionVisualState.idle, size: 96),

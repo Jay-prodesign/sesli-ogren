@@ -82,9 +82,7 @@ void main() {
       const MaterialApp(
         home: MediaQuery(
           data: MediaQueryData(disableAnimations: true),
-          child: Scaffold(
-            body: CompanionView(state: CompanionVisualState.think),
-          ),
+          child: Scaffold(body: CompanionView(state: CompanionVisualState.think)),
         ),
       ),
     );
@@ -98,9 +96,7 @@ void main() {
       const MaterialApp(
         home: TickerMode(
           enabled: false,
-          child: Scaffold(
-            body: CompanionView(state: CompanionVisualState.idle),
-          ),
+          child: Scaffold(body: CompanionView(state: CompanionVisualState.idle)),
         ),
       ),
     );
@@ -108,5 +104,4 @@ void main() {
     await tester.pump(const Duration(seconds: 3));
     expect(tester.binding.transientCallbackCount, 0);
   });
-
 }
