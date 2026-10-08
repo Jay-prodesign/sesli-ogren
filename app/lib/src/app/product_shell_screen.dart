@@ -298,7 +298,7 @@ class _HomeSurface extends StatelessWidget {
   }
 
   static String _nextReason(LearningContinuation? continuation) =>
-      continuation?.nextAction.reasonText ?? 'Kaynağından kısa bir Recall ile ilk gerçek öğrenme kanıtını oluştur.';
+      continuation?.nextAction.reasonText ?? 'Kaynağından kısa bir hatırlama denemesiyle ilk gerçek öğrenme kanıtını oluştur.';
 }
 
 class _FirstMaterialHero extends StatelessWidget {
@@ -372,87 +372,182 @@ class _ContinueHero extends StatelessWidget {
     final mediaIcon = material.mediaType == SourceMediaType.pdf ? Icons.picture_as_pdf_rounded : Icons.notes_rounded;
 
     return Material(
-      color: AppPalette.primaryDark,
-      borderRadius: BorderRadius.circular(28),
+      color: AppPalette.surface,
+      borderRadius: BorderRadius.circular(24),
       clipBehavior: Clip.antiAlias,
       child: InkWell(
         key: const ValueKey('home-continuation-hero'),
         onTap: onPressed,
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(22, 20, 22, 22),
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            border: Border.all(color: AppPalette.outline),
+            borderRadius: BorderRadius.circular(24),
+          ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Row(
-                children: [
-                  DecoratedBox(
-                    decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.11),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(9),
-                      child: Icon(mediaIcon, color: Colors.white, size: 20),
-                    ),
-                  ),
-                  const SizedBox(width: 11),
-                  Expanded(
-                    child: Column(
+              Padding(
+                padding: const EdgeInsets.fromLTRB(18, 18, 18, 16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          'Materyalin',
-                          style: theme.textTheme.labelMedium?.copyWith(
-                            color: Colors.white.withValues(alpha: 0.68),
-                            fontWeight: FontWeight.w700,
+                        DecoratedBox(
+                          decoration: BoxDecoration(
+                            color: AppPalette.primarySoft,
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.all(10),
+                            child: Icon(mediaIcon, color: AppPalette.primary, size: 21),
                           ),
                         ),
-                        const SizedBox(height: 2),
-                        Text(
-                          material.title,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: theme.textTheme.titleMedium?.copyWith(color: Colors.white),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'KALDIĞIN MATERYAL',
+                                style: theme.textTheme.labelSmall?.copyWith(
+                                  color: AppPalette.inkMuted,
+                                  fontWeight: FontWeight.w900,
+                                  letterSpacing: 0.55,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                material.title,
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                                style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
+                              ),
+                            ],
+                          ),
                         ),
+                        const Icon(Icons.arrow_outward_rounded, color: AppPalette.inkMuted, size: 20),
                       ],
                     ),
-                  ),
-                  const Icon(Icons.arrow_outward_rounded, color: Colors.white70, size: 20),
-                ],
-              ),
-              if (sourceName != material.title) ...[
-                const SizedBox(height: 7),
-                Text(
-                  sourceName,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: theme.textTheme.bodySmall?.copyWith(color: Colors.white.withValues(alpha: 0.62)),
+                    if (sourceName != material.title) ...[
+                      const SizedBox(height: 11),
+                      Text(
+                        sourceName,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.textTheme.bodySmall?.copyWith(color: AppPalette.inkMuted),
+                      ),
+                    ],
+                    const SizedBox(height: 13),
+                    DecoratedBox(
+                      decoration: BoxDecoration(
+                        color: _stateSoft(data.continuation),
+                        borderRadius: BorderRadius.circular(999),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                        child: Text(
+                          _stateLabel(data.continuation),
+                          style: theme.textTheme.labelSmall?.copyWith(
+                            color: _stateAccent(data.continuation),
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-              ],
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 20),
-                child: Divider(color: Colors.white.withValues(alpha: 0.16)),
               ),
-              _HeroLabel(icon: Icons.bolt_rounded, text: 'Şimdi ne yapmalı?', foreground: const Color(0xFFAFC0FF)),
-              const SizedBox(height: 10),
-              Text(title, style: theme.textTheme.headlineMedium?.copyWith(color: Colors.white)),
-              const SizedBox(height: 8),
-              Text(
-                reason,
-                style: theme.textTheme.bodyLarge?.copyWith(color: Colors.white.withValues(alpha: 0.82), height: 1.42),
-              ),
-              const SizedBox(height: 22),
-              FilledButton.icon(
-                style: FilledButton.styleFrom(backgroundColor: Colors.white, foregroundColor: AppPalette.primaryDark),
-                onPressed: onPressed,
-                icon: const Icon(Icons.arrow_forward_rounded),
-                label: const Text('Devam et'),
+              DecoratedBox(
+                decoration: const BoxDecoration(color: AppPalette.primaryDark),
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(18, 17, 18, 18),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Row(
+                        children: [
+                          DecoratedBox(
+                            decoration: BoxDecoration(
+                              color: AppPalette.momentum,
+                              borderRadius: BorderRadius.circular(999),
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
+                              child: Text(
+                                'ŞİMDİ',
+                                style: theme.textTheme.labelSmall?.copyWith(
+                                  color: AppPalette.momentumInk,
+                                  fontWeight: FontWeight.w900,
+                                  letterSpacing: 0.5,
+                                ),
+                              ),
+                            ),
+                          ),
+                          const Spacer(),
+                          Icon(Icons.bolt_rounded, color: Colors.white.withValues(alpha: 0.72), size: 18),
+                        ],
+                      ),
+                      const SizedBox(height: 11),
+                      Text(title, style: theme.textTheme.headlineSmall?.copyWith(color: Colors.white)),
+                      const SizedBox(height: 7),
+                      Text(
+                        reason,
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: Colors.white.withValues(alpha: 0.80),
+                          height: 1.4,
+                        ),
+                      ),
+                      const SizedBox(height: 17),
+                      FilledButton.icon(
+                        style: FilledButton.styleFrom(
+                          backgroundColor: Colors.white,
+                          foregroundColor: AppPalette.primaryDark,
+                        ),
+                        onPressed: onPressed,
+                        icon: const Icon(Icons.arrow_forward_rounded),
+                        label: const Text('Devam et'),
+                      ),
+                    ],
+                  ),
+                ),
               ),
             ],
           ),
         ),
       ),
     );
+  }
+
+  static String _stateLabel(LearningContinuation? continuation) {
+    if (continuation == null) return 'Henüz ölçülmedi';
+    return switch (continuation.state.kind) {
+      RecallStateKind.notAssessed => 'Henüz ölçülmedi',
+      RecallStateKind.developing => 'Gelişiyor',
+      RecallStateKind.retrievedOnce => 'Bir kez bağımsız hatırlandı',
+      RecallStateKind.needsReview => 'Tekrar gerekiyor',
+    };
+  }
+
+  static Color _stateSoft(LearningContinuation? continuation) {
+    final state = continuation?.state.kind ?? RecallStateKind.notAssessed;
+    return switch (state) {
+      RecallStateKind.notAssessed => AppPalette.surfaceMuted,
+      RecallStateKind.developing => AppPalette.primarySoft,
+      RecallStateKind.retrievedOnce => AppPalette.successSoft,
+      RecallStateKind.needsReview => AppPalette.attentionSoft,
+    };
+  }
+
+  static Color _stateAccent(LearningContinuation? continuation) {
+    final state = continuation?.state.kind ?? RecallStateKind.notAssessed;
+    return switch (state) {
+      RecallStateKind.notAssessed => AppPalette.inkMuted,
+      RecallStateKind.developing => AppPalette.primary,
+      RecallStateKind.retrievedOnce => AppPalette.success,
+      RecallStateKind.needsReview => AppPalette.attention,
+    };
   }
 }
 
@@ -653,12 +748,12 @@ class _ContextCard extends StatelessWidget {
             children: [
               DecoratedBox(
                 decoration: BoxDecoration(
-                  color: title == 'Dinle' ? AppPalette.successSoft : AppPalette.primarySoft,
+                  color: title == 'Dinle' ? AppPalette.signalSoft : AppPalette.primarySoft,
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Padding(
                   padding: const EdgeInsets.all(9),
-                  child: Icon(icon, size: 20, color: title == 'Dinle' ? AppPalette.success : AppPalette.primary),
+                  child: Icon(icon, size: 20, color: title == 'Dinle' ? AppPalette.signal : AppPalette.primary),
                 ),
               ),
               const SizedBox(height: 14),
