@@ -50,10 +50,11 @@ class _Colors {
 }
 
 class _Action extends StatelessWidget {
-  const _Action({required this.label, required this.onTap, required this.dark});
+  const _Action({required this.label, required this.onTap, required this.dark, this.enabled = true});
   final String label;
   final VoidCallback onTap;
   final bool dark;
+  final bool enabled;
   @override
   Widget build(BuildContext context) => SizedBox(
     width: double.infinity,
@@ -63,7 +64,7 @@ class _Action extends StatelessWidget {
         foregroundColor: dark ? const Color(0xFF173139) : Colors.white,
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
-      onPressed: onTap,
+      onPressed: enabled ? onTap : null,
       icon: const Icon(Icons.arrow_forward_rounded),
       label: Text(label),
     ),
@@ -402,7 +403,7 @@ class LearningTreatmentRecallPrompt extends StatelessWidget {
               Text(errorText!, style: const TextStyle(color: Color(0xFFAA463D))),
             ],
             const SizedBox(height: 18),
-            _Action(label: 'Yanıtla', onTap: busy ? () {} : onSubmit, dark: false),
+            _Action(label: 'Yanıtla', onTap: onSubmit, dark: false, enabled: !busy),
             const SizedBox(height: 13),
             Wrap(spacing: 6, runSpacing: 4, children: [
               OutlinedButton(onPressed: busy ? null : onHint, child: const Text('İpucu')),
