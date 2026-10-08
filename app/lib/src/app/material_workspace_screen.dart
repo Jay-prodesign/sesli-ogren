@@ -8,6 +8,7 @@ import 'companion_view.dart';
 import 'explain_screen.dart';
 import 'focus_screen.dart';
 import 'learning_slice_screen.dart';
+import 'la0040_visual_treatments.dart';
 import 'listen_screen.dart';
 
 class MaterialWorkspaceScreen extends StatefulWidget {
@@ -129,6 +130,19 @@ class _WorkspaceBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final candidate = LearningVisualTreatmentScope.maybeOf(context);
+    if (candidate != null) {
+      return LearningTreatmentWorkspace(
+        lane: candidate,
+        material: data.material,
+        excerpt: data.extracted?.normalizedText ?? '',
+        continuation: data.continuation,
+        onRecall: onRecall,
+        onListen: onListen,
+        onExplain: onExplain,
+        onFocus: onFocus,
+      );
+    }
     return ListView(
       padding: const EdgeInsets.fromLTRB(20, 12, 20, 36),
       children: [
