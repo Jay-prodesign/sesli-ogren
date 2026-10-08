@@ -252,6 +252,33 @@ class AtelierRecall extends StatelessWidget {
       ),
       const SizedBox(height: 17),
       Container(
+        key: const ValueKey('la0040-recall-companion-guidance'),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        decoration: BoxDecoration(
+          color: AtelierStyle.mint,
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(color: AtelierStyle.line),
+        ),
+        child: const Row(
+          children: [
+            Icon(Icons.chat_bubble_outline_rounded, color: AtelierStyle.teal, size: 21),
+            SizedBox(width: 11),
+            Expanded(
+              child: Text(
+                'D/Knot: Acele etme. Hatırladığın kadarıyla anlat; takıldığında ipucu isteyebilirsin.',
+                style: TextStyle(
+                  color: AtelierStyle.ink,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  height: 1.4,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+      const SizedBox(height: 15),
+      Container(
         width: double.infinity,
         padding: const EdgeInsets.fromLTRB(19, 19, 19, 23),
         decoration: BoxDecoration(color: AtelierStyle.ink, borderRadius: BorderRadius.circular(21)),
@@ -450,6 +477,31 @@ class AtelierResult extends StatelessWidget {
               ? 'Tek bir bağımsız deneme, henüz ustalık değil.'
               : 'Bu sonuç denemeni ve varsa aldığın yardımı yansıtır.',
           style: const TextStyle(color: AtelierStyle.muted, fontSize: 14, height: 1.42),
+        ),
+        const SizedBox(height: 13),
+        Container(
+          key: const ValueKey('la0040-result-companion-reflection'),
+          padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 13),
+          decoration: BoxDecoration(
+            color: AtelierStyle.mint,
+            borderRadius: BorderRadius.circular(17),
+          ),
+          child: Row(
+            children: [
+              const Icon(Icons.auto_awesome_outlined, color: AtelierStyle.teal, size: 20),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  independent
+                      ? 'D/Knot: Kendi başına hatırladın. Bunu kalıcılaştırmak için daha sonra yeniden dene.'
+                      : assisted
+                      ? 'D/Knot: İpucundan yararlandın. Şimdi kaynağı görüp sonra yeniden denemek iyi olabilir.'
+                      : 'D/Knot: Bu deneme bize sonraki çalışmanda nereye odaklanacağını gösteriyor.',
+                  style: const TextStyle(color: AtelierStyle.ink, fontSize: 13, height: 1.45),
+                ),
+              ),
+            ],
+          ),
         ),
         const SizedBox(height: 13),
         const Text(
