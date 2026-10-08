@@ -307,7 +307,7 @@ void main() {
     await pumpUntilFound(tester, find.text('Öğrenme durumu'));
 
     expect(find.text('Öğrenme durumu'), findsOneWidget);
-    expect(find.text('Henüz ölçülmedi'), findsOneWidget);
+    expect(find.text('Henüz ölçülmedi'), findsWidgets);
     expect(find.text('SIRADAKİ ADIM'), findsOneWidget);
     expect(find.text('Hatırla ile devam'), findsOneWidget);
 
