@@ -62,6 +62,10 @@ jobs:
           test -s test/goldens/la0040_explain.png
           test -s test/goldens/la0040_explain_back.png
           test -s test/goldens/la0040_recall_prompt.png
+          test -s test/goldens/la0040_profile.png
+          test -s test/goldens/la0040_stress_narrow_home.png
+          test -s test/goldens/la0040_stress_text130_workspace.png
+          test -s test/goldens/la0040_stress_text150_recall.png
 
       - name: Stage review evidence
         run: |
@@ -77,6 +81,10 @@ jobs:
           cp app/test/goldens/la0040_explain.png docs/qa/evidence/la0039/explain.png
           cp app/test/goldens/la0040_explain_back.png docs/qa/evidence/la0039/explain-back.png
           cp app/test/goldens/la0040_recall_prompt.png docs/qa/evidence/la0039/recall-prompt.png
+          cp app/test/goldens/la0040_profile.png docs/qa/evidence/la0039/profile.png
+          cp app/test/goldens/la0040_stress_narrow_home.png docs/qa/evidence/la0039/stress-narrow-home.png
+          cp app/test/goldens/la0040_stress_text130_workspace.png docs/qa/evidence/la0039/stress-text130-workspace.png
+          cp app/test/goldens/la0040_stress_text150_recall.png docs/qa/evidence/la0039/stress-text150-recall.png
           sha256sum docs/qa/evidence/la0039/*.png | tee docs/qa/evidence/la0039/SHA256SUMS.txt
 
       - name: Upload review evidence
