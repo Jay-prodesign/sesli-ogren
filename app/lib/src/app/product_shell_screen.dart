@@ -7,6 +7,7 @@ import 'app_theme.dart';
 import 'companion_view.dart';
 import 'learning_slice_screen.dart';
 import 'la0040_visual_treatments.dart';
+import 'living_study_desk_home.dart';
 import 'listen_screen.dart';
 import 'material_workspace_screen.dart';
 import 'profile_surface.dart';
@@ -47,6 +48,12 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
       learner: widget.runtime.learner,
       materialId: material.id,
     );
+    final extracted = source == null
+        ? null
+        : await widget.runtime.store.extractedContentForSource(
+            learner: widget.runtime.learner,
+            sourceVersionId: source.identity.sourceVersionId,
+          );
     final continuation = await widget.runtime.recall.reopen(learner: widget.runtime.learner, materialId: material.id);
     final progress = <ProgressItem>[];
     for (final item in materials) {
@@ -60,6 +67,7 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
     return _HomeSnapshot(
       material: material,
       source: source,
+      extracted: extracted,
       continuation: continuation,
       materials: materials,
       progress: progress,
@@ -157,6 +165,7 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
                     onOpenLearning: _openLearning,
                     onOpenListen: _openListen,
                     onOpenWorkspace: () => _openWorkspace(),
+                    onOpenMaterial: (id) => _openWorkspace(id),
                   ),
                 ),
                 TickerMode(
@@ -221,15 +230,29 @@ class _HomeSurface extends StatelessWidget {
     required this.onOpenLearning,
     required this.onOpenListen,
     required this.onOpenWorkspace,
+    required this.onOpenMaterial,
   });
 
   final _HomeSnapshot data;
   final VoidCallback onOpenLearning;
   final VoidCallback onOpenListen;
   final VoidCallback onOpenWorkspace;
+  final ValueChanged<MaterialId> onOpenMaterial;
 
   @override
   Widget build(BuildContext context) {
+    if (LivingDeskReviewScope.active(context)) {
+      return LivingStudyDeskHome(
+        material: data.material,
+        continuation: data.continuation,
+        sourceText: data.extracted?.normalizedText,
+        otherMaterials: data.materials.where((item) => item.id != data.material?.id).toList(),
+        onOpenWorkspace: onOpenWorkspace,
+        onOpenLearning: onOpenLearning,
+        onOpenListen: onOpenListen,
+        onOpenMaterial: onOpenMaterial,
+      );
+    }
     final theme = Theme.of(context);
     final hasMaterial = data.material != null;
     final candidate = LearningVisualTreatmentScope.maybeOf(context);
@@ -979,6 +1002,7 @@ class _HomeSnapshot {
   const _HomeSnapshot({
     this.material,
     this.source,
+    this.extracted,
     this.continuation,
     this.materials = const [],
     this.progress = const [],
@@ -986,6 +1010,7 @@ class _HomeSnapshot {
 
   final MaterialRecord? material;
   final SourceVersionRecord? source;
+  final ExtractedContentRecord? extracted;
   final LearningContinuation? continuation;
   final List<MaterialRecord> materials;
   final List<ProgressItem> progress;
