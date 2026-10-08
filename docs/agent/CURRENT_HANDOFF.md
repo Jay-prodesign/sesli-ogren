@@ -1,3 +1,13 @@
+# SINGLE CURRENT UI IMPLEMENTATION CURSOR — 2026-10-08
+
+Stop cycling research/themes. Previous Learning App visual research and rejected Flutter treatments are reconciled into ONE concrete, bounded candidate: **CANLI ÇALIŞMA MASASI / Living Study Desk Home + SOURCE STAGE Workspace/Recall/Result**, as specified screen-by-screen in `docs/design/LA-0040_SOURCE_STAGE_INTERACTION_IMPLEMENTATION_CONTRACT.md`. Preserve playful/living/companion ambitions with source/evidence truth and D/Knot canonical identity; do NOT resurrect giant dark Studio cards, four equal tool tiles or fictitious course maps.
+
+**IMMEDIATE NEXT EXECUTION:** actual opt-in Flutter populated Home + empty Home in one distinctive material-first composition → capture both at 390×844 → inspect and fix visible craft blockers → carry same material to source reader, focused Recall and grounded Result → physical/runtime review and explicit Founder visual disposition. Start with current real Flutter data contract; no new broad competitor research, generic design engine, task IDs, app-wide refactor or final visual PASS assumption.
+
+Old Editorial/Studio/Knowledge remain REJECTED. This is an implementable experiment, NOT final visual approval. Existing learning truth, source evidence, other routes and D-068 release protection remain unchanged. QA gate still controls every prototype and eventual screen family expansion.
+
+---
+
 # CURRENT FOUNDER OVERRIDE — 2026-10-08 / LA-0040 SECOND VISUAL FAIL — ALL THREE TREATMENTS REJECTED
 
 **Decision authority: Founder reviewed the latest actual 12-screen Flutter packet and explicitly judged the interface bad / overall visual direction FAIL.** This supersedes the previous "Studio primary refinement lead" and every instruction to continue Studio polishing or choose Editorial/Knowledge. **NO visual treatment winner, NO accepted visual direction.** LA-0039/LA-0040 remain IN_PROGRESS / DESIGN FAIL. The validated Flutter code is engineering evidence only, NOT commercial UX acceptance.
