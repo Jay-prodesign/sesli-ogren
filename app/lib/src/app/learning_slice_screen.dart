@@ -7,6 +7,7 @@ import '../domain/operational_event.dart';
 import 'app_runtime.dart';
 import 'app_theme.dart';
 import 'companion_view.dart';
+import 'la0040_visual_treatments.dart';
 
 enum _SlicePhase { loading, source, recall, result, continuation, error }
 
@@ -740,6 +741,19 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
   Widget _resultCard(BuildContext context) {
     final result = _result;
     if (result == null) return _errorCard(context);
+    final candidate = LearningVisualTreatmentScope.maybeOf(context);
+    if (candidate != null) {
+      return LearningTreatmentResult(
+        lane: candidate,
+        result: result,
+        onContinue: () {
+          setState(() {
+            _continuation = LearningContinuation(state: result.state, nextAction: result.nextAction);
+            _phase = _SlicePhase.continuation;
+          });
+        },
+      );
+    }
     final theme = Theme.of(context);
     final isIndependent = result.evidence.outcome == RecallOutcome.correct;
 
