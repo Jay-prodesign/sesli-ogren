@@ -1,3 +1,11 @@
+# CURRENT REAL FLUTTER QA — 2026-10-08 / ff6ca982
+
+Scoped real-app Source Atelier visual implementation is no longer just a concept. Four exact-head CI suites [product](https://github.com/Jay-prodesign/sesli-ogren/actions/runs/37775177464), [bootstrap](https://github.com/Jay-prodesign/sesli-ogren/actions/runs/37775177462), [account deletion](https://github.com/Jay-prodesign/sesli-ogren/actions/runs/37775177948) and [real visual capture](https://github.com/Jay-prodesign/sesli-ogren/actions/runs/37775170110) passed. Real source, prompt, answer and next-action paths were exercised; known `AnimatedSwitcher` ghost-text defect fixed and clean screenshot recapture validated. The review artifact contains populated/empty/narrow/text-scaled Home, Reader, Recall, independent, unknown and hinted Result screenshots.
+
+**Distinguish gates:** functional Flutter/learning-truth scoped technical gate = PASS for TESTED paths; visual professional craft/desirability = REWORK; canonical D/Knot assets high-res and states = PARTIAL; 320/390 and 1.3/1.5x stress on ALL updated screens = NOT FULLY VERIFIED; uncoached human 3–5s/60s and Founder direction lock = PENDING; iOS/Android real-device D-068 = PENDING. One golden capture is not full cross-platform QA. Preview remains explicit opt-in and default published UI unchanged. Prior instructions claiming Flutter production visual not started are historical. No DONE or release claim.
+
+---
+
 # CURRENT V4 STATE & RESPONSIVE QA RESULT — 2026-10-08
 
 **New browser concept evidence** (NOT real Flutter) extends the same LA-0040 Canlı Kaynak Atölyesi art direction with three specific states: genuinely empty Home, unknown/“Bilmiyorum” Result, and hinted (assistance-explicit) Result. Source identity/quote is displayed as labeled DEMO only. The same exact canonical D/Knot original file is embedded; no new character or invented progress.
