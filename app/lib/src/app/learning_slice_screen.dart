@@ -872,7 +872,7 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
                 _phase = _SlicePhase.continuation;
               });
             },
-            child: const Text('Devam et'),
+            child: const Text('Sıradaki adıma geç'),
           ),
         ],
       ),
