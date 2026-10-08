@@ -684,6 +684,21 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
     if (prompt == null) {
       return _errorCard(context);
     }
+    final candidate = LearningVisualTreatmentScope.maybeOf(context);
+    if (candidate != null) {
+      return LearningTreatmentRecallPrompt(
+        lane: candidate,
+        prompt: prompt,
+        controller: _answerController,
+        busy: _busy,
+        onSubmit: _submit,
+        onHint: _requestHint,
+        onReveal: _revealAnswer,
+        onUnknown: () => _submit(unknown: true),
+        supportText: _supportText,
+        errorText: _inlineError,
+      );
+    }
     return _SurfaceCard(
       key: const ValueKey('recall'),
       child: Column(
