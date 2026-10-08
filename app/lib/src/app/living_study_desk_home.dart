@@ -236,12 +236,18 @@ class LivingStudyDeskHome extends StatelessWidget {
         Center(
           child: Container(key: const ValueKey('la0040-source-to-recall-thread'), width: 2, height: 14, color: _accent),
         ),
-        Container(
-          decoration: BoxDecoration(color: _paper, borderRadius: BorderRadius.circular(18)),
-          padding: const EdgeInsets.fromLTRB(14, 11, 16, 13),
-          child: Row(
-            children: [
-              const CompanionView(state: CompanionVisualState.idle, size: 112),
+        Material(
+          color: _paper,
+          borderRadius: BorderRadius.circular(18),
+          clipBehavior: Clip.antiAlias,
+          child: InkWell(
+            key: const ValueKey('la0040-living-next-step-open'),
+            onTap: onOpenLearning,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(14, 11, 16, 13),
+              child: Row(
+                children: [
+                  const CompanionView(state: CompanionVisualState.idle, size: 112),
               const SizedBox(width: 10),
               Expanded(
                 child: Column(
