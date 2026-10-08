@@ -541,6 +541,9 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
     final media = MediaQuery.maybeOf(context);
     final reducedMotion = (media?.disableAnimations ?? false) || (media?.accessibleNavigation ?? false);
     final compactResultHeader = _phase == _SlicePhase.result;
+    final candidate = LearningVisualTreatmentScope.maybeOf(context);
+    final reviewFocus = candidate != null &&
+        (_phase == _SlicePhase.recall || _phase == _SlicePhase.result);
     return Scaffold(
       body: SafeArea(
         child: DecoratedBox(
@@ -557,7 +560,34 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
               child: ListView(
                 padding: const EdgeInsets.fromLTRB(24, 28, 24, 40),
                 children: [
-                  Row(
+                  if (reviewFocus)
+                    Row(
+                      children: [
+                        IconButton(
+                          tooltip: 'Çalışmadan çık',
+                          onPressed: () => Navigator.of(context).maybePop(),
+                          icon: const Icon(Icons.arrow_back_rounded),
+                        ),
+                        const SizedBox(width: 3),
+                        Expanded(
+                          child: Text(
+                            'SESLİ ÖĞREN',
+                            style: theme.textTheme.labelLarge?.copyWith(
+                              fontWeight: FontWeight.w900,
+                              letterSpacing: 1.2,
+                            ),
+                          ),
+                        ),
+                        Text(
+                          compactResultHeader ? 'SONUÇ' : 'HATIRLA',
+                          style: theme.textTheme.labelSmall?.copyWith(
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                      ],
+                    )
+                  else
+                    Row(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       DecoratedBox(
@@ -591,7 +621,7 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
                       ),
                     ],
                   ),
-                  SizedBox(height: compactResultHeader ? 18 : 24),
+                  SizedBox(height: reviewFocus ? 10 : (compactResultHeader ? 18 : 24)),
                   AnimatedSwitcher(
                     duration: reducedMotion ? Duration.zero : const Duration(milliseconds: 220),
                     child: _phaseBody(context),
