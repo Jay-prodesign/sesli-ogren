@@ -289,7 +289,7 @@ class AtelierResult extends StatelessWidget {
       spans.add(
         TextSpan(
           text: excerpt.substring(index, index + answer.length),
-          style: const TextStyle(fontWeight: FontWeight.w900, backgroundColor: AtelierStyle.mark),
+          style: const TextStyle(color: AtelierStyle.mark, fontWeight: FontWeight.w900),
         ),
       );
       spans.add(TextSpan(text: excerpt.substring(index + answer.length)));
@@ -317,7 +317,15 @@ class AtelierResult extends StatelessWidget {
                 ),
               ),
             ),
-            const CompanionView(state: CompanionVisualState.correct, size: 62),
+            CompanionView(
+              state: result.evidence.outcome == RecallOutcome.correct &&
+                      result.evidence.assistance == RecallAssistance.none
+                  ? CompanionVisualState.success
+                  : result.evidence.outcome == RecallOutcome.unknown
+                  ? CompanionVisualState.think
+                  : CompanionVisualState.correct,
+              size: 62,
+            ),
           ],
         ),
         const SizedBox(height: 10),
@@ -343,27 +351,93 @@ class AtelierResult extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 22),
-        const Text(
-          'KAYNAĞINDAKİ DOĞRU İFADE',
-          style: TextStyle(color: AtelierStyle.teal, fontSize: 11, fontWeight: FontWeight.w900, letterSpacing: 1),
-        ),
-        const SizedBox(height: 9),
-        Text(
-          result.correctAnswer,
-          style: const TextStyle(color: AtelierStyle.ink, fontSize: 23, fontWeight: FontWeight.w900, height: 1.24),
-        ),
-        const SizedBox(height: 12),
-        Container(
-          width: double.infinity,
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: AtelierStyle.paper,
-            border: Border.all(color: AtelierStyle.line),
-            borderRadius: BorderRadius.circular(14),
+        Center(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 15),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.arrow_downward_rounded, color: AtelierStyle.teal, size: 20),
+                const SizedBox(width: 8),
+                const Text(
+                  'KAYNAĞINDAKİ KARŞILIĞI',
+                  style: TextStyle(
+                    color: AtelierStyle.teal,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 1,
+                  ),
+                ),
+              ],
+            ),
           ),
-          child: Text.rich(
-            TextSpan(children: spans),
-            style: const TextStyle(color: AtelierStyle.ink, fontSize: 16, height: 1.55),
+        ),
+        TweenAnimationBuilder<double>(
+          key: const ValueKey('la0040-source-evidence-reveal'),
+          tween: Tween<double>(begin: 0, end: 1),
+          duration: (MediaQuery.maybeOf(context)?.disableAnimations ?? false)
+              ? Duration.zero
+              : const Duration(milliseconds: 240),
+          builder: (context, progress, child) => Opacity(
+            opacity: progress,
+            child: Transform.translate(
+              offset: Offset(0, 12 * (1 - progress)),
+              child: child,
+            ),
+          ),
+          child: Container(
+            width: double.infinity,
+            padding: const EdgeInsets.fromLTRB(20, 21, 20, 23),
+            decoration: BoxDecoration(
+              color: AtelierStyle.ink,
+              borderRadius: BorderRadius.circular(21),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Row(
+                  children: [
+                    Icon(Icons.find_in_page_outlined, color: AtelierStyle.mark, size: 20),
+                    SizedBox(width: 9),
+                    Expanded(
+                      child: Text(
+                        'KAYNAKTAKİ DOĞRU İFADE',
+                        style: TextStyle(
+                          color: AtelierStyle.mark,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: 1,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 14),
+                Text(
+                  result.correctAnswer,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 25,
+                    height: 1.2,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+                const SizedBox(height: 15),
+                const Divider(color: Color(0xFF486068), height: 1),
+                const SizedBox(height: 14),
+                Text.rich(
+                  TextSpan(children: spans),
+                  style: const TextStyle(color: Color(0xFFE4EDEC), fontSize: 16, height: 1.54),
+                ),
+                if (index < 0) ...[
+                  const SizedBox(height: 10),
+                  const Text(
+                    'Bu alıntıda doğru ifadeye birebir vurgu bulunamadı.',
+                    style: TextStyle(color: Color(0xFFC7D6D4), fontSize: 12, height: 1.4),
+                  ),
+                ],
+              ],
+            ),
           ),
         ),
         const SizedBox(height: 22),
