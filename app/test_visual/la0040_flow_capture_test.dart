@@ -84,6 +84,10 @@ void main() {
     tester.view.physicalSize = const Size(390, 844);
     tester.view.devicePixelRatio = 1;
     await tester.pumpWidget(MaterialApp(debugShowCheckedModeBanner: false, home: Scaffold(body: child)));
+    // Resolve asynchronously decoded character assets before capturing the first frame.
+    await tester.runAsync(() async {
+      await Future<void>.delayed(const Duration(milliseconds: 250));
+    });
     await tester.pump(const Duration(milliseconds: 300));
     await expectLater(find.byType(Scaffold), matchesGoldenFile('goldens/$name.png'));
     tester.view.resetPhysicalSize();
