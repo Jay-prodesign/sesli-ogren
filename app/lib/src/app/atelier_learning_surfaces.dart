@@ -74,15 +74,28 @@ class AtelierWorkspace extends StatelessWidget {
                 )
               else
                 Container(
-                  padding: const EdgeInsets.fromLTRB(20, 21, 20, 25),
-                  decoration: BoxDecoration(
+                  padding: const EdgeInsets.fromLTRB(22, 22, 22, 30),
+                  decoration: const BoxDecoration(
                     color: AtelierStyle.paper,
-                    border: Border.all(color: AtelierStyle.line),
-                    borderRadius: BorderRadius.circular(19),
+                    border: Border(left: BorderSide(color: AtelierStyle.teal, width: 3)),
+                    boxShadow: [BoxShadow(color: Color(0x0B15313A), blurRadius: 18, offset: Offset(0, 8))],
                   ),
-                  child: SelectableText(
-                    sourceText,
-                    style: const TextStyle(color: AtelierStyle.ink, fontSize: 17, height: 1.62),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Row(
+                        children: [
+                          Icon(Icons.auto_stories_outlined, color: AtelierStyle.teal, size: 17),
+                          SizedBox(width: 8),
+                          Text('ORİJİNAL KAYNAĞIN', style: TextStyle(color: AtelierStyle.teal, fontSize: 10, fontWeight: FontWeight.w900, letterSpacing: 1)),
+                        ],
+                      ),
+                      const SizedBox(height: 17),
+                      SelectableText(
+                        sourceText,
+                        style: const TextStyle(color: AtelierStyle.ink, fontSize: 18, height: 1.65),
+                      ),
+                    ],
                   ),
                 ),
             ],
@@ -303,6 +316,14 @@ class AtelierResult extends StatelessWidget {
     final excerpt = result.sourceExcerpt;
     final answer = result.correctAnswer.trim();
     final index = answer.isEmpty ? -1 : excerpt.toLowerCase().indexOf(answer.toLowerCase());
+    final independent = result.evidence.outcome == RecallOutcome.correct &&
+        result.evidence.assistance == RecallAssistance.none;
+    final assisted = result.evidence.outcome == RecallOutcome.helpedCorrect;
+    final responseColor = independent
+        ? AtelierStyle.mint
+        : assisted
+            ? const Color(0xFFFFF1D9)
+            : const Color(0xFFF1F0EC);
     final spans = <TextSpan>[];
     if (index == -1) {
       spans.add(TextSpan(text: excerpt));
@@ -367,7 +388,11 @@ class AtelierResult extends StatelessWidget {
         Container(
           width: double.infinity,
           padding: const EdgeInsets.all(17),
-          decoration: BoxDecoration(color: AtelierStyle.mint, borderRadius: BorderRadius.circular(14)),
+          decoration: BoxDecoration(
+            color: responseColor,
+            borderRadius: BorderRadius.circular(14),
+            border: Border(left: BorderSide(color: independent ? AtelierStyle.teal : assisted ? const Color(0xFFC48B33) : AtelierStyle.muted, width: 4)),
+          ),
           child: Text(
             _response,
             style: const TextStyle(color: AtelierStyle.ink, fontSize: 16, height: 1.45, fontWeight: FontWeight.w700),
