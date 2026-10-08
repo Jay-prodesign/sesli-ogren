@@ -54,9 +54,13 @@ class _MaterialWorkspaceScreenState extends State<MaterialWorkspaceScreen> {
   }
 
   Future<void> _openRecall() async {
+    final treatment = LearningVisualTreatmentScope.maybeOf(context);
     await Navigator.of(context).push<void>(
       MaterialPageRoute(
-        builder: (_) => LearningSliceScreen(runtime: widget.runtime, materialId: widget.materialId),
+        builder: (_) {
+          final screen = LearningSliceScreen(runtime: widget.runtime, materialId: widget.materialId);
+          return treatment == null ? screen : LearningVisualTreatmentScope(treatment: treatment, child: screen);
+        },
       ),
     );
     if (!mounted) return;
