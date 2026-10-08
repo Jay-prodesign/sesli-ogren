@@ -1,3 +1,5 @@
+> **2026-10-08 COMPETITOR CHALLENGE / DESIGN REQUIREMENT:** [Market+visual UX benchmark](../research/LA-0040_PUBLIC_LEARNING_AUDIO_SUMMARY_UX_BENCHMARK_2026-10-08.md) plus [BM-01…BM-07 QA gate](../qa/LA-0040_VISUAL_QUALITY_GATE.md) control acceptance of Source Stage. **NotebookLM already offers own-source audio and quiz/flashcards**, Quizlet offers short active retrieval, and Speechify/ElevenReader provide mature listen+read controls. Therefore “load PDF, listen, answer one question” is not assumed a differentiated/commercially compelling design. Source Stage must prove a faster-to-understand and more personally meaningful *honest learner evidence+source return* loop in actual uncoached user comparison, not from aesthetic self-scoring. Keep this as a FALSIFIABLE hypothesis; no visual lock, new paid/provider contract or copied UI.
+
 # LA-0040 — SOURCE STAGE / KAYNAK SAHNESİ
 ## Concrete interaction-first design and implementation contract (2026-10-08)
 
