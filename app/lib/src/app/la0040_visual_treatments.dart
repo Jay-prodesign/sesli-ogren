@@ -293,3 +293,125 @@ class LearningTreatmentResult extends StatelessWidget {
         result.evidence.assistance == RecallAssistance.none,
   );
 }
+
+ 
+/// The actual RecallPrompt from the active SourceVersion drives this stage;
+/// no answer, source hint, or expected outcome is created by the visual lane.
+class LearningTreatmentRecallPrompt extends StatelessWidget {
+  const LearningTreatmentRecallPrompt({
+    required this.lane,
+    required this.prompt,
+    required this.controller,
+    required this.busy,
+    required this.onSubmit,
+    required this.onHint,
+    required this.onReveal,
+    required this.onUnknown,
+    this.supportText,
+    this.errorText,
+    super.key,
+  });
+  final LearningVisualTreatment lane;
+  final RecallPrompt prompt;
+  final TextEditingController controller;
+  final bool busy;
+  final VoidCallback onSubmit;
+  final VoidCallback onHint;
+  final VoidCallback onReveal;
+  final VoidCallback onUnknown;
+  final String? supportText;
+  final String? errorText;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = _Colors.of(lane);
+    final studio = lane == LearningVisualTreatment.studio;
+    return ColoredBox(
+      key: ValueKey('la0040-prompt-' + lane.name),
+      color: c.paper,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(20, 20, 20, 22),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            if (studio)
+              Container(
+                padding: const EdgeInsets.all(21),
+                decoration: BoxDecoration(
+                  color: c.ink,
+                  borderRadius: BorderRadius.circular(24),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Row(
+                      children: [
+                        Expanded(
+                          child: Text('KAYNAĞA BAKMADAN',
+                              style: TextStyle(color: Color(0xFFE2F3AB),
+                                  fontSize: 11, letterSpacing: 1.1)),
+                        ),
+                        CompanionView(state: CompanionVisualState.think, size: 48),
+                      ],
+                    ),
+                    const SizedBox(height: 14),
+                    Text(prompt.promptText,
+                        style: const TextStyle(color: Colors.white,
+                            fontSize: 24, height: 1.25,
+                            fontWeight: FontWeight.w700)),
+                  ],
+                ),
+              )
+            else if (lane == LearningVisualTreatment.editorial)
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('HATIRLA / AÇIK KİTAP YOK',
+                      style: TextStyle(color: c.accent, fontSize: 11,
+                          letterSpacing: 1.1, fontWeight: FontWeight.w800)),
+                  const SizedBox(height: 20),
+                  Text(prompt.promptText,
+                      style: TextStyle(color: c.ink, fontSize: 26,
+                          height: 1.22, fontWeight: FontWeight.w700)),
+                  const SizedBox(height: 20),
+                  Divider(color: c.support.withValues(alpha: 0.45)),
+                ],
+              )
+            else
+              _ThreadRow(label: 'Kaynaktan geri çağır',
+                  value: prompt.promptText, ink: c.ink, accent: c.accent),
+            const SizedBox(height: 22),
+            TextField(
+              controller: controller,
+              enabled: !busy,
+              textInputAction: TextInputAction.done,
+              onSubmitted: (_) => onSubmit(),
+              maxLines: 3,
+              minLines: 2,
+              decoration: const InputDecoration(
+                labelText: 'Kendi yanıtın',
+                border: OutlineInputBorder(),
+              ),
+            ),
+            if (supportText != null) ...[
+              const SizedBox(height: 9),
+              Text(supportText!, style: TextStyle(color: c.support)),
+            ],
+            if (errorText != null) ...[
+              const SizedBox(height: 9),
+              Text(errorText!, style: const TextStyle(color: Color(0xFFAA463D))),
+            ],
+            const SizedBox(height: 18),
+            _Action(label: 'Yanıtla', onTap: busy ? () {} : onSubmit, dark: false),
+            const SizedBox(height: 13),
+            Wrap(spacing: 6, runSpacing: 4, children: [
+              OutlinedButton(onPressed: busy ? null : onHint, child: const Text('İpucu')),
+              OutlinedButton(onPressed: busy ? null : onReveal, child: const Text('Yanıtı göster')),
+              TextButton(onPressed: busy ? null : onUnknown, child: const Text('Bilmiyorum')),
+            ]),
+          ],
+        ),
+      ),
+    );
+  }
+}
