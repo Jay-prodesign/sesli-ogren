@@ -8,11 +8,11 @@ This section supersedes stale branch/cursor/visual-pass/companion-lock lines bel
 - Founder visual correction on 2026-10-07 is expanded: **colors, visual system and D/Knot visual identity are all reopened.** D-070’s prior companion visual lock is superseded for current visual-direction evaluation. Learning truth, source/provenance, evidence semantics and account/data safety are not reopened.
 - **LA-0040 — Million-Dollar Visual Audit & Student Experience Elevation: IN_PROGRESS / ACTIVE CURSOR.**
 - Current LA-0039 treatment (Premium Active Learning Studio) is now a baseline/control, not a locked final visual lane.
-- LA-0040 Round-0 VQG result: **FAIL / REDESIGN REQUIRED for the stated quality ambition**. High findings: generic-identity risk, prototype-like/repetitive Material Workspace, over-text/under-visual presentation, weak student-specific desire, and incomplete companion/UI integration.
+- LA-0040 grounded Golden Slice VQG result: **CONDITIONAL PASS**. The prior automatic FAILs (prototype-like Workspace, over-text structural dependence, weak payoff/continuation, companion mismatch) are closed in the representative slice. Final identity / priority-audience desire / whole-product coherence remain open.
 - Current leading prototype lane: **Visual Learning Studio × Student Momentum**. Sesli Öğren remains broader than high school; Turkish high-school students (9–12 / approx. 14–18) are the priority-weighted initial audience segment. Final visual lock waits for prior-roadmap/research reconciliation + implementation-truth prototype + VQG-01.
 - Companion correction: the generated round/plush blue-purple concept mascot is **REJECTED because it is not canonical D/Knot**. Canonical D/Knot remains the selected baseline from the prior Founder-reviewed Round-7/D-070 work; first adjust integration, placement and bounded styling. Redesign/removal requires new HIGH/BLOCKER evidence.
 - Validated runtime baseline: `8caff368b653e0a3bae037903d581411dab9befa` — bootstrap `37641586921` PASS; account-deletion `37641586906` PASS; product-bounded `37641586870` PASS; visual capture `37641549582` PASS.
-- Prior research/roadmap reconciliation is complete in `docs/design/LA-0040_PRIOR_RESEARCH_ROADMAP_RECONCILIATION.md`. Current cursor: prototype **Living Visual Learning Studio / Student Momentum** using only implemented/current product truth (Home -> Workspace -> Recall -> Result, with real Listen/Explain/Focus where applicable) and canonical D/Knot; then rerun VQG-01 + visual stress/red-team before final visual lock.
+- Prior research/roadmap reconciliation and grounded Golden Slice proof are complete. Validated runtime head: `e14b98f2ef26c6a18c818695da907d57e73cd0d2` — bootstrap `37728851631` PASS; account-deletion `37728851629` PASS; product-bounded `37728851623` PASS. Representative visual capture: run `37728364553` PASS, artifact `11528344389`. Current cursor: roll the grounded Living Visual Learning Studio grammar into **Listen -> Explain/Explain-Back -> Focus -> Library/Progress -> Profile/common states**, then recapture and rerun full VQG-01 before Founder lock.
 - Physical-device release validation remains separate under D-068.
 - Game Engine / corebreak-game remains READ-ONLY methodology reference only. No cross-project product decision, code or asset authority is imported.
 - No merge, release, deploy, paid provider, production secret or cross-project mutation is authorized.
@@ -25,6 +25,7 @@ Authoritative LA-0040 artifacts:
 - docs/design/LA-0040_AUDIENCE_BRAND_VISUAL_DIRECTION_LOCK.md
 - docs/qa/LA-0040_VISUAL_QUALITY_GATE.md
 - docs/qa/LA-0040_VISUAL_STRESS_REDTEAM.md
+- docs/qa/LA-0040_GROUNDED_GOLDEN_SLICE_AUDIT_2026-10-08.md
 
 ---
 
