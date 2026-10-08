@@ -87,7 +87,15 @@ class AtelierWorkspace extends StatelessWidget {
                         children: [
                           Icon(Icons.auto_stories_outlined, color: AtelierStyle.teal, size: 17),
                           SizedBox(width: 8),
-                          Text('ORİJİNAL KAYNAĞIN', style: TextStyle(color: AtelierStyle.teal, fontSize: 10, fontWeight: FontWeight.w900, letterSpacing: 1)),
+                          Text(
+                            'ORİJİNAL KAYNAĞIN',
+                            style: TextStyle(
+                              color: AtelierStyle.teal,
+                              fontSize: 10,
+                              fontWeight: FontWeight.w900,
+                              letterSpacing: 1,
+                            ),
+                          ),
                         ],
                       ),
                       const SizedBox(height: 17),
@@ -316,14 +324,14 @@ class AtelierResult extends StatelessWidget {
     final excerpt = result.sourceExcerpt;
     final answer = result.correctAnswer.trim();
     final index = answer.isEmpty ? -1 : excerpt.toLowerCase().indexOf(answer.toLowerCase());
-    final independent = result.evidence.outcome == RecallOutcome.correct &&
-        result.evidence.assistance == RecallAssistance.none;
+    final independent =
+        result.evidence.outcome == RecallOutcome.correct && result.evidence.assistance == RecallAssistance.none;
     final assisted = result.evidence.outcome == RecallOutcome.helpedCorrect;
     final responseColor = independent
         ? AtelierStyle.mint
         : assisted
-            ? const Color(0xFFFFF1D9)
-            : const Color(0xFFF1F0EC);
+        ? const Color(0xFFFFF1D9)
+        : const Color(0xFFF1F0EC);
     final spans = <TextSpan>[];
     if (index == -1) {
       spans.add(TextSpan(text: excerpt));
@@ -391,7 +399,16 @@ class AtelierResult extends StatelessWidget {
           decoration: BoxDecoration(
             color: responseColor,
             borderRadius: BorderRadius.circular(14),
-            border: Border(left: BorderSide(color: independent ? AtelierStyle.teal : assisted ? const Color(0xFFC48B33) : AtelierStyle.muted, width: 4)),
+            border: Border(
+              left: BorderSide(
+                color: independent
+                    ? AtelierStyle.teal
+                    : assisted
+                    ? const Color(0xFFC48B33)
+                    : AtelierStyle.muted,
+                width: 4,
+              ),
+            ),
           ),
           child: Text(
             _response,
