@@ -85,7 +85,8 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
       MaterialPageRoute(
         builder: (_) {
           final screen = LearningSliceScreen(runtime: widget.runtime, materialId: materialId);
-          return treatment == null ? screen : LearningVisualTreatmentScope(treatment: treatment, child: screen);
+          if (treatment != null) return LearningVisualTreatmentScope(treatment: treatment, child: screen);
+          return LivingDeskReviewScope.active(context) ? LivingDeskReviewScope(child: screen) : screen;
         },
       ),
     );
@@ -101,7 +102,8 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
       MaterialPageRoute(
         builder: (_) {
           final screen = MaterialWorkspaceScreen(runtime: widget.runtime, materialId: selected);
-          return treatment == null ? screen : LearningVisualTreatmentScope(treatment: treatment, child: screen);
+          if (treatment != null) return LearningVisualTreatmentScope(treatment: treatment, child: screen);
+          return LivingDeskReviewScope.active(context) ? LivingDeskReviewScope(child: screen) : screen;
         },
       ),
     );
