@@ -98,7 +98,7 @@ class LivingStudyDeskHome extends StatelessWidget {
                     ),
                   ],
                 ),
-                const SizedBox(height: 32),
+                const SizedBox(height: 18),
                 if (hasMaterial) _populated(context) else _empty(context),
               ],
             ),
@@ -253,11 +253,11 @@ class LivingStudyDeskHome extends StatelessWidget {
           child: Container(key: const ValueKey('la0040-source-to-recall-thread'), width: 2, height: 14, color: _accent),
         ),
         Container(
-          decoration: BoxDecoration(color: _ink, borderRadius: BorderRadius.circular(18)),
+          decoration: BoxDecoration(color: _paper, borderRadius: BorderRadius.circular(18)),
           padding: const EdgeInsets.fromLTRB(14, 11, 16, 13),
           child: Row(
             children: [
-              const CompanionView(state: CompanionVisualState.idle, size: 64),
+              const CompanionView(state: CompanionVisualState.idle, size: 112),
               const SizedBox(width: 10),
               Expanded(
                 child: Column(
@@ -266,7 +266,7 @@ class LivingStudyDeskHome extends StatelessWidget {
                     const Text(
                       'SIRADAKİ GERÇEK ADIM',
                       style: TextStyle(
-                        color: Color(0xFFB5DAD1),
+                        color: _accent,
                         fontSize: 10,
                         fontWeight: FontWeight.w900,
                         letterSpacing: 1,
@@ -277,14 +277,14 @@ class LivingStudyDeskHome extends StatelessWidget {
                       _nextStep,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(color: Colors.white, fontSize: 17, fontWeight: FontWeight.w900),
+                      style: const TextStyle(color: _ink, fontSize: 17, fontWeight: FontWeight.w900),
                     ),
                     const SizedBox(height: 3),
                     Text(
                       _why,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(color: Color(0xFFD4E6E2), fontSize: 12, height: 1.3),
+                      style: const TextStyle(color: _sub, fontSize: 12, height: 1.3),
                     ),
                   ],
                 ),
@@ -358,7 +358,7 @@ class LivingStudyDeskHome extends StatelessWidget {
       const SizedBox(height: 18),
       Row(
         children: [
-          const CompanionView(state: CompanionVisualState.idle, size: 76),
+          const CompanionView(state: CompanionVisualState.idle, size: 128),
           const SizedBox(width: 12),
           const Expanded(
             child: Text(
