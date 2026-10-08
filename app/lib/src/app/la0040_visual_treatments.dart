@@ -8,13 +8,54 @@ import 'companion_view.dart';
 /// reviewer explicitly installs a treatment scope in the widget tree.
 enum LearningVisualTreatment { editorial, studio, knowledge }
 
-class LearningVisualTreatmentScope extends InheritedWidget {
-  const LearningVisualTreatmentScope({required this.treatment, required super.child, super.key});
+/// Keeps each visual experiment coherent across chrome, navigation and routes
+/// without changing the production app theme when this scope is absent.
+class LearningVisualTreatmentScope extends StatelessWidget {
+  const LearningVisualTreatmentScope({
+    required this.treatment,
+    required this.child,
+    super.key,
+  });
+
   final LearningVisualTreatment treatment;
+  final Widget child;
+
   static LearningVisualTreatment? maybeOf(BuildContext context) =>
-      context.dependOnInheritedWidgetOfExactType<LearningVisualTreatmentScope>()?.treatment;
+      context.dependOnInheritedWidgetOfExactType<_TreatmentInherited>()?.treatment;
+
   @override
-  bool updateShouldNotify(LearningVisualTreatmentScope oldWidget) => treatment != oldWidget.treatment;
+  Widget build(BuildContext context) {
+    final c = _Colors.of(treatment);
+    final base = Theme.of(context);
+    return Theme(
+      data: base.copyWith(
+        scaffoldBackgroundColor: c.paper,
+        colorScheme: base.colorScheme.copyWith(
+          primary: c.ink,
+          onPrimary: Colors.white,
+          primaryContainer: c.paper,
+          onPrimaryContainer: c.ink,
+          secondary: c.accent,
+          onSecondary: c.ink,
+          surface: c.paper,
+          onSurface: c.ink,
+        ),
+        navigationBarTheme: NavigationBarThemeData(
+          backgroundColor: c.paper,
+          indicatorColor: c.accent.withValues(alpha: 0.18),
+        ),
+      ),
+      child: _TreatmentInherited(treatment: treatment, child: child),
+    );
+  }
+}
+
+class _TreatmentInherited extends InheritedWidget {
+  const _TreatmentInherited({required this.treatment, required super.child});
+  final LearningVisualTreatment treatment;
+
+  @override
+  bool updateShouldNotify(_TreatmentInherited oldWidget) => treatment != oldWidget.treatment;
 }
 
 String _status(LearningContinuation? c) => switch (c?.state.kind) {
