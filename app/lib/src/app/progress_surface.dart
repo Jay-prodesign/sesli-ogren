@@ -21,11 +21,43 @@ class ProgressSurface extends StatelessWidget {
     return ListView(
       padding: const EdgeInsets.fromLTRB(20, 24, 20, 32),
       children: [
-        Text('İlerleme', style: theme.textTheme.headlineMedium),
-        const SizedBox(height: 6),
+        Row(
+          children: [
+            Expanded(child: Text('İlerleme', style: theme.textTheme.headlineMedium)),
+            DecoratedBox(
+              decoration: BoxDecoration(
+                color: AppPalette.signalSoft,
+                borderRadius: BorderRadius.circular(999),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                child: Text(
+                  'KANITA DAYALI',
+                  style: theme.textTheme.labelSmall?.copyWith(
+                    color: AppPalette.signal,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 0.45,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
         Text(
-          'Yalnızca aktif öğrenme kanıtına dayalı durumlar. Dinlemek veya açıklama okumak ilerlemeyi yapay olarak artırmaz.',
+          'Burada yalnızca aktif öğrenme denemelerinden gelen gerçek durumları görürsün.',
           style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+        ),
+        const SizedBox(height: 12),
+        DecoratedBox(
+          decoration: BoxDecoration(
+            color: AppPalette.attentionSoft,
+            borderRadius: BorderRadius.circular(14),
+          ),
+          child: const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 13, vertical: 11),
+            child: Text('Dinlemek veya açıklama okumak ilerlemeyi yapay olarak artırmaz.'),
+          ),
         ),
         const SizedBox(height: 24),
         if (items.isEmpty)
@@ -62,7 +94,7 @@ class _ProgressCard extends StatelessWidget {
       RecallStateKind.retrievedOnce => 'Bir kez bağımsız hatırlandı',
       RecallStateKind.needsReview => 'Tekrar gerekiyor',
     };
-    final reason = item.continuation?.nextAction.reasonText ?? 'Aktif Recall henüz öğrenme kanıtı üretmedi.';
+    final reason = item.continuation?.nextAction.reasonText ?? 'Aktif hatırlama henüz öğrenme kanıtı üretmedi.';
     final (accent, soft, icon) = switch (state) {
       RecallStateKind.notAssessed => (
         AppPalette.inkMuted,
@@ -76,54 +108,107 @@ class _ProgressCard extends StatelessWidget {
     return Card(
       child: InkWell(
         onTap: onPressed,
-        borderRadius: BorderRadius.circular(20),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              DecoratedBox(
-                decoration: BoxDecoration(color: soft, borderRadius: BorderRadius.circular(13)),
-                child: Padding(
-                  padding: const EdgeInsets.all(10),
-                  child: Icon(icon, color: accent, size: 21),
-                ),
+        borderRadius: BorderRadius.circular(18),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 15, 16, 13),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  DecoratedBox(
+                    decoration: BoxDecoration(color: soft, borderRadius: BorderRadius.circular(13)),
+                    child: Padding(
+                      padding: const EdgeInsets.all(10),
+                      child: Icon(icon, color: accent, size: 21),
+                    ),
+                  ),
+                  const SizedBox(width: 13),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          item.material.title,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
+                        ),
+                        const SizedBox(height: 8),
+                        DecoratedBox(
+                          decoration: BoxDecoration(color: soft, borderRadius: BorderRadius.circular(999)),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                            child: Text(
+                              label,
+                              style: theme.textTheme.labelSmall?.copyWith(
+                                color: accent,
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const Padding(
+                    padding: EdgeInsets.only(top: 8),
+                    child: Icon(Icons.chevron_right_rounded, color: AppPalette.inkMuted),
+                  ),
+                ],
               ),
-              const SizedBox(width: 13),
-              Expanded(
-                child: Column(
+            ),
+            DecoratedBox(
+              decoration: const BoxDecoration(
+                color: AppPalette.primaryDark,
+                borderRadius: BorderRadius.vertical(bottom: Radius.circular(18)),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(15, 12, 15, 13),
+                child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      item.material.title,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: theme.textTheme.titleMedium,
-                    ),
-                    const SizedBox(height: 8),
                     DecoratedBox(
-                      decoration: BoxDecoration(color: soft, borderRadius: BorderRadius.circular(999)),
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                        child: Text(
-                          label,
-                          style: theme.textTheme.labelSmall?.copyWith(color: accent, fontWeight: FontWeight.w700),
-                        ),
+                      decoration: BoxDecoration(
+                        color: AppPalette.momentum,
+                        borderRadius: BorderRadius.circular(999),
+                      ),
+                      child: const Padding(
+                        padding: EdgeInsets.all(6),
+                        child: Icon(Icons.arrow_forward_rounded, color: AppPalette.momentumInk, size: 16),
                       ),
                     ),
-                    const SizedBox(height: 10),
-                    Text(
-                      'Sıradaki adım',
-                      style: theme.textTheme.labelSmall?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+                    const SizedBox(width: 9),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Sıradaki adım',
+                            style: theme.textTheme.labelSmall?.copyWith(
+                              color: Colors.white.withValues(alpha: 0.68),
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                          const SizedBox(height: 3),
+                          Text(
+                            reason,
+                            maxLines: 3,
+                            overflow: TextOverflow.ellipsis,
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: Colors.white,
+                              height: 1.4,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                    const SizedBox(height: 3),
-                    Text(reason, maxLines: 3, overflow: TextOverflow.ellipsis),
                   ],
                 ),
               ),
-              const Padding(padding: EdgeInsets.only(top: 8), child: Icon(Icons.chevron_right_rounded)),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
