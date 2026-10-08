@@ -14,6 +14,7 @@ import 'package:sesli_ogren/src/app/listen_screen.dart';
 import 'package:sesli_ogren/src/app/material_workspace_screen.dart';
 import 'package:sesli_ogren/src/app/product_shell_screen.dart';
 import 'package:sesli_ogren/src/domain/learning_contracts.dart';
+import 'package:sesli_ogren/src/domain/learning_truth.dart';
 import 'package:sesli_ogren/src/data/pdf_text_extractor.dart';
 import 'package:sesli_ogren/src/data/source_ingest_service.dart';
 import 'package:sesli_ogren/src/data/sqlite_source_store.dart';
@@ -379,6 +380,50 @@ void main() {
         find.byType(Scaffold).last,
         matchesGoldenFile('goldens/la0040_treatment_${lane.name}_result.png'),
       );
+
+      // Exercise the persisted negative path on the SAME material and
+      // scoped review route. A prior independent result cannot convert an
+      // unknown or hinted attempt into unassisted success.
+      await tester.ensureVisible(find.text('Sıradaki adıma geç'));
+      await tester.tap(find.text('Sıradaki adıma geç'));
+      await _pumpUntilFound(tester, find.text('Hatırlamaya dön'));
+      await tester.tap(find.text('Hatırlamaya dön'));
+      await _pumpUntilFound(tester, find.byKey(ValueKey('la0040-prompt-${lane.name}')));
+      await tester.ensureVisible(find.text('Bilmiyorum'));
+      await tester.tap(find.text('Bilmiyorum'));
+      await _pumpUntilFound(tester, find.byKey(ValueKey('la0040-result-${lane.name}')));
+      await tester.pump(const Duration(milliseconds: 280));
+      expect(find.text('Henüz yanıt veremedin'), findsOneWidget);
+      expect(find.text('İpucusuz hatırladın'), findsNothing);
+
+      await tester.ensureVisible(find.text('Sıradaki adıma geç'));
+      await tester.tap(find.text('Sıradaki adıma geç'));
+      await _pumpUntilFound(tester, find.text('Hatırlamaya dön'));
+      await tester.tap(find.text('Hatırlamaya dön'));
+      await _pumpUntilFound(tester, find.byKey(ValueKey('la0040-prompt-${lane.name}')));
+      await tester.ensureVisible(find.text('İpucu'));
+      await tester.tap(find.text('İpucu'));
+      await tester.pump(const Duration(milliseconds: 180));
+      await tester.enterText(find.byType(TextField), action.expectedAnswer);
+      await tester.ensureVisible(find.text('Yanıtla'));
+      await tester.tap(find.text('Yanıtla'));
+      await _pumpUntilFound(tester, find.byKey(ValueKey('la0040-result-${lane.name}')));
+      await tester.pump(const Duration(milliseconds: 280));
+      expect(find.text('Destekle doğru yanıt'), findsOneWidget);
+      expect(find.text('İpucusuz hatırladın'), findsNothing);
+
+      final storedSource = await store.currentSourceVersion(
+        learner: runtime.learner,
+        materialId: AppRuntime.primaryMaterialId,
+      );
+      expect(storedSource, isNotNull);
+      final evidence = await store.learningTruthStore().evidenceForMaterial(
+        learner: runtime.learner,
+        materialId: AppRuntime.primaryMaterialId,
+        sourceVersionId: storedSource!.identity.sourceVersionId,
+      );
+      expect(evidence.any((row) => row.outcome == RecallOutcome.unknown), isTrue);
+      expect(evidence.any((row) => row.assistance == RecallAssistance.hint), isTrue);
 
       await tester.pumpWidget(const SizedBox());
       await store.close();
