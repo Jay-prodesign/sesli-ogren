@@ -1,0 +1,49 @@
+name: la0040-visual-capture
+
+on:
+  pull_request:
+    paths:
+      - "app/lib/src/app/companion_view.dart"
+      - "app/lib/src/app/living_study_desk_home.dart"
+      - "app/test_visual/**"
+      - ".github/workflows/la0040-visual-capture.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  capture:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: app
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - id: flutter_pin
+        working-directory: .
+        shell: bash
+        run: |
+          version="$(tr -d '[:space:]' < .flutter-version)"
+          test -n "$version"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
+        with:
+          channel: stable
+          flutter-version: ${{ steps.flutter_pin.outputs.version }}
+          cache: false
+          pub-cache: false
+      - run: flutter pub get
+      - name: Render 390x844 visual review frames
+        run: flutter test --update-goldens test_visual/la0040_capture_test.dart --reporter expanded
+      - name: Upload review frames
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: la0040-visual-390x844
+          path: app/test_visual/goldens/*.png
+          if-no-files-found: warn
+          retention-days: 7
