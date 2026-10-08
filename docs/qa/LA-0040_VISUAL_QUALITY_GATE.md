@@ -1,3 +1,19 @@
+> **ACTIVE 2026-10-08 FOUNDER SECOND FAIL — STRUCTURAL REJECTION:** Founder reviewed the latest real Flutter 12-screen packet and **rejected Editorial, Studio and Knowledge altogether.** Any previous "Studio refinement lead", "three meaningful UX variants" or future intent to select among them is superseded. Status of LA-0040/LA-0039 = **DESIGN FAIL / IN_PROGRESS**. Technical CI/capture success remains historical technical PASS only. The controlling new acceptance is not better colors or labels; it is a distinct source-centered, interaction-first learning experience.
+
+### Immediate hard FAIL gates for next LA-0040 visual work
+
+1. **Same skeleton**: Home/Workspace/Recall/Result are still primarily heading→body text→rectangular card→CTA, even if colors, sizes, typography or decoration change.
+2. **No perceptible study action**: user only navigates pages while meaningful source work, attempted recall or comparison is not felt as an interaction.
+3. **No material hierarchy**: source title/material text is a small incidental content field rather than the real object of the work.
+4. **No earned visual payoff**: outcome looks like generic success copy and a next button; visual comparison/feedback has no credible, observable consequence.
+5. **Mascot pasted-on**: D/Knot simply fills empty space or adds charm, with no useful role/relationship to learning state. Omit where not relevant; no unauthorized redesign.
+6. **Prototypical layout**: awkward unused mobile area, unbalanced dense copy, mismatched navigation/chrome, unreadable hierarchy, overly generic presentation.
+7. **Untruthful aesthetics**: fabricated progress, mastery, source maps, points, motivational promise or icons unsupported by canonical evidence.
+
+**Admission/spec gate:** use the bounded revised LA-0040 second-FAIL task spec (S1–S7); do not create another task or a fourth color treatment. **Implementation gate:** prove interaction through actual Flutter behavior using learner-owned source + canonical Recall outcome, with 320/390px, long real Turkish material, text scaling, keyboard, unknown/hint/reveal/error and reduced-motion paths. **Human gate:** original Founder visual FAIL stands until Founder explicitly approves a new runtime, regardless of test scores or reviewer rankings.
+
+---
+
 > **CURRENT FOUNDER FAIL OVERRIDE (2026-10-08):** Founder rejected the actual LA-0040 runtime screenshot packet. Historical internal PASS remains a record, not visual sign-off. Current external/product gate = **FAIL / CHANGES_REQUIRED**. To repair, apply the explicit acceptance matrix in [LA-0040_FOUNDER_FAIL_REWORK_SPEC.md](../exec-plans/LA-0040_FOUNDER_FAIL_REWORK_SPEC.md), and the rework evidence additions below. No repeat internal score can overrule Founder FAIL.
 
 # LA-0040 Visual Quality Gate (VQG-01)
