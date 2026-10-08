@@ -12,13 +12,9 @@ class SupabaseGroundedExplainGateway implements GroundedExplainGateway {
   Future<GroundedExplainResult> explain(GroundedExplainRequest request) async {
     // Local SQLite identifiers are not server UUIDs.
     final serverMaterialId = request.materialId.value;
-    final uuidPattern = RegExp(
-      r'^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}',
-    );
+    final uuidPattern = RegExp(r'^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}');
     if (serverMaterialId.length != 36 || !uuidPattern.hasMatch(serverMaterialId)) {
-      return const GroundedExplainUnavailable(
-        reason: GroundedExplainUnavailableReason.sourceUnavailable,
-      );
+      return const GroundedExplainUnavailable(reason: GroundedExplainUnavailableReason.sourceUnavailable);
     }
     try {
       final client = await SupabaseLearnerAuth.clientForAuthenticatedRuntime();

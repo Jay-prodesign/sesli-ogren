@@ -45,10 +45,7 @@ class _ExplainScreenState extends State<ExplainScreen> {
         future: _result,
         builder: (context, snapshot) {
           if (snapshot.hasError) {
-            return _Unavailable(
-              reason: GroundedExplainUnavailableReason.temporaryFailure,
-              onRetry: _retry,
-            );
+            return _Unavailable(reason: GroundedExplainUnavailableReason.temporaryFailure, onRetry: _retry);
           }
           if (!snapshot.hasData) {
             return const Center(child: CircularProgressIndicator());
