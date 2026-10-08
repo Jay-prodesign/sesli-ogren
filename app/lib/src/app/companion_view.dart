@@ -25,6 +25,16 @@ class _CompanionViewState extends State<CompanionView> with SingleTickerProvider
   }
 
   @override
+  void didUpdateWidget(covariant CompanionView oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.state != widget.state && !_reducedMotion) {
+      _motion
+        ..reset()
+        ..repeat();
+    }
+  }
+
+  @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     final media = MediaQuery.maybeOf(context);
