@@ -37,8 +37,7 @@ class _ReadyExplainGateway implements GroundedExplainGateway {
   Future<GroundedExplainResult> explain(GroundedExplainRequest request) async => GroundedExplainReady(
     sourceVersionId: request.sourceVersionId,
     sourceContentDigest: request.sourceContentDigest,
-    explanation:
-        'Fotosentezde bitki, ışık enerjisini kullanarak su ve karbondioksitten kimyasal enerji depolayan moleküller üretir.',
+    explanation: 'Fotosentezde bitki, ışık enerjisini kullanarak su ve karbondioksitten kimyasal enerji depolayan moleküller üretir.',
     keyPoints: const [
       'Işık enerjisi süreci başlatır.',
       'Karbondioksit ve su kaynak olarak kullanılır.',
@@ -138,10 +137,7 @@ void main() {
       sourceName: 'Biyoloji — Fotosentez Notları',
     );
 
-    final source = await store.currentSourceVersion(
-      learner: runtime.learner,
-      materialId: AppRuntime.primaryMaterialId,
-    );
+    final source = await store.currentSourceVersion(learner: runtime.learner, materialId: AppRuntime.primaryMaterialId);
     final extracted = source == null
         ? null
         : await store.extractedContentForSource(
@@ -172,21 +168,13 @@ void main() {
     await tester.pump(const Duration(milliseconds: 200));
     await expectLater(find.byType(Scaffold).first, matchesGoldenFile('goldens/la0039_workspace.png'));
 
-    await tester.pumpWidget(
-      _phoneFrame(ListenScreen(runtime: runtime, materialId: AppRuntime.primaryMaterialId)),
-    );
+    await tester.pumpWidget(_phoneFrame(ListenScreen(runtime: runtime, materialId: AppRuntime.primaryMaterialId)));
     await _pumpUntilFound(tester, find.text('DİNLEME'));
     await tester.pump(const Duration(milliseconds: 200));
     await expectLater(find.byType(Scaffold).first, matchesGoldenFile('goldens/la0040_listen.png'));
 
     await tester.pumpWidget(
-      _phoneFrame(
-        FocusScreen(
-          runtime: runtime,
-          source: source!,
-          sourceText: extracted!.normalizedText,
-        ),
-      ),
+      _phoneFrame(FocusScreen(runtime: runtime, source: source!, sourceText: extracted!.normalizedText)),
     );
     await _pumpUntilFound(tester, find.text('Kısa odak oturumu'));
     await tester.pump(const Duration(milliseconds: 200));
