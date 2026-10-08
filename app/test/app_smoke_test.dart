@@ -7,6 +7,7 @@ import 'package:sesli_ogren/src/account/account_overview_gateway.dart';
 import 'package:sesli_ogren/src/app/app_runtime.dart';
 import 'package:sesli_ogren/src/app/learning_slice_screen.dart';
 import 'package:sesli_ogren/src/app/listen_screen.dart';
+import 'package:sesli_ogren/src/app/material_workspace_screen.dart';
 import 'package:sesli_ogren/src/app/product_shell_screen.dart';
 import 'package:sesli_ogren/src/app/profile_surface.dart';
 import 'package:sesli_ogren/src/app/sesli_ogren_app.dart';
