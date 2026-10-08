@@ -647,43 +647,81 @@ class _LibraryMaterialCard extends StatelessWidget {
     final theme = Theme.of(context);
     final mediaIcon = material.mediaType == SourceMediaType.pdf ? Icons.picture_as_pdf_rounded : Icons.notes_rounded;
     final mediaLabel = material.mediaType == SourceMediaType.pdf ? 'PDF' : 'Metin';
+
     return Card(
       child: InkWell(
         onTap: onPressed,
-        borderRadius: BorderRadius.circular(20),
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 14, 8, 14),
-          child: Row(
-            children: [
-              DecoratedBox(
-                decoration: BoxDecoration(color: AppPalette.primarySoft, borderRadius: BorderRadius.circular(14)),
-                child: Padding(
-                  padding: const EdgeInsets.all(11),
-                  child: Icon(mediaIcon, color: AppPalette.primary, size: 22),
-                ),
+        borderRadius: BorderRadius.circular(18),
+        child: Column(
+          children: [
+            Container(
+              height: 5,
+              decoration: const BoxDecoration(
+                color: AppPalette.primary,
+                borderRadius: BorderRadius.vertical(top: Radius.circular(18)),
               ),
-              const SizedBox(width: 13),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      material.title,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: theme.textTheme.titleMedium,
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 14, 8, 15),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  DecoratedBox(
+                    decoration: BoxDecoration(
+                      color: AppPalette.primarySoft,
+                      borderRadius: BorderRadius.circular(14),
                     ),
-                    const SizedBox(height: 5),
-                    Text(
-                      '$mediaLabel · Çalışma alanını aç',
-                      style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+                    child: Padding(
+                      padding: const EdgeInsets.all(11),
+                      child: Icon(mediaIcon, color: AppPalette.primary, size: 22),
                     ),
-                  ],
-                ),
+                  ),
+                  const SizedBox(width: 13),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          mediaLabel.toUpperCase(),
+                          style: theme.textTheme.labelSmall?.copyWith(
+                            color: AppPalette.inkMuted,
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: 0.45,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          material.title,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
+                        ),
+                        const SizedBox(height: 8),
+                        Row(
+                          children: [
+                            const Icon(Icons.arrow_forward_rounded, size: 16, color: AppPalette.primary),
+                            const SizedBox(width: 6),
+                            Text(
+                              'Çalışma alanını aç',
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: AppPalette.primary,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                  IconButton(
+                    tooltip: 'Materyali sil',
+                    onPressed: onDelete,
+                    icon: const Icon(Icons.delete_outline_rounded),
+                  ),
+                ],
               ),
-              IconButton(tooltip: 'Materyali sil', onPressed: onDelete, icon: const Icon(Icons.delete_outline_rounded)),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
