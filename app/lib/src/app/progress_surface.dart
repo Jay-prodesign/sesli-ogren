@@ -25,10 +25,7 @@ class ProgressSurface extends StatelessWidget {
           children: [
             Expanded(child: Text('İlerleme', style: theme.textTheme.headlineMedium)),
             DecoratedBox(
-              decoration: BoxDecoration(
-                color: AppPalette.signalSoft,
-                borderRadius: BorderRadius.circular(999),
-              ),
+              decoration: BoxDecoration(color: AppPalette.signalSoft, borderRadius: BorderRadius.circular(999)),
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                 child: Text(
@@ -50,10 +47,7 @@ class ProgressSurface extends StatelessWidget {
         ),
         const SizedBox(height: 12),
         DecoratedBox(
-          decoration: BoxDecoration(
-            color: AppPalette.attentionSoft,
-            borderRadius: BorderRadius.circular(14),
-          ),
+          decoration: BoxDecoration(color: AppPalette.attentionSoft, borderRadius: BorderRadius.circular(14)),
           child: const Padding(
             padding: EdgeInsets.symmetric(horizontal: 13, vertical: 11),
             child: Text('Dinlemek veya açıklama okumak ilerlemeyi yapay olarak artırmaz.'),
@@ -142,10 +136,7 @@ class _ProgressCard extends StatelessWidget {
                             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                             child: Text(
                               label,
-                              style: theme.textTheme.labelSmall?.copyWith(
-                                color: accent,
-                                fontWeight: FontWeight.w800,
-                              ),
+                              style: theme.textTheme.labelSmall?.copyWith(color: accent, fontWeight: FontWeight.w800),
                             ),
                           ),
                         ),
@@ -170,10 +161,7 @@ class _ProgressCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     DecoratedBox(
-                      decoration: BoxDecoration(
-                        color: AppPalette.momentum,
-                        borderRadius: BorderRadius.circular(999),
-                      ),
+                      decoration: BoxDecoration(color: AppPalette.momentum, borderRadius: BorderRadius.circular(999)),
                       child: const Padding(
                         padding: EdgeInsets.all(6),
                         child: Icon(Icons.arrow_forward_rounded, color: AppPalette.momentumInk, size: 16),
@@ -196,10 +184,7 @@ class _ProgressCard extends StatelessWidget {
                             reason,
                             maxLines: 3,
                             overflow: TextOverflow.ellipsis,
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              color: Colors.white,
-                              height: 1.4,
-                            ),
+                            style: theme.textTheme.bodySmall?.copyWith(color: Colors.white, height: 1.4),
                           ),
                         ],
                       ),
