@@ -42,7 +42,7 @@ jobs:
           sudo apt-get install -y fonts-dejavu-core
       - run: flutter pub get
       - name: Render 390x844 visual review frames
-        run: flutter test --update-goldens test_visual/la0040_capture_test.dart --reporter expanded
+        run: flutter test --update-goldens test_visual --reporter expanded
       - name: Upload review frames
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
