@@ -626,7 +626,8 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
                     ),
                   SizedBox(height: reviewFocus ? 10 : (compactResultHeader ? 18 : 24)),
                   AnimatedSwitcher(
-                    duration: reducedMotion ? Duration.zero : const Duration(milliseconds: 220),
+                    // Never cross-fade whole source/answer stages: old text must not linger or ghost during Recall.
+                    duration: reducedMotion || living ? Duration.zero : const Duration(milliseconds: 220),
                     child: KeyedSubtree(
                       key: ValueKey('${_phase.name}-${_activeAttemptId?.value ?? 'unopened'}'),
                       child: _phaseBody(context),
