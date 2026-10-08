@@ -13,79 +13,9 @@ class SupabaseGroundedExplainGateway implements GroundedExplainGateway {
     // Local SQLite identifiers are not server UUIDs.
     final serverMaterialId = request.materialId.value;
     final uuidPattern = RegExp(
-      r'^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}' + r'\
-      final client = await SupabaseLearnerAuth.clientForAuthenticatedRuntime();
-      await client.rpc<Object?>(
-        'request_grounded_explain',
-        params: {
-          'p_material_id': request.materialId.value,
-          'p_source_content_hash': request.sourceContentDigest,
-          'p_idempotency_key': _idempotencyKey(request),
-        },
-      );
-
-      // Generation is asynchronous. A newly queued summary will not exist on
-      // the first read; give the worker a bounded window before showing Retry.
-      List<dynamic> rows = <dynamic>[];
-      for (var attempt = 0; attempt < 6; attempt++) {
-        if (attempt > 0) {
-          await Future<void>.delayed(const Duration(seconds: 2));
-        }
-        rows = await client.rpc<List<dynamic>>(
-          'read_grounded_explain',
-          params: {'p_material_id': request.materialId.value, 'p_source_content_hash': request.sourceContentDigest},
-        );
-        if (rows.isNotEmpty) break;
-      }
-      if (rows.isEmpty) {
-        return const GroundedExplainUnavailable(reason: GroundedExplainUnavailableReason.temporaryFailure);
-      }
-
-      final row = Map<String, dynamic>.from(rows.first as Map);
-      final content = Map<String, dynamic>.from(row['content'] as Map);
-      final explanation = (content['summary'] as String?)?.trim() ?? '';
-      final rawPoints = content['key_points'];
-      final keyPoints = rawPoints is List
-          ? rawPoints.whereType<String>().map((e) => e.trim()).where((e) => e.isNotEmpty).toList()
-          : <String>[];
-      final language = (content['language'] as String?)?.trim() ?? request.outputLocale;
-      final digest = (row['source_content_hash'] as String?) ?? '';
-
-      if (explanation.isEmpty || digest != request.sourceContentDigest) {
-        return const GroundedExplainUnavailable(reason: GroundedExplainUnavailableReason.staleSource);
-      }
-
-      return GroundedExplainReady(
-        sourceVersionId: request.sourceVersionId,
-        sourceContentDigest: digest,
-        explanation: explanation,
-        keyPoints: keyPoints,
-        language: language,
-        executionRef: (row['provider_execution_ref'] as String?) ?? 'server:artifact',
-      );
-    } on PostgrestException catch (error) {
-      if (error.message.contains('stale_source')) {
-        return const GroundedExplainUnavailable(reason: GroundedExplainUnavailableReason.staleSource);
-      }
-      if (error.message.contains('material_not_found')) {
-        return const GroundedExplainUnavailable(reason: GroundedExplainUnavailableReason.sourceUnavailable);
-      }
-      return const GroundedExplainUnavailable(reason: GroundedExplainUnavailableReason.temporaryFailure);
-    } catch (_) {
-      return const GroundedExplainUnavailable(reason: GroundedExplainUnavailableReason.temporaryFailure);
-    }
-  }
-
-  static String _idempotencyKey(GroundedExplainRequest request) {
-    final digest = request.sourceContentDigest.length <= 24
-        ? request.sourceContentDigest
-        : request.sourceContentDigest.substring(0, 24);
-    return 'explain:${request.materialId.value}:$digest';
-  }
-}
-,
+      r'^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}',
     );
-    if (!uuidPattern.hasMatch(serverMaterialId)) {
+    if (serverMaterialId.length != 36 || !uuidPattern.hasMatch(serverMaterialId)) {
       return const GroundedExplainUnavailable(
         reason: GroundedExplainUnavailableReason.sourceUnavailable,
       );
