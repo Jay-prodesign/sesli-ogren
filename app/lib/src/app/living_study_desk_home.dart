@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../domain/learning_contracts.dart';
 import '../domain/learning_truth.dart';
+import 'companion_view.dart';
 
 /// Opt-in runtime review. Never changes the unscoped shipping Home.
 class LivingDeskReviewScope extends InheritedWidget {
@@ -38,12 +39,12 @@ class LivingStudyDeskHome extends StatelessWidget {
   final VoidCallback onOpenListen;
   final ValueChanged<MaterialId> onOpenMaterial;
 
-  static const _canvas = Color(0xFFF5F4F0);
-  static const _paper = Color(0xFFFFFEFA);
-  static const _ink = Color(0xFF1C292B);
-  static const _sub = Color(0xFF58696A);
-  static const _accent = Color(0xFF236B63);
-  static const _line = Color(0xFFDDE2DD);
+  static const _canvas = Color(0xFFF5F7F4);
+  static const _paper = Color(0xFFFFFDF9);
+  static const _ink = Color(0xFF15313A);
+  static const _sub = Color(0xFF52696B);
+  static const _accent = Color(0xFF0A716A);
+  static const _line = Color(0xFFD5E3DC);
 
   String get _nextStep {
     if (continuation == null) return 'İlk hatırlama denemeni yap';
@@ -107,7 +108,7 @@ class LivingStudyDeskHome extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text(
-          'Kaldığın yer',
+          'Kaldığın yer hazır.',
           style: TextStyle(color: _ink, fontSize: 32, fontWeight: FontWeight.w800, height: 1.08, letterSpacing: -1.2),
         ),
         const SizedBox(height: 9),
@@ -203,11 +204,20 @@ class LivingStudyDeskHome extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 24),
-        const Text(
-          'SIRADAKİ GERÇEK ADIM',
-          style: TextStyle(fontSize: 11, letterSpacing: 1.25, fontWeight: FontWeight.w800, color: _accent),
+        Row(
+          children: [
+            const CompanionView(state: CompanionVisualState.idle, size: 68),
+            const SizedBox(width: 10),
+            const Expanded(
+              child: Text(
+                'SIRADAKİ GERÇEK ADIM',
+                style: TextStyle(color: _accent, fontWeight: FontWeight.w900,
+                  letterSpacing: 1, fontSize: 11),
+              ),
+            ),
+          ],
         ),
-        const SizedBox(height: 10),
+        const SizedBox(height: 8),
         Text(
           _nextStep,
           style: const TextStyle(fontSize: 21, fontWeight: FontWeight.w800, color: _ink, height: 1.2),
