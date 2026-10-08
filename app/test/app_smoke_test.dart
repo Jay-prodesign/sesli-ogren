@@ -369,7 +369,7 @@ void main() {
 
     await tester.pumpWidget(MaterialApp(home: ProductShellScreen(runtime: runtime)));
     await pumpUntilFound(tester, find.text('KALDIĞIN MATERYAL'));
-    await tapVisible(tester, find.text('Devam et'));
+    await tapVisible(tester, find.text('Çalışmaya devam et'));
     await pumpUntilFound(tester, find.text('Son materyal'));
 
     expect(find.text('Son materyal'), findsWidgets);
@@ -423,7 +423,7 @@ void main() {
 
     await tapVisible(tester, find.text('Ana Sayfa').last);
     await pumpUntilFound(tester, find.text('KALDIĞIN MATERYAL'));
-    await tapVisible(tester, find.text('Devam et'));
+    await tapVisible(tester, find.text('Çalışmaya devam et'));
     await pumpUntilFound(tester, find.text('Korunacak materyal'));
     expect(find.text('Korunacak materyal'), findsWidgets);
   });
