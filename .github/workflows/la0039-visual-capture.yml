@@ -5,11 +5,14 @@ on:
     branches:
       - feat/full-product-shell-continuity
     paths:
+      - app/lib/src/app/**
+      - app/assets/companions/**
       - app/test/la0039_visual_capture_test.dart
+      - app/pubspec.yaml
       - .github/workflows/la0039-visual-capture.yml
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
   group: la0039-visual-capture
@@ -94,31 +97,3 @@ jobs:
           path: docs/qa/evidence/la0039
           if-no-files-found: error
           retention-days: 7
-
-      - name: Commit review evidence
-        run: |
-          set -euo pipefail
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add docs/qa/evidence/la0039
-          if git diff --cached --quiet; then
-            echo "No new visual evidence to commit."
-            exit 0
-          fi
-          git commit -m "test: capture LA-0039 visual review [skip ci]"
-          if git push origin "HEAD:${GITHUB_REF_NAME}"; then
-            exit 0
-          fi
-
-          echo "Branch advanced while visual evidence was being captured; retrying on top of current branch."
-          git fetch origin "${GITHUB_REF_NAME}"
-          if git rebase "origin/${GITHUB_REF_NAME}"; then
-            if git push origin "HEAD:${GITHUB_REF_NAME}"; then
-              exit 0
-            fi
-          else
-            git rebase --abort || true
-          fi
-
-          echo "::warning::Repository evidence commit skipped because the branch advanced concurrently. The uploaded visual artifact remains authoritative for this run."
-          exit 0
