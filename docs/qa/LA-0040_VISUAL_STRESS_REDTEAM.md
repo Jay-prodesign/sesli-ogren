@@ -1,7 +1,38 @@
 # LA-0040 Visual Stress + Red-Team
 
-Status: ROUND 0 EXECUTED AGAINST CURRENT LA-0039 CAPTURE
-Decision: **FAIL — HIGH visual/product findings remain.**
+Status: **ROUND 1 CURRENT — CONDITIONAL PASS; ROUND 0 RETAINED AS HISTORY BELOW**
+Current authority: `docs/qa/LA-0040_VQG_ROUND1_RETEST_2026-10-08.md` + current accessibility/narrow-phone capture packet.
+Current decision: **CONDITIONAL PASS — no visual BLOCKER/HIGH in the grounded Golden Slice; whole-product P1 polish + stress closure remain.**
+
+## Round 1 current summary
+
+The grounded Living Visual Learning Studio pass materially changed the Round-0 result:
+- ST-01 3–5 second comprehension: PASS
+- ST-02 10 second value comprehension: PASS / strong
+- ST-03 Workspace repetition fatigue: PASS
+- ST-04 show-don't-tell: PASS with P1
+- ST-05 priority-weighted high-school relevance: CONDITIONAL PASS / improved
+- ST-06 canonical D/Knot integration: PASS
+- ST-07 Recall payoff: PASS
+- ST-08 390px phone: PASS
+- ST-09 long-session comfort: PASS by visual inspection; human-duration evidence remains later
+- ST-10 long Turkish + 1.3× / 1.5× text scale: evidence capture admitted; current artifact retest pending final disposition
+
+Round-1 red-team severity:
+- RT-01 Boring app: MEDIUM
+- RT-02 Template app: MEDIUM
+- RT-03 Too much reading: LOW–MEDIUM
+- RT-04 Unclear differentiated value: LOW–MEDIUM
+- RT-05 Not made for me: MEDIUM
+- RT-06 Not premium enough: MEDIUM
+- RT-07 Mascot mismatch: LOW–MEDIUM
+- RT-08 No strong return pull: LOW–MEDIUM
+
+No Round-1 red-team item is currently HIGH in the grounded slice.
+
+The remainder of this document records the historical Round-0 attack packet and must not be read as current disposition.
+
+## Round 0 historical evidence
 
 ## Evidence
 Representative current captures:
