@@ -89,11 +89,22 @@ jobs:
           cp app/test/goldens/la0040_stress_text130_workspace.png docs/qa/evidence/la0039/stress-text130-workspace.png
           cp app/test/goldens/la0040_stress_text150_recall.png docs/qa/evidence/la0039/stress-text150-recall.png
           sha256sum docs/qa/evidence/la0039/*.png | tee docs/qa/evidence/la0039/SHA256SUMS.txt
+          mkdir -p docs/qa/evidence/la0040-treatments
+          for lane in editorial studio knowledge; do
+            for stage in home workspace prompt result; do
+              file="app/test/goldens/la0040_treatment_${lane}_${stage}.png"
+              test -s "$file"
+              cp "$file" "docs/qa/evidence/la0040-treatments/${lane}-${stage}.png"
+            done
+          done
+          sha256sum docs/qa/evidence/la0040-treatments/*.png | tee docs/qa/evidence/la0040-treatments/SHA256SUMS.txt
 
       - name: Upload review evidence
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: la0039-visual-review
-          path: docs/qa/evidence/la0039
+          path: |
+            docs/qa/evidence/la0039
+            docs/qa/evidence/la0040-treatments
           if-no-files-found: error
           retention-days: 7
