@@ -233,13 +233,13 @@ class _HomeSurface extends StatelessWidget {
           children: [
             DecoratedBox(
               decoration: BoxDecoration(
-                color: AppPalette.primarySoft,
+                color: _companionSoft(data.continuation),
                 borderRadius: BorderRadius.circular(18),
-                border: Border.all(color: AppPalette.primary.withValues(alpha: 0.12)),
+                border: Border.all(color: _companionAccent(data.continuation).withValues(alpha: 0.14)),
               ),
-              child: const Padding(
-                padding: EdgeInsets.all(7),
-                child: CompanionView(state: CompanionVisualState.idle, size: 50),
+              child: Padding(
+                padding: const EdgeInsets.all(7),
+                child: CompanionView(state: _companionState(data.continuation), size: 50),
               ),
             ),
             const SizedBox(width: 13),
@@ -251,7 +251,7 @@ class _HomeSurface extends StatelessWidget {
                   const SizedBox(height: 2),
                   Text(
                     hasMaterial
-                        ? 'Materyalin hazır. Sıradaki anlamlı adıma geç.'
+                        ? _headerLine(data.continuation)
                         : 'Kendi materyalini aktif öğrenmeye dönüştür.',
                     style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
                   ),
@@ -300,6 +300,46 @@ class _HomeSurface extends StatelessWidget {
   static String _nextReason(LearningContinuation? continuation) =>
       continuation?.nextAction.reasonText ??
       'Kaynağından kısa bir hatırlama denemesiyle ilk gerçek öğrenme kanıtını oluştur.';
+
+  static String _headerLine(LearningContinuation? continuation) {
+    final state = continuation?.state.kind ?? RecallStateKind.notAssessed;
+    return switch (state) {
+      RecallStateKind.notAssessed => 'İlk aktif adımın hazır.',
+      RecallStateKind.developing => 'Kaldığın yer hazır. Bir sonraki denemeye geç.',
+      RecallStateKind.retrievedOnce => 'Bir kez bağımsız hatırladın. Sıradaki adım hazır.',
+      RecallStateKind.needsReview => 'Kısa bir tekrar noktası hazır.',
+    };
+  }
+
+  static CompanionVisualState _companionState(LearningContinuation? continuation) {
+    final state = continuation?.state.kind ?? RecallStateKind.notAssessed;
+    return switch (state) {
+      RecallStateKind.notAssessed => CompanionVisualState.idle,
+      RecallStateKind.developing => CompanionVisualState.think,
+      RecallStateKind.retrievedOnce => CompanionVisualState.success,
+      RecallStateKind.needsReview => CompanionVisualState.think,
+    };
+  }
+
+  static Color _companionSoft(LearningContinuation? continuation) {
+    final state = continuation?.state.kind ?? RecallStateKind.notAssessed;
+    return switch (state) {
+      RecallStateKind.notAssessed => AppPalette.primarySoft,
+      RecallStateKind.developing => AppPalette.primarySoft,
+      RecallStateKind.retrievedOnce => AppPalette.successSoft,
+      RecallStateKind.needsReview => AppPalette.attentionSoft,
+    };
+  }
+
+  static Color _companionAccent(LearningContinuation? continuation) {
+    final state = continuation?.state.kind ?? RecallStateKind.notAssessed;
+    return switch (state) {
+      RecallStateKind.notAssessed => AppPalette.primary,
+      RecallStateKind.developing => AppPalette.primary,
+      RecallStateKind.retrievedOnce => AppPalette.success,
+      RecallStateKind.needsReview => AppPalette.attention,
+    };
+  }
 }
 
 class _FirstMaterialHero extends StatelessWidget {
@@ -508,7 +548,7 @@ class _ContinueHero extends StatelessWidget {
                         ),
                         onPressed: onPressed,
                         icon: const Icon(Icons.arrow_forward_rounded),
-                        label: const Text('Devam et'),
+                        label: const Text('Çalışmaya devam et'),
                       ),
                     ],
                   ),
@@ -834,11 +874,14 @@ class _ContextCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isListen = title == 'Dinle';
+    final soft = isListen ? AppPalette.signalSoft : AppPalette.primarySoft;
+    final accent = isListen ? AppPalette.signal : AppPalette.primary;
     return Material(
-      color: AppPalette.surface,
+      color: soft.withValues(alpha: 0.42),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(20),
-        side: const BorderSide(color: AppPalette.outline),
+        side: BorderSide(color: accent.withValues(alpha: 0.14)),
       ),
       clipBehavior: Clip.antiAlias,
       child: InkWell(
@@ -850,12 +893,13 @@ class _ContextCard extends StatelessWidget {
             children: [
               DecoratedBox(
                 decoration: BoxDecoration(
-                  color: title == 'Dinle' ? AppPalette.signalSoft : AppPalette.primarySoft,
+                  color: AppPalette.surface,
                   borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: accent.withValues(alpha: 0.10)),
                 ),
                 child: Padding(
                   padding: const EdgeInsets.all(9),
-                  child: Icon(icon, size: 20, color: title == 'Dinle' ? AppPalette.signal : AppPalette.primary),
+                  child: Icon(icon, size: 20, color: accent),
                 ),
               ),
               const SizedBox(height: 14),
