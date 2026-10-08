@@ -72,6 +72,8 @@ jobs:
           for state in empty populated narrow scale150; do
             test -s "test/goldens/la0040_living_home_${state}.png"
           done
+          test -s test/goldens/la0040_atelier_home_320_text150.png
+          test -s test/goldens/la0040_atelier_result_320_text150.png
           for state in workspace recall result unknown hinted; do
             test -s "test/goldens/la0040_atelier_${state}.png"
           done
@@ -114,6 +116,9 @@ jobs:
             cp "app/test/goldens/la0040_atelier_${state}.png" "docs/qa/evidence/la0040-atelier/${state}.png"
           done
           sha256sum docs/qa/evidence/la0040-atelier/*.png | tee docs/qa/evidence/la0040-atelier/SHA256SUMS.txt
+          cp app/test/goldens/la0040_atelier_home_320_text150.png docs/qa/evidence/la0040-atelier/home-320-text150.png
+          cp app/test/goldens/la0040_atelier_result_320_text150.png docs/qa/evidence/la0040-atelier/result-320-text150.png
+          sha256sum docs/qa/evidence/la0040-atelier/*.png > docs/qa/evidence/la0040-atelier/SHA256SUMS.txt
           # Carry the EXISTING canonical D/Knot reference into the visual-review
           # packet so art-direction work never invents/replaces the character.
           mkdir -p docs/qa/evidence/la0040-companion
