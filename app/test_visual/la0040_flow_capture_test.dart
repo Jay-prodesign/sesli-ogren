@@ -1,3 +1,6 @@
+import 'dart:io';
+
+import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sesli_ogren/src/app/atelier_learning_surfaces.dart';
@@ -7,6 +10,21 @@ import 'package:sesli_ogren/src/domain/learning_truth.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
+
+  setUpAll(() async {
+    Future<void> loadFont(String family, String path) async {
+      final bytes = await File(path).readAsBytes();
+      final loader = FontLoader(family)..addFont(Future.value(ByteData.sublistView(bytes)));
+      await loader.load();
+    }
+
+    await loadFont('Roboto', '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf');
+    final flutterRoot = Platform.environment['FLUTTER_ROOT'];
+    if (flutterRoot == null || flutterRoot.isEmpty) {
+      throw StateError('FLUTTER_ROOT is required for material icon capture.');
+    }
+    await loadFont('MaterialIcons', '$flutterRoot/bin/cache/artifacts/material_fonts/MaterialIcons-Regular.otf');
+  });
 
   final now = DateTime.utc(2026, 10, 8);
   const materialId = MaterialId('visual-fixture');
