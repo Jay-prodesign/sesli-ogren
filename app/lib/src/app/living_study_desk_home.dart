@@ -107,12 +107,21 @@ class LivingStudyDeskHome extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'Kaldığın yer hazır.',
-          style: TextStyle(color: _ink, fontSize: 32, fontWeight: FontWeight.w800, height: 1.08, letterSpacing: -1.2),
+        const Text.rich(
+          TextSpan(
+            children: [
+              TextSpan(text: 'Kendi kaynağın.\n', style: TextStyle(color: _ink)),
+              TextSpan(text: 'Gerçek hatırlama.', style: TextStyle(color: _accent)),
+            ],
+          ),
+          key: ValueKey('la0040-atelier-home-promise'),
+          style: TextStyle(fontSize: 30, fontWeight: FontWeight.w900, height: 1.13, letterSpacing: -1.2),
         ),
-        const SizedBox(height: 9),
-        const Text('Kendi notlarınla, kaldığın noktadan.', style: TextStyle(color: _sub, fontSize: 15, height: 1.35)),
+        const SizedBox(height: 11),
+        const Text(
+          'Oku, hatırlamayı dene, cevabını kendi notunda gör.',
+          style: TextStyle(color: _sub, fontSize: 15, height: 1.42),
+        ),
         const SizedBox(height: 24),
         Stack(
           children: [
@@ -157,7 +166,16 @@ class LivingStudyDeskHome extends StatelessWidget {
                             const Icon(Icons.north_east_rounded, color: _sub, size: 19),
                           ],
                         ),
-                        const SizedBox(height: 21),
+                        const SizedBox(height: 15),
+                        Container(
+                          width: 76,
+                          height: 4,
+                          decoration: BoxDecoration(
+                            color: _accent,
+                            borderRadius: BorderRadius.circular(3),
+                          ),
+                        ),
+                        const SizedBox(height: 14),
                         Text(
                           current.title,
                           maxLines: 3,
@@ -203,7 +221,17 @@ class LivingStudyDeskHome extends StatelessWidget {
             ),
           ],
         ),
-        const SizedBox(height: 24),
+        const SizedBox(height: 10),
+        Padding(
+          padding: const EdgeInsets.only(left: 26),
+          child: Container(
+            key: const ValueKey('la0040-source-to-recall-thread'),
+            width: 2,
+            height: 22,
+            color: _accent,
+          ),
+        ),
+        const SizedBox(height: 5),
         Row(
           children: [
             const CompanionView(state: CompanionVisualState.idle, size: 68),
