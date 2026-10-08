@@ -296,11 +296,11 @@ void main() {
         ),
       ),
     );
-    await pumpUntilFound(tester, find.text('Şimdi ne yapmalı?'));
+    await pumpUntilFound(tester, find.text('KALDIĞIN MATERYAL'));
 
     expect(find.text('Kütüphane'), findsOneWidget);
     expect(find.byKey(const ValueKey('home-continuation-hero')), findsOneWidget);
-    expect(find.text('Materyalin'), findsOneWidget);
+    expect(find.text('KALDIĞIN MATERYAL'), findsOneWidget);
     expect(find.text('Fotosentez çalışma notu'), findsWidgets);
 
     await tapVisible(tester, find.text('Fotosentez çalışma notu').last);
@@ -366,7 +366,7 @@ void main() {
     );
 
     await tester.pumpWidget(MaterialApp(home: ProductShellScreen(runtime: runtime)));
-    await pumpUntilFound(tester, find.text('Şimdi ne yapmalı?'));
+    await pumpUntilFound(tester, find.text('KALDIĞIN MATERYAL'));
     await tapVisible(tester, find.text('Devam et'));
     await pumpUntilFound(tester, find.text('Son materyal'));
 
@@ -420,7 +420,7 @@ void main() {
     expect(await store.material(learner: runtime.learner, materialId: const MaterialId('delete-recent')), isNull);
 
     await tapVisible(tester, find.text('Ana Sayfa').last);
-    await pumpUntilFound(tester, find.text('Şimdi ne yapmalı?'));
+    await pumpUntilFound(tester, find.text('KALDIĞIN MATERYAL'));
     await tapVisible(tester, find.text('Devam et'));
     await pumpUntilFound(tester, find.text('Korunacak materyal'));
     expect(find.text('Korunacak materyal'), findsWidgets);
