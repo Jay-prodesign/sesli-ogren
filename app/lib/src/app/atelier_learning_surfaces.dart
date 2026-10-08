@@ -344,9 +344,9 @@ class AtelierResult extends StatelessWidget {
                   result.evidence.outcome == RecallOutcome.correct &&
                       result.evidence.assistance == RecallAssistance.none
                   ? CompanionVisualState.success
-                  : result.evidence.outcome == RecallOutcome.unknown
-                  ? CompanionVisualState.think
-                  : CompanionVisualState.correct,
+                  : result.evidence.outcome == RecallOutcome.helpedCorrect
+                  ? CompanionVisualState.correct
+                  : CompanionVisualState.think,
               size: 62,
             ),
           ],
