@@ -283,6 +283,19 @@ class AtelierRecall extends StatelessWidget {
         ),
       ),
       const SizedBox(height: 20),
+      const Row(
+        children: [
+          Icon(Icons.lock_outline_rounded, color: AtelierStyle.teal, size: 17),
+          SizedBox(width: 7),
+          Expanded(
+            child: Text(
+              'Kaynak yanıtını gönderene kadar kapalı kalacak.',
+              style: TextStyle(color: AtelierStyle.muted, fontSize: 13, height: 1.4),
+            ),
+          ),
+        ],
+      ),
+      const SizedBox(height: 16),
       const Text(
         'YANITIN',
         style: TextStyle(color: AtelierStyle.muted, fontWeight: FontWeight.w900, fontSize: 11, letterSpacing: 1),

@@ -258,28 +258,39 @@ class LivingStudyDeskHome extends StatelessWidget {
         const SizedBox(height: 22),
         const Divider(color: _line),
         const SizedBox(height: 12),
+        const Text(
+          'NASIL DEVAM ETMEK İSTERSİN?',
+          style: TextStyle(color: _sub, fontSize: 11, fontWeight: FontWeight.w900, letterSpacing: 1),
+        ),
+        const SizedBox(height: 10),
         Row(
           children: [
-            const Expanded(
-              child: Text(
-                'Bu materyalle',
-                style: TextStyle(color: _ink, fontWeight: FontWeight.w800, fontSize: 15),
+            Expanded(
+              child: OutlinedButton.icon(
+                key: const ValueKey('la0040-living-listen'),
+                onPressed: onOpenListen,
+                icon: const Icon(Icons.headphones_rounded, size: 20),
+                label: const Text('Dinle'),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: _accent,
+                  minimumSize: const Size.fromHeight(50),
+                  side: const BorderSide(color: _accent),
+                ),
               ),
             ),
-            TextButton.icon(
-              key: const ValueKey('la0040-living-recall'),
-              onPressed: onOpenLearning,
-              icon: const Icon(Icons.psychology_alt_outlined, size: 19),
-              label: const Text('Hatırla'),
-              style: TextButton.styleFrom(foregroundColor: _accent),
-            ),
-            const SizedBox(width: 6),
-            TextButton.icon(
-              key: const ValueKey('la0040-living-listen'),
-              onPressed: onOpenListen,
-              icon: const Icon(Icons.headphones_rounded, size: 19),
-              label: const Text('Dinle'),
-              style: TextButton.styleFrom(foregroundColor: _accent),
+            const SizedBox(width: 10),
+            Expanded(
+              child: FilledButton.icon(
+                key: const ValueKey('la0040-living-recall'),
+                onPressed: onOpenLearning,
+                icon: const Icon(Icons.psychology_alt_outlined, size: 20),
+                label: const Text('Hatırla'),
+                style: FilledButton.styleFrom(
+                  backgroundColor: _accent,
+                  foregroundColor: Colors.white,
+                  minimumSize: const Size.fromHeight(50),
+                ),
+              ),
             ),
           ],
         ),
