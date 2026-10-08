@@ -76,7 +76,7 @@ class LivingStudyDeskHome extends StatelessWidget {
           Expanded(
             child: ListView(
               key: ValueKey(hasMaterial ? 'la0040-living-home-populated' : 'la0040-living-home-empty'),
-              padding: const EdgeInsets.fromLTRB(20, 18, 20, 34),
+              padding: const EdgeInsets.fromLTRB(20, 18, 20, 80),
               children: [
                 Row(
                   children: [
@@ -103,25 +103,7 @@ class LivingStudyDeskHome extends StatelessWidget {
               ],
             ),
           ),
-          if (hasMaterial)
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 8, 20, 12),
-              child: SizedBox(
-                width: double.infinity,
-                child: FilledButton.icon(
-                  key: const ValueKey('la0040-living-continue'),
-                  onPressed: onOpenWorkspace,
-                  icon: const Icon(Icons.arrow_forward_rounded, size: 20),
-                  label: const Text('Çalışmaya devam et'),
-                  style: FilledButton.styleFrom(
-                    backgroundColor: _ink,
-                    foregroundColor: Colors.white,
-                    minimumSize: const Size.fromHeight(53),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-                  ),
-                ),
-              ),
-            ),
+
         ],
       ),
     );
@@ -247,7 +229,7 @@ class LivingStudyDeskHome extends StatelessWidget {
               padding: const EdgeInsets.fromLTRB(14, 11, 16, 13),
               child: Row(
                 children: [
-                  const CompanionView(state: CompanionVisualState.idle, size: 112),
+                  const CompanionView(state: CompanionVisualState.think, size: 128),
                   const SizedBox(width: 10),
                   Expanded(
                     child: Column(
@@ -267,9 +249,7 @@ class LivingStudyDeskHome extends StatelessWidget {
                         const SizedBox(height: 3),
                         Text(
                           _why,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(color: _sub, fontSize: 12, height: 1.3),
+                          style: const TextStyle(color: _sub, fontSize: 13, height: 1.4),
                         ),
                       ],
                     ),
@@ -279,7 +259,7 @@ class LivingStudyDeskHome extends StatelessWidget {
             ),
           ),
         ),
-        const SizedBox(height: 14),
+        const SizedBox(height: 22),
         const Divider(color: _line),
         const SizedBox(height: 12),
         Row(
