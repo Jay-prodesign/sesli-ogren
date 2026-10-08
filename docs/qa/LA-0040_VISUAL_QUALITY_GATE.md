@@ -1,3 +1,84 @@
+# ACTIVE LA-0040 SOURCE STAGE — IMPLEMENTATION QA GATE (2026-10-08)
+
+**Status:** SPECIFICATION ACCEPTANCE CRITERIA DEFINED / **NOT EXECUTED**. This section supersedes only earlier *how-to-implement* candidate tournament directions. The prior Editorial/Studio/Knowledge visual FAIL is unchanged. Implementation hypothesis: [LA-0040_SOURCE_STAGE_INTERACTION_IMPLEMENTATION_CONTRACT.md](../design/LA-0040_SOURCE_STAGE_INTERACTION_IMPLEMENTATION_CONTRACT.md). No selected winner and no claimed new visual PASS.
+
+**Decision model:** Task Spec Quality PASS → build bounded source-first Flutter interaction → exact-head focused technical tests + real visual evidence → independent visual/perceptual review → protected Founder approval. A missing proof is UNVERIFIED, not PASS. An unresolved BLOCKER/HIGH fails regardless of average score.
+
+## Q0 — Mandatory SPEC gate (before further implementation)
+
+- Contract explicitly identifies learner journey S0–S5, real data authority (`MaterialRecord`, `SourceVersionRecord`, `ExtractedContentRecord`, `RecallPrompt`, `RecallAttemptResult`, `LearnerEvidence`, `LearnerState`, `NextLearningAction`), exact screen/route changes, realistic source display, privacy, rollback, visual grammar, transitions, edge cases, human judgment. Current source contract provides this content, but **feasibility check must verify actual files/fields before coding**.
+- No unsupported original PDF rendering, invented page layout, source-selection→question generation, persisted raw answer, fabricated mastery, character redesign, new provider/framework, app-wide makeover or source authority change.
+- Gate outcome: **SPECIFIED / PENDING FILE-LEVEL FEASIBILITY CHECK**. Do not call it implementation-complete.
+
+## Q1 — Functional Flutter journey (engineering, automatable)
+
+| ID | Real interaction to test | Exact observable expected behavior | FAIL criterion |
+| --- | --- | --- | --- |
+| F01 | Existing imported material opens Home → Workspace | Current authorized title, source type, actual normalized text; scroll and one recall action work; other product routes still available | Placeholder/fictional material, mode grid dominates, wrong source or unreachable action |
+| F02 | Start Recall after reading | Current learner/source's `RecallPrompt` opens; expected answer and source clause are not visible; keyboard and support actions reachable | Source leak before answer, fake user-select-generated prompt |
+| F03 | Submit unaided correct answer | Exactly one canonical evidence/result persists; one retrieval, never mastery; actual correct answer + matching source excerpt displayed; next action reason from persistence | UI-created evidence, made-up score, wrong anchor or premature success |
+| F04 | Tap continuation, exit/reopen | Persisted next action and learner/material continuity restored; raw typed response not invented on fresh session | Navigation dead end, missing state, replayed imaginary answer |
+| F05 | No imported material, import failure or missing/stale source | Honest intake, safe error/retry or source repair; no cross-learner material contamination | Fictitious sample content claimed as user-owned; stale version silently used |
+| F06 | Old production UI without review opt-in | Existing Home/Workspace/Recall/Listen/Explain/Focus/etc work unchanged | Default visual unexpectedly changed, modal callbacks broken |
+| F07 | Primary button while busy, repeated submit, close/reenter | Disabled duplicate operation; canonical attempt/evidence idempotence; recoverable return to active attempt | Duplicate learning evidence, data loss or stuck loading |
+
+## Q2 — Truth, privacy and adverse outcomes (hard BLOCKERS)
+
+| ID | Input/path | Required result |
+| --- | --- | --- |
+| T01 | Unknown / `Bilmiyorum` | No independent success; acknowledge no answer and use canonical next action. |
+| T02 | Hint then correct | Display **helped correct** and assistance, not unaided retrieval. |
+| T03 | `Yanıtı göster` then submit | Mark **answer exposed**, never label the prefilled answer as the learner's independent response. |
+| T04 | Incorrect and partial | Accurate corresponding canonical outcome; no generic celebratory victory. |
+| T05 | User typed answer visible in result in SAME mounted session | It is only transient UI data. It is NOT duplicated to analytics, persistent profiles, local events or replayed after restart. Unknown/revealed variants must be labelled distinctly. |
+| T06 | Source anchor missing/out of bounds, source version changes | No false source-highlight; fall back to plain excerpt when valid or honest no-reference error. No answer from another source/version/learner. |
+| T07 | Passive listen or character animation | No mastery/readiness/evidence changes. |
+| T08 | App interruption, fresh result restoration | Only durable authorized evidence, state and next action resume. Do not pretend transient response was persisted. |
+
+Any incorrect outcome/provenance/assistance handling = **BLOCKER**, even if visuals otherwise impress.
+
+## Q3 — Visual architecture and signature payoff (mandatory human+runtime)
+
+- **V01 Composition break:** new workspace cannot be described mainly as heading→explanatory copy→large colored card→CTA. The source is the dominant readable work surface; compact material identity and action relationship are visible without a wall of introductory prose.
+- **V02 Learning action legibility:** at initial glance, a first-time learner can locate their actual source and a meaningful Recall action. Prompt concealment and grounded post-answer reveal communicate source→attempt→feedback in motion, not mere page change.
+- **V03 Earned feedback:** without name/logo, the result screen shows a truthful meaningful relationship between typed response/assistance, literal source anchor and specific next action. A still image and reduced-motion version also work.
+- **V04 Character integrity:** D/Knot contributes to relevant action or is absent. Pasted/stretched low-quality mascot art = HIGH.
+- **V05 Production craft:** no huge unused void coupled with a giant text block, inconsistent app chrome, arbitrary nested card family, generic AI-app marketing gradients, stretched source excerpt, duplicated headings or visual reliance on labels; strong typographic rhythm across all states.
+- **V06 Independent comparator:** display a same-viewport side-by-side of previously rejected screen(s) and candidate real Flutter screens; a credible reviewer can state a **structural** difference rather than palette/typography changes. Original product/user values remain.
+- **V07 Signature only where truthful:** source-fold and anchored reveal reflect actual on-screen state. If new design looks conventional/generic even after source integration, **RETURN TO DESIGN**, not auto-pick Studio or randomly iterate colors.
+- **Evidence:** actual Flutter screenshot at 390px, 5–10s route interaction clip where possible, inspect in context (keyboard/source scroll/transition) and record observed deficiencies. Unit tests do not automatically PASS V01–V07. Founder review stays FAIL until explicit new judgment.
+
+## Q4 — Mobile resilience, accessibility, and asset fidelity
+
+| ID | Exact test | Threshold / PASS evidence |
+| --- | --- | --- |
+| A01 | 390×844, 320×~700 mobile logical sizes and real long Turkish material title | Source remains readable, all core actions accessible by scrolling, no visual clip/RenderFlex overflow |
+| A02 | 1.3× and 1.5× text scale on source, Recall and result | Complete question, typed answer, support actions, source proof and next action reachable; no fixed-height clipping |
+| A03 | >=5,000-char authorized source with newlines, Turkish I/İ/ı/ş/ğ and PDF normalized text | Scroll responsive, source version/anchor correct, no fake original PDF pages or unverified derived summaries |
+| A04 | Keyboard open, safe-area, screen reader semantics/focus order, back navigation | Submit/unknown/hint/support remain discoverable, no source behind active unaided prompt, no obscured focused input |
+| A05 | Color contrast and touch | Normal text ≥4.5:1, large text ≥3:1, meaningful UI non-text contrast ≥3:1; target interactive regions **designed** ≥44–48 logical px when feasible; labels do not rely solely on color (based on WCAG 2.2 concepts) |
+| A06 | Reduced Motion / no-animation setting | State semantics, source conceal/reveal and focus remain clear; no motion-only explanation |
+| A07 | Actual D/Knot asset or other signature asset | Confirm repo license/provenance, resolution, states, integration and contextual QA. Generated/reference art by itself = NOT production ready |
+| A08 | Dynamic source update, missing excerpt, very short source and selection/copy | Honest empty/fallback/warnings; no crashes, content leakage or misleading source highlight |
+
+Physical iOS and Android device/speech/performance/voice accessibility are **separately required before release under D-068**. Simulator/widget screenshots cannot waive them.
+
+## Q5 — Evidence-backed first-user comprehension and independent product review
+
+- With a genuinely usable runtime, recruit an initially small **n=5–8 uncoached priority-segment** group. Show 3–5s Home/reader exposure, ask them to name the material and next action **without prompting**, observe first tap, source→Recall→result within a prepared-material 60s target, ask what feedback means and why they might return. Record actual utterances, hesitations, errors and observed steps, not synthetic survey numbers.
+- If two or more in a five-person initial sample cannot identify the material/action, or multiple repeat the same critical misinterpretation of assisted evidence, treat as **REDESIGN**, not a “passing average”. Low n is formative evidence, not a statistically reliable retention/conversion forecast.
+- Blind competitive/product-fit check: describe new screenshot with branding concealed; is the source-based *reason to use this over a generic summary/audio app* perceptible in action and supported by the real build? Avoid claimed “unique” features without actual comparison.
+- Founder must personally ACCEPT/CHANGES_REQUIRED/REJECT the **actual updated runtime**. No design concept, README, percentage, internal automated score or this document substitutes for that protected decision.
+
+## Q6 — Completion, fail path, and exact status
+
+- **SPEC Q0:** authored; feasibility verification pending.
+- **ENGINEERING Q1 / TRUTH Q2 / VISUAL Q3 / STRESS Q4 / USERS Q5:** all **NOT RUN** for the *new Source Stage hypothesis*. Previous code-run PASS belongs to rejected treatment prototypes and remains only an engineering baseline.
+- **LA-0040 DONE:** only after Q0–Q5 applicable gates, explicit Founder visual approval, selected experience applied to required consumer surfaces and LA-0039 reconciled. D-068 final physical-device/release checks remain separate.
+- **Recovery:** if Q3 FAIL, do not polish buttons/colors; return to interaction contract and revise the real source→Recall→feedback behavior. Discard candidate by removing opt-in review wiring; preserve store/evidence schema and baseline routes.
+
+---
+
 > **ACTIVE 2026-10-08 FOUNDER SECOND FAIL — STRUCTURAL REJECTION:** Founder reviewed the latest real Flutter 12-screen packet and **rejected Editorial, Studio and Knowledge altogether.** Any previous "Studio refinement lead", "three meaningful UX variants" or future intent to select among them is superseded. Status of LA-0040/LA-0039 = **DESIGN FAIL / IN_PROGRESS**. Technical CI/capture success remains historical technical PASS only. The controlling new acceptance is not better colors or labels; it is a distinct source-centered, interaction-first learning experience.
 
 ### Immediate hard FAIL gates for next LA-0040 visual work
