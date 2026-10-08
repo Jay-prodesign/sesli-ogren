@@ -1,3 +1,13 @@
+# CURRENT V3 FOUR-SCREEN ART-DIRECTION CHECK — 2026-10-08
+
+**Controlling visual review:** [V3 source-led four-screen review](../design/LA-0040_LIVING_SOURCE_ATELIER_V3_FOUR_SCREEN_VISUAL_REVIEW_2026-10-08.md). V2 Home+Reader is now incorporated into one V3 four-screen composition with source-hidden Recall and source-linked Result; no new mascot, no fake question counters or outcome badges. The final screenshot is a browser-rendered concept only and NOT the actual running Flutter app.
+
+**AD status:** AD-01/02 = PARTIAL; AD-03 = UNTESTED; AD-04 = CONCEPT ONLY; AD-05 original D/Knot bytes VERIFIED, character quality/production states PENDING; AD-06 illustrative source quote matches but live learner outcomes UNTESTED; AD-07 production assets PENDING; AD-08 320/390 no horizontal overflow and reader dock clear in Chromium PASS for those geometries, forced 1.5x Turkish wrap **REWORK**, native Flutter/device accessibility NOT RUN; AD-09 Founder decision PENDING. **Visual direction lock stays CLOSED.**
+
+**Next visual admission gate:** fix 1.5x question rendering; add empty Home and truthful hinted/unknown result screen samples in the SAME family; preserve actual `RecallOutcome`/`RecallAssistance` and non-persisted raw answer boundaries. Human perception and Flutter/device QA may not be self-certified from concept screens.
+
+---
+
 # TWO-SCREEN ART-DIRECTION CANDIDATE — REVIEW CHECKPOINT 2026-10-08
 
 Exact design and assessment: [LA-0040 Living Source Atelier Home + Reader](../design/LA-0040_LIVING_SOURCE_ATELIER_TWO_SCREEN_DIRECTION_2026-10-08.md). This is a **VISUAL CONCEPT**, not a running Flutter production screen and not Founder-locked. The canonical D/Knot original is included unchanged and verified byte-identical, avoiding V3's counterfeit character failure. Public Quizlet/Speechify/Brilliant designs were referenced for UI principles only.
