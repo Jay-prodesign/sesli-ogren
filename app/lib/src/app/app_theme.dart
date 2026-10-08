@@ -120,12 +120,23 @@ abstract final class SesliOgrenTheme {
         elevation: 0,
         centerTitle: false,
       ),
-      navigationBarTheme: const NavigationBarThemeData(
+      navigationBarTheme: NavigationBarThemeData(
         backgroundColor: AppPalette.surface,
         indicatorColor: AppPalette.primarySoft,
         elevation: 0,
         height: 72,
         labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
+        iconTheme: WidgetStateProperty.resolveWith(
+          (states) => IconThemeData(
+            color: states.contains(WidgetState.selected) ? AppPalette.primary : AppPalette.inkMuted,
+          ),
+        ),
+        labelTextStyle: WidgetStateProperty.resolveWith(
+          (states) => TextStyle(
+            color: states.contains(WidgetState.selected) ? AppPalette.primaryDark : AppPalette.inkMuted,
+            fontWeight: states.contains(WidgetState.selected) ? FontWeight.w700 : FontWeight.w500,
+          ),
+        ),
       ),
       filledButtonTheme: FilledButtonThemeData(
         style: FilledButton.styleFrom(
