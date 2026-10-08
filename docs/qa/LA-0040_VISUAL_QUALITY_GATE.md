@@ -1,3 +1,19 @@
+# CURRENT SCOPE CORRECTION — COMPETITOR VISUAL/UI STUDY ONLY (2026-10-08)
+
+Founder clarified that the requested competitor research is **only for choosing and improving Sesli Öğren's visual UI/UX direction**. This explicitly supersedes the earlier market/business/substitution framing of BM-01–BM-07 below. No download-market analysis, revenue, acquisition, paywall, monetization, retention measurement, feature-parity roadmap or growth thesis belongs to THIS competitor design audit. Existing independent project-level EV and release QA requirements remain separate; do not invoke them as required outputs of the competitor *visual audit*.
+
+**Visual benchmark gate VBM-01…VBM-06 (current controlling scope):**
+- **VBM-01 | Screen evidence:** For leading learning (Duolingo, Quizlet, Brilliant, Khan Academy, Photomath) and reading/audio/summary (Speechify, ElevenReader, NotebookLM, Blinkist, Headway; NaturalReader, kitUP, Voiser as available), record actual official store/app screenshots or verified public UI recordings, platform, approximate observed date, and whether genuine in-app interaction was verified. Do not infer hidden screens from marketing copy.
+- **VBM-02 | Visual anatomy:** Compare actual backgrounds/color usage, light/dark treatment, typography, hierarchy, grid/spacing, card/dialog patterns, iconography, illustration, mascots/character roles, top/bottom navigation and hierarchy consistency. Distinguish observable facts from interpretation.
+- **VBM-03 | Feature presentation:** Screen-by-screen show HOW material import/reader, voice playback, study/quiz, feedback, result, progress, onboarding and empty/error states are VISUALLY implemented—not speculative new features to add.
+- **VBM-04 | Quality and friction:** Note strongest visual decisions, visible compromises, competing elements, visual overload, generic template signals, weak clarity, reachability and production assets; no unsupported claims that an app's installs prove its UI superiority.
+- **VBM-05 | Learning App design translation:** For each screen/function, decide ADOPT PRINCIPLE / AVOID / IMPROVE with exact rationale, then formulate distinctive **independently implemented** screen compositions, colors, typography, companion placement and interaction styling suited to our actual feature set. Never copy proprietary UI/characters/assets.
+- **VBM-06 | Gate output:** Make a screen-evidence-backed visual direction brief with mobile Home, material reader, listen/player, Recall, result, progress, navigation, D/Knot treatment and visual assets; implement a short real Flutter visual proof and judge it against actual benchmark screenshots and Founder taste. No design PASS solely from descriptions or code CI.
+
+**Current state:** baseline benchmark list and some public descriptions collected, but **detailed screenshot-by-screenshot UI anatomy and selected superior visual direction are NOT YET VERIFIED/DONE**. Visual direction remains FOUNDER FAIL. The broader BM gates below are historical and NON-CONTROLLING for this narrow research.
+
+---
+
 # CURRENT BENCHMARK GATE — LA-0040 LEARNING + AUDIO + SUMMARY COMPETITORS (2026-10-08)
 
 **Mandatory reference:** [Current 2026-10-08 market/visual UX benchmark](../research/LA-0040_PUBLIC_LEARNING_AUDIO_SUMMARY_UX_BENCHMARK_2026-10-08.md). Founder requires the first visual direction be tested against high-install education leaders (Duolingo, Photomath, Quizlet, Khan Academy, Brilliant) AND reader/audio/summary experiences (Speechify, NaturalReader, ElevenReader, NotebookLM, Blinkist, Headway, kitUP, Voiser). Ranking based solely on download counts or visual taste is invalid.
