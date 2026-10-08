@@ -106,6 +106,11 @@ jobs:
             cp "app/test/goldens/la0040_living_home_${state}.png" "docs/qa/evidence/la0040-living-home/${state}.png"
           done
           sha256sum docs/qa/evidence/la0040-living-home/*.png | tee docs/qa/evidence/la0040-living-home/SHA256SUMS.txt
+          # Carry the EXISTING canonical D/Knot reference into the visual-review
+          # packet so art-direction work never invents/replaces the character.
+          mkdir -p docs/qa/evidence/la0040-companion
+          cp app/assets/companions/D_KNOT_128.webp docs/qa/evidence/la0040-companion/D_KNOT_128_reference.webp
+          sha256sum docs/qa/evidence/la0040-companion/*.webp | tee docs/qa/evidence/la0040-companion/SHA256SUMS.txt
 
       - name: Upload review evidence
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
@@ -115,5 +120,6 @@ jobs:
             docs/qa/evidence/la0039
             docs/qa/evidence/la0040-treatments
             docs/qa/evidence/la0040-living-home
+            docs/qa/evidence/la0040-companion
           if-no-files-found: error
           retention-days: 7
