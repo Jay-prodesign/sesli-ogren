@@ -1,28 +1,36 @@
 import 'package:flutter/material.dart';
 
-/// Product-level visual tokens for the Premium Active Learning Studio lane.
+/// Product-level visual tokens for the grounded Living Visual Learning Studio.
 ///
-/// These tokens are intentionally product-local. They are not a generic design
-/// system and should only grow when Sesli Öğren has a concrete experience need.
+/// These tokens are intentionally product-local. They express the current
+/// material-first / active-learning presentation without inventing learning
+/// state. They are not a generic design system and should grow only when
+/// Sesli Öğren has a concrete experience need.
 abstract final class AppPalette {
-  static const canvas = Color(0xFFF8F6F1);
-  static const surface = Color(0xFFFFFEFB);
-  static const surfaceMuted = Color(0xFFF0EFEA);
-  static const ink = Color(0xFF101828);
-  static const inkMuted = Color(0xFF5E6678);
+  static const canvas = Color(0xFFF7F8FC);
+  static const surface = Color(0xFFFFFFFF);
+  static const surfaceMuted = Color(0xFFF1F3F9);
+  static const ink = Color(0xFF111827);
+  static const inkMuted = Color(0xFF667085);
 
-  static const primary = Color(0xFF3D4ED8);
-  static const primaryDark = Color(0xFF27369F);
-  static const primarySoft = Color(0xFFE8EBFF);
+  static const primary = Color(0xFF3657FF);
+  static const primaryDark = Color(0xFF14224A);
+  static const primarySoft = Color(0xFFE8EDFF);
 
-  static const success = Color(0xFF167C6A);
-  static const successSoft = Color(0xFFDFF7F0);
+  static const signal = Color(0xFF0D8F80);
+  static const signalSoft = Color(0xFFDFF7F3);
+  static const momentum = Color(0xFFC9F45D);
+  static const momentumInk = Color(0xFF29451E);
 
-  static const attention = Color(0xFFAC4F08);
-  static const attentionSoft = Color(0xFFFFEFD8);
+  static const success = Color(0xFF138A72);
+  static const successSoft = Color(0xFFE2F7F2);
 
-  static const destructive = Color(0xFFB42318);
-  static const outline = Color(0xFFD9DCE5);
+  static const attention = Color(0xFFA9560A);
+  static const attentionAccent = Color(0xFFE99024);
+  static const attentionSoft = Color(0xFFFFEEDB);
+
+  static const destructive = Color(0xFFD64550);
+  static const outline = Color(0xFFE4E7EC);
 }
 
 abstract final class SesliOgrenTheme {
@@ -33,10 +41,10 @@ abstract final class SesliOgrenTheme {
       onPrimary: Colors.white,
       primaryContainer: AppPalette.primarySoft,
       onPrimaryContainer: AppPalette.primaryDark,
-      secondary: AppPalette.success,
+      secondary: AppPalette.signal,
       onSecondary: Colors.white,
-      secondaryContainer: AppPalette.successSoft,
-      onSecondaryContainer: const Color(0xFF0B4E43),
+      secondaryContainer: AppPalette.signalSoft,
+      onSecondaryContainer: const Color(0xFF075E54),
       tertiary: AppPalette.attention,
       tertiaryContainer: AppPalette.attentionSoft,
       error: AppPalette.destructive,
@@ -48,8 +56,8 @@ abstract final class SesliOgrenTheme {
       surfaceContainerLowest: AppPalette.canvas,
       surfaceContainerLow: AppPalette.surface,
       surfaceContainer: AppPalette.surfaceMuted,
-      surfaceContainerHigh: const Color(0xFFE9E8E3),
-      surfaceContainerHighest: const Color(0xFFE2E1DC),
+      surfaceContainerHigh: const Color(0xFFE9ECF4),
+      surfaceContainerHighest: const Color(0xFFE1E5EF),
     );
 
     final text = base.textTheme.copyWith(
@@ -101,7 +109,7 @@ abstract final class SesliOgrenTheme {
         elevation: 0,
         margin: EdgeInsets.zero,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(18),
           side: const BorderSide(color: AppPalette.outline),
         ),
       ),
