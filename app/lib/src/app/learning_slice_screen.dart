@@ -545,8 +545,7 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
     final compactResultHeader = _phase == _SlicePhase.result;
     final candidate = LearningVisualTreatmentScope.maybeOf(context);
     final living = LivingDeskReviewScope.active(context);
-    final reviewFocus = (candidate != null || living) &&
-        (_phase == _SlicePhase.recall || _phase == _SlicePhase.result);
+    final reviewFocus = (candidate != null || living) && (_phase == _SlicePhase.recall || _phase == _SlicePhase.result);
     return Scaffold(
       backgroundColor: living ? AtelierStyle.canvas : null,
       body: SafeArea(
