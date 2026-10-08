@@ -76,31 +76,31 @@ class LivingStudyDeskHome extends StatelessWidget {
           Expanded(
             child: ListView(
               key: ValueKey(hasMaterial ? 'la0040-living-home-populated' : 'la0040-living-home-empty'),
-        padding: const EdgeInsets.fromLTRB(20, 18, 20, 34),
-        children: [
-          Row(
-            children: [
-              Container(
-                width: 9,
-                height: 30,
-                decoration: BoxDecoration(color: _accent, borderRadius: BorderRadius.circular(3)),
-              ),
-              const SizedBox(width: 11),
-              const Expanded(
-                child: Text(
-                  'sesli öğren',
-                  style: TextStyle(fontSize: 19, fontWeight: FontWeight.w800, letterSpacing: -0.9, color: _ink),
+              padding: const EdgeInsets.fromLTRB(20, 18, 20, 34),
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      width: 9,
+                      height: 30,
+                      decoration: BoxDecoration(color: _accent, borderRadius: BorderRadius.circular(3)),
+                    ),
+                    const SizedBox(width: 11),
+                    const Expanded(
+                      child: Text(
+                        'sesli öğren',
+                        style: TextStyle(fontSize: 19, fontWeight: FontWeight.w800, letterSpacing: -0.9, color: _ink),
+                      ),
+                    ),
+                    const Text(
+                      'ÇALIŞMA MASAN',
+                      style: TextStyle(color: _sub, fontSize: 10, fontWeight: FontWeight.w800, letterSpacing: 1),
+                    ),
+                  ],
                 ),
-              ),
-              const Text(
-                'ÇALIŞMA MASAN',
-                style: TextStyle(color: _sub, fontSize: 10, fontWeight: FontWeight.w800, letterSpacing: 1),
-              ),
-            ],
-          ),
-          const SizedBox(height: 32),
-          if (hasMaterial) _populated(context) else _empty(context),
-        ],
+                const SizedBox(height: 32),
+                if (hasMaterial) _populated(context) else _empty(context),
+              ],
             ),
           ),
           if (hasMaterial)
