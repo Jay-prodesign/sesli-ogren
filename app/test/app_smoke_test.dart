@@ -321,7 +321,7 @@ void main() {
     await tapVisible(tester, find.text('İpucu ver'));
     await pumpUntilFound(tester, find.textContaining('henüz etkin değil'));
     expect(find.textContaining('öğrenme kanıtı oluşturmaz'), findsOneWidget);
-    Navigator.of(tester.element(find.text('Kısa odak oturumu'))).pop();
+    await tester.pageBack();
     await tester.pumpAndSettle();
     await tester.scrollUntilVisible(find.text('Kaynağa hızlı bakış'), 260, scrollable: find.byType(Scrollable).last);
     await tester.pumpAndSettle();
@@ -756,6 +756,12 @@ void main() {
     expect(find.textContaining('ışık enerjisini kimyasal enerjiye'), findsOneWidget);
     expect(find.text('Önemli noktalar'), findsOneWidget);
     expect(find.textContaining('öğrenme kanıtı oluşturmaz'), findsOneWidget);
+    await tester.scrollUntilVisible(
+      find.text('Kendi cümlelerinle anlat'),
+      260,
+      scrollable: find.byType(Scrollable).last,
+    );
+    await tester.pumpAndSettle();
     expect(find.text('Hatırla ile dene'), findsOneWidget);
     expect(find.text('Kendi cümlelerinle anlat'), findsOneWidget);
     await tapVisible(tester, find.text('Kendi cümlelerinle anlat'));
@@ -765,7 +771,13 @@ void main() {
     await tapVisible(tester, find.text('Anlatımımı değerlendir'));
     await pumpUntilFound(tester, find.text('Henüz güvenilir değerlendirme yok'));
     expect(find.textContaining('öğrenme kanıtı olarak kaydetmiyoruz'), findsOneWidget);
-    Navigator.of(tester.element(find.text('Henüz güvenilir değerlendirme yok'))).pop();
+    await tester.pageBack();
+    await tester.pumpAndSettle();
+    await tester.scrollUntilVisible(
+      find.text('Hatırla ile dene'),
+      260,
+      scrollable: find.byType(Scrollable).last,
+    );
     await tester.pumpAndSettle();
     await tapVisible(tester, find.text('Hatırla ile dene'));
     await pumpUntilFound(tester, find.byType(LearningSliceScreen));
