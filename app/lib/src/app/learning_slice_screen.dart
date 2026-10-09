@@ -958,7 +958,10 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Senin yanıtın', style: theme.textTheme.labelMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
+                  Text(
+                    result.evidence.assistance == RecallAssistance.answerExposed ? 'Gösterilen yanıt' : 'Senin yanıtın',
+                    style: theme.textTheme.labelMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+                  ),
                   const SizedBox(height: 6),
                   Text(
                     _submittedAnswer == null || _submittedAnswer!.isEmpty ? 'Henüz bilmiyorum' : _submittedAnswer!,
