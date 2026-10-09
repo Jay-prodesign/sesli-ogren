@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sesli_ogren/src/app/app_runtime.dart';
 import 'package:sesli_ogren/src/app/quick_recap_screen.dart';
@@ -99,6 +100,29 @@ void main() {
     expect(gateway.submitCalls, 1);
     expect(gateway.deletedMaterialIds, isEmpty);
     expect(find.text('Kaynağa bağlı kısa özet.'), findsOneWidget);
+    // A generated, persisted recap must be usable outside the app.
+    String? copiedText;
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+      SystemChannels.platform,
+      (call) async {
+        if (call.method == 'Clipboard.setData') {
+          copiedText = (call.arguments as Map<Object?, Object?>)['text'] as String?;
+        }
+        return null;
+      },
+    );
+    addTearDown(() => tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+      SystemChannels.platform,
+      null,
+    ));
+    await tester.tap(find.text('Özeti kopyala'));
+    await tester.pumpAndSettle();
+    expect(copiedText, contains('Kaynağa bağlı kısa özet.'));
+    expect(copiedText, contains('Biyoloji notu'));
+    expect(copiedText, contains('AI tarafından oluşturulan özet'));
+    expect(copiedText, contains('Aynı server material yeniden kullanıldı.'));
+    expect(find.text('Özet panoya kopyalandı'), findsOneWidget);
+
     expect(
       await store.summaryServerMaterialId(
         learner: runtime.learner,
