@@ -211,6 +211,9 @@ void main() {
     await pumpUntilFound(tester, find.text('İpucusuz hatırladın'));
 
     expect(find.text('İpucusuz hatırladın'), findsOneWidget);
+    expect(find.text('Senin yanıtın'), findsOneWidget);
+    expect(find.text(action.expectedAnswer), findsWidgets);
+    expect(find.text('Kaynakla karşılaştır'), findsOneWidget);
     expect(find.text('Sıradaki adım'), findsOneWidget);
     await tapVisible(tester, find.text('Sıradaki adıma geç'));
     await pumpUntilFound(tester, find.text('Devam noktası'));
