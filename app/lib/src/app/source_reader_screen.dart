@@ -216,7 +216,7 @@ class _SourceReaderScreenState extends State<SourceReaderScreen> {
                   children: [
                     const Icon(Icons.menu_book_outlined, size: 18),
                     const SizedBox(width: 8),
-                    Expanded(child: Text('%${(_readingProgress * 100).round()} okundu')),
+                    Expanded(child: Text('Metindeki konum · %${(_readingProgress * 100).round()}')),
                     IconButton(
                       tooltip: 'Yazıyı küçült',
                       onPressed: _fontSize <= 14 ? null : () => setState(() => _fontSize -= 1),
