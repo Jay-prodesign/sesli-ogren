@@ -54,7 +54,7 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> {
         _submittedSourceVersion = source.identity.sourceVersionId;
       });
       await _refresh();
-      if (mounted && !(_status?.isTerminal ?? false)) {
+      if (mounted && _jobId != null && !(_status?.isTerminal ?? false)) {
         _startPolling();
       }
     } catch (_) {
