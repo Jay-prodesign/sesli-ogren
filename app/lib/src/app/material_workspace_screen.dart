@@ -99,9 +99,10 @@ class _MaterialWorkspaceScreenState extends State<MaterialWorkspaceScreen> {
         builder: (listenContext) => ListenScreen(
           runtime: widget.runtime,
           materialId: widget.materialId,
-          onRecall: () {
+          onRecall: () async {
             Navigator.of(listenContext).pop();
-            _openRecall();
+            if (!mounted) return;
+            await _openRecall();
           },
         ),
       ),
