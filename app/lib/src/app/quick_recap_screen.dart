@@ -22,6 +22,7 @@ class QuickRecapScreen extends StatefulWidget {
 class _QuickRecapScreenState extends State<QuickRecapScreen> {
   static const _gateway = SupabaseSourceSummaryGateway();
   String? _jobId;
+  SourceVersionId? _submittedSourceVersion;
   ServerSummaryStatus? _status;
   String? _error;
   bool _busy = false;
@@ -48,7 +49,10 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> {
         sourceVersionId: source.identity.sourceVersionId,
       );
       if (!mounted || id == null) return;
-      setState(() => _jobId = id);
+      setState(() {
+        _jobId = id;
+        _submittedSourceVersion = source.identity.sourceVersionId;
+      });
       await _refresh();
       if (mounted && !(_status?.isTerminal ?? false)) {
         _startPolling();
@@ -110,7 +114,10 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> {
         jobId: submission.jobId,
       );
       if (!mounted) return;
-      setState(() => _jobId = submission.jobId);
+      setState(() {
+        _jobId = submission.jobId;
+        _submittedSourceVersion = source.identity.sourceVersionId;
+      });
       await _refresh();
       if (mounted && !(_status?.isTerminal ?? false)) {
         _startPolling();
@@ -130,6 +137,22 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> {
     _checking = true;
     try {
       final status = await _gateway.status(id);
+      final currentSource = await widget.runtime.store.currentSourceVersion(
+        learner: widget.runtime.learner,
+        materialId: widget.materialId,
+      );
+      if (currentSource?.identity.sourceVersionId != _submittedSourceVersion) {
+        _pollTimer?.cancel();
+        if (mounted) {
+          setState(() {
+            _jobId = null;
+            _submittedSourceVersion = null;
+            _status = null;
+            _error = 'Kaynak değişti. Yeni sürüm için özet oluşturabilirsin.';
+          });
+        }
+        return;
+      }
       if (status.isTerminal) {
         _pollTimer?.cancel();
       }
