@@ -478,16 +478,6 @@ class _HomeSurface extends StatelessWidget {
       continuation?.nextAction.reasonText ??
       'Kaynağından kısa bir hatırlama denemesiyle ilk gerçek öğrenme kanıtını oluştur.';
 
-  static String _headerLine(LearningContinuation? continuation) {
-    final state = continuation?.state.kind ?? RecallStateKind.notAssessed;
-    return switch (state) {
-      RecallStateKind.notAssessed => 'İlk aktif adımın hazır.',
-      RecallStateKind.developing => 'Kaldığın yer hazır. Bir sonraki denemeye geç.',
-      RecallStateKind.retrievedOnce => 'Bir kez bağımsız hatırladın. Sıradaki adım hazır.',
-      RecallStateKind.needsReview => 'Kısa bir tekrar noktası hazır.',
-    };
-  }
-
   static CompanionVisualState _companionState(LearningContinuation? continuation) {
     final state = continuation?.state.kind ?? RecallStateKind.notAssessed;
     return switch (state) {
@@ -498,25 +488,7 @@ class _HomeSurface extends StatelessWidget {
     };
   }
 
-  static Color _companionSoft(LearningContinuation? continuation) {
-    final state = continuation?.state.kind ?? RecallStateKind.notAssessed;
-    return switch (state) {
-      RecallStateKind.notAssessed => AppPalette.primarySoft,
-      RecallStateKind.developing => AppPalette.primarySoft,
-      RecallStateKind.retrievedOnce => AppPalette.successSoft,
-      RecallStateKind.needsReview => AppPalette.attentionSoft,
-    };
-  }
 
-  static Color _companionAccent(LearningContinuation? continuation) {
-    final state = continuation?.state.kind ?? RecallStateKind.notAssessed;
-    return switch (state) {
-      RecallStateKind.notAssessed => AppPalette.primary,
-      RecallStateKind.developing => AppPalette.primary,
-      RecallStateKind.retrievedOnce => AppPalette.success,
-      RecallStateKind.needsReview => AppPalette.attention,
-    };
-  }
 }
 
 class _FirstMaterialHero extends StatelessWidget {
