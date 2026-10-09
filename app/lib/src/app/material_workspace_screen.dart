@@ -96,9 +96,8 @@ class _MaterialWorkspaceScreenState extends State<MaterialWorkspaceScreen> {
       await _openSourceReader(data);
     } catch (_) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Kaynak metni açılamadı. Tekrar deneyebilirsin.')),
-      );
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text('Kaynak metni açılamadı. Tekrar deneyebilirsin.')));
     }
   }
 
