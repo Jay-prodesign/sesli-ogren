@@ -436,6 +436,7 @@ class _AccountOverviewCard extends StatelessWidget {
     'structured_generation' => 'AI üretimi',
     'grounded_explain' => 'Kaynağa dayalı açıklama',
     'explain_back' => 'Anlatım değerlendirme',
+    'focus' => 'Odak AI yardımı',
     _ => capability.replaceAll('_', ' '),
   };
 }
