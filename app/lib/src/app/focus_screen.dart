@@ -414,18 +414,12 @@ class _FocusScreenState extends State<FocusScreen> {
                       const SizedBox(width: 7),
                       Text(
                         'Kaynak metni',
-                        style: theme.textTheme.labelMedium?.copyWith(
-                          color: accent,
-                          fontWeight: FontWeight.w800,
-                        ),
+                        style: theme.textTheme.labelMedium?.copyWith(color: accent, fontWeight: FontWeight.w800),
                       ),
                     ],
                   ),
                   const SizedBox(height: 10),
-                  Text(
-                    widget.sourceText,
-                    style: theme.textTheme.bodyMedium?.copyWith(height: 1.5, color: ink),
-                  ),
+                  Text(widget.sourceText, style: theme.textTheme.bodyMedium?.copyWith(height: 1.5, color: ink)),
                 ],
               ),
             ),

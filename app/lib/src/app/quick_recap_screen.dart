@@ -511,20 +511,15 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> with WidgetsBinding
           if (living) ...[
             Text(
               'KAYNAĞA BAĞLI AI',
-              style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                color: accent,
-                fontWeight: FontWeight.w900,
-                letterSpacing: 0.9,
-              ),
+              style: Theme.of(context).textTheme.labelSmall
+                  ?.copyWith(color: accent, fontWeight: FontWeight.w900, letterSpacing: 0.9),
             ),
             const SizedBox(height: 7),
           ],
           Text(
             'Kaynağına bağlı AI özeti',
-            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-              color: living ? AtelierStyle.ink : null,
-              fontWeight: living ? FontWeight.w900 : null,
-            ),
+            style: Theme.of(context).textTheme.headlineSmall
+                ?.copyWith(color: living ? AtelierStyle.ink : null, fontWeight: living ? FontWeight.w900 : null),
           ),
           const SizedBox(height: 12),
           Text(
