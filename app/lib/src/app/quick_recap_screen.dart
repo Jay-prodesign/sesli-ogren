@@ -114,6 +114,15 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> {
         jobId: submission.jobId,
       );
       if (!mounted) return;
+      final currentSource = await widget.runtime.store.currentSourceVersion(
+        learner: widget.runtime.learner,
+        materialId: widget.materialId,
+      );
+      if (!mounted) return;
+      if (currentSource?.identity.sourceVersionId != source.identity.sourceVersionId) {
+        setState(() => _error = 'Kaynak değişti. Yeni sürüm için özet oluşturabilirsin.');
+        return;
+      }
       setState(() {
         _jobId = submission.jobId;
         _submittedSourceVersion = source.identity.sourceVersionId;
