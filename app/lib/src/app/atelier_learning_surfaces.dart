@@ -66,73 +66,8 @@ class AtelierWorkspace extends StatelessWidget {
               ),
               const SizedBox(height: 17),
               if (sourceText.trim().isNotEmpty) ...[
-                Container(
-                  key: const ValueKey('la0040-reader-companion-scene'),
-                  padding: const EdgeInsets.fromLTRB(12, 12, 16, 12),
-                  decoration: BoxDecoration(color: const Color(0xFFE7F2EA), borderRadius: BorderRadius.circular(20)),
-                  child: const Row(
-                    children: [
-                      CompanionView(state: CompanionVisualState.idle, size: 96),
-                      SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'BİRLİKTE KEŞFEDELİM',
-                              style: TextStyle(
-                                color: AtelierStyle.teal,
-                                fontSize: 10,
-                                fontWeight: FontWeight.w900,
-                                letterSpacing: 0.8,
-                              ),
-                            ),
-                            SizedBox(height: 7),
-                            Text(
-                              'Önce oku, sonra kendi sözlerinle anlat.',
-                              style: TextStyle(
-                                color: AtelierStyle.ink,
-                                fontSize: 17,
-                                height: 1.24,
-                                fontWeight: FontWeight.w800,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 15),
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.fromLTRB(16, 15, 16, 15),
-                  decoration: BoxDecoration(color: AtelierStyle.mint, borderRadius: BorderRadius.circular(14)),
-                  child: const Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Icon(Icons.lightbulb_outline_rounded, color: AtelierStyle.teal, size: 22),
-                      SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Okurken bir şeyi yakala',
-                              style: TextStyle(color: AtelierStyle.ink, fontWeight: FontWeight.w900, fontSize: 16),
-                            ),
-                            SizedBox(height: 5),
-                            Text(
-                              'Bu metnin en önemli fikri ne? Birazdan kaynağı kapatıp kendi sözlerinle hatırlayacaksın.',
-                              style: TextStyle(color: AtelierStyle.muted, fontSize: 14, height: 1.4),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 18),
+                const _ReaderCue(),
+                const SizedBox(height: 12),
               ],
               const Divider(color: AtelierStyle.line),
               const SizedBox(height: 14),
@@ -243,6 +178,48 @@ class AtelierWorkspace extends StatelessWidget {
   );
 }
 
+class _ReaderCue extends StatelessWidget {
+  const _ReaderCue();
+
+  @override
+  Widget build(BuildContext context) => Semantics(
+    label: 'Önce kaynağı oku, sonra kaynağı kapat ve kendi sözlerinle hatırla.',
+    child: Row(
+      children: [
+        _step(Icons.auto_stories_outlined, 'OKU'),
+        _arrow(),
+        _step(Icons.visibility_off_outlined, 'KAPAT'),
+        _arrow(),
+        _step(Icons.record_voice_over_outlined, 'ANLAT'),
+      ],
+    ),
+  );
+
+  Widget _arrow() => const Expanded(
+    child: Padding(
+      padding: EdgeInsets.symmetric(horizontal: 7),
+      child: Divider(color: AtelierStyle.line, thickness: 1),
+    ),
+  );
+
+  Widget _step(IconData icon, String label) => Row(
+    mainAxisSize: MainAxisSize.min,
+    children: [
+      Icon(icon, color: AtelierStyle.teal, size: 18),
+      const SizedBox(width: 5),
+      Text(
+        label,
+        style: const TextStyle(
+          color: AtelierStyle.ink,
+          fontSize: 10,
+          fontWeight: FontWeight.w900,
+          letterSpacing: 0.8,
+        ),
+      ),
+    ],
+  );
+}
+
 class AtelierRecall extends StatelessWidget {
   const AtelierRecall({
     required this.prompt,
@@ -282,35 +259,34 @@ class AtelierRecall extends StatelessWidget {
           Expanded(
             child: Text(
               'Hatırlama sırası sende.',
-              style: TextStyle(color: AtelierStyle.ink, fontSize: 28, height: 1.15, fontWeight: FontWeight.w900),
-            ),
-          ),
-          CompanionView(state: CompanionVisualState.think, size: 128),
-        ],
-      ),
-      const SizedBox(height: 17),
-      Container(
-        key: const ValueKey('la0040-recall-companion-guidance'),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-        decoration: BoxDecoration(
-          color: AtelierStyle.mint,
-          borderRadius: BorderRadius.circular(18),
-          border: Border.all(color: AtelierStyle.line),
-        ),
-        child: const Row(
-          children: [
-            Icon(Icons.chat_bubble_outline_rounded, color: AtelierStyle.teal, size: 21),
-            SizedBox(width: 11),
-            Expanded(
-              child: Text(
-                'D/Knot: Acele etme. Hatırladığın kadarıyla anlat; takıldığında ipucu isteyebilirsin.',
-                style: TextStyle(color: AtelierStyle.ink, fontSize: 14, fontWeight: FontWeight.w600, height: 1.4),
+              style: TextStyle(
+                color: AtelierStyle.ink,
+                fontSize: 29,
+                height: 1.08,
+                fontWeight: FontWeight.w900,
+                letterSpacing: -0.8,
               ),
             ),
-          ],
-        ),
+          ),
+          SizedBox(width: 10),
+          CompanionView(state: CompanionVisualState.think, size: 90),
+        ],
       ),
-      const SizedBox(height: 15),
+      const SizedBox(height: 6),
+      const Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(Icons.chat_bubble_outline_rounded, color: AtelierStyle.teal, size: 18),
+          SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              'D/Knot: Hatırladığın kadarını yaz. Yardım istersen aşağıdaki seçenekleri kullan.',
+              style: TextStyle(color: AtelierStyle.muted, fontSize: 13, height: 1.42),
+            ),
+          ),
+        ],
+      ),
+      const SizedBox(height: 16),
       Container(
         width: double.infinity,
         padding: const EdgeInsets.fromLTRB(19, 19, 19, 23),
@@ -500,7 +476,7 @@ class AtelierResult extends StatelessWidget {
                   : result.evidence.outcome == RecallOutcome.helpedCorrect
                   ? CompanionVisualState.correct
                   : CompanionVisualState.think,
-              size: 128,
+              size: 90,
             ),
           ],
         ),
@@ -512,28 +488,25 @@ class AtelierResult extends StatelessWidget {
           style: const TextStyle(color: AtelierStyle.muted, fontSize: 14, height: 1.42),
         ),
         const SizedBox(height: 13),
-        Container(
+        Row(
           key: const ValueKey('la0040-result-companion-reflection'),
-          padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 13),
-          decoration: BoxDecoration(color: AtelierStyle.mint, borderRadius: BorderRadius.circular(17)),
-          child: Row(
-            children: [
-              const Icon(Icons.auto_awesome_outlined, color: AtelierStyle.teal, size: 20),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Text(
-                  independent
-                      ? 'D/Knot: Kendi başına hatırladın. Bunu kalıcılaştırmak için daha sonra yeniden dene.'
-                      : assisted
-                      ? 'D/Knot: İpucundan yararlandın. Şimdi kaynağı görüp sonra yeniden denemek iyi olabilir.'
-                      : 'D/Knot: Bu deneme bize sonraki çalışmanda nereye odaklanacağını gösteriyor.',
-                  style: const TextStyle(color: AtelierStyle.ink, fontSize: 13, height: 1.45),
-                ),
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Icon(Icons.auto_awesome_outlined, color: AtelierStyle.teal, size: 18),
+            const SizedBox(width: 9),
+            Expanded(
+              child: Text(
+                independent
+                    ? 'D/Knot: Kendi başına hatırladın. Kalıcı olup olmadığını sonraki denemeler gösterecek.'
+                    : assisted
+                    ? 'D/Knot: İpucundan yararlandın. Kaynakla karşılaştırıp sonra yeniden deneyebilirsin.'
+                    : 'D/Knot: Bu deneme, sonraki çalışmanda nereye odaklanacağını gösteriyor.',
+                style: const TextStyle(color: AtelierStyle.muted, fontSize: 13, height: 1.42),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
-        const SizedBox(height: 13),
+        const SizedBox(height: 18),
         const Text(
           'ÖNCE SENİN YANITIN',
           style: TextStyle(color: AtelierStyle.muted, fontSize: 11, fontWeight: FontWeight.w900, letterSpacing: 1),
@@ -643,24 +616,6 @@ class AtelierResult extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 18),
-        const Row(
-          children: [
-            Icon(Icons.route_outlined, color: AtelierStyle.teal, size: 20),
-            SizedBox(width: 8),
-            Text(
-              'ÖĞRENME YOLCULUĞUN',
-              style: TextStyle(color: AtelierStyle.teal, fontWeight: FontWeight.w900, fontSize: 11, letterSpacing: 1),
-            ),
-          ],
-        ),
-        const SizedBox(height: 10),
-        Text(
-          independent
-              ? 'Bir kez kendi başına hatırladın. Bilginin kalıcı olup olmadığını sonraki denemeler gösterecek.'
-              : 'Bu deneme kaydedildi. Kaynağı ve kendi yanıtını karşılaştırarak bir sonraki adımına hazırlan.',
-          style: const TextStyle(color: AtelierStyle.muted, fontSize: 14, height: 1.45),
-        ),
-        const SizedBox(height: 13),
         const Text(
           'SIRADAKİ GERÇEK ADIM',
           style: TextStyle(color: AtelierStyle.teal, fontWeight: FontWeight.w900, fontSize: 11, letterSpacing: 1),
