@@ -242,26 +242,14 @@ CREATE TABLE sentinel (
         serverMaterialId: 'server-a',
         jobId: 'job-a',
       );
-      expect(
-        await store.summaryJobId(learner: owner, materialId: material, sourceVersionId: sourceA),
-        'job-a',
-      );
-      expect(
-        await store.summaryJobId(learner: other, materialId: material, sourceVersionId: sourceA),
-        isNull,
-      );
-      expect(
-        await store.summaryJobId(learner: owner, materialId: material, sourceVersionId: sourceB),
-        isNull,
-      );
+      expect(await store.summaryJobId(learner: owner, materialId: material, sourceVersionId: sourceA), 'job-a');
+      expect(await store.summaryJobId(learner: other, materialId: material, sourceVersionId: sourceA), isNull);
+      expect(await store.summaryJobId(learner: owner, materialId: material, sourceVersionId: sourceB), isNull);
       await store.close();
       store = null;
 
       store = await SqliteSourceStore.open(factory: databaseFactoryFfi, path: path);
-      expect(
-        await store.summaryJobId(learner: owner, materialId: material, sourceVersionId: sourceA),
-        'job-a',
-      );
+      expect(await store.summaryJobId(learner: owner, materialId: material, sourceVersionId: sourceA), 'job-a');
       await store.saveSummaryJob(
         learner: owner,
         materialId: material,
@@ -269,14 +257,8 @@ CREATE TABLE sentinel (
         serverMaterialId: 'server-b',
         jobId: 'job-b',
       );
-      expect(
-        await store.summaryJobId(learner: owner, materialId: material, sourceVersionId: sourceA),
-        isNull,
-      );
-      expect(
-        await store.summaryJobId(learner: owner, materialId: material, sourceVersionId: sourceB),
-        'job-b',
-      );
+      expect(await store.summaryJobId(learner: owner, materialId: material, sourceVersionId: sourceA), isNull);
+      expect(await store.summaryJobId(learner: owner, materialId: material, sourceVersionId: sourceB), 'job-b');
     } finally {
       await database?.close();
       await store?.close();
