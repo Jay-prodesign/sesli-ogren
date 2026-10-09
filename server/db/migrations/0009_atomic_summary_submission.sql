@@ -52,7 +52,7 @@ begin
   exception
     when unique_violation then
       select j.*, s.content_hash
-        into v_existing_job, v_existing_hash
+        into v_existing_material_id, v_existing_job_id, v_existing_hash
       from public.generation_jobs j
       join public.source_assets s on s.id = j.source_asset_id
       where j.account_id = v_user
