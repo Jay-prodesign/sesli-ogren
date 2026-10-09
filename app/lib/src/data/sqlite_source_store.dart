@@ -361,17 +361,13 @@ CREATE TABLE IF NOT EXISTS summary_jobs (
     required String serverMaterialId,
     required String jobId,
   }) async {
-    await _database.insert(
-      'summary_jobs',
-      {
-        'learner_id': learner.id.value,
-        'material_id': materialId.value,
-        'source_version_id': sourceVersionId.value,
-        'server_material_id': serverMaterialId,
-        'job_id': jobId,
-      },
-      conflictAlgorithm: ConflictAlgorithm.replace,
-    );
+    await _database.insert('summary_jobs', {
+      'learner_id': learner.id.value,
+      'material_id': materialId.value,
+      'source_version_id': sourceVersionId.value,
+      'server_material_id': serverMaterialId,
+      'job_id': jobId,
+    }, conflictAlgorithm: ConflictAlgorithm.replace);
   }
 
   static Future<void> _upgradeActiveRecallAttemptSchema(Database db) async {
