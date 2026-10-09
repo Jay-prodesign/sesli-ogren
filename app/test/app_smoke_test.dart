@@ -300,7 +300,7 @@ void main() {
     expect(find.text('SIRADAKİ ADIM'), findsOneWidget);
     expect(find.text('Hatırla ile devam'), findsOneWidget);
 
-    await tester.scrollUntilVisible(find.text('Odaklan'), 260, scrollable: find.byType(Scrollable).last);
+    await tester.ensureVisible(find.text('Odaklan').last);
     await tester.pump(const Duration(milliseconds: 300));
     expect(find.text('Odaklan'), findsOneWidget);
     await tapVisible(tester, find.text('Odaklan').last);
