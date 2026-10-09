@@ -397,6 +397,7 @@ class _ListenScreenState extends State<ListenScreen> {
                       ChoiceChip(
                         label: Text(
                           '${rate.toStringAsFixed(rate == 1.0 ? 0 : 2).replaceFirst(RegExp(r'0+
+                        selected: playbackRate == rate,
                         onSelected: _speaking || _startingPlayback ? null : (_) => _setPlaybackRate(rate),
                       ),
                   ],
@@ -492,6 +493,7 @@ class _ListenSource {
   final double playbackRate;
 }
 ), '').replaceFirst(RegExp(r'\.
+                        selected: playbackRate == rate,
                         onSelected: _speaking || _startingPlayback ? null : (_) => _setPlaybackRate(rate),
                       ),
                   ],
