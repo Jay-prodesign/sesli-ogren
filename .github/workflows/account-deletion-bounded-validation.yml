@@ -6,6 +6,7 @@ on:
       - "server/db/**"
       - "supabase/functions/delete-account/**"
       - "supabase/functions/generation-worker/**"
+      - "supabase/functions/explain-back-evaluator/**"
       - "supabase/config.toml"
       - ".github/workflows/account-deletion-bounded-validation.yml"
 
@@ -50,6 +51,7 @@ jobs:
           cp server/db/tests/80_generation_targeted_claim.sql "$tmp/tests/"
           cp server/db/tests/81_atomic_summary_submission.sql "$tmp/tests/"
           cp server/db/tests/82_distinct_grounded_explain.sql "$tmp/tests/"
+          cp server/db/tests/83_explain_back_evaluator.sql "$tmp/tests/"
           report="$RUNNER_TEMP/account-deletion-sql-report.txt"
           if ! bash spike/architecture-proof/db/run_sql_suite.sh account_deletion "$tmp/migrations" "$tmp/tests" "$report"; then
             cat "$report" || true
@@ -64,6 +66,7 @@ jobs:
           echo "$RUNNER_TEMP/deno" >> "$GITHUB_PATH"
       - name: Edge Function lint + type-check
         run: |
-          deno lint supabase/functions/delete-account/index.ts supabase/functions/generation-worker/index.ts
+          deno lint supabase/functions/delete-account/index.ts supabase/functions/generation-worker/index.ts supabase/functions/explain-back-evaluator/index.ts
           deno check supabase/functions/delete-account/index.ts
           deno check supabase/functions/generation-worker/index.ts
+          deno check supabase/functions/explain-back-evaluator/index.ts
