@@ -52,10 +52,7 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
-        home: MaterialWorkspaceScreen(
-          runtime: runtime,
-          materialId: const MaterialId('missing-workspace-material'),
-        ),
+        home: MaterialWorkspaceScreen(runtime: runtime, materialId: const MaterialId('missing-workspace-material')),
       ),
     );
     await _pumpUntilFound(tester, find.text('Materyal açılamadı.'));
