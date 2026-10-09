@@ -103,6 +103,23 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> {
         sourceVersionId: source.identity.sourceVersionId,
       );
       if (extracted == null) throw StateError('Source text unavailable');
+      final existingJobId = await widget.runtime.store.summaryJobId(
+        learner: widget.runtime.learner,
+        materialId: widget.materialId,
+        sourceVersionId: source.identity.sourceVersionId,
+      );
+      if (existingJobId != null) {
+        if (!mounted) return;
+        setState(() {
+          _jobId = existingJobId;
+          _submittedSourceVersion = source.identity.sourceVersionId;
+        });
+        await _refresh();
+        if (mounted && _jobId != null && !(_status?.isTerminal ?? false)) {
+          _startPolling();
+        }
+        return;
+      }
       final submission = await _gateway.submit(
         source: SourceIngestResult(material: material, sourceVersion: source, extractedContent: extracted),
       );
