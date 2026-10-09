@@ -19,7 +19,7 @@ class QuickRecapScreen extends StatefulWidget {
   State<QuickRecapScreen> createState() => _QuickRecapScreenState();
 }
 
-class _QuickRecapScreenState extends State<QuickRecapScreen> {
+class _QuickRecapScreenState extends State<QuickRecapScreen> with WidgetsBindingObserver {
   static const _gateway = SupabaseSourceSummaryGateway();
   String? _jobId;
   SourceVersionId? _submittedSourceVersion;
@@ -33,6 +33,7 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _restore();
   }
 
@@ -67,7 +68,15 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> {
   }
 
   @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed && _jobId != null) {
+      _refresh();
+    }
+  }
+
+  @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _pollTimer?.cancel();
     super.dispose();
   }
