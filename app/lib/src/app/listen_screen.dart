@@ -293,10 +293,7 @@ class _ListenScreenState extends State<ListenScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             DecoratedBox(
-                              decoration: BoxDecoration(
-                                color: accentSoft,
-                                borderRadius: BorderRadius.circular(16),
-                              ),
+                              decoration: BoxDecoration(color: accentSoft, borderRadius: BorderRadius.circular(16)),
                               child: Padding(
                                 padding: const EdgeInsets.all(5),
                                 child: CompanionView(
@@ -311,10 +308,7 @@ class _ListenScreenState extends State<ListenScreen> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   DecoratedBox(
-                                    decoration: BoxDecoration(
-                                      color: accent,
-                                      borderRadius: BorderRadius.circular(999),
-                                    ),
+                                    decoration: BoxDecoration(color: accent, borderRadius: BorderRadius.circular(999)),
                                     child: Padding(
                                       padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
                                       child: Text(
@@ -400,18 +394,12 @@ class _ListenScreenState extends State<ListenScreen> {
                             const SizedBox(width: 7),
                             Text(
                               widget.textOverride?.trim().isNotEmpty == true ? 'Quick Recap özeti' : 'Kaynak metni',
-                              style: theme.textTheme.labelMedium?.copyWith(
-                                color: accent,
-                                fontWeight: FontWeight.w800,
-                              ),
+                              style: theme.textTheme.labelMedium?.copyWith(color: accent, fontWeight: FontWeight.w800),
                             ),
                           ],
                         ),
                         const SizedBox(height: 12),
-                        Text(
-                          source.text,
-                          style: theme.textTheme.bodyLarge?.copyWith(height: 1.58, color: ink),
-                        ),
+                        Text(source.text, style: theme.textTheme.bodyLarge?.copyWith(height: 1.58, color: ink)),
                       ],
                     ),
                   ),
@@ -433,16 +421,15 @@ class _ListenScreenState extends State<ListenScreen> {
                         selectedColor: living ? AtelierStyle.mark : null,
                         checkmarkColor: living ? AtelierStyle.ink : null,
                         side: living ? const BorderSide(color: AtelierStyle.line) : null,
-                        labelStyle: living ? const TextStyle(color: AtelierStyle.ink, fontWeight: FontWeight.w700) : null,
+                        labelStyle: living
+                            ? const TextStyle(color: AtelierStyle.ink, fontWeight: FontWeight.w700)
+                            : null,
                         onSelected: _speaking || _startingPlayback ? null : (_) => _setPlaybackRate(rate),
                       ),
                   ],
                 ),
                 const SizedBox(height: 6),
-                Text(
-                  'Hız tercihin bu cihazda hatırlanır.',
-                  style: theme.textTheme.bodySmall?.copyWith(color: muted),
-                ),
+                Text('Hız tercihin bu cihazda hatırlanır.', style: theme.textTheme.bodySmall?.copyWith(color: muted)),
                 if (_error != null) ...[
                   const SizedBox(height: 12),
                   Text(_error!, style: TextStyle(color: theme.colorScheme.error)),
