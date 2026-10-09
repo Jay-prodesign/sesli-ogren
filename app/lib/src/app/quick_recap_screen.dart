@@ -1,12 +1,8 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:share_plus/share_plus.dart';
-import 'package:pdf/pdf.dart';
-import 'package:pdf/widgets.dart' as pw;
-import 'package:path_provider/path_provider.dart';
 
 import '../domain/learning_contracts.dart';
 import '../generation/supabase_source_summary_gateway.dart';
@@ -354,63 +350,6 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> with WidgetsBinding
     };
   }
 
-  Future<void> _exportPdf(ServerSummaryStatus status) async {
-    final summary = status.summary;
-    if (summary == null || summary.trim().isEmpty) return;
-    try {
-      final material = await widget.runtime.store.material(
-        learner: widget.runtime.learner,
-        materialId: widget.materialId,
-      );
-      if (!mounted) return;
-      final title = material?.title.trim().isNotEmpty == true ? material!.title : 'Öğrenme materyali';
-      final font = pw.Font.ttf(await rootBundle.load('assets/fonts/NotoSans-Regular.ttf'));
-      final boldFont = pw.Font.ttf(await rootBundle.load('assets/fonts/NotoSans-Bold.ttf'));
-      final document = pw.Document();
-      document.addPage(
-        pw.MultiPage(
-          pageFormat: PdfPageFormat.a4,
-          margin: const pw.EdgeInsets.all(36),
-          theme: pw.ThemeData.withFont(base: font, bold: boldFont),
-          build: (_) => [
-            pw.Text('Hızlı özet', style: pw.TextStyle(font: boldFont, fontSize: 22)),
-            pw.SizedBox(height: 10),
-            pw.Text(title, style: pw.TextStyle(font: boldFont, fontSize: 14)),
-            pw.SizedBox(height: 8),
-            pw.Text('AI tarafından oluşturulmuştur · Sesli Öğren'),
-            pw.Text('Dışa aktarma: ${DateTime.now().toLocal().toIso8601String().split('T').first}'),
-            pw.SizedBox(height: 20),
-            pw.Text(summary),
-            if (status.keyPoints.isNotEmpty) ...[
-              pw.SizedBox(height: 18),
-              pw.Text('Önemli noktalar', style: pw.TextStyle(font: boldFont)),
-              for (final point in status.keyPoints)
-                pw.Padding(
-                  padding: const pw.EdgeInsets.only(top: 6),
-                  child: pw.Bullet(text: point, style: pw.TextStyle(font: font)),
-                ),
-            ],
-          ],
-        ),
-      );
-      final directory = await getTemporaryDirectory();
-      final file = File('${directory.path}/sesli-ogren-ozet-${DateTime.now().millisecondsSinceEpoch}.pdf');
-      await file.writeAsBytes(await document.save(), flush: true);
-      if (!mounted) return;
-      await SharePlus.instance.share(
-        ShareParams(
-          files: [XFile(file.path, mimeType: 'application/pdf')],
-          subject: 'Hızlı özet — $title',
-        ),
-      );
-    } catch (_) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('PDF hazırlanamadı veya paylaşılamadı. Tekrar deneyebilirsin.')),
-      );
-    }
-  }
-
   Future<void> _shareSummary(ServerSummaryStatus status) async {
     final summary = status.summary;
     if (summary == null || summary.trim().isEmpty) return;
@@ -543,11 +482,6 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> with WidgetsBinding
               spacing: 8,
               runSpacing: 8,
               children: [
-                OutlinedButton.icon(
-                  onPressed: () => _exportPdf(status),
-                  icon: const Icon(Icons.picture_as_pdf_outlined),
-                  label: const Text('PDF dışa aktar'),
-                ),
                 OutlinedButton.icon(
                   onPressed: () => _shareSummary(status),
                   icon: const Icon(Icons.share_outlined),
