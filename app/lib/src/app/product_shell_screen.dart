@@ -96,13 +96,23 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
     await _openLearningFor(materialId);
   }
 
-  Future<void> _openLearningFor(MaterialId materialId) async {
+  Future<void> _openNextLearningAction() async {
+    final materialId = (await _snapshot).material?.id ?? widget.runtime.newMaterialId();
+    if (!mounted) return;
+    await _openLearningFor(materialId, autoAdvanceContinuation: true);
+  }
+
+  Future<void> _openLearningFor(MaterialId materialId, {bool autoAdvanceContinuation = false}) async {
     if (!mounted) return;
     final treatment = LearningVisualTreatmentScope.maybeOf(context);
     await Navigator.of(context).push<void>(
       MaterialPageRoute(
         builder: (_) {
-          final screen = LearningSliceScreen(runtime: widget.runtime, materialId: materialId);
+          final screen = LearningSliceScreen(
+            runtime: widget.runtime,
+            materialId: materialId,
+            autoAdvanceContinuation: autoAdvanceContinuation,
+          );
           if (treatment != null) return LearningVisualTreatmentScope(treatment: treatment, child: screen);
           return LivingDeskReviewScope.active(context) ? LivingDeskReviewScope(child: screen) : screen;
         },
@@ -364,7 +374,7 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
                         enabled: _index == 0,
                         child: _HomeSurface(
                           data: data,
-                          onOpenLearning: _openLearning,
+                          onOpenLearning: _openNextLearningAction,
                           onOpenListen: _openListen,
                           onOpenWorkspace: () => _openWorkspace(),
                           onOpenMaterial: (id) => _openWorkspace(id),
