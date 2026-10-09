@@ -157,12 +157,13 @@ class _ListenScreenState extends State<ListenScreen> {
   Future<void> _stop() async {
     _playToken++;
     await _speech.stop();
-    if (mounted)
+    if (mounted) {
       setState(() {
         _speaking = false;
         _startedPlayback = false;
         _startingPlayback = false;
       });
+    }
   }
 
   @override
