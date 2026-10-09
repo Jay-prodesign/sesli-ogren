@@ -1,15 +1,55 @@
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:sesli_ogren/src/app/app_runtime.dart';
 import 'package:sesli_ogren/src/app/atelier_learning_surfaces.dart';
+import 'package:sesli_ogren/src/app/listen_screen.dart';
 import 'package:sesli_ogren/src/app/living_study_desk_home.dart';
+import 'package:sesli_ogren/src/data/pdf_text_extractor.dart';
+import 'package:sesli_ogren/src/data/source_ingest_service.dart';
+import 'package:sesli_ogren/src/data/sqlite_source_store.dart';
 import 'package:sesli_ogren/src/domain/learning_contracts.dart';
 import 'package:sesli_ogren/src/domain/learning_truth.dart';
+import 'package:sesli_ogren/src/learning/recall_learning_service.dart';
+import 'package:sesli_ogren/src/speech/device_speech_output.dart';
+import 'package:sqflite_common_ffi/sqflite_ffi.dart';
+
+
+class _UnusedPdfExtractor implements PdfTextExtractor {
+  const _UnusedPdfExtractor();
+
+  @override
+  Future<ExtractedPdf> extract(Uint8List bytes, {required String sourceName}) {
+    throw UnimplementedError();
+  }
+}
+
+class _NoopSpeechOutput implements SpeechOutput {
+  const _NoopSpeechOutput();
+
+  @override
+  Future<void> speak(
+    String text, {
+    required String locale,
+    required VoidCallback onStart,
+    required VoidCallback onDone,
+    required ValueChanged<Object> onError,
+    double rateMultiplier = 1.0,
+  }) async {}
+
+  @override
+  Future<void> stop() async {}
+
+  @override
+  Future<void> dispose() async {}
+}
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
+  sqfliteFfiInit();
 
   setUpAll(() async {
     Future<void> loadFont(String family, String path) async {
@@ -163,6 +203,48 @@ void main() {
         onFocus: () {},
       ),
     );
+  });
+
+  testWidgets('LA-0040 source-first Listen', (tester) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
+    addTearDown(store.close);
+    final ingest = SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor());
+    final runtime = AppRuntime(
+      learner: AppRuntime.localM5LearnerFixture,
+      store: store,
+      ingest: ingest,
+      recall: RecallLearningService(sourceStore: store, learningStore: store.learningTruthStore()),
+      telemetry: store.operationalTelemetry(),
+    );
+    const listenMaterialId = MaterialId('visual-listen-material');
+    await ingest.ingestPastedText(
+      learner: runtime.learner,
+      materialId: listenMaterialId,
+      text: source,
+      sourceName: 'Fotosentez: ışık ve enerji',
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        debugShowCheckedModeBanner: false,
+        home: LivingDeskReviewScope(
+          child: ListenScreen(
+            runtime: runtime,
+            materialId: listenMaterialId,
+            speechOutput: const _NoopSpeechOutput(),
+            onRecall: () {},
+          ),
+        ),
+      ),
+    );
+    await tester.pump(const Duration(milliseconds: 500));
+    expect(tester.takeException(), isNull);
+    await expectLater(find.byType(Scaffold), matchesGoldenFile('goldens/la0040_listen_390x844.png'));
   });
 
   testWidgets('LA-0040 source-hidden Recall', (tester) async {
