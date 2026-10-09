@@ -3,6 +3,8 @@ name: product-platform-build-validation
 on:
   pull_request:
     paths:
+      - "app/lib/**"
+      - "app/assets/**"
       - "app/android/**"
       - "app/ios/**"
       - "app/pubspec.yaml"
