@@ -77,6 +77,38 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  testWidgets('reader navigation keeps Home available after returning', (tester) async {
+    final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
+    addTearDown(store.close);
+    final ingest = SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor());
+    const learner = AppRuntime.localM5LearnerFixture;
+    await ingest.ingestPastedText(
+      learner: learner,
+      materialId: const MaterialId('reader-return-material'),
+      text: 'Fotosentez bitkilerde gerçekleşir ve ışık enerjisi kullanır.',
+      sourceName: 'Biyoloji · Fotosentez',
+    );
+    final runtime = AppRuntime(
+      learner: learner,
+      store: store,
+      ingest: ingest,
+      recall: RecallLearningService(sourceStore: store, learningStore: store.learningTruthStore()),
+      telemetry: store.operationalTelemetry(),
+    );
+
+    await tester.pumpWidget(MaterialApp(home: ProductShellScreen(runtime: runtime)));
+    await _pumpUntilFound(tester, find.text('Biyoloji · Fotosentez'));
+    await tester.tap(find.text('Kütüphane'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byTooltip('Son kaynağı oku'));
+    await tester.pumpAndSettle();
+    expect(find.text('Fotosentez bitkilerde gerçekleşir ve ışık enerjisi kullanır.'), findsWidgets);
+    await tester.pageBack();
+    await tester.pumpAndSettle();
+    expect(find.byType(ProductShellScreen), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('product shell repairs stale continuation without blocking the library', (tester) async {
     final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
     addTearDown(store.close);
