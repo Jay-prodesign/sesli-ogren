@@ -83,18 +83,21 @@ void main() {
         await tester.pageBack();
         await tester.pump(const Duration(milliseconds: 400));
       }
-      await tester.tap(find.text('Kütüphane').last);
+      await tester.tap(find.descendant(of: find.byType(NavigationBar), matching: find.text('Kütüphane')));
+      expect(tester.widget<NavigationBar>(find.byType(NavigationBar)).selectedIndex, 1);
       await tester.pump(const Duration(milliseconds: 400));
       expect(find.text('SENİN KAYNAKLARIN'), findsOneWidget);
       expect(tester.takeException(), isNull);
       await expectLater(find.byType(Scaffold).last, matchesGoldenFile('goldens/product_shell_library_${populated ? 'populated' : 'empty'}_390x844.png'));
       // Capture the other real navigation destinations as well. These frames
       // must use the same runtime truth as Home and Library, not mock counters.
-      await tester.tap(find.text('İlerleme').last);
+      await tester.tap(find.descendant(of: find.byType(NavigationBar), matching: find.text('İlerleme')));
+      expect(tester.widget<NavigationBar>(find.byType(NavigationBar)).selectedIndex, 2);
       await tester.pump(const Duration(milliseconds: 400));
       expect(tester.takeException(), isNull);
       await expectLater(find.byType(Scaffold).first, matchesGoldenFile('goldens/product_shell_progress_${populated ? 'populated' : 'empty'}_390x844.png'));
-      await tester.tap(find.text('Profil').last);
+      await tester.tap(find.descendant(of: find.byType(NavigationBar), matching: find.text('Profil')));
+      expect(tester.widget<NavigationBar>(find.byType(NavigationBar)).selectedIndex, 3);
       await tester.pump(const Duration(milliseconds: 400));
       expect(tester.takeException(), isNull);
       await expectLater(find.byType(Scaffold).first, matchesGoldenFile('goldens/product_shell_profile_${populated ? 'populated' : 'empty'}_390x844.png'));
