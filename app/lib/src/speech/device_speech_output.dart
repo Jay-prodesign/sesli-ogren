@@ -34,14 +34,10 @@ final class DeviceSpeechOutput implements SpeechOutput {
     if (!kIsWeb && defaultTargetPlatform == TargetPlatform.iOS) {
       await _tts.setSharedInstance(true);
       await _tts.autoStopSharedSession(false);
-      await _tts.setIosAudioCategory(
-        IosTextToSpeechAudioCategory.playback,
-        const [
-          IosTextToSpeechAudioCategoryOptions.allowBluetoothA2DP,
-          IosTextToSpeechAudioCategoryOptions.allowAirPlay,
-        ],
-        IosTextToSpeechAudioMode.spokenAudio,
-      );
+      await _tts.setIosAudioCategory(IosTextToSpeechAudioCategory.playback, const [
+        IosTextToSpeechAudioCategoryOptions.allowBluetoothA2DP,
+        IosTextToSpeechAudioCategoryOptions.allowAirPlay,
+      ], IosTextToSpeechAudioMode.spokenAudio);
     }
 
     await _tts.setLanguage(locale);
