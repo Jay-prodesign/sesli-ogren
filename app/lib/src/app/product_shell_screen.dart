@@ -814,12 +814,21 @@ class _LibrarySurfaceState extends State<_LibrarySurface> {
     final visibleMaterials = _visibleMaterials;
     final hasQuery = _query.trim().isNotEmpty;
     return ListView(
-      padding: const EdgeInsets.fromLTRB(20, 24, 20, 32),
+      padding: const EdgeInsets.fromLTRB(24, 30, 24, 40),
       children: [
+        Text(
+          'SENİN KAYNAKLARIN',
+          style: theme.textTheme.labelSmall?.copyWith(
+            color: AppPalette.primary,
+            fontWeight: FontWeight.w900,
+            letterSpacing: 1.8,
+          ),
+        ),
+        const SizedBox(height: 12),
         Row(
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
-            Expanded(child: Text('Kütüphane', style: theme.textTheme.headlineMedium)),
+            Expanded(child: Text('Kütüphane', style: theme.textTheme.headlineLarge?.copyWith(fontWeight: FontWeight.w900, letterSpacing: -1.1))),
             if (widget.data.materials.isNotEmpty)
               Text(
                 hasQuery
@@ -829,13 +838,13 @@ class _LibrarySurfaceState extends State<_LibrarySurface> {
               ),
           ],
         ),
-        const SizedBox(height: 6),
+        const SizedBox(height: 12),
         Text(
           'Kaynakların, kaldığın yer ve öğrenme devamın tek yerde.',
           style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
         ),
         if (widget.data.materials.isNotEmpty) ...[
-          const SizedBox(height: 16),
+          const SizedBox(height: 24),
           TextField(
             key: const ValueKey('library-search'),
             controller: _searchController,
@@ -855,7 +864,7 @@ class _LibrarySurfaceState extends State<_LibrarySurface> {
             ),
           ),
         ],
-        const SizedBox(height: 24),
+        const SizedBox(height: 28),
         if (widget.data.materials.isEmpty)
           _PrimaryCard(
             title: 'Henüz materyal yok',
