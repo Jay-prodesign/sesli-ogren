@@ -62,15 +62,9 @@ void main() {
   sqfliteFfiInit();
 
   testWidgets('Listen persists playback speed and passes it to device speech', (tester) async {
-    final store = await SqliteSourceStore.open(
-      factory: databaseFactoryFfiNoIsolate,
-      path: inMemoryDatabasePath,
-    );
+    final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
     addTearDown(store.close);
-    final ingest = SourceIngestService(
-      store: store,
-      pdfTextExtractor: const _UnusedPdfExtractor(),
-    );
+    final ingest = SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor());
     const materialId = MaterialId('listen-speed-material');
     await ingest.ingestPastedText(
       learner: AppRuntime.localM5LearnerFixture,
@@ -82,10 +76,7 @@ void main() {
       learner: AppRuntime.localM5LearnerFixture,
       store: store,
       ingest: ingest,
-      recall: RecallLearningService(
-        sourceStore: store,
-        learningStore: store.learningTruthStore(),
-      ),
+      recall: RecallLearningService(sourceStore: store, learningStore: store.learningTruthStore()),
       telemetry: store.operationalTelemetry(),
     );
 
@@ -94,11 +85,7 @@ void main() {
       MaterialApp(
         home: MediaQuery(
           data: const MediaQueryData(disableAnimations: true),
-          child: ListenScreen(
-            runtime: runtime,
-            materialId: materialId,
-            speechOutput: firstSpeech,
-          ),
+          child: ListenScreen(runtime: runtime, materialId: materialId, speechOutput: firstSpeech),
         ),
       ),
     );
@@ -120,11 +107,7 @@ void main() {
       MaterialApp(
         home: MediaQuery(
           data: const MediaQueryData(disableAnimations: true),
-          child: ListenScreen(
-            runtime: runtime,
-            materialId: materialId,
-            speechOutput: secondSpeech,
-          ),
+          child: ListenScreen(runtime: runtime, materialId: materialId, speechOutput: secondSpeech),
         ),
       ),
     );
