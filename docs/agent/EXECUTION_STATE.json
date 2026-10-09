@@ -38,7 +38,7 @@
     "LA-0019": "DONE",
     "LA-0020": "DONE",
     "LA-0021": "DONE",
-    "LA-0022": "CANCELLED — historical M5 checkpoint cursor superseded by current LA-0039/LA-0040 integrated outcome; retain historical record",
+    "LA-0022": "CANCELLED",
     "LA-0023": "DONE",
     "LA-0024": "DONE",
     "LA-0025": "DONE",
@@ -72,7 +72,7 @@
       "84e96dce… -> feat/m5-golden-learning-slice (ACTIVE)"
     ],
     "pr_state": "OPEN_ACTIVE_PRODUCT_LINE",
-    "head_sha": "fb466d869d4f9fdd5c398560c72e8a4b82976d64"
+    "head_sha": "2f14e1e581c61ec7aae6df43fcb40ac0ab3b59e9"
   },
   "round7_evidence_program": {
     "status": "PRE_M5_CLOSED_OR_BOUNDED",
