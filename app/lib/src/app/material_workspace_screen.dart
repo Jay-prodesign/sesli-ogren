@@ -80,6 +80,10 @@ class _MaterialWorkspaceScreenState extends State<MaterialWorkspaceScreen> {
             Navigator.of(context).pop();
             _openQuickRecap();
           },
+          onRecall: () {
+            Navigator.of(context).pop();
+            _openRecall();
+          },
         ),
       ),
     );
