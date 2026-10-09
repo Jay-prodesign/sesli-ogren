@@ -17,6 +17,7 @@ class SourceReaderScreen extends StatefulWidget {
 class _SourceReaderScreenState extends State<SourceReaderScreen> {
   final TextEditingController _search = TextEditingController();
   double _fontSize = 17;
+  bool _showSearch = false;
 
   @override
   void dispose() {
@@ -64,50 +65,78 @@ class _SourceReaderScreenState extends State<SourceReaderScreen> {
       appBar: AppBar(
         title: Text(widget.title, maxLines: 1, overflow: TextOverflow.ellipsis),
         actions: [
-          if (widget.onListen != null)
-            IconButton(tooltip: 'Kaynağı dinle', onPressed: widget.onListen, icon: const Icon(Icons.headphones_rounded)),
-          if (widget.onRecap != null)
-            IconButton(tooltip: 'Hızlı özet', onPressed: widget.onRecap, icon: const Icon(Icons.auto_awesome)),
-          if (widget.onRecall != null)
-            IconButton(tooltip: 'Hatırla', onPressed: widget.onRecall, icon: const Icon(Icons.psychology_alt_outlined)),
           IconButton(
-            tooltip: 'Yazıyı küçült',
-            onPressed: _fontSize <= 14 ? null : () => setState(() => _fontSize -= 1),
-            icon: const Icon(Icons.text_decrease),
+            tooltip: 'Metinde ara',
+            onPressed: () => setState(() => _showSearch = !_showSearch),
+            icon: Icon(_showSearch ? Icons.search_off : Icons.search),
           ),
-          IconButton(
-            tooltip: 'Yazıyı büyüt',
-            onPressed: _fontSize >= 26 ? null : () => setState(() => _fontSize += 1),
-            icon: const Icon(Icons.text_increase),
+          PopupMenuButton<String>(
+            tooltip: 'Okuma ve öğrenme seçenekleri',
+            onSelected: (action) {
+              switch (action) {
+                case 'listen': widget.onListen?.call();
+                case 'recap': widget.onRecap?.call();
+                case 'recall': widget.onRecall?.call();
+                case 'smaller': setState(() => _fontSize = (_fontSize - 1).clamp(14.0, 26.0));
+                case 'larger': setState(() => _fontSize = (_fontSize + 1).clamp(14.0, 26.0));
+              }
+            },
+            itemBuilder: (_) => [
+              if (widget.onListen != null)
+                const PopupMenuItem(value: 'listen', child: ListTile(leading: Icon(Icons.headphones_rounded), title: Text('Kaynağı dinle'))),
+              if (widget.onRecap != null)
+                const PopupMenuItem(value: 'recap', child: ListTile(leading: Icon(Icons.auto_awesome), title: Text('Hızlı özet'))),
+              if (widget.onRecall != null)
+                const PopupMenuItem(value: 'recall', child: ListTile(leading: Icon(Icons.psychology_alt_outlined), title: Text('Hatırlama çalışması'))),
+              const PopupMenuItem(value: 'smaller', child: ListTile(leading: Icon(Icons.text_decrease), title: Text('Yazıyı küçült'))),
+              const PopupMenuItem(value: 'larger', child: ListTile(leading: Icon(Icons.text_increase), title: Text('Yazıyı büyüt'))),
+            ],
           ),
         ],
       ),
       body: SafeArea(
         child: Column(
           children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
-              child: TextField(
-                controller: _search,
-                onChanged: (_) => setState(() {}),
-                decoration: InputDecoration(
-                  prefixIcon: const Icon(Icons.search),
-                  hintText: 'Metinde ara',
-                  border: const OutlineInputBorder(),
-                  suffixIcon: query.isEmpty ? null : IconButton(
-                    tooltip: 'Aramayı temizle',
-                    icon: const Icon(Icons.close),
-                    onPressed: () { _search.clear(); setState(() {}); },
+            if (_showSearch)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+                child: TextField(
+                  controller: _search,
+                  autofocus: true,
+                  onChanged: (_) => setState(() {}),
+                  decoration: InputDecoration(
+                    prefixIcon: const Icon(Icons.search),
+                    hintText: 'Metinde ara',
+                    border: const OutlineInputBorder(),
+                    suffixIcon: query.isEmpty ? null : IconButton(
+                      tooltip: 'Aramayı temizle',
+                      icon: const Icon(Icons.close),
+                      onPressed: () { _search.clear(); setState(() {}); },
+                    ),
                   ),
                 ),
               ),
-            ),
+            if (!_showSearch && query.isNotEmpty)
+              TextButton.icon(
+                onPressed: () => setState(() => _showSearch = true),
+                icon: const Icon(Icons.search),
+                label: Text('Arama: $query'),
+              ),
             if (query.isNotEmpty)
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 4),
                 child: Align(
                   alignment: Alignment.centerLeft,
                   child: Text(matches.isEmpty ? 'Eşleşme bulunamadı' : '${matches.length}${matches.length == 2000 ? '+' : ''} eşleşme'),
+                ),
+              ),
+            if (source.isNotEmpty && widget.onRecall != null)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 8, 20, 8),
+                child: FilledButton.icon(
+                  onPressed: widget.onRecall,
+                  icon: const Icon(Icons.psychology_alt_outlined),
+                  label: const Text('Okuduklarını hatırla'),
                 ),
               ),
             Expanded(
