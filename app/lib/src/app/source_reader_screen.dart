@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'atelier_learning_surfaces.dart';
+import 'living_study_desk_home.dart';
 import 'source_text_matching.dart';
 
 /// Read the complete locally extracted source without sending it to a model.
@@ -55,9 +57,16 @@ class _SourceReaderScreenState extends State<SourceReaderScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final living = LivingDeskReviewScope.active(context);
     final query = _search.text.trim();
     final source = widget.sourceText.trim();
     final matches = findTurkishSourceTextMatches(source, query);
+    final ink = living ? AtelierStyle.ink : theme.colorScheme.onSurface;
+    final accent = living ? AtelierStyle.teal : theme.colorScheme.primary;
+    final line = living ? AtelierStyle.line : theme.colorScheme.outlineVariant;
+    final paper = living ? AtelierStyle.paper : theme.colorScheme.surface;
+    final canvas = living ? AtelierStyle.canvas : theme.colorScheme.surface;
 
     final spans = <TextSpan>[];
     if (matches.isEmpty) {
@@ -70,7 +79,8 @@ class _SourceReaderScreenState extends State<SourceReaderScreen> {
           TextSpan(
             text: source.substring(match.start, match.end),
             style: TextStyle(
-              backgroundColor: Theme.of(context).colorScheme.tertiaryContainer,
+              backgroundColor: living ? AtelierStyle.mark : theme.colorScheme.tertiaryContainer,
+              color: ink,
               fontWeight: FontWeight.w700,
             ),
           ),
@@ -80,8 +90,43 @@ class _SourceReaderScreenState extends State<SourceReaderScreen> {
       if (cursor < source.length) spans.add(TextSpan(text: source.substring(cursor)));
     }
 
+    final article = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (living) ...[
+          Text(
+            'KAYNAK · OKUMA',
+            style: theme.textTheme.labelSmall?.copyWith(
+              color: accent,
+              fontWeight: FontWeight.w900,
+              letterSpacing: 0.9,
+            ),
+          ),
+          const SizedBox(height: 8),
+        ],
+        Text(
+          widget.title,
+          style: theme.textTheme.titleLarge?.copyWith(
+            color: ink,
+            fontWeight: living ? FontWeight.w900 : null,
+          ),
+        ),
+        const SizedBox(height: 16),
+        RichText(
+          text: TextSpan(
+            style: TextStyle(color: ink, fontSize: _fontSize, height: 1.65),
+            children: spans,
+          ),
+        ),
+      ],
+    );
+
     return Scaffold(
+      backgroundColor: canvas,
       appBar: AppBar(
+        backgroundColor: canvas,
+        foregroundColor: ink,
+        surfaceTintColor: Colors.transparent,
         title: Text(widget.title, maxLines: 1, overflow: TextOverflow.ellipsis),
         actions: [
           IconButton(
@@ -188,9 +233,14 @@ class _SourceReaderScreenState extends State<SourceReaderScreen> {
                 padding: const EdgeInsets.fromLTRB(20, 8, 20, 4),
                 child: Row(
                   children: [
-                    const Icon(Icons.menu_book_outlined, size: 18),
+                    Icon(Icons.menu_book_outlined, size: 18, color: accent),
                     const SizedBox(width: 8),
-                    Expanded(child: Text('Metindeki konum · %${(_readingProgress * 100).round()}')),
+                    Expanded(
+                      child: Text(
+                        'Metindeki konum · %${(_readingProgress * 100).round()}',
+                        style: TextStyle(color: living ? AtelierStyle.muted : null),
+                      ),
+                    ),
                     IconButton(
                       tooltip: 'Yazıyı küçült',
                       onPressed: _fontSize <= 14 ? null : () => setState(() => _fontSize -= 1),
@@ -204,14 +254,27 @@ class _SourceReaderScreenState extends State<SourceReaderScreen> {
                   ],
                 ),
               ),
-              LinearProgressIndicator(value: _readingProgress, minHeight: 3),
+              LinearProgressIndicator(
+                value: _readingProgress,
+                minHeight: living ? 4 : 3,
+                color: accent,
+                backgroundColor: living ? line : null,
+              ),
             ],
             if (source.isNotEmpty && (widget.onListen != null || widget.onRecap != null || widget.onRecall != null))
               Padding(
                 padding: const EdgeInsets.fromLTRB(20, 8, 20, 4),
                 child: Row(
                   children: [
-                    Expanded(child: Text('Kaynakla çalış', style: Theme.of(context).textTheme.titleSmall)),
+                    Expanded(
+                      child: Text(
+                        'Kaynakla çalış',
+                        style: theme.textTheme.titleSmall?.copyWith(
+                          color: ink,
+                          fontWeight: living ? FontWeight.w800 : null,
+                        ),
+                      ),
+                    ),
                     IconButton(
                       tooltip: _showLearningActions ? 'Öğrenme araçlarını gizle' : 'Öğrenme araçlarını göster',
                       onPressed: () => setState(() => _showLearningActions = !_showLearningActions),
@@ -224,6 +287,13 @@ class _SourceReaderScreenState extends State<SourceReaderScreen> {
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
                 child: OutlinedButton.icon(
+                  style: living
+                      ? OutlinedButton.styleFrom(
+                          foregroundColor: accent,
+                          side: BorderSide(color: line),
+                          backgroundColor: paper,
+                        )
+                      : null,
                   onPressed: widget.onListen,
                   icon: const Icon(Icons.headphones_rounded),
                   label: const Text('Kaynağı dinle'),
@@ -233,6 +303,13 @@ class _SourceReaderScreenState extends State<SourceReaderScreen> {
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
                 child: OutlinedButton.icon(
+                  style: living
+                      ? OutlinedButton.styleFrom(
+                          foregroundColor: accent,
+                          side: BorderSide(color: line),
+                          backgroundColor: paper,
+                        )
+                      : null,
                   onPressed: widget.onRecap,
                   icon: const Icon(Icons.auto_awesome),
                   label: const Text('Hızlı özet'),
@@ -242,6 +319,9 @@ class _SourceReaderScreenState extends State<SourceReaderScreen> {
               Padding(
                 padding: const EdgeInsets.fromLTRB(20, 8, 20, 8),
                 child: FilledButton.icon(
+                  style: living
+                      ? FilledButton.styleFrom(backgroundColor: AtelierStyle.ink, foregroundColor: Colors.white)
+                      : null,
                   onPressed: widget.onRecall,
                   icon: const Icon(Icons.psychology_alt_outlined),
                   label: const Text('Okuduklarını hatırla'),
@@ -255,18 +335,20 @@ class _SourceReaderScreenState extends State<SourceReaderScreen> {
                         controller: _readingScroll,
                         padding: const EdgeInsets.fromLTRB(20, 16, 20, 48),
                         children: [
-                          Text(widget.title, style: Theme.of(context).textTheme.titleLarge),
-                          const SizedBox(height: 16),
-                          RichText(
-                            text: TextSpan(
-                              style: TextStyle(
-                                color: Theme.of(context).colorScheme.onSurface,
-                                fontSize: _fontSize,
-                                height: 1.65,
+                          if (living)
+                            DecoratedBox(
+                              decoration: BoxDecoration(
+                                color: paper,
+                                borderRadius: BorderRadius.circular(18),
+                                border: Border.all(color: line),
                               ),
-                              children: spans,
-                            ),
-                          ),
+                              child: Padding(
+                                padding: const EdgeInsets.fromLTRB(22, 22, 22, 28),
+                                child: article,
+                              ),
+                            )
+                          else
+                            article,
                         ],
                       ),
                     ),
