@@ -13,6 +13,9 @@ import 'explain_back_screen.dart';
 import 'explain_screen.dart';
 import 'learning_slice_screen.dart';
 
+String _foldTurkish(String value) =>
+    value.replaceAll('I', 'i').replaceAll('ı', 'i').toLowerCase().replaceAll('\u0307', '');
+
 class FocusScreen extends StatefulWidget {
   const FocusScreen({
     required this.runtime,
@@ -99,7 +102,7 @@ class _FocusScreenState extends State<FocusScreen> {
       'şey',
     };
     final terms = RegExp(r'[A-Za-zÇĞİÖŞÜçğıöşü0-9]+')
-        .allMatches(learnerQuestion.toLowerCase())
+        .allMatches(_foldTurkish(learnerQuestion))
         .map((match) => match.group(0)!)
         .where((term) => term.length >= 4 && !stopWords.contains(term))
         .toSet();
@@ -119,7 +122,7 @@ class _FocusScreenState extends State<FocusScreen> {
     String? best;
     var bestScore = 0;
     for (final segment in segments) {
-      final normalized = segment.toLowerCase();
+      final normalized = _foldTurkish(segment);
       final score = terms.where(normalized.contains).length;
       if (score > bestScore) {
         best = segment;
