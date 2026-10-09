@@ -157,7 +157,7 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
               ListenScreen(
                 runtime: widget.runtime,
                 materialId: selected,
-                onRecall: () => _openRecallFromCurrentRoute(selected),
+                onRecall: () => _openRecallFromCurrentRoute(readerContext, selected),
               ),
             ),
             onRecap: () => _replaceReaderWith(
