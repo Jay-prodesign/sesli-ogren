@@ -35,18 +35,12 @@ Future<void> _tapVisible(WidgetTester tester, Finder finder) async {
 }
 
 Future<AppRuntime> _runtime(SqliteSourceStore store) async {
-  final ingest = SourceIngestService(
-    store: store,
-    pdfTextExtractor: const _UnusedPdfExtractor(),
-  );
+  final ingest = SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor());
   return AppRuntime(
     learner: AppRuntime.localM5LearnerFixture,
     store: store,
     ingest: ingest,
-    recall: RecallLearningService(
-      sourceStore: store,
-      learningStore: store.learningTruthStore(),
-    ),
+    recall: RecallLearningService(sourceStore: store, learningStore: store.learningTruthStore()),
     telemetry: store.operationalTelemetry(),
   );
 }
@@ -78,10 +72,7 @@ void main() {
   sqfliteFfiInit();
 
   testWidgets('pasted material keeps the learner supplied library title', (tester) async {
-    final store = await SqliteSourceStore.open(
-      factory: databaseFactoryFfiNoIsolate,
-      path: inMemoryDatabasePath,
-    );
+    final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
     addTearDown(store.close);
     final runtime = await _runtime(store);
     const materialId = MaterialId('named-pasted-material');
@@ -90,10 +81,7 @@ void main() {
     await tester.tap(find.text('Yeni materyal'));
     await _pumpUntilFound(tester, find.text('Çalışma materyalini ekle'));
 
-    await tester.enterText(
-      find.byKey(const ValueKey('pasted-material-title')),
-      'Biyoloji · Fotosentez',
-    );
+    await tester.enterText(find.byKey(const ValueKey('pasted-material-title')), 'Biyoloji · Fotosentez');
     await tester.enterText(
       find.byKey(const ValueKey('pasted-material-text')),
       'Fotosentez ışık enerjisini kimyasal enerjiye dönüştürmeye yardımcı olur.',
@@ -101,18 +89,12 @@ void main() {
     await _tapVisible(tester, find.text('Hatırlama başlat'));
     await _pumpUntilFound(tester, find.text('Yeni materyal'));
 
-    final material = await store.material(
-      learner: runtime.learner,
-      materialId: materialId,
-    );
+    final material = await store.material(learner: runtime.learner, materialId: materialId);
     expect(material?.title, 'Biyoloji · Fotosentez');
   });
 
   testWidgets('blank pasted material title derives a useful bounded library name', (tester) async {
-    final store = await SqliteSourceStore.open(
-      factory: databaseFactoryFfiNoIsolate,
-      path: inMemoryDatabasePath,
-    );
+    final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
     addTearDown(store.close);
     final runtime = await _runtime(store);
     const materialId = MaterialId('derived-pasted-material');
@@ -128,10 +110,7 @@ void main() {
     await _tapVisible(tester, find.text('Hatırlama başlat'));
     await _pumpUntilFound(tester, find.text('Yeni materyal'));
 
-    final material = await store.material(
-      learner: runtime.learner,
-      materialId: materialId,
-    );
+    final material = await store.material(learner: runtime.learner, materialId: materialId);
     expect(material, isNotNull);
     expect(material!.title, startsWith('Fotosentez ışık enerjisini'));
     expect(material.title, isNot('Çalışma materyalim'));
