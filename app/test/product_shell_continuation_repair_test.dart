@@ -156,7 +156,7 @@ void main() {
     await tester.tap(find.text('Şimdi hatırlamayı dene'));
     await _pumpUntilFound(tester, find.byType(LearningSliceScreen));
     expect(find.byType(LearningSliceScreen), findsOneWidget);
-    await tester.pageBack();
+    Navigator.of(tester.element(find.byType(LearningSliceScreen))).pop();
     await tester.pumpAndSettle();
     expect(find.byType(ProductShellScreen), findsOneWidget);
     expect(tester.takeException(), isNull);
