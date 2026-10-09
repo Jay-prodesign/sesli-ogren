@@ -92,6 +92,7 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
 
   Future<void> _openLearning() async {
     final materialId = (await _snapshot).material?.id ?? widget.runtime.newMaterialId();
+    if (!mounted) return;
     await _openLearningFor(materialId);
   }
 
