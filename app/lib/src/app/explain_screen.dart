@@ -123,14 +123,9 @@ class _ExplainScreenState extends State<ExplainScreen> {
         serverMaterialId = createdServerMaterialId;
       }
 
-      final boundServerMaterialId = serverMaterialId;
-      if (boundServerMaterialId == null) {
-        return const GroundedExplainUnavailable(reason: GroundedExplainUnavailableReason.sourceUnavailable);
-      }
-
-      return widget.runtime.explain.explain(
+      return await widget.runtime.explain.explain(
         GroundedExplainRequest(
-          materialId: MaterialId(boundServerMaterialId),
+          materialId: MaterialId(serverMaterialId),
           sourceVersionId: widget.source.identity.sourceVersionId,
           sourceContentDigest: widget.source.identity.contentDigest,
           groundingContentHash: groundingContentHash,
