@@ -89,7 +89,7 @@ class AtelierWorkspace extends StatelessWidget {
                           Icon(Icons.auto_stories_outlined, color: AtelierStyle.teal, size: 17),
                           SizedBox(width: 8),
                           Text(
-                            'ORİJİNAL KAYNAĞIN',
+                            'KAYNAĞINDAN ÇIKARILAN METİN',
                             style: TextStyle(
                               color: AtelierStyle.teal,
                               fontSize: 10,
@@ -443,7 +443,7 @@ class AtelierResult extends StatelessWidget {
   Widget build(BuildContext context) {
     final excerpt = result.sourceExcerpt;
     final answer = result.correctAnswer.trim();
-    final index = answer.isEmpty ? -1 : excerpt.toLowerCase().indexOf(answer.toLowerCase());
+    final index = answer.isEmpty ? -1 : excerpt.indexOf(answer);
     final independent =
         result.evidence.outcome == RecallOutcome.correct && result.evidence.assistance == RecallAssistance.none;
     final assisted = result.evidence.outcome == RecallOutcome.helpedCorrect;
@@ -624,7 +624,7 @@ class AtelierResult extends StatelessWidget {
                 const SizedBox(height: 15),
                 const Divider(color: Color(0xFF486068), height: 1),
                 const SizedBox(height: 14),
-                Text.rich(
+                SelectableText.rich(
                   TextSpan(children: spans),
                   style: const TextStyle(color: Color(0xFFE4EDEC), fontSize: 16, height: 1.54),
                 ),
