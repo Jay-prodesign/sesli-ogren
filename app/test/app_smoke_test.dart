@@ -304,8 +304,10 @@ void main() {
     await pumpUntilFound(tester, find.text('Kısa odak oturumu'));
     expect(find.text('İpucu ver'), findsOneWidget);
     expect(find.text('Doğrudan açıkla'), findsOneWidget);
+    await tester.enterText(find.byType(TextField), 'Fotosentezde karbondioksit nasıl kullanılır?');
     await tapVisible(tester, find.text('İpucu ver'));
-    await pumpUntilFound(tester, find.textContaining('henüz etkin değil'));
+    await pumpUntilFound(tester, find.textContaining('Kaynak ipucu:'));
+    expect(find.textContaining('karbondioksit'), findsWidgets);
     expect(find.textContaining('öğrenme kanıtı oluşturmaz'), findsOneWidget);
     Navigator.of(tester.element(find.textContaining('öğrenme kanıtı oluşturmaz'))).pop();
     await tester.pumpAndSettle();
