@@ -88,18 +88,23 @@ class _MaterialWorkspaceScreenState extends State<MaterialWorkspaceScreen> {
     setState(() => _snapshot = _load());
   }
 
-  Future<void> _openListen() => Navigator.of(context).push<void>(
-    MaterialPageRoute(
-      builder: (listenContext) => ListenScreen(
-        runtime: widget.runtime,
-        materialId: widget.materialId,
-        onRecall: () {
-          Navigator.of(listenContext).pop();
-          _openRecall();
-        },
+  Future<void> _openListen() async {
+    final navigator = Navigator.of(context);
+    await navigator.push<void>(
+      MaterialPageRoute(
+        builder: (listenContext) => ListenScreen(
+          runtime: widget.runtime,
+          materialId: widget.materialId,
+          onRecall: () {
+            Navigator.of(listenContext).pop();
+            _openRecall();
+          },
+        ),
       ),
-    ),
-  );
+    );
+    if (!mounted) return;
+    setState(() => _snapshot = _load());
+  }
 
   Future<void> _openFocus(_WorkspaceSnapshot data) => Navigator.of(context).push<void>(
     MaterialPageRoute(
