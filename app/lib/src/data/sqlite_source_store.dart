@@ -1281,7 +1281,7 @@ ON CONFLICT(learner_id) DO UPDATE SET
     final raw = rows.single['listen_rate'];
     if (raw is! num) return 1.0;
     final value = raw.toDouble();
-    return const <double>{0.75, 1.0, 1.25, 1.5}.contains(value) ? value : 1.0;
+    return const <double>[0.75, 1.0, 1.25, 1.5].contains(value) ? value : 1.0;
   }
 
   Future<void> saveListenRate({
@@ -1289,7 +1289,7 @@ ON CONFLICT(learner_id) DO UPDATE SET
     required double rate,
     required DateTime updatedAt,
   }) async {
-    if (!const <double>{0.75, 1.0, 1.25, 1.5}.contains(rate)) {
+    if (!const <double>[0.75, 1.0, 1.25, 1.5].contains(rate)) {
       throw ArgumentError.value(rate, 'rate', 'Unsupported listening rate.');
     }
     await _database.rawInsert(

@@ -459,7 +459,7 @@ class _ListenScreenState extends State<ListenScreen> {
     1.0 => '1×',
     1.25 => '1.25×',
     1.5 => '1.5×',
-    _ => '${rate}×',
+    _ => '$rate×',
   };
 
   static List<String> _chunkText(String text, {int maxCharacters = 650}) {
