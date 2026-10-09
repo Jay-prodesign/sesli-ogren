@@ -218,10 +218,7 @@ class _ExplainBackScreenState extends State<ExplainBackScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       DecoratedBox(
-                        decoration: BoxDecoration(
-                          color: accentSoft,
-                          borderRadius: BorderRadius.circular(999),
-                        ),
+                        decoration: BoxDecoration(color: accentSoft, borderRadius: BorderRadius.circular(999)),
                         child: Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
                           child: Text(

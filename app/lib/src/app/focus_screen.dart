@@ -522,8 +522,8 @@ class _FocusScreenState extends State<FocusScreen> {
                     children: [
                       DecoratedBox(
                         decoration: BoxDecoration(color: mark, borderRadius: BorderRadius.circular(999)),
-                        child: const Padding(
-                          padding: EdgeInsets.all(7),
+                        child: Padding(
+                          padding: const EdgeInsets.all(7),
                           child: Icon(Icons.arrow_forward_rounded, color: markInk, size: 17),
                         ),
                       ),
