@@ -184,7 +184,7 @@ class _MaterialWorkspaceScreenState extends State<MaterialWorkspaceScreen> {
         backgroundColor: LivingDeskReviewScope.active(context) ? AtelierStyle.canvas : null,
       ),
       body: SafeArea(
-        child: FutureBuilder<_WorkspaceSnapshot>(
+        child: FutureBuilder<_WorkspaceSnapshot?>(
           future: _snapshot,
           builder: (context, snapshot) {
             if (snapshot.hasError || (snapshot.hasData && snapshot.data == null)) {
