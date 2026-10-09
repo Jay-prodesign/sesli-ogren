@@ -211,7 +211,7 @@ void main() {
 
     expect(find.text('İpucusuz hatırladın'), findsOneWidget);
     expect(find.text('Sıradaki adım'), findsOneWidget);
-    await tapVisible(tester, find.text('Sıradaki adıma geç'));
+    await tapVisible(tester, find.text('Bugünlük tamamla'));
     await pumpUntilFound(tester, find.text('Bugünlük iyi bir adım'));
     expect(find.text('Bugünlük iyi bir adım'), findsOneWidget);
     expect(find.text('Çalışmayı bitir'), findsOneWidget);
@@ -928,8 +928,6 @@ void main() {
     await pumpUntilFound(tester, find.text('Hatırla'));
     await tapVisible(tester, find.text('Bilmiyorum'));
     await pumpUntilFound(tester, find.text('Geri bildirim'));
-    await tapVisible(tester, find.text('Sıradaki adıma geç'));
-    await pumpUntilFound(tester, find.text('Önce kaynağı gözden geçir'));
     await tapVisible(tester, find.text('Kaynağı gözden geçir'));
     await pumpUntilFound(tester, find.text('Bu bölümü yeniden kur'));
 
