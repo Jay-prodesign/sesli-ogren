@@ -898,6 +898,22 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
               ),
             ),
           ),
+          const SizedBox(height: 18),
+          Text(
+            'SENİN DENEMEN',
+            style: theme.textTheme.labelSmall?.copyWith(
+              color: AppPalette.inkMuted,
+              fontWeight: FontWeight.w800,
+              letterSpacing: 1,
+            ),
+          ),
+          const SizedBox(height: 8),
+          SelectableText(
+            _answerController.text.trim().isEmpty
+                ? 'Bu denemede yazılı yanıt verilmedi.'
+                : _answerController.text.trim(),
+            style: theme.textTheme.titleMedium?.copyWith(height: 1.45),
+          ),
           const SizedBox(height: 20),
           Row(
             children: [
