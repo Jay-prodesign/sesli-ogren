@@ -4,7 +4,10 @@ import '../domain/learning_contracts.dart';
 import '../domain/learning_truth.dart';
 import 'companion_view.dart';
 
-/// Opt-in runtime review. Never changes the unscoped shipping Home.
+/// Current source-first product experience scope.
+///
+/// The legacy shell remains available only as an explicit fallback while this
+/// unmerged branch is verified. This scope does not imply visual-lock or release approval.
 class LivingDeskReviewScope extends InheritedWidget {
   const LivingDeskReviewScope({required super.child, super.key});
 
@@ -16,7 +19,7 @@ class LivingDeskReviewScope extends InheritedWidget {
 }
 
 /// The learner's REAL material is the main interface object, not a feature menu.
-/// This is a falsifiable visual candidate, not an approved production design.
+/// This is the active reversible branch implementation; final visual lock and release remain separate gates.
 class LivingStudyDeskHome extends StatelessWidget {
   const LivingStudyDeskHome({
     required this.material,
