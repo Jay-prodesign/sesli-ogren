@@ -42,15 +42,9 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
 
   Future<LearningContinuation?> _continuationFor(MaterialId materialId) async {
     try {
-      return await widget.runtime.recall.reopen(
-        learner: widget.runtime.learner,
-        materialId: materialId,
-      );
+      return await widget.runtime.recall.reopen(learner: widget.runtime.learner, materialId: materialId);
     } on RecallLearningException {
-      return widget.runtime.recall.repairContinuation(
-        learner: widget.runtime.learner,
-        materialId: materialId,
-      );
+      return widget.runtime.recall.repairContinuation(learner: widget.runtime.learner, materialId: materialId);
     }
   }
 
