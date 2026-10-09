@@ -72,6 +72,14 @@ class _MaterialWorkspaceScreenState extends State<MaterialWorkspaceScreen> {
         builder: (_) => SourceReaderScreen(
           title: data.material.title,
           sourceText: data.extracted?.normalizedText ?? '',
+          onListen: () {
+            Navigator.of(context).pop();
+            _openListen();
+          },
+          onRecap: () {
+            Navigator.of(context).pop();
+            _openQuickRecap();
+          },
         ),
       ),
     );
