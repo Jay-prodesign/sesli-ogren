@@ -579,10 +579,7 @@ class AtelierResult extends StatelessWidget {
         Container(
           key: const ValueKey('la0040-result-companion-reflection'),
           padding: const EdgeInsets.fromLTRB(13, 11, 13, 11),
-          decoration: BoxDecoration(
-            color: AtelierStyle.mint,
-            borderRadius: BorderRadius.circular(12),
-          ),
+          decoration: BoxDecoration(color: AtelierStyle.mint, borderRadius: BorderRadius.circular(12)),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -595,7 +592,12 @@ class AtelierResult extends StatelessWidget {
                       : assisted
                       ? 'D/Knot: İpucundan yararlandın. Şimdi kaynakla bağı güçlendirip yeniden deneyebilirsin.'
                       : 'D/Knot: Kanıt, bir sonraki çalışmanda nereye dönmen gerektiğini gösteriyor.',
-                  style: const TextStyle(color: AtelierStyle.ink, fontSize: 13, height: 1.4, fontWeight: FontWeight.w600),
+                  style: const TextStyle(
+                    color: AtelierStyle.ink,
+                    fontSize: 13,
+                    height: 1.4,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ),
             ],
