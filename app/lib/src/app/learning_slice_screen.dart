@@ -1141,6 +1141,8 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
     if (_busy) return;
     _setBusy(true);
     try {
+      final continuation = _continuation;
+      if (continuation == null) return;
       final source = await widget.runtime.store.currentSourceVersion(
         learner: widget.runtime.learner,
         materialId: widget.materialId,
@@ -1151,6 +1153,11 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
           _phase = _SlicePhase.error;
           _inlineError = 'Kayıtlı kaynak bulunamadı. Materyalini yeniden ekleyebilirsin.';
         });
+        return;
+      }
+      if (source.identity.sourceVersionId != continuation.state.sourceVersionId) {
+        if (!mounted) return;
+        _showRecoverableError();
         return;
       }
       final extracted = await widget.runtime.store.extractedContentForSource(
