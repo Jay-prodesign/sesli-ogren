@@ -706,6 +706,12 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
             icon: const Icon(Icons.picture_as_pdf_outlined),
             label: const Text('PDF seç'),
           ),
+          const SizedBox(height: 6),
+          Text(
+            'Metin içeren PDF dosyalarıyla çalışır.',
+            textAlign: TextAlign.center,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
+          ),
           const Padding(
             padding: EdgeInsets.symmetric(vertical: 14),
             child: Row(
@@ -748,7 +754,7 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
           FilledButton.icon(
             onPressed: _busy ? null : _saveSource,
             icon: const Icon(Icons.arrow_forward_rounded),
-            label: const Text('Hatırlama başlat'),
+            label: Text(_busy ? 'Materyal hazırlanıyor…' : 'Hatırlama başlat'),
           ),
         ],
       ),
