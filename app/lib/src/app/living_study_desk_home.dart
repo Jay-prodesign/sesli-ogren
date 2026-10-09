@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../domain/learning_contracts.dart';
 import '../domain/learning_truth.dart';
 import 'companion_view.dart';
+import 'app_theme.dart';
 
 /// Opt-in runtime review. Never changes the unscoped shipping Home.
 class LivingDeskReviewScope extends InheritedWidget {
@@ -39,12 +40,12 @@ class LivingStudyDeskHome extends StatelessWidget {
   final VoidCallback onOpenListen;
   final ValueChanged<MaterialId> onOpenMaterial;
 
-  static const _canvas = Color(0xFFF5F7F4);
-  static const _paper = Color(0xFFFFFDF9);
-  static const _ink = Color(0xFF15313A);
-  static const _sub = Color(0xFF52696B);
-  static const _accent = Color(0xFF0A716A);
-  static const _line = Color(0xFFD5E3DC);
+  static const _canvas = AppPalette.canvas;
+  static const _paper = AppPalette.surface;
+  static const _ink = AppPalette.ink;
+  static const _sub = AppPalette.inkMuted;
+  static const _accent = AppPalette.primary;
+  static const _line = Color(0xFFE5E0F0);
 
   String get _nextStep {
     if (continuation == null) return 'İlk hatırlama denemeni yap';
@@ -146,7 +147,7 @@ class LivingStudyDeskHome extends StatelessWidget {
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(8, 9, 0, 0),
                 child: DecoratedBox(
-                  decoration: BoxDecoration(color: const Color(0xFFE2E9E3), borderRadius: BorderRadius.circular(13)),
+                  decoration: BoxDecoration(color: const Color(0xFFE9E5F5), borderRadius: BorderRadius.circular(13)),
                 ),
               ),
             ),
