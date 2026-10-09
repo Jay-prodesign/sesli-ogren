@@ -62,8 +62,7 @@
   "git": {
     "branch": "feat/full-product-shell-continuity",
     "base_sha": "84e96dce5b3cc9f32af3f459d422b652d0e86624",
-    "head_sha": "9ca6631321a33ab2a1d9725034bb8c760e3a7a50",
-    "head_sha_note": "This was the live HEAD before the current-state reconciliation commit; resolve the live branch API for current HEAD. Product-code validation baseline remains 761087f6; later commits are governance-only.",
+    "head_sha_note": "Resolve current HEAD from the live GitHub branch API on each run. Last product-code batch: 62de13b966548b14d94bcfd195690f814e8ed6d7; subsequent commits update current-state/handoff records only. Older Actions results do not validate the latest code.",
     "pr_number": 13,
     "pr_url": "https://github.com/Jay-prodesign/sesli-ogren/pull/13",
     "merged": false,
@@ -99,7 +98,7 @@
     "Product-bounded validation currently fails the canonical format step; account-deletion SQL tests 87 and 89 fail, with test 89 syntax error. Fix the relevant code/workflow/test issues as an independent repair batch; do not let them block unrelated product implementation."
   ],
   "protected_gate": "Merge, release, deploy, paid providers, credentials/secrets, licensing posture, production mutation: Product Owner only",
-  "next_action": "Continue a cohesive implementation batch on feat/full-product-shell-continuity: finish source→learn→evidence→next-action→resume continuity and fix connected error/recovery/integration defects. Visual Founder disposition gates only visual lock/closure; implementation continues. Do not stop after a commit or bounded CI failure.",
+  "next_action": "Continue the integrated LA-0039/LA-0040 outcome on the live current branch. Source-reader actions from Quick Recap now preserve transitions to Listen, Recall, and back to recap; formatter and lockfile alignment has been applied. Next fix the two SQL validation issues in one privacy-erasure repair batch where tool access allows, then continue the product journey. Do not stop at a CI failure or documentation update.",
   "canonical_source_refs": [
     "CURRENT_EXECUTION_STATE — Learning App",
     "Founder visual/companion correction — 2026-10-07 (supersedes D-070 companion visual lock for LA-0040 evaluation)",
@@ -449,17 +448,17 @@
     "pr": 13,
     "pr_status": "open, unmerged, unreleased",
     "verified": {
-      "bootstrap_validation": "PASS at 761087f6",
-      "la0040_visual_capture": "PASS at 761087f6",
-      "product_bounded_validation": "FAIL — Canonical format step",
-      "account_deletion_bounded_validation": "FAIL — SQL tests 87 and 89; test 89 syntax error",
-      "android_ios_release_compile": "IN_PROGRESS at last observation"
+      "bootstrap_validation": "PASS at prior product-code baseline 761087f6 only; latest code batch not yet validated",
+      "la0040_visual_capture": "PASS at prior product-code baseline 761087f6 only; not evidence of Founder visual lock",
+      "product_bounded_validation": "FAIL at prior baseline on Canonical format; formatter corrections applied to current branch, latest batch not yet validated",
+      "account_deletion_bounded_validation": "FAIL at prior baseline: test 87 assertions conflict with 0017 material erasure contract; test 89 has invalid dollar quoting. SQL test fixes remain open.",
+      "android_ios_release_compile": "IN_PROGRESS at last observation; latest code batch result unverified"
     },
     "executable_now": [
-      "Continue integrated LA-0039/LA-0040 product work on current branch",
-      "Fix relevant formatting/integration errors within the current batch",
-      "Repair account-deletion SQL validation failures independently where safe",
-      "Continue independent approved backend, recovery, settings, accessibility and commercial-readiness work"
+      "Continue integrated LA-0039/LA-0040 product implementation on live branch",
+      "Repair current source/recap/listen/recall navigation and error/recovery edges in the same outcome batch",
+      "Resolve SQL test 87/89 contradictions against the material-content-erasure contract",
+      "Continue independent approved accessibility, settings, backend/recovery and commercial-readiness work"
     ],
     "gate_classification": {
       "current_and_real": [
@@ -480,6 +479,7 @@
         "Older Founder-review labels and candidate tournaments after supersession; preserve as history, not active stop conditions"
       ]
     },
-    "next_action": "Implement the next coherent user-visible source→learn→evidence→next-action→resume improvement, integrate connected UI/state/error handling, then continue to the next safe authorized outcome. Do not stop after one file, commit or test."
+    "next_action": "Implement the next coherent user-visible source→learn→evidence→next-action→resume improvement, integrate connected UI/state/error handling, then continue to the next safe authorized outcome. Do not stop after one file, commit or test.",
+    "current_product_code_batch_sha": "62de13b966548b14d94bcfd195690f814e8ed6d7"
   }
 }
