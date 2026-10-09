@@ -110,9 +110,7 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
-        home: LivingDeskReviewScope(
-          child: ProductShellScreen(runtime: runtime),
-        ),
+        home: LivingDeskReviewScope(child: ProductShellScreen(runtime: runtime)),
       ),
     );
     await tester.pumpAndSettle();
@@ -136,5 +134,4 @@ void main() {
     expect(find.byType(ListenScreen), findsOneWidget);
     expect(LivingDeskReviewScope.active(tester.element(find.byType(ListenScreen))), isTrue);
   });
-
 }

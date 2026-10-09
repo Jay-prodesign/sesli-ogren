@@ -38,6 +38,7 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> with WidgetsBinding
     if (treatment != null) return LearningVisualTreatmentScope(treatment: treatment, child: screen);
     return LivingDeskReviewScope.active(context) ? LivingDeskReviewScope(child: screen) : screen;
   }
+
   String? _jobId;
   SourceVersionId? _submittedSourceVersion;
   ServerSummaryStatus? _status;
