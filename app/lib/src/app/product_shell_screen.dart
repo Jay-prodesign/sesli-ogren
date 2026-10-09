@@ -131,10 +131,7 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
     try {
       final selected = materialId ?? (await _snapshot).material?.id;
       if (selected == null) return;
-      final material = await widget.runtime.store.material(
-        learner: widget.runtime.learner,
-        materialId: selected,
-      );
+      final material = await widget.runtime.store.material(learner: widget.runtime.learner, materialId: selected);
       final source = await widget.runtime.store.currentSourceVersion(
         learner: widget.runtime.learner,
         materialId: selected,
@@ -175,9 +172,8 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
       );
     } catch (_) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Kaynak açılamadı. Tekrar deneyebilirsin.')),
-      );
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text('Kaynak açılamadı. Tekrar deneyebilirsin.')));
     }
   }
 
