@@ -41,7 +41,7 @@ class _CompanionViewState extends State<CompanionView> with SingleTickerProvider
     final reduced =
         (media?.disableAnimations ?? false) ||
         (media?.accessibleNavigation ?? false) ||
-        !TickerMode.valuesOf(context).enabled;
+        !TickerMode.of(context);
     if (reduced == _reducedMotion) {
       return;
     }
@@ -150,6 +150,7 @@ class _CompanionViewState extends State<CompanionView> with SingleTickerProvider
                   'assets/companions/D_KNOT_128.webp',
                   fit: BoxFit.contain,
                   filterQuality: FilterQuality.high,
+                  semanticLabel: null,
                   gaplessPlayback: true,
                   errorBuilder: (context, error, stackTrace) =>
                       Center(child: Text('Düğüm', style: Theme.of(context).textTheme.titleMedium)),
