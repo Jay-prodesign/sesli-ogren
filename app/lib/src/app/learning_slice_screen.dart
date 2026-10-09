@@ -348,6 +348,8 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
         _phase = _SlicePhase.error;
         _inlineError = 'Hatırlama başlatılamadı. Kaynağın kayıtlı; devamı yeniden deneyebilirsin.';
       });
+    } finally {
+      _openingRecall = false;
     }
   }
 
