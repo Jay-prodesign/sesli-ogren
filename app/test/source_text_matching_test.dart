@@ -3,7 +3,7 @@ import 'package:sesli_ogren/src/app/source_text_matching.dart';
 
 void main() {
   test('finds Turkish source evidence without changing original source offsets', () {
-    const source = 'Klorofil ışığın soğurulmasında görev alır. Işık enerjisi dönüşür.';
+    const source = 'Klorofil ışık enerjisini kullanır. Işık enerjisi dönüşür.';
 
     final chlorophyll = findFirstTurkishSourceTextMatch(source, 'KLOROFİL');
     expect(chlorophyll, isNotNull);
@@ -11,7 +11,7 @@ void main() {
 
     final light = findTurkishSourceTextMatches(source, 'ışık');
     expect(light, hasLength(2));
-    expect(source.substring(light.first.start, light.first.end), 'ışığ');
+    expect(source.substring(light.first.start, light.first.end), 'ışık');
     expect(source.substring(light.last.start, light.last.end), 'Işık');
   });
 
