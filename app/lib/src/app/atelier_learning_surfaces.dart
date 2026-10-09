@@ -444,7 +444,6 @@ class AtelierResult extends StatelessWidget {
     final excerpt = result.sourceExcerpt;
     final answer = result.correctAnswer.trim();
     final index = answer.isEmpty ? -1 : excerpt.toLowerCase().indexOf(answer.toLowerCase());
-    final hasLiteralSourceMatch = index >= 0;
     final independent =
         result.evidence.outcome == RecallOutcome.correct && result.evidence.assistance == RecallAssistance.none;
     final assisted = result.evidence.outcome == RecallOutcome.helpedCorrect;
@@ -560,14 +559,6 @@ class AtelierResult extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 13),
-        if (!hasLiteralSourceMatch)
-          const Padding(
-            padding: EdgeInsets.only(bottom: 8),
-            child: Text(
-              'Kaynak alıntısında birebir yanıt vurgusu bulunamadı; aşağıdaki metin orijinal kaynaktan alınmıştır.',
-              style: TextStyle(color: AtelierStyle.muted, fontSize: 12, height: 1.4),
-            ),
-          ),
         Center(
           child: Padding(
             padding: const EdgeInsets.symmetric(vertical: 15),
