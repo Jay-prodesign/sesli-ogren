@@ -1,16 +1,12 @@
-import 'dart:convert';
-
-import 'package:crypto/crypto.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../auth/supabase_learner_auth.dart';
 import 'explain_back_gateway.dart';
 
-/// Client-safe adapter over LA-0026's server-owned attempt boundary.
+/// Authenticated adapter over the source-bound Explain-back evaluator.
 ///
-/// Opening an attempt persists only response digest/length. Until a separately
-/// authorized server evaluator completes the attempt, this returns unavailable
-/// and never converts the learner's text into a mastery claim on-device.
+/// Learner response plaintext is sent only for the live evaluator request. The
+/// database stores only response digest/length plus the bounded evaluation.
 class SupabaseExplainBackGateway implements ExplainBackGateway {
   const SupabaseExplainBackGateway();
 
@@ -23,30 +19,56 @@ class SupabaseExplainBackGateway implements ExplainBackGateway {
 
     try {
       final client = await SupabaseLearnerAuth.clientForAuthenticatedRuntime();
-      final responseDigest = sha256.convert(utf8.encode(normalized)).toString();
+      if (client.auth.currentSession == null) {
+        return const ExplainBackUnavailable('Değerlendirme için güvenli oturum gerekli.');
+      }
 
-      await client.rpc<Object?>(
-        'open_explain_back_attempt',
-        params: {
-          'p_attempt_id': request.attemptId.value,
-          'p_material_id': request.materialId.value,
-          'p_source_content_hash': request.sourceContentDigest,
-          'p_response_digest': responseDigest,
-          'p_response_length': normalized.length,
+      final invocation = await client.functions.invoke(
+        'explain-back-evaluator',
+        body: {
+          'attempt_id': request.attemptId.value,
+          'material_id': request.materialId.value,
+          'source_content_hash': request.groundingContentHash,
+          'response': normalized,
+          'output_locale': request.outputLocale,
         },
       );
+      final data = invocation.data;
+      final evaluatorStatus = data is Map ? data['status'] as String? : null;
 
-      final rows = await client.rpc<List<dynamic>>(
-        'read_explain_back_attempt',
-        params: {'p_attempt_id': request.attemptId.value},
-      );
+      if (evaluatorStatus == 'reconciliation_required') {
+        return const ExplainBackUnavailable(
+          'Önceki değerlendirme çağrısının sonucu belirsiz. Çifte değerlendirme yapmamak için otomatik tekrar kapalı.',
+        );
+      }
+      if (evaluatorStatus == 'failed_final') {
+        return const ExplainBackUnavailable('Bu yanıt güvenilir biçimde değerlendirilemedi.');
+      }
+      if (evaluatorStatus == 'failed_retryable' || evaluatorStatus == 'not_runnable') {
+        return const ExplainBackUnavailable('Değerlendirme geçici olarak tamamlanamadı. Yeniden deneyebilirsin.');
+      }
+
+      List<dynamic> rows = <dynamic>[];
+      for (var attempt = 0; attempt < 4; attempt++) {
+        if (attempt > 0) {
+          await Future<void>.delayed(const Duration(milliseconds: 350));
+        }
+        rows = await client.rpc<List<dynamic>>(
+          'read_explain_back_attempt',
+          params: {'p_attempt_id': request.attemptId.value},
+        );
+        if (rows.isNotEmpty) {
+          final current = Map<String, dynamic>.from(rows.first as Map);
+          if (current['evaluation_kind'] != null) break;
+        }
+      }
       if (rows.isEmpty) {
         return const ExplainBackUnavailable('Değerlendirme kaydı doğrulanamadı.');
       }
 
       final row = Map<String, dynamic>.from(rows.first as Map);
-      final digest = row['source_content_hash'] as String? ?? '';
-      if (digest != request.sourceContentDigest) {
+      final groundingHash = row['source_content_hash'] as String? ?? '';
+      if (groundingHash != request.groundingContentHash) {
         return const ExplainBackUnavailable('Kaynak değişti; eski denemeyi öğrenme kanıtı saymıyoruz.');
       }
 
@@ -54,7 +76,7 @@ class SupabaseExplainBackGateway implements ExplainBackGateway {
       final evaluatorRef = row['evaluator_ref'] as String?;
       if (rawKind == null || evaluatorRef == null || evaluatorRef.trim().isEmpty) {
         return const ExplainBackUnavailable(
-          'Yanıt kaydedildi ancak güvenilir anlamsal değerlendirme henüz tamamlanmadı.',
+          'Yanıt güvenilir biçimde değerlendirilmeden öğrenme kanıtı oluşturmuyoruz.',
         );
       }
 
@@ -67,7 +89,7 @@ class SupabaseExplainBackGateway implements ExplainBackGateway {
       return ExplainBackEvaluated(
         attemptId: request.attemptId,
         sourceVersionId: request.sourceVersionId,
-        sourceContentDigest: digest,
+        sourceContentDigest: request.sourceContentDigest,
         kind: kind,
         feedback: (row['feedback'] as String?)?.trim() ?? '',
         targetedRepair: (row['targeted_repair'] as String?)?.trim() ?? '',
