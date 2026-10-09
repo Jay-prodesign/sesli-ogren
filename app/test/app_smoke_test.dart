@@ -306,7 +306,7 @@ void main() {
     await tapVisible(tester, find.text('Odaklan').last);
     await pumpUntilFound(tester, find.text('KISA ODAK · 3 ADIM'));
     await tester.scrollUntilVisible(find.text('İpucu ver'), 220, scrollable: find.byType(Scrollable).last);
-    await tester.pumpAndSettle();
+    await tester.pump(const Duration(milliseconds: 300));
     expect(find.text('İpucu ver'), findsOneWidget);
     expect(find.text('Sorumu açıkla'), findsOneWidget);
     await tester.enterText(find.byType(TextField), 'Fotosentezde karbondioksit nasıl kullanılır?');
