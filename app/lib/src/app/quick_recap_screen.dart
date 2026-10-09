@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../domain/learning_contracts.dart';
@@ -20,6 +22,23 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> {
   ServerSummaryStatus? _status;
   String? _error;
   bool _busy = false;
+  bool _checking = false;
+  Timer? _pollTimer;
+
+  @override
+  void dispose() {
+    _pollTimer?.cancel();
+    super.dispose();
+  }
+
+  void _startPolling() {
+    _pollTimer?.cancel();
+    _pollTimer = Timer.periodic(const Duration(seconds: 5), (_) {
+      if (!_checking && mounted) {
+        _refresh();
+      }
+    });
+  }
 
   Future<void> _submit() async {
     if (_busy || _jobId != null) return;
@@ -49,6 +68,9 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> {
       if (!mounted) return;
       setState(() => _jobId = submission.jobId);
       await _refresh();
+      if (mounted && !(_status?.isTerminal ?? false)) {
+        _startPolling();
+      }
     } catch (_) {
       if (mounted) setState(() => _error = 'Özet isteği gönderilemedi. Oturumunu ve bağlantını kontrol et.');
     } finally {
@@ -57,11 +79,16 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> {
   }
 
   Future<void> _refresh() async {
+    if (_checking) return;
     if (_busy && _jobId == null) return;
     final id = _jobId;
     if (id == null) return;
+    _checking = true;
     try {
       final status = await _gateway.status(id);
+      if (status.isTerminal) {
+        _pollTimer?.cancel();
+      }
       if (mounted) {
         setState(() {
           _status = status;
@@ -70,6 +97,8 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> {
       }
     } catch (_) {
       if (mounted) setState(() => _error = 'Özet durumu alınamadı. Tekrar deneyebilirsin.');
+    } finally {
+      _checking = false;
     }
   }
 
