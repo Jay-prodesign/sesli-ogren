@@ -246,7 +246,10 @@ class LivingStudyDeskHome extends StatelessWidget {
                     const SizedBox(height: 2),
                     const Icon(Icons.arrow_downward_rounded, color: _accent, size: 19),
                     const SizedBox(height: 1),
-                    CompanionView(state: hasRecallEvidence ? CompanionVisualState.idle : CompanionVisualState.think, size: 76),
+                    CompanionView(
+                      state: hasRecallEvidence ? CompanionVisualState.idle : CompanionVisualState.think,
+                      size: 76,
+                    ),
                   ],
                 ),
               ),
