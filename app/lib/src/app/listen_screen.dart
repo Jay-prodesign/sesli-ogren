@@ -432,7 +432,11 @@ class _ListenScreenState extends State<ListenScreen> {
                   const SizedBox(height: 12),
                   OutlinedButton.icon(
                     onPressed: () async {
-                      await _stop();
+                      try {
+                        await _stop();
+                      } catch (_) {
+                        // A device speech-stop failure must not trap the learner in Listen.
+                      }
                       if (!mounted) return;
                       widget.onRecall?.call();
                     },
