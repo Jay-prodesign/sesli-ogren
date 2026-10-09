@@ -77,6 +77,19 @@ class _MaterialWorkspaceScreenState extends State<MaterialWorkspaceScreen> {
     );
   }
 
+  Future<void> _readCurrentSource() async {
+    try {
+      final data = await _snapshot;
+      if (!mounted) return;
+      await _openSourceReader(data);
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Kaynak metni açılamadı. Tekrar deneyebilirsin.')),
+      );
+    }
+  }
+
   Future<void> _openQuickRecap() async {
     await Navigator.of(context).push<void>(
       MaterialPageRoute(
@@ -146,7 +159,10 @@ class _MaterialWorkspaceScreenState extends State<MaterialWorkspaceScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Materyal'),
-        actions: [IconButton(tooltip: 'Quick Recap', onPressed: _openQuickRecap, icon: const Icon(Icons.auto_awesome))],
+        actions: [
+          IconButton(tooltip: 'Kaynağı oku', onPressed: _readCurrentSource, icon: const Icon(Icons.menu_book_outlined)),
+          IconButton(tooltip: 'Quick Recap', onPressed: _openQuickRecap, icon: const Icon(Icons.auto_awesome)),
+        ],
         backgroundColor: LivingDeskReviewScope.active(context) ? AtelierStyle.canvas : null,
       ),
       body: SafeArea(
