@@ -26,11 +26,7 @@ class SupabaseGroundedExplainGateway implements GroundedExplainGateway {
           'p_idempotency_key': _idempotencyKey(request),
         },
       );
-      final jobs = await client
-          .from('generation_jobs')
-          .select('state,failure_class')
-          .eq('id', jobId)
-          .limit(1);
+      final jobs = await client.from('generation_jobs').select('state,failure_class').eq('id', jobId).limit(1);
       if (jobs.isEmpty) {
         return const GroundedExplainUnavailable(reason: GroundedExplainUnavailableReason.temporaryFailure);
       }
