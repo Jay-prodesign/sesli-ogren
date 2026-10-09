@@ -108,7 +108,7 @@ class _MaterialWorkspaceScreenState extends State<MaterialWorkspaceScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Materyal'),
-        actions: [IconButton(tooltip: 'Quick Recap', onPressed: _openQuickRecap, icon: const Icon(Icons.auto_awesome))],
+        actions: [IconButton(tooltip: 'AI ile hızlı özet', onPressed: _openQuickRecap, icon: const Icon(Icons.auto_awesome))],
         backgroundColor: LivingDeskReviewScope.active(context) ? AtelierStyle.canvas : null,
       ),
       body: SafeArea(
