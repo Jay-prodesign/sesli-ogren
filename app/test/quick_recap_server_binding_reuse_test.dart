@@ -59,8 +59,7 @@ class _DispatchFailureGateway extends _RecordingSummaryGateway {
   Future<bool> dispatch(String jobId) async => throw StateError('offline');
 
   @override
-  Future<ServerSummaryStatus> status(String jobId) async =>
-      const ServerSummaryStatus(state: 'QUEUED');
+  Future<ServerSummaryStatus> status(String jobId) async => const ServerSummaryStatus(state: 'QUEUED');
 }
 
 void main() {
@@ -113,19 +112,13 @@ void main() {
     expect(find.text('Kaynağa bağlı kısa özet.'), findsOneWidget);
     // A generated, persisted recap must be usable outside the app.
     String? copiedText;
-    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
-      SystemChannels.platform,
-      (call) async {
-        if (call.method == 'Clipboard.setData') {
-          copiedText = (call.arguments as Map<Object?, Object?>)['text'] as String?;
-        }
-        return null;
-      },
-    );
-    addTearDown(() => tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
-      SystemChannels.platform,
-      null,
-    ));
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (call) async {
+      if (call.method == 'Clipboard.setData') {
+        copiedText = (call.arguments as Map<Object?, Object?>)['text'] as String?;
+      }
+      return null;
+    });
+    addTearDown(() => tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, null));
     await tester.tap(find.text('Özeti kopyala'));
     await tester.pumpAndSettle();
     expect(copiedText, contains('Kaynağa bağlı kısa özet.'));
@@ -163,11 +156,11 @@ void main() {
       recall: RecallLearningService(sourceStore: store, learningStore: store.learningTruthStore()),
       telemetry: store.operationalTelemetry(),
     );
-    final gateway = _DispatchFailureGateway(
-      serverMaterialId: '11111111-1111-4111-8111-111111111111',
-    );
+    final gateway = _DispatchFailureGateway(serverMaterialId: '11111111-1111-4111-8111-111111111111');
     await tester.pumpWidget(
-      MaterialApp(home: QuickRecapScreen(runtime: runtime, materialId: materialId, summaryGateway: gateway)),
+      MaterialApp(
+        home: QuickRecapScreen(runtime: runtime, materialId: materialId, summaryGateway: gateway),
+      ),
     );
     await tester.pumpAndSettle();
     await tester.tap(find.text('Özet oluştur'));
