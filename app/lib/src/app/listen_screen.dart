@@ -6,7 +6,9 @@ import '../domain/learning_contracts.dart';
 import '../speech/device_speech_output.dart';
 import 'app_runtime.dart';
 import 'app_theme.dart';
+import 'atelier_learning_surfaces.dart';
 import 'companion_view.dart';
+import 'living_study_desk_home.dart';
 
 class ListenScreen extends StatefulWidget {
   const ListenScreen({
@@ -224,8 +226,33 @@ class _ListenScreenState extends State<ListenScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final living = LivingDeskReviewScope.active(context);
+    final hero = living ? AtelierStyle.ink : AppPalette.primaryDark;
+    final accent = living ? AtelierStyle.teal : AppPalette.signal;
+    final accentSoft = living ? AtelierStyle.mint : AppPalette.signalSoft;
+    final surface = living ? AtelierStyle.paper : AppPalette.surface;
+    final line = living ? AtelierStyle.line : AppPalette.outline;
+    final ink = living ? AtelierStyle.ink : AppPalette.ink;
+    final muted = living ? AtelierStyle.muted : theme.colorScheme.onSurfaceVariant;
+    final truthSoft = living ? AtelierStyle.mint : AppPalette.attentionSoft;
+    final truthAccent = living ? AtelierStyle.teal : AppPalette.attention;
+    final progressAccent = living ? AtelierStyle.mark : AppPalette.signal;
+    final primaryButtonStyle = living
+        ? FilledButton.styleFrom(backgroundColor: AtelierStyle.ink, foregroundColor: Colors.white)
+        : null;
+    final outlineButtonStyle = living
+        ? OutlinedButton.styleFrom(
+            foregroundColor: AtelierStyle.teal,
+            side: const BorderSide(color: AtelierStyle.line),
+          )
+        : null;
     return Scaffold(
-      appBar: AppBar(title: const Text('Dinle')),
+      backgroundColor: living ? AtelierStyle.canvas : null,
+      appBar: AppBar(
+        title: const Text('Dinle'),
+        backgroundColor: living ? AtelierStyle.canvas : null,
+        foregroundColor: living ? AtelierStyle.ink : null,
+      ),
       body: SafeArea(
         child: FutureBuilder<_ListenSource>(
           future: _source,
@@ -256,7 +283,7 @@ class _ListenScreenState extends State<ListenScreen> {
               padding: const EdgeInsets.fromLTRB(20, 16, 20, 36),
               children: [
                 DecoratedBox(
-                  decoration: BoxDecoration(color: AppPalette.primaryDark, borderRadius: BorderRadius.circular(24)),
+                  decoration: BoxDecoration(color: hero, borderRadius: BorderRadius.circular(living ? 20 : 24)),
                   child: Padding(
                     padding: const EdgeInsets.fromLTRB(18, 16, 18, 18),
                     child: Column(
@@ -267,7 +294,7 @@ class _ListenScreenState extends State<ListenScreen> {
                           children: [
                             DecoratedBox(
                               decoration: BoxDecoration(
-                                color: AppPalette.signalSoft,
+                                color: accentSoft,
                                 borderRadius: BorderRadius.circular(16),
                               ),
                               child: Padding(
@@ -285,7 +312,7 @@ class _ListenScreenState extends State<ListenScreen> {
                                 children: [
                                   DecoratedBox(
                                     decoration: BoxDecoration(
-                                      color: AppPalette.signal,
+                                      color: accent,
                                       borderRadius: BorderRadius.circular(999),
                                     ),
                                     child: Padding(
@@ -319,7 +346,7 @@ class _ListenScreenState extends State<ListenScreen> {
                             minHeight: 6,
                             value: progress,
                             backgroundColor: Colors.white.withValues(alpha: 0.12),
-                            color: AppPalette.signal,
+                            color: accent,
                           ),
                         ),
                         const SizedBox(height: 8),
@@ -337,18 +364,18 @@ class _ListenScreenState extends State<ListenScreen> {
                 ),
                 const SizedBox(height: 12),
                 DecoratedBox(
-                  decoration: BoxDecoration(color: AppPalette.attentionSoft, borderRadius: BorderRadius.circular(14)),
+                  decoration: BoxDecoration(color: truthSoft, borderRadius: BorderRadius.circular(14)),
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 11),
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Icon(Icons.info_outline_rounded, color: AppPalette.attention, size: 19),
+                        const Icon(Icons.info_outline_rounded, color: truthAccent, size: 19),
                         const SizedBox(width: 9),
                         Expanded(
                           child: Text(
                             'Dinlemek öğrenme kanıtı oluşturmaz. Hatırlamayı denediğinde öğrenme durumun güncellenebilir.',
-                            style: theme.textTheme.bodySmall?.copyWith(color: AppPalette.ink),
+                            style: theme.textTheme.bodySmall?.copyWith(color: ink),
                           ),
                         ),
                       ],
@@ -358,9 +385,9 @@ class _ListenScreenState extends State<ListenScreen> {
                 const SizedBox(height: 18),
                 DecoratedBox(
                   decoration: BoxDecoration(
-                    color: AppPalette.surface,
+                    color: surface,
                     borderRadius: BorderRadius.circular(18),
-                    border: Border.all(color: AppPalette.outline),
+                    border: Border.all(color: line),
                   ),
                   child: Padding(
                     padding: const EdgeInsets.fromLTRB(18, 17, 18, 18),
@@ -369,25 +396,31 @@ class _ListenScreenState extends State<ListenScreen> {
                       children: [
                         Row(
                           children: [
-                            const Icon(Icons.article_outlined, color: AppPalette.signal, size: 18),
+                            const Icon(Icons.article_outlined, color: accent, size: 18),
                             const SizedBox(width: 7),
                             Text(
                               widget.textOverride?.trim().isNotEmpty == true ? 'Quick Recap özeti' : 'Kaynak metni',
                               style: theme.textTheme.labelMedium?.copyWith(
-                                color: AppPalette.signal,
+                                color: accent,
                                 fontWeight: FontWeight.w800,
                               ),
                             ),
                           ],
                         ),
                         const SizedBox(height: 12),
-                        Text(source.text, style: theme.textTheme.bodyLarge?.copyWith(height: 1.58)),
+                        Text(
+                          source.text,
+                          style: theme.textTheme.bodyLarge?.copyWith(height: 1.58, color: ink),
+                        ),
                       ],
                     ),
                   ),
                 ),
                 const SizedBox(height: 18),
-                Text('Dinleme hızı', style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w800)),
+                Text(
+                  'Dinleme hızı',
+                  style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w800, color: ink),
+                ),
                 const SizedBox(height: 8),
                 Wrap(
                   spacing: 8,
@@ -397,6 +430,10 @@ class _ListenScreenState extends State<ListenScreen> {
                       ChoiceChip(
                         label: Text(_rateLabel(rate)),
                         selected: playbackRate == rate,
+                        selectedColor: living ? AtelierStyle.mark : null,
+                        checkmarkColor: living ? AtelierStyle.ink : null,
+                        side: living ? const BorderSide(color: AtelierStyle.line) : null,
+                        labelStyle: living ? const TextStyle(color: AtelierStyle.ink, fontWeight: FontWeight.w700) : null,
                         onSelected: _speaking || _startingPlayback ? null : (_) => _setPlaybackRate(rate),
                       ),
                   ],
@@ -404,7 +441,7 @@ class _ListenScreenState extends State<ListenScreen> {
                 const SizedBox(height: 6),
                 Text(
                   'Hız tercihin bu cihazda hatırlanır.',
-                  style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+                  style: theme.textTheme.bodySmall?.copyWith(color: muted),
                 ),
                 if (_error != null) ...[
                   const SizedBox(height: 12),
@@ -414,39 +451,61 @@ class _ListenScreenState extends State<ListenScreen> {
                 if (_speaking || _startingPlayback)
                   FilledButton.icon(
                     onPressed: _stop,
+                    style: primaryButtonStyle,
                     icon: const Icon(Icons.stop_rounded),
                     label: Text(_startingPlayback ? 'Başlatmayı iptal et' : 'Durdur'),
                   )
                 else ...[
                   FilledButton.icon(
                     onPressed: () => _play(source),
+                    style: primaryButtonStyle,
                     icon: const Icon(Icons.play_arrow_rounded),
                     label: Text(hasResume ? 'Kaldığın yerden dinle' : 'Dinlemeye başla'),
                   ),
                   if (hasResume) ...[
                     const SizedBox(height: 8),
-                    OutlinedButton(onPressed: () => _play(source, fromChunk: 0), child: const Text('Baştan dinle')),
+                    OutlinedButton(
+                      onPressed: () => _play(source, fromChunk: 0),
+                      style: outlineButtonStyle,
+                      child: const Text('Baştan dinle'),
+                    ),
                   ],
                 ],
                 if (widget.onRecall != null) ...[
                   const SizedBox(height: 12),
-                  OutlinedButton.icon(
-                    onPressed: () {
-                      // Stop playback without blocking the navigation gesture on a
-                      // platform TTS response. Disposal also stops any active speech.
-                      unawaited(_stop().catchError((Object _) {}));
-                      if (!mounted) return;
-                      widget.onRecall?.call();
-                    },
-                    icon: const Icon(Icons.psychology_alt_outlined),
-                    label: Text(_finishedListening ? 'Dinlemeyi bitirdin · Şimdi hatırla' : 'Şimdi hatırlamayı dene'),
-                  ),
+                  if (living && _finishedListening)
+                    FilledButton.icon(
+                      onPressed: () {
+                        unawaited(_stop().catchError((Object _) {}));
+                        if (!mounted) return;
+                        widget.onRecall?.call();
+                      },
+                      style: FilledButton.styleFrom(
+                        backgroundColor: AtelierStyle.mark,
+                        foregroundColor: AtelierStyle.ink,
+                      ),
+                      icon: const Icon(Icons.psychology_alt_outlined),
+                      label: const Text('Dinlemeyi bitirdin · Şimdi hatırla'),
+                    )
+                  else
+                    OutlinedButton.icon(
+                      onPressed: () {
+                        // Stop playback without blocking the navigation gesture on a
+                        // platform TTS response. Disposal also stops any active speech.
+                        unawaited(_stop().catchError((Object _) {}));
+                        if (!mounted) return;
+                        widget.onRecall?.call();
+                      },
+                      style: outlineButtonStyle,
+                      icon: const Icon(Icons.psychology_alt_outlined),
+                      label: Text(_finishedListening ? 'Dinlemeyi bitirdin · Şimdi hatırla' : 'Şimdi hatırlamayı dene'),
+                    ),
                 ],
                 const SizedBox(height: 10),
                 Text(
                   'Dinledikten sonra hatırlamayı denemek, öğrenme durumunu güncelleyebilen aktif adımdır.',
                   textAlign: TextAlign.center,
-                  style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+                  style: theme.textTheme.bodySmall?.copyWith(color: muted),
                 ),
               ],
             );
