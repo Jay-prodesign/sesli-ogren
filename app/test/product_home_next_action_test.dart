@@ -4,6 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sesli_ogren/src/app/app_runtime.dart';
 import 'package:sesli_ogren/src/app/product_shell_screen.dart';
+import 'package:sesli_ogren/src/app/living_study_desk_home.dart';
+import 'package:sesli_ogren/src/app/listen_screen.dart';
+import 'package:sesli_ogren/src/app/material_workspace_screen.dart';
+import 'package:sesli_ogren/src/app/quick_recap_screen.dart';
 import 'package:sesli_ogren/src/data/pdf_text_extractor.dart';
 import 'package:sesli_ogren/src/data/source_ingest_service.dart';
 import 'package:sesli_ogren/src/data/sqlite_source_store.dart';
@@ -97,4 +101,40 @@ void main() {
     expect(find.text('Öğrenme durumu'), findsOneWidget);
     expect(find.text('Kaynağa dön'), findsNothing);
   });
+  testWidgets('source-first scope survives Home to Workspace, Recap and Listen routes', (tester) async {
+    final runtime = await _runtimeWithEvidence(
+      disposition: RecallResponseDisposition.answer,
+      submitCorrectAnswer: true,
+    );
+    addTearDown(runtime.close);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: LivingDeskReviewScope(
+          child: ProductShellScreen(runtime: runtime),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Kaynağa dön'));
+    await tester.pumpAndSettle();
+    expect(find.byType(MaterialWorkspaceScreen), findsOneWidget);
+    expect(LivingDeskReviewScope.active(tester.element(find.byType(MaterialWorkspaceScreen))), isTrue);
+
+    await tester.tap(find.byTooltip('Quick Recap'));
+    await tester.pumpAndSettle();
+    expect(find.byType(QuickRecapScreen), findsOneWidget);
+    expect(LivingDeskReviewScope.active(tester.element(find.byType(QuickRecapScreen))), isTrue);
+
+    Navigator.of(tester.element(find.byType(QuickRecapScreen))).pop();
+    await tester.pumpAndSettle();
+    expect(find.byType(MaterialWorkspaceScreen), findsOneWidget);
+
+    await tester.tap(find.text('Dinle').last);
+    await tester.pumpAndSettle();
+    expect(find.byType(ListenScreen), findsOneWidget);
+    expect(LivingDeskReviewScope.active(tester.element(find.byType(ListenScreen))), isTrue);
+  });
+
 }
