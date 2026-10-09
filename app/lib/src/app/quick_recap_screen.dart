@@ -62,8 +62,7 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> with WidgetsBinding
     if (_jobId != id) return;
     if (!accepted) {
       setState(
-        () => _error =
-            'Bu özet işi güvenli biçimde yeniden sıraya alınamadı. Daha sonra tekrar dene veya sunucu durumunu kontrol et.',
+        () => _error = 'Bu özet işi güvenli biçimde yeniden sıraya alınamadı. Daha sonra tekrar dene veya sunucu durumunu kontrol et.',
       );
       return;
     }
@@ -315,10 +314,7 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> with WidgetsBinding
                 label: const Text('Güvenli yeniden dene'),
               ),
             ],
-            if (_dispatching) ...[
-              const SizedBox(height: 8),
-              const LinearProgressIndicator(),
-            ],
+            if (_dispatching) ...[const SizedBox(height: 8), const LinearProgressIndicator()],
           ],
           if (status?.summary != null) ...[
             Text(status!.summary!, style: Theme.of(context).textTheme.bodyLarge),

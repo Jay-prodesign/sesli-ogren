@@ -51,7 +51,7 @@ begin
     v_job := public.request_summary(v_material, v_idempotency_key, false);
   exception
     when unique_violation then
-      select j.*, s.content_hash
+      select j.material_id, j.id, s.content_hash
         into v_existing_material_id, v_existing_job_id, v_existing_hash
       from public.generation_jobs j
       join public.source_assets s on s.id = j.source_asset_id
