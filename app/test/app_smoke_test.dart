@@ -812,10 +812,7 @@ void main() {
     expect(find.text('Kaynağına dayalı açıklama'), findsNothing);
     expect(find.textContaining('öğrenme kanıtı veya ustalık iddiası oluşturmaz'), findsOneWidget);
 
-    await tester.enterText(
-      find.byType(TextField),
-      'Fotosentez ışık enerjisini kimyasal enerjiye dönüştürür.',
-    );
+    await tester.enterText(find.byType(TextField), 'Fotosentez ışık enerjisini kimyasal enerjiye dönüştürür.');
     await tapVisible(tester, find.text('Anlatımımı değerlendir'));
     await pumpUntilFound(tester, find.text('Henüz güvenilir değerlendirme yok'));
 
