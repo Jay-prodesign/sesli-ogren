@@ -516,7 +516,8 @@ class _HomeSurface extends StatelessWidget {
             data: data,
             title: _nextTitle(data.continuation),
             reason: _nextReason(data.continuation),
-            onPressed: onOpenWorkspace,
+            actionLabel: _nextActionLabel(data.continuation),
+            onPressed: _nextActionOpensLearning(data.continuation) ? onOpenLearning : onOpenWorkspace,
           ),
           const SizedBox(height: 22),
           Row(
@@ -548,6 +549,20 @@ class _HomeSurface extends StatelessWidget {
   static String _nextReason(LearningContinuation? continuation) =>
       continuation?.nextAction.reasonText ??
       'Kaynağından kısa bir hatırlama denemesiyle ilk gerçek öğrenme kanıtını oluştur.';
+
+  static bool _nextActionOpensLearning(LearningContinuation? continuation) {
+    final kind = continuation?.nextAction.kind;
+    return kind == NextLearningActionKind.reviewSourceThenRecall || kind == NextLearningActionKind.retryRecallWithoutHint;
+  }
+
+  static String _nextActionLabel(LearningContinuation? continuation) {
+    if (continuation == null) return 'Çalışmaya devam et';
+    return switch (continuation.nextAction.kind) {
+      NextLearningActionKind.reviewSourceThenRecall => 'Kaynağı gözden geçir',
+      NextLearningActionKind.retryRecallWithoutHint => 'İpucusuz tekrar dene',
+      NextLearningActionKind.repeatRecallLater => 'Kaynağa dön',
+    };
+  }
 
   static String _headerLine(LearningContinuation? continuation) {
     final state = continuation?.state.kind ?? RecallStateKind.notAssessed;
@@ -646,11 +661,18 @@ class _FirstMaterialHero extends StatelessWidget {
 }
 
 class _ContinueHero extends StatelessWidget {
-  const _ContinueHero({required this.data, required this.title, required this.reason, required this.onPressed});
+  const _ContinueHero({
+    required this.data,
+    required this.title,
+    required this.reason,
+    required this.actionLabel,
+    required this.onPressed,
+  });
 
   final _HomeSnapshot data;
   final String title;
   final String reason;
+  final String actionLabel;
   final VoidCallback onPressed;
 
   @override
@@ -796,7 +818,7 @@ class _ContinueHero extends StatelessWidget {
                         ),
                         onPressed: onPressed,
                         icon: const Icon(Icons.arrow_forward_rounded),
-                        label: const Text('Çalışmaya devam et'),
+                        label: Text(actionLabel),
                       ),
                     ],
                   ),
