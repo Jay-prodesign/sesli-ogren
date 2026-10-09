@@ -94,11 +94,7 @@ void main() {
 
     await _tapVisible(tester, find.byTooltip('Aramayı temizle'));
     await tester.pumpAndSettle();
-    await tester.scrollUntilVisible(
-      find.text('Biyoloji · Fotosentez'),
-      -240,
-      scrollable: find.byType(Scrollable).last,
-    );
+    await tester.scrollUntilVisible(find.text('Biyoloji · Fotosentez'), -240, scrollable: find.byType(Scrollable).last);
 
     expect(find.text('Biyoloji · Fotosentez'), findsOneWidget);
     expect(find.text('Fizik · Newton Yasaları'), findsOneWidget);

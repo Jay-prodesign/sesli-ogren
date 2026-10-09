@@ -305,11 +305,7 @@ void main() {
     expect(find.text('Odaklan'), findsOneWidget);
     await tapVisible(tester, find.text('Odaklan').last);
     await pumpUntilFound(tester, find.text('KISA ODAK · 3 ADIM'));
-    await tester.scrollUntilVisible(
-      find.text('İpucu ver'),
-      220,
-      scrollable: find.byType(Scrollable).last,
-    );
+    await tester.scrollUntilVisible(find.text('İpucu ver'), 220, scrollable: find.byType(Scrollable).last);
     await tester.pumpAndSettle();
     expect(find.text('İpucu ver'), findsOneWidget);
     expect(find.text('Sorumu açıkla'), findsOneWidget);
