@@ -220,6 +220,9 @@ CREATE TABLE sentinel (
     const sourceB = SourceVersionId('source-b');
 
     try {
+      store = await SqliteSourceStore.open(factory: databaseFactoryFfi, path: path);
+      await store.close();
+      store = null;
       database = await databaseFactoryFfi.openDatabase(path);
       await database.insert('materials', {
         'learner_id': 'owner',
