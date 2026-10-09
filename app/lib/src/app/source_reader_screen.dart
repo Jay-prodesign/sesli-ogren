@@ -2,7 +2,14 @@ import 'package:flutter/material.dart';
 
 /// Read the complete locally extracted source without sending it to a model.
 class SourceReaderScreen extends StatefulWidget {
-  const SourceReaderScreen({required this.title, required this.sourceText, this.onListen, this.onRecap, this.onRecall, super.key});
+  const SourceReaderScreen({
+    required this.title,
+    required this.sourceText,
+    this.onListen,
+    this.onRecap,
+    this.onRecall,
+    super.key,
+  });
 
   final String title;
   final String sourceText;
@@ -49,13 +56,15 @@ class _SourceReaderScreenState extends State<SourceReaderScreen> {
       var cursor = 0;
       for (final at in matches) {
         if (at > cursor) spans.add(TextSpan(text: source.substring(cursor, at)));
-        spans.add(TextSpan(
-          text: source.substring(at, at + needle.length),
-          style: TextStyle(
-            backgroundColor: Theme.of(context).colorScheme.tertiaryContainer,
-            fontWeight: FontWeight.w700,
+        spans.add(
+          TextSpan(
+            text: source.substring(at, at + needle.length),
+            style: TextStyle(
+              backgroundColor: Theme.of(context).colorScheme.tertiaryContainer,
+              fontWeight: FontWeight.w700,
+            ),
           ),
-        ));
+        );
         cursor = at + needle.length;
       }
       if (cursor < source.length) spans.add(TextSpan(text: source.substring(cursor)));
@@ -93,13 +102,28 @@ class _SourceReaderScreenState extends State<SourceReaderScreen> {
             },
             itemBuilder: (_) => [
               if (widget.onListen != null)
-                const PopupMenuItem(value: 'listen', child: ListTile(leading: Icon(Icons.headphones_rounded), title: Text('Kaynağı dinle'))),
+                const PopupMenuItem(
+                  value: 'listen',
+                  child: ListTile(leading: Icon(Icons.headphones_rounded), title: Text('Kaynağı dinle')),
+                ),
               if (widget.onRecap != null)
-                const PopupMenuItem(value: 'recap', child: ListTile(leading: Icon(Icons.auto_awesome), title: Text('Hızlı özet'))),
+                const PopupMenuItem(
+                  value: 'recap',
+                  child: ListTile(leading: Icon(Icons.auto_awesome), title: Text('Hızlı özet')),
+                ),
               if (widget.onRecall != null)
-                const PopupMenuItem(value: 'recall', child: ListTile(leading: Icon(Icons.psychology_alt_outlined), title: Text('Hatırlama çalışması'))),
-              const PopupMenuItem(value: 'smaller', child: ListTile(leading: Icon(Icons.text_decrease), title: Text('Yazıyı küçült'))),
-              const PopupMenuItem(value: 'larger', child: ListTile(leading: Icon(Icons.text_increase), title: Text('Yazıyı büyüt'))),
+                const PopupMenuItem(
+                  value: 'recall',
+                  child: ListTile(leading: Icon(Icons.psychology_alt_outlined), title: Text('Hatırlama çalışması')),
+                ),
+              const PopupMenuItem(
+                value: 'smaller',
+                child: ListTile(leading: Icon(Icons.text_decrease), title: Text('Yazıyı küçült')),
+              ),
+              const PopupMenuItem(
+                value: 'larger',
+                child: ListTile(leading: Icon(Icons.text_increase), title: Text('Yazıyı büyüt')),
+              ),
             ],
           ),
         ],
@@ -118,11 +142,16 @@ class _SourceReaderScreenState extends State<SourceReaderScreen> {
                     prefixIcon: const Icon(Icons.search),
                     hintText: 'Metinde ara',
                     border: const OutlineInputBorder(),
-                    suffixIcon: query.isEmpty ? null : IconButton(
-                      tooltip: 'Aramayı temizle',
-                      icon: const Icon(Icons.close),
-                      onPressed: () { _search.clear(); setState(() {}); },
-                    ),
+                    suffixIcon: query.isEmpty
+                        ? null
+                        : IconButton(
+                            tooltip: 'Aramayı temizle',
+                            icon: const Icon(Icons.close),
+                            onPressed: () {
+                              _search.clear();
+                              setState(() {});
+                            },
+                          ),
                   ),
                 ),
               ),
@@ -137,7 +166,11 @@ class _SourceReaderScreenState extends State<SourceReaderScreen> {
                 padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 4),
                 child: Align(
                   alignment: Alignment.centerLeft,
-                  child: Text(matches.isEmpty ? 'Eşleşme bulunamadı' : '${matches.length}${matches.length == 2000 ? '+' : ''} eşleşme'),
+                  child: Text(
+                    matches.isEmpty
+                        ? 'Eşleşme bulunamadı'
+                        : '${matches.length}${matches.length == 2000 ? '+' : ''} eşleşme',
+                  ),
                 ),
               ),
             if (source.isNotEmpty && widget.onRecall != null)
