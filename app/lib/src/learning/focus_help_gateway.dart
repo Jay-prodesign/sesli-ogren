@@ -10,6 +10,8 @@ class FocusHelpRequest {
     required this.kind,
     required this.outputLocale,
     this.learnerQuestion,
+    this.serverMaterialId,
+    this.groundingContentHash,
   });
   final MaterialId materialId;
   final SourceVersionId sourceVersionId;
@@ -17,6 +19,12 @@ class FocusHelpRequest {
   final FocusHelpKind kind;
   final String outputLocale;
   final String? learnerQuestion;
+
+  /// Server UUID bound to the exact current local source version.
+  final String? serverMaterialId;
+
+  /// SHA-256 of the normalized text mirrored to the server.
+  final String? groundingContentHash;
 }
 
 sealed class FocusHelpResult {
@@ -29,11 +37,13 @@ class FocusHelpReady extends FocusHelpResult {
     required this.sourceContentDigest,
     required this.text,
     required this.executionRef,
+    this.sourceCues = const <String>[],
   });
   final SourceVersionId sourceVersionId;
   final String sourceContentDigest;
   final String text;
   final String executionRef;
+  final List<String> sourceCues;
 
   bool matches(SourceVersionIdentity source) =>
       sourceVersionId == source.sourceVersionId && sourceContentDigest == source.contentDigest;
