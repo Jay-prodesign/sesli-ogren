@@ -290,6 +290,34 @@ CREATE TABLE sentinel (
         'created_at_utc': '2026-10-09T00:00:00Z',
         'updated_at_utc': '2026-10-09T00:00:00Z',
       });
+      await database.insert('source_versions', {
+        'learner_id': 'owner',
+        'material_id': 'material-a',
+        'source_version_id': 'source-a',
+        'content_digest': 'digest-a',
+        'trust_class': 'userProvided',
+        'knowledge_class': 'learnerOwned',
+        'media_type': 'pastedText',
+        'source_name': 'A',
+        'mime_type': 'text/plain',
+        'byte_size': 1,
+        'inline_text': 'A',
+        'created_at_utc': '2026-10-09T00:00:00Z',
+      });
+      await database.insert('source_versions', {
+        'learner_id': 'owner',
+        'material_id': 'material-a',
+        'source_version_id': 'source-b',
+        'content_digest': 'digest-b',
+        'trust_class': 'userProvided',
+        'knowledge_class': 'learnerOwned',
+        'media_type': 'pastedText',
+        'source_name': 'B',
+        'mime_type': 'text/plain',
+        'byte_size': 1,
+        'inline_text': 'B',
+        'created_at_utc': '2026-10-09T00:01:00Z',
+      });
       await database.close();
       database = null;
       store = await SqliteSourceStore.open(factory: databaseFactoryFfi, path: path);
