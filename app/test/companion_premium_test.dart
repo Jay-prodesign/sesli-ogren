@@ -5,7 +5,6 @@ import 'package:sesli_ogren/src/app/companion_view.dart';
 void main() {
   testWidgets('companion exposes one accessible state label', (tester) async {
     final handle = tester.ensureSemantics();
-    addTearDown(handle.dispose);
     await tester.pumpWidget(
       const MaterialApp(
         home: Scaffold(
@@ -18,6 +17,7 @@ void main() {
     );
     expect(find.bySemanticsLabel('Düğüm dinleme modunda'), findsOneWidget);
     expect(tester.takeException(), isNull);
+    handle.dispose();
   });
 
   testWidgets('companion supports compact presentation with reduced motion', (tester) async {
