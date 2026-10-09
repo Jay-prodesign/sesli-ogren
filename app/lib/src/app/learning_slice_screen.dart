@@ -547,11 +547,8 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
     _SlicePhase.source => CompanionVisualState.idle,
     _SlicePhase.recall => _busy ? CompanionVisualState.think : CompanionVisualState.listen,
     _SlicePhase.result =>
-      _result?.evidence.outcome == RecallOutcome.correct
-          ? CompanionVisualState.success
-          : CompanionVisualState.correct,
-    _SlicePhase.continuation =>
-      CompanionVisualState.idle,
+      _result?.evidence.outcome == RecallOutcome.correct ? CompanionVisualState.success : CompanionVisualState.correct,
+    _SlicePhase.continuation => CompanionVisualState.idle,
     _SlicePhase.error => CompanionVisualState.correct,
   };
 
@@ -841,10 +838,8 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
     final excerpt = result.sourceExcerpt;
     final answer = result.correctAnswer.trim();
     final at = answer.isEmpty ? -1 : excerpt.indexOf(answer);
-    final style = Theme.of(context).textTheme.bodyMedium?.copyWith(
-      color: Theme.of(context).colorScheme.onSurfaceVariant,
-      height: 1.45,
-    );
+    final style = Theme.of(context).textTheme.bodyMedium
+        ?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant, height: 1.45);
     if (at < 0) {
       return SelectableText(excerpt, style: style);
     }
@@ -861,8 +856,7 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
               color: AppPalette.primaryDark,
             ),
           ),
-          if (at + answer.length < excerpt.length)
-            TextSpan(text: excerpt.substring(at + answer.length)),
+          if (at + answer.length < excerpt.length) TextSpan(text: excerpt.substring(at + answer.length)),
         ],
       ),
     );
@@ -878,8 +872,8 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
         answerInMemory: _submittedUnknown
             ? ''
             : _answerWasRevealed
-                ? 'Yanıt gösterildi; bu metin öğrencinin bağımsız yanıtı değil.'
-                : _answerController.text,
+            ? 'Yanıt gösterildi; bu metin öğrencinin bağımsız yanıtı değil.'
+            : _answerController.text,
         onContinue: () {
           setState(() {
             _continuation = LearningContinuation(state: result.state, nextAction: result.nextAction);
@@ -954,10 +948,10 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
             _submittedUnknown
                 ? 'Bilmiyorum seçildi.'
                 : _answerWasRevealed
-                    ? 'Yanıt gösterildi; bu metin öğrencinin bağımsız yanıtı değil.'
-                    : _answerController.text.trim().isEmpty
-                        ? 'Bu denemede yazılı yanıt verilmedi.'
-                        : _answerController.text.trim(),
+                ? 'Yanıt gösterildi; bu metin öğrencinin bağımsız yanıtı değil.'
+                : _answerController.text.trim().isEmpty
+                ? 'Bu denemede yazılı yanıt verilmedi.'
+                : _answerController.text.trim(),
             style: theme.textTheme.titleMedium?.copyWith(height: 1.45),
           ),
           const SizedBox(height: 20),
