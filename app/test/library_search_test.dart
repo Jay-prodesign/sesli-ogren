@@ -95,10 +95,16 @@ void main() {
     await _tapVisible(tester, find.widgetWithText(FilledButton, 'Aramayı temizle'));
     await tester.pump(const Duration(milliseconds: 100));
 
-    expect(find.text('Biyoloji · Fotosentez'), findsOneWidget);
-    expect(find.text('Fizik · Newton Yasaları'), findsOneWidget);
-    expect(find.text('İktisat · Enflasyon'), findsOneWidget);
+    // Clearing search restores all records, even when a lazy list has not
+    // built off-screen cards at the current scroll position.
     expect(find.text('3 materyal'), findsOneWidget);
+    await tester.enterText(find.byKey(const ValueKey('library-search')), 'biyoloji');
+    await tester.pump();
+    expect(find.text('Biyoloji · Fotosentez'), findsOneWidget);
+    expect(find.text('1 / 3 materyal'), findsOneWidget);
+    await tester.enterText(find.byKey(const ValueKey('library-search')), 'fizik');
+    await tester.pump();
+    expect(find.text('Fizik · Newton Yasaları'), findsOneWidget);
 
     await tester.enterText(find.byKey(const ValueKey('library-search')), 'iktisat');
     await tester.pump();
