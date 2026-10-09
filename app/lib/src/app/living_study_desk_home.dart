@@ -61,9 +61,9 @@ class LivingStudyDeskHome extends StatelessWidget {
   String get _nextActionCta {
     final action = continuation?.nextAction.kind;
     return switch (action) {
-      NextLearningActionKind.reviewSourceThenRecall => 'Kaynağı gözden geçir ve yeniden dene',
-      NextLearningActionKind.retryRecallWithoutHint => 'İpucusuz tekrar dene',
-      NextLearningActionKind.repeatRecallLater => 'Bugünlük tamamla',
+      NextLearningActionKind.reviewSourceThenRecall => 'Kaynak onarımını aç',
+      NextLearningActionKind.retryRecallWithoutHint => 'İpucusuz denemeyi aç',
+      NextLearningActionKind.repeatRecallLater => 'Bugünlük adımı aç',
       null => 'Hatırlamayı dene',
     };
   }
