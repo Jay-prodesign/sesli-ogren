@@ -1,17 +1,32 @@
+import 'dart:convert';
+
+import 'package:crypto/crypto.dart';
 import 'package:flutter/material.dart';
 
 import '../domain/learning_contracts.dart';
+import '../generation/supabase_source_summary_gateway.dart';
 import '../learning/focus_help_gateway.dart';
 import 'app_runtime.dart';
 import 'app_theme.dart';
-import 'explain_screen.dart';
 import 'companion_view.dart';
+import 'explain_back_screen.dart';
+import 'explain_screen.dart';
+import 'learning_slice_screen.dart';
 
 class FocusScreen extends StatefulWidget {
-  const FocusScreen({required this.runtime, required this.source, required this.sourceText, super.key});
+  const FocusScreen({
+    required this.runtime,
+    required this.source,
+    required this.sourceText,
+    this.sourceGateway = const SupabaseSourceSummaryGateway(),
+    super.key,
+  });
+
   final AppRuntime runtime;
   final SourceVersionRecord source;
   final String sourceText;
+  final SupabaseSourceSummaryGateway sourceGateway;
+
   @override
   State<FocusScreen> createState() => _FocusScreenState();
 }
@@ -30,6 +45,21 @@ class _FocusScreenState extends State<FocusScreen> {
   Future<void> _openDirectExplanation() => Navigator.of(context).push<void>(
     MaterialPageRoute(
       builder: (_) => ExplainScreen(runtime: widget.runtime, source: widget.source),
+    ),
+  );
+
+  Future<void> _openRecall() => Navigator.of(context).push<void>(
+    MaterialPageRoute(
+      builder: (_) => LearningSliceScreen(
+        runtime: widget.runtime,
+        materialId: widget.source.identity.materialId,
+      ),
+    ),
+  );
+
+  Future<void> _openExplainBack() => Navigator.of(context).push<void>(
+    MaterialPageRoute(
+      builder: (_) => ExplainBackScreen(runtime: widget.runtime, source: widget.source),
     ),
   );
 
@@ -111,24 +141,98 @@ class _FocusScreenState extends State<FocusScreen> {
       sourceVersionId: widget.source.identity.sourceVersionId,
       sourceContentDigest: widget.source.identity.contentDigest,
       text: 'Kaynak ipucu: “$excerpt”\n\nBu bölümdeki ilişkiyi kendi cümlelerinle yeniden kurmayı dene.',
+      sourceCues: [excerpt],
       executionRef: 'local:source-cue-v1',
     );
   }
 
-  Future<void> request(FocusHelpKind kind) async {
-    setState(() {
-      busy = true;
-      help = null;
-    });
+  Future<FocusHelpResult> _requestServerHelp(FocusHelpKind kind) async {
+    final learnerQuestion = question.text.trim();
+    if (learnerQuestion.length < 2) {
+      return const FocusHelpUnavailable('Takıldığın noktayı kısa ve somut bir soruyla yaz.');
+    }
 
-    if (kind == FocusHelpKind.hint && widget.runtime.focusHelp is UnavailableFocusHelpGateway) {
-      final result = _localSourceHint();
-      if (!mounted) return;
-      setState(() {
-        busy = false;
-        help = result;
-      });
-      return;
+    final currentSource = await widget.runtime.store.currentSourceVersion(
+      learner: widget.runtime.learner,
+      materialId: widget.source.identity.materialId,
+    );
+    if (currentSource == null ||
+        currentSource.identity.sourceVersionId != widget.source.identity.sourceVersionId ||
+        currentSource.identity.contentDigest != widget.source.identity.contentDigest) {
+      return const FocusHelpUnavailable('Kaynak değişti. Güncel materyalden yeniden Odaklan aç.');
+    }
+
+    final material = await widget.runtime.store.material(
+      learner: widget.runtime.learner,
+      materialId: widget.source.identity.materialId,
+    );
+    final extracted = await widget.runtime.store.extractedContentForSource(
+      learner: widget.runtime.learner,
+      sourceVersionId: widget.source.identity.sourceVersionId,
+    );
+    if (material == null ||
+        extracted == null ||
+        !extracted.isValid ||
+        extracted.sourceContentDigest != widget.source.identity.contentDigest) {
+      return const FocusHelpUnavailable('Güncel kaynak güvenilir biçimde okunamıyor.');
+    }
+
+    final normalizedSource = extracted.normalizedText.trim();
+    if (normalizedSource.isEmpty) {
+      return const FocusHelpUnavailable('Güncel kaynak metni boş.');
+    }
+    final groundingContentHash = sha256.convert(utf8.encode(normalizedSource)).toString();
+
+    var serverMaterialId = await widget.runtime.store.summaryServerMaterialId(
+      learner: widget.runtime.learner,
+      materialId: widget.source.identity.materialId,
+      sourceVersionId: widget.source.identity.sourceVersionId,
+    );
+
+    if (serverMaterialId == null) {
+      final staleServerMaterialId = await widget.runtime.store.summaryServerMaterialId(
+        learner: widget.runtime.learner,
+        materialId: widget.source.identity.materialId,
+      );
+      if (staleServerMaterialId != null) {
+        final removed = await widget.sourceGateway.deleteServerMaterial(staleServerMaterialId);
+        if (!removed) {
+          return const FocusHelpUnavailable('Önceki kaynak kopyası güvenli biçimde temizlenemedi.');
+        }
+        await widget.runtime.store.clearSummaryJob(
+          learner: widget.runtime.learner,
+          materialId: widget.source.identity.materialId,
+        );
+        await widget.runtime.store.clearServerMaterialBinding(
+          learner: widget.runtime.learner,
+          materialId: widget.source.identity.materialId,
+        );
+      }
+
+      serverMaterialId = await widget.sourceGateway.ensureServerMaterial(
+        source: SourceIngestResult(
+          material: material,
+          sourceVersion: currentSource,
+          extractedContent: extracted,
+        ),
+      );
+
+      final sourceAfterBinding = await widget.runtime.store.currentSourceVersion(
+        learner: widget.runtime.learner,
+        materialId: widget.source.identity.materialId,
+      );
+      if (sourceAfterBinding?.identity.sourceVersionId != widget.source.identity.sourceVersionId ||
+          sourceAfterBinding?.identity.contentDigest != widget.source.identity.contentDigest) {
+        await widget.sourceGateway.deleteServerMaterial(serverMaterialId);
+        return const FocusHelpUnavailable('Kaynak değişti; eski sürüm için AI yardımı göstermiyoruz.');
+      }
+
+      await widget.runtime.store.saveServerMaterialBinding(
+        learner: widget.runtime.learner,
+        materialId: widget.source.identity.materialId,
+        sourceVersionId: widget.source.identity.sourceVersionId,
+        serverMaterialId: serverMaterialId,
+      );
     }
 
     final result = await widget.runtime.focusHelp.help(
@@ -138,13 +242,57 @@ class _FocusScreenState extends State<FocusScreen> {
         sourceContentDigest: widget.source.identity.contentDigest,
         kind: kind,
         outputLocale: 'tr-TR',
-        learnerQuestion: question.text.trim().isEmpty ? null : question.text.trim(),
+        learnerQuestion: learnerQuestion,
+        serverMaterialId: serverMaterialId,
+        groundingContentHash: groundingContentHash,
       ),
     );
+
+    final sourceAfterHelp = await widget.runtime.store.currentSourceVersion(
+      learner: widget.runtime.learner,
+      materialId: widget.source.identity.materialId,
+    );
+    if (sourceAfterHelp?.identity.sourceVersionId != widget.source.identity.sourceVersionId ||
+        sourceAfterHelp?.identity.contentDigest != widget.source.identity.contentDigest) {
+      return const FocusHelpUnavailable('Kaynak değişti; eski sürüme ait yanıtı göstermiyoruz.');
+    }
+    return result;
+  }
+
+  Future<void> request(FocusHelpKind kind) async {
+    if (busy) return;
+    setState(() {
+      busy = true;
+      help = null;
+    });
+
+    if (widget.runtime.focusHelp is UnavailableFocusHelpGateway) {
+      if (kind == FocusHelpKind.hint) {
+        final result = _localSourceHint();
+        if (!mounted) return;
+        setState(() {
+          busy = false;
+          help = result;
+        });
+        return;
+      }
+      if (mounted) setState(() => busy = false);
+      await _openDirectExplanation();
+      return;
+    }
+
+    FocusHelpResult result;
+    try {
+      result = await _requestServerHelp(kind);
+    } catch (_) {
+      result = const FocusHelpUnavailable('Kaynağa bağlı AI yardımına şu anda ulaşılamıyor.');
+    }
     if (!mounted) return;
     setState(() {
       busy = false;
-      help = result;
+      help = result is FocusHelpReady && !result.matches(widget.source.identity)
+          ? const FocusHelpUnavailable('Kaynak değişti; eski yanıtı göstermiyoruz.')
+          : result;
     });
   }
 
@@ -182,7 +330,7 @@ class _FocusScreenState extends State<FocusScreen> {
                       child: Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
                         child: Text(
-                          'KISA ODAK',
+                          'KISA ODAK · 3 ADIM',
                           style: theme.textTheme.labelSmall?.copyWith(
                             color: AppPalette.momentumInk,
                             fontWeight: FontWeight.w900,
@@ -193,7 +341,7 @@ class _FocusScreenState extends State<FocusScreen> {
                     ),
                     const SizedBox(height: 9),
                     Text(
-                      'Kısa odak oturumu',
+                      'Kaynağı netleştir, sonra aktif olarak doğrula.',
                       style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w800),
                     ),
                   ],
@@ -247,6 +395,7 @@ class _FocusScreenState extends State<FocusScreen> {
           const SizedBox(height: 9),
           TextField(
             controller: question,
+            enabled: !busy,
             maxLength: 600,
             maxLines: 4,
             decoration: const InputDecoration(hintText: 'Neyi netleştirmek istiyorsun?'),
@@ -263,9 +412,9 @@ class _FocusScreenState extends State<FocusScreen> {
               const SizedBox(width: 8),
               Expanded(
                 child: FilledButton.icon(
-                  onPressed: busy ? null : _openDirectExplanation,
+                  onPressed: busy ? null : () => request(FocusHelpKind.directExplanation),
                   icon: const Icon(Icons.auto_awesome_outlined),
-                  label: const Text('Doğrudan açıkla'),
+                  label: const Text('Sorumu açıkla'),
                 ),
               ),
             ],
@@ -277,10 +426,25 @@ class _FocusScreenState extends State<FocusScreen> {
               decoration: BoxDecoration(color: AppPalette.primarySoft, borderRadius: BorderRadius.circular(18)),
               child: Padding(
                 padding: const EdgeInsets.all(15),
-                child: Text(
-                  readyHelp.matches(widget.source.identity)
-                      ? readyHelp.text
-                      : 'Kaynak değişti; eski yanıtı göstermiyoruz.',
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      readyHelp.matches(widget.source.identity)
+                          ? readyHelp.text
+                          : 'Kaynak değişti; eski yanıtı göstermiyoruz.',
+                    ),
+                    if (readyHelp.sourceCues.isNotEmpty && readyHelp.matches(widget.source.identity)) ...[
+                      const SizedBox(height: 14),
+                      Text('Kaynak dayanakları', style: theme.textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w800)),
+                      const SizedBox(height: 6),
+                      for (final cue in readyHelp.sourceCues)
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 5),
+                          child: Text('• $cue'),
+                        ),
+                    ],
+                  ],
                 ),
               ),
             ),
@@ -307,22 +471,55 @@ class _FocusScreenState extends State<FocusScreen> {
             decoration: BoxDecoration(color: AppPalette.primaryDark, borderRadius: BorderRadius.circular(18)),
             child: Padding(
               padding: const EdgeInsets.all(15),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  DecoratedBox(
-                    decoration: BoxDecoration(color: AppPalette.momentum, borderRadius: BorderRadius.circular(999)),
-                    child: const Padding(
-                      padding: EdgeInsets.all(7),
-                      child: Icon(Icons.arrow_forward_rounded, color: AppPalette.momentumInk, size: 17),
-                    ),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      DecoratedBox(
+                        decoration: BoxDecoration(color: AppPalette.momentum, borderRadius: BorderRadius.circular(999)),
+                        child: const Padding(
+                          padding: EdgeInsets.all(7),
+                          child: Icon(Icons.arrow_forward_rounded, color: AppPalette.momentumInk, size: 17),
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          '3 · Şimdi yardım almadan aktif olarak doğrula.',
+                          style: theme.textTheme.bodyMedium?.copyWith(color: Colors.white, fontWeight: FontWeight.w700),
+                        ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: Text(
-                      '3 · Hatırla veya kendi cümlelerinle anlat ile aktif olarak doğrula.',
-                      style: theme.textTheme.bodyMedium?.copyWith(color: Colors.white, fontWeight: FontWeight.w700),
-                    ),
+                  const SizedBox(height: 14),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton.icon(
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: Colors.white,
+                            side: BorderSide(color: Colors.white.withValues(alpha: 0.30)),
+                          ),
+                          onPressed: _openRecall,
+                          icon: const Icon(Icons.psychology_alt_outlined),
+                          label: const Text('Hatırla'),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: FilledButton.icon(
+                          style: FilledButton.styleFrom(
+                            backgroundColor: Colors.white,
+                            foregroundColor: AppPalette.primaryDark,
+                          ),
+                          onPressed: _openExplainBack,
+                          icon: const Icon(Icons.record_voice_over_outlined),
+                          label: const Text('Kendi cümlelerinle anlat'),
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
