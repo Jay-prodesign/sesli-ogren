@@ -27,7 +27,16 @@ void main() {
       final bytes = await File(path).readAsBytes();
       await (FontLoader(name)..addFont(Future.value(ByteData.sublistView(bytes)))).load();
     }
-    await load('Roboto', '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf');
+    // Widget tests otherwise fall back to Ahem for unregistered weights.
+    // Register regular and bold under the same family used by Material.
+    final roboto = FontLoader('Roboto');
+    for (final path in [
+      '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf',
+      '/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf',
+    ]) {
+      roboto.addFont(Future.value(ByteData.sublistView(await File(path).readAsBytes())));
+    }
+    await roboto.load();
     final root = Platform.environment['FLUTTER_ROOT']!;
     await load('MaterialIcons', '$root/bin/cache/artifacts/material_fonts/MaterialIcons-Regular.otf');
   });
