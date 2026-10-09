@@ -1,4 +1,3 @@
-import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../auth/supabase_learner_auth.dart';
 import '../domain/learning_contracts.dart';
