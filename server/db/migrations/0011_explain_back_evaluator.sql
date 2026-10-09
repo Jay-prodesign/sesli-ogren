@@ -100,9 +100,9 @@ begin
 
   select *
   into v_attempt
-  from public.explain_back_attempts
-  where account_id = p_account_id
-    and attempt_id = p_attempt_id
+  from public.explain_back_attempts a
+  where a.account_id = p_account_id
+    and a.attempt_id = p_attempt_id
   for update;
 
   if not found then
@@ -120,16 +120,16 @@ begin
     end if;
 
     if v_attempt.evaluator_dispatch_state = 'not_dispatched' then
-      update public.explain_back_attempts
+      update public.explain_back_attempts a
       set evaluation_state = 'PENDING',
           evaluation_lease_token = null,
           evaluation_lease_expires_at = null,
           evaluation_failure_class = 'lease_expired_before_dispatch'
-      where account_id = p_account_id
-        and attempt_id = p_attempt_id;
+      where a.account_id = p_account_id
+        and a.attempt_id = p_attempt_id;
       v_attempt.evaluation_state := 'PENDING';
     else
-      update public.explain_back_attempts
+      update public.explain_back_attempts a
       set evaluation_state = 'RECONCILIATION_REQUIRED',
           evaluator_dispatch_state = 'dispatch_unknown',
           evaluation_failure_class = 'lease_expired_after_dispatch',
@@ -142,17 +142,17 @@ begin
   end if;
 
   if v_attempt.evaluation_attempt_count >= 3 then
-    update public.explain_back_attempts
+    update public.explain_back_attempts a
     set evaluation_state = 'FAILED_FINAL',
         evaluation_failure_class = 'max_attempts_exhausted',
         evaluation_lease_token = null,
         evaluation_lease_expires_at = null
-    where account_id = p_account_id
-      and attempt_id = p_attempt_id;
+    where a.account_id = p_account_id
+      and a.attempt_id = p_attempt_id;
     return;
   end if;
 
-  update public.explain_back_attempts
+  update public.explain_back_attempts a
   set evaluation_state = 'PROCESSING',
       evaluation_attempt_count = evaluation_attempt_count + 1,
       evaluator_dispatch_state = 'not_dispatched',
@@ -161,8 +161,8 @@ begin
       evaluation_failure_class = null,
       evaluation_lease_token = v_token,
       evaluation_lease_expires_at = now() + make_interval(secs => p_lease_seconds)
-  where account_id = p_account_id
-    and attempt_id = p_attempt_id;
+  where a.account_id = p_account_id
+    and a.attempt_id = p_attempt_id;
 
   return query
   select a.attempt_id,
