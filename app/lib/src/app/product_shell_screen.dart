@@ -12,6 +12,7 @@ import 'la0040_visual_treatments.dart';
 import 'living_study_desk_home.dart';
 import 'listen_screen.dart';
 import 'material_workspace_screen.dart';
+import 'source_reader_screen.dart';
 import 'profile_surface.dart';
 import 'progress_surface.dart';
 
@@ -125,6 +126,40 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
     setState(_refresh);
   }
 
+  Future<void> _openSourceReader([MaterialId? materialId]) async {
+    try {
+      final selected = materialId ?? (await _snapshot).material?.id;
+      if (selected == null) return;
+      final material = await widget.runtime.store.material(
+        learner: widget.runtime.learner,
+        materialId: selected,
+      );
+      final source = await widget.runtime.store.currentSourceVersion(
+        learner: widget.runtime.learner,
+        materialId: selected,
+      );
+      if (material == null || source == null || !mounted) return;
+      final extracted = await widget.runtime.store.extractedContentForSource(
+        learner: widget.runtime.learner,
+        sourceVersionId: source.identity.sourceVersionId,
+      );
+      if (!mounted) return;
+      await Navigator.of(context).push<void>(
+        MaterialPageRoute(
+          builder: (_) => SourceReaderScreen(
+            title: material.title,
+            sourceText: extracted?.normalizedText ?? '',
+          ),
+        ),
+      );
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Kaynak açılamadı. Tekrar deneyebilirsin.')),
+      );
+    }
+  }
+
   Future<void> _openListen() async {
     final material = (await _snapshot).material;
     if (material == null || !mounted) return;
@@ -186,6 +221,12 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
     setState(_refresh);
     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Materyal silindi.')));
   }
+
+  Widget _readerShortcut(_HomeSnapshot data) => IconButton(
+    tooltip: 'Son kaynağı oku',
+    icon: const Icon(Icons.menu_book_outlined),
+    onPressed: data.material == null ? null : () => _openSourceReader(data.material!.id),
+  );
 
   Widget _buildNavigationBar() => NavigationBar(
     selectedIndex: _index,
@@ -255,7 +296,14 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
               return const Center(child: CircularProgressIndicator());
             }
             final data = snapshot.data!;
-            return IndexedStack(
+            return Column(
+              children: [
+                if (_index == 1 && data.material != null)
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: _readerShortcut(data),
+                  ),
+                Expanded(child: IndexedStack(
               index: _index,
               children: [
                 TickerMode(
@@ -289,6 +337,8 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
                     onSignOut: widget.onSignOut,
                   ),
                 ),
+              ],
+            )),
               ],
             );
           },
