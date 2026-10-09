@@ -1047,10 +1047,21 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
     );
   }
 
+  String _focusedSourceReview(String text, SourceAnchor anchor) {
+    const contextRadius = 220;
+    final start = (anchor.startOffset - contextRadius).clamp(0, text.length);
+    final end = (anchor.endOffset + contextRadius).clamp(0, text.length);
+    var excerpt = text.substring(start, end).trim();
+    if (start > 0) excerpt = '…$excerpt';
+    if (end < text.length) excerpt = '$excerpt…';
+    return excerpt;
+  }
+
   Future<void> _reviewContinuationSource() async {
     if (_busy) return;
     final continuation = _continuation;
     if (continuation == null) return;
+    var retryAfterReview = false;
     _setBusy(true);
     try {
       final source = await widget.runtime.store.currentSourceVersion(
@@ -1058,7 +1069,8 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
         materialId: widget.materialId,
       );
       if (!mounted) return;
-      if (source == null || source.identity.sourceVersionId != continuation.state.sourceVersionId) {
+      if (source == null ||
+          source.identity.sourceVersionId != continuation.state.sourceVersionId) {
         _showRecoverableError();
         return;
       }
@@ -1072,38 +1084,72 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
         _showRecoverableError();
         return;
       }
-      await showModalBottomSheet<void>(
-        context: context,
-        isScrollControlled: true,
-        showDragHandle: true,
-        builder: (sheetContext) => SafeArea(
-          child: SizedBox(
-            height: MediaQuery.sizeOf(sheetContext).height * 0.75,
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Text('Kaynağını yeniden incele', style: Theme.of(sheetContext).textTheme.titleLarge),
-                  const SizedBox(height: 8),
-                  const Text('Bu metin son hatırlama denemenin kaynak sürümünden geliyor.'),
-                  const SizedBox(height: 16),
-                  Expanded(child: SingleChildScrollView(child: SelectableText(text))),
-                  const SizedBox(height: 12),
-                  FilledButton(
-                    onPressed: () => Navigator.of(sheetContext).pop(),
-                    child: const Text('İncelemeyi bitir'),
+      final prompt = await widget.runtime.recall.createCurrentPrompt(
+        learner: widget.runtime.learner,
+        materialId: widget.materialId,
+      );
+      if (!mounted) return;
+      if (prompt.sourceVersionId != source.identity.sourceVersionId) {
+        _showRecoverableError();
+        return;
+      }
+      final excerpt = _focusedSourceReview(text, prompt.anchor);
+      retryAfterReview =
+          await showModalBottomSheet<bool>(
+            context: context,
+            isScrollControlled: true,
+            showDragHandle: true,
+            builder: (sheetContext) => SafeArea(
+              child: SizedBox(
+                height: MediaQuery.sizeOf(sheetContext).height * 0.72,
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Text(
+                        'Bu bölümü yeniden kur',
+                        style: Theme.of(sheetContext).textTheme.titleLarge,
+                      ),
+                      const SizedBox(height: 8),
+                      const Text(
+                        'Son denemende zorlandığın kaynak bölümüne odaklan. '
+                        'Hazır olduğunda kaynağı kapatıp aynı hatırlamayı yeniden dene.',
+                      ),
+                      const SizedBox(height: 16),
+                      Expanded(
+                        child: Semantics(
+                          container: true,
+                          label: 'Kaynak bölümü',
+                          child: SingleChildScrollView(
+                            child: SelectableText(excerpt),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      FilledButton.icon(
+                        onPressed: () => Navigator.of(sheetContext).pop(true),
+                        icon: const Icon(Icons.psychology_alt_outlined),
+                        label: const Text('Kaynağı kapat ve yeniden dene'),
+                      ),
+                      TextButton(
+                        onPressed: () => Navigator.of(sheetContext).pop(false),
+                        child: const Text('Şimdilik kapat'),
+                      ),
+                    ],
                   ),
-                ],
+                ),
               ),
             ),
-          ),
-        ),
-      );
+          ) ??
+          false;
     } catch (_) {
       _showRecoverableError();
     } finally {
       _setBusy(false);
+    }
+    if (retryAfterReview && mounted) {
+      await _openRecall();
     }
   }
 
