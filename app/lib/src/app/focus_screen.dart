@@ -45,6 +45,7 @@ class _FocusScreenState extends State<FocusScreen> {
     if (treatment != null) return LearningVisualTreatmentScope(treatment: treatment, child: screen);
     return LivingDeskReviewScope.active(context) ? LivingDeskReviewScope(child: screen) : screen;
   }
+
   FocusHelpResult? help;
   bool busy = false;
 
