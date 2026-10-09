@@ -72,7 +72,14 @@ class _MaterialWorkspaceScreenState extends State<MaterialWorkspaceScreen> {
 
   Future<void> _openListen() => Navigator.of(context).push<void>(
     MaterialPageRoute(
-      builder: (_) => ListenScreen(runtime: widget.runtime, materialId: widget.materialId),
+      builder: (listenContext) => ListenScreen(
+        runtime: widget.runtime,
+        materialId: widget.materialId,
+        onRecall: () {
+          Navigator.of(listenContext).pop();
+          _openRecall();
+        },
+      ),
     ),
   );
 
