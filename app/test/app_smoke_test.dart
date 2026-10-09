@@ -332,10 +332,9 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Açıkla'), findsOneWidget);
     await tapVisible(tester, find.text('Açıkla'));
-    await pumpUntilFound(tester, find.text('Kendi cümlelerinle anlat'));
-    expect(find.text('Anlatımımı değerlendir'), findsOneWidget);
-    expect(find.textContaining('öğrenme kanıtı veya ustalık iddiası oluşturmaz'), findsOneWidget);
-    Navigator.of(tester.element(find.text('Kendi cümlelerinle anlat'))).pop();
+    await pumpUntilFound(tester, find.text('Açıklama henüz hazır değil'));
+    expect(find.textContaining('yapay bir sonuç göstermiyoruz'), findsOneWidget);
+    Navigator.of(tester.element(find.text('Açıklama henüz hazır değil'))).pop();
     await tester.pumpAndSettle();
     expect(find.text('Hatırla'), findsWidgets);
     expect(find.text('Dinle'), findsOneWidget);
@@ -795,7 +794,7 @@ void main() {
     expect(await store.material(learner: runtime.learner, materialId: AppRuntime.primaryMaterialId), isNotNull);
   });
 
-  testWidgets('grounded direct explanation stays distinct from active teach-back', (tester) async {
+  testWidgets('grounded Explain labels generated interpretation and preserves Recall as active step', (tester) async {
     final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
     addTearDown(store.close);
     final ingest = SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor());
@@ -817,12 +816,8 @@ void main() {
     await tester.pumpWidget(MaterialApp(home: ProductShellScreen(runtime: runtime)));
     await pumpUntilFound(tester, find.text('Biyoloji notu'));
     await tapVisible(tester, find.text('Biyoloji notu').last);
-    await pumpUntilFound(tester, find.text('Odaklan'));
-    await tester.scrollUntilVisible(find.text('Odaklan'), 260, scrollable: find.byType(Scrollable).last);
-    await tester.pumpAndSettle();
-    await tapVisible(tester, find.text('Odaklan').last);
-    await pumpUntilFound(tester, find.text('Kısa odak oturumu'));
-    await tapVisible(tester, find.text('Doğrudan açıkla'));
+    await pumpUntilFound(tester, find.text('Açıkla'));
+    await tapVisible(tester, find.text('Açıkla'));
     await pumpUntilFound(tester, find.text('Kaynağına dayalı açıklama'));
 
     expect(find.textContaining('kaynak metnin kendisi değil'), findsOneWidget);
