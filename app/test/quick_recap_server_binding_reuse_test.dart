@@ -52,6 +52,17 @@ class _RecordingSummaryGateway extends SupabaseSourceSummaryGateway {
   );
 }
 
+class _DispatchFailureGateway extends _RecordingSummaryGateway {
+  _DispatchFailureGateway({required super.serverMaterialId});
+
+  @override
+  Future<bool> dispatch(String jobId) async => throw StateError('offline');
+
+  @override
+  Future<ServerSummaryStatus> status(String jobId) async =>
+      const ServerSummaryStatus(state: 'QUEUED');
+}
+
 void main() {
   sqfliteFfiInit();
 
@@ -133,4 +144,36 @@ void main() {
       serverMaterialId,
     );
   });
+  testWidgets('Quick Recap shows recoverable error when dispatch throws', (tester) async {
+    final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
+    addTearDown(store.close);
+    final ingest = SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor());
+    const materialId = MaterialId('quick-recap-dispatch-error');
+    await ingest.ingestPastedText(
+      learner: AppRuntime.localM5LearnerFixture,
+      materialId: materialId,
+      text: 'Fotosentez ışık enerjisinin kimyasal enerjiye dönüşmesini sağlar.',
+      sourceName: 'Biyoloji notu',
+    );
+    final runtime = AppRuntime(
+      learner: AppRuntime.localM5LearnerFixture,
+      store: store,
+      ingest: ingest,
+      recall: RecallLearningService(sourceStore: store, learningStore: store.learningTruthStore()),
+      telemetry: store.operationalTelemetry(),
+    );
+    final gateway = _DispatchFailureGateway(
+      serverMaterialId: '11111111-1111-4111-8111-111111111111',
+    );
+    await tester.pumpWidget(
+      MaterialApp(home: QuickRecapScreen(runtime: runtime, materialId: materialId, summaryGateway: gateway)),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Özet oluştur'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(find.textContaining('Sunucuya ulaşılamadı'), findsOneWidget);
+    expect(find.text('İşlemi başlatmayı tekrar dene'), findsOneWidget);
+  });
+
 }
