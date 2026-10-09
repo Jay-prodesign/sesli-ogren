@@ -860,8 +860,10 @@ class _LibrarySurfaceState extends State<_LibrarySurface> {
   }
 
   void _clearSearch() {
-    _searchController.clear();
-    setState(() => _query = '');
+    setState(() {
+      _query = '';
+      _searchController.clear();
+    });
   }
 
   String _searchKey(String value) =>
