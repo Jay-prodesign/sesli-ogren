@@ -174,6 +174,7 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
     );
     _setBusy(true);
     try {
+      if (mounted) setState(() => _inlineError = null);
       final bytes = await file.readAsBytes();
       final ingestResult = await widget.runtime.ingest.ingestPdf(
         learner: widget.runtime.learner,
@@ -244,6 +245,7 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
     );
     _setBusy(true);
     try {
+      if (mounted) setState(() => _inlineError = null);
       final ingestResult = await widget.runtime.ingest.ingestPastedText(
         learner: widget.runtime.learner,
         materialId: widget.materialId,
