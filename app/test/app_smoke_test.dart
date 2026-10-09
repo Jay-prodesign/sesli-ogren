@@ -11,7 +11,6 @@ import 'package:sesli_ogren/src/app/material_workspace_screen.dart';
 import 'package:sesli_ogren/src/app/product_shell_screen.dart';
 import 'package:sesli_ogren/src/app/profile_surface.dart';
 import 'package:sesli_ogren/src/app/sesli_ogren_app.dart';
-import 'package:sesli_ogren/src/auth/supabase_learner_auth.dart';
 import 'package:sesli_ogren/src/data/pdf_text_extractor.dart';
 import 'package:sesli_ogren/src/data/source_ingest_service.dart';
 import 'package:sesli_ogren/src/data/sqlite_source_store.dart';
@@ -131,16 +130,18 @@ Future<void> pumpUntilGone(WidgetTester tester, Finder finder, {int maxPumps = 1
 void main() {
   sqfliteFfiInit();
 
-  test('production auth restore fails closed when Supabase config is absent', () async {
-    await expectLater(SupabaseLearnerAuth.restoreSession(), throwsA(isA<LearnerAuthConfigurationException>()));
-  });
+  testWidgets('production app routes a missing restored session to passwordless account entry', (tester) async {
+    await tester.pumpWidget(
+      SesliOgrenApp(
+        restoreSession: () async => null,
+      ),
+    );
+    await pumpUntilFound(tester, find.text('Öğrenme alanına gir'));
 
-  testWidgets('production app does not open learner data without auth config', (tester) async {
-    await tester.pumpWidget(const SesliOgrenApp());
-    await pumpUntilFound(tester, find.text('Uygulama bağlantısı henüz yapılandırılmadı.'));
-
-    expect(find.text('Uygulama bağlantısı henüz yapılandırılmadı.'), findsOneWidget);
-    expect(find.textContaining('Öğrenme verisi açılmadı'), findsOneWidget);
+    expect(find.text('Öğrenme alanına gir'), findsOneWidget);
+    expect(find.text('Kod gönder'), findsOneWidget);
+    expect(find.textContaining('Şifre gerekmiyor'), findsOneWidget);
+    expect(find.text('Uygulama bağlantısı henüz yapılandırılmadı.'), findsNothing);
   });
 
   testWidgets('production learning slice boots at truthful source entry', (tester) async {
