@@ -1054,11 +1054,7 @@ class _LibraryMaterialCard extends StatelessWidget {
                     tooltip: 'Materyali sil',
                     onPressed: widget.isDeletingMaterial ? null : onDelete,
                     icon: widget.isDeletingMaterial
-                        ? const SizedBox(
-                            width: 18,
-                            height: 18,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
+                        ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2))
                         : const Icon(Icons.delete_outline_rounded),
                   ),
                 ],
