@@ -170,5 +170,4 @@ void main() {
     expect(find.textContaining('Sunucuya ulaşılamadı'), findsOneWidget);
     expect(find.text('İşlemi başlatmayı tekrar dene'), findsOneWidget);
   });
-
 }
