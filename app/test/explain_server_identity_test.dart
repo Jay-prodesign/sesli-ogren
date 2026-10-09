@@ -24,12 +24,22 @@ class _UnusedPdfExtractor implements PdfTextExtractor {
   }
 }
 
-class _SucceededSummaryGateway extends SupabaseSourceSummaryGateway {
-  const _SucceededSummaryGateway();
+class _RecordingServerMaterialGateway extends SupabaseSourceSummaryGateway {
+  _RecordingServerMaterialGateway(this.serverMaterialId);
+
+  final String serverMaterialId;
+  int ensureCalls = 0;
 
   @override
-  Future<ServerSummaryStatus> status(String jobId) async =>
-      const ServerSummaryStatus(state: 'SUCCEEDED', summary: 'ready');
+  Future<String> ensureServerMaterial({required SourceIngestResult source}) async {
+    ensureCalls++;
+    return serverMaterialId;
+  }
+
+  @override
+  Future<ServerSummarySubmission> submit({required SourceIngestResult source}) {
+    throw StateError('Explain must not create a Quick Recap job.');
+  }
 }
 
 class _RecordingExplainGateway implements GroundedExplainGateway {
@@ -79,14 +89,7 @@ void main() {
     expect(source, isNotNull);
 
     const serverMaterialId = '11111111-1111-4111-8111-111111111111';
-    await store.saveSummaryJob(
-      learner: AppRuntime.localM5LearnerFixture,
-      materialId: localMaterialId,
-      sourceVersionId: source!.identity.sourceVersionId,
-      serverMaterialId: serverMaterialId,
-      jobId: '22222222-2222-4222-8222-222222222222',
-    );
-
+    final serverMaterialGateway = _RecordingServerMaterialGateway(serverMaterialId);
     final explain = _RecordingExplainGateway();
     final runtime = AppRuntime(
       learner: AppRuntime.localM5LearnerFixture,
@@ -104,6 +107,23 @@ void main() {
     );
     await _pumpUntilFound(tester, find.text('Sunucu materyaline bağlı açıklama'));
 
+    expect(serverMaterialGateway.ensureCalls, 1);
+    expect(
+      await store.summaryJobId(
+        learner: AppRuntime.localM5LearnerFixture,
+        materialId: localMaterialId,
+        sourceVersionId: source.identity.sourceVersionId,
+      ),
+      isNull,
+    );
+    expect(
+      await store.summaryServerMaterialId(
+        learner: AppRuntime.localM5LearnerFixture,
+        materialId: localMaterialId,
+        sourceVersionId: source.identity.sourceVersionId,
+      ),
+      serverMaterialId,
+    );
     expect(explain.lastRequest, isNotNull);
     expect(explain.lastRequest!.materialId.value, serverMaterialId);
     expect(explain.lastRequest!.sourceVersionId, source.identity.sourceVersionId);
