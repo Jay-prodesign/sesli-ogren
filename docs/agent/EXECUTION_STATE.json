@@ -56,8 +56,7 @@
     "LA-0037": "DONE",
     "LA-0038": "DONE",
     "LA-0039": "IN_PROGRESS",
-    "LA-0040": "IN_PROGRESS",
-    "LA0022": "CLOSED_FOR_M5_DEVELOPMENT; release evidence deferred under D-068"
+    "LA-0040": "IN_PROGRESS"
   },
   "git": {
     "branch": "feat/full-product-shell-continuity",
@@ -72,7 +71,8 @@
       "Round 7 sibling lineage -> accepted non-physical candidate 84e96dce…",
       "84e96dce… -> feat/m5-golden-learning-slice (ACTIVE)"
     ],
-    "pr_state": "OPEN_ACTIVE_PRODUCT_LINE"
+    "pr_state": "OPEN_ACTIVE_PRODUCT_LINE",
+    "head_sha": "719b80e242cacef16405529785a278ff9d1ddbe8"
   },
   "round7_evidence_program": {
     "status": "PRE_M5_CLOSED_OR_BOUNDED",
