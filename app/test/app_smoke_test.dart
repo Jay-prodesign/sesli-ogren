@@ -67,6 +67,7 @@ class _ReadyAccountOverviewGateway implements AccountOverviewGateway {
 
 class _FakeSpeechOutput implements SpeechOutput {
   String? lastText;
+  double? lastRateMultiplier;
   VoidCallback? _onDone;
 
   @override
@@ -76,8 +77,10 @@ class _FakeSpeechOutput implements SpeechOutput {
     required VoidCallback onStart,
     required VoidCallback onDone,
     required ValueChanged<Object> onError,
+    double rateMultiplier = 1.0,
   }) async {
     lastText = text;
+    lastRateMultiplier = rateMultiplier;
     _onDone = onDone;
     onStart();
   }

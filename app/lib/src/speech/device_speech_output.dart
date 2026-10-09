@@ -8,6 +8,7 @@ abstract interface class SpeechOutput {
     required VoidCallback onStart,
     required VoidCallback onDone,
     required ValueChanged<Object> onError,
+    double rateMultiplier = 1.0,
   });
 
   Future<void> stop();
@@ -41,11 +42,15 @@ final class DeviceSpeechOutput implements SpeechOutput {
     }
 
     await _tts.setLanguage(locale);
-    await _tts.setSpeechRate(0.46);
     await _tts.setPitch(1.0);
     await _tts.setVolume(1.0);
     await _tts.awaitSpeakCompletion(true);
     _configuredLocale = locale;
+  }
+
+  static double _platformSpeechRate(double multiplier) {
+    final normalized = multiplier.clamp(0.75, 1.5).toDouble();
+    return (0.46 * normalized).clamp(0.34, 0.70).toDouble();
   }
 
   @override
@@ -55,6 +60,7 @@ final class DeviceSpeechOutput implements SpeechOutput {
     required VoidCallback onStart,
     required VoidCallback onDone,
     required ValueChanged<Object> onError,
+    double rateMultiplier = 1.0,
   }) async {
     final generation = ++_generation;
 
@@ -71,6 +77,7 @@ final class DeviceSpeechOutput implements SpeechOutput {
     try {
       await _tts.stop();
       await _configure(locale);
+      await _tts.setSpeechRate(_platformSpeechRate(rateMultiplier));
       final result = await _tts.speak(text);
       if (result != 1 && generation == _generation) {
         onError(StateError('device_tts_speak_failed:$result'));

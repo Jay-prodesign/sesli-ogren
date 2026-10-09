@@ -43,6 +43,7 @@ class _ListenScreenState extends State<ListenScreen> {
   int? _resumeChunkOverride;
   int _currentChunkIndex = 0;
   int _playToken = 0;
+  double? _playbackRate;
 
   @override
   void initState() {
@@ -83,18 +84,21 @@ class _ListenScreenState extends State<ListenScreen> {
           )
         : 0;
     final resumeChunk = storedResume >= 0 && storedResume < chunks.length ? storedResume : 0;
+    final playbackRate = await widget.runtime.store.listenRate(learner: widget.runtime.learner);
     return _ListenSource(
       name: widget.titleOverride?.trim().isNotEmpty == true ? widget.titleOverride!.trim() : version.sourceName,
       text: text,
       sourceVersionId: version.identity.sourceVersionId,
       chunks: chunks,
       resumeChunk: resumeChunk,
+      playbackRate: playbackRate,
     );
   }
 
   Future<void> _play(_ListenSource source, {int? fromChunk}) async {
     final start = fromChunk ?? _resumeChunkOverride ?? source.resumeChunk;
     final safeStart = start >= 0 && start < source.chunks.length ? start : 0;
+    final rate = _playbackRate ?? source.playbackRate;
     final token = ++_playToken;
     setState(() {
       _error = null;
@@ -103,10 +107,10 @@ class _ListenScreenState extends State<ListenScreen> {
       _startingPlayback = true;
       _finishedListening = false;
     });
-    await _playChunk(source, safeStart, token);
+    await _playChunk(source, safeStart, token, rate);
   }
 
-  Future<void> _playChunk(_ListenSource source, int index, int token) async {
+  Future<void> _playChunk(_ListenSource source, int index, int token, double rate) async {
     if (!mounted || token != _playToken) return;
     _currentChunkIndex = index;
     await _speech.speak(
@@ -125,8 +129,9 @@ class _ListenScreenState extends State<ListenScreen> {
       },
       onDone: () {
         if (token != _playToken) return;
-        unawaited(_completeChunk(source, index, token));
+        unawaited(_completeChunk(source, index, token, rate));
       },
+      rateMultiplier: rate,
       onError: (_) {
         if (!mounted || token != _playToken) return;
         setState(() {
@@ -138,7 +143,7 @@ class _ListenScreenState extends State<ListenScreen> {
     );
   }
 
-  Future<void> _completeChunk(_ListenSource source, int index, int token) async {
+  Future<void> _completeChunk(_ListenSource source, int index, int token, double rate) async {
     if (token != _playToken) return;
     final next = index + 1;
     if (next >= source.chunks.length) {
@@ -161,7 +166,29 @@ class _ListenScreenState extends State<ListenScreen> {
       _resumeChunkOverride = next;
       _currentChunkIndex = next;
     });
-    await _playChunk(source, next, token);
+    await _playChunk(source, next, token, rate);
+  }
+
+  Future<void> _setPlaybackRate(double rate) async {
+    if (_speaking || _startingPlayback || _playbackRate == rate) return;
+    final previous = _playbackRate;
+    setState(() {
+      _playbackRate = rate;
+      _error = null;
+    });
+    try {
+      await widget.runtime.store.saveListenRate(
+        learner: widget.runtime.learner,
+        rate: rate,
+        updatedAt: DateTime.now().toUtc(),
+      );
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        _playbackRate = previous;
+        _error = 'Dinleme hızı kaydedilemedi. Önceki hız korunuyor.';
+      });
+    }
   }
 
   Future<void> _saveResume(_ListenSource source, int chunkIndex) {
@@ -217,6 +244,7 @@ class _ListenScreenState extends State<ListenScreen> {
             final source = snapshot.data!;
             final resumeChunk = _resumeChunkOverride ?? source.resumeChunk;
             final hasResume = resumeChunk > 0;
+            final playbackRate = _playbackRate ?? source.playbackRate;
             final visibleChunk = _speaking ? _currentChunkIndex : resumeChunk;
             final progress = _finishedListening
                 ? 1.0
@@ -358,6 +386,26 @@ class _ListenScreenState extends State<ListenScreen> {
                     ),
                   ),
                 ),
+                const SizedBox(height: 18),
+                Text('Dinleme hızı', style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w800)),
+                const SizedBox(height: 8),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    for (final rate in const <double>[0.75, 1.0, 1.25, 1.5])
+                      ChoiceChip(
+                        label: Text('${rate.toStringAsFixed(rate == 1.0 ? 0 : 2).replaceFirst(RegExp(r'0+$'), '').replaceFirst(RegExp(r'\.$'), '')}×'),
+                        selected: playbackRate == rate,
+                        onSelected: _speaking || _startingPlayback ? null : (_) => _setPlaybackRate(rate),
+                      ),
+                  ],
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  'Hız tercihin bu cihazda hatırlanır.',
+                  style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+                ),
                 if (_error != null) ...[
                   const SizedBox(height: 12),
                   Text(_error!, style: TextStyle(color: theme.colorScheme.error)),
@@ -433,6 +481,7 @@ class _ListenSource {
     required this.sourceVersionId,
     required this.chunks,
     required this.resumeChunk,
+    required this.playbackRate,
   });
 
   final String name;
@@ -440,4 +489,5 @@ class _ListenSource {
   final SourceVersionId sourceVersionId;
   final List<String> chunks;
   final int resumeChunk;
+  final double playbackRate;
 }

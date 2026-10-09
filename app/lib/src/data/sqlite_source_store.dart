@@ -36,7 +36,7 @@ class SqliteSourceStore implements SourceStore {
     final database = await selectedFactory.openDatabase(
       databasePath,
       options: OpenDatabaseOptions(
-        version: 11,
+        version: 12,
         onConfigure: (db) => db.execute('PRAGMA foreign_keys = ON'),
         onUpgrade: (db, oldVersion, newVersion) async {
           if (oldVersion < 2) {
@@ -68,6 +68,9 @@ class SqliteSourceStore implements SourceStore {
           }
           if (oldVersion < 11) {
             await _upgradeServerMaterialBindingSchema(db);
+          }
+          if (oldVersion < 12) {
+            await _upgradeListenRatePreferenceSchema(db);
           }
         },
         onCreate: (db, version) async {
@@ -265,8 +268,10 @@ CREATE TABLE listen_progress (
 CREATE TABLE learner_preferences (
   learner_id TEXT PRIMARY KEY,
   onboarding_completed INTEGER NOT NULL DEFAULT 0,
+  listen_rate REAL NOT NULL DEFAULT 1.0,
   updated_at_utc TEXT NOT NULL,
-  CHECK (onboarding_completed IN (0, 1))
+  CHECK (onboarding_completed IN (0, 1)),
+  CHECK (listen_rate >= 0.75 AND listen_rate <= 1.5)
 )
 ''');
           await _upgradeSummaryJobsSchema(db);
@@ -604,10 +609,24 @@ CREATE TABLE IF NOT EXISTS listen_progress (
 CREATE TABLE IF NOT EXISTS learner_preferences (
   learner_id TEXT PRIMARY KEY,
   onboarding_completed INTEGER NOT NULL DEFAULT 0,
+  listen_rate REAL NOT NULL DEFAULT 1.0,
   updated_at_utc TEXT NOT NULL,
-  CHECK (onboarding_completed IN (0, 1))
+  CHECK (onboarding_completed IN (0, 1)),
+  CHECK (listen_rate >= 0.75 AND listen_rate <= 1.5)
 )
 ''');
+  }
+
+  static Future<void> _upgradeListenRatePreferenceSchema(Database db) async {
+    final columns = await db.rawQuery('PRAGMA table_info(learner_preferences)');
+    final hasListenRate = columns.any((column) => column['name'] == 'listen_rate');
+    if (!hasListenRate) {
+      await db.execute(
+        'ALTER TABLE learner_preferences '
+        'ADD COLUMN listen_rate REAL NOT NULL DEFAULT 1.0 '
+        'CHECK (listen_rate >= 0.75 AND listen_rate <= 1.5)',
+      );
+    }
   }
 
   static Future<void> _upgradeOperationalTelemetrySchema(Database db) async {
@@ -1238,11 +1257,51 @@ LIMIT 1
   }
 
   Future<void> markOnboardingCompleted({required AuthenticatedLearner learner, required DateTime updatedAt}) async {
-    await _database.insert('learner_preferences', {
-      'learner_id': learner.id.value,
-      'onboarding_completed': 1,
-      'updated_at_utc': updatedAt.toUtc().toIso8601String(),
-    }, conflictAlgorithm: ConflictAlgorithm.replace);
+    await _database.rawInsert(
+      '''
+INSERT INTO learner_preferences (learner_id, onboarding_completed, updated_at_utc)
+VALUES (?, 1, ?)
+ON CONFLICT(learner_id) DO UPDATE SET
+  onboarding_completed = 1,
+  updated_at_utc = excluded.updated_at_utc
+''',
+      [learner.id.value, updatedAt.toUtc().toIso8601String()],
+    );
+  }
+
+  Future<double> listenRate({required AuthenticatedLearner learner}) async {
+    final rows = await _database.query(
+      'learner_preferences',
+      columns: ['listen_rate'],
+      where: 'learner_id = ?',
+      whereArgs: [learner.id.value],
+      limit: 1,
+    );
+    if (rows.isEmpty) return 1.0;
+    final raw = rows.single['listen_rate'];
+    if (raw is! num) return 1.0;
+    final value = raw.toDouble();
+    return const <double>{0.75, 1.0, 1.25, 1.5}.contains(value) ? value : 1.0;
+  }
+
+  Future<void> saveListenRate({
+    required AuthenticatedLearner learner,
+    required double rate,
+    required DateTime updatedAt,
+  }) async {
+    if (!const <double>{0.75, 1.0, 1.25, 1.5}.contains(rate)) {
+      throw ArgumentError.value(rate, 'rate', 'Unsupported listening rate.');
+    }
+    await _database.rawInsert(
+      '''
+INSERT INTO learner_preferences (learner_id, listen_rate, updated_at_utc)
+VALUES (?, ?, ?)
+ON CONFLICT(learner_id) DO UPDATE SET
+  listen_rate = excluded.listen_rate,
+  updated_at_utc = excluded.updated_at_utc
+''',
+      [learner.id.value, rate, updatedAt.toUtc().toIso8601String()],
+    );
   }
 
   @override
