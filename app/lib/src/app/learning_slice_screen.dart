@@ -679,7 +679,10 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
                       child: _phaseBody(context),
                     ),
                   ),
-                  if (_busy) ...[const SizedBox(height: 20), const LinearProgressIndicator()],
+                  if (_busy) ...[
+                    const SizedBox(height: 20),
+                    const LinearProgressIndicator(),
+                  ],
                 ],
               ),
             ),
