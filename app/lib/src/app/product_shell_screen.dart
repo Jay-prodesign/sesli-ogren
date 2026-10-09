@@ -193,6 +193,10 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
         ),
       ),
     );
+    // Listening may lead directly into recall; reload persisted continuation
+    // when the route returns so Home and Progress show the latest evidence.
+    if (!mounted) return;
+    setState(_refresh);
   }
 
   Future<void> _deleteMaterial(MaterialRecord material) async {
