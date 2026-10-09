@@ -21,9 +21,7 @@ class SupabaseFocusHelpGateway implements FocusHelpGateway {
     if (question.length < 2 || question.length > 600) {
       return const FocusHelpUnavailable('Sorunu 2–600 karakter arasında kısa ve somut biçimde yaz.');
     }
-    if (serverMaterialId == null ||
-        groundingContentHash == null ||
-        !_isUuid(serverMaterialId)) {
+    if (serverMaterialId == null || groundingContentHash == null || !_isUuid(serverMaterialId)) {
       return const FocusHelpUnavailable('Güncel kaynak sunucuda güvenli biçimde bağlanamadı.');
     }
 
@@ -45,16 +43,11 @@ class SupabaseFocusHelpGateway implements FocusHelpGateway {
           'p_source_content_hash': groundingContentHash,
           'p_question': question,
           'p_help_kind': serverKind,
-          'p_idempotency_key':
-              'focus:$serverMaterialId:$serverKind:${digest.substring(0, 24)}',
+          'p_idempotency_key': 'focus:$serverMaterialId:$serverKind:${digest.substring(0, 24)}',
         },
       );
 
-      final jobs = await client
-          .from('generation_jobs')
-          .select('state,failure_class')
-          .eq('id', jobId)
-          .limit(1);
+      final jobs = await client.from('generation_jobs').select('state,failure_class').eq('id', jobId).limit(1);
       if (jobs.isEmpty) {
         return const FocusHelpUnavailable('Odak yardımı işi doğrulanamadı.');
       }
@@ -73,10 +66,7 @@ class SupabaseFocusHelpGateway implements FocusHelpGateway {
         await client.rpc<String>('retry_generation_job', params: {'p_job_id': jobId});
       }
       if (state == 'QUEUED' || state == 'PROCESSING' || state == 'FAILED_RETRYABLE') {
-        final response = await client.functions.invoke(
-          'generation-worker',
-          body: {'job_id': jobId},
-        );
+        final response = await client.functions.invoke('generation-worker', body: {'job_id': jobId});
         if (response.status < 200 || response.status >= 300) {
           return const FocusHelpUnavailable('Kaynağa bağlı AI yardımı şu anda başlatılamadı.');
         }
@@ -89,10 +79,7 @@ class SupabaseFocusHelpGateway implements FocusHelpGateway {
         }
         rows = await client.rpc<List<dynamic>>(
           'read_focus_help',
-          params: {
-            'p_job_id': jobId,
-            'p_source_content_hash': groundingContentHash,
-          },
+          params: {'p_job_id': jobId, 'p_source_content_hash': groundingContentHash},
         );
         if (rows.isNotEmpty) break;
       }
@@ -106,11 +93,11 @@ class SupabaseFocusHelpGateway implements FocusHelpGateway {
       final rawPoints = content['key_points'];
       final sourceCues = rawPoints is List
           ? rawPoints
-              .whereType<String>()
-              .map((item) => item.trim())
-              .where((item) => item.isNotEmpty)
-              .take(8)
-              .toList(growable: false)
+                .whereType<String>()
+                .map((item) => item.trim())
+                .where((item) => item.isNotEmpty)
+                .take(8)
+                .toList(growable: false)
           : const <String>[];
       final hash = row['source_content_hash'] as String? ?? '';
       if (responseText.isEmpty || sourceCues.isEmpty || hash != groundingContentHash) {
@@ -126,7 +113,9 @@ class SupabaseFocusHelpGateway implements FocusHelpGateway {
       );
     } on PostgrestException catch (error) {
       if (error.message.contains('quota_exceeded')) {
-        return const FocusHelpUnavailable('Bugünkü ücretsiz AI yardım hakkın doldu. Kaynak, Dinle ve Hatırla açık kalır.');
+        return const FocusHelpUnavailable(
+          'Bugünkü ücretsiz AI yardım hakkın doldu. Kaynak, Dinle ve Hatırla açık kalır.',
+        );
       }
       if (error.message.contains('stale_source')) {
         return const FocusHelpUnavailable('Kaynak değişti. Güncel kaynakla yeniden sor.');
