@@ -13,12 +13,19 @@ class GroundedExplainRequest {
     required this.materialId,
     required this.sourceVersionId,
     required this.sourceContentDigest,
+    required this.groundingContentHash,
     required this.outputLocale,
   });
 
   final MaterialId materialId;
   final SourceVersionId sourceVersionId;
+
+  /// Local source identity digest. This may represent raw PDF bytes and is
+  /// intentionally distinct from the server grounding hash below.
   final String sourceContentDigest;
+
+  /// SHA-256 of the exact normalized text sent to the server material boundary.
+  final String groundingContentHash;
   final String outputLocale;
 }
 
