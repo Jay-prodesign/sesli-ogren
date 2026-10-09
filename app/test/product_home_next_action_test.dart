@@ -74,8 +74,9 @@ void main() {
     await tester.tap(action);
     await tester.pumpAndSettle();
 
-    expect(find.text('Önce kaynağı gözden geçir'), findsOneWidget);
-    expect(find.text('Kaynağı gözden geçir'), findsOneWidget);
+    expect(find.text('Bu bölümü yeniden kur'), findsOneWidget);
+    expect(find.text('Kaynağı kapat ve yeniden dene'), findsOneWidget);
+    expect(find.text('Önce kaynağı gözden geçir'), findsNothing);
   });
 
   testWidgets('Home completed action returns to the source workspace instead of replaying Recall', (tester) async {
