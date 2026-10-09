@@ -357,16 +357,31 @@ CREATE TABLE IF NOT EXISTS summary_jobs (
   Future<String?> summaryServerMaterialId({
     required AuthenticatedLearner learner,
     required MaterialId materialId,
-    required SourceVersionId sourceVersionId,
+    SourceVersionId? sourceVersionId,
   }) async {
     final rows = await _database.query(
       'summary_jobs',
       columns: ['server_material_id'],
-      where: 'learner_id = ? AND material_id = ? AND source_version_id = ?',
-      whereArgs: [learner.id.value, materialId.value, sourceVersionId.value],
+      where: sourceVersionId == null
+          ? 'learner_id = ? AND material_id = ?'
+          : 'learner_id = ? AND material_id = ? AND source_version_id = ?',
+      whereArgs: sourceVersionId == null
+          ? [learner.id.value, materialId.value]
+          : [learner.id.value, materialId.value, sourceVersionId.value],
       limit: 1,
     );
     return rows.isEmpty ? null : rows.first['server_material_id']! as String;
+  }
+
+  Future<void> clearSummaryJob({
+    required AuthenticatedLearner learner,
+    required MaterialId materialId,
+  }) async {
+    await _database.delete(
+      'summary_jobs',
+      where: 'learner_id = ? AND material_id = ?',
+      whereArgs: [learner.id.value, materialId.value],
+    );
   }
 
   Future<void> saveSummaryJob({
@@ -990,6 +1005,11 @@ LIMIT 1
         return;
       }
 
+      await transaction.delete(
+        'summary_jobs',
+        where: 'learner_id = ? AND material_id = ?',
+        whereArgs: [learner.id.value, materialId.value],
+      );
       await transaction.delete(
         'active_recall_attempts',
         where: 'learner_id = ? AND material_id = ?',

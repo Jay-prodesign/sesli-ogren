@@ -62,6 +62,21 @@ class SupabaseSourceSummaryGateway {
     }
   }
 
+  /// Removes a server-side text mirror owned by the current learner.
+  /// If RLS no longer exposes the row, it is already absent/deleted for this learner.
+  Future<bool> deleteServerMaterial(String serverMaterialId) async {
+    try {
+      final client = await SupabaseLearnerAuth.clientForAuthenticatedRuntime();
+      if (client.auth.currentSession == null) return false;
+      final rows = await client.from('materials').select('id').eq('id', serverMaterialId).limit(1);
+      if (rows.isEmpty) return true;
+      await client.rpc('delete_material', params: {'p_material_id': serverMaterialId});
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
+
   Future<ServerSummarySubmission> submit({required SourceIngestResult source}) async {
     final normalizedText = source.extractedContent.normalizedText.trim();
     if (normalizedText.isEmpty || normalizedText.length > 200000) {
