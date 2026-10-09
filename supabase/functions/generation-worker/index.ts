@@ -1,4 +1,5 @@
 import { createClient } from "npm:@supabase/supabase-js@2.117.2";
+import { selectRelevantSourceContext } from "../_shared/source_context.ts";
 
 declare const EdgeRuntime: {
   waitUntil(promise: Promise<unknown>): void;
@@ -277,7 +278,11 @@ Deno.serve(async (request) => {
                     content: spec.question == null
                       ? String(job.normalized_text)
                       : "STUDY SOURCE:\n" +
-                        String(job.normalized_text) +
+                        selectRelevantSourceContext(
+                          String(job.normalized_text),
+                          spec.question,
+                          24000,
+                        ) +
                         "\n\nLEARNER QUESTION:\n" +
                         spec.question,
                   },
