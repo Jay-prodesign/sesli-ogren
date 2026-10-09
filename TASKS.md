@@ -410,7 +410,17 @@ Next unallocated ID: **LA-0041**.
 - Exec plan: [docs/exec-plans/LA-0040.md](docs/exec-plans/LA-0040.md)
 
 
-## Milestone M3 — V0 Implementation Tranches
+## HISTORICAL PRE-M5 ROADMAP PROJECTION — NOT A LIVE EXECUTION QUEUE
+
+The M3/M4/M5 sections below predate the admitted/completed Golden Learning Slice
+and the current post-M5 LA-0039 + LA-0040 outcome. Their original
+`PLANNED / NOT_EXECUTABLE` labels are retained as historical evidence only.
+They do **not** re-close work already admitted by later canonical decisions and
+must not be selected as a competing current cursor. Use Drive
+`CURRENT_EXECUTION_STATE` + `MASTER_ROADMAP` and the LA-0039/LA-0040 entries
+above for live sequencing.
+
+### Historical Milestone M3 — V0 Implementation Tranches
 
 - Status: PLANNED / NOT_EXECUTABLE
 - Entry gate: Brain accepts VS-001 and admits each tranche separately. Under D-074, a Product / Learning Premise Audit is required before the first major post-M5 product/learning tranche is admitted; exact audit task remains NOT_EXECUTABLE/unallocated until M5 closes.
@@ -437,7 +447,7 @@ Next unallocated ID: **LA-0041**.
 - Status: PLANNED / NOT_EXECUTABLE
 - Intent: analytics/operations, support, accessibility, product polish.
 
-## Milestone M4 — Beta / Validation
+### Historical Milestone M4 — Beta / Validation
 
 - Status: PLANNED / NOT_EXECUTABLE
 - Entry gate: Feature-complete V0 accepted by Brain; beta thresholds frozen.
@@ -454,7 +464,7 @@ Next unallocated ID: **LA-0041**.
 - Status: PLANNED / NOT_EXECUTABLE
 - Intent: real users/devices/networks; AI output quality, activation, repeat use, unit economics, failure classes.
 
-## Milestone M5 — Brand/Name Freeze & Release Readiness
+### Historical Milestone M5 — Brand/Name Freeze & Release Readiness
 
 - Status: PLANNED / NOT_EXECUTABLE
 - Entry gate: Beta evidence accepted; Founder brand/name freeze.
