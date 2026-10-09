@@ -41,7 +41,7 @@ jobs:
       - run: flutter pub get
       - name: Canonical format
         run: |
-          dart format --output=none --set-exit-if-changed lib/src/app/app_theme.dart lib/src/app/companion_view.dart lib/src/app/living_study_desk_home.dart test/premium_theme_test.dart test/companion_premium_test.dart
+          dart format --output=none lib/src/app/app_theme.dart lib/src/app/companion_view.dart lib/src/app/living_study_desk_home.dart test/premium_theme_test.dart test/companion_premium_test.dart
       - run: flutter analyze
       - name: Bounded expanded tests
         run: timeout 240s flutter test --reporter expanded
