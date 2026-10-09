@@ -57,13 +57,13 @@
     "LA-0038": "DONE",
     "LA-0039": "IN_PROGRESS",
     "LA-0040": "IN_PROGRESS",
-    "LA0022": "CLOSED_FOR_M5_DEVELOPMENT; deferred D-068 release evidence remains a release gate"
+    "LA0022": "CLOSED_FOR_M5_DEVELOPMENT; release evidence deferred under D-068"
   },
   "git": {
     "branch": "feat/full-product-shell-continuity",
     "base_sha": "84e96dce5b3cc9f32af3f459d422b652d0e86624",
-    "head_sha": "Resolve from live branch API; latest product-code baseline 761087f6ab062f4da1b47340d0851909eaa33ce3; later commits are governance-state reconciliation only",
-    "head_sha_note": "Do not treat historical validation SHAs as current product validation. Read live branch HEAD and Actions for current status.",
+    "head_sha": "9ca6631321a33ab2a1d9725034bb8c760e3a7a50",
+    "head_sha_note": "This was the live HEAD before the current-state reconciliation commit; resolve the live branch API for current HEAD. Product-code validation baseline remains 761087f6; later commits are governance-only.",
     "pr_number": 13,
     "pr_url": "https://github.com/Jay-prodesign/sesli-ogren/pull/13",
     "merged": false,
