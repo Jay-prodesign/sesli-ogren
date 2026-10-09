@@ -14,6 +14,7 @@ import 'living_study_desk_home.dart';
 import 'atelier_learning_surfaces.dart';
 import 'listen_screen.dart';
 import 'quick_recap_screen.dart';
+import 'source_reader_screen.dart';
 
 class MaterialWorkspaceScreen extends StatefulWidget {
   const MaterialWorkspaceScreen({required this.runtime, required this.materialId, super.key});
@@ -63,6 +64,17 @@ class _MaterialWorkspaceScreenState extends State<MaterialWorkspaceScreen> {
       );
     }
     return _WorkspaceSnapshot(material: material, source: source, extracted: extracted, continuation: continuation);
+  }
+
+  Future<void> _openSourceReader(_WorkspaceSnapshot data) async {
+    await Navigator.of(context).push<void>(
+      MaterialPageRoute(
+        builder: (_) => SourceReaderScreen(
+          title: data.material.title,
+          sourceText: data.extracted?.normalizedText ?? '',
+        ),
+      ),
+    );
   }
 
   Future<void> _openQuickRecap() async {
@@ -174,6 +186,7 @@ class _MaterialWorkspaceScreenState extends State<MaterialWorkspaceScreen> {
               data: snapshot.data!,
               onRecall: _openRecall,
               onQuickRecap: _openQuickRecap,
+              onReadSource: () => _openSourceReader(snapshot.data!),
               onListen: _openListen,
               onExplain: () => _openExplain(snapshot.data!.source),
               onFocus: () => _openFocus(snapshot.data!),
@@ -190,6 +203,7 @@ class _WorkspaceBody extends StatelessWidget {
     required this.data,
     required this.onRecall,
     required this.onQuickRecap,
+    required this.onReadSource,
     required this.onListen,
     required this.onExplain,
     required this.onFocus,
@@ -198,6 +212,7 @@ class _WorkspaceBody extends StatelessWidget {
   final _WorkspaceSnapshot data;
   final VoidCallback onRecall;
   final VoidCallback onQuickRecap;
+  final VoidCallback onReadSource;
   final VoidCallback onListen;
   final VoidCallback onExplain;
   final VoidCallback onFocus;
@@ -262,6 +277,12 @@ class _WorkspaceBody extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 12),
+        OutlinedButton.icon(
+          onPressed: onReadSource,
+          icon: const Icon(Icons.menu_book_outlined),
+          label: const Text('Kaynağın tamamını oku'),
+        ),
+        const SizedBox(height: 8),
         OutlinedButton.icon(
           onPressed: onQuickRecap,
           icon: const Icon(Icons.auto_awesome),
