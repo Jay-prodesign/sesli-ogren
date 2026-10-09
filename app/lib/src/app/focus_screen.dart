@@ -50,10 +50,7 @@ class _FocusScreenState extends State<FocusScreen> {
 
   Future<void> _openRecall() => Navigator.of(context).push<void>(
     MaterialPageRoute(
-      builder: (_) => LearningSliceScreen(
-        runtime: widget.runtime,
-        materialId: widget.source.identity.materialId,
-      ),
+      builder: (_) => LearningSliceScreen(runtime: widget.runtime, materialId: widget.source.identity.materialId),
     ),
   );
 
@@ -210,11 +207,7 @@ class _FocusScreenState extends State<FocusScreen> {
       }
 
       serverMaterialId = await widget.sourceGateway.ensureServerMaterial(
-        source: SourceIngestResult(
-          material: material,
-          sourceVersion: currentSource,
-          extractedContent: extracted,
-        ),
+        source: SourceIngestResult(material: material, sourceVersion: currentSource, extractedContent: extracted),
       );
 
       final sourceAfterBinding = await widget.runtime.store.currentSourceVersion(
@@ -436,13 +429,13 @@ class _FocusScreenState extends State<FocusScreen> {
                     ),
                     if (readyHelp.sourceCues.isNotEmpty && readyHelp.matches(widget.source.identity)) ...[
                       const SizedBox(height: 14),
-                      Text('Kaynak dayanakları', style: theme.textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w800)),
+                      Text(
+                        'Kaynak dayanakları',
+                        style: theme.textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w800),
+                      ),
                       const SizedBox(height: 6),
                       for (final cue in readyHelp.sourceCues)
-                        Padding(
-                          padding: const EdgeInsets.only(bottom: 5),
-                          child: Text('• $cue'),
-                        ),
+                        Padding(padding: const EdgeInsets.only(bottom: 5), child: Text('• $cue')),
                     ],
                   ],
                 ),
