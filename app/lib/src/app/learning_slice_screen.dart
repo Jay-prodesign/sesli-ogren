@@ -639,6 +639,12 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
+                        IconButton(
+                          tooltip: 'Çalışmadan çık',
+                          onPressed: _busy ? null : () => Navigator.of(context).maybePop(),
+                          icon: const Icon(Icons.arrow_back_rounded),
+                        ),
+                        const SizedBox(width: 4),
                         DecoratedBox(
                           decoration: BoxDecoration(
                             color: compactResultHeader ? AppPalette.successSoft : AppPalette.primarySoft,
