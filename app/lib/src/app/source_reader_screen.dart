@@ -26,13 +26,31 @@ class SourceReaderScreen extends StatefulWidget {
 
 class _SourceReaderScreenState extends State<SourceReaderScreen> {
   final TextEditingController _search = TextEditingController();
+  final ScrollController _readingScroll = ScrollController();
+  double _readingProgress = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _readingScroll.addListener(_updateReadingProgress);
+  }
   double _fontSize = 17;
   bool _showSearch = false;
 
   @override
   void dispose() {
+    _readingScroll.dispose();
     _search.dispose();
     super.dispose();
+  }
+
+  void _updateReadingProgress() {
+    if (!_readingScroll.hasClients) return;
+    final max = _readingScroll.position.maxScrollExtent;
+    final progress = max <= 0 ? 1.0 : (_readingScroll.offset / max).clamp(0.0, 1.0);
+    if ((progress - _readingProgress).abs() >= 0.01 || progress == 1.0) {
+      setState(() => _readingProgress = progress);
+    }
   }
 
   @override
@@ -190,6 +208,29 @@ class _SourceReaderScreenState extends State<SourceReaderScreen> {
                   ),
                 ),
               ),
+            if (source.isNotEmpty) ...[
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 8, 20, 4),
+                child: Row(
+                  children: [
+                    const Icon(Icons.menu_book_outlined, size: 18),
+                    const SizedBox(width: 8),
+                    Expanded(child: Text('Okuma ilerlemesi · %${(_readingProgress * 100).round()}')),
+                    IconButton(
+                      tooltip: 'Yazıyı küçült',
+                      onPressed: _fontSize <= 14 ? null : () => setState(() => _fontSize -= 1),
+                      icon: const Icon(Icons.text_decrease),
+                    ),
+                    IconButton(
+                      tooltip: 'Yazıyı büyüt',
+                      onPressed: _fontSize >= 26 ? null : () => setState(() => _fontSize += 1),
+                      icon: const Icon(Icons.text_increase),
+                    ),
+                  ],
+                ),
+              ),
+              LinearProgressIndicator(value: _readingProgress, minHeight: 3),
+            ],
             if (source.isNotEmpty && widget.onRecall != null)
               Padding(
                 padding: const EdgeInsets.fromLTRB(20, 8, 20, 8),
@@ -204,6 +245,7 @@ class _SourceReaderScreenState extends State<SourceReaderScreen> {
                   ? const Center(child: Text('Bu kaynak için okunabilir metin bulunamadı.'))
                   : SelectionArea(
                       child: ListView(
+                        controller: _readingScroll,
                         padding: const EdgeInsets.fromLTRB(20, 16, 20, 48),
                         children: [
                           Text(widget.title, style: Theme.of(context).textTheme.titleLarge),
