@@ -5,8 +5,18 @@ import '../domain/authenticated_learner.dart';
 class SupabaseLearnerAuth {
   SupabaseLearnerAuth._();
 
-  static const _projectUrl = String.fromEnvironment('SUPABASE_URL');
-  static const _publishableKey = String.fromEnvironment('SUPABASE_PUBLISHABLE_KEY');
+  // Publishable keys are client credentials, not secrets. Mobile binaries
+  // expose them by design; access control still comes from the user's Auth JWT
+  // plus RLS/RPC ownership checks. Dart defines remain available for alternate
+  // review/staging environments.
+  static const _projectUrl = String.fromEnvironment(
+    'SUPABASE_URL',
+    defaultValue: 'https://detldfcvoxjuqstkaayd.supabase.co',
+  );
+  static const _publishableKey = String.fromEnvironment(
+    'SUPABASE_PUBLISHABLE_KEY',
+    defaultValue: 'sb_publishable_iNQgTRI7B2I7VVAWQx4Czg_aUs68WRo',
+  );
 
   static SupabaseClient? _client;
   static Future<SupabaseClient>? _initializing;
