@@ -35,6 +35,7 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
   LearningContinuation? _continuation;
   RecallAttemptId? _activeAttemptId;
   String? _supportText;
+  String? _submittedAnswer;
   String? _inlineError;
   bool _busy = false;
   bool _openingRecall = false;
@@ -334,6 +335,7 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
       setState(() {
         _prompt = prompt;
         _result = null;
+        _submittedAnswer = null;
         _continuation = null;
         _activeAttemptId = session.attempt.attemptId;
         _supportText = _restoredSupportNotice(session.assistance);
@@ -418,6 +420,7 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
       return;
     }
 
+    final submittedAnswer = unknown ? null : _answerController.text.trim();
     _setBusy(true);
     final stopwatch = Stopwatch()..start();
     await _recordEvent(
@@ -437,7 +440,7 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
         actionId: prompt.id,
         attemptId: attemptId,
         disposition: unknown ? RecallResponseDisposition.unknown : RecallResponseDisposition.answer,
-        answer: unknown ? '' : _answerController.text,
+        answer: submittedAnswer ?? '',
       );
       stopwatch.stop();
       await _recordEvent(
@@ -461,6 +464,7 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
       if (!mounted) return;
       setState(() {
         _result = result;
+        _submittedAnswer = submittedAnswer;
         _phase = _SlicePhase.result;
         _inlineError = null;
       });
@@ -882,7 +886,7 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
     if (LivingDeskReviewScope.active(context)) {
       return AtelierResult(
         result: result,
-        answerInMemory: _answerController.text,
+        answerInMemory: _submittedAnswer ?? '',
         onContinue: () {
           setState(() {
             _continuation = LearningContinuation(state: result.state, nextAction: result.nextAction);
@@ -938,6 +942,27 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
                         Text(_outcomeText(result.evidence.outcome)),
                       ],
                     ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 20),
+          DecoratedBox(
+            decoration: BoxDecoration(
+              color: theme.colorScheme.surfaceContainerHighest,
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Senin yanıtın', style: theme.textTheme.labelMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
+                  const SizedBox(height: 6),
+                  Text(
+                    _submittedAnswer == null || _submittedAnswer!.isEmpty ? 'Henüz bilmiyorum' : _submittedAnswer!,
+                    style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
                   ),
                 ],
               ),
