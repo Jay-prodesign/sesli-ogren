@@ -144,34 +144,30 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
         sourceVersionId: source.identity.sourceVersionId,
       );
       if (!mounted) return;
+
+      // Replace the reader route with its chosen learning activity. This avoids
+      // racing a pop against a new push on the same Navigator.
       await Navigator.of(context).push<void>(
         MaterialPageRoute(
-          builder: (_) => SourceReaderScreen(
+          builder: (readerContext) => SourceReaderScreen(
             title: material.title,
             sourceText: extracted?.normalizedText ?? '',
-            onListen: () {
-              Navigator.of(context).pop();
-              Navigator.of(context).push<void>(
-                MaterialPageRoute(
-                  builder: (_) => ListenScreen(runtime: widget.runtime, materialId: selected),
-                ),
-              );
-            },
-            onRecap: () {
-              Navigator.of(context).pop();
-              Navigator.of(context).push<void>(
-                MaterialPageRoute(
-                  builder: (_) => QuickRecapScreen(runtime: widget.runtime, materialId: selected),
-                ),
-              );
-            },
-            onRecall: () {
-              Navigator.of(context).pop();
-              _openLearningFor(selected);
-            },
+            onListen: () => _replaceReaderWith(
+              readerContext,
+              ListenScreen(runtime: widget.runtime, materialId: selected),
+            ),
+            onRecap: () => _replaceReaderWith(
+              readerContext,
+              QuickRecapScreen(runtime: widget.runtime, materialId: selected),
+            ),
+            onRecall: () => _replaceReaderWith(
+              readerContext,
+              LearningSliceScreen(runtime: widget.runtime, materialId: selected),
+            ),
           ),
         ),
       );
+      if (mounted) setState(_refresh);
     } catch (_) {
       if (!mounted) return;
       ScaffoldMessenger.of(context)
@@ -179,23 +175,44 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
     }
   }
 
+  void _replaceReaderWith(BuildContext readerContext, Widget destination) {
+    final treatment = LearningVisualTreatmentScope.maybeOf(context);
+    final livingReview = LivingDeskReviewScope.active(context);
+    final wrapped = treatment != null
+        ? LearningVisualTreatmentScope(treatment: treatment, child: destination)
+        : livingReview
+            ? LivingDeskReviewScope(child: destination)
+            : destination;
+    Navigator.of(readerContext).pushReplacement<void, void>(
+      MaterialPageRoute(builder: (_) => wrapped),
+    );
+  }
+
   Future<void> _openListen() async {
     final material = (await _snapshot).material;
     if (material == null || !mounted) return;
     await Navigator.of(context).push<void>(
       MaterialPageRoute(
-        builder: (_) => ListenScreen(
+        builder: (listenContext) => ListenScreen(
           runtime: widget.runtime,
           materialId: material.id,
           onRecall: () {
-            Navigator.of(context).pop();
-            _openLearningFor(material.id);
+            final treatment = LearningVisualTreatmentScope.maybeOf(context);
+            final livingReview = LivingDeskReviewScope.active(context);
+            final screen = LearningSliceScreen(runtime: widget.runtime, materialId: material.id);
+            Navigator.of(listenContext).pushReplacement<void, void>(
+              MaterialPageRoute(
+                builder: (_) => treatment != null
+                    ? LearningVisualTreatmentScope(treatment: treatment, child: screen)
+                    : livingReview
+                        ? LivingDeskReviewScope(child: screen)
+                        : screen,
+              ),
+            );
           },
         ),
       ),
     );
-    // Listening may lead directly into recall; reload persisted continuation
-    // when the route returns so Home and Progress show the latest evidence.
     if (!mounted) return;
     setState(_refresh);
   }
