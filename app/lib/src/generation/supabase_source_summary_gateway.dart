@@ -77,6 +77,31 @@ class SupabaseSourceSummaryGateway {
     }
   }
 
+  /// Ensures the learner has one server text mirror for this exact local
+  /// source version without creating a Summary generation job.
+  Future<String> ensureServerMaterial({required SourceIngestResult source}) async {
+    final normalizedText = source.extractedContent.normalizedText.trim();
+    if (normalizedText.isEmpty || normalizedText.length > 200000) {
+      throw const ServerSummarySubmissionException('Source text is empty or too large.');
+    }
+    final client = await SupabaseLearnerAuth.clientForAuthenticatedRuntime();
+    if (client.auth.currentSession == null) {
+      throw const ServerSummarySubmissionException('Authentication required.');
+    }
+    final serverMaterialId = await client.rpc<String>(
+      'ensure_text_material',
+      params: {
+        'p_title': source.material.title,
+        'p_text': normalizedText,
+        'p_client_source_id': source.sourceVersion.identity.sourceVersionId.value,
+      },
+    );
+    if (serverMaterialId.isEmpty) {
+      throw const ServerSummarySubmissionException('Server material was not created.');
+    }
+    return serverMaterialId;
+  }
+
   Future<ServerSummarySubmission> submit({required SourceIngestResult source}) async {
     final normalizedText = source.extractedContent.normalizedText.trim();
     if (normalizedText.isEmpty || normalizedText.length > 200000) {
