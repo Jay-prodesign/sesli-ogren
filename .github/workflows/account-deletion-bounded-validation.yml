@@ -56,6 +56,7 @@ jobs:
           cp server/db/tests/85_explain_back_quota_recovery.sql "$tmp/tests/"
           cp server/db/tests/86_focus_help_generation.sql "$tmp/tests/"
           cp server/db/tests/87_focus_request_minimization.sql "$tmp/tests/"
+          cp server/db/tests/88_focus_help_replay.sql "$tmp/tests/"
           report="$RUNNER_TEMP/account-deletion-sql-report.txt"
           if ! bash spike/architecture-proof/db/run_sql_suite.sh account_deletion "$tmp/migrations" "$tmp/tests" "$report"; then
             cat "$report" || true
