@@ -17,7 +17,6 @@ import 'package:sesli_ogren/src/learning/recall_learning_service.dart';
 import 'package:sesli_ogren/src/speech/device_speech_output.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
-
 class _UnusedPdfExtractor implements PdfTextExtractor {
   const _UnusedPdfExtractor();
 
