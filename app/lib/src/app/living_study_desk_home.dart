@@ -78,25 +78,45 @@ class LivingStudyDeskHome extends StatelessWidget {
               key: ValueKey(hasMaterial ? 'la0040-living-home-populated' : 'la0040-living-home-empty'),
               padding: const EdgeInsets.fromLTRB(20, 18, 20, 80),
               children: [
-                Row(
-                  children: [
-                    Container(
-                      width: 9,
-                      height: 30,
-                      decoration: BoxDecoration(color: _accent, borderRadius: BorderRadius.circular(3)),
-                    ),
-                    const SizedBox(width: 11),
-                    const Expanded(
-                      child: Text(
-                        'sesli öğren',
-                        style: TextStyle(fontSize: 19, fontWeight: FontWeight.w800, letterSpacing: -0.9, color: _ink),
-                      ),
-                    ),
-                    const Text(
-                      'ÇALIŞMA MASAN',
-                      style: TextStyle(color: _sub, fontSize: 10, fontWeight: FontWeight.w800, letterSpacing: 1),
-                    ),
-                  ],
+                LayoutBuilder(
+                  builder: (context, constraints) {
+                    final compactHeader =
+                        constraints.maxWidth < 340 || MediaQuery.textScalerOf(context).scale(1) > 1.25;
+                    return Row(
+                      children: [
+                        Container(
+                          width: 9,
+                          height: 30,
+                          decoration: BoxDecoration(color: _accent, borderRadius: BorderRadius.circular(3)),
+                        ),
+                        const SizedBox(width: 11),
+                        const Expanded(
+                          child: Text(
+                            'sesli öğren',
+                            maxLines: 1,
+                            overflow: TextOverflow.fade,
+                            softWrap: false,
+                            style: TextStyle(
+                              fontSize: 19,
+                              fontWeight: FontWeight.w800,
+                              letterSpacing: -0.9,
+                              color: _ink,
+                            ),
+                          ),
+                        ),
+                        if (!compactHeader)
+                          const Text(
+                            'ÇALIŞMA MASAN',
+                            style: TextStyle(
+                              color: _sub,
+                              fontSize: 10,
+                              fontWeight: FontWeight.w800,
+                              letterSpacing: 1,
+                            ),
+                          ),
+                      ],
+                    );
+                  },
                 ),
                 const SizedBox(height: 18),
                 if (hasMaterial) _populated(context) else _empty(context),

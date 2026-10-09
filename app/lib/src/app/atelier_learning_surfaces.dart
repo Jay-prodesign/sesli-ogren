@@ -245,38 +245,67 @@ class AtelierRecall extends StatelessWidget {
         style: TextStyle(color: AtelierStyle.teal, fontWeight: FontWeight.w900, fontSize: 11, letterSpacing: 1),
       ),
       const SizedBox(height: 12),
-      const Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded(
-            child: Text(
-              'Hatırlama sırası sende.',
-              style: TextStyle(
-                color: AtelierStyle.ink,
-                fontSize: 29,
-                height: 1.08,
-                fontWeight: FontWeight.w900,
-                letterSpacing: -0.8,
+      LayoutBuilder(
+        builder: (context, constraints) {
+          final compactHeader =
+              constraints.maxWidth < 330 || MediaQuery.textScalerOf(context).scale(1) > 1.3;
+          const title = Text(
+            'Hatırlama sırası sende.',
+            style: TextStyle(
+              color: AtelierStyle.ink,
+              fontSize: 29,
+              height: 1.08,
+              fontWeight: FontWeight.w900,
+              letterSpacing: -0.8,
+            ),
+          );
+          const guidance = Row(
+            key: ValueKey('la0040-recall-companion-guidance'),
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Icon(Icons.chat_bubble_outline_rounded, color: AtelierStyle.teal, size: 18),
+              SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  'D/Knot: Hatırladığın kadarını yaz. Yardım istersen aşağıdaki seçenekleri kullan.',
+                  style: TextStyle(color: AtelierStyle.muted, fontSize: 13, height: 1.42),
+                ),
               ),
-            ),
-          ),
-          SizedBox(width: 10),
-          CompanionView(state: CompanionVisualState.think, size: 90),
-        ],
-      ),
-      const SizedBox(height: 6),
-      const Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Icon(Icons.chat_bubble_outline_rounded, color: AtelierStyle.teal, size: 18),
-          SizedBox(width: 8),
-          Expanded(
-            child: Text(
-              'D/Knot: Hatırladığın kadarını yaz. Yardım istersen aşağıdaki seçenekleri kullan.',
-              style: TextStyle(color: AtelierStyle.muted, fontSize: 13, height: 1.42),
-            ),
-          ),
-        ],
+            ],
+          );
+          if (compactHeader) {
+            return const Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                title,
+                SizedBox(height: 10),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    CompanionView(state: CompanionVisualState.think, size: 64),
+                    SizedBox(width: 10),
+                    Expanded(child: guidance),
+                  ],
+                ),
+              ],
+            );
+          }
+          return const Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(child: title),
+                  SizedBox(width: 10),
+                  CompanionView(state: CompanionVisualState.think, size: 90),
+                ],
+              ),
+              SizedBox(height: 6),
+              guidance,
+            ],
+          );
+        },
       ),
       const SizedBox(height: 16),
       Container(
