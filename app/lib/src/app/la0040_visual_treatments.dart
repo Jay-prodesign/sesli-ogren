@@ -63,6 +63,7 @@ String _status(LearningContinuation? c) => switch (c?.state.kind) {
 
 String _outcome(RecallAttemptResult r) => switch (r.evidence.outcome) {
   RecallOutcome.correct when r.evidence.assistance == RecallAssistance.none => 'İpucusuz hatırladın',
+  RecallOutcome.correct => 'Destekle doğru yanıt',
   RecallOutcome.helpedCorrect => 'Destekle doğru yanıt',
   RecallOutcome.answerExposed => 'Yanıt gösterildi',
   RecallOutcome.partial => 'Kısmen hatırlandı',
