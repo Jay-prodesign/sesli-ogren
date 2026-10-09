@@ -72,7 +72,8 @@ void main() {
       expect(tester.takeException(), isNull);
       await expectLater(find.byType(Scaffold).first, matchesGoldenFile('goldens/product_shell_home_${populated ? 'populated' : 'empty'}_390x844.png'));
       tester.widget<NavigationBar>(find.byType(NavigationBar)).onDestinationSelected!(1);
-      await tester.pump(const Duration(milliseconds: 900));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 500));
       expect(tester.widget<NavigationBar>(find.byType(NavigationBar)).selectedIndex, 1);
       expect(find.text('SENİN KAYNAKLARIN'), findsOneWidget);
       expect(tester.takeException(), isNull);
@@ -80,12 +81,14 @@ void main() {
       // Capture the other real navigation destinations as well. These frames
       // must use the same runtime truth as Home and Library, not mock counters.
       tester.widget<NavigationBar>(find.byType(NavigationBar)).onDestinationSelected!(2);
-      await tester.pump(const Duration(milliseconds: 900));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 500));
       expect(tester.widget<NavigationBar>(find.byType(NavigationBar)).selectedIndex, 2);
       expect(tester.takeException(), isNull);
       await expectLater(find.byType(Scaffold).first, matchesGoldenFile('goldens/product_shell_progress_${populated ? 'populated' : 'empty'}_390x844.png'));
       tester.widget<NavigationBar>(find.byType(NavigationBar)).onDestinationSelected!(3);
-      await tester.pump(const Duration(milliseconds: 900));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 500));
       expect(tester.widget<NavigationBar>(find.byType(NavigationBar)).selectedIndex, 3);
       expect(tester.takeException(), isNull);
       await expectLater(find.byType(Scaffold).first, matchesGoldenFile('goldens/product_shell_profile_${populated ? 'populated' : 'empty'}_390x844.png'));
@@ -93,7 +96,8 @@ void main() {
       // the independent tab captures with an offstage Navigator scaffold.
       if (populated) {
         tester.widget<NavigationBar>(find.byType(NavigationBar)).onDestinationSelected!(0);
-        await tester.pump(const Duration(milliseconds: 900));
+        await tester.pump();
+      await tester.pump(const Duration(milliseconds: 500));
         await tester.tap(find.byKey(const ValueKey('home-continuation-hero')));
         for (var i = 0; i < 30; i++) {
           await tester.pump(const Duration(milliseconds: 100));
@@ -103,7 +107,8 @@ void main() {
         expect(tester.takeException(), isNull);
         await expectLater(find.byType(Scaffold).last, matchesGoldenFile('goldens/product_shell_workspace_populated_390x844.png'));
         await tester.pageBack();
-        await tester.pump(const Duration(milliseconds: 900));
+        await tester.pump();
+      await tester.pump(const Duration(milliseconds: 500));
       }
     });
   }
