@@ -67,7 +67,9 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  testWidgets('completed Recall returns Home CTA to the source instead of reopening the completed step', (tester) async {
+  testWidgets('completed Recall returns Home CTA to the source instead of reopening the completed step', (
+    tester,
+  ) async {
     var workspaceOpens = 0;
     var learningOpens = 0;
     await pumpHome(
