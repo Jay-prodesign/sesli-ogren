@@ -42,6 +42,7 @@ void main() {
         materialId: MaterialId('material-1'),
         sourceVersionId: SourceVersionId('source-v2'),
         sourceContentDigest: 'digest-v2',
+        groundingContentHash: 'grounding-v2',
         outputLocale: 'tr-TR',
       ),
     );
