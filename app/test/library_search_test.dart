@@ -93,7 +93,8 @@ void main() {
     expect(find.text('Eşleşen materyal bulunamadı'), findsOneWidget);
 
     await _tapVisible(tester, find.byTooltip('Aramayı temizle'));
-    await tester.pump();
+    await tester.pumpAndSettle();
+    await tester.ensureVisible(find.text('Biyoloji · Fotosentez'));
 
     expect(find.text('Biyoloji · Fotosentez'), findsOneWidget);
     expect(find.text('Fizik · Newton Yasaları'), findsOneWidget);
