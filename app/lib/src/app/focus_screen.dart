@@ -252,6 +252,19 @@ class _FocusScreenState extends State<FocusScreen> {
     return result;
   }
 
+  Future<FocusHelpResult> _localHintForCurrentSource() async {
+    final currentSource = await widget.runtime.store.currentSourceVersion(
+      learner: widget.runtime.learner,
+      materialId: widget.source.identity.materialId,
+    );
+    if (currentSource == null ||
+        currentSource.identity.sourceVersionId != widget.source.identity.sourceVersionId ||
+        currentSource.identity.contentDigest != widget.source.identity.contentDigest) {
+      return const FocusHelpUnavailable('Kaynak değişti. Güncel materyalden yeniden Odaklan aç.');
+    }
+    return _localSourceHint();
+  }
+
   Future<void> request(FocusHelpKind kind) async {
     if (busy) return;
     setState(() {
@@ -279,6 +292,9 @@ class _FocusScreenState extends State<FocusScreen> {
       result = await _requestServerHelp(kind);
     } catch (_) {
       result = const FocusHelpUnavailable('Kaynağa bağlı AI yardımına şu anda ulaşılamıyor.');
+    }
+    if (kind == FocusHelpKind.hint && result is FocusHelpUnavailable) {
+      result = await _localHintForCurrentSource();
     }
     if (!mounted) return;
     setState(() {
