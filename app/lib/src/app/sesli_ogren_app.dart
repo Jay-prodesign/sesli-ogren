@@ -114,7 +114,6 @@ class _SesliOgrenAppState extends State<SesliOgrenApp> {
                 if (snapshot.hasData) {
                   final runtime = snapshot.data!;
                   return FirstRunOnboardingGate(
-                    runtime: runtime,
                     child: const bool.fromEnvironment('LA0040_ATELIER_PREVIEW', defaultValue: false)
                         ? LivingDeskReviewScope(
                             child: ProductShellScreen(
