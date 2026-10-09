@@ -21,18 +21,12 @@ class _UnusedPdfExtractor implements PdfTextExtractor {
 }
 
 Future<AppRuntime> _runtime(SqliteSourceStore store) async {
-  final ingest = SourceIngestService(
-    store: store,
-    pdfTextExtractor: const _UnusedPdfExtractor(),
-  );
+  final ingest = SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor());
   return AppRuntime(
     learner: AppRuntime.localM5LearnerFixture,
     store: store,
     ingest: ingest,
-    recall: RecallLearningService(
-      sourceStore: store,
-      learningStore: store.learningTruthStore(),
-    ),
+    recall: RecallLearningService(sourceStore: store, learningStore: store.learningTruthStore()),
     telemetry: store.operationalTelemetry(),
   );
 }
@@ -41,10 +35,7 @@ void main() {
   sqfliteFfiInit();
 
   testWidgets('Focus hint points only to a source passage with term overlap', (tester) async {
-    final store = await SqliteSourceStore.open(
-      factory: databaseFactoryFfiNoIsolate,
-      path: inMemoryDatabasePath,
-    );
+    final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
     addTearDown(store.close);
     final runtime = await _runtime(store);
     const materialId = MaterialId('focus-source-hint');
@@ -56,10 +47,7 @@ void main() {
           'Bitki bu süreçte karbondioksit ve su kullanır.',
       sourceName: 'Biyoloji notu',
     );
-    final source = await store.currentSourceVersion(
-      learner: runtime.learner,
-      materialId: materialId,
-    );
+    final source = await store.currentSourceVersion(learner: runtime.learner, materialId: materialId);
     expect(source, isNotNull);
 
     await tester.pumpWidget(
@@ -74,10 +62,7 @@ void main() {
       ),
     );
 
-    await tester.enterText(
-      find.byType(TextField),
-      'Karbondioksit bu süreçte nasıl kullanılır?',
-    );
+    await tester.enterText(find.byType(TextField), 'Karbondioksit bu süreçte nasıl kullanılır?');
     await tester.tap(find.text('İpucu ver'));
     await tester.pump();
 
@@ -87,10 +72,7 @@ void main() {
   });
 
   testWidgets('Focus hint refuses to invent a passage when terms do not match', (tester) async {
-    final store = await SqliteSourceStore.open(
-      factory: databaseFactoryFfiNoIsolate,
-      path: inMemoryDatabasePath,
-    );
+    final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
     addTearDown(store.close);
     final runtime = await _runtime(store);
     const materialId = MaterialId('focus-source-no-match');
@@ -100,10 +82,7 @@ void main() {
       text: 'Fotosentez ışık enerjisini kimyasal enerjiye dönüştürür.',
       sourceName: 'Biyoloji notu',
     );
-    final source = await store.currentSourceVersion(
-      learner: runtime.learner,
-      materialId: materialId,
-    );
+    final source = await store.currentSourceVersion(learner: runtime.learner, materialId: materialId);
     expect(source, isNotNull);
 
     await tester.pumpWidget(
@@ -116,17 +95,11 @@ void main() {
       ),
     );
 
-    await tester.enterText(
-      find.byType(TextField),
-      'Mitokondriyal ribozomların alt birimi nedir?',
-    );
+    await tester.enterText(find.byType(TextField), 'Mitokondriyal ribozomların alt birimi nedir?');
     await tester.tap(find.text('İpucu ver'));
     await tester.pump();
 
-    expect(
-      find.textContaining('kaynakta güvenle bağlayabildiğimiz bir bölüm bulamadık'),
-      findsOneWidget,
-    );
+    expect(find.textContaining('kaynakta güvenle bağlayabildiğimiz bir bölüm bulamadık'), findsOneWidget);
     expect(find.textContaining('Kaynak ipucu:'), findsNothing);
   });
 }
