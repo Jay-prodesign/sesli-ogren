@@ -122,6 +122,7 @@ void main() {
     expect(copiedText, contains('AI tarafından oluşturulan özet'));
     expect(copiedText, contains('Aynı server material yeniden kullanıldı.'));
     expect(find.text('Özet panoya kopyalandı'), findsOneWidget);
+    expect(find.text('Paylaş'), findsOneWidget);
 
     expect(
       await store.summaryServerMaterialId(
