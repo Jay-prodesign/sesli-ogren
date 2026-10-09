@@ -856,14 +856,17 @@ class _LibrarySurface extends StatefulWidget {
 
 class _LibrarySurfaceState extends State<_LibrarySurface> {
   final _searchController = TextEditingController();
+  final _listController = ScrollController();
 
   @override
   void dispose() {
     _searchController.dispose();
+    _listController.dispose();
     super.dispose();
   }
 
   void _clearSearch() {
+    if (_listController.hasClients) _listController.jumpTo(0);
     setState(_searchController.clear);
   }
 
@@ -884,6 +887,8 @@ class _LibrarySurfaceState extends State<_LibrarySurface> {
     final visibleMaterials = _visibleMaterials;
     final hasQuery = _searchController.text.trim().isNotEmpty;
     return ListView(
+      key: const ValueKey('library-material-list'),
+      controller: _listController,
       padding: const EdgeInsets.fromLTRB(20, 24, 20, 32),
       children: [
         Row(
