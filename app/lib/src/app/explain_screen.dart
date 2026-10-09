@@ -86,6 +86,10 @@ class _ExplainScreenState extends State<ExplainScreen> {
             learner: widget.runtime.learner,
             materialId: widget.source.identity.materialId,
           );
+          await widget.runtime.store.clearServerMaterialBinding(
+            learner: widget.runtime.learner,
+            materialId: widget.source.identity.materialId,
+          );
         }
 
         final material = await widget.runtime.store.material(
