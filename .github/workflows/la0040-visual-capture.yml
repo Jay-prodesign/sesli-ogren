@@ -5,6 +5,9 @@ on:
     paths:
       - "app/lib/src/app/companion_view.dart"
       - "app/lib/src/app/living_study_desk_home.dart"
+      - "app/lib/src/app/atelier_learning_surfaces.dart"
+      - "app/lib/src/app/learning_slice_screen.dart"
+      - "app/lib/src/app/material_workspace_screen.dart"
       - "app/test_visual/**"
       - ".github/workflows/la0040-visual-capture.yml"
   workflow_dispatch:
