@@ -64,9 +64,7 @@ class SupabaseGroundedExplainGateway implements GroundedExplainGateway {
 
       final row = Map<String, dynamic>.from(rows.first as Map);
       final content = Map<String, dynamic>.from(row['content'] as Map);
-      // Explain V1 intentionally reuses the validated summary.v1 artifact authority.
-      // The canonical artifact payload key is therefore `summary`, not `explanation`.
-      final explanation = (content['summary'] as String?)?.trim() ?? '';
+      final explanation = (content['explanation'] as String?)?.trim() ?? '';
       final rawPoints = content['key_points'];
       final keyPoints = rawPoints is List
           ? rawPoints.whereType<String>().map((e) => e.trim()).where((e) => e.isNotEmpty).toList()
