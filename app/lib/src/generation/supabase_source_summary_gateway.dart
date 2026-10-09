@@ -33,7 +33,10 @@ class SupabaseSourceSummaryGateway {
     return ServerSummaryStatus(state: state, failureClass: rows.first['failure_class'] as String?);
   }
 
-  Future<ServerSummarySubmission> submit({required SourceIngestResult source}) async {
+  Future<ServerSummarySubmission> submit({
+    required SourceIngestResult source,
+    String? existingServerMaterialId,
+  }) async {
     final normalizedText = source.extractedContent.normalizedText.trim();
     if (normalizedText.isEmpty || normalizedText.length > 200000) {
       throw const ServerSummarySubmissionException('Source text is empty or too large.');
@@ -43,10 +46,11 @@ class SupabaseSourceSummaryGateway {
     if (session == null) {
       throw const ServerSummarySubmissionException('Authentication required.');
     }
-    final serverMaterialId = await client.rpc<String>(
-      'create_text_material',
-      params: {'p_title': source.material.title, 'p_text': normalizedText},
-    );
+    final serverMaterialId = existingServerMaterialId ??
+        await client.rpc<String>(
+          'create_text_material',
+          params: {'p_title': source.material.title, 'p_text': normalizedText},
+        );
     if (serverMaterialId.isEmpty) {
       throw const ServerSummarySubmissionException('Server material was not created.');
     }
