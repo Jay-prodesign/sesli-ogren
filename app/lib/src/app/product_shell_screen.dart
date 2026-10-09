@@ -710,7 +710,7 @@ class _HeroLabel extends StatelessWidget {
   }
 }
 
-class _LibrarySurface extends StatelessWidget {
+class _LibrarySurface extends StatefulWidget {
   const _LibrarySurface({
     required this.data,
     required this.onOpenLearning,
@@ -724,8 +724,37 @@ class _LibrarySurface extends StatelessWidget {
   final ValueChanged<MaterialRecord> onDeleteMaterial;
 
   @override
+  State<_LibrarySurface> createState() => _LibrarySurfaceState();
+}
+
+class _LibrarySurfaceState extends State<_LibrarySurface> {
+  final _searchController = TextEditingController();
+  String _query = '';
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  void _clearSearch() {
+    _searchController.clear();
+    setState(() => _query = '');
+  }
+
+  List<MaterialRecord> get _visibleMaterials {
+    final query = _query.trim().toLowerCase();
+    if (query.isEmpty) return widget.data.materials;
+    return widget.data.materials
+        .where((material) => material.title.toLowerCase().contains(query))
+        .toList(growable: false);
+  }
+
+  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final visibleMaterials = _visibleMaterials;
+    final hasQuery = _query.trim().isNotEmpty;
     return ListView(
       padding: const EdgeInsets.fromLTRB(20, 24, 20, 32),
       children: [
@@ -733,9 +762,11 @@ class _LibrarySurface extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
             Expanded(child: Text('Kütüphane', style: theme.textTheme.headlineMedium)),
-            if (data.materials.isNotEmpty)
+            if (widget.data.materials.isNotEmpty)
               Text(
-                '${data.materials.length} materyal',
+                hasQuery
+                    ? '${visibleMaterials.length} / ${widget.data.materials.length} materyal'
+                    : '${widget.data.materials.length} materyal',
                 style: theme.textTheme.labelMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
               ),
           ],
@@ -745,22 +776,51 @@ class _LibrarySurface extends StatelessWidget {
           'Kaynakların, kaldığın yer ve öğrenme devamın tek yerde.',
           style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
         ),
+        if (widget.data.materials.isNotEmpty) ...[
+          const SizedBox(height: 16),
+          TextField(
+            key: const ValueKey('library-search'),
+            controller: _searchController,
+            onChanged: (value) => setState(() => _query = value),
+            textInputAction: TextInputAction.search,
+            decoration: InputDecoration(
+              hintText: 'Materyal ara',
+              prefixIcon: const Icon(Icons.search_rounded),
+              suffixIcon: hasQuery
+                  ? IconButton(
+                      tooltip: 'Aramayı temizle',
+                      onPressed: _clearSearch,
+                      icon: const Icon(Icons.close_rounded),
+                    )
+                  : null,
+              border: const OutlineInputBorder(),
+            ),
+          ),
+        ],
         const SizedBox(height: 24),
-        if (data.materials.isEmpty)
+        if (widget.data.materials.isEmpty)
           _PrimaryCard(
             title: 'Henüz materyal yok',
             body: 'İlk kaynağını eklediğinde burada kaldığın yerden devam edebilirsin.',
             buttonLabel: 'Materyal ekle',
             icon: Icons.add_rounded,
-            onPressed: onOpenLearning,
+            onPressed: widget.onOpenLearning,
+          )
+        else if (visibleMaterials.isEmpty)
+          _PrimaryCard(
+            title: 'Eşleşen materyal bulunamadı',
+            body: 'Başka bir başlık ara veya aramayı temizleyip tüm materyallerini gör.',
+            buttonLabel: 'Aramayı temizle',
+            icon: Icons.search_off_rounded,
+            onPressed: _clearSearch,
           )
         else
-          for (final material in data.materials) ...[
+          for (final material in visibleMaterials) ...[
             _LibraryMaterialCard(
               material: material,
               continuation: _continuationFor(material.id),
-              onPressed: () => onOpenWorkspace(material.id),
-              onDelete: () => onDeleteMaterial(material),
+              onPressed: () => widget.onOpenWorkspace(material.id),
+              onDelete: () => widget.onDeleteMaterial(material),
             ),
             const SizedBox(height: 10),
           ],
@@ -769,7 +829,7 @@ class _LibrarySurface extends StatelessWidget {
   }
 
   LearningContinuation? _continuationFor(MaterialId materialId) {
-    for (final item in data.progress) {
+    for (final item in widget.data.progress) {
       if (item.material.id == materialId) return item.continuation;
     }
     return null;
