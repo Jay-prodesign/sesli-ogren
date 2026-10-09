@@ -147,22 +147,24 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
 
   Future<void> _pickPdf() async {
     if (_busy) return;
-    final file = await (() async {
-      try {
-        return await FilePicker.pickFile(
-          type: FileType.custom,
-          allowedExtensions: const ['pdf'],
-          dialogTitle: 'Çalışmak istediğin PDF’i seç',
-        );
-      } catch (_) {
-        if (mounted) {
-          setState(() => _inlineError = 'PDF seçici açılamadı. Yeniden deneyebilirsin.');
-        }
-        return null;
-      }
-    })();
-    if (file == null || !mounted) return;
+    _setBusy(true);
+    try {
+      final file = await FilePicker.pickFile(
+        type: FileType.custom,
+        allowedExtensions: const ['pdf'],
+        dialogTitle: 'Çalışmak istediğin PDF’i seç',
+      );
+      if (file == null || !mounted) return;
+      await _ingestPdfFile(file);
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _inlineError = 'PDF seçilemedi. Lütfen yeniden dene.');
+    } finally {
+      _setBusy(false);
+    }
+  }
 
+  Future<void> _ingestPdfFile(PlatformFile file) async {
     final stopwatch = Stopwatch()..start();
     await _recordEvent(
       OperationalEvent(
@@ -174,6 +176,7 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
     );
     _setBusy(true);
     try {
+      if (mounted) setState(() => _inlineError = null);
       if (mounted) setState(() => _inlineError = null);
       final bytes = await file.readAsBytes();
       final ingestResult = await widget.runtime.ingest.ingestPdf(
@@ -211,8 +214,6 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
       setState(() {
         _inlineError = 'PDF güvenli biçimde işlenemedi. Metin içeren başka bir PDF deneyebilirsin.';
       });
-    } finally {
-      _setBusy(false);
     }
   }
 
