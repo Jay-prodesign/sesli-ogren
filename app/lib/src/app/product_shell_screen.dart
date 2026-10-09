@@ -79,6 +79,10 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
 
   Future<void> _openLearning() async {
     final materialId = (await _snapshot).material?.id ?? widget.runtime.newMaterialId();
+    await _openLearningFor(materialId);
+  }
+
+  Future<void> _openLearningFor(MaterialId materialId) async {
     if (!mounted) return;
     final treatment = LearningVisualTreatmentScope.maybeOf(context);
     await Navigator.of(context).push<void>(
@@ -121,7 +125,7 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
           materialId: material.id,
           onRecall: () {
             Navigator.of(context).pop();
-            _openLearning();
+            _openLearningFor(material.id);
           },
         ),
       ),
