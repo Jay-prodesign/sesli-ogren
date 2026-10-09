@@ -552,7 +552,8 @@ class _HomeSurface extends StatelessWidget {
 
   static bool _nextActionOpensLearning(LearningContinuation? continuation) {
     final kind = continuation?.nextAction.kind;
-    return kind == NextLearningActionKind.reviewSourceThenRecall || kind == NextLearningActionKind.retryRecallWithoutHint;
+    return kind == NextLearningActionKind.reviewSourceThenRecall ||
+        kind == NextLearningActionKind.retryRecallWithoutHint;
   }
 
   static String _nextActionLabel(LearningContinuation? continuation) {
