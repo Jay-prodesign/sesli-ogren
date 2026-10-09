@@ -52,7 +52,9 @@ void main() {
 
   testWidgets('source reader gives a clear empty-source recovery state', (tester) async {
     await tester.pumpWidget(
-      const MaterialApp(home: SourceReaderScreen(title: 'Kaynak', sourceText: '   ')),
+      const MaterialApp(
+        home: SourceReaderScreen(title: 'Kaynak', sourceText: '   '),
+      ),
     );
     await tester.pumpAndSettle();
     expect(find.text('Bu kaynak için okunabilir metin bulunamadı.'), findsOneWidget);
