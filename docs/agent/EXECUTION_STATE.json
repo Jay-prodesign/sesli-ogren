@@ -11,20 +11,12 @@
   },
   "mission": {
     "id": "LA-0039_LA-0040_INTEGRATED_OUTCOME",
-    "title": "Post-M5 commercial product completion — integrated source-grounded learning journey",
-    "executor": "Founder-authorized active ChatGPT/Codex executor; Claude is optional after fresh-read, not a waiting dependency"
+    "title": "Integrated source-grounded learning journey and product experience completion",
+    "executor": "Founder-authorized active product/engineering executor; ChatGPT may implement directly, Claude/Codex are available when assigned and are not mandatory waiting dependencies"
   },
-  "lifecycle_stage": "Post-M5 commercial-product completion; current integrated outcome executable, physical mobile/release evidence deferred to final release readiness",
+  "lifecycle_stage": "Post-M5 commercial-product completion; LA-0039 + LA-0040 integrated outcome executable; physical-device/release evidence remains deferred to release readiness",
   "status": "IN_PROGRESS",
-  "active_milestone": "Post-M5 commercial-product completion — LA-0039 + LA-0040 integrated outcome batch",
-  "architecture_proof": {
-    "disposition": "ARCHITECTURE_PROOF_PASS / GO_ADAPT",
-    "reviewed_head_sha": "0327d2e5b854df1c9923c65ed88f77151cfe9eed",
-    "evidence_branch": "spike/v0-architecture-proof",
-    "pr_number": 2,
-    "merged": false,
-    "note": "Accepted architecture proof substrate imported selectively into the M5 branch at e875a885466578447f0a50ed215dddf91aea5c2e; stale architecture control-plane was intentionally not imported."
-  },
+  "active_milestone": "LA-0039 + LA-0040 integrated product outcome",
   "tasks": {
     "LA-0001": "DONE",
     "LA-0002": "DONE",
@@ -34,98 +26,73 @@
     "LA-0006": "DONE",
     "LA-0007": "DONE",
     "LA-0008": "DONE",
-    "LA-0018": "DONE",
-    "LA-0019": "DONE",
-    "LA-0020": "DONE",
-    "LA-0021": "DONE",
-    "LA-0022": "CANCELLED",
-    "LA-0023": "DONE",
-    "LA-0024": "DONE",
-    "LA-0025": "DONE",
-    "LA-0026": "DONE",
-    "LA-0027": "DONE",
-    "LA-0028": "DONE",
-    "LA-0029": "DONE",
-    "LA-0030": "DONE",
-    "LA-0031": "DONE",
-    "LA-0032": "DONE",
-    "LA-0033": "DONE",
-    "LA-0034": "DONE",
-    "LA-0035": "DONE",
-    "LA-0036": "DONE",
-    "LA-0037": "DONE",
     "LA-0038": "DONE",
     "LA-0039": "IN_PROGRESS",
     "LA-0040": "IN_PROGRESS"
   },
   "git": {
     "branch": "feat/full-product-shell-continuity",
-    "base_sha": "84e96dce5b3cc9f32af3f459d422b652d0e86624",
-    "head_sha_note": "Current product-code baseline 84383ec937cd1a27e13d4a404602759022461014 (includes Turkish-safe search and regression tests). Subsequent current-state-only commits do not change product code; resolve live branch API for exact HEAD. Validation is SHA-specific.",
+    "base_sha": "d9088dd9bcf4a07a0841c617fbaa0651160e6c79",
+    "head_sha": "7e121ab6e354f4d808b21228da0a46329af8078c",
+    "head_sha_semantics": "Last resolved live branch HEAD before this state-file commit; resolve branch API for exact current HEAD because updating this file necessarily advances the branch.",
     "pr_number": 13,
     "pr_url": "https://github.com/Jay-prodesign/sesli-ogren/pull/13",
+    "pr_state": "OPEN_DRAFT_UNMERGED",
     "merged": false,
-    "stack": [
-      "main -> PR #1 bootstrap (PASS, unmerged)",
-      "bootstrap -> PR #2 architecture proof (PASS, unmerged; accepted substrate selectively imported)",
-      "Round 7 sibling lineage -> accepted non-physical candidate 84e96dce…",
-      "84e96dce… -> feat/m5-golden-learning-slice (ACTIVE)"
-    ],
-    "pr_state": "OPEN_ACTIVE_PRODUCT_LINE",
-    "head_sha": "84383ec937cd1a27e13d4a404602759022461014"
-  },
-  "round7_evidence_program": {
-    "status": "PRE_M5_CLOSED_OR_BOUNDED",
-    "founder_product_visual": "PASS_D_KNOT_SELECTED_D070",
-    "non_physical_technical": "PASS",
-    "physical_device": "DEFERRED_FINAL_MOBILE_READINESS_D068",
-    "D1": "DEFERRED",
-    "D2": "DEFERRED",
-    "D3": "DEFERRED",
-    "release_rule": "Physical iOS/Android speech/accessibility/performance/orientation checks remain mandatory before release-candidate/public-release claims."
+    "main_role": "DEFAULT_BRANCH_NOT_RUNNABLE_PRODUCT_SELECTOR"
   },
   "next_handoff": {
-    "id": "LA0040_VISUAL_AUDIT",
-    "title": "Million-Dollar Visual Audit & Student Experience Elevation",
-    "status": "FOUNDER_VISUAL_FAIL_REWORK",
-    "admission": "Founder visual-quality correction + D-074 Tier-A governance",
-    "acceptance": "Founder rejected both the original and revised 2026-10-08 Flutter visual packets; Editorial/Studio/Knowledge have no accepted product design direction. Rebuild one coherent source-centered learning interaction within LA-0040 and require explicit new Founder visual PASS.",
-    "current_task": "LA-0040"
+    "id": "LA-0039_LA-0040_INTEGRATED_OUTCOME",
+    "status": "IN_PROGRESS",
+    "note": "No new handoff is required for routine continuation; this legacy schema field points at the same single live mission."
   },
   "blockers": [
-    "Supabase client-safe auth validation lacks configured SUPABASE_URL and SUPABASE_PUBLISHABLE_KEY in the validation environment; this blocks only that external configuration evidence, not independent product implementation.",
-    "Physical iOS/Android speech/accessibility/performance/orientation checks remain deferred under D-068 and mandatory before release readiness claims.",
-    "Product-bounded validation currently fails the canonical format step; account-deletion SQL tests 87 and 89 fail, with test 89 syntax error. Fix the relevant code/workflow/test issues as an independent repair batch; do not let them block unrelated product implementation."
+    "Founder visual disposition blocks only final visual lock/closure, not independent implementation.",
+    "D-068 physical iOS/Android readiness evidence remains required before release claims.",
+    "Protected production/release/spend/secrets/destructive actions remain owner-gated."
   ],
-  "protected_gate": "Merge, release, deploy, paid providers, credentials/secrets, licensing posture, production mutation: Product Owner only",
-  "next_action": "Complete current Flutter canonical-format, analyzer, widget tests and Android/iOS compile on 84383ec9. Fix failures autonomously; source-reader search now folds Turkish dotted/dotless I while preserving source offsets, and tests cover local search, learning actions, empty-source recovery and Turkish I variants. Then continue the next integrated source→learn→evidence→resume product outcome; do not merge or release without protected authorization.",
+  "observed_ci": {
+    "observed_product_head": "d7aff1352fa20d3d2da2e460df1aa5127ce21ec6",
+    "bootstrap_validation": "PASS",
+    "account_deletion_bounded_validation": "PASS",
+    "la0040_visual_capture": "PASS",
+    "product_bounded_validation": "FAIL_CANONICAL_FORMAT_ONLY; analyze/tests skipped",
+    "ios_simulator_compile": "PASS",
+    "android_release_compile": "IN_PROGRESS_AT_OBSERVATION",
+    "rule": "Evidence is SHA-specific. Re-query live workflows after new product/control commits; a failure blocks only the covered claim/surface."
+  },
+  "current_outcome": {
+    "product_truth": "Learner-owned PDF/text → authoritative source/version/provenance → Reader/Listen or source-hidden Recall → truthful correct/unknown/hinted result with source evidence → explainable next action → persistence/reopen/recovery.",
+    "visual_truth": "Prior Editorial/Studio/Knowledge treatments and three-treatment tournament are failed historical experiments. Build/refine one coherent source-centered real-Flutter journey; Founder approval is required only for final visual lock/closure.",
+    "execution_rule": "Implement → integrate → proportionally verify → fix → select next dependency-ready roadmap outcome. File/commit/test/report/checkpoint is not a stop condition. Isolate a blocked dependency and continue independent admitted work.",
+    "quality_scope": [
+      "source/evidence correctness",
+      "recoverable error handling",
+      "persistence/reopen continuity",
+      "navigation",
+      "accessibility",
+      "settings/account/commercial-readiness already admitted by roadmap",
+      "premium coherent visual craft without fake learner state"
+    ]
+  },
+  "protected_gate": "Merge/release/deploy/publication, paid-provider/spend activation, credentials/secrets, destructive real-user-data operation, licensing/visibility change, serious irreversible product/architecture pivot, and cross-project mutation require applicable explicit owner authority.",
+  "next_action": "Repair the current learning_slice_screen canonical-format failure, run/observe the relevant grouped product checks, then continue the highest-value integrated source→learn→evidence→next-action→resume product improvement and subsequent dependency-ready roadmap work without a routine review stop.",
   "canonical_source_refs": [
     "CURRENT_EXECUTION_STATE — Learning App",
-    "Founder visual/companion correction — 2026-10-07 (supersedes D-070 companion visual lock for LA-0040 evaluation)",
-    "LA-0040 — Million-Dollar Visual Audit & Student Experience Elevation",
-    "docs/qa/LA-0040_VISUAL_QUALITY_GATE.md",
-    "docs/research/LA-0040_CURRENT_VISUAL_AUDIT_2026-10-07.md",
-    "docs/design/LA-0040_VISUAL_TREATMENT_TOURNAMENT.md",
-    "docs/design/LA-0040_COMPANION_REEVALUATION.md",
-    "D-071 — M5 Golden Learning Slice explicit admission",
-    "D-068 — Final Install After Implementation / Physical Device Gate Bounded",
-    "D-074 — Adaptive Task Governance / Premise Audit / Dependency Propagation",
-    "D-075 — Asset Necessity / Experience Role / Sustainable Production Pipeline",
-    "CMD-0002 — Founder Visual FAIL and Visual Intelligence READ-ONLY Methodology Gap Correction"
+    "MASTER_ROADMAP — Learning App",
+    "ENGINEERING_EXECUTION_PROTOCOL — Learning App",
+    "GOVERNANCE — Learning App",
+    "D-053/D-054 V0 scope",
+    "D-068 final physical mobile readiness gate",
+    "D-070 canonical D/Knot identity",
+    "D-076 provenance/licensing"
   ],
-  "updated_at": "2026-10-08",
+  "updated_at": "2026-10-10",
   "auto_agent_bridge": {
     "status": "AUTO_AGENT_BRIDGE_BLOCKED",
-    "mechanism": "anthropics/claude-code-action@v1 via .github/workflows/claude-bridge.yml (wake-up only)",
-    "configured": [
-      "workflow file on the PR branch: inert, trusted-role guard, least privilege, no secrets in repo"
-    ],
+    "role": "Optional historical wake-up/delegation path; not required for active direct execution.",
     "missing_authorizations": [
-      "Founder: install or confirm the Claude GitHub App (github.com/apps/claude) on Jay-prodesign/sesli-ogren",
-      "Founder: create repository secret CLAUDE_CODE_OAUTH_TOKEN (generated interactively with `claude setup-token` on a Claude Pro/Max account)",
-      "Founder: set repository variable CLAUDE_BRIDGE_ENABLED=true",
-      "Founder: merge the workflow to main (protected); issue_comment/issues workflows run only from the default branch",
-      "Founder: grant the Brain (ChatGPT) GitHub connector issue/PR comment write (currently 403), or accept Drive-to-engineer transcription"
+      "Claude GitHub App / token / enablement are not configured for autonomous bridge invocation; this does not block direct authorized product execution."
     ]
   },
   "last_command_id": "CMD-0002",
@@ -138,348 +105,5 @@
       "return_id": "RET-0001"
     }
   },
-  "temporary_execution_override": {
-    "status": "ACTIVE",
-    "authority": "Founder explicit instruction in Learning App chat + D-071 admission",
-    "scope": "Dependency-safe, reversible, app-first M5 Golden Learning Slice implementation through the defined checkpoint.",
-    "exclusions": [
-      "merge",
-      "release",
-      "deploy",
-      "paid-provider spend",
-      "credentials/secrets",
-      "production mutation",
-      "cross-project mutation",
-      "V1 learner-model expansion"
-    ]
-  },
-  "founder_sequence_override": {
-    "decision_id": "D-068",
-    "status": "ACTIVE",
-    "rule": "Real-phone installation is deferred until the app is otherwise complete enough for final device/mobile-readiness validation.",
-    "pre_m5_effect": "Satisfied/bounded for admission.",
-    "release_effect": "Physical iOS/Android device, speech, accessibility, performance and orientation checks remain mandatory before release-candidate/public-release claims."
-  },
-  "founder_visual_decision": {
-    "decision_id": "D-070 + Founder visual/companion correction 2026-10-07",
-    "companion": "KEEP CANONICAL D/KNOT — full-packet evidence supports stateful/sparse integration; no HIGH/BLOCKER redesign/removal trigger remains",
-    "product_visual": "REWORK — Founder visual lock/closure remains explicitly reserved; current work continues autonomously and this gate does not block implementation.",
-    "reason": "A visual candidate previously failed Founder review. Rework autonomously; request Founder disposition only when a materially improved representative runtime candidate is ready. No component-level approvals.",
-    "affected": [
-      "colors",
-      "typography",
-      "surface hierarchy",
-      "Home",
-      "Library presentation",
-      "Material Workspace",
-      "Listen presentation",
-      "active-learning surfaces",
-      "Progress presentation",
-      "navigation",
-      "microinteraction/motion",
-      "signature asset integration",
-      "D/Knot palette",
-      "D/Knot form/rendering",
-      "companion placement/frequency",
-      "companion identity if evidence supports redesign/removal"
-    ],
-    "unaffected": [
-      "learning truth",
-      "source grounding/provenance",
-      "evidence semantics",
-      "account/data safety"
-    ],
-    "active_authority": [
-      "docs/exec-plans/LA-0040.md",
-      "docs/design/LA-0040_PRIOR_RESEARCH_ROADMAP_RECONCILIATION.md",
-      "docs/design/LA-0040_AUDIENCE_BRAND_VISUAL_DIRECTION_LOCK.md",
-      "docs/design/LA-0040_COMPANION_REEVALUATION.md",
-      "docs/qa/LA-0040_VISUAL_QUALITY_GATE.md",
-      "docs/qa/LA-0040_VISUAL_STRESS_REDTEAM.md",
-      "docs/qa/LA-0040_VQG_ROUND1_RETEST_2026-10-08.md",
-      "docs/qa/LA-0040_GROUNDED_GOLDEN_SLICE_AUDIT_2026-10-08.md",
-      "docs/qa/LA-0040_VQG_FINAL_PRE_FOUNDER_2026-10-08.md"
-    ]
-  },
-  "m5_admission": {
-    "decision_id": "D-071",
-    "status": "ACTIVE_EXECUTABLE",
-    "scope": "real PDF/text -> source/version/provenance -> grounded processing -> active learning -> LearnerEvidence -> minimal LearnerState -> explainable next action -> persistence/reopen/recovery",
-    "continuity_transition_required": true,
-    "passive_consumption_creates_mastery": false
-  },
-  "validation_mode": {
-    "decision_id": "D-072",
-    "routine_github_actions": "BOUNDED_ALLOWED",
-    "routine_method": [
-      "local/Codex validation for fast iterative checks",
-      "GitHub Actions only for bounded milestone/checkpoint validation or when it materially saves Codex/Claude credits",
-      "static/code review and deterministic file-level checks where sufficient"
-    ],
-    "deferred": "Physical-device evidence remains deferred under D-068.",
-    "batch_rule": "GitHub Actions are allowed again by Founder decision on 2026-10-05, but must be used sparingly. Do not run Actions on every commit. Prefer one bounded validation workflow after a stable candidate is pushed, and avoid reruns unless a concrete failure has been corrected.",
-    "one_shot_actions_workflow": {
-      "status": "PASS_REMOVED_AFTER_RUN",
-      "path": ".github/workflows/m5-bounded-validation.yml",
-      "added_at_commit": "12f3e87ee4e03dd142010714dadb2d3799e85065",
-      "trigger": "next push to feat/m5-golden-learning-slice containing app/** changes",
-      "scope": "Flutter 3.47.5 toolchain check, lockfile reproducibility, format, analyze, flutter test, Android profile build, APK SHA-256",
-      "cleanup": "COMPLETED — M5 bounded Flutter/Android workflow removed after PASS; M5 platform validation workflow also removed after PASS.",
-      "last_run": {
-        "run_id": 37334117375,
-        "head_sha": "72494bec8525f37a9fed8a6b6f38d60033b57e08",
-        "result": "PASS",
-        "summary": "Flutter 3.47.5/toolchain PASS; lockfile PASS; format PASS; analyze PASS; real PDF engine probe PASS (2 pages); flutter test PASS (39); Android profile APK PASS; libpdfium.so packaged; APK SHA-256 04e2294ba054c5ed20eb2509f50b76d94759e8f9692e1555e69a14261f7d0b74."
-      }
-    }
-  },
-  "pause_checkpoint": {
-    "status": "SUPERSEDED_RESUMED",
-    "recorded_at": "2026-10-05",
-    "note": "Historical pause record only; Founder subsequently resumed work. Current authority is CURRENT_HANDOFF + EXECUTION_STATE.",
-    "branch_head_at_pause_note_commit": "caa364ad8aab8b2eb370cd3fce9ecb508c6df85f",
-    "runtime_candidate": "01670f42029ef228706c4a772594102e5656ebdf",
-    "resume_rule": "Fresh-read control plane, confirm branch/runtime-candidate drift, then continue from the first unresolved LA-0022 gate. Do not add feature breadth before M5 closes.",
-    "superseded_at": "2026-10-05"
-  },
-  "governance_overlay": {
-    "decision_id": "D-074",
-    "status": "APPROVED_ACTIVE",
-    "model": "Adaptive two-tier product/task governance",
-    "tier_a": "Decision / high-uncertainty / high-blast-radius: Task Intent -> decision-grade Task Spec -> Spec Quality Gate -> execution/evidence -> Result Gate -> canonical decision -> blast-radius propagation.",
-    "tier_b": "Routine production: Need -> small spec -> implement -> smallest useful QA -> device QA when applicable -> done.",
-    "premise_audit_triggers": [
-      "major milestone closure",
-      "credible evidence materially contradicts/weakens an accepted premise",
-      "before admission of a major new product/learning tranche"
-    ],
-    "propagation": "CHANGE -> BLAST-RADIUS ANALYSIS -> AFFECTED/UNAFFECTED -> REVALIDATE/UPDATE_REQUIRED/NO_CHANGE",
-    "current_effect": "LA-0039/LA-0040 integrated product completion is executable. Tier-A governs material unresolved premise/admission decisions only; it does not create an approval gate for routine reversible implementation or block independent tasks.",
-    "post_m5_intent": "Superseded by active LA-0039 World-Class Experience / Golden Product Slice. Further premise audits remain trigger-based, not automatic bureaucracy."
-  },
-  "asset_governance_overlay": {
-    "decision_id": "D-075",
-    "status": "APPROVED_ACTIVE",
-    "purpose": "Asset necessity, experience role, sustainable production economics and behavior-correct runtime integration.",
-    "pre_generation": [
-      "Asset Necessity Gate",
-      "Is this really an asset problem?",
-      "Experience Role",
-      "Reuse / existing-asset audit",
-      "Asset family/system decision",
-      "Production-economics check",
-      "Greybox/low-cost proof when interaction or learning behavior is materially uncertain"
-    ],
-    "post_generation": [
-      "Identity QA when applicable",
-      "Differentiation QA for signature assets",
-      "Character / Asset Behavior Gate when applicable",
-      "Preparation / rig / export",
-      "App integration",
-      "Runtime QA",
-      "Device QA",
-      "User/learning effect check only for material experience hypotheses"
-    ],
-    "tiers": {
-      "tier_a": "Signature / behavior-critical assets use full D-075 path.",
-      "tier_b": "Routine / commodity assets use lean existing-asset-check -> small spec -> prepare/generate -> integrate -> runtime/device QA when applicable -> done."
-    },
-    "current_effect": "LA-0039 may create a bounded production asset manifest for signature experience roles. D/Knot identity remains locked; no speculative asset-family expansion."
-  },
-  "gls083_review": {
-    "status": "FOUNDER_WAIVER_SYNTHETIC_ACCEPTED",
-    "runtime_candidate": "64579d48bcf9c33f4c709927a0e453349efb7c5b",
-    "packet": "docs/qa/M5_GLS083_REVIEW_PACKET.md",
-    "reviewer_command": "docs/qa/M5_GLS083_INDEPENDENT_REVIEW_COMMAND.md",
-    "return_path": "docs/qa/M5_GLS083_INDEPENDENT_REVIEW_RETURN.md",
-    "execution_note": "Synthetic adversarial review is the accepted M5 review evidence by Founder decision. External independence is waived for LA-0022/M5 only. Current runtime candidate is 64579d48….",
-    "review_surface": {
-      "pr_number": 12,
-      "pr_url": "https://github.com/Jay-prodesign/sesli-ogren/pull/12",
-      "branch": "review/m5-gls083-64579d48",
-      "base": "feat/round7-companion-production-sequence-v2",
-      "runtime_candidate": "64579d48bcf9c33f4c709927a0e453349efb7c5b",
-      "review_only": true,
-      "draft": true,
-      "head_review_metadata_commit": "b429de5c194c988724788318f670af4cf19ea244",
-      "actions_runs_observed": 0,
-      "note": "PR #12 is closed and historical only. Founder accepted synthetic review for M5; it must not block LA-0022.",
-      "state": "CLOSED_HISTORICAL"
-    },
-    "manual_completion_paths": [
-      "GitHub PR #12 -> Reviewers -> Copilot -> Request, only if the account/repository exposes Copilot review and Founder accepts any AI-credit/Actions spend.",
-      "Open a separate Claude/Codex reviewer context and give it docs/qa/M5_GLS083_INDEPENDENT_REVIEW_COMMAND.md plus PR #12 / frozen SHA 64579d48…."
-    ],
-    "paid_browser_automation": "NOT_AUTHORIZED — do not use metered browser automation or paid reviewer execution without explicit Founder authorization.",
-    "synthetic_review": {
-      "status": "SYNTHETIC_PASS_NO_UNRESOLVED_BLOCKER_HIGH",
-      "artifact": "docs/qa/M5_GLS083_SYNTHETIC_ADVERSARIAL_REVIEW_2026-10-05.md",
-      "finding_s003": "RESOLVED_HIGH",
-      "independence": false
-    },
-    "founder_disposition": {
-      "date": "2026-10-05",
-      "decision": "For M5/LA-0022 only, synthetic adversarial review is accepted as sufficient review evidence and external independence is waived.",
-      "scope": "M5 checkpoint only; does not remove independent review expectations for future high-risk tasks."
-    }
-  },
-  "validation_batch_readiness": {
-    "status": "BLOCKED_LIVE_AUTH_ONLY",
-    "manifest": "docs/qa/M5_BATCH_VALIDATION_MANIFEST.md",
-    "return": "docs/qa/M5_FINAL_VALIDATION_RETURN.md",
-    "sql_helper": "scripts/m5_validate_server_sql.sh",
-    "live_auth_helper": "scripts/m5_probe_supabase_anonymous_auth.py",
-    "execution_rule": "Run the single D-072 batch only after the Founder-accepted synthetic review artifact is present and app/pubspec.lock is generated/reviewed/committed from Flutter 3.47.5.",
-    "server_rpc_regression_test_commit": "f00df73dbf7851f48d7edf8e95ae463859c18bb4",
-    "server_rpc_regression_scope": "PASS in GitHub Actions platform validation run 37337837569: 5/5 SQL tests including Recall RPC semantics, RLS/tenant isolation and idempotency.",
-    "linux_runner": "scripts/m5_run_final_validation_linux.sh",
-    "macos_runner": "scripts/m5_run_final_validation_macos.sh",
-    "guard": "Both runners require the accepted synthetic review artifact plus committed app/pubspec.lock before executing. Linux runner performs live auth, bootstrap checks, dependency reproducibility, format/analyze/tests, Android profile build and combined SQL suite; macOS runner performs lock reproducibility and iOS profile no-codesign build.",
-    "execution_environment": "HYBRID checkpoint completed: Flutter/Android run 37334117375 PASS; server SQL + iOS run 37337837569 PASS. Live auth remains blocked only by missing protected client-safe Supabase config. Routine/per-commit Actions remain disabled/removed after checkpoint.",
-    "actions_freeze_branch": "HISTORICAL ONLY — prior temporary lockfile workflow branch; not authoritative for current validation."
-  },
-  "agent_cost_efficiency": {
-    "status": "ACTIVE_FOUNDER_RULE",
-    "rule": "Minimize Codex/Claude credit consumption. ChatGPT/Brain handles planning, research, reconciliation, review, documentation, task scoping, and command drafting whenever no local runtime is required. Codex/Claude are used only for bounded implementation, terminal/runtime execution, or repo-local verification that cannot be performed by Brain.",
-    "defaults": [
-      "Do not ask Codex/Claude to re-read broad project history when the exact current task can be supplied narrowly.",
-      "Do not request duplicate audits, explanations, summaries, evidence packets, or re-analysis of already-known context.",
-      "Batch adjacent terminal checks into one command/run when safe.",
-      "Prefer one narrow task with exact files/commands/stop condition over open-ended exploration.",
-      "Stop on the first controlling failure; do not spend credits continuing downstream checks that cannot change the outcome.",
-      "Return only decision-relevant evidence: command/result, changed files, blocker, exact next action."
-    ]
-  },
-  "flutter_android_validation": {
-    "status": "PASS",
-    "actions_run_id": 37334117375,
-    "validated_head_sha": "72494bec8525f37a9fed8a6b6f38d60033b57e08",
-    "flutter": "3.47.5",
-    "lockfile_reproducibility": "PASS",
-    "format": "PASS",
-    "analyze": "PASS",
-    "pdf_engine_probe": "PASS_2_PAGES_EXPECTED_TEXT",
-    "flutter_tests": "PASS_39",
-    "android_profile_build": "PASS",
-    "apk_size": "94.0MB",
-    "pdfium_packaged_in_apk": true,
-    "apk_sha256": "04e2294ba054c5ed20eb2509f50b76d94759e8f9692e1555e69a14261f7d0b74",
-    "test_harness_fixes": [
-      "Widget tests use databaseFactoryFfiNoIsolate as recommended for sqflite_common_ffi widget tests.",
-      "Scrollable controls are brought into view before tap assertions.",
-      "Real PDFium parsing is validated in a Dart native-assets probe rather than Flutter host-test plugin context."
-    ]
-  },
-  "platform_validation": {
-    "status": "PASS_EXCEPT_LIVE_AUTH_CONFIG",
-    "actions_run_id": 37337837569,
-    "validated_head_sha": "17773e631e3dc1ae28dd1a4656e0509309083923",
-    "server_sql": "PASS_5_OF_5",
-    "server_sql_artifact_id": 11357231937,
-    "server_sql_artifact_sha256": "01f40d5dde24baa25aa9db3510bee0815b213ae10c0e0afa0bf2dd2918703368",
-    "ios_profile_build": "PASS",
-    "ios_app_size": "34.4MB",
-    "ios_app_fingerprint_sha256": "74a5eaafa081fc64a33ade9575f4ac49f53bbd51b21834a8c92f1f1b9003f9b7",
-    "xcode": "26.6",
-    "supabase_client_config_present": false,
-    "live_auth_probe": "BLOCKED_MISSING_PROTECTED_CLIENT_VALUES"
-  },
-  "product_branch_override": {
-    "status": "ACTIVE",
-    "runnable_branch": "feat/full-product-shell-continuity",
-    "validated_head_sha": "5ee9f4fa8ab30504c7761ca5f5c6e7ae4fddc075",
-    "validation_run_id": 37617623345,
-    "bootstrap_validation_run_id": 37617623288,
-    "account_deletion_validation_run_id": 37617623323,
-    "main_role": "BOOTSTRAP_ONLY_NOT_RUNNABLE",
-    "local_preview_rule": "VS Code / Android local checkout should track feat/full-product-shell-continuity."
-  },
-  "hosted_supabase_state": {
-    "status": "EMPTY_SUBSTRATE_NO_DEPLOYMENT",
-    "project_ref": "detldfcvoxjuqstkaayd",
-    "observed_at": "2026-10-07",
-    "public_tables": 0,
-    "migrations": 0,
-    "edge_functions": 0,
-    "rule": "Read-only inspection only. Do not deploy/mutate until canonical server substrate deployment is explicitly admitted."
-  },
-  "la0039_engineering_checkpoint": {
-    "status": "PASS",
-    "runtime_head_sha": "1277cf44e3c2bec915442d5fdf13ea1b0f841862",
-    "bootstrap_run_id": 37637610659,
-    "account_deletion_run_id": 37637610454,
-    "product_bounded_run_id": 37637610321,
-    "product_validation": [
-      "canonical format PASS",
-      "flutter analyze PASS",
-      "expanded Flutter tests PASS"
-    ],
-    "polish_fixes": [
-      "hidden IndexedStack tabs pause tickers via TickerMode",
-      "attention semantic foreground tightened to AA-safe contrast against attentionSoft"
-    ],
-    "remaining_gate": "Founder representative runtime visual review; LA-0039 remains IN_PROGRESS until that review is accepted."
-  },
-  "audience_visual_lock": {
-    "status": "REWORK_IN_PROGRESS_FOUNDER_LOCK_ONLY",
-    "primary_audience": "Broad learner-owned-material product; Turkish high-school students (grades 9–12 / approx. ages 14–18) are the priority-weighted initial commercial segment, not the exclusive target",
-    "theme": "Living Visual Learning Studio / Student Momentum — VQG-01 PASS; Founder visual lock pending",
-    "voice": "smart study partner; direct, respectful, evidence-aware, calm under failure, energetic in action; informal singular Turkish 'sen'",
-    "signature_palette": {
-      "canvas": "#F7F8FC",
-      "ink": "#111827",
-      "pulse_blue": "#3657FF",
-      "deep_focus": "#14224A",
-      "signal_aqua": "#20BFA9",
-      "volt_lime": "#C9F45D",
-      "success": "#138A72",
-      "attention": "#E99024",
-      "error": "#D64550"
-    },
-    "companion": "KEEP canonical D/Knot. Generated non-canonical plush concept rejected; current evidence supports stateful/sparse integration rather than identity redesign/removal.",
-    "authority": "docs/design/LA-0040_AUDIENCE_BRAND_VISUAL_DIRECTION_LOCK.md"
-  },
-  "current_execution_authority": {
-    "as_of": "2026-10-09",
-    "current_product_truth": "Source-grounded, voice-enabled personal learning product; learner-owned PDF/text → authoritative source/version/provenance → Listen or source-hidden active recall → truthful correct/unknown/hinted result with source evidence → explainable next action → persistence/reopen/recovery.",
-    "current_goal": "Complete the coherent LA-0039 + LA-0040 first-session and resumed learning journey with premium real-Flutter visual execution; do not add isolated shortcuts as substitutes.",
-    "current_branch": "feat/full-product-shell-continuity",
-    "current_head_sha": "761087f6ab062f4da1b47340d0851909eaa33ce3",
-    "pr": 13,
-    "pr_status": "open, unmerged, unreleased",
-    "verified": {
-      "bootstrap_validation": "PASS at parent d772e619; latest 84383ec9 run in progress",
-      "la0040_visual_capture": "PASS at parent d772e619; latest 84383ec9 capture in progress",
-      "product_bounded_validation": "PENDING at 84383ec9 after canonical Dart formatting correction; analyze and expanded widget tests have not completed",
-      "account_deletion_bounded_validation": "PASS at parent d772e619; latest 84383ec9 run in progress",
-      "android_ios_release_compile": "PENDING at 84383ec9"
-    },
-    "executable_now": [
-      "Continue integrated LA-0039/LA-0040 product implementation on live branch",
-      "Repair current source/recap/listen/recall navigation and error/recovery edges in the same outcome batch",
-      "Resolve SQL test 87/89 contradictions against the material-content-erasure contract",
-      "Continue independent approved accessibility, settings, backend/recovery and commercial-readiness work"
-    ],
-    "gate_classification": {
-      "current_and_real": [
-        "Protected merge/release/publication; spending; legal/financial commitments; secrets; destructive real-user-data operations; serious irreversible product/architecture pivot",
-        "D-068 physical Android/iOS/mobile readiness before release",
-        "D-070 locked D/Knot identity",
-        "D-076 provenance and licensing restrictions"
-      ],
-      "narrow": [
-        "Founder visual disposition blocks visual lock/closure only, not implementation or independent work",
-        "Missing external fresh-user/device evidence blocks only the corresponding evidence claim/release gate"
-      ],
-      "superseded": [
-        "Historical zero-based discovery active and M4/M5 re-admission claims where they conflict with D-053/D-054 and later accepted D-070–D-076 decisions",
-        "Old M3 pre-admission and paused/not-executable descriptions contradicted by admitted current execution"
-      ],
-      "historical": [
-        "Older Founder-review labels and candidate tournaments after supersession; preserve as history, not active stop conditions"
-      ]
-    },
-    "next_action": "Implement the next coherent user-visible source→learn→evidence→next-action→resume improvement, integrate connected UI/state/error handling, then continue to the next safe authorized outcome. Do not stop after one file, commit or test.",
-    "current_product_code_batch_sha": "84383ec937cd1a27e13d4a404602759022461014"
-  }
+  "history_rule": "Prior M4/M5, Round 7, GLS, candidate-tournament, pause, per-agent and SHA-bound evidence records remain in dedicated files and git history. They are historical where they conflict with this live cursor and must not be treated as active stop conditions."
 }
