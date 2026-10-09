@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sesli_ogren/src/data/sqlite_source_store.dart';
 import 'package:sesli_ogren/src/domain/authenticated_learner.dart';
+import 'package:sesli_ogren/src/domain/learning_contracts.dart';
 import 'package:sesli_ogren/src/domain/learning_truth.dart';
 import 'package:sesli_ogren/src/domain/operational_event.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
@@ -203,6 +204,82 @@ CREATE TABLE sentinel (
       await legacy?.close();
       await upgraded?.close();
       await inspected?.close();
+      await temp.delete(recursive: true);
+    }
+  });
+
+  test('summary job survives reopen and respects learner and source version', () async {
+    final temp = await Directory.systemTemp.createTemp('sesli-ogren-summary-job-');
+    final path = '${temp.path}/summary.db';
+    SqliteSourceStore? store;
+    Database? database;
+    const owner = AuthenticatedLearner(id: LearnerId('owner'));
+    const other = AuthenticatedLearner(id: LearnerId('other'));
+    const material = MaterialId('material-a');
+    const sourceA = SourceVersionId('source-a');
+    const sourceB = SourceVersionId('source-b');
+
+    try {
+      store = await SqliteSourceStore.open(factory: databaseFactoryFfi, path: path);
+      database = await databaseFactoryFfi.openDatabase(path);
+      await database.insert('materials', {
+        'learner_id': 'owner',
+        'material_id': 'material-a',
+        'title': 'Sample',
+        'media_type': 'pastedText',
+        'lifecycle_status': 'active',
+        'processing_state': 'ready',
+        'created_at_utc': '2026-10-09T00:00:00Z',
+        'updated_at_utc': '2026-10-09T00:00:00Z',
+      });
+      await database.close();
+      database = null;
+
+      await store.saveSummaryJob(
+        learner: owner,
+        materialId: material,
+        sourceVersionId: sourceA,
+        serverMaterialId: 'server-a',
+        jobId: 'job-a',
+      );
+      expect(
+        await store.summaryJobId(learner: owner, materialId: material, sourceVersionId: sourceA),
+        'job-a',
+      );
+      expect(
+        await store.summaryJobId(learner: other, materialId: material, sourceVersionId: sourceA),
+        isNull,
+      );
+      expect(
+        await store.summaryJobId(learner: owner, materialId: material, sourceVersionId: sourceB),
+        isNull,
+      );
+      await store.close();
+      store = null;
+
+      store = await SqliteSourceStore.open(factory: databaseFactoryFfi, path: path);
+      expect(
+        await store.summaryJobId(learner: owner, materialId: material, sourceVersionId: sourceA),
+        'job-a',
+      );
+      await store.saveSummaryJob(
+        learner: owner,
+        materialId: material,
+        sourceVersionId: sourceB,
+        serverMaterialId: 'server-b',
+        jobId: 'job-b',
+      );
+      expect(
+        await store.summaryJobId(learner: owner, materialId: material, sourceVersionId: sourceA),
+        isNull,
+      );
+      expect(
+        await store.summaryJobId(learner: owner, materialId: material, sourceVersionId: sourceB),
+        'job-b',
+      );
+    } finally {
+      await database?.close();
+      await store?.close();
       await temp.delete(recursive: true);
     }
   });
