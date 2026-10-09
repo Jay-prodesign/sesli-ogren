@@ -47,7 +47,9 @@ class _SourceReaderScreenState extends State<SourceReaderScreen> {
   void _updateReadingProgress() {
     if (!_readingScroll.hasClients) return;
     final max = _readingScroll.position.maxScrollExtent;
-    final progress = max <= 0 ? 1.0 : (_readingScroll.offset / max).clamp(0.0, 1.0);
+    final progress = max <= 0
+        ? 1.0
+        : (_readingScroll.offset / max).clamp(0.0, 1.0);
     if ((progress - _readingProgress).abs() >= 0.01 || progress == 1.0) {
       setState(() => _readingProgress = progress);
     }
@@ -215,9 +217,7 @@ class _SourceReaderScreenState extends State<SourceReaderScreen> {
                   children: [
                     const Icon(Icons.menu_book_outlined, size: 18),
                     const SizedBox(width: 8),
-                    Expanded(
-                      child: Text('Okuma ilerlemesi · %${(_readingProgress * 100).round()}'),
-                    ),
+                    Expanded(child: Text('Okuma ilerlemesi · %${(_readingProgress * 100).round()}')),
                     IconButton(
                       tooltip: 'Yazıyı küçült',
                       onPressed: _fontSize <= 14 ? null : () => setState(() => _fontSize -= 1),
