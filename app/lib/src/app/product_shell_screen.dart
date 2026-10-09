@@ -166,6 +166,10 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
                 ),
               );
             },
+            onRecall: () {
+              Navigator.of(context).pop();
+              _openLearningFor(selected);
+            },
           ),
         ),
       );
