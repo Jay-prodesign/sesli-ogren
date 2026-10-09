@@ -219,6 +219,10 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> with WidgetsBinding
             learner: widget.runtime.learner,
             materialId: widget.materialId,
           );
+          await widget.runtime.store.clearServerMaterialBinding(
+            learner: widget.runtime.learner,
+            materialId: widget.materialId,
+          );
         }
       }
 
@@ -241,7 +245,14 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> with WidgetsBinding
       if (currentSource?.identity.sourceVersionId != source.identity.sourceVersionId) {
         final removed = await _gateway.deleteServerMaterial(submission.materialId);
         if (removed) {
-          await widget.runtime.store.clearSummaryJob(learner: widget.runtime.learner, materialId: widget.materialId);
+          await widget.runtime.store.clearSummaryJob(
+            learner: widget.runtime.learner,
+            materialId: widget.materialId,
+          );
+          await widget.runtime.store.clearServerMaterialBinding(
+            learner: widget.runtime.learner,
+            materialId: widget.materialId,
+          );
         }
         if (mounted) {
           setState(() => _error = 'Kaynak değişti. Yeni sürüm için özet oluşturabilirsin.');
