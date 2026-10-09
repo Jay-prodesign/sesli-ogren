@@ -154,11 +154,12 @@ class _ListenScreenState extends State<ListenScreen> {
   Future<void> _stop() async {
     _playToken++;
     await _speech.stop();
-    if (mounted) setState(() {
-      _speaking = false;
-      _startedPlayback = false;
-      _startingPlayback = false;
-    });
+    if (mounted)
+      setState(() {
+        _speaking = false;
+        _startedPlayback = false;
+        _startingPlayback = false;
+      });
   }
 
   @override
@@ -334,7 +335,11 @@ class _ListenScreenState extends State<ListenScreen> {
                 ],
                 const SizedBox(height: 18),
                 if (_speaking || _startingPlayback)
-                  FilledButton.icon(onPressed: _stop, icon: const Icon(Icons.stop_rounded), label: Text(_startingPlayback ? 'Başlatmayı iptal et' : 'Durdur'))
+                  FilledButton.icon(
+                    onPressed: _stop,
+                    icon: const Icon(Icons.stop_rounded),
+                    label: Text(_startingPlayback ? 'Başlatmayı iptal et' : 'Durdur'),
+                  )
                 else ...[
                   FilledButton.icon(
                     onPressed: () => _play(source),
