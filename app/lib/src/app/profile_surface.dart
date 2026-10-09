@@ -431,6 +431,8 @@ class _AccountOverviewCard extends StatelessWidget {
   }
 
   static String _capabilityLabel(String capability) => switch (capability) {
+    'summary' => 'Quick Recap',
+    'explain' => 'Kaynağa dayalı açıklama',
     'structured_generation' => 'AI üretimi',
     'grounded_explain' => 'Kaynağa dayalı açıklama',
     'explain_back' => 'Anlatım değerlendirme',
