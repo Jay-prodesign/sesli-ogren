@@ -37,10 +37,7 @@ class _RecordingSummaryGateway extends SupabaseSourceSummaryGateway {
   @override
   Future<ServerSummarySubmission> submit({required SourceIngestResult source}) async {
     submitCalls += 1;
-    return ServerSummarySubmission(
-      materialId: serverMaterialId,
-      jobId: '22222222-2222-4222-8222-222222222222',
-    );
+    return ServerSummarySubmission(materialId: serverMaterialId, jobId: '22222222-2222-4222-8222-222222222222');
   }
 
   @override
@@ -58,16 +55,10 @@ void main() {
   sqfliteFfiInit();
 
   testWidgets('Quick Recap reuses current-source server material created by Explain', (tester) async {
-    final store = await SqliteSourceStore.open(
-      factory: databaseFactoryFfiNoIsolate,
-      path: inMemoryDatabasePath,
-    );
+    final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
     addTearDown(store.close);
 
-    final ingest = SourceIngestService(
-      store: store,
-      pdfTextExtractor: const _UnusedPdfExtractor(),
-    );
+    final ingest = SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor());
     const materialId = MaterialId('quick-recap-shared-server-material');
     await ingest.ingestPastedText(
       learner: AppRuntime.localM5LearnerFixture,
@@ -75,10 +66,7 @@ void main() {
       text: 'Fotosentez ışık enerjisinin kimyasal enerjiye dönüşmesini sağlar.',
       sourceName: 'Biyoloji notu',
     );
-    final source = await store.currentSourceVersion(
-      learner: AppRuntime.localM5LearnerFixture,
-      materialId: materialId,
-    );
+    final source = await store.currentSourceVersion(learner: AppRuntime.localM5LearnerFixture, materialId: materialId);
     expect(source, isNotNull);
 
     const serverMaterialId = '11111111-1111-4111-8111-111111111111';
@@ -93,21 +81,14 @@ void main() {
       learner: AppRuntime.localM5LearnerFixture,
       store: store,
       ingest: ingest,
-      recall: RecallLearningService(
-        sourceStore: store,
-        learningStore: store.learningTruthStore(),
-      ),
+      recall: RecallLearningService(sourceStore: store, learningStore: store.learningTruthStore()),
       telemetry: store.operationalTelemetry(),
     );
     final gateway = _RecordingSummaryGateway(serverMaterialId: serverMaterialId);
 
     await tester.pumpWidget(
       MaterialApp(
-        home: QuickRecapScreen(
-          runtime: runtime,
-          materialId: materialId,
-          summaryGateway: gateway,
-        ),
+        home: QuickRecapScreen(runtime: runtime, materialId: materialId, summaryGateway: gateway),
       ),
     );
     await tester.pumpAndSettle();
