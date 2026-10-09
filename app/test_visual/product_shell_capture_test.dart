@@ -58,7 +58,7 @@ void main() {
       }
       await tester.pumpWidget(MaterialApp(
         debugShowCheckedModeBanner: false,
-        theme: buildAppTheme(),
+        theme: SesliOgrenTheme.light(),
         home: const MediaQuery(
           data: MediaQueryData(disableAnimations: true),
           child: SizedBox.shrink(),
@@ -66,7 +66,7 @@ void main() {
       ));
       await tester.pumpWidget(MaterialApp(
         debugShowCheckedModeBanner: false,
-        theme: buildAppTheme(),
+        theme: SesliOgrenTheme.light(),
         home: MediaQuery(
           data: const MediaQueryData(disableAnimations: true),
           child: ProductShellScreen(runtime: runtime),
