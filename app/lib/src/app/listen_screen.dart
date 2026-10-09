@@ -346,7 +346,7 @@ class _ListenScreenState extends State<ListenScreen> {
                             minHeight: 6,
                             value: progress,
                             backgroundColor: Colors.white.withValues(alpha: 0.12),
-                            color: accent,
+                            color: progressAccent,
                           ),
                         ),
                         const SizedBox(height: 8),
@@ -370,7 +370,7 @@ class _ListenScreenState extends State<ListenScreen> {
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Icon(Icons.info_outline_rounded, color: truthAccent, size: 19),
+                        Icon(Icons.info_outline_rounded, color: truthAccent, size: 19),
                         const SizedBox(width: 9),
                         Expanded(
                           child: Text(
@@ -396,7 +396,7 @@ class _ListenScreenState extends State<ListenScreen> {
                       children: [
                         Row(
                           children: [
-                            const Icon(Icons.article_outlined, color: accent, size: 18),
+                            Icon(Icons.article_outlined, color: accent, size: 18),
                             const SizedBox(width: 7),
                             Text(
                               widget.textOverride?.trim().isNotEmpty == true ? 'Quick Recap özeti' : 'Kaynak metni',
