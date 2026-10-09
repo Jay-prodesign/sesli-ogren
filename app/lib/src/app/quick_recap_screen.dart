@@ -11,16 +11,22 @@ import 'explain_back_screen.dart';
 
 /// Source-grounded summary UI. No synthetic AI output is ever shown as genuine.
 class QuickRecapScreen extends StatefulWidget {
-  const QuickRecapScreen({required this.runtime, required this.materialId, super.key});
+  const QuickRecapScreen({
+    required this.runtime,
+    required this.materialId,
+    this.summaryGateway = const SupabaseSourceSummaryGateway(),
+    super.key,
+  });
   final AppRuntime runtime;
   final MaterialId materialId;
+  final SupabaseSourceSummaryGateway summaryGateway;
 
   @override
   State<QuickRecapScreen> createState() => _QuickRecapScreenState();
 }
 
 class _QuickRecapScreenState extends State<QuickRecapScreen> with WidgetsBindingObserver {
-  static const _gateway = SupabaseSourceSummaryGateway();
+  SupabaseSourceSummaryGateway get _gateway => widget.summaryGateway;
   String? _jobId;
   SourceVersionId? _submittedSourceVersion;
   ServerSummaryStatus? _status;
@@ -194,16 +200,26 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> with WidgetsBinding
         }
         return;
       }
-      final staleServerMaterialId = await widget.runtime.store.summaryServerMaterialId(
+      final currentServerMaterialId = await widget.runtime.store.summaryServerMaterialId(
         learner: widget.runtime.learner,
         materialId: widget.materialId,
+        sourceVersionId: source.identity.sourceVersionId,
       );
-      if (staleServerMaterialId != null) {
-        final removed = await _gateway.deleteServerMaterial(staleServerMaterialId);
-        if (!removed) {
-          throw const ServerSummarySubmissionException('Previous server source could not be removed.');
+      if (currentServerMaterialId == null) {
+        final staleServerMaterialId = await widget.runtime.store.summaryServerMaterialId(
+          learner: widget.runtime.learner,
+          materialId: widget.materialId,
+        );
+        if (staleServerMaterialId != null) {
+          final removed = await _gateway.deleteServerMaterial(staleServerMaterialId);
+          if (!removed) {
+            throw const ServerSummarySubmissionException('Previous server source could not be removed.');
+          }
+          await widget.runtime.store.clearSummaryJob(
+            learner: widget.runtime.learner,
+            materialId: widget.materialId,
+          );
         }
-        await widget.runtime.store.clearSummaryJob(learner: widget.runtime.learner, materialId: widget.materialId);
       }
 
       final submission = await _gateway.submit(
