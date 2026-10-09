@@ -214,7 +214,11 @@ class _WorkspaceBody extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 12),
-        OutlinedButton.icon(onPressed: onQuickRecap, icon: const Icon(Icons.auto_awesome), label: const Text('Quick Recap — AI özet')),
+        OutlinedButton.icon(
+          onPressed: onQuickRecap,
+          icon: const Icon(Icons.auto_awesome),
+          label: const Text('Quick Recap — AI özet'),
+        ),
         const SizedBox(height: 24),
         Text('Öğrenme durumu', style: theme.textTheme.titleMedium),
         const SizedBox(height: 10),

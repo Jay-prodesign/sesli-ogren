@@ -16,7 +16,12 @@ class SupabaseSourceSummaryGateway {
     if (rows.isEmpty) throw const ServerSummarySubmissionException('Summary job not found.');
     final state = rows.first['state'] as String;
     if (state == 'SUCCEEDED') {
-      final artifacts = await client.from('artifacts').select('content').eq('generation_job_id', jobId).eq('status', 'available').limit(1);
+      final artifacts = await client
+          .from('artifacts')
+          .select('content')
+          .eq('generation_job_id', jobId)
+          .eq('status', 'available')
+          .limit(1);
       if (artifacts.isEmpty) return const ServerSummaryStatus(state: 'PROCESSING');
       final content = Map<String, dynamic>.from(artifacts.first['content'] as Map);
       return ServerSummaryStatus(
@@ -76,6 +81,6 @@ class ServerSummaryStatus {
   final String? summary;
   final List<String> keyPoints;
   final String? failureClass;
-  bool get isTerminal => state == 'SUCCEEDED' || state == 'FAILED_FINAL' ||
-      state == 'FAILED_RETRYABLE' || state == 'CANCELLED';
+  bool get isTerminal =>
+      state == 'SUCCEEDED' || state == 'FAILED_FINAL' || state == 'FAILED_RETRYABLE' || state == 'CANCELLED';
 }
