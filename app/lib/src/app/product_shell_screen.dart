@@ -154,10 +154,12 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
             sourceText: extracted?.normalizedText ?? '',
             onListen: () => _replaceReaderWith(
               readerContext,
-              ListenScreen(
-                runtime: widget.runtime,
-                materialId: selected,
-                onRecall: () => _openRecallFromCurrentRoute(readerContext, selected),
+              Builder(
+                builder: (listenContext) => ListenScreen(
+                  runtime: widget.runtime,
+                  materialId: selected,
+                  onRecall: () => _openRecallFromCurrentRoute(listenContext, selected),
+                ),
               ),
             ),
             onRecap: () =>
