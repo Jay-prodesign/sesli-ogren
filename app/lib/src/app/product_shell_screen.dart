@@ -52,8 +52,9 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
   }
 
   Future<_HomeSnapshot> _loadSnapshot() async {
-    // A preview requires extra source I/O; keep the unscoped product path unchanged.
-    // This read-only ancestor lookup is safe during initState (unlike dependOnInheritedWidgetOfExactType).
+    // The current source-first Home uses a real source preview. The explicit
+    // legacy fallback skips this extra read. This ancestor lookup is safe during
+    // initState (unlike dependOnInheritedWidgetOfExactType).
     final livingReview = context.getElementForInheritedWidgetOfExactType<LivingDeskReviewScope>() != null;
     final materials = await widget.runtime.store.activeMaterials(learner: widget.runtime.learner);
     if (materials.isEmpty) return const _HomeSnapshot();
