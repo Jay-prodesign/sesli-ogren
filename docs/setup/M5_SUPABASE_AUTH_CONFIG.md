@@ -11,25 +11,30 @@ The production runtime requires a real Supabase Auth session before opening lear
 
 ## Client configuration
 
-Provide only client-safe values at build/run time:
+The production client carries the selected Sesli Öğren Supabase project URL and its modern `sb_publishable_...`
+key as client-safe defaults. Supabase explicitly treats publishable keys as public client credentials suitable for
+mobile apps and public source; they do not bypass RLS.
+
+Use Dart defines only when intentionally targeting another environment:
 
 ```bash
 flutter run \
-  --dart-define=SUPABASE_URL=https://<project-ref>.supabase.co \
-  --dart-define=SUPABASE_PUBLISHABLE_KEY=<sb_publishable_...>
+  --dart-define=SUPABASE_URL=https://<alternate-project-ref>.supabase.co \
+  --dart-define=SUPABASE_PUBLISHABLE_KEY=<alternate-sb_publishable_...>
 ```
 
-Do not commit a service-role/secret key or provider credential. The publishable key is intentionally a client credential; authorization remains enforced by Auth/RLS and server RPC boundaries.
+Never commit or embed a Supabase secret/service-role key or an AI-provider credential. Authorization remains
+enforced by the authenticated user's JWT plus RLS and server RPC ownership checks.
 
 ## Authentication behavior
 
-1. Initialize Supabase from `SUPABASE_URL` + `SUPABASE_PUBLISHABLE_KEY`.
+1. Initialize Supabase from the production client-safe defaults, or explicit `SUPABASE_URL` + `SUPABASE_PUBLISHABLE_KEY` overrides.
 2. Reuse the persisted current session when present.
 3. With no session, show explicit passwordless account entry.
 4. Request an email OTP with Supabase Auth; the same flow may create a new account when allowed by project policy.
 5. Verify the six-digit OTP and open `AppRuntime` only after Supabase returns a real authenticated user/session.
 6. Local sign-out removes only the device session; learner-scoped local data remains isolated under the authenticated user UUID.
-7. Missing config or failed auth is fail-closed: learner data is not opened.
+7. Failed initialization or failed auth is fail-closed: learner data is not opened.
 
 ## Project-side prerequisite
 
