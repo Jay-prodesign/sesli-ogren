@@ -255,6 +255,32 @@ void main() {
     expect(find.textContaining('Neden:'), findsNothing);
   });
 
+  testWidgets('unknown recall shows honest learner response beside source evidence', (tester) async {
+    final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
+    addTearDown(store.close);
+    final runtime = AppRuntime(
+      learner: AppRuntime.localM5LearnerFixture,
+      store: store,
+      ingest: SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor()),
+      recall: RecallLearningService(sourceStore: store, learningStore: store.learningTruthStore()),
+      telemetry: store.operationalTelemetry(),
+    );
+    await runtime.ingest.ingestPastedText(
+      learner: runtime.learner,
+      materialId: AppRuntime.primaryMaterialId,
+      text: 'Bitkiler fotosentez sırasında ışık enerjisini kimyasal enerjiye dönüştürür. Klorofil ışığın soğurulmasında rol alır.',
+      sourceName: 'Fotosentez notu',
+    );
+    await tester.pumpWidget(testShell(runtime));
+    await pumpUntilFound(tester, find.text('Hatırla'));
+    await tapVisible(tester, find.text('Bilmiyorum'));
+    await pumpUntilFound(tester, find.text('Kaynakla karşılaştır'));
+    expect(find.text('Senin yanıtın'), findsOneWidget);
+    expect(find.text('Henüz bilmiyorum'), findsOneWidget);
+    expect(find.text('Kaynak bağlamı'), findsOneWidget);
+    expect(find.text('İpucusuz hatırladın'), findsNothing);
+  });
+
   testWidgets('empty shell workspace request opens first material creation', (tester) async {
     final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
     addTearDown(store.close);
