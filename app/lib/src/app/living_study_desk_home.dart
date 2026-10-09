@@ -58,6 +58,16 @@ class LivingStudyDeskHome extends StatelessWidget {
 
   String get _why => continuation?.nextAction.reasonText ?? 'Kaynağından bir hatırlama denemesiyle ne bildiğini gör.';
 
+  String get _nextActionCta {
+    final action = continuation?.nextAction.kind;
+    return switch (action) {
+      NextLearningActionKind.reviewSourceThenRecall => 'Kaynağı gözden geçir ve yeniden dene',
+      NextLearningActionKind.retryRecallWithoutHint => 'İpucusuz tekrar dene',
+      NextLearningActionKind.repeatRecallLater => 'Bugünlük tamamla',
+      null => 'Hatırlamayı dene',
+    };
+  }
+
   String get _preview {
     final source = sourceText?.trim() ?? '';
     if (source.isEmpty) return 'Bu materyalin metin önizlemesi henüz hazır değil.';
@@ -298,7 +308,7 @@ class LivingStudyDeskHome extends StatelessWidget {
               key: const ValueKey('la0040-living-continue'),
               onPressed: onOpenLearning,
               icon: const Icon(Icons.psychology_alt_outlined, size: 20),
-              label: Text(hasRecallEvidence ? 'Sonraki öğrenme adımını aç' : 'Hatırlamayı dene'),
+              label: Text(_nextActionCta),
               style: FilledButton.styleFrom(
                 backgroundColor: _ink,
                 foregroundColor: Colors.white,
