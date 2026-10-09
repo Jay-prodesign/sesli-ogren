@@ -12,6 +12,7 @@ import '../learning/explain_back_gateway.dart';
 import '../learning/focus_help_gateway.dart';
 import '../learning/recall_learning_service.dart';
 import '../learning/supabase_explain_back_gateway.dart';
+import '../learning/supabase_focus_help_gateway.dart';
 import '../generation/grounded_explain_gateway.dart';
 import '../generation/supabase_grounded_explain_gateway.dart';
 
@@ -60,6 +61,7 @@ class AppRuntime {
       telemetry: store.operationalTelemetry(),
       explain: const SupabaseGroundedExplainGateway(),
       explainBack: const SupabaseExplainBackGateway(),
+      focusHelp: const SupabaseFocusHelpGateway(),
       accountOverview: const SupabaseAccountOverviewGateway(),
       accountDeletion: const SupabaseAccountDeletionGateway(),
     );
