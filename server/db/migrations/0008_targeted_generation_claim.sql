@@ -1,4 +1,4 @@
--- LA-0041: exact-job worker claim for authenticated on-demand generation wake-up.
+-- Quick Recap: exact-job worker claim for authenticated on-demand generation wake-up.
 -- Service-role only. The Edge Function verifies learner ownership with RLS first.
 \set ON_ERROR_STOP on
 
