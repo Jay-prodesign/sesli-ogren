@@ -25,6 +25,7 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> {
   ServerSummaryStatus? _status;
   String? _error;
   bool _busy = false;
+  bool _restoring = true;
   bool _checking = false;
   Timer? _pollTimer;
 
@@ -56,6 +57,8 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> {
       if (mounted) {
         setState(() => _error = 'Önceki özet işi yüklenemedi.');
       }
+    } finally {
+      if (mounted) setState(() => _restoring = false);
     }
   }
 
@@ -75,7 +78,7 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> {
   }
 
   Future<void> _submit() async {
-    if (_busy || _jobId != null) return;
+    if (_busy || _restoring || _jobId != null) return;
     setState(() {
       _busy = true;
       _error = null;
@@ -178,7 +181,7 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> {
           const SizedBox(height: 20),
           if (_jobId == null)
             FilledButton.icon(
-              onPressed: _busy ? null : _submit,
+              onPressed: (_busy || _restoring) ? null : _submit,
               icon: const Icon(Icons.auto_awesome),
               label: const Text('Özet oluştur'),
             ),
