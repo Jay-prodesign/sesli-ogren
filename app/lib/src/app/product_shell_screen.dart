@@ -13,6 +13,7 @@ import 'living_study_desk_home.dart';
 import 'listen_screen.dart';
 import 'material_workspace_screen.dart';
 import 'source_reader_screen.dart';
+import 'quick_recap_screen.dart';
 import 'profile_surface.dart';
 import 'progress_surface.dart';
 
@@ -149,6 +150,22 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
           builder: (_) => SourceReaderScreen(
             title: material.title,
             sourceText: extracted?.normalizedText ?? '',
+            onListen: () {
+              Navigator.of(context).pop();
+              Navigator.of(context).push<void>(
+                MaterialPageRoute(
+                  builder: (_) => ListenScreen(runtime: widget.runtime, materialId: selected),
+                ),
+              );
+            },
+            onRecap: () {
+              Navigator.of(context).pop();
+              Navigator.of(context).push<void>(
+                MaterialPageRoute(
+                  builder: (_) => QuickRecapScreen(runtime: widget.runtime, materialId: selected),
+                ),
+              );
+            },
           ),
         ),
       );
