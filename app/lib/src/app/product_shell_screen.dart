@@ -30,6 +30,7 @@ class ProductShellScreen extends StatefulWidget {
 
 class _ProductShellScreenState extends State<ProductShellScreen> {
   int _index = 0;
+  bool _deletingMaterial = false;
   late Future<_HomeSnapshot> _snapshot;
 
   @override
@@ -209,34 +210,47 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
         ],
       ),
     );
-    if (confirmed != true || !mounted) return;
+    if (confirmed != true || !mounted || _deletingMaterial) return;
 
-    final serverMaterialId = await widget.runtime.store.summaryServerMaterialId(
-      learner: widget.runtime.learner,
-      materialId: material.id,
-    );
-    if (serverMaterialId != null) {
-      final removed = await const SupabaseSourceSummaryGateway().deleteServerMaterial(serverMaterialId);
-      if (!mounted) return;
-      if (!removed) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Sunucudaki kaynak kopyası silinemedi. Materyal güvenlik için yerelde korunuyor.'),
-          ),
-        );
-        return;
+    setState(() => _deletingMaterial = true);
+    try {
+      final serverMaterialId = await widget.runtime.store.summaryServerMaterialId(
+        learner: widget.runtime.learner,
+        materialId: material.id,
+      );
+      if (serverMaterialId != null) {
+        final removed = await const SupabaseSourceSummaryGateway().deleteServerMaterial(serverMaterialId);
+        if (!mounted) return;
+        if (!removed) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Sunucudaki kaynak kopyası silinemedi. Materyal güvenlik için yerelde korunuyor.'),
+            ),
+          );
+          return;
+        }
       }
+
+      await widget.runtime.store.deleteMaterial(
+        learner: widget.runtime.learner,
+        materialId: material.id,
+        deletedAt: DateTime.now().toUtc(),
+      );
+      if (!mounted) return;
+
+      setState(_refresh);
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Materyal silindi.')));
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Silme işlemi tamamlanamadı. Materyalin durumunu kontrol edip tekrar deneyebilirsin.'),
+        ),
+      );
+      setState(_refresh);
+    } finally {
+      if (mounted) setState(() => _deletingMaterial = false);
     }
-
-    await widget.runtime.store.deleteMaterial(
-      learner: widget.runtime.learner,
-      materialId: material.id,
-      deletedAt: DateTime.now().toUtc(),
-    );
-    if (!mounted) return;
-
-    setState(_refresh);
-    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Materyal silindi.')));
   }
 
   Widget _readerShortcut(_HomeSnapshot data) => IconButton(
