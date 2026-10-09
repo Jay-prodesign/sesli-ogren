@@ -144,8 +144,10 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
   }
 
   Future<void> _openListen() async {
-    final material = (await _snapshot).material;
-    if (material == null || !mounted) return;
+    final snapshot = await _snapshot;
+    if (!mounted) return;
+    final material = snapshot.material;
+    if (material == null) return;
     await Navigator.of(context).push<void>(
       MaterialPageRoute(
         builder: (_) => ListenScreen(
