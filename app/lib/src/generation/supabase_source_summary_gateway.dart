@@ -56,7 +56,7 @@ class SupabaseSourceSummaryGateway {
       final client = await SupabaseLearnerAuth.clientForAuthenticatedRuntime();
       if (client.auth.currentSession == null) return false;
       await client.rpc<String>('retry_generation_job', params: {'p_job_id': jobId});
-      return dispatch(jobId);
+      return await dispatch(jobId);
     } catch (_) {
       return false;
     }
