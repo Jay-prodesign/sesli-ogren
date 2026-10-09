@@ -52,15 +52,30 @@ class _MaterialWorkspaceScreenState extends State<MaterialWorkspaceScreen> {
       learner: widget.runtime.learner,
       sourceVersionId: source.identity.sourceVersionId,
     );
-    final continuation = await widget.runtime.recall.reopen(learner: widget.runtime.learner, materialId: material.id);
+    LearningContinuation? continuation;
+    try {
+      continuation = await widget.runtime.recall.reopen(
+        learner: widget.runtime.learner,
+        materialId: material.id,
+      );
+    } on Exception {
+      continuation = await widget.runtime.recall.repairContinuation(
+        learner: widget.runtime.learner,
+        materialId: material.id,
+      );
+    }
     return _WorkspaceSnapshot(material: material, source: source, extracted: extracted, continuation: continuation);
   }
 
-  Future<void> _openQuickRecap() => Navigator.of(context).push<void>(
-    MaterialPageRoute(
-      builder: (_) => QuickRecapScreen(runtime: widget.runtime, materialId: widget.materialId),
-    ),
-  );
+  Future<void> _openQuickRecap() async {
+    await Navigator.of(context).push<void>(
+      MaterialPageRoute(
+        builder: (_) => QuickRecapScreen(runtime: widget.runtime, materialId: widget.materialId),
+      ),
+    );
+    if (!mounted) return;
+    setState(() => _snapshot = _load());
+  }
 
   Future<void> _openRecall() async {
     final treatment = LearningVisualTreatmentScope.maybeOf(context);
@@ -77,31 +92,47 @@ class _MaterialWorkspaceScreenState extends State<MaterialWorkspaceScreen> {
     setState(() => _snapshot = _load());
   }
 
-  Future<void> _openListen() => Navigator.of(context).push<void>(
-    MaterialPageRoute(
-      builder: (listenContext) => ListenScreen(
-        runtime: widget.runtime,
-        materialId: widget.materialId,
-        onRecall: () {
-          Navigator.of(listenContext).pop();
-          _openRecall();
-        },
+  Future<void> _openListen() async {
+    final navigator = Navigator.of(context);
+    await navigator.push<void>(
+      MaterialPageRoute(
+        builder: (listenContext) => ListenScreen(
+          runtime: widget.runtime,
+          materialId: widget.materialId,
+          onRecall: () {
+            Navigator.of(listenContext).pop();
+            _openRecall();
+          },
+        ),
       ),
-    ),
-  );
+    );
+    if (!mounted) return;
+    setState(() => _snapshot = _load());
+  }
 
-  Future<void> _openFocus(_WorkspaceSnapshot data) => Navigator.of(context).push<void>(
-    MaterialPageRoute(
-      builder: (_) =>
-          FocusScreen(runtime: widget.runtime, source: data.source, sourceText: data.extracted?.normalizedText ?? ''),
-    ),
-  );
+  Future<void> _openFocus(_WorkspaceSnapshot data) async {
+    await Navigator.of(context).push<void>(
+      MaterialPageRoute(
+        builder: (_) => FocusScreen(
+          runtime: widget.runtime,
+          source: data.source,
+          sourceText: data.extracted?.normalizedText ?? '',
+        ),
+      ),
+    );
+    if (!mounted) return;
+    setState(() => _snapshot = _load());
+  }
 
-  Future<void> _openExplain(SourceVersionRecord source) => Navigator.of(context).push<void>(
-    MaterialPageRoute(
-      builder: (_) => ExplainBackScreen(runtime: widget.runtime, source: source),
-    ),
-  );
+  Future<void> _openExplain(SourceVersionRecord source) async {
+    await Navigator.of(context).push<void>(
+      MaterialPageRoute(
+        builder: (_) => ExplainBackScreen(runtime: widget.runtime, source: source),
+      ),
+    );
+    if (!mounted) return;
+    setState(() => _snapshot = _load());
+  }
 
   @override
   Widget build(BuildContext context) {
