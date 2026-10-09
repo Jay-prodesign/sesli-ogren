@@ -108,7 +108,9 @@ class _MaterialWorkspaceScreenState extends State<MaterialWorkspaceScreen> {
       ),
     );
     if (!mounted) return;
-    setState(() => _snapshot = _load());
+    setState(() {
+      _snapshot = _load();
+    });
   }
 
   Future<void> _openRecall() async {
@@ -123,7 +125,9 @@ class _MaterialWorkspaceScreenState extends State<MaterialWorkspaceScreen> {
       ),
     );
     if (!mounted) return;
-    setState(() => _snapshot = _load());
+    setState(() {
+      _snapshot = _load();
+    });
   }
 
   Future<void> _openListen() async {
@@ -141,7 +145,9 @@ class _MaterialWorkspaceScreenState extends State<MaterialWorkspaceScreen> {
       ),
     );
     if (!mounted) return;
-    setState(() => _snapshot = _load());
+    setState(() {
+      _snapshot = _load();
+    });
   }
 
   Future<void> _openFocus(_WorkspaceSnapshot data) async {
@@ -152,7 +158,9 @@ class _MaterialWorkspaceScreenState extends State<MaterialWorkspaceScreen> {
       ),
     );
     if (!mounted) return;
-    setState(() => _snapshot = _load());
+    setState(() {
+      _snapshot = _load();
+    });
   }
 
   Future<void> _openExplain(SourceVersionRecord source) async {
@@ -162,7 +170,9 @@ class _MaterialWorkspaceScreenState extends State<MaterialWorkspaceScreen> {
       ),
     );
     if (!mounted) return;
-    setState(() => _snapshot = _load());
+    setState(() {
+      _snapshot = _load();
+    });
   }
 
   @override
