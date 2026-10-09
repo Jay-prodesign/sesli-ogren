@@ -360,24 +360,29 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> with WidgetsBinding
     };
   }
 
+  Future<String> _formattedExportText(ServerSummaryStatus status) async {
+    final material = await widget.runtime.store.material(
+      learner: widget.runtime.learner,
+      materialId: widget.materialId,
+    );
+    final title = material?.title.trim().isNotEmpty == true
+        ? material!.title
+        : 'Öğrenme materyali';
+    return [
+      'Hızlı özet — $title',
+      'AI tarafından oluşturulan özet · Sesli Öğren',
+      status.summary!,
+      if (status.keyPoints.isNotEmpty)
+        'Önemli noktalar:\n${status.keyPoints.map((point) => '• $point').join('\n')}',
+    ].join('\n\n');
+  }
+
   Future<void> _shareSummary(ServerSummaryStatus status) async {
-    final summary = status.summary;
-    if (summary == null || summary.trim().isEmpty) return;
+    if (status.summary?.trim().isNotEmpty != true) return;
     try {
-      final material = await widget.runtime.store.material(
-        learner: widget.runtime.learner,
-        materialId: widget.materialId,
-      );
+      final text = await _formattedExportText(status);
       if (!mounted) return;
-      final title = material?.title.trim().isNotEmpty == true ? material!.title : 'Öğrenme materyali';
-      final text = [
-        'Hızlı özet — $title',
-        'AI tarafından oluşturulan özet · Sesli Öğren',
-        summary,
-        if (status.keyPoints.isNotEmpty)
-          'Önemli noktalar:\n${status.keyPoints.map((point) => '• $point').join('\n')}',
-      ].join('\n\n');
-      await SharePlus.instance.share(ShareParams(text: text, subject: 'Hızlı özet — $title'));
+      await SharePlus.instance.share(ShareParams(text: text, subject: 'Hızlı özet · Sesli Öğren'));
     } catch (_) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -387,21 +392,10 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> with WidgetsBinding
   }
 
   Future<void> _copySummary(ServerSummaryStatus status) async {
-    final summary = status.summary;
-    if (summary == null || summary.trim().isEmpty) return;
+    if (status.summary?.trim().isNotEmpty != true) return;
     try {
-      final material = await widget.runtime.store.material(
-        learner: widget.runtime.learner,
-        materialId: widget.materialId,
-      );
+      final text = await _formattedExportText(status);
       if (!mounted) return;
-      final title = material?.title.trim().isNotEmpty == true ? material!.title : 'Öğrenme materyali';
-      final text = [
-        'Hızlı özet — $title',
-        'AI tarafından oluşturulan özet · Sesli Öğren',
-        summary,
-        if (status.keyPoints.isNotEmpty) 'Önemli noktalar:\n${status.keyPoints.map((point) => '• $point').join('\n')}',
-      ].join('\n\n');
       await Clipboard.setData(ClipboardData(text: text));
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
