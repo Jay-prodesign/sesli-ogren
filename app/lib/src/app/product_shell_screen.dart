@@ -39,6 +39,20 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
     _snapshot = _loadSnapshot();
   }
 
+  Future<LearningContinuation?> _continuationFor(MaterialId materialId) async {
+    try {
+      return await widget.runtime.recall.reopen(
+        learner: widget.runtime.learner,
+        materialId: materialId,
+      );
+    } on RecallLearningException {
+      return widget.runtime.recall.repairContinuation(
+        learner: widget.runtime.learner,
+        materialId: materialId,
+      );
+    }
+  }
+
   Future<_HomeSnapshot> _loadSnapshot() async {
     // A preview requires extra source I/O; keep the unscoped product path unchanged.
     // This read-only ancestor lookup is safe during initState (unlike dependOnInheritedWidgetOfExactType).
@@ -58,15 +72,20 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
             learner: widget.runtime.learner,
             sourceVersionId: source.identity.sourceVersionId,
           );
-    final continuation = await widget.runtime.recall.reopen(learner: widget.runtime.learner, materialId: material.id);
-    final progress = <ProgressItem>[];
-    for (final item in materials) {
-      progress.add(
-        ProgressItem(
+    final progress = await Future.wait(
+      materials.map(
+        (item) async => ProgressItem(
           material: item,
-          continuation: await widget.runtime.recall.reopen(learner: widget.runtime.learner, materialId: item.id),
+          continuation: await _continuationFor(item.id),
         ),
-      );
+      ),
+    );
+    LearningContinuation? continuation;
+    for (final item in progress) {
+      if (item.material.id == material.id) {
+        continuation = item.continuation;
+        break;
+      }
     }
     return _HomeSnapshot(
       material: material,
@@ -212,6 +231,36 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
         child: FutureBuilder<_HomeSnapshot>(
           future: _snapshot,
           builder: (context, snapshot) {
+            if (snapshot.hasError) {
+              return Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(28),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.sync_problem_rounded, size: 40),
+                      const SizedBox(height: 12),
+                      Text(
+                        'Kütüphane şu anda yüklenemedi.',
+                        style: Theme.of(context).textTheme.titleMedium,
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 8),
+                      const Text(
+                        'Kaynakların silinmedi. Yerel öğrenme durumunu yeniden yüklemeyi deneyebilirsin.',
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 16),
+                      OutlinedButton.icon(
+                        onPressed: () => setState(_refresh),
+                        icon: const Icon(Icons.refresh_rounded),
+                        label: const Text('Tekrar dene'),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            }
             if (!snapshot.hasData) {
               return const Center(child: CircularProgressIndicator());
             }
