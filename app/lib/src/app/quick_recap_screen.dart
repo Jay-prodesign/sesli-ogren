@@ -75,7 +75,9 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> with WidgetsBinding
       final accepted = await _gateway.retry(id);
       if (!mounted || _jobId != id) return;
       if (!accepted) {
-        setState(() => _error = 'Bu özet işi güvenli biçimde yeniden sıraya alınamadı. Daha sonra tekrar dene veya sunucu durumunu kontrol et.');
+        setState(
+          () => _error = 'Bu özet işi güvenli biçimde yeniden sıraya alınamadı. Daha sonra tekrar dene veya sunucu durumunu kontrol et.',
+        );
         return;
       }
       await _refresh();
@@ -366,15 +368,12 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> with WidgetsBinding
       learner: widget.runtime.learner,
       materialId: widget.materialId,
     );
-    final title = material?.title.trim().isNotEmpty == true
-        ? material!.title
-        : 'Öğrenme materyali';
+    final title = material?.title.trim().isNotEmpty == true ? material!.title : 'Öğrenme materyali';
     return [
       'Hızlı özet — $title',
       'AI tarafından oluşturulan özet · Sesli Öğren',
       status.summary!,
-      if (status.keyPoints.isNotEmpty)
-        'Önemli noktalar:\n${status.keyPoints.map((point) => '• $point').join('\n')}',
+      if (status.keyPoints.isNotEmpty) 'Önemli noktalar:\n${status.keyPoints.map((point) => '• $point').join('\n')}',
     ].join('\n\n');
   }
 
@@ -386,9 +385,8 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> with WidgetsBinding
       await SharePlus.instance.share(ShareParams(text: text, subject: 'Hızlı özet · Sesli Öğren'));
     } catch (_) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Özet paylaşılamadı. Tekrar deneyebilirsin.')),
-      );
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text('Özet paylaşılamadı. Tekrar deneyebilirsin.')));
     }
   }
 
@@ -399,14 +397,11 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> with WidgetsBinding
       if (!mounted) return;
       await Clipboard.setData(ClipboardData(text: text));
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Özet panoya kopyalandı')),
-      );
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Özet panoya kopyalandı')));
     } catch (_) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Özet kopyalanamadı. Tekrar deneyebilirsin.')),
-      );
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text('Özet kopyalanamadı. Tekrar deneyebilirsin.')));
     }
   }
 
@@ -428,17 +423,13 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> with WidgetsBinding
       if (!mounted) return;
       await Navigator.of(context).push<void>(
         MaterialPageRoute(
-          builder: (_) => SourceReaderScreen(
-            title: material.title,
-            sourceText: extracted?.normalizedText ?? '',
-          ),
+          builder: (_) => SourceReaderScreen(title: material.title, sourceText: extracted?.normalizedText ?? ''),
         ),
       );
     } catch (_) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Kaynak metni açılamadı. Tekrar deneyebilirsin.')),
-      );
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text('Kaynak metni açılamadı. Tekrar deneyebilirsin.')));
     }
   }
 
