@@ -1,0 +1,78 @@
+name: product-platform-build-validation
+
+on:
+  pull_request:
+    paths:
+      - "app/android/**"
+      - "app/ios/**"
+      - "app/pubspec.yaml"
+      - "app/pubspec.lock"
+      - ".flutter-version"
+      - ".github/workflows/product-platform-build-validation.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: product-platform-build-validation-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  android-release-compile:
+    name: Android release compile
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: app
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - id: flutter_pin
+        working-directory: .
+        shell: bash
+        run: |
+          version="$(tr -d '[:space:]' < .flutter-version)"
+          test -n "$version"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
+        with:
+          channel: stable
+          flutter-version: ${{ steps.flutter_pin.outputs.version }}
+          cache: true
+          pub-cache: true
+      - run: flutter pub get
+      - name: Compile Android release APK
+        run: |
+          flutter build apk --release --no-pub
+          test -s build/app/outputs/flutter-apk/app-release.apk
+
+  ios-release-compile:
+    name: iOS release compile (no codesign)
+    runs-on: macos-15
+    timeout-minutes: 40
+    defaults:
+      run:
+        working-directory: app
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - id: flutter_pin
+        working-directory: .
+        shell: bash
+        run: |
+          version="$(tr -d '[:space:]' < .flutter-version)"
+          test -n "$version"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
+        with:
+          channel: stable
+          flutter-version: ${{ steps.flutter_pin.outputs.version }}
+          cache: true
+          pub-cache: true
+      - run: flutter pub get
+      - name: Compile iOS release app
+        run: flutter build ios --release --no-codesign --no-pub
