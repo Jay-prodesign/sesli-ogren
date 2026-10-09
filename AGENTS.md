@@ -1,5 +1,7 @@
 # AGENTS.md — Operating Contract for Sesli Öğren (Learning App)
 
+> **Current execution clarification (2026-10-10, Founder-authorized):** ChatGPT may directly implement and commit routine, reversible Learning App product changes. The Brain/Claude/Codex role restrictions and mandatory handoff-per-edit / decision-request-per-routine-change wording below describe the historical delegation model; they are not active blockers to this authorization. The current repository implementation and live PR heads outrank stale SHA/status snapshots for engineering state. Continue across coherent product outcomes without micro-commit reporting or repeating already completed gates. Preserve historical decisions and required safety, source-truth, privacy, security, licensing, spending, merge, release and Founder visual-acceptance boundaries. Do not treat a visual candidate or passing code tests as Founder-approved visual direction.
+
 This file binds **every** agent (human-directed or automated) that reads or changes
 this repository. Where a tool-specific file (e.g. `CLAUDE.md`) exists, it adds to
 this contract and never relaxes it.
