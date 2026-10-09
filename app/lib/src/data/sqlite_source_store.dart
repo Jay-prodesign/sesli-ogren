@@ -443,16 +443,12 @@ FROM summary_jobs
     required SourceVersionId sourceVersionId,
     required String serverMaterialId,
   }) async {
-    await _database.insert(
-      'server_material_bindings',
-      {
-        'learner_id': learner.id.value,
-        'material_id': materialId.value,
-        'source_version_id': sourceVersionId.value,
-        'server_material_id': serverMaterialId,
-      },
-      conflictAlgorithm: ConflictAlgorithm.replace,
-    );
+    await _database.insert('server_material_bindings', {
+      'learner_id': learner.id.value,
+      'material_id': materialId.value,
+      'source_version_id': sourceVersionId.value,
+      'server_material_id': serverMaterialId,
+    }, conflictAlgorithm: ConflictAlgorithm.replace);
   }
 
   Future<CachedSummaryResult?> cachedSummaryResult({
@@ -542,27 +538,19 @@ FROM summary_jobs
     required String jobId,
   }) async {
     await _database.transaction((transaction) async {
-      await transaction.insert(
-        'server_material_bindings',
-        {
-          'learner_id': learner.id.value,
-          'material_id': materialId.value,
-          'source_version_id': sourceVersionId.value,
-          'server_material_id': serverMaterialId,
-        },
-        conflictAlgorithm: ConflictAlgorithm.replace,
-      );
-      await transaction.insert(
-        'summary_jobs',
-        {
-          'learner_id': learner.id.value,
-          'material_id': materialId.value,
-          'source_version_id': sourceVersionId.value,
-          'server_material_id': serverMaterialId,
-          'job_id': jobId,
-        },
-        conflictAlgorithm: ConflictAlgorithm.replace,
-      );
+      await transaction.insert('server_material_bindings', {
+        'learner_id': learner.id.value,
+        'material_id': materialId.value,
+        'source_version_id': sourceVersionId.value,
+        'server_material_id': serverMaterialId,
+      }, conflictAlgorithm: ConflictAlgorithm.replace);
+      await transaction.insert('summary_jobs', {
+        'learner_id': learner.id.value,
+        'material_id': materialId.value,
+        'source_version_id': sourceVersionId.value,
+        'server_material_id': serverMaterialId,
+        'job_id': jobId,
+      }, conflictAlgorithm: ConflictAlgorithm.replace);
     });
   }
 
