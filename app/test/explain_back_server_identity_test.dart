@@ -68,16 +68,10 @@ void main() {
   sqfliteFfiInit();
 
   testWidgets('Explain-back uses server material UUID and normalized grounding hash', (tester) async {
-    final store = await SqliteSourceStore.open(
-      factory: databaseFactoryFfiNoIsolate,
-      path: inMemoryDatabasePath,
-    );
+    final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
     addTearDown(store.close);
 
-    final ingest = SourceIngestService(
-      store: store,
-      pdfTextExtractor: const _UnusedPdfExtractor(),
-    );
+    final ingest = SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor());
     const localMaterialId = MaterialId('local-explain-back-material');
     await ingest.ingestPastedText(
       learner: AppRuntime.localM5LearnerFixture,
@@ -105,21 +99,17 @@ void main() {
       learner: AppRuntime.localM5LearnerFixture,
       store: store,
       ingest: ingest,
-      recall: RecallLearningService(
-        sourceStore: store,
-        learningStore: store.learningTruthStore(),
-      ),
+      recall: RecallLearningService(sourceStore: store, learningStore: store.learningTruthStore()),
       telemetry: store.operationalTelemetry(),
       explainBack: explainBack,
     );
 
     await tester.pumpWidget(
-      MaterialApp(home: ExplainBackScreen(runtime: runtime, source: source)),
+      MaterialApp(
+        home: ExplainBackScreen(runtime: runtime, source: source),
+      ),
     );
-    await tester.enterText(
-      find.byType(TextField),
-      'Fotosentezde ışık enerjisi kimyasal enerjiye dönüşür.',
-    );
+    await tester.enterText(find.byType(TextField), 'Fotosentezde ışık enerjisi kimyasal enerjiye dönüşür.');
     await tester.tap(find.text('Anlatımımı değerlendir'));
     await tester.pumpAndSettle();
 
@@ -137,10 +127,7 @@ void main() {
     final firstAttemptId = explainBack.lastRequest!.attemptId;
     await tester.tap(find.text('Tekrar kendi cümlelerimle anlat'));
     await tester.pumpAndSettle();
-    await tester.enterText(
-      find.byType(TextField),
-      'Fotosentezde ışık enerjisi kimyasal enerjiye dönüşür.',
-    );
+    await tester.enterText(find.byType(TextField), 'Fotosentezde ışık enerjisi kimyasal enerjiye dönüşür.');
     await tester.tap(find.text('Anlatımımı değerlendir'));
     await tester.pumpAndSettle();
 
@@ -149,16 +136,10 @@ void main() {
   });
 
   testWidgets('Explain-back deletes stale server source before rebinding a newer local source', (tester) async {
-    final store = await SqliteSourceStore.open(
-      factory: databaseFactoryFfiNoIsolate,
-      path: inMemoryDatabasePath,
-    );
+    final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
     addTearDown(store.close);
 
-    final ingest = SourceIngestService(
-      store: store,
-      pdfTextExtractor: const _UnusedPdfExtractor(),
-    );
+    final ingest = SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor());
     const materialId = MaterialId('explain-back-stale-binding-material');
     final first = await ingest.ingestPastedText(
       learner: AppRuntime.localM5LearnerFixture,
@@ -181,35 +162,23 @@ void main() {
       sourceName: 'Biyoloji notu',
     );
     const newServerMaterialId = '77777777-7777-4777-8777-777777777777';
-    final sourceGateway = _RecordingSourceGateway(
-      createdServerMaterialId: newServerMaterialId,
-    );
+    final sourceGateway = _RecordingSourceGateway(createdServerMaterialId: newServerMaterialId);
     final explainBack = _RecordingExplainBackGateway();
     final runtime = AppRuntime(
       learner: AppRuntime.localM5LearnerFixture,
       store: store,
       ingest: ingest,
-      recall: RecallLearningService(
-        sourceStore: store,
-        learningStore: store.learningTruthStore(),
-      ),
+      recall: RecallLearningService(sourceStore: store, learningStore: store.learningTruthStore()),
       telemetry: store.operationalTelemetry(),
       explainBack: explainBack,
     );
 
     await tester.pumpWidget(
       MaterialApp(
-        home: ExplainBackScreen(
-          runtime: runtime,
-          source: second.sourceVersion,
-          sourceGateway: sourceGateway,
-        ),
+        home: ExplainBackScreen(runtime: runtime, source: second.sourceVersion, sourceGateway: sourceGateway),
       ),
     );
-    await tester.enterText(
-      find.byType(TextField),
-      'Fotosentez ışık enerjisini kimyasal enerjiye dönüştürür.',
-    );
+    await tester.enterText(find.byType(TextField), 'Fotosentez ışık enerjisini kimyasal enerjiye dönüştürür.');
     await tester.tap(find.text('Anlatımımı değerlendir'));
     await tester.pumpAndSettle();
 
@@ -233,5 +202,4 @@ void main() {
       isNull,
     );
   });
-
 }
