@@ -121,7 +121,11 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
 
   Future<void> _openWorkspace([MaterialId? materialId]) async {
     final selected = materialId ?? (await _snapshot).material?.id;
-    if (selected == null || !mounted) return;
+    if (!mounted) return;
+    if (selected == null) {
+      await _openLearning();
+      return;
+    }
     final treatment = LearningVisualTreatmentScope.maybeOf(context);
     await Navigator.of(context).push<void>(
       MaterialPageRoute(
