@@ -16,7 +16,6 @@ import 'package:sesli_ogren/src/data/pdf_text_extractor.dart';
 import 'package:sesli_ogren/src/data/source_ingest_service.dart';
 import 'package:sesli_ogren/src/data/sqlite_source_store.dart';
 import 'package:sesli_ogren/src/learning/recall_learning_service.dart';
-import 'package:sesli_ogren/src/generation/grounded_explain_gateway.dart';
 import 'package:sesli_ogren/src/speech/device_speech_output.dart';
 import 'package:sesli_ogren/src/domain/authenticated_learner.dart';
 import 'package:sesli_ogren/src/domain/learning_truth.dart';
@@ -31,20 +30,6 @@ class _UnusedPdfExtractor implements PdfTextExtractor {
   Future<ExtractedPdf> extract(Uint8List bytes, {required String sourceName}) {
     throw UnimplementedError();
   }
-}
-
-class _ReadyExplainGateway implements GroundedExplainGateway {
-  const _ReadyExplainGateway();
-
-  @override
-  Future<GroundedExplainResult> explain(GroundedExplainRequest request) async => GroundedExplainReady(
-    sourceVersionId: request.sourceVersionId,
-    sourceContentDigest: request.sourceContentDigest,
-    explanation: 'Fotosentez, bitkinin ışık enerjisini kimyasal enerjiye dönüştürmesine yardımcı olan süreçtir.',
-    keyPoints: const ['Işık enerjisi kullanılır', 'Kimyasal enerji depolanır'],
-    language: 'tr-TR',
-    executionRef: 'test:grounded-explain',
-  );
 }
 
 class _RecordingAccountDeletionGateway implements AccountDeletionGateway {
@@ -332,9 +317,11 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Açıkla'), findsOneWidget);
     await tapVisible(tester, find.text('Açıkla'));
-    await pumpUntilFound(tester, find.text('Açıklama henüz hazır değil'));
-    expect(find.textContaining('yapay bir sonuç göstermiyoruz'), findsOneWidget);
-    Navigator.of(tester.element(find.text('Açıklama henüz hazır değil'))).pop();
+    await pumpUntilFound(tester, find.text('Anlatımımı değerlendir'));
+    expect(find.text('Kendi cümlelerinle anlat'), findsOneWidget);
+    expect(find.textContaining('öğrenme kanıtı veya ustalık iddiası oluşturmaz'), findsOneWidget);
+    expect(find.text('Kaynağına dayalı açıklama'), findsNothing);
+    Navigator.of(tester.element(find.text('Anlatımımı değerlendir'))).pop();
     await tester.pumpAndSettle();
     expect(find.text('Hatırla'), findsWidgets);
     expect(find.text('Dinle'), findsOneWidget);
@@ -794,7 +781,7 @@ void main() {
     expect(await store.material(learner: runtime.learner, materialId: AppRuntime.primaryMaterialId), isNotNull);
   });
 
-  testWidgets('grounded Explain labels generated interpretation and preserves Recall as active step', (tester) async {
+  testWidgets('workspace Explain stays an active teach-back and fails closed without evaluator', (tester) async {
     final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
     addTearDown(store.close);
     final ingest = SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor());
@@ -804,7 +791,6 @@ void main() {
       ingest: ingest,
       recall: RecallLearningService(sourceStore: store, learningStore: store.learningTruthStore()),
       telemetry: store.operationalTelemetry(),
-      explain: const _ReadyExplainGateway(),
     );
     await ingest.ingestPastedText(
       learner: runtime.learner,
@@ -818,34 +804,21 @@ void main() {
     await tapVisible(tester, find.text('Biyoloji notu').last);
     await pumpUntilFound(tester, find.text('Açıkla'));
     await tapVisible(tester, find.text('Açıkla'));
-    await pumpUntilFound(tester, find.text('Kaynağına dayalı açıklama'));
-
-    expect(find.textContaining('kaynak metnin kendisi değil'), findsOneWidget);
-    expect(find.textContaining('ışık enerjisini kimyasal enerjiye'), findsOneWidget);
-    expect(find.text('Önemli noktalar'), findsOneWidget);
-    expect(find.textContaining('öğrenme kanıtı oluşturmaz'), findsOneWidget);
-    await tester.scrollUntilVisible(
-      find.text('Kendi cümlelerinle anlat'),
-      260,
-      scrollable: find.byType(Scrollable).last,
-    );
-    await tester.pumpAndSettle();
-    expect(find.text('Hatırla ile dene'), findsOneWidget);
-    expect(find.text('Kendi cümlelerinle anlat'), findsOneWidget);
-    await tapVisible(tester, find.text('Kendi cümlelerinle anlat'));
     await pumpUntilFound(tester, find.text('Anlatımımı değerlendir'));
+
+    expect(find.text('Kendi cümlelerinle anlat'), findsOneWidget);
+    expect(find.text('Kaynağına dayalı açıklama'), findsNothing);
     expect(find.textContaining('öğrenme kanıtı veya ustalık iddiası oluşturmaz'), findsOneWidget);
-    await tester.enterText(find.byType(TextField), 'Fotosentez ışık enerjisini kimyasal enerjiye dönüştürür.');
+
+    await tester.enterText(
+      find.byType(TextField),
+      'Fotosentez ışık enerjisini kimyasal enerjiye dönüştürür.',
+    );
     await tapVisible(tester, find.text('Anlatımımı değerlendir'));
     await pumpUntilFound(tester, find.text('Henüz güvenilir değerlendirme yok'));
+
     expect(find.textContaining('öğrenme kanıtı olarak kaydetmiyoruz'), findsOneWidget);
-    Navigator.of(tester.element(find.text('Henüz güvenilir değerlendirme yok'))).pop();
-    await tester.pumpAndSettle();
-    await tester.scrollUntilVisible(find.text('Hatırla ile dene'), 260, scrollable: find.byType(Scrollable).last);
-    await tester.pumpAndSettle();
-    await tapVisible(tester, find.text('Hatırla ile dene'));
-    await pumpUntilFound(tester, find.byType(LearningSliceScreen));
-    expect(find.byType(LearningSliceScreen), findsOneWidget);
+    expect(find.text('Anlatımında temel fikirler görünüyor'), findsNothing);
   });
 
   testWidgets('answer exposure survives close and reopen without becoming independent', (tester) async {
