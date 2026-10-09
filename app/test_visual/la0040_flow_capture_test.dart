@@ -80,15 +80,30 @@ void main() {
     sourceExcerpt: 'Klorofil ışığın soğurulmasında görev alır.',
   );
 
-  Future<void> capture(WidgetTester tester, String name, Widget child) async {
-    tester.view.physicalSize = const Size(390, 844);
+  Future<void> capture(
+    WidgetTester tester,
+    String name,
+    Widget child, {
+    Size size = const Size(390, 844),
+    TextScaler textScaler = TextScaler.noScaling,
+  }) async {
+    tester.view.physicalSize = size;
     tester.view.devicePixelRatio = 1;
-    await tester.pumpWidget(MaterialApp(debugShowCheckedModeBanner: false, home: Scaffold(body: child)));
+    await tester.pumpWidget(
+      MaterialApp(
+        debugShowCheckedModeBanner: false,
+        home: MediaQuery(
+          data: MediaQueryData(textScaler: textScaler, disableAnimations: true),
+          child: Scaffold(body: child),
+        ),
+      ),
+    );
     // Resolve asynchronously decoded character assets before capturing the first frame.
     await tester.runAsync(() async {
       await Future<void>.delayed(const Duration(milliseconds: 250));
     });
     await tester.pump(const Duration(milliseconds: 300));
+    expect(tester.takeException(), isNull);
     await expectLater(find.byType(Scaffold), matchesGoldenFile('goldens/$name.png'));
     tester.view.resetPhysicalSize();
     tester.view.resetDevicePixelRatio();
@@ -108,6 +123,30 @@ void main() {
         onOpenListen: () {},
         onOpenMaterial: (_) {},
       ),
+    );
+  });
+
+  testWidgets('LA-0040 populated Home survives 320px + large type', (tester) async {
+    await capture(
+      tester,
+      'la0040_home_populated_320_text150',
+      SingleChildScrollView(
+        child: SizedBox(
+          height: 920,
+          child: LivingStudyDeskHome(
+            material: material,
+            continuation: continuation,
+            sourceText: source,
+            otherMaterials: const [],
+            onOpenWorkspace: () {},
+            onOpenLearning: () {},
+            onOpenListen: () {},
+            onOpenMaterial: (_) {},
+          ),
+        ),
+      ),
+      size: const Size(320, 700),
+      textScaler: const TextScaler.linear(1.5),
     );
   });
 
@@ -162,6 +201,47 @@ void main() {
         padding: const EdgeInsets.all(20),
         child: AtelierResult(result: result, answerInMemory: 'Klorofil', onContinue: () {}),
       ),
+    );
+  });
+
+  testWidgets('LA-0040 Recall and Result survive 320px + large type', (tester) async {
+    final controller = TextEditingController();
+    addTearDown(controller.dispose);
+    await capture(
+      tester,
+      'la0040_recall_320_text150',
+      SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
+        child: AtelierRecall(
+          prompt: const RecallPrompt(
+            id: RecallActionId('visual-action'),
+            materialId: materialId,
+            sourceVersionId: versionId,
+            promptText: 'Işığın soğurulmasında hangi pigment görev alır?',
+            anchor: SourceAnchor(startOffset: 75, endOffset: 84),
+            ruleVersion: 'visual-fixture',
+          ),
+          controller: controller,
+          busy: false,
+          onSubmit: () {},
+          onHint: () {},
+          onReveal: () {},
+          onUnknown: () {},
+        ),
+      ),
+      size: const Size(320, 700),
+      textScaler: const TextScaler.linear(1.5),
+    );
+
+    await capture(
+      tester,
+      'la0040_result_320_text150',
+      SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
+        child: AtelierResult(result: result, answerInMemory: 'Klorofil', onContinue: () {}),
+      ),
+      size: const Size(320, 700),
+      textScaler: const TextScaler.linear(1.5),
     );
   });
 }
