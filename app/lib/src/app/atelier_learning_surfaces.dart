@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../domain/learning_contracts.dart';
 import '../domain/learning_truth.dart';
 import 'companion_view.dart';
+import 'source_text_matching.dart';
 
 /// One source-led art direction across Reader, Recall and Result.
 /// Source/learning models and outcome classification stay canonical.
@@ -449,7 +450,7 @@ class AtelierResult extends StatelessWidget {
   Widget build(BuildContext context) {
     final excerpt = result.sourceExcerpt;
     final answer = result.correctAnswer.trim();
-    final index = answer.isEmpty ? -1 : excerpt.indexOf(answer);
+    final match = answer.isEmpty ? null : findFirstTurkishSourceTextMatch(excerpt, answer);
     final independent =
         result.evidence.outcome == RecallOutcome.correct && result.evidence.assistance == RecallAssistance.none;
     final assisted = result.evidence.outcome == RecallOutcome.helpedCorrect;
@@ -459,13 +460,13 @@ class AtelierResult extends StatelessWidget {
         ? const Color(0xFFFFF1D9)
         : const Color(0xFFF1F0EC);
     final spans = <TextSpan>[];
-    if (index == -1) {
+    if (match == null) {
       spans.add(TextSpan(text: excerpt));
     } else {
-      spans.add(TextSpan(text: excerpt.substring(0, index)));
+      spans.add(TextSpan(text: excerpt.substring(0, match.start)));
       spans.add(
         TextSpan(
-          text: excerpt.substring(index, index + answer.length),
+          text: excerpt.substring(match.start, match.end),
           style: const TextStyle(
             color: AtelierStyle.ink,
             backgroundColor: AtelierStyle.mark,
@@ -473,7 +474,7 @@ class AtelierResult extends StatelessWidget {
           ),
         ),
       );
-      spans.add(TextSpan(text: excerpt.substring(index + answer.length)));
+      spans.add(TextSpan(text: excerpt.substring(match.end)));
     }
     return Column(
       key: const ValueKey('la0040-atelier-result'),
@@ -634,7 +635,7 @@ class AtelierResult extends StatelessWidget {
                   TextSpan(children: spans),
                   style: const TextStyle(color: Color(0xFFE4EDEC), fontSize: 16, height: 1.54),
                 ),
-                if (index < 0) ...[
+                if (match == null) ...[
                   const SizedBox(height: 10),
                   const Text(
                     'Bu alıntıda doğru ifadeye birebir vurgu bulunamadı.',
