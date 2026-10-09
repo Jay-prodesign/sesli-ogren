@@ -118,7 +118,7 @@ Future<void> pumpUntilFound(WidgetTester tester, Finder finder, {int maxPumps = 
 }
 
 Future<void> tapVisible(WidgetTester tester, Finder finder) async {
-  await tester.ensureVisible(finder);
+  await tester.scrollUntilVisible(finder, 240, scrollable: find.byType(Scrollable).last);
   await tester.pump();
   await tester.tap(finder);
 }
