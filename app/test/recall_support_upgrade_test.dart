@@ -208,6 +208,81 @@ CREATE TABLE sentinel (
     }
   });
 
+  test('v10 database upgrades server material bindings without reset', () async {
+    final temp = await Directory.systemTemp.createTemp('sesli-ogren-v10-server-binding-');
+    final path = '${temp.path}/upgrade.db';
+    Database? legacy;
+    SqliteSourceStore? upgraded;
+
+    try {
+      legacy = await databaseFactoryFfi.openDatabase(
+        path,
+        options: OpenDatabaseOptions(
+          version: 10,
+          onCreate: (db, version) async {
+            await db.execute('''
+CREATE TABLE materials (
+  learner_id TEXT NOT NULL,
+  material_id TEXT NOT NULL,
+  PRIMARY KEY (learner_id, material_id)
+)
+''');
+            await db.execute('''
+CREATE TABLE source_versions (
+  learner_id TEXT NOT NULL,
+  material_id TEXT NOT NULL,
+  source_version_id TEXT NOT NULL,
+  PRIMARY KEY (learner_id, source_version_id)
+)
+''');
+            await db.execute('''
+CREATE TABLE summary_jobs (
+  learner_id TEXT NOT NULL,
+  material_id TEXT NOT NULL,
+  source_version_id TEXT NOT NULL,
+  server_material_id TEXT NOT NULL,
+  job_id TEXT NOT NULL,
+  summary_text TEXT,
+  key_points_json TEXT,
+  summary_cached_at_utc TEXT,
+  PRIMARY KEY (learner_id, material_id)
+)
+''');
+            await db.insert('materials', {'learner_id': 'owner', 'material_id': 'material-a'});
+            await db.insert('source_versions', {
+              'learner_id': 'owner',
+              'material_id': 'material-a',
+              'source_version_id': 'source-a',
+            });
+            await db.insert('summary_jobs', {
+              'learner_id': 'owner',
+              'material_id': 'material-a',
+              'source_version_id': 'source-a',
+              'server_material_id': 'server-a',
+              'job_id': 'job-a',
+            });
+          },
+        ),
+      );
+      await legacy.close();
+      legacy = null;
+
+      upgraded = await SqliteSourceStore.open(factory: databaseFactoryFfi, path: path);
+      expect(
+        await upgraded.summaryServerMaterialId(
+          learner: const AuthenticatedLearner(id: LearnerId('owner')),
+          materialId: const MaterialId('material-a'),
+          sourceVersionId: const SourceVersionId('source-a'),
+        ),
+        'server-a',
+      );
+    } finally {
+      await legacy?.close();
+      await upgraded?.close();
+      await temp.delete(recursive: true);
+    }
+  });
+
   test('v9 database upgrades durable summary cache columns without reset', () async {
     final temp = await Directory.systemTemp.createTemp('sesli-ogren-v9-summary-cache-');
     final path = '${temp.path}/upgrade.db';
