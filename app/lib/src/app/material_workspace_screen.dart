@@ -117,11 +117,15 @@ class _MaterialWorkspaceScreenState extends State<MaterialWorkspaceScreen> {
     ),
   );
 
-  Future<void> _openExplain(SourceVersionRecord source) => Navigator.of(context).push<void>(
-    MaterialPageRoute(
-      builder: (_) => ExplainBackScreen(runtime: widget.runtime, source: source),
-    ),
-  );
+  Future<void> _openExplain(SourceVersionRecord source) async {
+    await Navigator.of(context).push<void>(
+      MaterialPageRoute(
+        builder: (_) => ExplainBackScreen(runtime: widget.runtime, source: source),
+      ),
+    );
+    if (!mounted) return;
+    setState(() => _snapshot = _load());
+  }
 
   @override
   Widget build(BuildContext context) {
