@@ -1173,6 +1173,11 @@ LIMIT 1
         whereArgs: [learner.id.value, materialId.value],
       );
       await transaction.delete(
+        'server_material_bindings',
+        where: 'learner_id = ? AND material_id = ?',
+        whereArgs: [learner.id.value, materialId.value],
+      );
+      await transaction.delete(
         'active_recall_attempts',
         where: 'learner_id = ? AND material_id = ?',
         whereArgs: [learner.id.value, materialId.value],
