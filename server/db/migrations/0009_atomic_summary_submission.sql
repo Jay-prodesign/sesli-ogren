@@ -18,7 +18,8 @@ declare
   v_client_source_id text := btrim(coalesce(p_client_source_id, ''));
   v_idempotency_key text;
   v_expected_hash text := public.la_sha256(p_text);
-  v_existing_job public.generation_jobs%rowtype;
+  v_existing_material_id uuid;
+  v_existing_job_id uuid;
   v_existing_hash text;
   v_material uuid;
   v_job uuid;
@@ -29,8 +30,8 @@ begin
 
   v_idempotency_key := 'summary:source:' || v_client_source_id;
 
-  select j.*, s.content_hash
-    into v_existing_job, v_existing_hash
+  select j.material_id, j.id, s.content_hash
+    into v_existing_material_id, v_existing_job_id, v_existing_hash
   from public.generation_jobs j
   join public.source_assets s on s.id = j.source_asset_id
   where j.account_id = v_user
@@ -41,7 +42,7 @@ begin
     if v_existing_hash <> v_expected_hash then
       raise exception 'idempotency_key_reused' using errcode = '22023';
     end if;
-    return query select v_existing_job.material_id, v_existing_job.id;
+    return query select v_existing_material_id, v_existing_job_id;
     return;
   end if;
 
@@ -62,7 +63,7 @@ begin
       if v_existing_hash <> v_expected_hash then
         raise exception 'idempotency_key_reused' using errcode = '22023';
       end if;
-      return query select v_existing_job.material_id, v_existing_job.id;
+      return query select v_existing_material_id, v_existing_job_id;
       return;
   end;
 
