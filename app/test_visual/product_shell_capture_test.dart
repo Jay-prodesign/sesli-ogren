@@ -74,6 +74,16 @@ void main() {
       await tester.pump(const Duration(milliseconds: 400));
       expect(tester.takeException(), isNull);
       await expectLater(find.byType(Scaffold).first, matchesGoldenFile('goldens/product_shell_library_${populated ? 'populated' : 'empty'}_390x844.png'));
+      // Capture the other real navigation destinations as well. These frames
+      // must use the same runtime truth as Home and Library, not mock counters.
+      await tester.tap(find.text('İlerleme').last);
+      await tester.pump(const Duration(milliseconds: 400));
+      expect(tester.takeException(), isNull);
+      await expectLater(find.byType(Scaffold).first, matchesGoldenFile('goldens/product_shell_progress_${populated ? 'populated' : 'empty'}_390x844.png'));
+      await tester.tap(find.text('Profil').last);
+      await tester.pump(const Duration(milliseconds: 400));
+      expect(tester.takeException(), isNull);
+      await expectLater(find.byType(Scaffold).first, matchesGoldenFile('goldens/product_shell_profile_${populated ? 'populated' : 'empty'}_390x844.png'));
     });
   }
 }
