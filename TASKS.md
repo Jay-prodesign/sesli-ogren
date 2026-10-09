@@ -377,11 +377,11 @@ Next unallocated ID: **LA-0041**.
 - Depends on: LA-0038
 - Owner: Brain
 - Executor: ChatGPT (bounded reversible engineering)
-- Verification: engineering baseline is green at current branch checkpoints; representative Golden Product Slice capture exposed visual-quality gaps despite technical PASS. LA-0039 cannot close until LA-0040 resolves the reopened visual direction and Founder reviews the resulting treatment.
+- Verification: LA-0039 and LA-0040 are one integrated product outcome on PR #13. Engineering truth is SHA-specific; current implementation must preserve source/version/provenance, evidence semantics, error/recovery, persistence/reopen and navigation continuity while the visual direction is reworked. Founder visual disposition is required only to lock/close final visual direction, not to continue implementation.
 - Intent: preserve the validated Golden Product Slice as an engineering baseline while LA-0040 reevaluates the visual system, student desirability and companion treatment. Learning truth, provenance/evidence semantics and current feature scope remain authoritative.
 - Prior treatment: T2 Premium Active Learning Studio is now a baseline/control, not a locked final treatment.
 - Quality authority: [docs/qa/LA-0039_WORLD_CLASS_EXPERIENCE_GATE.md](docs/qa/LA-0039_WORLD_CLASS_EXPERIENCE_GATE.md) + LA-0040 VQG-01.
-- Current cursor: WAITING ON / COUPLED TO LA-0040 visual-direction audit; do not mark DONE on engineering confidence alone.
+- Current cursor: ACTIVE / COUPLED WITH LA-0040. Continue the coherent source → Reader/Listen → source-hidden Recall → truthful evidence/result → reasoned next action → reopen/resume outcome; do not wait on visual lock for independent product work.
 - Exec plan: [docs/exec-plans/LA-0039.md](docs/exec-plans/LA-0039.md)
 
 ##### LA-0040 — Million-Dollar Visual Audit & Student Experience Elevation
@@ -392,7 +392,7 @@ Next unallocated ID: **LA-0041**.
 - Tier: A — Founder-triggered visual/product decision
 - Depends on: LA-0039 engineering baseline
 - Owner: Brain + Founder protected visual disposition
-- Executor: ChatGPT (research/audit/spec + reversible product polish)
+- Executor: Founder-authorized active product/engineering executor (ChatGPT/Claude/Codex when assigned); reversible implementation is executable now
 - Verification: full-product visual packet and engineering gates are green at validated runtime head `93cd80be370e7a08f29358f175831a53bc474403`: bootstrap `37737380112` PASS, account-deletion `37737380121` PASS, product-bounded `37737380119` PASS (canonical format + Flutter analyze + bounded expanded tests). Final full visual capture `37737373695` PASS; artifact `11532626337` (`sha256:990e9494cef15d67b17fc5183ab50558cffe7818ab4cd7e13d138eb108eef748`) contains Home, Workspace, Recall prompt/payoff, Listen, Explain, Explain-Back, Focus, Library, Progress, Profile and narrow/text-scale stress evidence.
 - Intent: validate a distinctive, premium, show-don't-tell Learning App experience without inventing learner state or discarding prior Learning App research.
 - Audience: Sesli Öğren remains a broad learner-owned-material product; Turkish high-school students are the **priority-weighted initial commercial segment**, not the exclusive target.
@@ -406,7 +406,7 @@ Next unallocated ID: **LA-0041**.
 - Stress/red-team: [docs/qa/LA-0040_VISUAL_STRESS_REDTEAM.md](docs/qa/LA-0040_VISUAL_STRESS_REDTEAM.md).
 - Round-1 retest: [docs/qa/LA-0040_VQG_ROUND1_RETEST_2026-10-08.md](docs/qa/LA-0040_VQG_ROUND1_RETEST_2026-10-08.md).
 - Prior research/roadmap reconciliation: [docs/design/LA-0040_PRIOR_RESEARCH_ROADMAP_RECONCILIATION.md](docs/design/LA-0040_PRIOR_RESEARCH_ROADMAP_RECONCILIATION.md).
-- Current cursor: **CMD-0002 Founder visual FAIL corrective execution**. Reuse existing work; fix grounded visual hierarchy, production-fidelity and signature-payoff failures with three comparable real Flutter treatments. Founder must approve revised representative runtime before closure.
+- Current cursor: **LA-0039_LA-0040_INTEGRATED_OUTCOME**. The three-treatment tournament is a failed historical experiment, not an active requirement. Build and refine ONE coherent source-centered real-Flutter learning journey, integrate truth/error/recovery/continuity/accessibility as needed, and keep moving to the next dependency-ready roadmap outcome. Founder approval is required only for final visual lock/closure.
 - Exec plan: [docs/exec-plans/LA-0040.md](docs/exec-plans/LA-0040.md)
 
 
