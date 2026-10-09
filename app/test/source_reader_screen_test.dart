@@ -46,7 +46,7 @@ void main() {
 
     await tester.tap(find.byTooltip('Okuma ve öğrenme seçenekleri'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Kaynağı dinle'));
+    await tester.tap(find.text('Kaynağı dinle').last);
     await tester.pump();
     expect(listened, 1);
 
