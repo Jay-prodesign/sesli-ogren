@@ -36,6 +36,7 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
   String? _supportText;
   String? _inlineError;
   bool _busy = false;
+  bool _openingRecall = false;
 
   @override
   void initState() {
@@ -288,6 +289,8 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
   }
 
   Future<void> _openRecall() async {
+    if (_openingRecall) return;
+    _openingRecall = true;
     final stopwatch = Stopwatch()..start();
     await _recordEvent(
       OperationalEvent(
