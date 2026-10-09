@@ -36,7 +36,7 @@ class SqliteSourceStore implements SourceStore {
     final database = await selectedFactory.openDatabase(
       databasePath,
       options: OpenDatabaseOptions(
-        version: 10,
+        version: 11,
         onConfigure: (db) => db.execute('PRAGMA foreign_keys = ON'),
         onUpgrade: (db, oldVersion, newVersion) async {
           if (oldVersion < 2) {
@@ -65,6 +65,9 @@ class SqliteSourceStore implements SourceStore {
           }
           if (oldVersion < 10) {
             await _upgradeSummaryCacheSchema(db);
+          }
+          if (oldVersion < 11) {
+            await _upgradeServerMaterialBindingSchema(db);
           }
         },
         onCreate: (db, version) async {
@@ -268,6 +271,7 @@ CREATE TABLE learner_preferences (
 ''');
           await _upgradeSummaryJobsSchema(db);
           await _upgradeSummaryCacheSchema(db);
+          await _upgradeServerMaterialBindingSchema(db);
           await db.execute('''
 CREATE TABLE operational_events (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -361,6 +365,32 @@ CREATE TABLE IF NOT EXISTS summary_jobs (
     await add('summary_cached_at_utc', 'ALTER TABLE summary_jobs ADD COLUMN summary_cached_at_utc TEXT');
   }
 
+  static Future<void> _upgradeServerMaterialBindingSchema(Database db) async {
+    await db.execute('''
+CREATE TABLE IF NOT EXISTS server_material_bindings (
+  learner_id TEXT NOT NULL,
+  material_id TEXT NOT NULL,
+  source_version_id TEXT NOT NULL,
+  server_material_id TEXT NOT NULL,
+  PRIMARY KEY (learner_id, material_id),
+  FOREIGN KEY (learner_id, material_id)
+    REFERENCES materials (learner_id, material_id) ON DELETE CASCADE,
+  FOREIGN KEY (learner_id, source_version_id)
+    REFERENCES source_versions (learner_id, source_version_id) ON DELETE CASCADE
+)
+''');
+    await db.execute('''
+INSERT OR REPLACE INTO server_material_bindings (
+  learner_id,
+  material_id,
+  source_version_id,
+  server_material_id
+)
+SELECT learner_id, material_id, source_version_id, server_material_id
+FROM summary_jobs
+''');
+  }
+
   Future<String?> summaryJobId({
     required AuthenticatedLearner learner,
     required MaterialId materialId,
@@ -381,18 +411,48 @@ CREATE TABLE IF NOT EXISTS summary_jobs (
     required MaterialId materialId,
     SourceVersionId? sourceVersionId,
   }) async {
-    final rows = await _database.query(
-      'summary_jobs',
+    final where = sourceVersionId == null
+        ? 'learner_id = ? AND material_id = ?'
+        : 'learner_id = ? AND material_id = ? AND source_version_id = ?';
+    final whereArgs = sourceVersionId == null
+        ? <Object?>[learner.id.value, materialId.value]
+        : <Object?>[learner.id.value, materialId.value, sourceVersionId.value];
+
+    final bindings = await _database.query(
+      'server_material_bindings',
       columns: ['server_material_id'],
-      where: sourceVersionId == null
-          ? 'learner_id = ? AND material_id = ?'
-          : 'learner_id = ? AND material_id = ? AND source_version_id = ?',
-      whereArgs: sourceVersionId == null
-          ? [learner.id.value, materialId.value]
-          : [learner.id.value, materialId.value, sourceVersionId.value],
+      where: where,
+      whereArgs: whereArgs,
       limit: 1,
     );
-    return rows.isEmpty ? null : rows.first['server_material_id']! as String;
+    if (bindings.isNotEmpty) return bindings.first['server_material_id']! as String;
+
+    final legacyRows = await _database.query(
+      'summary_jobs',
+      columns: ['server_material_id'],
+      where: where,
+      whereArgs: whereArgs,
+      limit: 1,
+    );
+    return legacyRows.isEmpty ? null : legacyRows.first['server_material_id']! as String;
+  }
+
+  Future<void> saveServerMaterialBinding({
+    required AuthenticatedLearner learner,
+    required MaterialId materialId,
+    required SourceVersionId sourceVersionId,
+    required String serverMaterialId,
+  }) async {
+    await _database.insert(
+      'server_material_bindings',
+      {
+        'learner_id': learner.id.value,
+        'material_id': materialId.value,
+        'source_version_id': sourceVersionId.value,
+        'server_material_id': serverMaterialId,
+      },
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
   }
 
   Future<CachedSummaryResult?> cachedSummaryResult({
@@ -456,11 +516,18 @@ CREATE TABLE IF NOT EXISTS summary_jobs (
   }
 
   Future<void> clearSummaryJob({required AuthenticatedLearner learner, required MaterialId materialId}) async {
-    await _database.delete(
-      'summary_jobs',
-      where: 'learner_id = ? AND material_id = ?',
-      whereArgs: [learner.id.value, materialId.value],
-    );
+    await _database.transaction((transaction) async {
+      await transaction.delete(
+        'summary_jobs',
+        where: 'learner_id = ? AND material_id = ?',
+        whereArgs: [learner.id.value, materialId.value],
+      );
+      await transaction.delete(
+        'server_material_bindings',
+        where: 'learner_id = ? AND material_id = ?',
+        whereArgs: [learner.id.value, materialId.value],
+      );
+    });
   }
 
   Future<void> saveSummaryJob({
@@ -470,13 +537,29 @@ CREATE TABLE IF NOT EXISTS summary_jobs (
     required String serverMaterialId,
     required String jobId,
   }) async {
-    await _database.insert('summary_jobs', {
-      'learner_id': learner.id.value,
-      'material_id': materialId.value,
-      'source_version_id': sourceVersionId.value,
-      'server_material_id': serverMaterialId,
-      'job_id': jobId,
-    }, conflictAlgorithm: ConflictAlgorithm.replace);
+    await _database.transaction((transaction) async {
+      await transaction.insert(
+        'server_material_bindings',
+        {
+          'learner_id': learner.id.value,
+          'material_id': materialId.value,
+          'source_version_id': sourceVersionId.value,
+          'server_material_id': serverMaterialId,
+        },
+        conflictAlgorithm: ConflictAlgorithm.replace,
+      );
+      await transaction.insert(
+        'summary_jobs',
+        {
+          'learner_id': learner.id.value,
+          'material_id': materialId.value,
+          'source_version_id': sourceVersionId.value,
+          'server_material_id': serverMaterialId,
+          'job_id': jobId,
+        },
+        conflictAlgorithm: ConflictAlgorithm.replace,
+      );
+    });
   }
 
   static Future<void> _upgradeActiveRecallAttemptSchema(Database db) async {
