@@ -8,7 +8,9 @@ import '../generation/supabase_source_summary_gateway.dart';
 import '../learning/explain_back_gateway.dart';
 import 'app_runtime.dart';
 import 'app_theme.dart';
+import 'atelier_learning_surfaces.dart';
 import 'companion_view.dart';
+import 'living_study_desk_home.dart';
 
 class ExplainBackScreen extends StatefulWidget {
   const ExplainBackScreen({
@@ -185,8 +187,17 @@ class _ExplainBackScreenState extends State<ExplainBackScreen> {
   @override
   Widget build(BuildContext context) {
     final result = _result;
+    final living = LivingDeskReviewScope.active(context);
+    final accent = living ? AtelierStyle.teal : AppPalette.primary;
+    final accentSoft = living ? AtelierStyle.mint : AppPalette.primarySoft;
+    final truthSoft = living ? AtelierStyle.mint : AppPalette.signalSoft;
     return Scaffold(
-      appBar: AppBar(title: const Text('Kendi cümlelerinle anlat')),
+      backgroundColor: living ? AtelierStyle.canvas : null,
+      appBar: AppBar(
+        title: const Text('Kendi cümlelerinle anlat'),
+        backgroundColor: living ? AtelierStyle.canvas : null,
+        foregroundColor: living ? AtelierStyle.ink : null,
+      ),
       body: SafeArea(
         child: ListView(
           padding: const EdgeInsets.fromLTRB(20, 18, 20, 36),
@@ -195,7 +206,7 @@ class _ExplainBackScreenState extends State<ExplainBackScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 DecoratedBox(
-                  decoration: BoxDecoration(color: AppPalette.primarySoft, borderRadius: BorderRadius.circular(16)),
+                  decoration: BoxDecoration(color: accentSoft, borderRadius: BorderRadius.circular(16)),
                   child: const Padding(
                     padding: EdgeInsets.all(6),
                     child: CompanionView(state: CompanionVisualState.listen, size: 54),
@@ -208,7 +219,7 @@ class _ExplainBackScreenState extends State<ExplainBackScreen> {
                     children: [
                       DecoratedBox(
                         decoration: BoxDecoration(
-                          color: AppPalette.primarySoft,
+                          color: accentSoft,
                           borderRadius: BorderRadius.circular(999),
                         ),
                         child: Padding(
@@ -216,7 +227,7 @@ class _ExplainBackScreenState extends State<ExplainBackScreen> {
                           child: Text(
                             'KAYNAĞA BAKMADAN',
                             style: Theme.of(context).textTheme.labelSmall
-                                ?.copyWith(color: AppPalette.primary, fontWeight: FontWeight.w900, letterSpacing: 0.4),
+                                ?.copyWith(color: accent, fontWeight: FontWeight.w900, letterSpacing: 0.4),
                           ),
                         ),
                       ),
@@ -232,7 +243,7 @@ class _ExplainBackScreenState extends State<ExplainBackScreen> {
             ),
             const SizedBox(height: 14),
             DecoratedBox(
-              decoration: BoxDecoration(color: AppPalette.signalSoft, borderRadius: BorderRadius.circular(14)),
+              decoration: BoxDecoration(color: truthSoft, borderRadius: BorderRadius.circular(14)),
               child: const Padding(
                 padding: EdgeInsets.symmetric(horizontal: 13, vertical: 11),
                 child: Text('Bu aktif deneme değerlendirilmeden öğrenme kanıtı veya ustalık iddiası oluşturmaz.'),
@@ -254,6 +265,9 @@ class _ExplainBackScreenState extends State<ExplainBackScreen> {
             const SizedBox(height: 10),
             if (result == null)
               FilledButton(
+                style: living
+                    ? FilledButton.styleFrom(backgroundColor: AtelierStyle.teal, foregroundColor: Colors.white)
+                    : null,
                 onPressed: _submitting ? null : _submit,
                 child: Text(_submitting ? 'Değerlendiriliyor…' : 'Anlatımımı değerlendir'),
               ),
@@ -311,6 +325,7 @@ class _EvaluatedResult extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final living = LivingDeskReviewScope.active(context);
     final title = switch (result.kind) {
       ExplainBackEvaluationKind.sufficient => 'Anlatımında temel fikirler görünüyor',
       ExplainBackEvaluationKind.gapDetected => 'Bir noktayı güçlendirebiliriz',
@@ -320,7 +335,7 @@ class _EvaluatedResult extends StatelessWidget {
     final isStrong = result.kind == ExplainBackEvaluationKind.sufficient;
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: isStrong ? AppPalette.successSoft : AppPalette.attentionSoft,
+        color: isStrong ? (living ? AtelierStyle.mint : AppPalette.successSoft) : AppPalette.attentionSoft,
         borderRadius: BorderRadius.circular(18),
       ),
       child: Padding(
@@ -344,7 +359,7 @@ class _EvaluatedResult extends StatelessWidget {
               const SizedBox(height: 14),
               DecoratedBox(
                 decoration: BoxDecoration(
-                  color: AppPalette.surface.withValues(alpha: 0.72),
+                  color: (living ? AtelierStyle.paper : AppPalette.surface).withValues(alpha: 0.82),
                   borderRadius: BorderRadius.circular(14),
                 ),
                 child: Padding(

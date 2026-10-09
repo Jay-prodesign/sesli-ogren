@@ -7,6 +7,7 @@ import 'package:share_plus/share_plus.dart';
 import '../domain/learning_contracts.dart';
 import '../generation/supabase_source_summary_gateway.dart';
 import 'app_runtime.dart';
+import 'atelier_learning_surfaces.dart';
 import 'listen_screen.dart';
 import 'learning_slice_screen.dart';
 import 'la0040_visual_treatments.dart';
@@ -485,17 +486,55 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> with WidgetsBinding
   @override
   Widget build(BuildContext context) {
     final status = _status;
+    final living = LivingDeskReviewScope.active(context);
+    final accent = living ? AtelierStyle.teal : Theme.of(context).colorScheme.primary;
+    final muted = living ? AtelierStyle.muted : Theme.of(context).colorScheme.onSurfaceVariant;
+    final outlineStyle = living
+        ? OutlinedButton.styleFrom(
+            foregroundColor: AtelierStyle.teal,
+            side: const BorderSide(color: AtelierStyle.line),
+          )
+        : null;
+    final primaryStyle = living
+        ? FilledButton.styleFrom(backgroundColor: AtelierStyle.ink, foregroundColor: Colors.white)
+        : null;
     return Scaffold(
-      appBar: AppBar(title: const Text('Hızlı özet')),
+      backgroundColor: living ? AtelierStyle.canvas : null,
+      appBar: AppBar(
+        title: const Text('Hızlı özet'),
+        backgroundColor: living ? AtelierStyle.canvas : null,
+        foregroundColor: living ? AtelierStyle.ink : null,
+      ),
       body: ListView(
         padding: const EdgeInsets.all(24),
         children: [
-          Text('Kaynağına bağlı AI özeti', style: Theme.of(context).textTheme.headlineSmall),
+          if (living) ...[
+            Text(
+              'KAYNAĞA BAĞLI AI',
+              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                color: accent,
+                fontWeight: FontWeight.w900,
+                letterSpacing: 0.9,
+              ),
+            ),
+            const SizedBox(height: 7),
+          ],
+          Text(
+            'Kaynağına bağlı AI özeti',
+            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+              color: living ? AtelierStyle.ink : null,
+              fontWeight: living ? FontWeight.w900 : null,
+            ),
+          ),
           const SizedBox(height: 12),
-          const Text('Özet, yüklediğin kaynağın güncel metnine dayanır. Kaynak değiştiğinde eski özet gösterilmez.'),
+          Text(
+            'Özet, yüklediğin kaynağın güncel metnine dayanır. Kaynak değiştiğinde eski özet gösterilmez.',
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: muted),
+          ),
           const SizedBox(height: 20),
           if (_jobId == null)
             FilledButton.icon(
+              style: primaryStyle,
               onPressed: (_busy || _restoring) ? null : _submit,
               icon: const Icon(Icons.auto_awesome),
               label: const Text('Özet oluştur'),
@@ -509,7 +548,7 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> with WidgetsBinding
               const LinearProgressIndicator(),
             ],
             const SizedBox(height: 12),
-            OutlinedButton(onPressed: _dispatching ? null : _refresh, child: const Text('Durumu yenile')),
+            OutlinedButton(style: outlineStyle, onPressed: _dispatching ? null : _refresh, child: const Text('Durumu yenile')),
             if (status?.state == 'QUEUED' || status?.state == 'PROCESSING') ...[
               const SizedBox(height: 8),
               OutlinedButton(
@@ -522,6 +561,7 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> with WidgetsBinding
             if (status?.state == 'FAILED_RETRYABLE' && status?.failureClass != 'reconciliation_required') ...[
               const SizedBox(height: 8),
               FilledButton.icon(
+                style: primaryStyle,
                 onPressed: _dispatching ? null : _retryCurrent,
                 icon: const Icon(Icons.refresh_rounded),
                 label: const Text('Güvenli yeniden dene'),
@@ -541,21 +581,25 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> with WidgetsBinding
               runSpacing: 8,
               children: [
                 OutlinedButton.icon(
+                  style: outlineStyle,
                   onPressed: _openOriginalSource,
                   icon: const Icon(Icons.menu_book_outlined),
                   label: const Text('Kaynağı oku'),
                 ),
                 OutlinedButton.icon(
+                  style: outlineStyle,
                   onPressed: () => _shareSummary(status),
                   icon: const Icon(Icons.share_outlined),
                   label: const Text('Paylaş'),
                 ),
                 OutlinedButton.icon(
+                  style: outlineStyle,
                   onPressed: () => _copySummary(status),
                   icon: const Icon(Icons.copy_outlined),
                   label: const Text('Özeti kopyala'),
                 ),
                 OutlinedButton.icon(
+                  style: outlineStyle,
                   onPressed: () {
                     final recapText = <String>[
                       status.summary!,
@@ -583,11 +627,13 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> with WidgetsBinding
                   label: const Text('Dinle'),
                 ),
                 OutlinedButton.icon(
+                  style: outlineStyle,
                   onPressed: _openRecall,
                   icon: const Icon(Icons.psychology_alt_outlined),
                   label: const Text('Hatırla'),
                 ),
                 OutlinedButton.icon(
+                  style: outlineStyle,
                   onPressed: _openExplain,
                   icon: const Icon(Icons.record_voice_over_outlined),
                   label: const Text('Kendi cümlelerinle açıkla'),

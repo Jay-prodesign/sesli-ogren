@@ -8,6 +8,7 @@ import '../generation/supabase_source_summary_gateway.dart';
 import '../learning/focus_help_gateway.dart';
 import 'app_runtime.dart';
 import 'app_theme.dart';
+import 'atelier_learning_surfaces.dart';
 import 'companion_view.dart';
 import 'explain_back_screen.dart';
 import 'explain_screen.dart';
@@ -323,9 +324,23 @@ class _FocusScreenState extends State<FocusScreen> {
     final theme = Theme.of(context);
     final readyHelp = help is FocusHelpReady ? help as FocusHelpReady : null;
     final unavailable = help is FocusHelpUnavailable ? help as FocusHelpUnavailable : null;
+    final living = LivingDeskReviewScope.active(context);
+    final accent = living ? AtelierStyle.teal : AppPalette.signal;
+    final accentSoft = living ? AtelierStyle.mint : AppPalette.signalSoft;
+    final paper = living ? AtelierStyle.paper : AppPalette.surface;
+    final line = living ? AtelierStyle.line : AppPalette.outline;
+    final ink = living ? AtelierStyle.ink : theme.colorScheme.onSurface;
+    final hero = living ? AtelierStyle.ink : AppPalette.primaryDark;
+    final mark = living ? AtelierStyle.mark : AppPalette.momentum;
+    final markInk = living ? AtelierStyle.ink : AppPalette.momentumInk;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Odaklan')),
+      backgroundColor: living ? AtelierStyle.canvas : null,
+      appBar: AppBar(
+        title: const Text('Odaklan'),
+        backgroundColor: living ? AtelierStyle.canvas : null,
+        foregroundColor: living ? AtelierStyle.ink : null,
+      ),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(20, 16, 20, 36),
         children: [
@@ -333,7 +348,7 @@ class _FocusScreenState extends State<FocusScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               DecoratedBox(
-                decoration: BoxDecoration(color: AppPalette.momentum, borderRadius: BorderRadius.circular(16)),
+                decoration: BoxDecoration(color: mark, borderRadius: BorderRadius.circular(16)),
                 child: Padding(
                   padding: const EdgeInsets.all(6),
                   child: CompanionView(state: busy ? CompanionVisualState.think : CompanionVisualState.idle, size: 56),
@@ -346,7 +361,7 @@ class _FocusScreenState extends State<FocusScreen> {
                   children: [
                     DecoratedBox(
                       decoration: BoxDecoration(
-                        color: const Color(0xFFF0F9D7),
+                        color: living ? AtelierStyle.mint : const Color(0xFFF0F9D7),
                         borderRadius: BorderRadius.circular(999),
                       ),
                       child: Padding(
@@ -354,7 +369,7 @@ class _FocusScreenState extends State<FocusScreen> {
                         child: Text(
                           'KISA ODAK · 3 ADIM',
                           style: theme.textTheme.labelSmall?.copyWith(
-                            color: AppPalette.momentumInk,
+                            color: markInk,
                             fontWeight: FontWeight.w900,
                             letterSpacing: 0.45,
                           ),
@@ -373,7 +388,7 @@ class _FocusScreenState extends State<FocusScreen> {
           ),
           const SizedBox(height: 14),
           DecoratedBox(
-            decoration: BoxDecoration(color: AppPalette.signalSoft, borderRadius: BorderRadius.circular(14)),
+            decoration: BoxDecoration(color: accentSoft, borderRadius: BorderRadius.circular(14)),
             child: const Padding(
               padding: EdgeInsets.symmetric(horizontal: 13, vertical: 11),
               child: Text('Bu oturum güncel kaynağa bağlıdır. Yardım almak tek başına öğrenme kanıtı oluşturmaz.'),
@@ -384,9 +399,9 @@ class _FocusScreenState extends State<FocusScreen> {
           const SizedBox(height: 9),
           DecoratedBox(
             decoration: BoxDecoration(
-              color: AppPalette.surface,
+              color: paper,
               borderRadius: BorderRadius.circular(18),
-              border: Border.all(color: AppPalette.outline),
+              border: Border.all(color: line),
             ),
             child: Padding(
               padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
@@ -395,19 +410,19 @@ class _FocusScreenState extends State<FocusScreen> {
                 children: [
                   Row(
                     children: [
-                      const Icon(Icons.article_outlined, color: AppPalette.signal, size: 18),
+                      Icon(Icons.article_outlined, color: accent, size: 18),
                       const SizedBox(width: 7),
                       Text(
                         'Kaynak metni',
                         style: theme.textTheme.labelMedium?.copyWith(
-                          color: AppPalette.signal,
+                          color: accent,
                           fontWeight: FontWeight.w800,
                         ),
                       ),
                     ],
                   ),
                   const SizedBox(height: 10),
-                  Text(widget.sourceText, style: theme.textTheme.bodyMedium?.copyWith(height: 1.5)),
+                  Text(widget.sourceText, style: theme.textTheme.bodyMedium?.copyWith(height: 1.5, color: ink)),
                 ],
               ),
             ),
@@ -434,6 +449,9 @@ class _FocusScreenState extends State<FocusScreen> {
               const SizedBox(width: 8),
               Expanded(
                 child: FilledButton.icon(
+                  style: living
+                      ? FilledButton.styleFrom(backgroundColor: AtelierStyle.teal, foregroundColor: Colors.white)
+                      : null,
                   onPressed: busy ? null : () => request(FocusHelpKind.directExplanation),
                   icon: const Icon(Icons.auto_awesome_outlined),
                   label: const Text('Sorumu açıkla'),
@@ -445,7 +463,7 @@ class _FocusScreenState extends State<FocusScreen> {
           if (readyHelp != null) ...[
             const SizedBox(height: 16),
             DecoratedBox(
-              decoration: BoxDecoration(color: AppPalette.primarySoft, borderRadius: BorderRadius.circular(18)),
+              decoration: BoxDecoration(color: accentSoft, borderRadius: BorderRadius.circular(18)),
               child: Padding(
                 padding: const EdgeInsets.all(15),
                 child: Column(
@@ -490,7 +508,7 @@ class _FocusScreenState extends State<FocusScreen> {
           ],
           const SizedBox(height: 22),
           DecoratedBox(
-            decoration: BoxDecoration(color: AppPalette.primaryDark, borderRadius: BorderRadius.circular(18)),
+            decoration: BoxDecoration(color: hero, borderRadius: BorderRadius.circular(18)),
             child: Padding(
               padding: const EdgeInsets.all(15),
               child: Column(
@@ -500,10 +518,10 @@ class _FocusScreenState extends State<FocusScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       DecoratedBox(
-                        decoration: BoxDecoration(color: AppPalette.momentum, borderRadius: BorderRadius.circular(999)),
+                        decoration: BoxDecoration(color: mark, borderRadius: BorderRadius.circular(999)),
                         child: const Padding(
                           padding: EdgeInsets.all(7),
-                          child: Icon(Icons.arrow_forward_rounded, color: AppPalette.momentumInk, size: 17),
+                          child: Icon(Icons.arrow_forward_rounded, color: markInk, size: 17),
                         ),
                       ),
                       const SizedBox(width: 10),

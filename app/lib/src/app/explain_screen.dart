@@ -8,6 +8,7 @@ import '../generation/grounded_explain_gateway.dart';
 import '../generation/supabase_source_summary_gateway.dart';
 import 'app_runtime.dart';
 import 'app_theme.dart';
+import 'atelier_learning_surfaces.dart';
 import 'explain_back_screen.dart';
 import 'learning_slice_screen.dart';
 import 'la0040_visual_treatments.dart';
@@ -148,9 +149,16 @@ class _ExplainScreenState extends State<ExplainScreen> {
   void _retry() => setState(() => _result = _request());
 
   @override
-  Widget build(BuildContext context) => Scaffold(
-    appBar: AppBar(title: const Text('Açıkla')),
-    body: SafeArea(
+  Widget build(BuildContext context) {
+    final living = LivingDeskReviewScope.active(context);
+    return Scaffold(
+      backgroundColor: living ? AtelierStyle.canvas : null,
+      appBar: AppBar(
+        title: const Text('Açıkla'),
+        backgroundColor: living ? AtelierStyle.canvas : null,
+        foregroundColor: living ? AtelierStyle.ink : null,
+      ),
+      body: SafeArea(
       child: FutureBuilder<GroundedExplainResult>(
         future: _result,
         builder: (context, snapshot) {
@@ -170,8 +178,8 @@ class _ExplainScreenState extends State<ExplainScreen> {
           return _Unavailable(reason: (result as GroundedExplainUnavailable).reason, onRetry: _retry);
         },
       ),
-    ),
-  );
+    );
+  }
 }
 
 class _Ready extends StatelessWidget {
@@ -184,19 +192,25 @@ class _Ready extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final living = LivingDeskReviewScope.active(context);
+    final accent = living ? AtelierStyle.teal : AppPalette.attention;
+    final accentSoft = living ? AtelierStyle.mint : AppPalette.attentionSoft;
+    final paper = living ? AtelierStyle.paper : AppPalette.surface;
+    final line = living ? AtelierStyle.line : AppPalette.outline;
+    final hero = living ? AtelierStyle.ink : AppPalette.primaryDark;
     return ListView(
       padding: const EdgeInsets.fromLTRB(20, 16, 20, 36),
       children: [
         Row(
           children: [
             DecoratedBox(
-              decoration: BoxDecoration(color: AppPalette.attentionSoft, borderRadius: BorderRadius.circular(999)),
+              decoration: BoxDecoration(color: accentSoft, borderRadius: BorderRadius.circular(999)),
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                 child: Text(
                   'ÜRETİLMİŞ AÇIKLAMA',
                   style: theme.textTheme.labelSmall?.copyWith(
-                    color: AppPalette.attention,
+                    color: accent,
                     fontWeight: FontWeight.w900,
                     letterSpacing: 0.4,
                   ),
@@ -204,7 +218,7 @@ class _Ready extends StatelessWidget {
               ),
             ),
             const Spacer(),
-            const Icon(Icons.auto_awesome_outlined, color: AppPalette.attention, size: 20),
+            Icon(Icons.auto_awesome_outlined, color: accent, size: 20),
           ],
         ),
         const SizedBox(height: 14),
@@ -222,9 +236,9 @@ class _Ready extends StatelessWidget {
         const SizedBox(height: 18),
         DecoratedBox(
           decoration: BoxDecoration(
-            color: AppPalette.surface,
+            color: paper,
             borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: AppPalette.outline),
+            border: Border.all(color: line),
           ),
           child: Padding(
             padding: const EdgeInsets.all(18),
@@ -247,13 +261,13 @@ class _Ready extends StatelessWidget {
           const SizedBox(height: 10),
           for (final point in result.keyPoints) ...[
             DecoratedBox(
-              decoration: BoxDecoration(color: AppPalette.primarySoft, borderRadius: BorderRadius.circular(14)),
+              decoration: BoxDecoration(color: living ? AtelierStyle.mint : AppPalette.primarySoft, borderRadius: BorderRadius.circular(14)),
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 11),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Icon(Icons.bolt_rounded, color: AppPalette.primary, size: 18),
+                    Icon(Icons.bolt_rounded, color: living ? AtelierStyle.teal : AppPalette.primary, size: 18),
                     const SizedBox(width: 9),
                     Expanded(child: Text(point)),
                   ],
@@ -265,13 +279,13 @@ class _Ready extends StatelessWidget {
         ],
         const SizedBox(height: 16),
         DecoratedBox(
-          decoration: BoxDecoration(color: AppPalette.signalSoft, borderRadius: BorderRadius.circular(16)),
+          decoration: BoxDecoration(color: living ? AtelierStyle.mint : AppPalette.signalSoft, borderRadius: BorderRadius.circular(16)),
           child: const Padding(
             padding: EdgeInsets.all(14),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Icon(Icons.verified_outlined, color: AppPalette.signal, size: 20),
+                Icon(Icons.verified_outlined, color: living ? AtelierStyle.teal : AppPalette.signal, size: 20),
                 SizedBox(width: 10),
                 Expanded(
                   child: Text(
@@ -284,7 +298,7 @@ class _Ready extends StatelessWidget {
         ),
         const SizedBox(height: 18),
         DecoratedBox(
-          decoration: BoxDecoration(color: AppPalette.primaryDark, borderRadius: BorderRadius.circular(20)),
+          decoration: BoxDecoration(color: hero, borderRadius: BorderRadius.circular(20)),
           child: Padding(
             padding: const EdgeInsets.all(16),
             child: Column(
@@ -301,7 +315,7 @@ class _Ready extends StatelessWidget {
                 ),
                 const SizedBox(height: 14),
                 FilledButton.icon(
-                  style: FilledButton.styleFrom(backgroundColor: Colors.white, foregroundColor: AppPalette.primaryDark),
+                  style: FilledButton.styleFrom(backgroundColor: Colors.white, foregroundColor: hero),
                   onPressed: () => Navigator.of(context).push<void>(
                     MaterialPageRoute(
                       builder: (_) =>
