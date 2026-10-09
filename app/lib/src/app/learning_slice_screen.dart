@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import '../domain/learning_contracts.dart';
 import '../domain/learning_truth.dart';
 import '../domain/operational_event.dart';
+import '../learning/recall_learning_service.dart';
 import 'app_runtime.dart';
 import 'app_theme.dart';
 import 'companion_view.dart';
@@ -98,10 +99,18 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
         return;
       }
 
-      final continuation = await widget.runtime.recall.reopen(
-        learner: widget.runtime.learner,
-        materialId: widget.materialId,
-      );
+      LearningContinuation? continuation;
+      try {
+        continuation = await widget.runtime.recall.reopen(
+          learner: widget.runtime.learner,
+          materialId: widget.materialId,
+        );
+      } on RecallLearningException {
+        continuation = await widget.runtime.recall.repairContinuation(
+          learner: widget.runtime.learner,
+          materialId: widget.materialId,
+        );
+      }
       if (!mounted) return;
 
       if (continuation != null) {
