@@ -139,22 +139,27 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
   Future<void> _openListen() async {
     final material = (await _snapshot).material;
     if (material == null || !mounted) return;
+    final materialId = material.id;
+    var continueToRecall = false;
     await Navigator.of(context).push<void>(
       MaterialPageRoute(
-        builder: (_) => ListenScreen(
+        builder: (listenContext) => ListenScreen(
           runtime: widget.runtime,
-          materialId: material.id,
+          materialId: materialId,
           onRecall: () {
-            Navigator.of(context).pop();
-            _openLearningFor(material.id);
+            continueToRecall = true;
+            Navigator.of(listenContext).pop();
           },
         ),
       ),
     );
-    // Listen can update the source-bound resume checkpoint. Rebuild Home and
-    // Progress after returning so the learner sees the latest continuation.
     if (!mounted) return;
+    // The player may have saved a resume checkpoint even when the user
+    // returns without starting Recall.
     setState(_refresh);
+    if (continueToRecall) {
+      await _openLearningFor(materialId);
+    }
   }
 
   Future<void> _deleteMaterial(MaterialRecord material) async {
