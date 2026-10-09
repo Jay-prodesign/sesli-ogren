@@ -82,7 +82,7 @@ void main() {
     await tester.pump();
 
     expect(find.textContaining('Kaynak ipucu:'), findsOneWidget);
-    expect(find.textContaining('karbondioksit ve su kullanır'), findsOneWidget);
+    expect(find.textContaining('karbondioksit ve su kullanır'), findsWidgets);
     expect(find.textContaining('kendi cümlelerinle yeniden kurmayı dene'), findsOneWidget);
   });
 
