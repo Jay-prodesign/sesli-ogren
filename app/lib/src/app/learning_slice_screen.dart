@@ -1058,8 +1058,7 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
         materialId: widget.materialId,
       );
       if (!mounted) return;
-      if (source == null ||
-          source.identity.sourceVersionId != continuation.state.sourceVersionId) {
+      if (source == null || source.identity.sourceVersionId != continuation.state.sourceVersionId) {
         _showRecoverableError();
         return;
       }
@@ -1085,8 +1084,7 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Text('Kaynağını yeniden incele',
-                      style: Theme.of(sheetContext).textTheme.titleLarge),
+                  Text('Kaynağını yeniden incele', style: Theme.of(sheetContext).textTheme.titleLarge),
                   const SizedBox(height: 8),
                   const Text('Bu metin son hatırlama denemenin kaynak sürümünden geliyor.'),
                   const SizedBox(height: 16),
@@ -1124,8 +1122,8 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
             needsSource
                 ? 'Önce kaynağı gözden geçir'
                 : canRetry
-                    ? 'Bir kez daha hatırla'
-                    : 'Bugünlük iyi bir adım',
+                ? 'Bir kez daha hatırla'
+                : 'Bugünlük iyi bir adım',
             style: Theme.of(context).textTheme.titleLarge,
           ),
           const SizedBox(height: 10),
@@ -1138,10 +1136,7 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
               label: const Text('Kaynağı gözden geçir'),
             ),
             const SizedBox(height: 8),
-            OutlinedButton(
-              onPressed: _busy ? null : _openRecall,
-              child: const Text('Yeniden hatırlamayı dene'),
-            ),
+            OutlinedButton(onPressed: _busy ? null : _openRecall, child: const Text('Yeniden hatırlamayı dene')),
           ] else if (canRetry)
             FilledButton.icon(
               onPressed: _busy ? null : _openRecall,
