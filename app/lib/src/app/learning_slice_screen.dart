@@ -174,9 +174,7 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
         createdAt: DateTime.now().toUtc(),
       ),
     );
-    _setBusy(true);
     try {
-      if (mounted) setState(() => _inlineError = null);
       if (mounted) setState(() => _inlineError = null);
       final bytes = await file.readAsBytes();
       final ingestResult = await widget.runtime.ingest.ingestPdf(
