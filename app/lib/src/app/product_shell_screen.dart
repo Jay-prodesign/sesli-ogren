@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../domain/learning_contracts.dart';
 import '../domain/learning_truth.dart';
 import '../generation/supabase_source_summary_gateway.dart';
+import '../learning/recall_learning_service.dart';
 import 'app_runtime.dart';
 import 'app_theme.dart';
 import 'companion_view.dart';
@@ -370,39 +371,73 @@ class _HomeSurface extends StatelessWidget {
 
     return ListView(
       key: const ValueKey('home-surface'),
-      padding: const EdgeInsets.fromLTRB(20, 22, 20, 36),
+      padding: const EdgeInsets.fromLTRB(24, 26, 24, 40),
       children: [
         Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             DecoratedBox(
               decoration: BoxDecoration(
-                color: _companionSoft(data.continuation),
-                borderRadius: BorderRadius.circular(18),
-                border: Border.all(color: _companionAccent(data.continuation).withValues(alpha: 0.14)),
+                color: AppPalette.primaryDark,
+                borderRadius: BorderRadius.circular(13),
               ),
-              child: Padding(
-                padding: const EdgeInsets.all(7),
-                child: CompanionView(state: _companionState(data.continuation), size: 50),
+              child: const Padding(
+                padding: EdgeInsets.all(10),
+                child: Icon(Icons.auto_awesome_rounded, color: Colors.white, size: 22),
               ),
             ),
-            const SizedBox(width: 13),
+            const SizedBox(width: 11),
             Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('Sesli Öğren', style: theme.textTheme.headlineSmall),
-                  const SizedBox(height: 2),
-                  Text(
-                    hasMaterial ? _headerLine(data.continuation) : 'Kendi materyalini aktif öğrenmeye dönüştür.',
-                    style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
-                  ),
-                ],
+              child: Text(
+                'sesli öğren',
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: -0.5,
+                ),
+              ),
+            ),
+            DecoratedBox(
+              decoration: BoxDecoration(
+                color: AppPalette.surfaceMuted,
+                borderRadius: BorderRadius.circular(999),
+                border: Border.all(color: AppPalette.outline),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(9),
+                child: CompanionView(state: _companionState(data.continuation), size: 30),
               ),
             ),
           ],
         ),
-        const SizedBox(height: 26),
+        const SizedBox(height: 38),
+        Text(
+          'SENİN ÖĞRENME ALANIN',
+          style: theme.textTheme.labelSmall?.copyWith(
+            color: AppPalette.primary,
+            fontWeight: FontWeight.w900,
+            letterSpacing: 2,
+          ),
+        ),
+        const SizedBox(height: 12),
+        Text(
+          hasMaterial ? 'Bugün biraz daha\nilerleyelim.' : 'Öğrenmeye kendi\nkaynağınla başla.',
+          style: theme.textTheme.headlineLarge?.copyWith(
+            fontWeight: FontWeight.w900,
+            fontSize: 34,
+            letterSpacing: -1.4,
+            height: 1.08,
+          ),
+        ),
+        const SizedBox(height: 12),
+        Text(
+          hasMaterial
+              ? 'Kaldığın yer hazır. Bir sonraki küçük adım, bilgiyi gerçekten hatırlamak.'
+              : 'PDF veya metnini ekle. Dinle, hatırla ve kendi cümlelerinle açıkla.',
+          style: theme.textTheme.bodyMedium?.copyWith(
+            color: AppPalette.inkMuted,
+            height: 1.55,
+          ),
+        ),
+        const SizedBox(height: 28),
         if (!hasMaterial)
           _FirstMaterialHero(onPressed: onOpenLearning)
         else ...[
@@ -443,16 +478,6 @@ class _HomeSurface extends StatelessWidget {
       continuation?.nextAction.reasonText ??
       'Kaynağından kısa bir hatırlama denemesiyle ilk gerçek öğrenme kanıtını oluştur.';
 
-  static String _headerLine(LearningContinuation? continuation) {
-    final state = continuation?.state.kind ?? RecallStateKind.notAssessed;
-    return switch (state) {
-      RecallStateKind.notAssessed => 'İlk aktif adımın hazır.',
-      RecallStateKind.developing => 'Kaldığın yer hazır. Bir sonraki denemeye geç.',
-      RecallStateKind.retrievedOnce => 'Bir kez bağımsız hatırladın. Sıradaki adım hazır.',
-      RecallStateKind.needsReview => 'Kısa bir tekrar noktası hazır.',
-    };
-  }
-
   static CompanionVisualState _companionState(LearningContinuation? continuation) {
     final state = continuation?.state.kind ?? RecallStateKind.notAssessed;
     return switch (state) {
@@ -463,25 +488,7 @@ class _HomeSurface extends StatelessWidget {
     };
   }
 
-  static Color _companionSoft(LearningContinuation? continuation) {
-    final state = continuation?.state.kind ?? RecallStateKind.notAssessed;
-    return switch (state) {
-      RecallStateKind.notAssessed => AppPalette.primarySoft,
-      RecallStateKind.developing => AppPalette.primarySoft,
-      RecallStateKind.retrievedOnce => AppPalette.successSoft,
-      RecallStateKind.needsReview => AppPalette.attentionSoft,
-    };
-  }
 
-  static Color _companionAccent(LearningContinuation? continuation) {
-    final state = continuation?.state.kind ?? RecallStateKind.notAssessed;
-    return switch (state) {
-      RecallStateKind.notAssessed => AppPalette.primary,
-      RecallStateKind.developing => AppPalette.primary,
-      RecallStateKind.retrievedOnce => AppPalette.success,
-      RecallStateKind.needsReview => AppPalette.attention,
-    };
-  }
 }
 
 class _FirstMaterialHero extends StatelessWidget {
@@ -529,7 +536,7 @@ class _FirstMaterialHero extends StatelessWidget {
                 style: FilledButton.styleFrom(backgroundColor: Colors.white, foregroundColor: AppPalette.primaryDark),
                 onPressed: onPressed,
                 icon: const Icon(Icons.add_rounded),
-                label: const Text('Materyal ekle'),
+                label: Text('Materyal ekle', style: theme.textTheme.labelLarge?.copyWith(fontFamily: 'Roboto', color: AppPalette.primaryDark, fontWeight: FontWeight.w700)),
               ),
             ],
           ),
@@ -556,7 +563,7 @@ class _ContinueHero extends StatelessWidget {
 
     return Material(
       color: AppPalette.surface,
-      borderRadius: BorderRadius.circular(24),
+      borderRadius: BorderRadius.circular(28),
       clipBehavior: Clip.antiAlias,
       child: InkWell(
         key: const ValueKey('home-continuation-hero'),
@@ -564,13 +571,13 @@ class _ContinueHero extends StatelessWidget {
         child: DecoratedBox(
           decoration: BoxDecoration(
             border: Border.all(color: AppPalette.outline),
-            borderRadius: BorderRadius.circular(24),
+            borderRadius: BorderRadius.circular(28),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Padding(
-                padding: const EdgeInsets.fromLTRB(18, 18, 18, 16),
+                padding: const EdgeInsets.fromLTRB(22, 24, 22, 22),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -597,7 +604,7 @@ class _ContinueHero extends StatelessWidget {
                                 style: theme.textTheme.labelSmall?.copyWith(
                                   color: AppPalette.inkMuted,
                                   fontWeight: FontWeight.w900,
-                                  letterSpacing: 0.55,
+                                  letterSpacing: 1.35,
                                 ),
                               ),
                               const SizedBox(height: 4),
@@ -605,7 +612,7 @@ class _ContinueHero extends StatelessWidget {
                                 material.title,
                                 maxLines: 2,
                                 overflow: TextOverflow.ellipsis,
-                                style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
+                                style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800, height: 1.2, letterSpacing: -0.35),
                               ),
                             ],
                           ),
@@ -645,7 +652,7 @@ class _ContinueHero extends StatelessWidget {
               DecoratedBox(
                 decoration: const BoxDecoration(color: AppPalette.primaryDark),
                 child: Padding(
-                  padding: const EdgeInsets.fromLTRB(18, 17, 18, 18),
+                  padding: const EdgeInsets.fromLTRB(22, 23, 22, 24),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
@@ -690,7 +697,7 @@ class _ContinueHero extends StatelessWidget {
                         ),
                         onPressed: onPressed,
                         icon: const Icon(Icons.arrow_forward_rounded),
-                        label: const Text('Çalışmaya devam et'),
+                        label: Text('Çalışmaya devam et', style: theme.textTheme.labelLarge?.copyWith(fontFamily: 'Roboto', color: AppPalette.primaryDark, fontWeight: FontWeight.w700)),
                       ),
                     ],
                   ),
@@ -807,12 +814,21 @@ class _LibrarySurfaceState extends State<_LibrarySurface> {
     final visibleMaterials = _visibleMaterials;
     final hasQuery = _query.trim().isNotEmpty;
     return ListView(
-      padding: const EdgeInsets.fromLTRB(20, 24, 20, 32),
+      padding: const EdgeInsets.fromLTRB(24, 30, 24, 40),
       children: [
+        Text(
+          'SENİN KAYNAKLARIN',
+          style: theme.textTheme.labelSmall?.copyWith(
+            color: AppPalette.primary,
+            fontWeight: FontWeight.w900,
+            letterSpacing: 1.8,
+          ),
+        ),
+        const SizedBox(height: 12),
         Row(
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
-            Expanded(child: Text('Kütüphane', style: theme.textTheme.headlineMedium)),
+            Expanded(child: Text('Kütüphane', style: theme.textTheme.headlineLarge?.copyWith(fontWeight: FontWeight.w900, letterSpacing: -1.1))),
             if (widget.data.materials.isNotEmpty)
               Text(
                 hasQuery
@@ -822,13 +838,13 @@ class _LibrarySurfaceState extends State<_LibrarySurface> {
               ),
           ],
         ),
-        const SizedBox(height: 6),
+        const SizedBox(height: 12),
         Text(
           'Kaynakların, kaldığın yer ve öğrenme devamın tek yerde.',
           style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
         ),
         if (widget.data.materials.isNotEmpty) ...[
-          const SizedBox(height: 16),
+          const SizedBox(height: 24),
           TextField(
             key: const ValueKey('library-search'),
             controller: _searchController,
@@ -848,7 +864,7 @@ class _LibrarySurfaceState extends State<_LibrarySurface> {
             ),
           ),
         ],
-        const SizedBox(height: 24),
+        const SizedBox(height: 28),
         if (widget.data.materials.isEmpty)
           _PrimaryCard(
             title: 'Henüz materyal yok',
@@ -916,20 +932,16 @@ class _LibraryMaterialCard extends StatelessWidget {
         continuation?.nextAction.reasonText ?? 'İlk aktif hatırlama denemesi öğrenme durumunu görünür kılar.';
 
     return Card(
+      margin: EdgeInsets.zero,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22), side: const BorderSide(color: AppPalette.outline)),
+      clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: onPressed,
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(22),
         child: Column(
           children: [
-            Container(
-              height: 5,
-              decoration: const BoxDecoration(
-                color: AppPalette.primary,
-                borderRadius: BorderRadius.vertical(top: Radius.circular(18)),
-              ),
-            ),
             Padding(
-              padding: const EdgeInsets.fromLTRB(16, 14, 8, 15),
+              padding: const EdgeInsets.fromLTRB(19, 20, 10, 20),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -987,11 +999,11 @@ class _LibraryMaterialCard extends StatelessWidget {
             ),
             DecoratedBox(
               decoration: const BoxDecoration(
-                color: AppPalette.primaryDark,
-                borderRadius: BorderRadius.vertical(bottom: Radius.circular(18)),
+                color: AppPalette.surfaceMuted,
+                borderRadius: BorderRadius.vertical(bottom: Radius.circular(22)),
               ),
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(15, 12, 15, 13),
+                padding: const EdgeInsets.fromLTRB(19, 15, 19, 17),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -1010,7 +1022,7 @@ class _LibraryMaterialCard extends StatelessWidget {
                           Text(
                             'Kaldığın yer',
                             style: theme.textTheme.labelSmall?.copyWith(
-                              color: Colors.white.withValues(alpha: 0.68),
+                              color: AppPalette.inkMuted,
                               fontWeight: FontWeight.w800,
                             ),
                           ),
@@ -1019,7 +1031,7 @@ class _LibraryMaterialCard extends StatelessWidget {
                             nextReason,
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
-                            style: theme.textTheme.bodySmall?.copyWith(color: Colors.white, height: 1.4),
+                            style: theme.textTheme.bodySmall?.copyWith(color: AppPalette.ink, height: 1.45),
                           ),
                         ],
                       ),
@@ -1082,23 +1094,23 @@ class _ContextCard extends StatelessWidget {
     final soft = isListen ? AppPalette.signalSoft : AppPalette.primarySoft;
     final accent = isListen ? AppPalette.signal : AppPalette.primary;
     return Material(
-      color: soft.withValues(alpha: 0.42),
+      color: AppPalette.surface,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
-        side: BorderSide(color: accent.withValues(alpha: 0.14)),
+        borderRadius: BorderRadius.circular(24),
+        side: const BorderSide(color: AppPalette.outline),
       ),
       clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: onPressed,
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 16, 14, 15),
+          padding: const EdgeInsets.fromLTRB(19, 20, 18, 20),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               DecoratedBox(
                 decoration: BoxDecoration(
-                  color: AppPalette.surface,
-                  borderRadius: BorderRadius.circular(12),
+                  color: soft,
+                  borderRadius: BorderRadius.circular(14),
                   border: Border.all(color: accent.withValues(alpha: 0.10)),
                 ),
                 child: Padding(
@@ -1106,9 +1118,9 @@ class _ContextCard extends StatelessWidget {
                   child: Icon(icon, size: 20, color: accent),
                 ),
               ),
-              const SizedBox(height: 14),
-              Text(title, style: theme.textTheme.titleMedium),
-              const SizedBox(height: 4),
+              const SizedBox(height: 20),
+              Text(title, style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800, letterSpacing: -0.3)),
+              const SizedBox(height: 7),
               Text(
                 body,
                 style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant, height: 1.35),
@@ -1141,9 +1153,10 @@ class _PrimaryCard extends StatelessWidget {
     final theme = Theme.of(context);
     return Card(
       elevation: 0,
-      color: theme.colorScheme.primaryContainer.withValues(alpha: 0.55),
+      color: AppPalette.surface,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24), side: const BorderSide(color: AppPalette.outline)),
       child: Padding(
-        padding: const EdgeInsets.all(22),
+        padding: const EdgeInsets.all(24),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -1151,7 +1164,18 @@ class _PrimaryCard extends StatelessWidget {
             const SizedBox(height: 8),
             Text(body),
             const SizedBox(height: 18),
-            FilledButton.icon(onPressed: onPressed, icon: Icon(icon), label: Text(buttonLabel)),
+            FilledButton.icon(
+              onPressed: onPressed,
+              icon: Icon(icon),
+              label: Text(
+                buttonLabel,
+                style: theme.textTheme.labelLarge?.copyWith(
+                  fontFamily: 'Roboto',
+                  fontWeight: FontWeight.w700,
+                  color: Colors.white,
+                ),
+              ),
+            ),
           ],
         ),
       ),

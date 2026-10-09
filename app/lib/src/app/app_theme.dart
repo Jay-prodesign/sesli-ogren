@@ -7,15 +7,15 @@ import 'package:flutter/material.dart';
 /// state. They are not a generic design system and should grow only when
 /// Sesli Öğren has a concrete experience need.
 abstract final class AppPalette {
-  static const canvas = Color(0xFFF7F8FC);
+  static const canvas = Color(0xFFFAF8F5);
   static const surface = Color(0xFFFFFFFF);
-  static const surfaceMuted = Color(0xFFF1F3F9);
-  static const ink = Color(0xFF111827);
-  static const inkMuted = Color(0xFF667085);
+  static const surfaceMuted = Color(0xFFF2F0F7);
+  static const ink = Color(0xFF18203C);
+  static const inkMuted = Color(0xFF657087);
 
-  static const primary = Color(0xFF3657FF);
-  static const primaryDark = Color(0xFF14224A);
-  static const primarySoft = Color(0xFFE8EDFF);
+  static const primary = Color(0xFF5452AE);
+  static const primaryDark = Color(0xFF252451);
+  static const primarySoft = Color(0xFFEDEAFB);
 
   static const signal = Color(0xFF0D8F80);
   static const signalSoft = Color(0xFFDFF7F3);
@@ -30,7 +30,7 @@ abstract final class AppPalette {
   static const attentionSoft = Color(0xFFFFEEDB);
 
   static const destructive = Color(0xFFD64550);
-  static const outline = Color(0xFFE4E7EC);
+  static const outline = Color(0xFFE5E0ED);
 }
 
 abstract final class SesliOgrenTheme {
@@ -142,7 +142,7 @@ abstract final class SesliOgrenTheme {
           minimumSize: const Size.fromHeight(52),
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          textStyle: const TextStyle(fontWeight: FontWeight.w700),
+          textStyle: const TextStyle(fontFamily: 'Roboto', fontWeight: FontWeight.w700),
         ),
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
@@ -151,7 +151,7 @@ abstract final class SesliOgrenTheme {
           padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 13),
           side: const BorderSide(color: AppPalette.outline),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          textStyle: const TextStyle(fontWeight: FontWeight.w700),
+          textStyle: const TextStyle(fontFamily: 'Roboto', fontWeight: FontWeight.w700),
         ),
       ),
       inputDecorationTheme: InputDecorationTheme(
@@ -172,6 +172,24 @@ abstract final class SesliOgrenTheme {
         ),
       ),
       dividerTheme: const DividerThemeData(color: AppPalette.outline, thickness: 1, space: 1),
+      iconTheme: const IconThemeData(color: AppPalette.ink, size: 22),
+      snackBarTheme: SnackBarThemeData(
+        backgroundColor: AppPalette.primaryDark,
+        contentTextStyle: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+        behavior: SnackBarBehavior.floating,
+      ),
+      bottomSheetTheme: const BottomSheetThemeData(
+        backgroundColor: AppPalette.surface,
+        surfaceTintColor: Colors.transparent,
+        showDragHandle: true,
+        dragHandleColor: AppPalette.outline,
+      ),
+      dialogTheme: DialogThemeData(
+        backgroundColor: AppPalette.surface,
+        surfaceTintColor: Colors.transparent,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+      ),
     );
   }
 }

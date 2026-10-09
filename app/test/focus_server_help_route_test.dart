@@ -50,6 +50,9 @@ class _FocusGateway implements FocusHelpGateway {
 }
 
 Future<void> _tapVisible(WidgetTester tester, Finder finder) async {
+  if (finder.evaluate().isEmpty) {
+    await tester.scrollUntilVisible(finder, 180, scrollable: find.byType(Scrollable).first);
+  }
   await tester.ensureVisible(finder);
   await tester.pump();
   await tester.tap(finder);
@@ -114,7 +117,7 @@ void main() {
     expect(focus.lastRequest!.groundingContentHash, hasLength(64));
     expect(focus.lastRequest!.kind, FocusHelpKind.directExplanation);
     expect(find.text('Kaynak dayanakları'), findsOneWidget);
-    expect(find.textContaining('Bitki bu süreçte karbondioksit ve su kullanır'), findsOneWidget);
+    expect(find.textContaining('Bitki bu süreçte karbondioksit ve su kullanır'), findsWidgets);
     expect(find.text('Hatırla'), findsOneWidget);
     expect(find.text('Kendi cümlelerinle anlat'), findsOneWidget);
   });

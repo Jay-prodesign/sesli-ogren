@@ -78,7 +78,12 @@ class _CompanionViewState extends State<CompanionView> with SingleTickerProvider
               final listeningBeat = math.sin(t * math.pi * 4);
               final thinkingDrift = math.sin(t * math.pi * 2 - math.pi / 3);
               final pose = switch (widget.state) {
-                CompanionVisualState.idle => (angle: 0.0, dx: 0.0, dy: -1.7 * wave, scale: 1.0 + 0.014 * wave),
+                CompanionVisualState.idle => (
+                  angle: 0.0,
+                  dx: 0.0,
+                  dy: -1.7 * wave,
+                  scale: 1.0 + 0.014 * wave,
+                ),
                 CompanionVisualState.listen => (
                   angle: 0.045 + 0.008 * listeningBeat,
                   dx: 1.1,
@@ -97,7 +102,12 @@ class _CompanionViewState extends State<CompanionView> with SingleTickerProvider
                   dy: -1.2 * wave,
                   scale: 1.012 + 0.012 * pulse,
                 ),
-                CompanionVisualState.correct => (angle: -0.035 + 0.008 * wave, dx: -0.8, dy: 0.3 * wave, scale: 0.99),
+                CompanionVisualState.correct => (
+                  angle: -0.035 + 0.008 * wave,
+                  dx: -0.8,
+                  dy: 0.3 * wave,
+                  scale: 0.99,
+                ),
                 CompanionVisualState.success => (
                   angle: 0.025 * wave,
                   dx: 0.0,
@@ -150,6 +160,7 @@ class _CompanionViewState extends State<CompanionView> with SingleTickerProvider
                   'assets/companions/D_KNOT_128.webp',
                   fit: BoxFit.contain,
                   filterQuality: FilterQuality.high,
+                  excludeFromSemantics: true,
                   gaplessPlayback: true,
                   errorBuilder: (context, error, stackTrace) =>
                       Center(child: Text('Düğüm', style: Theme.of(context).textTheme.titleMedium)),
@@ -163,12 +174,12 @@ class _CompanionViewState extends State<CompanionView> with SingleTickerProvider
   }
 
   static Color _haloColor(CompanionVisualState state) => switch (state) {
-    CompanionVisualState.idle => const Color(0xFFBEDDD0),
-    CompanionVisualState.listen => const Color(0xFF89C9DA),
-    CompanionVisualState.think => const Color(0xFFB4A3DB),
-    CompanionVisualState.speak => const Color(0xFF94B8E8),
-    CompanionVisualState.correct => const Color(0xFFE8B980),
-    CompanionVisualState.success => const Color(0xFF9DCB74),
+    CompanionVisualState.idle => const Color(0xFFD8D0F2),
+    CompanionVisualState.listen => const Color(0xFF8DB6DD),
+    CompanionVisualState.think => const Color(0xFFA99AE3),
+    CompanionVisualState.speak => const Color(0xFF8FA6E9),
+    CompanionVisualState.correct => const Color(0xFFE8C49E),
+    CompanionVisualState.success => const Color(0xFF9ACBB8),
   };
 
   static String _semanticLabel(CompanionVisualState state) => switch (state) {

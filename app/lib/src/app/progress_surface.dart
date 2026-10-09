@@ -47,10 +47,25 @@ class ProgressSurface extends StatelessWidget {
         ),
         const SizedBox(height: 12),
         DecoratedBox(
-          decoration: BoxDecoration(color: AppPalette.attentionSoft, borderRadius: BorderRadius.circular(14)),
+          decoration: BoxDecoration(
+            color: AppPalette.surface,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: AppPalette.outline),
+          ),
           child: const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 13, vertical: 11),
-            child: Text('Dinlemek veya açıklama okumak ilerlemeyi yapay olarak artırmaz.'),
+            padding: EdgeInsets.symmetric(horizontal: 14, vertical: 13),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Icon(Icons.verified_outlined, color: AppPalette.signal, size: 20),
+                SizedBox(width: 11),
+                Expanded(
+                  child: Text(
+                    'İlerleme, bir konuyu kendi başına hatırladığında kaydedilir. Dinleme ve özetler çalışmana yardımcı olur.',
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
         const SizedBox(height: 24),
