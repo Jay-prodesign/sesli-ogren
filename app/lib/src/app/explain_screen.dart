@@ -102,11 +102,7 @@ class _ExplainScreenState extends State<ExplainScreen> {
         }
 
         final submission = await widget.summaryGateway.submit(
-          source: SourceIngestResult(
-            material: material,
-            sourceVersion: widget.source,
-            extractedContent: extracted,
-          ),
+          source: SourceIngestResult(material: material, sourceVersion: widget.source, extractedContent: extracted),
         );
 
         final sourceAfterSubmission = await widget.runtime.store.currentSourceVersion(

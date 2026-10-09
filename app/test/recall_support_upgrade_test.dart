@@ -319,11 +319,7 @@ CREATE TABLE sentinel (
         ),
         isTrue,
       );
-      final cached = await store.cachedSummaryResult(
-        learner: owner,
-        materialId: material,
-        sourceVersionId: sourceA,
-      );
+      final cached = await store.cachedSummaryResult(learner: owner, materialId: material, sourceVersionId: sourceA);
       expect(cached?.summary, 'Kaynağa bağlı gerçek özet');
       expect(cached?.keyPoints, const ['Birinci nokta', 'İkinci nokta']);
       expect(cached?.cachedAt, DateTime.utc(2026, 10, 9, 0, 30));
@@ -355,11 +351,7 @@ CREATE TABLE sentinel (
       expect(await store.cachedSummaryResult(learner: owner, materialId: material, sourceVersionId: sourceA), isNull);
       expect(await store.cachedSummaryResult(learner: owner, materialId: material, sourceVersionId: sourceB), isNull);
 
-      await store.deleteMaterial(
-        learner: owner,
-        materialId: material,
-        deletedAt: DateTime.utc(2026, 10, 9, 1),
-      );
+      await store.deleteMaterial(learner: owner, materialId: material, deletedAt: DateTime.utc(2026, 10, 9, 1));
       expect(await store.summaryJobId(learner: owner, materialId: material, sourceVersionId: sourceB), isNull);
       expect(await store.summaryServerMaterialId(learner: owner, materialId: material), isNull);
     } finally {

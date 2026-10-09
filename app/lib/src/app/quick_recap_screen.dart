@@ -102,11 +102,7 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> with WidgetsBinding
         _jobId = id;
         _submittedSourceVersion = source.identity.sourceVersionId;
         if (cached != null) {
-          _status = ServerSummaryStatus(
-            state: 'SUCCEEDED',
-            summary: cached.summary,
-            keyPoints: cached.keyPoints,
-          );
+          _status = ServerSummaryStatus(state: 'SUCCEEDED', summary: cached.summary, keyPoints: cached.keyPoints);
         }
       });
       await _refresh();
@@ -207,10 +203,7 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> with WidgetsBinding
         if (!removed) {
           throw const ServerSummarySubmissionException('Previous server source could not be removed.');
         }
-        await widget.runtime.store.clearSummaryJob(
-          learner: widget.runtime.learner,
-          materialId: widget.materialId,
-        );
+        await widget.runtime.store.clearSummaryJob(learner: widget.runtime.learner, materialId: widget.materialId);
       }
 
       final submission = await _gateway.submit(
@@ -232,10 +225,7 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> with WidgetsBinding
       if (currentSource?.identity.sourceVersionId != source.identity.sourceVersionId) {
         final removed = await _gateway.deleteServerMaterial(submission.materialId);
         if (removed) {
-          await widget.runtime.store.clearSummaryJob(
-            learner: widget.runtime.learner,
-            materialId: widget.materialId,
-          );
+          await widget.runtime.store.clearSummaryJob(learner: widget.runtime.learner, materialId: widget.materialId);
         }
         if (mounted) {
           setState(() => _error = 'Kaynak değişti. Yeni sürüm için özet oluşturabilirsin.');
@@ -366,9 +356,7 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> with WidgetsBinding
         children: [
           Text('Kaynağına bağlı AI özeti', style: Theme.of(context).textTheme.headlineSmall),
           const SizedBox(height: 12),
-          const Text(
-            'Özet yalnızca güncel kaynak metninden üretilir. Kaynak değişirse eski sonuç kullanılmaz.',
-          ),
+          const Text('Özet yalnızca güncel kaynak metninden üretilir. Kaynak değişirse eski sonuç kullanılmaz.'),
           const SizedBox(height: 20),
           if (_jobId == null)
             FilledButton.icon(
@@ -379,10 +367,7 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> with WidgetsBinding
           if (_busy) const LinearProgressIndicator(),
           if (_jobId != null && status?.summary == null) ...[
             Text(_statusLabel(status), style: Theme.of(context).textTheme.titleMedium),
-            if (_statusDetail(status) != null) ...[
-              const SizedBox(height: 6),
-              Text(_statusDetail(status)!),
-            ],
+            if (_statusDetail(status) != null) ...[const SizedBox(height: 6), Text(_statusDetail(status)!)],
             if (status?.state == 'QUEUED' || status?.state == 'PROCESSING') ...[
               const SizedBox(height: 12),
               const LinearProgressIndicator(),
@@ -434,8 +419,8 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> with WidgetsBinding
                           titleOverride: 'Quick Recap',
                           persistProgress: false,
                           onRecall: () {
-                          Navigator.of(routeContext).pop();
-                          _openRecall();
+                            Navigator.of(routeContext).pop();
+                            _openRecall();
                           },
                         ),
                       ),

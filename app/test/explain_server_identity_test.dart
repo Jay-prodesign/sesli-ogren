@@ -61,16 +61,10 @@ void main() {
   sqfliteFfiInit();
 
   testWidgets('Explain uses persisted server material identity for a local source', (tester) async {
-    final store = await SqliteSourceStore.open(
-      factory: databaseFactoryFfiNoIsolate,
-      path: inMemoryDatabasePath,
-    );
+    final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
     addTearDown(store.close);
 
-    final ingest = SourceIngestService(
-      store: store,
-      pdfTextExtractor: const _UnusedPdfExtractor(),
-    );
+    final ingest = SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor());
     const localMaterialId = MaterialId('local-explain-material');
     await ingest.ingestPastedText(
       learner: AppRuntime.localM5LearnerFixture,
@@ -98,21 +92,14 @@ void main() {
       learner: AppRuntime.localM5LearnerFixture,
       store: store,
       ingest: ingest,
-      recall: RecallLearningService(
-        sourceStore: store,
-        learningStore: store.learningTruthStore(),
-      ),
+      recall: RecallLearningService(sourceStore: store, learningStore: store.learningTruthStore()),
       telemetry: store.operationalTelemetry(),
       explain: explain,
     );
 
     await tester.pumpWidget(
       MaterialApp(
-        home: ExplainScreen(
-          runtime: runtime,
-          source: source,
-          summaryGateway: const _SucceededSummaryGateway(),
-        ),
+        home: ExplainScreen(runtime: runtime, source: source, summaryGateway: const _SucceededSummaryGateway()),
       ),
     );
     await _pumpUntilFound(tester, find.text('Sunucu materyaline bağlı açıklama'));

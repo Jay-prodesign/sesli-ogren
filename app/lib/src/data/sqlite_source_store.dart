@@ -358,10 +358,7 @@ CREATE TABLE IF NOT EXISTS summary_jobs (
 
     await add('summary_text', 'ALTER TABLE summary_jobs ADD COLUMN summary_text TEXT');
     await add('key_points_json', 'ALTER TABLE summary_jobs ADD COLUMN key_points_json TEXT');
-    await add(
-      'summary_cached_at_utc',
-      'ALTER TABLE summary_jobs ADD COLUMN summary_cached_at_utc TEXT',
-    );
+    await add('summary_cached_at_utc', 'ALTER TABLE summary_jobs ADD COLUMN summary_cached_at_utc TEXT');
   }
 
   Future<String?> summaryJobId({
@@ -426,11 +423,7 @@ CREATE TABLE IF NOT EXISTS summary_jobs (
       if (decoded is! List || decoded.any((value) => value is! String) || cachedAt == null) {
         return null;
       }
-      return CachedSummaryResult(
-        summary: summary,
-        keyPoints: decoded.cast<String>(),
-        cachedAt: cachedAt.toUtc(),
-      );
+      return CachedSummaryResult(summary: summary, keyPoints: decoded.cast<String>(), cachedAt: cachedAt.toUtc());
     } catch (_) {
       return null;
     }
@@ -462,10 +455,7 @@ CREATE TABLE IF NOT EXISTS summary_jobs (
     return changed == 1;
   }
 
-  Future<void> clearSummaryJob({
-    required AuthenticatedLearner learner,
-    required MaterialId materialId,
-  }) async {
+  Future<void> clearSummaryJob({required AuthenticatedLearner learner, required MaterialId materialId}) async {
     await _database.delete(
       'summary_jobs',
       where: 'learner_id = ? AND material_id = ?',
@@ -2171,13 +2161,8 @@ class SqliteOperationalTelemetry implements OperationalTelemetry {
   }
 }
 
-
 class CachedSummaryResult {
-  const CachedSummaryResult({
-    required this.summary,
-    required this.keyPoints,
-    required this.cachedAt,
-  });
+  const CachedSummaryResult({required this.summary, required this.keyPoints, required this.cachedAt});
 
   final String summary;
   final List<String> keyPoints;
