@@ -46,15 +46,21 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> with WidgetsBinding
       _dispatching = true;
       _error = null;
     });
-    final accepted = await _gateway.dispatch(id);
-    if (!mounted) return;
-    setState(() => _dispatching = false);
-    if (_jobId != id) return;
-    if (!accepted) {
-      setState(() => _error = 'Özet kuyruğa alındı ancak sunucu işlemi başlatılamadı. Tekrar deneyebilirsin.');
-      return;
+    try {
+      final accepted = await _gateway.dispatch(id);
+      if (!mounted || _jobId != id) return;
+      if (!accepted) {
+        setState(() => _error = 'Özet kuyruğa alındı ancak sunucu işlemi başlatılamadı. Tekrar deneyebilirsin.');
+        return;
+      }
+      await _refresh();
+    } catch (_) {
+      if (mounted && _jobId == id) {
+        setState(() => _error = 'Sunucuya ulaşılamadı. Bağlantını kontrol edip tekrar dene.');
+      }
+    } finally {
+      if (mounted) setState(() => _dispatching = false);
     }
-    await _refresh();
   }
 
   Future<void> _retryCurrent() async {
@@ -64,19 +70,23 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> with WidgetsBinding
       _dispatching = true;
       _error = null;
     });
-    final accepted = await _gateway.retry(id);
-    if (!mounted) return;
-    setState(() => _dispatching = false);
-    if (_jobId != id) return;
-    if (!accepted) {
-      setState(
-        () => _error = 'Bu özet işi güvenli biçimde yeniden sıraya alınamadı. Daha sonra tekrar dene veya sunucu durumunu kontrol et.',
-      );
-      return;
-    }
-    await _refresh();
-    if (mounted && _jobId == id && !(_status?.isTerminal ?? false)) {
-      _startPolling();
+    try {
+      final accepted = await _gateway.retry(id);
+      if (!mounted || _jobId != id) return;
+      if (!accepted) {
+        setState(() => _error = 'Bu özet işi güvenli biçimde yeniden sıraya alınamadı. Daha sonra tekrar dene veya sunucu durumunu kontrol et.');
+        return;
+      }
+      await _refresh();
+      if (mounted && _jobId == id && !(_status?.isTerminal ?? false)) {
+        _startPolling();
+      }
+    } catch (_) {
+      if (mounted && _jobId == id) {
+        setState(() => _error = 'Yeniden deneme sırasında bağlantı hatası oluştu. Tekrar deneyebilirsin.');
+      }
+    } finally {
+      if (mounted) setState(() => _dispatching = false);
     }
   }
 
