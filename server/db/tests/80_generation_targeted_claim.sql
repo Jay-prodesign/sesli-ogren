@@ -1,4 +1,4 @@
--- LA-0041: targeted worker claims cannot drain a different queued job.
+-- Quick Recap: targeted worker claims cannot drain a different queued job.
 \set ON_ERROR_STOP on
 \set user_a '''d1000000-0000-4000-8000-00000000000a'''
 \set user_b '''d1000000-0000-4000-8000-00000000000b'''
