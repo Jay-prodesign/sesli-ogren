@@ -197,7 +197,9 @@ class _MaterialWorkspaceScreenState extends State<MaterialWorkspaceScreen> {
                       ),
                       const SizedBox(height: 16),
                       OutlinedButton.icon(
-                        onPressed: () => setState(() => _snapshot = _load()),
+                        onPressed: () => setState(() {
+                          _snapshot = _load();
+                        }),
                         icon: const Icon(Icons.refresh_rounded),
                         label: const Text('Tekrar dene'),
                       ),
