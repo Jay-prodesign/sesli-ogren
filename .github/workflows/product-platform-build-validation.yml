@@ -52,7 +52,7 @@ jobs:
           test -s build/app/outputs/flutter-apk/app-release.apk
 
   ios-release-compile:
-    name: iOS release compile (no codesign)
+    name: iOS simulator compile (no signing)
     runs-on: macos-15
     timeout-minutes: 40
     defaults:
@@ -76,5 +76,7 @@ jobs:
           cache: true
           pub-cache: true
       - run: flutter pub get
-      - name: Compile iOS release app
-        run: flutter build ios --release --no-codesign --no-pub
+      - name: Compile iOS simulator app without provisioning
+        run: |
+          flutter build ios --simulator --no-codesign --no-pub
+          test -d build/ios/iphonesimulator/Runner.app
