@@ -695,10 +695,19 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text('Çalışma materyalini ekle', style: Theme.of(context).textTheme.titleLarge),
+          Text(
+            '01 / 03  ·  KAYNAĞIN',
+            style: Theme.of(context).textTheme.labelMedium?.copyWith(
+              color: Theme.of(context).colorScheme.primary,
+              fontWeight: FontWeight.w800,
+              letterSpacing: 1.1,
+            ),
+          ),
+          const SizedBox(height: 10),
+          Text('Çalışma materyalini ekle', style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w800)),
           const SizedBox(height: 8),
           const Text(
-            'Bir PDF seç ya da notlarını yapıştır. Ardından kaynağı kapatıp neler hatırladığını birlikte keşfedelim.',
+            'Bir PDF seç ya da notlarını yapıştır. Sonra kaynağı kapatıp kendi kelimelerinle hatırlamayı deneyeceksin.',
           ),
           const SizedBox(height: 18),
           OutlinedButton.icon(
