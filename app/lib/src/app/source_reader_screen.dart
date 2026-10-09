@@ -84,10 +84,10 @@ class _SourceReaderScreenState extends State<SourceReaderScreen> {
                   widget.onRecall?.call();
                   break;
                 case 'smaller':
-                  setState(() => _fontSize = (_fontSize - 1).clamp(14.0, 26.0));
+                  setState(() => _fontSize = (_fontSize - 1).clamp(14.0, 26.0).toDouble());
                   break;
                 case 'larger':
-                  setState(() => _fontSize = (_fontSize + 1).clamp(14.0, 26.0));
+                  setState(() => _fontSize = (_fontSize + 1).clamp(14.0, 26.0).toDouble());
                   break;
               }
             },
