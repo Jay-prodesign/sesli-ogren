@@ -828,6 +828,38 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
     );
   }
 
+  /// Highlight only an exact literal answer span; never fabricate a source match.
+  Widget _sourceProofText(BuildContext context, RecallAttemptResult result) {
+    final excerpt = result.sourceExcerpt;
+    final answer = result.correctAnswer.trim();
+    final at = answer.isEmpty ? -1 : excerpt.indexOf(answer);
+    final style = Theme.of(context).textTheme.bodyMedium?.copyWith(
+      color: Theme.of(context).colorScheme.onSurfaceVariant,
+      height: 1.45,
+    );
+    if (at < 0) {
+      return SelectableText(excerpt, style: style);
+    }
+    return SelectableText.rich(
+      TextSpan(
+        style: style,
+        children: [
+          if (at > 0) TextSpan(text: excerpt.substring(0, at)),
+          TextSpan(
+            text: excerpt.substring(at, at + answer.length),
+            style: const TextStyle(
+              backgroundColor: AppPalette.signalSoft,
+              fontWeight: FontWeight.w800,
+              color: AppPalette.primaryDark,
+            ),
+          ),
+          if (at + answer.length < excerpt.length)
+            TextSpan(text: excerpt.substring(at + answer.length)),
+        ],
+      ),
+    );
+  }
+
   Widget _resultCard(BuildContext context) {
     final result = _result;
     if (result == null) return _errorCard(context);
@@ -952,13 +984,7 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
                   const SizedBox(height: 13),
                   Text('Kaynak bağlamı', style: theme.textTheme.labelMedium?.copyWith(color: AppPalette.inkMuted)),
                   const SizedBox(height: 5),
-                  Text(
-                    result.sourceExcerpt,
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant,
-                      height: 1.45,
-                    ),
-                  ),
+                  _sourceProofText(context, result),
                 ],
               ),
             ),
