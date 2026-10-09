@@ -371,39 +371,73 @@ class _HomeSurface extends StatelessWidget {
 
     return ListView(
       key: const ValueKey('home-surface'),
-      padding: const EdgeInsets.fromLTRB(20, 22, 20, 36),
+      padding: const EdgeInsets.fromLTRB(24, 26, 24, 40),
       children: [
         Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             DecoratedBox(
               decoration: BoxDecoration(
-                color: _companionSoft(data.continuation),
-                borderRadius: BorderRadius.circular(18),
-                border: Border.all(color: _companionAccent(data.continuation).withValues(alpha: 0.14)),
+                color: AppPalette.primaryDark,
+                borderRadius: BorderRadius.circular(13),
               ),
-              child: Padding(
-                padding: const EdgeInsets.all(7),
-                child: CompanionView(state: _companionState(data.continuation), size: 50),
+              child: const Padding(
+                padding: EdgeInsets.all(10),
+                child: Icon(Icons.auto_awesome_rounded, color: Colors.white, size: 22),
               ),
             ),
-            const SizedBox(width: 13),
+            const SizedBox(width: 11),
             Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('Sesli Öğren', style: theme.textTheme.headlineSmall),
-                  const SizedBox(height: 2),
-                  Text(
-                    hasMaterial ? _headerLine(data.continuation) : 'Kendi materyalini aktif öğrenmeye dönüştür.',
-                    style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
-                  ),
-                ],
+              child: Text(
+                'sesli öğren',
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: -0.5,
+                ),
+              ),
+            ),
+            DecoratedBox(
+              decoration: BoxDecoration(
+                color: AppPalette.surfaceMuted,
+                borderRadius: BorderRadius.circular(999),
+                border: Border.all(color: AppPalette.outline),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(9),
+                child: CompanionView(state: _companionState(data.continuation), size: 30),
               ),
             ),
           ],
         ),
-        const SizedBox(height: 26),
+        const SizedBox(height: 38),
+        Text(
+          'SENİN ÖĞRENME ALANIN',
+          style: theme.textTheme.labelSmall?.copyWith(
+            color: AppPalette.primary,
+            fontWeight: FontWeight.w900,
+            letterSpacing: 2,
+          ),
+        ),
+        const SizedBox(height: 12),
+        Text(
+          hasMaterial ? 'Bugün biraz daha\nilerleyelim.' : 'Öğrenmeye kendi\nkaynağınla başla.',
+          style: theme.textTheme.headlineLarge?.copyWith(
+            fontWeight: FontWeight.w900,
+            fontSize: 34,
+            letterSpacing: -1.4,
+            height: 1.08,
+          ),
+        ),
+        const SizedBox(height: 12),
+        Text(
+          hasMaterial
+              ? 'Kaldığın yer hazır. Bir sonraki küçük adım, bilgiyi gerçekten hatırlamak.'
+              : 'PDF veya metnini ekle. Dinle, hatırla ve kendi cümlelerinle açıkla.',
+          style: theme.textTheme.bodyMedium?.copyWith(
+            color: AppPalette.inkMuted,
+            height: 1.55,
+          ),
+        ),
+        const SizedBox(height: 28),
         if (!hasMaterial)
           _FirstMaterialHero(onPressed: onOpenLearning)
         else ...[
