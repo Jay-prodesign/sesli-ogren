@@ -932,20 +932,16 @@ class _LibraryMaterialCard extends StatelessWidget {
         continuation?.nextAction.reasonText ?? 'İlk aktif hatırlama denemesi öğrenme durumunu görünür kılar.';
 
     return Card(
+      margin: EdgeInsets.zero,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22), side: const BorderSide(color: AppPalette.outline)),
+      clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: onPressed,
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(22),
         child: Column(
           children: [
-            Container(
-              height: 5,
-              decoration: const BoxDecoration(
-                color: AppPalette.primary,
-                borderRadius: BorderRadius.vertical(top: Radius.circular(18)),
-              ),
-            ),
             Padding(
-              padding: const EdgeInsets.fromLTRB(16, 14, 8, 15),
+              padding: const EdgeInsets.fromLTRB(19, 20, 10, 20),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -1003,11 +999,11 @@ class _LibraryMaterialCard extends StatelessWidget {
             ),
             DecoratedBox(
               decoration: const BoxDecoration(
-                color: AppPalette.primaryDark,
-                borderRadius: BorderRadius.vertical(bottom: Radius.circular(18)),
+                color: AppPalette.surfaceMuted,
+                borderRadius: BorderRadius.vertical(bottom: Radius.circular(22)),
               ),
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(15, 12, 15, 13),
+                padding: const EdgeInsets.fromLTRB(19, 15, 19, 17),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -1026,7 +1022,7 @@ class _LibraryMaterialCard extends StatelessWidget {
                           Text(
                             'Kaldığın yer',
                             style: theme.textTheme.labelSmall?.copyWith(
-                              color: Colors.white.withValues(alpha: 0.68),
+                              color: AppPalette.inkMuted,
                               fontWeight: FontWeight.w800,
                             ),
                           ),
@@ -1035,7 +1031,7 @@ class _LibraryMaterialCard extends StatelessWidget {
                             nextReason,
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
-                            style: theme.textTheme.bodySmall?.copyWith(color: Colors.white, height: 1.4),
+                            style: theme.textTheme.bodySmall?.copyWith(color: AppPalette.ink, height: 1.45),
                           ),
                         ],
                       ),
