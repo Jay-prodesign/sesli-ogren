@@ -25,10 +25,7 @@ Future<AppRuntime> _runtimeWithEvidence({
   required RecallResponseDisposition disposition,
   required bool submitCorrectAnswer,
 }) async {
-  final store = await SqliteSourceStore.open(
-    factory: databaseFactoryFfiNoIsolate,
-    path: inMemoryDatabasePath,
-  );
+  final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
   final ingest = SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor());
   final recall = RecallLearningService(sourceStore: store, learningStore: store.learningTruthStore());
   final runtime = AppRuntime(
@@ -48,15 +45,9 @@ Future<AppRuntime> _runtimeWithEvidence({
         'Mitokondri hücresel solunumla kullanılabilir enerji üretimine katkı sağlar.',
     sourceName: 'Biyoloji çalışma notu',
   );
-  final prompt = await recall.createCurrentPrompt(
-    learner: runtime.learner,
-    materialId: AppRuntime.primaryMaterialId,
-  );
+  final prompt = await recall.createCurrentPrompt(learner: runtime.learner, materialId: AppRuntime.primaryMaterialId);
   final session = await recall.openAttempt(learner: runtime.learner, actionId: prompt.id);
-  final action = await store.learningTruthStore().recallAction(
-    learner: runtime.learner,
-    actionId: prompt.id,
-  );
+  final action = await store.learningTruthStore().recallAction(learner: runtime.learner, actionId: prompt.id);
   await recall.submit(
     learner: runtime.learner,
     actionId: prompt.id,
