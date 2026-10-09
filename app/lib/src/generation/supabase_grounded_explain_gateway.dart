@@ -22,7 +22,7 @@ class SupabaseGroundedExplainGateway implements GroundedExplainGateway {
         'request_grounded_explain',
         params: {
           'p_material_id': request.materialId.value,
-          'p_source_content_hash': request.sourceContentDigest,
+          'p_source_content_hash': request.groundingContentHash,
           'p_idempotency_key': _idempotencyKey(request),
         },
       );
@@ -36,7 +36,7 @@ class SupabaseGroundedExplainGateway implements GroundedExplainGateway {
         }
         rows = await client.rpc<List<dynamic>>(
           'read_grounded_explain',
-          params: {'p_material_id': request.materialId.value, 'p_source_content_hash': request.sourceContentDigest},
+          params: {'p_material_id': request.materialId.value, 'p_source_content_hash': request.groundingContentHash},
         );
         if (rows.isNotEmpty) break;
       }
@@ -54,13 +54,13 @@ class SupabaseGroundedExplainGateway implements GroundedExplainGateway {
       final language = (content['language'] as String?)?.trim() ?? request.outputLocale;
       final digest = (row['source_content_hash'] as String?) ?? '';
 
-      if (explanation.isEmpty || digest != request.sourceContentDigest) {
+      if (explanation.isEmpty || digest != request.groundingContentHash) {
         return const GroundedExplainUnavailable(reason: GroundedExplainUnavailableReason.staleSource);
       }
 
       return GroundedExplainReady(
         sourceVersionId: request.sourceVersionId,
-        sourceContentDigest: digest,
+        sourceContentDigest: request.sourceContentDigest,
         explanation: explanation,
         keyPoints: keyPoints,
         language: language,
@@ -80,9 +80,9 @@ class SupabaseGroundedExplainGateway implements GroundedExplainGateway {
   }
 
   static String _idempotencyKey(GroundedExplainRequest request) {
-    final digest = request.sourceContentDigest.length <= 24
-        ? request.sourceContentDigest
-        : request.sourceContentDigest.substring(0, 24);
+    final digest = request.groundingContentHash.length <= 24
+        ? request.groundingContentHash
+        : request.groundingContentHash.substring(0, 24);
     return 'explain:${request.materialId.value}:$digest';
   }
 }
