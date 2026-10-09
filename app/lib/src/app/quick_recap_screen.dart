@@ -92,9 +92,22 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> with WidgetsBinding
         sourceVersionId: source.identity.sourceVersionId,
       );
       if (!mounted || id == null) return;
+      final cached = await widget.runtime.store.cachedSummaryResult(
+        learner: widget.runtime.learner,
+        materialId: widget.materialId,
+        sourceVersionId: source.identity.sourceVersionId,
+      );
+      if (!mounted) return;
       setState(() {
         _jobId = id;
         _submittedSourceVersion = source.identity.sourceVersionId;
+        if (cached != null) {
+          _status = ServerSummaryStatus(
+            state: 'SUCCEEDED',
+            summary: cached.summary,
+            keyPoints: cached.keyPoints,
+          );
+        }
       });
       await _refresh();
       if (mounted && _jobId != null && !(_status?.isTerminal ?? false)) {
@@ -249,7 +262,8 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> with WidgetsBinding
     if (_checking || !mounted) return;
     if (_busy && _jobId == null) return;
     final id = _jobId;
-    if (id == null) return;
+    final submittedSourceVersion = _submittedSourceVersion;
+    if (id == null || submittedSourceVersion == null) return;
     _checking = true;
     try {
       final status = await _gateway.status(id);
@@ -258,7 +272,7 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> with WidgetsBinding
         materialId: widget.materialId,
       );
       if (!mounted || _jobId != id) return;
-      if (currentSource?.identity.sourceVersionId != _submittedSourceVersion) {
+      if (currentSource?.identity.sourceVersionId != submittedSourceVersion) {
         _pollTimer?.cancel();
         if (mounted) {
           setState(() {
@@ -271,6 +285,17 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> with WidgetsBinding
         return;
       }
       if (_jobId != id || !mounted) return;
+      if (status.summary != null) {
+        await widget.runtime.store.saveCachedSummaryResult(
+          learner: widget.runtime.learner,
+          materialId: widget.materialId,
+          sourceVersionId: submittedSourceVersion,
+          jobId: id,
+          summary: status.summary!,
+          keyPoints: status.keyPoints,
+          cachedAt: DateTime.now().toUtc(),
+        );
+      }
       if (status.isTerminal) {
         _pollTimer?.cancel();
       }
@@ -281,7 +306,13 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> with WidgetsBinding
         });
       }
     } catch (_) {
-      if (mounted && _jobId == id) setState(() => _error = 'Özet durumu alınamadı. Tekrar deneyebilirsin.');
+      if (mounted && _jobId == id) {
+        setState(
+          () => _error = _status?.summary != null
+              ? 'Kaydedilmiş özet gösteriliyor. Sunucu durumu şu anda yenilenemedi.'
+              : 'Özet durumu alınamadı. Tekrar deneyebilirsin.',
+        );
+      }
     } finally {
       _checking = false;
     }

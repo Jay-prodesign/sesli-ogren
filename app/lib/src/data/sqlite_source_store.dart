@@ -36,7 +36,7 @@ class SqliteSourceStore implements SourceStore {
     final database = await selectedFactory.openDatabase(
       databasePath,
       options: OpenDatabaseOptions(
-        version: 9,
+        version: 10,
         onConfigure: (db) => db.execute('PRAGMA foreign_keys = ON'),
         onUpgrade: (db, oldVersion, newVersion) async {
           if (oldVersion < 2) {
@@ -62,6 +62,9 @@ class SqliteSourceStore implements SourceStore {
           }
           if (oldVersion < 9) {
             await _upgradeSummaryJobsSchema(db);
+          }
+          if (oldVersion < 10) {
+            await _upgradeSummaryCacheSchema(db);
           }
         },
         onCreate: (db, version) async {
@@ -264,6 +267,7 @@ CREATE TABLE learner_preferences (
 )
 ''');
           await _upgradeSummaryJobsSchema(db);
+          await _upgradeSummaryCacheSchema(db);
           await db.execute('''
 CREATE TABLE operational_events (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -332,11 +336,32 @@ CREATE TABLE IF NOT EXISTS summary_jobs (
   source_version_id TEXT NOT NULL,
   server_material_id TEXT NOT NULL,
   job_id TEXT NOT NULL,
+  summary_text TEXT,
+  key_points_json TEXT,
+  summary_cached_at_utc TEXT,
   PRIMARY KEY (learner_id, material_id),
   FOREIGN KEY (learner_id, material_id)
     REFERENCES materials (learner_id, material_id) ON DELETE CASCADE
 )
 ''');
+  }
+
+  static Future<void> _upgradeSummaryCacheSchema(Database db) async {
+    final columns = await db.rawQuery('PRAGMA table_info(summary_jobs)');
+    final names = columns.map((row) => row['name'] as String).toSet();
+
+    Future<void> add(String name, String sql) async {
+      if (!names.contains(name)) {
+        await db.execute(sql);
+      }
+    }
+
+    await add('summary_text', 'ALTER TABLE summary_jobs ADD COLUMN summary_text TEXT');
+    await add('key_points_json', 'ALTER TABLE summary_jobs ADD COLUMN key_points_json TEXT');
+    await add(
+      'summary_cached_at_utc',
+      'ALTER TABLE summary_jobs ADD COLUMN summary_cached_at_utc TEXT',
+    );
   }
 
   Future<String?> summaryJobId({
@@ -371,6 +396,70 @@ CREATE TABLE IF NOT EXISTS summary_jobs (
       limit: 1,
     );
     return rows.isEmpty ? null : rows.first['server_material_id']! as String;
+  }
+
+  Future<CachedSummaryResult?> cachedSummaryResult({
+    required AuthenticatedLearner learner,
+    required MaterialId materialId,
+    required SourceVersionId sourceVersionId,
+  }) async {
+    final rows = await _database.query(
+      'summary_jobs',
+      columns: ['summary_text', 'key_points_json', 'summary_cached_at_utc'],
+      where: 'learner_id = ? AND material_id = ? AND source_version_id = ?',
+      whereArgs: [learner.id.value, materialId.value, sourceVersionId.value],
+      limit: 1,
+    );
+    if (rows.isEmpty) return null;
+
+    final row = rows.first;
+    final summary = row['summary_text'] as String?;
+    final keyPointsJson = row['key_points_json'] as String?;
+    final cachedAtRaw = row['summary_cached_at_utc'] as String?;
+    if (summary == null || summary.trim().isEmpty || keyPointsJson == null || cachedAtRaw == null) {
+      return null;
+    }
+
+    try {
+      final decoded = jsonDecode(keyPointsJson);
+      final cachedAt = DateTime.tryParse(cachedAtRaw);
+      if (decoded is! List || decoded.any((value) => value is! String) || cachedAt == null) {
+        return null;
+      }
+      return CachedSummaryResult(
+        summary: summary,
+        keyPoints: decoded.cast<String>(),
+        cachedAt: cachedAt.toUtc(),
+      );
+    } catch (_) {
+      return null;
+    }
+  }
+
+  Future<bool> saveCachedSummaryResult({
+    required AuthenticatedLearner learner,
+    required MaterialId materialId,
+    required SourceVersionId sourceVersionId,
+    required String jobId,
+    required String summary,
+    required List<String> keyPoints,
+    required DateTime cachedAt,
+  }) async {
+    final normalizedSummary = summary.trim();
+    if (normalizedSummary.isEmpty) return false;
+    final normalizedPoints = keyPoints.map((point) => point.trim()).where((point) => point.isNotEmpty).toList();
+
+    final changed = await _database.update(
+      'summary_jobs',
+      {
+        'summary_text': normalizedSummary,
+        'key_points_json': jsonEncode(normalizedPoints),
+        'summary_cached_at_utc': cachedAt.toUtc().toIso8601String(),
+      },
+      where: 'learner_id = ? AND material_id = ? AND source_version_id = ? AND job_id = ?',
+      whereArgs: [learner.id.value, materialId.value, sourceVersionId.value, jobId],
+    );
+    return changed == 1;
   }
 
   Future<void> clearSummaryJob({
@@ -2080,4 +2169,17 @@ class SqliteOperationalTelemetry implements OperationalTelemetry {
         })
         .toList(growable: false);
   }
+}
+
+
+class CachedSummaryResult {
+  const CachedSummaryResult({
+    required this.summary,
+    required this.keyPoints,
+    required this.cachedAt,
+  });
+
+  final String summary;
+  final List<String> keyPoints;
+  final DateTime cachedAt;
 }
