@@ -1168,8 +1168,8 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
         isScrollControlled: true,
         showDragHandle: true,
         builder: (sheetContext) => SafeArea(
-          child: FractionallySizedBox(
-            heightFactor: 0.8,
+          child: SizedBox(
+            height: MediaQuery.sizeOf(sheetContext).height * 0.8,
             child: Padding(
               padding: const EdgeInsets.fromLTRB(24, 12, 24, 24),
               child: Column(
