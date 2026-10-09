@@ -8,11 +8,7 @@ String foldTurkishSourceText(String value) =>
 ///
 /// The returned text always comes from [source]; this helper never manufactures
 /// or semantically infers evidence.
-List<SourceTextRange> findTurkishSourceTextMatches(
-  String source,
-  String query, {
-  int limit = 2000,
-}) {
+List<SourceTextRange> findTurkishSourceTextMatches(String source, String query, {int limit = 2000}) {
   final needle = foldTurkishSourceText(query.trim());
   if (needle.isEmpty || source.isEmpty || limit <= 0) return const [];
 
