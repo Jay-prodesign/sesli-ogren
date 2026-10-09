@@ -30,7 +30,7 @@ abstract final class AppPalette {
   static const attentionSoft = Color(0xFFFFEEDB);
 
   static const destructive = Color(0xFFD64550);
-  static const outline = Color(0xFFE4E7EC);
+  static const outline = Color(0xFFE5E0ED);
 }
 
 abstract final class SesliOgrenTheme {
