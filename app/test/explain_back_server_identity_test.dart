@@ -10,6 +10,7 @@ import 'package:sesli_ogren/src/data/pdf_text_extractor.dart';
 import 'package:sesli_ogren/src/data/source_ingest_service.dart';
 import 'package:sesli_ogren/src/data/sqlite_source_store.dart';
 import 'package:sesli_ogren/src/domain/learning_contracts.dart';
+import 'package:sesli_ogren/src/generation/supabase_source_summary_gateway.dart';
 import 'package:sesli_ogren/src/learning/explain_back_gateway.dart';
 import 'package:sesli_ogren/src/learning/recall_learning_service.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
@@ -38,6 +39,26 @@ class _RecordingExplainBackGateway implements ExplainBackGateway {
       targetedRepair: 'Enerjinin kimyasal biçimde depolandığını da belirt.',
       executionRef: 'test:explain-back',
     );
+  }
+}
+
+class _RecordingSourceGateway extends SupabaseSourceSummaryGateway {
+  _RecordingSourceGateway({required this.createdServerMaterialId});
+
+  final String createdServerMaterialId;
+  final List<String> deletedServerMaterialIds = <String>[];
+  var ensureCalls = 0;
+
+  @override
+  Future<bool> deleteServerMaterial(String serverMaterialId) async {
+    deletedServerMaterialIds.add(serverMaterialId);
+    return true;
+  }
+
+  @override
+  Future<String> ensureServerMaterial({required SourceIngestResult source}) async {
+    ensureCalls += 1;
+    return createdServerMaterialId;
   }
 }
 
@@ -111,4 +132,91 @@ void main() {
         .toString();
     expect(explainBack.lastRequest!.groundingContentHash, expectedGroundingHash);
   });
+
+  testWidgets('Explain-back deletes stale server source before rebinding a newer local source', (tester) async {
+    final store = await SqliteSourceStore.open(
+      factory: databaseFactoryFfiNoIsolate,
+      path: inMemoryDatabasePath,
+    );
+    addTearDown(store.close);
+
+    final ingest = SourceIngestService(
+      store: store,
+      pdfTextExtractor: const _UnusedPdfExtractor(),
+    );
+    const materialId = MaterialId('explain-back-stale-binding-material');
+    final first = await ingest.ingestPastedText(
+      learner: AppRuntime.localM5LearnerFixture,
+      materialId: materialId,
+      text: 'Eski kaynak sürümü.',
+      sourceName: 'Biyoloji notu',
+    );
+    const oldServerMaterialId = '66666666-6666-4666-8666-666666666666';
+    await store.saveServerMaterialBinding(
+      learner: AppRuntime.localM5LearnerFixture,
+      materialId: materialId,
+      sourceVersionId: first.sourceVersion.identity.sourceVersionId,
+      serverMaterialId: oldServerMaterialId,
+    );
+
+    final second = await ingest.ingestPastedText(
+      learner: AppRuntime.localM5LearnerFixture,
+      materialId: materialId,
+      text: 'Yeni kaynak sürümü fotosentezin enerji dönüşümünü anlatır.',
+      sourceName: 'Biyoloji notu',
+    );
+    const newServerMaterialId = '77777777-7777-4777-8777-777777777777';
+    final sourceGateway = _RecordingSourceGateway(
+      createdServerMaterialId: newServerMaterialId,
+    );
+    final explainBack = _RecordingExplainBackGateway();
+    final runtime = AppRuntime(
+      learner: AppRuntime.localM5LearnerFixture,
+      store: store,
+      ingest: ingest,
+      recall: RecallLearningService(
+        sourceStore: store,
+        learningStore: store.learningTruthStore(),
+      ),
+      telemetry: store.operationalTelemetry(),
+      explainBack: explainBack,
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: ExplainBackScreen(
+          runtime: runtime,
+          source: second.sourceVersion,
+          sourceGateway: sourceGateway,
+        ),
+      ),
+    );
+    await tester.enterText(
+      find.byType(TextField),
+      'Fotosentez ışık enerjisini kimyasal enerjiye dönüştürür.',
+    );
+    await tester.tap(find.text('Anlatımımı değerlendir'));
+    await tester.pumpAndSettle();
+
+    expect(sourceGateway.deletedServerMaterialIds, [oldServerMaterialId]);
+    expect(sourceGateway.ensureCalls, 1);
+    expect(explainBack.lastRequest?.materialId.value, newServerMaterialId);
+    expect(
+      await store.summaryServerMaterialId(
+        learner: runtime.learner,
+        materialId: materialId,
+        sourceVersionId: second.sourceVersion.identity.sourceVersionId,
+      ),
+      newServerMaterialId,
+    );
+    expect(
+      await store.summaryServerMaterialId(
+        learner: runtime.learner,
+        materialId: materialId,
+        sourceVersionId: first.sourceVersion.identity.sourceVersionId,
+      ),
+      isNull,
+    );
+  });
+
 }
