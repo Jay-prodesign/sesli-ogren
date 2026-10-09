@@ -379,6 +379,16 @@ CREATE TABLE IF NOT EXISTS server_material_bindings (
     REFERENCES source_versions (learner_id, source_version_id) ON DELETE CASCADE
 )
 ''');
+
+    final prerequisiteTables = await db.rawQuery(
+      "SELECT name FROM sqlite_master WHERE type = 'table' "
+      "AND name IN ('materials', 'source_versions', 'summary_jobs')",
+    );
+    final prerequisiteNames = prerequisiteTables.map((row) => row['name'] as String).toSet();
+    if (!prerequisiteNames.containsAll({'materials', 'source_versions', 'summary_jobs'})) {
+      return;
+    }
+
     await db.execute('''
 INSERT OR REPLACE INTO server_material_bindings (
   learner_id,
