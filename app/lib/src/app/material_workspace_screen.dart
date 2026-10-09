@@ -116,8 +116,39 @@ class _MaterialWorkspaceScreenState extends State<MaterialWorkspaceScreen> {
           future: _snapshot,
           builder: (context, snapshot) {
             if (snapshot.hasError) {
-              return const Center(
-                child: Padding(padding: EdgeInsets.all(24), child: Text('Materyal açılamadı.')),
+              return Center(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 24),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.menu_book_outlined, size: 40, color: AppPalette.primary),
+                      const SizedBox(height: 16),
+                      Text(
+                        'Materyal şu anda açılamıyor',
+                        textAlign: TextAlign.center,
+                        style: Theme.of(context).textTheme.titleLarge,
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Kaynağı yükleyemedik. Kütüphanene dönüp tekrar açabilir veya yeniden deneyebilirsin.',
+                        textAlign: TextAlign.center,
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: AppPalette.inkMuted),
+                      ),
+                      const SizedBox(height: 20),
+                      FilledButton.icon(
+                        onPressed: () => setState(() => _snapshot = _load()),
+                        icon: const Icon(Icons.refresh_rounded),
+                        label: const Text('Yeniden dene'),
+                      ),
+                      const SizedBox(height: 8),
+                      TextButton(
+                        onPressed: () => Navigator.of(context).maybePop(),
+                        child: const Text('Kütüphaneye dön'),
+                      ),
+                    ],
+                  ),
+                ),
               );
             }
             if (!snapshot.hasData) {
