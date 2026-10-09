@@ -2,12 +2,13 @@ import 'package:flutter/material.dart';
 
 /// Read the complete locally extracted source without sending it to a model.
 class SourceReaderScreen extends StatefulWidget {
-  const SourceReaderScreen({required this.title, required this.sourceText, this.onListen, this.onRecap, super.key});
+  const SourceReaderScreen({required this.title, required this.sourceText, this.onListen, this.onRecap, this.onRecall, super.key});
 
   final String title;
   final String sourceText;
   final VoidCallback? onListen;
   final VoidCallback? onRecap;
+  final VoidCallback? onRecall;
 
   @override
   State<SourceReaderScreen> createState() => _SourceReaderScreenState();
@@ -67,6 +68,8 @@ class _SourceReaderScreenState extends State<SourceReaderScreen> {
             IconButton(tooltip: 'Kaynağı dinle', onPressed: widget.onListen, icon: const Icon(Icons.headphones_rounded)),
           if (widget.onRecap != null)
             IconButton(tooltip: 'Hızlı özet', onPressed: widget.onRecap, icon: const Icon(Icons.auto_awesome)),
+          if (widget.onRecall != null)
+            IconButton(tooltip: 'Hatırla', onPressed: widget.onRecall, icon: const Icon(Icons.psychology_alt_outlined)),
           IconButton(
             tooltip: 'Yazıyı küçült',
             onPressed: _fontSize <= 14 ? null : () => setState(() => _fontSize -= 1),
