@@ -30,6 +30,10 @@ class _ExplainScreenState extends State<ExplainScreen> {
   }
 
   Future<GroundedExplainResult> _request() async {
+    if (widget.runtime.explain is UnavailableGroundedExplainGateway) {
+      return const GroundedExplainUnavailable(reason: GroundedExplainUnavailableReason.providerNotConfigured);
+    }
+
     try {
       final currentSource = await widget.runtime.store.currentSourceVersion(
         learner: widget.runtime.learner,
@@ -98,11 +102,17 @@ class _ExplainScreenState extends State<ExplainScreen> {
         summaryJobId = submission.jobId;
       }
 
-      await _summaryGateway.dispatch(summaryJobId);
+      final boundServerMaterialId = serverMaterialId;
+      final boundSummaryJobId = summaryJobId;
+      if (boundServerMaterialId == null || boundSummaryJobId == null) {
+        return const GroundedExplainUnavailable(reason: GroundedExplainUnavailableReason.sourceUnavailable);
+      }
+
+      await _summaryGateway.dispatch(boundSummaryJobId);
 
       return widget.runtime.explain.explain(
         GroundedExplainRequest(
-          materialId: MaterialId(serverMaterialId),
+          materialId: MaterialId(boundServerMaterialId),
           sourceVersionId: widget.source.identity.sourceVersionId,
           sourceContentDigest: widget.source.identity.contentDigest,
           outputLocale: 'tr-TR',
