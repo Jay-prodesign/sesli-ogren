@@ -1047,23 +1047,113 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
     );
   }
 
+  Future<void> _reviewContinuationSource() async {
+    if (_busy) return;
+    final continuation = _continuation;
+    if (continuation == null) return;
+    _setBusy(true);
+    try {
+      final source = await widget.runtime.store.currentSourceVersion(
+        learner: widget.runtime.learner,
+        materialId: widget.materialId,
+      );
+      if (!mounted) return;
+      if (source == null ||
+          source.identity.sourceVersionId != continuation.state.sourceVersionId) {
+        _showRecoverableError();
+        return;
+      }
+      final extracted = await widget.runtime.store.extractedContentForSource(
+        learner: widget.runtime.learner,
+        sourceVersionId: source.identity.sourceVersionId,
+      );
+      if (!mounted) return;
+      final text = extracted?.normalizedText ?? '';
+      if (text.trim().isEmpty) {
+        _showRecoverableError();
+        return;
+      }
+      await showModalBottomSheet<void>(
+        context: context,
+        isScrollControlled: true,
+        showDragHandle: true,
+        builder: (sheetContext) => SafeArea(
+          child: SizedBox(
+            height: MediaQuery.sizeOf(sheetContext).height * 0.75,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Text('Kaynağını yeniden incele',
+                      style: Theme.of(sheetContext).textTheme.titleLarge),
+                  const SizedBox(height: 8),
+                  const Text('Bu metin son hatırlama denemenin kaynak sürümünden geliyor.'),
+                  const SizedBox(height: 16),
+                  Expanded(child: SingleChildScrollView(child: SelectableText(text))),
+                  const SizedBox(height: 12),
+                  FilledButton(
+                    onPressed: () => Navigator.of(sheetContext).pop(),
+                    child: const Text('İncelemeyi bitir'),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+    } catch (_) {
+      _showRecoverableError();
+    } finally {
+      _setBusy(false);
+    }
+  }
+
   Widget _continuationCard(BuildContext context) {
     final continuation = _continuation;
     if (continuation == null) return _errorCard(context);
+    final kind = continuation.nextAction.kind;
+    final needsSource = kind == NextLearningActionKind.reviewSourceThenRecall;
+    final canRetry = kind != NextLearningActionKind.repeatRecallLater;
     return _SurfaceCard(
       key: const ValueKey('continuation'),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text('Devam noktası', style: Theme.of(context).textTheme.titleLarge),
+          Text(
+            needsSource
+                ? 'Önce kaynağı gözden geçir'
+                : canRetry
+                    ? 'Bir kez daha hatırla'
+                    : 'Bugünlük iyi bir adım',
+            style: Theme.of(context).textTheme.titleLarge,
+          ),
           const SizedBox(height: 10),
           Text(continuation.nextAction.reasonText),
           const SizedBox(height: 20),
-          FilledButton.icon(
-            onPressed: _busy ? null : _openRecall,
-            icon: const Icon(Icons.refresh_rounded),
-            label: const Text('Hatırlamaya dön'),
-          ),
+          if (needsSource) ...[
+            FilledButton.icon(
+              onPressed: _busy ? null : _reviewContinuationSource,
+              icon: const Icon(Icons.menu_book_outlined),
+              label: const Text('Kaynağı gözden geçir'),
+            ),
+            const SizedBox(height: 8),
+            OutlinedButton(
+              onPressed: _busy ? null : _openRecall,
+              child: const Text('Yeniden hatırlamayı dene'),
+            ),
+          ] else if (canRetry)
+            FilledButton.icon(
+              onPressed: _busy ? null : _openRecall,
+              icon: const Icon(Icons.refresh_rounded),
+              label: const Text('İpucusuz tekrar dene'),
+            )
+          else
+            FilledButton.icon(
+              onPressed: _busy ? null : () => Navigator.of(context).maybePop(),
+              icon: const Icon(Icons.check_rounded),
+              label: const Text('Çalışmayı bitir'),
+            ),
           const SizedBox(height: 8),
           TextButton(
             onPressed: _busy
