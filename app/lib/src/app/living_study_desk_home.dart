@@ -78,8 +78,7 @@ class LivingStudyDeskHome extends StatelessWidget {
   VoidCallback get _nextActionHandler =>
       continuation?.nextAction.kind == NextLearningActionKind.repeatRecallLater ? onOpenWorkspace : onOpenLearning;
 
-  IconData get _nextActionIcon =>
-      continuation?.nextAction.kind == NextLearningActionKind.repeatRecallLater
+  IconData get _nextActionIcon => continuation?.nextAction.kind == NextLearningActionKind.repeatRecallLater
       ? Icons.auto_stories_outlined
       : Icons.psychology_alt_outlined;
 
