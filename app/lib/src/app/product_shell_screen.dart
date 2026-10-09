@@ -856,7 +856,6 @@ class _LibrarySurface extends StatefulWidget {
 
 class _LibrarySurfaceState extends State<_LibrarySurface> {
   final _searchController = TextEditingController();
-  String _query = '';
 
   @override
   void dispose() {
@@ -865,17 +864,14 @@ class _LibrarySurfaceState extends State<_LibrarySurface> {
   }
 
   void _clearSearch() {
-    setState(() {
-      _query = '';
-      _searchController.clear();
-    });
+    setState(_searchController.clear);
   }
 
   String _searchKey(String value) =>
       value.replaceAll('I', 'i').replaceAll('ı', 'i').toLowerCase().replaceAll('\u0307', '');
 
   List<MaterialRecord> get _visibleMaterials {
-    final query = _searchKey(_query.trim());
+    final query = _searchKey(_searchController.text.trim());
     if (query.isEmpty) return widget.data.materials;
     return widget.data.materials
         .where((material) => _searchKey(material.title).contains(query))
@@ -886,7 +882,7 @@ class _LibrarySurfaceState extends State<_LibrarySurface> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final visibleMaterials = _visibleMaterials;
-    final hasQuery = _query.trim().isNotEmpty;
+    final hasQuery = _searchController.text.trim().isNotEmpty;
     return ListView(
       padding: const EdgeInsets.fromLTRB(20, 24, 20, 32),
       children: [
@@ -913,7 +909,7 @@ class _LibrarySurfaceState extends State<_LibrarySurface> {
           TextField(
             key: const ValueKey('library-search'),
             controller: _searchController,
-            onChanged: (value) => setState(() => _query = value),
+            onChanged: (_) => setState(() {}),
             textInputAction: TextInputAction.search,
             decoration: InputDecoration(
               hintText: 'Materyal ara',
