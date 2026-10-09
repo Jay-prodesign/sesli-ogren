@@ -160,14 +160,10 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
                 onRecall: () => _openRecallFromCurrentRoute(readerContext, selected),
               ),
             ),
-            onRecap: () => _replaceReaderWith(
-              readerContext,
-              QuickRecapScreen(runtime: widget.runtime, materialId: selected),
-            ),
-            onRecall: () => _replaceReaderWith(
-              readerContext,
-              LearningSliceScreen(runtime: widget.runtime, materialId: selected),
-            ),
+            onRecap: () =>
+                _replaceReaderWith(readerContext, QuickRecapScreen(runtime: widget.runtime, materialId: selected)),
+            onRecall: () =>
+                _replaceReaderWith(readerContext, LearningSliceScreen(runtime: widget.runtime, materialId: selected)),
           ),
         ),
       );
