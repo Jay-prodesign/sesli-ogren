@@ -96,20 +96,13 @@ class _SourceReaderScreenState extends State<SourceReaderScreen> {
         if (living) ...[
           Text(
             'KAYNAK · OKUMA',
-            style: theme.textTheme.labelSmall?.copyWith(
-              color: accent,
-              fontWeight: FontWeight.w900,
-              letterSpacing: 0.9,
-            ),
+            style: theme.textTheme.labelSmall?.copyWith(color: accent, fontWeight: FontWeight.w900, letterSpacing: 0.9),
           ),
           const SizedBox(height: 8),
         ],
         Text(
           widget.title,
-          style: theme.textTheme.titleLarge?.copyWith(
-            color: ink,
-            fontWeight: living ? FontWeight.w900 : null,
-          ),
+          style: theme.textTheme.titleLarge?.copyWith(color: ink, fontWeight: living ? FontWeight.w900 : null),
         ),
         const SizedBox(height: 16),
         RichText(
@@ -342,10 +335,7 @@ class _SourceReaderScreenState extends State<SourceReaderScreen> {
                                 borderRadius: BorderRadius.circular(18),
                                 border: Border.all(color: line),
                               ),
-                              child: Padding(
-                                padding: const EdgeInsets.fromLTRB(22, 22, 22, 28),
-                                child: article,
-                              ),
+                              child: Padding(padding: const EdgeInsets.fromLTRB(22, 22, 22, 28), child: article),
                             )
                           else
                             article,
