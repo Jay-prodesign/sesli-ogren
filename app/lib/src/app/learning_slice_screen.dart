@@ -217,6 +217,7 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
   }
 
   Future<void> _saveSource() async {
+    if (_busy) return;
     final text = _sourceController.text;
     if (text.trim().isEmpty) {
       setState(() => _inlineError = 'Çalışmak istediğin metni ekle.');
@@ -687,7 +688,7 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
           Text('Çalışma materyalini ekle', style: Theme.of(context).textTheme.titleLarge),
           const SizedBox(height: 8),
           const Text(
-            'PDF seçebilir veya metni doğrudan yapıştırabilirsin. Kaynak sürümü öğrenme kanıtından ayrı tutulur.',
+            'Bir PDF seç ya da notlarını yapıştır. Ardından kaynağı kapatıp neler hatırladığını birlikte keşfedelim.',
           ),
           const SizedBox(height: 18),
           OutlinedButton.icon(
@@ -721,6 +722,7 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
           TextField(
             key: const ValueKey('pasted-material-text'),
             controller: _sourceController,
+            enabled: !_busy,
             minLines: 7,
             maxLines: 14,
             textCapitalization: TextCapitalization.sentences,
