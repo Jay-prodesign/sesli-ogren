@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../domain/learning_contracts.dart';
 import '../domain/learning_truth.dart';
+import '../learning/recall_learning_service.dart';
 import '../generation/supabase_source_summary_gateway.dart';
 import 'app_runtime.dart';
 import 'app_theme.dart';
@@ -45,7 +46,7 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
         learner: widget.runtime.learner,
         materialId: materialId,
       );
-    } on Exception {
+    } on RecallLearningException {
       return widget.runtime.recall.repairContinuation(
         learner: widget.runtime.learner,
         materialId: materialId,
