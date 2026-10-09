@@ -546,8 +546,8 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
       );
       if (!mounted) return;
       setState(() {
-        _phase = _SlicePhase.source;
-        _inlineError = 'Güvenli devam oluşturulamadı. Kaynağı yeniden ekleyerek başlayabilirsin.';
+        _phase = _SlicePhase.error;
+        _inlineError = 'Devam onarılamadı. Yeniden deneyebilir veya materyalini güncelleyebilirsin.';
       });
     } finally {
       _setBusy(false);
@@ -1073,36 +1073,135 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
   Widget _continuationCard(BuildContext context) {
     final continuation = _continuation;
     if (continuation == null) return _errorCard(context);
+    final nextAction = continuation.nextAction;
+    final reviewFirst = nextAction.kind == NextLearningActionKind.reviewSourceThenRecall;
+    final later = nextAction.kind == NextLearningActionKind.repeatRecallLater;
+    final title = reviewFirst
+        ? 'Önce kaynağı gözden geçir'
+        : later
+            ? 'Bugünlük iyi bir adım'
+            : 'Bir kez daha hatırla';
+    final actionLabel = reviewFirst
+        ? 'Kaynağı gözden geçir'
+        : later
+            ? 'Yine de tekrar dene'
+            : 'İpucusuz yeniden dene';
     return _SurfaceCard(
       key: const ValueKey('continuation'),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text('Devam noktası', style: Theme.of(context).textTheme.titleLarge),
+          Text('03 / 03  ·  SONRAKİ ADIM', style: Theme.of(context).textTheme.labelMedium?.copyWith(
+            color: Theme.of(context).colorScheme.primary,
+            fontWeight: FontWeight.w800,
+            letterSpacing: 1.1,
+          )),
+          const SizedBox(height: 12),
+          Text(title, style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w800)),
           const SizedBox(height: 10),
-          Text(continuation.nextAction.reasonText),
+          Text(nextAction.reasonText),
           const SizedBox(height: 20),
           FilledButton.icon(
-            onPressed: _busy ? null : _openRecall,
-            icon: const Icon(Icons.refresh_rounded),
-            label: const Text('Hatırlamaya dön'),
+            onPressed: _busy ? null : reviewFirst ? _reviewCurrentSource : _openRecall,
+            icon: Icon(reviewFirst ? Icons.menu_book_rounded : Icons.refresh_rounded),
+            label: Text(actionLabel),
+          ),
+          if (reviewFirst) ...[
+            const SizedBox(height: 8),
+            TextButton(
+              onPressed: _busy ? null : _openRecall,
+              child: const Text('Kaynağa bakmadan tekrar dene'),
+            ),
+          ],
+          const SizedBox(height: 8),
+          TextButton(
+            onPressed: _busy ? null : () => Navigator.of(context).maybePop(),
+            child: const Text('Çalışmayı bitir'),
           ),
           const SizedBox(height: 8),
           TextButton(
-            onPressed: _busy
-                ? null
-                : () {
-                    setState(() {
-                      _sourceController.clear();
-                      _inlineError = null;
-                      _phase = _SlicePhase.source;
-                    });
-                  },
+            onPressed: _busy ? null : () {
+              setState(() {
+                _sourceController.clear();
+                _inlineError = null;
+                _phase = _SlicePhase.source;
+              });
+            },
             child: const Text('Materyali güncelle'),
           ),
         ],
       ),
     );
+  }
+
+  Future<void> _reviewCurrentSource() async {
+    if (_busy) return;
+    _setBusy(true);
+    try {
+      final source = await widget.runtime.store.currentSourceVersion(
+        learner: widget.runtime.learner,
+        materialId: widget.materialId,
+      );
+      if (source == null) {
+        if (!mounted) return;
+        setState(() {
+          _phase = _SlicePhase.error;
+          _inlineError = 'Kayıtlı kaynak bulunamadı. Materyalini yeniden ekleyebilirsin.';
+        });
+        return;
+      }
+      final extracted = await widget.runtime.store.extractedContentForSource(
+        learner: widget.runtime.learner,
+        sourceVersionId: source.identity.sourceVersionId,
+      );
+      if (!mounted) return;
+      final sourceText = extracted?.normalizedText ?? '';
+      if (sourceText.trim().isEmpty) {
+        setState(() {
+          _phase = _SlicePhase.error;
+          _inlineError = 'Kaynak metni şu anda okunamıyor. Materyalini yeniden ekleyebilirsin.';
+        });
+        return;
+      }
+      await showModalBottomSheet<void>(
+        context: context,
+        isScrollControlled: true,
+        showDragHandle: true,
+        builder: (sheetContext) => SafeArea(
+          child: FractionallySizedBox(
+            heightFactor: 0.8,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(24, 12, 24, 24),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Text('Kaynağın', style: Theme.of(sheetContext).textTheme.headlineSmall),
+                  const SizedBox(height: 6),
+                  const Text('Önce metni incele. Hazır olduğunda kapatıp yeniden hatırla.'),
+                  const SizedBox(height: 16),
+                  Expanded(child: SingleChildScrollView(
+                    child: SelectableText(sourceText),
+                  )),
+                  const SizedBox(height: 12),
+                  FilledButton(
+                    onPressed: () => Navigator.of(sheetContext).pop(),
+                    child: const Text('Kaynağı kapat'),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        _phase = _SlicePhase.error;
+        _inlineError = 'Kaynak açılamadı. Tekrar deneyebilir veya materyalini güncelleyebilirsin.';
+      });
+    } finally {
+      _setBusy(false);
+    }
   }
 
   Widget _errorCard(BuildContext context) {
