@@ -457,7 +457,9 @@ class _HomeSurface extends StatelessWidget {
             title: _nextTitle(data.continuation),
             reason: _nextReason(data.continuation),
             onPressed: onOpenWorkspace,
-            onStartRecall: onOpenLearning,
+            onStartRecall: data.continuation?.state.kind == RecallStateKind.needsReview
+                ? onOpenWorkspace
+                : onOpenLearning,
           ),
           const SizedBox(height: 22),
           Row(
@@ -710,7 +712,11 @@ class _ContinueHero extends StatelessWidget {
                         ),
                         onPressed: onStartRecall,
                         icon: const Icon(Icons.arrow_forward_rounded),
-                        label: Text('Hatırlamaya geç', style: theme.textTheme.labelLarge?.copyWith(fontFamily: 'Roboto', color: AppPalette.primaryDark, fontWeight: FontWeight.w700)),
+                        label: Text(
+                          data.continuation?.state.kind == RecallStateKind.needsReview
+                              ? 'Kaynağı tekrar aç'
+                              : 'Hatırlamaya geç',
+                          style: theme.textTheme.labelLarge?.copyWith(fontFamily: 'Roboto', color: AppPalette.primaryDark, fontWeight: FontWeight.w700)),
                       ),
                     ],
                   ),
