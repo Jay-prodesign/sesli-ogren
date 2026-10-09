@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../domain/learning_contracts.dart';
 import '../domain/learning_truth.dart';
+import '../generation/supabase_source_summary_gateway.dart';
 import 'app_runtime.dart';
 import 'app_theme.dart';
 import 'companion_view.dart';
@@ -148,6 +149,23 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
       ),
     );
     if (confirmed != true || !mounted) return;
+
+    final serverMaterialId = await widget.runtime.store.summaryServerMaterialId(
+      learner: widget.runtime.learner,
+      materialId: material.id,
+    );
+    if (serverMaterialId != null) {
+      final removed = await const SupabaseSourceSummaryGateway().deleteServerMaterial(serverMaterialId);
+      if (!mounted) return;
+      if (!removed) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Sunucudaki kaynak kopyası silinemedi. Materyal güvenlik için yerelde korunuyor.'),
+          ),
+        );
+        return;
+      }
+    }
 
     await widget.runtime.store.deleteMaterial(
       learner: widget.runtime.learner,

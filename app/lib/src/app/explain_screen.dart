@@ -60,6 +60,21 @@ class _ExplainScreenState extends State<ExplainScreen> {
 
       var createdServerBinding = false;
       if (serverMaterialId == null || summaryJobId == null) {
+        final staleServerMaterialId = await widget.runtime.store.summaryServerMaterialId(
+          learner: widget.runtime.learner,
+          materialId: widget.source.identity.materialId,
+        );
+        if (staleServerMaterialId != null) {
+          final removed = await _summaryGateway.deleteServerMaterial(staleServerMaterialId);
+          if (!removed) {
+            return const GroundedExplainUnavailable(reason: GroundedExplainUnavailableReason.temporaryFailure);
+          }
+          await widget.runtime.store.clearSummaryJob(
+            learner: widget.runtime.learner,
+            materialId: widget.source.identity.materialId,
+          );
+        }
+
         final material = await widget.runtime.store.material(
           learner: widget.runtime.learner,
           materialId: widget.source.identity.materialId,
@@ -89,6 +104,7 @@ class _ExplainScreenState extends State<ExplainScreen> {
         );
         if (sourceAfterSubmission?.identity.sourceVersionId != widget.source.identity.sourceVersionId ||
             sourceAfterSubmission?.identity.contentDigest != widget.source.identity.contentDigest) {
+          await _summaryGateway.deleteServerMaterial(submission.materialId);
           return const GroundedExplainUnavailable(reason: GroundedExplainUnavailableReason.staleSource);
         }
 

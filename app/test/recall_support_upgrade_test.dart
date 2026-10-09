@@ -249,6 +249,11 @@ CREATE TABLE sentinel (
         jobId: 'job-a',
       );
       expect(await store.summaryJobId(learner: owner, materialId: material, sourceVersionId: sourceA), 'job-a');
+      expect(
+        await store.summaryServerMaterialId(learner: owner, materialId: material, sourceVersionId: sourceA),
+        'server-a',
+      );
+      expect(await store.summaryServerMaterialId(learner: owner, materialId: material), 'server-a');
       expect(await store.summaryJobId(learner: other, materialId: material, sourceVersionId: sourceA), isNull);
       expect(await store.summaryJobId(learner: owner, materialId: material, sourceVersionId: sourceB), isNull);
       await store.close();
@@ -265,6 +270,15 @@ CREATE TABLE sentinel (
       );
       expect(await store.summaryJobId(learner: owner, materialId: material, sourceVersionId: sourceA), isNull);
       expect(await store.summaryJobId(learner: owner, materialId: material, sourceVersionId: sourceB), 'job-b');
+      expect(await store.summaryServerMaterialId(learner: owner, materialId: material), 'server-b');
+
+      await store.deleteMaterial(
+        learner: owner,
+        materialId: material,
+        deletedAt: DateTime.utc(2026, 10, 9, 1),
+      );
+      expect(await store.summaryJobId(learner: owner, materialId: material, sourceVersionId: sourceB), isNull);
+      expect(await store.summaryServerMaterialId(learner: owner, materialId: material), isNull);
     } finally {
       await database?.close();
       await store?.close();

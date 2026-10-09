@@ -185,6 +185,21 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> with WidgetsBinding
         }
         return;
       }
+      final staleServerMaterialId = await widget.runtime.store.summaryServerMaterialId(
+        learner: widget.runtime.learner,
+        materialId: widget.materialId,
+      );
+      if (staleServerMaterialId != null) {
+        final removed = await _gateway.deleteServerMaterial(staleServerMaterialId);
+        if (!removed) {
+          throw const ServerSummarySubmissionException('Previous server source could not be removed.');
+        }
+        await widget.runtime.store.clearSummaryJob(
+          learner: widget.runtime.learner,
+          materialId: widget.materialId,
+        );
+      }
+
       final submission = await _gateway.submit(
         source: SourceIngestResult(material: material, sourceVersion: source, extractedContent: extracted),
       );
@@ -202,7 +217,16 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> with WidgetsBinding
       );
       if (!mounted) return;
       if (currentSource?.identity.sourceVersionId != source.identity.sourceVersionId) {
-        setState(() => _error = 'Kaynak değişti. Yeni sürüm için özet oluşturabilirsin.');
+        final removed = await _gateway.deleteServerMaterial(submission.materialId);
+        if (removed) {
+          await widget.runtime.store.clearSummaryJob(
+            learner: widget.runtime.learner,
+            materialId: widget.materialId,
+          );
+        }
+        if (mounted) {
+          setState(() => _error = 'Kaynak değişti. Yeni sürüm için özet oluşturabilirsin.');
+        }
         return;
       }
       setState(() {
