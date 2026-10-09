@@ -9,12 +9,24 @@ import 'app_theme.dart';
 import 'companion_view.dart';
 
 class ListenScreen extends StatefulWidget {
-  const ListenScreen({required this.runtime, required this.materialId, this.speechOutput, this.onRecall, super.key});
+  const ListenScreen({
+    required this.runtime,
+    required this.materialId,
+    this.speechOutput,
+    this.onRecall,
+    this.textOverride,
+    this.titleOverride,
+    this.persistProgress = true,
+    super.key,
+  });
 
   final AppRuntime runtime;
   final MaterialId materialId;
   final SpeechOutput? speechOutput;
   final VoidCallback? onRecall;
+  final String? textOverride;
+  final String? titleOverride;
+  final bool persistProgress;
 
   @override
   State<ListenScreen> createState() => _ListenScreenState();
@@ -47,24 +59,32 @@ class _ListenScreenState extends State<ListenScreen> {
     if (version == null) {
       throw StateError('listen_source_missing');
     }
-    final extracted = await widget.runtime.store.extractedContentForSource(
-      learner: widget.runtime.learner,
-      sourceVersionId: version.identity.sourceVersionId,
-    );
-    if (extracted == null || !extracted.isValid || extracted.normalizedText.trim().isEmpty) {
-      throw StateError('listen_content_missing');
+    final overrideText = widget.textOverride?.trim();
+    String text;
+    if (overrideText != null && overrideText.isNotEmpty) {
+      text = overrideText;
+    } else {
+      final extracted = await widget.runtime.store.extractedContentForSource(
+        learner: widget.runtime.learner,
+        sourceVersionId: version.identity.sourceVersionId,
+      );
+      if (extracted == null || !extracted.isValid || extracted.normalizedText.trim().isEmpty) {
+        throw StateError('listen_content_missing');
+      }
+      text = extracted.normalizedText.trim();
     }
 
-    final text = extracted.normalizedText.trim();
     final chunks = _chunkText(text);
-    final storedResume = await widget.runtime.store.listenResumeChunk(
-      learner: widget.runtime.learner,
-      materialId: widget.materialId,
-      sourceVersionId: version.identity.sourceVersionId,
-    );
+    final storedResume = widget.persistProgress
+        ? await widget.runtime.store.listenResumeChunk(
+            learner: widget.runtime.learner,
+            materialId: widget.materialId,
+            sourceVersionId: version.identity.sourceVersionId,
+          )
+        : 0;
     final resumeChunk = storedResume >= 0 && storedResume < chunks.length ? storedResume : 0;
     return _ListenSource(
-      name: version.sourceName,
+      name: widget.titleOverride?.trim().isNotEmpty == true ? widget.titleOverride!.trim() : version.sourceName,
       text: text,
       sourceVersionId: version.identity.sourceVersionId,
       chunks: chunks,
@@ -145,6 +165,7 @@ class _ListenScreenState extends State<ListenScreen> {
   }
 
   Future<void> _saveResume(_ListenSource source, int chunkIndex) {
+    if (!widget.persistProgress) return Future<void>.value();
     return widget.runtime.store.saveListenResumeChunk(
       learner: widget.runtime.learner,
       materialId: widget.materialId,
@@ -323,7 +344,7 @@ class _ListenScreenState extends State<ListenScreen> {
                             const Icon(Icons.article_outlined, color: AppPalette.signal, size: 18),
                             const SizedBox(width: 7),
                             Text(
-                              'Kaynak metni',
+                              widget.textOverride?.trim().isNotEmpty == true ? 'Quick Recap özeti' : 'Kaynak metni',
                               style: theme.textTheme.labelMedium?.copyWith(
                                 color: AppPalette.signal,
                                 fontWeight: FontWeight.w800,

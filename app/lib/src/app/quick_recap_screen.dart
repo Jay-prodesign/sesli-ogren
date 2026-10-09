@@ -364,18 +364,27 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> with WidgetsBinding
               runSpacing: 8,
               children: [
                 OutlinedButton.icon(
-                  onPressed: () => Navigator.of(context).push<void>(
-                    MaterialPageRoute(
-                      builder: (routeContext) => ListenScreen(
-                        runtime: widget.runtime,
-                        materialId: widget.materialId,
-                        onRecall: () {
+                  onPressed: () {
+                    final recapText = <String>[
+                      status.summary!,
+                      if (status.keyPoints.isNotEmpty) 'Önemli noktalar:\n${status.keyPoints.join('\n')}',
+                    ].join('\n\n');
+                    Navigator.of(context).push<void>(
+                      MaterialPageRoute(
+                        builder: (routeContext) => ListenScreen(
+                          runtime: widget.runtime,
+                          materialId: widget.materialId,
+                          textOverride: recapText,
+                          titleOverride: 'Quick Recap',
+                          persistProgress: false,
+                          onRecall: () {
                           Navigator.of(routeContext).pop();
                           _openRecall();
-                        },
+                          },
+                        ),
                       ),
-                    ),
-                  ),
+                    );
+                  },
                   icon: const Icon(Icons.headphones),
                   label: const Text('Dinle'),
                 ),
