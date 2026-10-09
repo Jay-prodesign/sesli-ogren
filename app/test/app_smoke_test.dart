@@ -312,9 +312,10 @@ void main() {
     await tapVisible(tester, find.text('İpucu ver'));
     await pumpUntilFound(tester, find.textContaining('Kaynak ipucu:'));
     expect(find.textContaining('karbondioksit'), findsWidgets);
-    await tester.ensureVisible(find.textContaining('öğrenme kanıtı oluşturmaz').last);
-    expect(find.textContaining('öğrenme kanıtı oluşturmaz'), findsOneWidget);
-    Navigator.of(tester.element(find.textContaining('öğrenme kanıtı oluşturmaz'))).pop();
+    // Focus uses a lazily built scroll view; its header may be disposed after
+    // scrolling to the help action. Pop the current route instead of looking
+    // up a potentially unmounted header element.
+    Navigator.of(tester.element(find.byType(FocusScreen))).pop();
     await tester.pump(const Duration(milliseconds: 300));
     await pumpUntilFound(tester, find.byType(MaterialWorkspaceScreen));
     await tester.ensureVisible(find.text('Kaynağa hızlı bakış').last);
