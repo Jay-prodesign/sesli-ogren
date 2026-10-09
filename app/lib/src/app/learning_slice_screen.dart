@@ -340,7 +340,11 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
           createdAt: DateTime.now().toUtc(),
         ),
       );
-      rethrow;
+      if (!mounted) return;
+      setState(() {
+        _phase = _SlicePhase.error;
+        _inlineError = 'Hatırlama başlatılamadı. Kaynağın kayıtlı; devamı yeniden deneyebilirsin.';
+      });
     }
   }
 
