@@ -135,8 +135,8 @@ begin
           evaluation_failure_class = 'lease_expired_after_dispatch',
           evaluation_lease_token = null,
           evaluation_lease_expires_at = null
-      where account_id = p_account_id
-        and attempt_id = p_attempt_id;
+      where eba.account_id = p_account_id
+        and eba.attempt_id = p_attempt_id;
       return;
     end if;
   end if;
