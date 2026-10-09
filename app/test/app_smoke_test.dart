@@ -212,8 +212,9 @@ void main() {
     expect(find.text('İpucusuz hatırladın'), findsOneWidget);
     expect(find.text('Sıradaki adım'), findsOneWidget);
     await tapVisible(tester, find.text('Sıradaki adıma geç'));
-    await pumpUntilFound(tester, find.text('Devam noktası'));
-    expect(find.text('Devam noktası'), findsOneWidget);
+    await pumpUntilFound(tester, find.text('Bugünlük iyi bir adım'));
+    expect(find.text('Bugünlük iyi bir adım'), findsOneWidget);
+    expect(find.text('Çalışmayı bitir'), findsOneWidget);
 
     final events = await store.operationalTelemetry().events(learner: runtime.learner);
     expect(
@@ -895,6 +896,66 @@ void main() {
 
     expect(find.text('İpucusuz hatırladın'), findsNothing);
     expect(find.textContaining('geri çağırma başarısı olarak sayılmadı'), findsOneWidget);
+  });
+
+  testWidgets('unknown Recall repairs from the focused source and retries directly', (tester) async {
+    final store = await SqliteSourceStore.open(
+      factory: databaseFactoryFfiNoIsolate,
+      path: inMemoryDatabasePath,
+    );
+    addTearDown(store.close);
+    final ingest = SourceIngestService(
+      store: store,
+      pdfTextExtractor: const _UnusedPdfExtractor(),
+    );
+    final recall = RecallLearningService(
+      sourceStore: store,
+      learningStore: store.learningTruthStore(),
+    );
+    final runtime = AppRuntime(
+      learner: AppRuntime.localM5LearnerFixture,
+      store: store,
+      ingest: ingest,
+      recall: recall,
+      telemetry: store.operationalTelemetry(),
+    );
+
+    await ingest.ingestPastedText(
+      learner: runtime.learner,
+      materialId: AppRuntime.primaryMaterialId,
+      text:
+          'Fotosentez sırasında klorofil ışık enerjisini kimyasal enerjiye dönüştürmeye yardımcı olur. '
+          'Bitkiler bu süreçte karbondioksit kullanır ve oksijen açığa çıkarır. '
+          'Mitokondri hücresel solunumla kullanılabilir enerji üretimine katkı sağlar.',
+      sourceName: 'Biyoloji onarım notu',
+    );
+    final prompt = await recall.createCurrentPrompt(
+      learner: runtime.learner,
+      materialId: AppRuntime.primaryMaterialId,
+    );
+    final action = await store.learningTruthStore().recallAction(
+      learner: runtime.learner,
+      actionId: prompt.id,
+    );
+    expect(action, isNotNull);
+
+    await tester.pumpWidget(testShell(runtime));
+    await pumpUntilFound(tester, find.text('Hatırla'));
+    await tapVisible(tester, find.text('Bilmiyorum'));
+    await pumpUntilFound(tester, find.text('Geri bildirim'));
+    await tapVisible(tester, find.text('Sıradaki adıma geç'));
+    await pumpUntilFound(tester, find.text('Önce kaynağı gözden geçir'));
+    await tapVisible(tester, find.text('Kaynağı gözden geçir'));
+    await pumpUntilFound(tester, find.text('Bu bölümü yeniden kur'));
+
+    expect(find.textContaining(action!.expectedAnswer), findsWidgets);
+    expect(find.bySemanticsLabel('Kaynak bölümü'), findsOneWidget);
+
+    await tapVisible(tester, find.text('Kaynağı kapat ve yeniden dene'));
+    await pumpUntilFound(tester, find.text('Hatırla'));
+    expect(find.text('Bu bölümü yeniden kur'), findsNothing);
+    expect(find.text('Yanıtla'), findsOneWidget);
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('Reduced Motion keeps the learning slice usable', (tester) async {
