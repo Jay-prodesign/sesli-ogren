@@ -97,7 +97,12 @@ class _CompanionViewState extends State<CompanionView> with SingleTickerProvider
                   dy: -1.2 * wave,
                   scale: 1.012 + 0.012 * pulse,
                 ),
-                CompanionVisualState.correct => (angle: -0.035 + 0.008 * wave, dx: -0.8, dy: 0.3 * wave, scale: 0.99),
+                CompanionVisualState.correct => (
+                  angle: -0.035 + 0.008 * wave,
+                  dx: -0.8,
+                  dy: 0.3 * wave,
+                  scale: 0.99,
+                ),
                 CompanionVisualState.success => (
                   angle: 0.025 * wave,
                   dx: 0.0,
