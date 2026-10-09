@@ -78,11 +78,7 @@ Future<void> _pumpUntilFound(WidgetTester tester, Finder finder, {int maxPumps =
   fail('Expected Explain-back widget was not reached within bounded pumps.');
 }
 
-Future<void> _pumpUntilCondition(
-  WidgetTester tester,
-  bool Function() condition, {
-  int maxPumps = 100,
-}) async {
+Future<void> _pumpUntilCondition(WidgetTester tester, bool Function() condition, {int maxPumps = 100}) async {
   for (var i = 0; i < maxPumps; i++) {
     await tester.pump(const Duration(milliseconds: 20));
     if (condition()) return;
@@ -206,10 +202,7 @@ void main() {
     );
     await tester.enterText(find.byType(TextField), 'Fotosentez ışık enerjisini kimyasal enerjiye dönüştürür.');
     await _tapVisible(tester, find.text('Anlatımımı değerlendir'));
-    await _pumpUntilCondition(
-      tester,
-      () => sourceGateway.ensureCalls == 1 && explainBack.lastRequest != null,
-    );
+    await _pumpUntilCondition(tester, () => sourceGateway.ensureCalls == 1 && explainBack.lastRequest != null);
 
     expect(sourceGateway.deletedServerMaterialIds, [oldServerMaterialId]);
     expect(sourceGateway.ensureCalls, 1);
