@@ -46,6 +46,7 @@ jobs:
           cp server/db/tests/70_account_deletion.sql "$tmp/tests/"
           cp server/db/tests/71_account_deletion_behavior.sql "$tmp/tests/"
           cp server/db/tests/80_generation_targeted_claim.sql "$tmp/tests/"
+          cp server/db/tests/81_atomic_summary_submission.sql "$tmp/tests/"
           report="$RUNNER_TEMP/account-deletion-sql-report.txt"
           if ! bash spike/architecture-proof/db/run_sql_suite.sh account_deletion "$tmp/migrations" "$tmp/tests" "$report"; then
             cat "$report" || true

@@ -151,3 +151,9 @@ select pg_temp.ok(
    from public.generation_jobs where id = :'job_b2'),
   'ambiguous targeted job requires reconciliation'
 );
+
+
+-- Do not leak runnable queue state into later server test files.
+update public.generation_jobs
+set state = 'CANCELLED', lease_token = null, lease_expires_at = null
+where state in ('QUEUED', 'PROCESSING', 'FAILED_RETRYABLE');

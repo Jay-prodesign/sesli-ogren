@@ -72,21 +72,23 @@ class SupabaseSourceSummaryGateway {
     if (session == null) {
       throw const ServerSummarySubmissionException('Authentication required.');
     }
-    final serverMaterialId = await client.rpc<String>(
-      'create_text_material',
-      params: {'p_title': source.material.title, 'p_text': normalizedText},
-    );
-    if (serverMaterialId.isEmpty) {
-      throw const ServerSummarySubmissionException('Server material was not created.');
-    }
-    final jobId = await client.rpc<String>(
-      'request_summary',
+    final rows = await client.rpc<List<dynamic>>(
+      'submit_text_summary',
       params: {
-        'p_material_id': serverMaterialId,
-        'p_idempotency_key': 'summary:initial:$serverMaterialId',
-        'p_regenerate': false,
+        'p_title': source.material.title,
+        'p_text': normalizedText,
+        'p_client_source_id': source.sourceVersion.identity.sourceVersionId.value,
       },
     );
+    if (rows.length != 1 || rows.first is! Map) {
+      throw const ServerSummarySubmissionException('Server summary request was not created.');
+    }
+    final row = Map<String, dynamic>.from(rows.first as Map);
+    final serverMaterialId = row['material_id'] as String? ?? '';
+    final jobId = row['job_id'] as String? ?? '';
+    if (serverMaterialId.isEmpty || jobId.isEmpty) {
+      throw const ServerSummarySubmissionException('Server summary identity is missing.');
+    }
     return ServerSummarySubmission(materialId: serverMaterialId, jobId: jobId);
   }
 }
