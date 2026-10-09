@@ -540,13 +540,11 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
     _SlicePhase.source => CompanionVisualState.idle,
     _SlicePhase.recall => _busy ? CompanionVisualState.think : CompanionVisualState.listen,
     _SlicePhase.result =>
-      _result?.state.kind == RecallStateKind.retrievedOnce
+      _result?.evidence.outcome == RecallOutcome.correct
           ? CompanionVisualState.success
           : CompanionVisualState.correct,
     _SlicePhase.continuation =>
-      _continuation?.state.kind == RecallStateKind.retrievedOnce
-          ? CompanionVisualState.success
-          : CompanionVisualState.idle,
+      CompanionVisualState.idle,
     _SlicePhase.error => CompanionVisualState.correct,
   };
 
