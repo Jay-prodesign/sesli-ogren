@@ -194,39 +194,39 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> {
             for (final point in status.keyPoints)
               Padding(padding: const EdgeInsets.only(bottom: 8), child: Text('• $point')),
             const Text('AI tarafından oluşturuldu · Kaynak metne dayalı'),
-          const SizedBox(height: 20),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: [
-              OutlinedButton.icon(
-                onPressed: () => Navigator.of(context).push<void>(
-                  MaterialPageRoute(
-                    builder: (routeContext) => ListenScreen(
-                      runtime: widget.runtime,
-                      materialId: widget.materialId,
-                      onRecall: () {
-                        Navigator.of(routeContext).pop();
-                        _openRecall();
-                      },
+            const SizedBox(height: 20),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                OutlinedButton.icon(
+                  onPressed: () => Navigator.of(context).push<void>(
+                    MaterialPageRoute(
+                      builder: (routeContext) => ListenScreen(
+                        runtime: widget.runtime,
+                        materialId: widget.materialId,
+                        onRecall: () {
+                          Navigator.of(routeContext).pop();
+                          _openRecall();
+                        },
+                      ),
                     ),
                   ),
+                  icon: const Icon(Icons.headphones),
+                  label: const Text('Dinle'),
                 ),
-                icon: const Icon(Icons.headphones),
-                label: const Text('Dinle'),
-              ),
-              OutlinedButton.icon(
-                onPressed: _openRecall,
-                icon: const Icon(Icons.psychology_alt_outlined),
-                label: const Text('Hatırla'),
-              ),
-              OutlinedButton.icon(
-                onPressed: _openExplain,
-                icon: const Icon(Icons.auto_awesome_outlined),
-                label: const Text('Açıkla'),
-              ),
-            ],
-          ),
+                OutlinedButton.icon(
+                  onPressed: _openRecall,
+                  icon: const Icon(Icons.psychology_alt_outlined),
+                  label: const Text('Hatırla'),
+                ),
+                OutlinedButton.icon(
+                  onPressed: _openExplain,
+                  icon: const Icon(Icons.auto_awesome_outlined),
+                  label: const Text('Açıkla'),
+                ),
+              ],
+            ),
           ],
           if (status?.state.startsWith('FAILED') == true)
             const Text('Özet üretimi başarısız oldu. Aynı işi otomatik yeniden göndermiyoruz.'),
