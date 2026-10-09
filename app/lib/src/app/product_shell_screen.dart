@@ -45,7 +45,7 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
         learner: widget.runtime.learner,
         materialId: materialId,
       );
-    } on RecallLearningException {
+    } on Exception {
       return widget.runtime.recall.repairContinuation(
         learner: widget.runtime.learner,
         materialId: materialId,
