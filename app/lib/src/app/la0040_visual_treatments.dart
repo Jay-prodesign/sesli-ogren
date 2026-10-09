@@ -459,11 +459,23 @@ class _GroundedExcerpt extends StatelessWidget {
       );
       spans.add(TextSpan(text: excerpt.substring(at + needle.length)));
     }
-    return Text.rich(
-      TextSpan(children: spans),
-      maxLines: 8,
-      overflow: TextOverflow.ellipsis,
-      style: TextStyle(color: ink, fontSize: 16, height: 1.5),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (at < 0) ...[
+          Text(
+            'Birebir ifade eşleşmesi yok; aşağıda ilgili kaynak bağlamı gösteriliyor.',
+            style: TextStyle(color: ink.withValues(alpha: 0.72), fontSize: 12, height: 1.4),
+          ),
+          const SizedBox(height: 8),
+        ],
+        Text.rich(
+          TextSpan(children: spans),
+          maxLines: 8,
+          overflow: TextOverflow.ellipsis,
+          style: TextStyle(color: ink, fontSize: 16, height: 1.5),
+        ),
+      ],
     );
   }
 }
