@@ -99,6 +99,10 @@ class _ExplainBackScreenState extends State<ExplainBackScreen> {
                 learner: widget.runtime.learner,
                 materialId: widget.source.identity.materialId,
               );
+              await widget.runtime.store.clearServerMaterialBinding(
+                learner: widget.runtime.learner,
+                materialId: widget.source.identity.materialId,
+              );
             }
 
             serverMaterialId = await _sourceGateway.ensureServerMaterial(
