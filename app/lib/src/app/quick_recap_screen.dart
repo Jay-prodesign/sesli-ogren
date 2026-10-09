@@ -548,10 +548,15 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> with WidgetsBinding
               const LinearProgressIndicator(),
             ],
             const SizedBox(height: 12),
-            OutlinedButton(style: outlineStyle, onPressed: _dispatching ? null : _refresh, child: const Text('Durumu yenile')),
+            OutlinedButton(
+              style: outlineStyle,
+              onPressed: _dispatching ? null : _refresh,
+              child: const Text('Durumu yenile'),
+            ),
             if (status?.state == 'QUEUED' || status?.state == 'PROCESSING') ...[
               const SizedBox(height: 8),
               OutlinedButton(
+                style: outlineStyle,
                 onPressed: _dispatching ? null : _dispatchCurrent,
                 child: Text(
                   status?.state == 'PROCESSING' ? 'Sunucuyu yeniden kontrol et' : 'İşlemi başlatmayı tekrar dene',

@@ -159,24 +159,25 @@ class _ExplainScreenState extends State<ExplainScreen> {
         foregroundColor: living ? AtelierStyle.ink : null,
       ),
       body: SafeArea(
-      child: FutureBuilder<GroundedExplainResult>(
-        future: _result,
-        builder: (context, snapshot) {
-          if (snapshot.hasError) {
-            return _Unavailable(reason: GroundedExplainUnavailableReason.temporaryFailure, onRetry: _retry);
-          }
-          if (!snapshot.hasData) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          final result = snapshot.data!;
-          if (result is GroundedExplainReady) {
-            if (!result.matches(widget.source.identity)) {
-              return _Unavailable(reason: GroundedExplainUnavailableReason.staleSource, onRetry: _retry);
+        child: FutureBuilder<GroundedExplainResult>(
+          future: _result,
+          builder: (context, snapshot) {
+            if (snapshot.hasError) {
+              return _Unavailable(reason: GroundedExplainUnavailableReason.temporaryFailure, onRetry: _retry);
             }
-            return _Ready(result: result, runtime: widget.runtime, source: widget.source);
-          }
-          return _Unavailable(reason: (result as GroundedExplainUnavailable).reason, onRetry: _retry);
-        },
+            if (!snapshot.hasData) {
+              return const Center(child: CircularProgressIndicator());
+            }
+            final result = snapshot.data!;
+            if (result is GroundedExplainReady) {
+              if (!result.matches(widget.source.identity)) {
+                return _Unavailable(reason: GroundedExplainUnavailableReason.staleSource, onRetry: _retry);
+              }
+              return _Ready(result: result, runtime: widget.runtime, source: widget.source);
+            }
+            return _Unavailable(reason: (result as GroundedExplainUnavailable).reason, onRetry: _retry);
+          },
+        ),
       ),
     );
   }
@@ -261,7 +262,10 @@ class _Ready extends StatelessWidget {
           const SizedBox(height: 10),
           for (final point in result.keyPoints) ...[
             DecoratedBox(
-              decoration: BoxDecoration(color: living ? AtelierStyle.mint : AppPalette.primarySoft, borderRadius: BorderRadius.circular(14)),
+              decoration: BoxDecoration(
+                color: living ? AtelierStyle.mint : AppPalette.primarySoft,
+                borderRadius: BorderRadius.circular(14),
+              ),
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 11),
                 child: Row(
@@ -279,15 +283,18 @@ class _Ready extends StatelessWidget {
         ],
         const SizedBox(height: 16),
         DecoratedBox(
-          decoration: BoxDecoration(color: living ? AtelierStyle.mint : AppPalette.signalSoft, borderRadius: BorderRadius.circular(16)),
-          child: const Padding(
-            padding: EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            color: living ? AtelierStyle.mint : AppPalette.signalSoft,
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(14),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Icon(Icons.verified_outlined, color: living ? AtelierStyle.teal : AppPalette.signal, size: 20),
-                SizedBox(width: 10),
-                Expanded(
+                const SizedBox(width: 10),
+                const Expanded(
                   child: Text(
                     'Açıklamayı okumak öğrenme kanıtı oluşturmaz. Hazır olduğunda kendi cümlelerinle anlat veya Hatırla ile aktif olarak dene.',
                   ),

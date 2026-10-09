@@ -422,7 +422,10 @@ class _FocusScreenState extends State<FocusScreen> {
                     ],
                   ),
                   const SizedBox(height: 10),
-                  Text(widget.sourceText, style: theme.textTheme.bodyMedium?.copyWith(height: 1.5, color: ink)),
+                  Text(
+                    widget.sourceText,
+                    style: theme.textTheme.bodyMedium?.copyWith(height: 1.5, color: ink),
+                  ),
                 ],
               ),
             ),
