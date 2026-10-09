@@ -27,7 +27,7 @@ class MaterialWorkspaceScreen extends StatefulWidget {
 }
 
 class _MaterialWorkspaceScreenState extends State<MaterialWorkspaceScreen> {
-  late Future<_WorkspaceSnapshot> _snapshot;
+  late Future<_WorkspaceSnapshot?> _snapshot;
 
   @override
   void initState() {
@@ -35,21 +35,17 @@ class _MaterialWorkspaceScreenState extends State<MaterialWorkspaceScreen> {
     _snapshot = _load();
   }
 
-  Future<_WorkspaceSnapshot> _load() async {
+  Future<_WorkspaceSnapshot?> _load() async {
     final material = await widget.runtime.store.material(
       learner: widget.runtime.learner,
       materialId: widget.materialId,
     );
-    if (material == null || !material.isActive) {
-      throw StateError('workspace_material_missing');
-    }
+    if (material == null || !material.isActive) return null;
     final source = await widget.runtime.store.currentSourceVersion(
       learner: widget.runtime.learner,
       materialId: material.id,
     );
-    if (source == null) {
-      throw StateError('workspace_source_missing');
-    }
+    if (source == null) return null;
     final extracted = await widget.runtime.store.extractedContentForSource(
       learner: widget.runtime.learner,
       sourceVersionId: source.identity.sourceVersionId,
@@ -93,6 +89,7 @@ class _MaterialWorkspaceScreenState extends State<MaterialWorkspaceScreen> {
     try {
       final data = await _snapshot;
       if (!mounted) return;
+      if (data == null) throw StateError('workspace_source_missing');
       await _openSourceReader(data);
     } catch (_) {
       if (!mounted) return;
@@ -190,7 +187,7 @@ class _MaterialWorkspaceScreenState extends State<MaterialWorkspaceScreen> {
         child: FutureBuilder<_WorkspaceSnapshot>(
           future: _snapshot,
           builder: (context, snapshot) {
-            if (snapshot.hasError) {
+            if (snapshot.hasError || (snapshot.hasData && snapshot.data == null)) {
               return Center(
                 child: Padding(
                   padding: const EdgeInsets.all(24),
