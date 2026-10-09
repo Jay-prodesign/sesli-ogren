@@ -354,6 +354,21 @@ CREATE TABLE IF NOT EXISTS summary_jobs (
     return rows.isEmpty ? null : rows.first['job_id']! as String;
   }
 
+  Future<String?> summaryServerMaterialId({
+    required AuthenticatedLearner learner,
+    required MaterialId materialId,
+    required SourceVersionId sourceVersionId,
+  }) async {
+    final rows = await _database.query(
+      'summary_jobs',
+      columns: ['server_material_id'],
+      where: 'learner_id = ? AND material_id = ? AND source_version_id = ?',
+      whereArgs: [learner.id.value, materialId.value, sourceVersionId.value],
+      limit: 1,
+    );
+    return rows.isEmpty ? null : rows.first['server_material_id']! as String;
+  }
+
   Future<void> saveSummaryJob({
     required AuthenticatedLearner learner,
     required MaterialId materialId,
