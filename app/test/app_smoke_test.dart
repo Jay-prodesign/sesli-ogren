@@ -781,7 +781,7 @@ void main() {
     expect(await store.material(learner: runtime.learner, materialId: AppRuntime.primaryMaterialId), isNotNull);
   });
 
-  testWidgets('workspace Explain is active self-explanation and does not fabricate evaluation', (tester) async {
+  testWidgets('workspace Explain stays active self-explanation and fails closed without evaluator', (tester) async {
     final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
     addTearDown(store.close);
     final ingest = SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor());
@@ -807,8 +807,18 @@ void main() {
     await pumpUntilFound(tester, find.text('Anlatımımı değerlendir'));
 
     expect(find.text('Kendi cümlelerinle anlat'), findsOneWidget);
-    expect(find.textContaining('öğrenme kanıtı veya ustalık iddiası oluşturmaz'), findsOneWidget);
     expect(find.text('Kaynağına dayalı açıklama'), findsNothing);
+    expect(find.textContaining('öğrenme kanıtı veya ustalık iddiası oluşturmaz'), findsOneWidget);
+
+    await tester.enterText(
+      find.byType(TextField),
+      'Fotosentez ışık enerjisini kimyasal enerjiye dönüştürür.',
+    );
+    await tapVisible(tester, find.text('Anlatımımı değerlendir'));
+    await pumpUntilFound(tester, find.text('Henüz güvenilir değerlendirme yok'));
+
+    expect(find.textContaining('öğrenme kanıtı olarak kaydetmiyoruz'), findsOneWidget);
+    expect(find.text('Anlatımında temel fikirler görünüyor'), findsNothing);
   });
 
   testWidgets('answer exposure survives close and reopen without becoming independent', (tester) async {
