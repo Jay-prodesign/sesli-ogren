@@ -61,16 +61,10 @@ void main() {
   sqfliteFfiInit();
 
   testWidgets('Focus sends the exact server source binding and renders grounded help', (tester) async {
-    final store = await SqliteSourceStore.open(
-      factory: databaseFactoryFfiNoIsolate,
-      path: inMemoryDatabasePath,
-    );
+    final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
     addTearDown(store.close);
 
-    final ingest = SourceIngestService(
-      store: store,
-      pdfTextExtractor: const _UnusedPdfExtractor(),
-    );
+    final ingest = SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor());
     const materialId = MaterialId('focus-server-route');
     const sourceText =
         'Fotosentez ışık enerjisini kimyasal enerjiye dönüştürür. '
@@ -81,10 +75,7 @@ void main() {
       text: sourceText,
       sourceName: 'Biyoloji notu',
     );
-    final source = await store.currentSourceVersion(
-      learner: AppRuntime.localM5LearnerFixture,
-      materialId: materialId,
-    );
+    final source = await store.currentSourceVersion(learner: AppRuntime.localM5LearnerFixture, materialId: materialId);
     expect(source, isNotNull);
 
     final focus = _FocusGateway();
@@ -92,10 +83,7 @@ void main() {
       learner: AppRuntime.localM5LearnerFixture,
       store: store,
       ingest: ingest,
-      recall: RecallLearningService(
-        sourceStore: store,
-        learningStore: store.learningTruthStore(),
-      ),
+      recall: RecallLearningService(sourceStore: store, learningStore: store.learningTruthStore()),
       telemetry: store.operationalTelemetry(),
       focusHelp: focus,
     );
