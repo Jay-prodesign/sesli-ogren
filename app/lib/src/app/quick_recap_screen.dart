@@ -39,8 +39,9 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> with WidgetsBinding
       _error = null;
     });
     final accepted = await _gateway.dispatch(id);
-    if (!mounted || _jobId != id) return;
+    if (!mounted) return;
     setState(() => _dispatching = false);
+    if (_jobId != id) return;
     if (!accepted) {
       setState(() => _error = 'Özet kuyruğa alındı ancak sunucu işlemi başlatılamadı. Tekrar deneyebilirsin.');
       return;
@@ -56,8 +57,9 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> with WidgetsBinding
       _error = null;
     });
     final accepted = await _gateway.retry(id);
-    if (!mounted || _jobId != id) return;
+    if (!mounted) return;
     setState(() => _dispatching = false);
+    if (_jobId != id) return;
     if (!accepted) {
       setState(
         () => _error =
