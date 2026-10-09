@@ -421,7 +421,7 @@ class LivingStudyDeskHome extends StatelessWidget {
         width: double.infinity,
         child: FilledButton.icon(
           key: const ValueKey('la0040-living-add'),
-          onPressed: onOpenWorkspace,
+          onPressed: onOpenLearning,
           icon: const Icon(Icons.add_rounded),
           label: const Text('İlk materyalini ekle'),
           style: FilledButton.styleFrom(
