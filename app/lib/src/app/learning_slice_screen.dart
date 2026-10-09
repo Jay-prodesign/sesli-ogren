@@ -280,6 +280,14 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
     }
   }
 
+  Future<void> _openRecallSafely() async {
+    try {
+      await _openRecall();
+    } catch (_) {
+      _showRecoverableError();
+    }
+  }
+
   Future<void> _openRecall() async {
     final stopwatch = Stopwatch()..start();
     await _recordEvent(
@@ -1056,7 +1064,7 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
         setState(() => _phase = _SlicePhase.continuation);
         await _reviewContinuationSource();
       case NextLearningActionKind.retryRecallWithoutHint:
-        await _openRecall();
+        await _openRecallSafely();
       case NextLearningActionKind.repeatRecallLater:
         if (!mounted) return;
         setState(() => _phase = _SlicePhase.continuation);
@@ -1159,7 +1167,7 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
       _setBusy(false);
     }
     if (retryAfterReview && mounted) {
-      await _openRecall();
+      await _openRecallSafely();
     }
   }
 
@@ -1192,10 +1200,10 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
               label: const Text('Kaynağı gözden geçir'),
             ),
             const SizedBox(height: 8),
-            OutlinedButton(onPressed: _busy ? null : _openRecall, child: const Text('Yeniden hatırlamayı dene')),
+            OutlinedButton(onPressed: _busy ? null : _openRecallSafely, child: const Text('Yeniden hatırlamayı dene')),
           ] else if (canRetry)
             FilledButton.icon(
-              onPressed: _busy ? null : _openRecall,
+              onPressed: _busy ? null : _openRecallSafely,
               icon: const Icon(Icons.refresh_rounded),
               label: const Text('İpucusuz tekrar dene'),
             )
