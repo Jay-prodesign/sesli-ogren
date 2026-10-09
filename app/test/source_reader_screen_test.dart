@@ -23,7 +23,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('Biyoloji notu'), findsOneWidget);
+    expect(find.descendant(of: find.byType(AppBar), matching: find.text('Biyoloji notu')), findsOneWidget);
     expect(find.byType(RichText), findsWidgets);
 
     await tester.tap(find.byTooltip('Metinde ara'));
