@@ -58,7 +58,6 @@ class _ExplainScreenState extends State<ExplainScreen> {
         sourceVersionId: widget.source.identity.sourceVersionId,
       );
 
-      var createdServerBinding = false;
       if (serverMaterialId == null || summaryJobId == null) {
         final staleServerMaterialId = await widget.runtime.store.summaryServerMaterialId(
           learner: widget.runtime.learner,
@@ -117,7 +116,6 @@ class _ExplainScreenState extends State<ExplainScreen> {
         );
         serverMaterialId = submission.materialId;
         summaryJobId = submission.jobId;
-        createdServerBinding = true;
       }
 
       final boundServerMaterialId = serverMaterialId;
@@ -126,7 +124,18 @@ class _ExplainScreenState extends State<ExplainScreen> {
         return const GroundedExplainUnavailable(reason: GroundedExplainUnavailableReason.sourceUnavailable);
       }
 
-      if (createdServerBinding) {
+      final summaryStatus = await _summaryGateway.status(boundSummaryJobId);
+      if (summaryStatus.state == 'FAILED_FINAL' ||
+          summaryStatus.state == 'CANCELLED' ||
+          summaryStatus.failureClass == 'reconciliation_required') {
+        return const GroundedExplainUnavailable(reason: GroundedExplainUnavailableReason.temporaryFailure);
+      }
+      if (summaryStatus.state == 'FAILED_RETRYABLE') {
+        final accepted = await _summaryGateway.retry(boundSummaryJobId);
+        if (!accepted) {
+          return const GroundedExplainUnavailable(reason: GroundedExplainUnavailableReason.temporaryFailure);
+        }
+      } else if (summaryStatus.state == 'QUEUED' || summaryStatus.state == 'PROCESSING') {
         final accepted = await _summaryGateway.dispatch(boundSummaryJobId);
         if (!accepted) {
           return const GroundedExplainUnavailable(reason: GroundedExplainUnavailableReason.temporaryFailure);
