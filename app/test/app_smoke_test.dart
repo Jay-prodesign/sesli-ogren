@@ -781,7 +781,7 @@ void main() {
     expect(await store.material(learner: runtime.learner, materialId: AppRuntime.primaryMaterialId), isNotNull);
   });
 
-  testWidgets('workspace Explain opens grounded explanation and fails closed without provider', (tester) async {
+  testWidgets('workspace Explain is active self-explanation and does not fabricate evaluation', (tester) async {
     final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
     addTearDown(store.close);
     final ingest = SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor());
@@ -804,10 +804,10 @@ void main() {
     await tapVisible(tester, find.text('Biyoloji notu').last);
     await pumpUntilFound(tester, find.text('Açıkla'));
     await tapVisible(tester, find.text('Açıkla'));
-    await pumpUntilFound(tester, find.text('Açıklama henüz hazır değil'));
+    await pumpUntilFound(tester, find.text('Anlatımımı değerlendir'));
 
-    expect(find.text('Açıklama henüz hazır değil'), findsOneWidget);
-    expect(find.text('Kendi cümlelerinle anlat'), findsNothing);
+    expect(find.text('Kendi cümlelerinle anlat'), findsOneWidget);
+    expect(find.textContaining('öğrenme kanıtı veya ustalık iddiası oluşturmaz'), findsOneWidget);
     expect(find.text('Kaynağına dayalı açıklama'), findsNothing);
   });
 
