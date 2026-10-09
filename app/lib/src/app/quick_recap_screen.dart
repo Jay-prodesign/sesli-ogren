@@ -30,6 +30,19 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> with WidgetsBinding
   bool _checking = false;
   Timer? _pollTimer;
 
+  Future<void> _dispatchCurrent() async {
+    final id = _jobId;
+    if (id == null || !mounted) return;
+    setState(() => _error = null);
+    final accepted = await _gateway.dispatch(id);
+    if (!mounted || _jobId != id) return;
+    if (!accepted) {
+      setState(() => _error = 'Özet kuyruğa alındı ancak sunucu işlemi başlatılamadı. Tekrar deneyebilirsin.');
+      return;
+    }
+    await _refresh();
+  }
+
   @override
   void initState() {
     super.initState();
@@ -56,6 +69,9 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> with WidgetsBinding
       });
       await _refresh();
       if (mounted && _jobId != null && !(_status?.isTerminal ?? false)) {
+        if (_status?.state == 'QUEUED') {
+          unawaited(_dispatchCurrent());
+        }
         _startPolling();
       }
     } catch (_) {
@@ -125,6 +141,9 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> with WidgetsBinding
         });
         await _refresh();
         if (mounted && _jobId != null && !(_status?.isTerminal ?? false)) {
+          if (_status?.state == 'QUEUED') {
+            unawaited(_dispatchCurrent());
+          }
           _startPolling();
         }
         return;
@@ -153,6 +172,7 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> with WidgetsBinding
         _jobId = submission.jobId;
         _submittedSourceVersion = source.identity.sourceVersionId;
       });
+      unawaited(_dispatchCurrent());
       await _refresh();
       if (mounted && _jobId != null && !(_status?.isTerminal ?? false)) {
         _startPolling();
@@ -250,6 +270,10 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> with WidgetsBinding
             Text('İş durumu: ${status?.state ?? "Gönderildi"}'),
             const SizedBox(height: 12),
             OutlinedButton(onPressed: _refresh, child: const Text('Durumu yenile')),
+            if (status?.state == 'QUEUED') ...[
+              const SizedBox(height: 8),
+              OutlinedButton(onPressed: _dispatchCurrent, child: const Text('İşlemi başlatmayı tekrar dene')),
+            ],
           ],
           if (status?.summary != null) ...[
             Text(status!.summary!, style: Theme.of(context).textTheme.bodyLarge),

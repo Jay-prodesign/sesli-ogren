@@ -33,6 +33,21 @@ class SupabaseSourceSummaryGateway {
     return ServerSummaryStatus(state: state, failureClass: rows.first['failure_class'] as String?);
   }
 
+  /// Best-effort wake-up for this learner's exact queued job.
+  /// The server re-verifies auth and ownership; provider/service credentials
+  /// never enter the Flutter client.
+  Future<bool> dispatch(String jobId) async {
+    try {
+      final client = await SupabaseLearnerAuth.clientForAuthenticatedRuntime();
+      if (client.auth.currentSession == null) return false;
+      final response = await client.functions.invoke('generation-worker', body: {'job_id': jobId});
+      final data = response.data;
+      return response.status >= 200 && response.status < 300 && data is Map && data['status'] is String;
+    } catch (_) {
+      return false;
+    }
+  }
+
   Future<ServerSummarySubmission> submit({required SourceIngestResult source}) async {
     final normalizedText = source.extractedContent.normalizedText.trim();
     if (normalizedText.isEmpty || normalizedText.length > 200000) {
