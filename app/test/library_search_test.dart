@@ -96,7 +96,8 @@ void main() {
     await tester.pump();
 
     expect(find.text('3 materyal'), findsOneWidget);
-    await tester.scrollUntilVisible(find.text('Biyoloji · Fotosentez'), -150, scrollable: find.byType(Scrollable).first);
+    await tester.scrollUntilVisible(find.byKey(const ValueKey('library-search')), -150, scrollable: find.byType(Scrollable).first);
+    await tester.pump();
     expect(find.text('Biyoloji · Fotosentez'), findsOneWidget);
     await tester.scrollUntilVisible(find.text('İktisat · Enflasyon'), 150, scrollable: find.byType(Scrollable).first);
     expect(find.text('İktisat · Enflasyon'), findsOneWidget);
