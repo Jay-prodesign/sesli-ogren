@@ -24,6 +24,7 @@ class LearningSliceScreen extends StatefulWidget {
 }
 
 class _LearningSliceScreenState extends State<LearningSliceScreen> {
+  final _titleController = TextEditingController();
   final _sourceController = TextEditingController();
   final _answerController = TextEditingController();
 
@@ -44,6 +45,7 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
 
   @override
   void dispose() {
+    _titleController.dispose();
     _sourceController.dispose();
     _answerController.dispose();
     super.dispose();
@@ -204,6 +206,16 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
     }
   }
 
+  String _pastedSourceName(String text) {
+    final typed = _titleController.text.trim().replaceAll(RegExp(r'\s+'), ' ');
+    if (typed.isNotEmpty) return typed;
+
+    final normalized = text.trim().replaceAll(RegExp(r'\s+'), ' ');
+    if (normalized.isEmpty) return 'Çalışma materyalim';
+    if (normalized.length <= 72) return normalized;
+    return '${normalized.substring(0, 69).trimRight()}…';
+  }
+
   Future<void> _saveSource() async {
     final text = _sourceController.text;
     if (text.trim().isEmpty) {
@@ -226,8 +238,9 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
         learner: widget.runtime.learner,
         materialId: widget.materialId,
         text: text,
-        sourceName: 'Çalışma materyalim',
+        sourceName: _pastedSourceName(text),
       );
+      _titleController.clear();
       _sourceController.clear();
       stopwatch.stop();
       await _recordEvent(
@@ -693,6 +706,20 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
             ),
           ),
           TextField(
+            key: const ValueKey('pasted-material-title'),
+            controller: _titleController,
+            enabled: !_busy,
+            maxLength: 120,
+            textCapitalization: TextCapitalization.sentences,
+            decoration: const InputDecoration(
+              labelText: 'Başlık (isteğe bağlı)',
+              hintText: 'Örn. Biyoloji · Fotosentez',
+              border: OutlineInputBorder(),
+            ),
+          ),
+          const SizedBox(height: 10),
+          TextField(
+            key: const ValueKey('pasted-material-text'),
             controller: _sourceController,
             minLines: 7,
             maxLines: 14,
