@@ -241,7 +241,7 @@ class AtelierRecall extends StatelessWidget {
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
       const Text(
-        'KAYNAK GİZLENDİ · ŞİMDİ SEN',
+        'KAYNAK EKRANI KAPALI · ŞİMDİ SEN',
         style: TextStyle(color: AtelierStyle.teal, fontWeight: FontWeight.w900, fontSize: 11, letterSpacing: 1),
       ),
       const SizedBox(height: 12),
@@ -345,7 +345,7 @@ class AtelierRecall extends StatelessWidget {
           SizedBox(width: 7),
           Expanded(
             child: Text(
-              'Kaynak yanıtını gönderene kadar kapalı kalacak.',
+              'Kaynak, yanıtını gönderene veya “Yanıtı göster” seçeneğini kullanana kadar gizli kalır.',
               style: TextStyle(color: AtelierStyle.muted, fontSize: 13, height: 1.4),
             ),
           ),
