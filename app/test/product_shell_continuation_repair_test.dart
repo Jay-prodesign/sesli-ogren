@@ -23,19 +23,13 @@ class _UnusedPdfExtractor implements PdfTextExtractor {
 }
 
 class _RepairingRecallService extends RecallLearningService {
-  _RepairingRecallService({
-    required super.sourceStore,
-    required super.learningStore,
-  });
+  _RepairingRecallService({required super.sourceStore, required super.learningStore});
 
   int reopenCalls = 0;
   int repairCalls = 0;
 
   @override
-  Future<LearningContinuation?> reopen({
-    required AuthenticatedLearner learner,
-    required MaterialId materialId,
-  }) async {
+  Future<LearningContinuation?> reopen({required AuthenticatedLearner learner, required MaterialId materialId}) async {
     reopenCalls++;
     throw const RecallLearningException('simulated stale derived projection');
   }
@@ -62,15 +56,9 @@ void main() {
   sqfliteFfiInit();
 
   testWidgets('product shell repairs stale continuation without blocking the library', (tester) async {
-    final store = await SqliteSourceStore.open(
-      factory: databaseFactoryFfiNoIsolate,
-      path: inMemoryDatabasePath,
-    );
+    final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
     addTearDown(store.close);
-    final ingest = SourceIngestService(
-      store: store,
-      pdfTextExtractor: const _UnusedPdfExtractor(),
-    );
+    final ingest = SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor());
     const learner = AppRuntime.localM5LearnerFixture;
     await ingest.ingestPastedText(
       learner: learner,
@@ -79,10 +67,7 @@ void main() {
       sourceName: 'Biyoloji · Fotosentez',
     );
 
-    final recall = _RepairingRecallService(
-      sourceStore: store,
-      learningStore: store.learningTruthStore(),
-    );
+    final recall = _RepairingRecallService(sourceStore: store, learningStore: store.learningTruthStore());
     final runtime = AppRuntime(
       learner: learner,
       store: store,
