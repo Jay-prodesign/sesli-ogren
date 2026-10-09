@@ -58,6 +58,13 @@ class LivingStudyDeskHome extends StatelessWidget {
 
   String get _why => continuation?.nextAction.reasonText ?? 'Kaynağından bir hatırlama denemesiyle ne bildiğini gör.';
 
+  String get _continuationLabel {
+    if (continuation == null) return 'KAYNAĞINDAN ÖĞREN';
+    return continuation!.nextAction.kind == NextLearningActionKind.repeatRecallLater
+        ? 'DENEMEN KAYITLI · BUGÜNLÜK TAMAM'
+        : 'DENEMEN KAYITLI · SIRADAKİ ADIM';
+  }
+
   String get _nextActionCta {
     final action = continuation?.nextAction.kind;
     return switch (action) {
@@ -279,7 +286,7 @@ class LivingStudyDeskHome extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        hasRecallEvidence ? 'DENEMEN KAYITLI · SIRADAKİ ADIM' : 'KAYNAĞINDAN ÖĞREN',
+                        hasRecallEvidence ? _continuationLabel : 'KAYNAĞINDAN ÖĞREN',
                         style: const TextStyle(
                           color: _accent,
                           fontSize: 10,
