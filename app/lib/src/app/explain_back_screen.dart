@@ -4,6 +4,7 @@ import 'package:crypto/crypto.dart';
 import 'package:flutter/material.dart';
 
 import '../domain/learning_contracts.dart';
+import '../generation/supabase_source_summary_gateway.dart';
 import '../learning/explain_back_gateway.dart';
 import 'app_runtime.dart';
 import 'app_theme.dart';
@@ -20,6 +21,8 @@ class ExplainBackScreen extends StatefulWidget {
 }
 
 class _ExplainBackScreenState extends State<ExplainBackScreen> {
+  static const _sourceGateway = SupabaseSourceSummaryGateway();
+
   final _controller = TextEditingController();
   ExplainBackResult? _result;
   bool _submitting = false;
@@ -35,24 +38,101 @@ class _ExplainBackScreenState extends State<ExplainBackScreen> {
     final response = _controller.text.trim();
     if (response.isEmpty || _submitting) return;
     setState(() => _submitting = true);
-    final ordinal = _attemptOrdinal++;
-    final digest = sha256
-        .convert(
-          utf8.encode(
-            '${widget.runtime.learner.id.value}\u0000${widget.source.identity.sourceVersionId.value}\u0000$ordinal\u0000$response',
-          ),
-        )
-        .toString();
-    final result = await widget.runtime.explainBack.evaluate(
-      ExplainBackRequest(
-        attemptId: ExplainBackAttemptId('explain-${digest.substring(0, 32)}'),
+
+    ExplainBackResult result;
+    try {
+      final currentSource = await widget.runtime.store.currentSourceVersion(
+        learner: widget.runtime.learner,
         materialId: widget.source.identity.materialId,
-        sourceVersionId: widget.source.identity.sourceVersionId,
-        sourceContentDigest: widget.source.identity.contentDigest,
-        response: response,
-        outputLocale: 'tr-TR',
-      ),
-    );
+      );
+      if (currentSource == null ||
+          currentSource.identity.sourceVersionId != widget.source.identity.sourceVersionId ||
+          currentSource.identity.contentDigest != widget.source.identity.contentDigest) {
+        result = const ExplainBackUnavailable('Kaynak değişti; güncel kaynakla yeniden dene.');
+      } else {
+        final material = await widget.runtime.store.material(
+          learner: widget.runtime.learner,
+          materialId: widget.source.identity.materialId,
+        );
+        final extracted = await widget.runtime.store.extractedContentForSource(
+          learner: widget.runtime.learner,
+          sourceVersionId: widget.source.identity.sourceVersionId,
+        );
+        if (material == null ||
+            extracted == null ||
+            !extracted.isValid ||
+            extracted.sourceContentDigest != widget.source.identity.contentDigest) {
+          result = const ExplainBackUnavailable('Güncel kaynak değerlendirilemedi.');
+        } else {
+          final normalizedSource = extracted.normalizedText.trim();
+          final groundingContentHash = sha256.convert(utf8.encode(normalizedSource)).toString();
+
+          var serverMaterialId = await widget.runtime.store.summaryServerMaterialId(
+            learner: widget.runtime.learner,
+            materialId: widget.source.identity.materialId,
+            sourceVersionId: widget.source.identity.sourceVersionId,
+          );
+
+          if (serverMaterialId == null) {
+            serverMaterialId = await _sourceGateway.ensureServerMaterial(
+              source: SourceIngestResult(
+                material: material,
+                sourceVersion: currentSource,
+                extractedContent: extracted,
+              ),
+            );
+
+            final sourceAfterBinding = await widget.runtime.store.currentSourceVersion(
+              learner: widget.runtime.learner,
+              materialId: widget.source.identity.materialId,
+            );
+            if (sourceAfterBinding?.identity.sourceVersionId != widget.source.identity.sourceVersionId ||
+                sourceAfterBinding?.identity.contentDigest != widget.source.identity.contentDigest) {
+              await _sourceGateway.deleteServerMaterial(serverMaterialId);
+              result = const ExplainBackUnavailable('Kaynak değişti; eski sürümü değerlendirmiyoruz.');
+              if (mounted) {
+                setState(() {
+                  _submitting = false;
+                  _result = result;
+                });
+              }
+              return;
+            }
+
+            await widget.runtime.store.saveServerMaterialBinding(
+              learner: widget.runtime.learner,
+              materialId: widget.source.identity.materialId,
+              sourceVersionId: widget.source.identity.sourceVersionId,
+              serverMaterialId: serverMaterialId,
+            );
+          }
+
+          final ordinal = _attemptOrdinal++;
+          final attemptDigest = sha256
+              .convert(
+                utf8.encode(
+                  '${widget.runtime.learner.id.value}\u0000${widget.source.identity.sourceVersionId.value}\u0000$ordinal\u0000$response',
+                ),
+              )
+              .toString();
+
+          result = await widget.runtime.explainBack.evaluate(
+            ExplainBackRequest(
+              attemptId: ExplainBackAttemptId('explain-${attemptDigest.substring(0, 32)}'),
+              materialId: MaterialId(serverMaterialId),
+              sourceVersionId: widget.source.identity.sourceVersionId,
+              sourceContentDigest: widget.source.identity.contentDigest,
+              groundingContentHash: groundingContentHash,
+              response: response,
+              outputLocale: 'tr-TR',
+            ),
+          );
+        }
+      }
+    } catch (_) {
+      result = const ExplainBackUnavailable('Değerlendirme servisine şu anda ulaşılamıyor.');
+    }
+
     if (!mounted) return;
     setState(() {
       _submitting = false;
