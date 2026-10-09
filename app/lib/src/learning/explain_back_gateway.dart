@@ -18,6 +18,7 @@ class ExplainBackRequest {
     required this.materialId,
     required this.sourceVersionId,
     required this.sourceContentDigest,
+    required this.groundingContentHash,
     required this.response,
     required this.outputLocale,
   });
@@ -25,7 +26,12 @@ class ExplainBackRequest {
   final ExplainBackAttemptId attemptId;
   final MaterialId materialId;
   final SourceVersionId sourceVersionId;
+  /// Local source identity digest used only to match the returned evaluation
+  /// back to the exact local source version.
   final String sourceContentDigest;
+
+  /// SHA-256 of the normalized text mirrored to the server evaluator.
+  final String groundingContentHash;
   final String response;
   final String outputLocale;
 }
