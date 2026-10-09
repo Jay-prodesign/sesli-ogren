@@ -423,7 +423,23 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> with WidgetsBinding
       if (!mounted) return;
       await Navigator.of(context).push<void>(
         MaterialPageRoute(
-          builder: (_) => SourceReaderScreen(title: material.title, sourceText: extracted?.normalizedText ?? ''),
+          builder: (_) => SourceReaderScreen(
+            title: material.title,
+            sourceText: extracted?.normalizedText ?? '',
+            onListen: () {
+              Navigator.of(context).pop();
+              Navigator.of(context).push<void>(
+                MaterialPageRoute(
+                  builder: (_) => ListenScreen(runtime: widget.runtime, materialId: widget.materialId),
+                ),
+              );
+            },
+            onRecap: () => Navigator.of(context).pop(),
+            onRecall: () {
+              Navigator.of(context).pop();
+              _openRecall();
+            },
+          ),
         ),
       );
     } catch (_) {
