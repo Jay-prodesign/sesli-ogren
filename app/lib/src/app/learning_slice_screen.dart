@@ -147,11 +147,20 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
 
   Future<void> _pickPdf() async {
     if (_busy) return;
-    final file = await FilePicker.pickFile(
-      type: FileType.custom,
-      allowedExtensions: const ['pdf'],
-      dialogTitle: 'Çalışmak istediğin PDF’i seç',
-    );
+    final file = await (() async {
+      try {
+        return await FilePicker.pickFile(
+          type: FileType.custom,
+          allowedExtensions: const ['pdf'],
+          dialogTitle: 'Çalışmak istediğin PDF’i seç',
+        );
+      } catch (_) {
+        if (mounted) {
+          setState(() => _inlineError = 'PDF seçici açılamadı. Yeniden deneyebilirsin.');
+        }
+        return null;
+      }
+    })();
     if (file == null || !mounted) return;
 
     final stopwatch = Stopwatch()..start();
