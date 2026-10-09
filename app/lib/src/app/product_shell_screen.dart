@@ -518,7 +518,7 @@ class _HomeSurface extends StatelessWidget {
                   const SizedBox(height: 2),
                   Text(
                     hasMaterial ? _headerLine(data.continuation) : 'Kendi materyalini aktif öğrenmeye dönüştür.',
-                    style: theme.textTheme.bodyMedium?.copyWith(color: muted),
+                    style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
                   ),
                 ],
               ),
@@ -542,7 +542,7 @@ class _HomeSurface extends StatelessWidget {
               Expanded(child: Text('Çalışma yolları', style: theme.textTheme.titleMedium)),
               Text(
                 'Aynı kaynakla',
-                style: theme.textTheme.labelMedium?.copyWith(color: muted),
+                style: theme.textTheme.labelMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
               ),
             ],
           ),
