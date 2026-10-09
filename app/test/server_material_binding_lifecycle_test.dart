@@ -21,18 +21,12 @@ void main() {
   sqfliteFfiInit();
 
   test('summary cleanup keeps reusable server material identity', () async {
-    final store = await SqliteSourceStore.open(
-      factory: databaseFactoryFfiNoIsolate,
-      path: inMemoryDatabasePath,
-    );
+    final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
     addTearDown(store.close);
 
     const learner = AuthenticatedLearner(id: LearnerId('binding-lifecycle-learner'));
     const materialId = MaterialId('binding-lifecycle-material');
-    final ingest = SourceIngestService(
-      store: store,
-      pdfTextExtractor: const _UnusedPdfExtractor(),
-    );
+    final ingest = SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor());
 
     await ingest.ingestPastedText(
       learner: learner,
@@ -41,10 +35,7 @@ void main() {
       sourceName: 'Biyoloji notu',
     );
 
-    final source = await store.currentSourceVersion(
-      learner: learner,
-      materialId: materialId,
-    );
+    final source = await store.currentSourceVersion(learner: learner, materialId: materialId);
     expect(source, isNotNull);
 
     await store.saveSummaryJob(
@@ -55,10 +46,7 @@ void main() {
       jobId: '22222222-2222-4222-8222-222222222222',
     );
 
-    await store.clearSummaryJob(
-      learner: learner,
-      materialId: materialId,
-    );
+    await store.clearSummaryJob(learner: learner, materialId: materialId);
 
     expect(
       await store.summaryJobId(
@@ -77,17 +65,8 @@ void main() {
       '11111111-1111-4111-8111-111111111111',
     );
 
-    await store.clearServerMaterialBinding(
-      learner: learner,
-      materialId: materialId,
-    );
+    await store.clearServerMaterialBinding(learner: learner, materialId: materialId);
 
-    expect(
-      await store.summaryServerMaterialId(
-        learner: learner,
-        materialId: materialId,
-      ),
-      isNull,
-    );
+    expect(await store.summaryServerMaterialId(learner: learner, materialId: materialId), isNull);
   });
 }
