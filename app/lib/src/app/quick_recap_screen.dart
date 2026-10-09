@@ -371,13 +371,13 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> with WidgetsBinding
   Widget build(BuildContext context) {
     final status = _status;
     return Scaffold(
-      appBar: AppBar(title: const Text('Quick Recap')),
+      appBar: AppBar(title: const Text('Hızlı özet')),
       body: ListView(
         padding: const EdgeInsets.all(24),
         children: [
           Text('Kaynağına bağlı AI özeti', style: Theme.of(context).textTheme.headlineSmall),
           const SizedBox(height: 12),
-          const Text('Özet yalnızca güncel kaynak metninden üretilir. Kaynak değişirse eski sonuç kullanılmaz.'),
+          const Text('Özet, yüklediğin kaynağın güncel metnine dayanır. Kaynak değiştiğinde eski özet gösterilmez.'),
           const SizedBox(height: 20),
           if (_jobId == null)
             FilledButton.icon(
@@ -419,7 +419,7 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> with WidgetsBinding
             const SizedBox(height: 16),
             for (final point in status.keyPoints)
               Padding(padding: const EdgeInsets.only(bottom: 8), child: Text('• $point')),
-            const Text('AI tarafından oluşturuldu · Kaynak metne dayalı'),
+            const Text('AI özeti · Yüklediğin kaynağa dayalı'),
             const SizedBox(height: 20),
             Wrap(
               spacing: 8,
@@ -437,7 +437,7 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> with WidgetsBinding
                           runtime: widget.runtime,
                           materialId: widget.materialId,
                           textOverride: recapText,
-                          titleOverride: 'Quick Recap',
+                          titleOverride: 'Hızlı özet',
                           persistProgress: false,
                           onRecall: () {
                             Navigator.of(routeContext).pop();
