@@ -61,7 +61,7 @@
   "git": {
     "branch": "feat/full-product-shell-continuity",
     "base_sha": "84e96dce5b3cc9f32af3f459d422b652d0e86624",
-    "head_sha_note": "Current product/code-and-test baseline d772e6197372bb22c951215660778024a1f93b55. Current-state-only commits may advance branch HEAD without changing this baseline; resolve the live branch API for exact HEAD. Validation results are SHA-specific.",
+    "head_sha_note": "Current product-code baseline 84383ec937cd1a27e13d4a404602759022461014 (includes Turkish-safe search and regression tests). Subsequent current-state-only commits do not change product code; resolve live branch API for exact HEAD. Validation is SHA-specific.",
     "pr_number": 13,
     "pr_url": "https://github.com/Jay-prodesign/sesli-ogren/pull/13",
     "merged": false,
@@ -72,7 +72,7 @@
       "84e96dce… -> feat/m5-golden-learning-slice (ACTIVE)"
     ],
     "pr_state": "OPEN_ACTIVE_PRODUCT_LINE",
-    "head_sha": "d772e6197372bb22c951215660778024a1f93b55"
+    "head_sha": "84383ec937cd1a27e13d4a404602759022461014"
   },
   "round7_evidence_program": {
     "status": "PRE_M5_CLOSED_OR_BOUNDED",
@@ -98,7 +98,7 @@
     "Product-bounded validation currently fails the canonical format step; account-deletion SQL tests 87 and 89 fail, with test 89 syntax error. Fix the relevant code/workflow/test issues as an independent repair batch; do not let them block unrelated product implementation."
   ],
   "protected_gate": "Merge, release, deploy, paid providers, credentials/secrets, licensing posture, production mutation: Product Owner only",
-  "next_action": "Finish Flutter analyze and expanded widget tests at the current code baseline. Fix any failures, then confirm Android/iOS release compile. The source-reader widget test covers search, local-only reading, learning exits and empty-source recovery; Turkish dotted/dotless I folding and source offsets are now explicitly covered. After validation, continue the next safe integrated product outcome; no merge/release without protected authorization.",
+  "next_action": "Complete current Flutter canonical-format, analyzer, widget tests and Android/iOS compile on 84383ec9. Fix failures autonomously; source-reader search now folds Turkish dotted/dotless I while preserving source offsets, and tests cover local search, learning actions, empty-source recovery and Turkish I variants. Then continue the next integrated source→learn→evidence→resume product outcome; do not merge or release without protected authorization.",
   "canonical_source_refs": [
     "CURRENT_EXECUTION_STATE — Learning App",
     "Founder visual/companion correction — 2026-10-07 (supersedes D-070 companion visual lock for LA-0040 evaluation)",
@@ -448,11 +448,11 @@
     "pr": 13,
     "pr_status": "open, unmerged, unreleased",
     "verified": {
-      "bootstrap_validation": "PASS at d772e619 (control-plane validator and negative tests)",
-      "la0040_visual_capture": "PASS at parent d9c937e (same product UI code; d772e619 adds the Turkish search regression test)",
-      "product_bounded_validation": "IN_PROGRESS at d772e619; canonical formatting fix applied using a direct Git blob/tree commit; analyzer and expanded widget tests have not completed",
-      "account_deletion_bounded_validation": "PASS at d772e619 (PostgreSQL account/material deletion SQL plus Deno Edge Function lint/type-check)",
-      "android_ios_release_compile": "IN_PROGRESS at d772e619; no completed dual-platform result yet"
+      "bootstrap_validation": "PASS at parent d772e619; latest 84383ec9 run in progress",
+      "la0040_visual_capture": "PASS at parent d772e619; latest 84383ec9 capture in progress",
+      "product_bounded_validation": "PENDING at 84383ec9 after canonical Dart formatting correction; analyze and expanded widget tests have not completed",
+      "account_deletion_bounded_validation": "PASS at parent d772e619; latest 84383ec9 run in progress",
+      "android_ios_release_compile": "PENDING at 84383ec9"
     },
     "executable_now": [
       "Continue integrated LA-0039/LA-0040 product implementation on live branch",
@@ -480,6 +480,6 @@
       ]
     },
     "next_action": "Implement the next coherent user-visible source→learn→evidence→next-action→resume improvement, integrate connected UI/state/error handling, then continue to the next safe authorized outcome. Do not stop after one file, commit or test.",
-    "current_product_code_batch_sha": "d772e6197372bb22c951215660778024a1f93b55"
+    "current_product_code_batch_sha": "84383ec937cd1a27e13d4a404602759022461014"
   }
 }
