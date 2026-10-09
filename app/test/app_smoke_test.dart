@@ -312,15 +312,15 @@ void main() {
     await tapVisible(tester, find.text('İpucu ver'));
     await pumpUntilFound(tester, find.textContaining('Kaynak ipucu:'));
     expect(find.textContaining('karbondioksit'), findsWidgets);
-    await tester.scrollUntilVisible(find.textContaining('öğrenme kanıtı oluşturmaz'), 160, scrollable: find.byType(Scrollable).last);
+    await tester.ensureVisible(find.textContaining('öğrenme kanıtı oluşturmaz').last);
     expect(find.textContaining('öğrenme kanıtı oluşturmaz'), findsOneWidget);
     Navigator.of(tester.element(find.textContaining('öğrenme kanıtı oluşturmaz'))).pop();
     await tester.pump(const Duration(milliseconds: 300));
     await pumpUntilFound(tester, find.byType(MaterialWorkspaceScreen));
-    await tester.scrollUntilVisible(find.text('Kaynağa hızlı bakış'), 260, scrollable: find.byType(Scrollable).last);
+    await tester.ensureVisible(find.text('Kaynağa hızlı bakış').last);
     await tester.pump(const Duration(milliseconds: 300));
     expect(find.text('Kaynağa hızlı bakış'), findsOneWidget);
-    await tester.scrollUntilVisible(find.text('Açıkla'), -260, scrollable: find.byType(Scrollable).last);
+    await tester.ensureVisible(find.text('Açıkla').last);
     await tester.pump(const Duration(milliseconds: 300));
     expect(find.text('Açıkla'), findsOneWidget);
     await tapVisible(tester, find.text('Açıkla'));
