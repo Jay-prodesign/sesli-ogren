@@ -39,6 +39,28 @@ function requestedJobId(body: unknown): string | null {
     : null;
 }
 
+function generationSpec(contract: unknown) {
+  if (contract === "summary.v1") {
+    return {
+      schemaName: "summary_v1",
+      primaryField: "summary",
+      completionRpc: "complete_generation_attempt",
+      system:
+        "Summarize the provided study material in Turkish. Use only the source text. Do not invent facts. Respond with the required JSON.",
+    };
+  }
+  if (contract === "explain.v1") {
+    return {
+      schemaName: "explain_v1",
+      primaryField: "explanation",
+      completionRpc: "complete_explain_generation_attempt",
+      system:
+        "Explain the provided study material clearly in Turkish for a learner. Use only the source text. Clarify relationships and difficult ideas without inventing facts. Respond with the required JSON.",
+    };
+  }
+  return null;
+}
+
 Deno.serve(async (request) => {
   if (request.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
@@ -116,7 +138,6 @@ Deno.serve(async (request) => {
   };
 
   const runGeneration = async (): Promise<Response> => {
-    let job: Record<string, unknown> | null = null;
     try {
       const result = targetJobId
         ? await rpc("claim_generation_job_by_id", {
@@ -124,12 +145,15 @@ Deno.serve(async (request) => {
             p_lease_seconds: 120,
           })
         : await rpc("claim_generation_job", { p_lease_seconds: 120 });
-      job = Array.isArray(result) ? (result[0] ?? null) : result;
+      const job: Record<string, unknown> | null = Array.isArray(result)
+        ? (result[0] ?? null)
+        : result;
       if (!job) return reply(200, targetJobId ? "not_runnable" : "idle");
-  
+
       const attempt = String(job.attempt_id);
       const lease = String(job.lease_token);
-      if (job.generation_contract !== "summary.v1") {
+      const spec = generationSpec(job.generation_contract);
+      if (!spec) {
         await rpc("fail_generation_attempt", {
           p_attempt_id: attempt,
           p_lease_token: lease,
@@ -138,13 +162,13 @@ Deno.serve(async (request) => {
         });
         return reply(200, "unsupported_contract");
       }
-  
+
       await rpc("mark_attempt_dispatched", {
         p_attempt_id: attempt,
         p_lease_token: lease,
         p_adapter_ref: "fetch-chat:" + model,
       });
-  
+
       let failure: "retryable" | "final" | "ambiguous" = "ambiguous";
       let providerRef: string | null = null;
       try {
@@ -168,14 +192,14 @@ Deno.serve(async (request) => {
                 response_format: {
                   type: "json_schema",
                   json_schema: {
-                    name: "summary_v1",
+                    name: spec.schemaName,
                     strict: true,
                     schema: {
                       type: "object",
                       additionalProperties: false,
-                      required: ["summary", "key_points", "language"],
+                      required: [spec.primaryField, "key_points", "language"],
                       properties: {
-                        summary: { type: "string" },
+                        [spec.primaryField]: { type: "string" },
                         key_points: {
                           type: "array",
                           items: { type: "string" },
@@ -187,11 +211,7 @@ Deno.serve(async (request) => {
                   },
                 },
                 messages: [
-                  {
-                    role: "system",
-                    content:
-                      "Summarize the provided study material in Turkish. Use only the source text. Do not invent facts. Respond with the required JSON.",
-                  },
+                  { role: "system", content: spec.system },
                   { role: "user", content: String(job.normalized_text) },
                 ],
               }),
@@ -200,7 +220,7 @@ Deno.serve(async (request) => {
         } finally {
           clearTimeout(timer);
         }
-  
+
         providerRef = response.headers.get("x-request-id");
         if (!response.ok) {
           failure =
@@ -216,10 +236,11 @@ Deno.serve(async (request) => {
           const content = JSON.parse(
             providerBody?.choices?.[0]?.message?.content ?? "null",
           );
+          const primary = content?.[spec.primaryField];
           if (
-            typeof content?.summary === "string" &&
-            content.summary.trim().length > 0 &&
-            content.summary.length <= 20000 &&
+            typeof primary === "string" &&
+            primary.trim().length > 0 &&
+            primary.length <= 20000 &&
             typeof content?.language === "string" &&
             content.language.length > 0 &&
             Array.isArray(content.key_points) &&
@@ -230,7 +251,7 @@ Deno.serve(async (request) => {
             )
           ) {
             try {
-              await rpc("complete_generation_attempt", {
+              await rpc(spec.completionRpc, {
                 p_attempt_id: attempt,
                 p_lease_token: lease,
                 p_content: content,
@@ -252,7 +273,7 @@ Deno.serve(async (request) => {
       } catch {
         // Ambiguous provider outcome: never automatically resend.
       }
-  
+
       await rpc("fail_generation_attempt", {
         p_attempt_id: attempt,
         p_lease_token: lease,

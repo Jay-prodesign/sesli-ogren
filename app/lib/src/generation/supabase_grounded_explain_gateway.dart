@@ -18,7 +18,7 @@ class SupabaseGroundedExplainGateway implements GroundedExplainGateway {
     }
     try {
       final client = await SupabaseLearnerAuth.clientForAuthenticatedRuntime();
-      await client.rpc<Object?>(
+      final jobId = await client.rpc<String>(
         'request_grounded_explain',
         params: {
           'p_material_id': request.materialId.value,
@@ -26,8 +26,30 @@ class SupabaseGroundedExplainGateway implements GroundedExplainGateway {
           'p_idempotency_key': _idempotencyKey(request),
         },
       );
+      final jobs = await client
+          .from('generation_jobs')
+          .select('state,failure_class')
+          .eq('id', jobId)
+          .limit(1);
+      if (jobs.isEmpty) {
+        return const GroundedExplainUnavailable(reason: GroundedExplainUnavailableReason.temporaryFailure);
+      }
+      final jobState = jobs.first['state'] as String;
+      final failureClass = jobs.first['failure_class'] as String?;
+      if (failureClass == 'reconciliation_required' || jobState == 'FAILED_FINAL' || jobState == 'CANCELLED') {
+        return const GroundedExplainUnavailable(reason: GroundedExplainUnavailableReason.temporaryFailure);
+      }
+      if (jobState == 'FAILED_RETRYABLE') {
+        await client.rpc<String>('retry_generation_job', params: {'p_job_id': jobId});
+      }
+      if (jobState == 'QUEUED' || jobState == 'PROCESSING' || jobState == 'FAILED_RETRYABLE') {
+        final response = await client.functions.invoke('generation-worker', body: {'job_id': jobId});
+        if (response.status < 200 || response.status >= 300) {
+          return const GroundedExplainUnavailable(reason: GroundedExplainUnavailableReason.temporaryFailure);
+        }
+      }
 
-      // Generation is asynchronous. A newly queued summary will not exist on
+      // Generation is asynchronous. A newly queued Explain artifact will not exist on
       // the first read; give the worker a bounded window before showing Retry.
       List<dynamic> rows = <dynamic>[];
       for (var attempt = 0; attempt < 6; attempt++) {
@@ -46,7 +68,7 @@ class SupabaseGroundedExplainGateway implements GroundedExplainGateway {
 
       final row = Map<String, dynamic>.from(rows.first as Map);
       final content = Map<String, dynamic>.from(row['content'] as Map);
-      final explanation = (content['summary'] as String?)?.trim() ?? '';
+      final explanation = (content['explanation'] as String?)?.trim() ?? '';
       final rawPoints = content['key_points'];
       final keyPoints = rawPoints is List
           ? rawPoints.whereType<String>().map((e) => e.trim()).where((e) => e.isNotEmpty).toList()
