@@ -28,9 +28,9 @@ Deno.test("selectRelevantSourceContext keeps a distant query-relevant passage in
   const selected = selectRelevantSourceContext(
     source,
     "Karbondioksit fotosentez sırasında nasıl kullanılır?",
-    5000,
+    4000,
   );
-  assert(selected.length <= 5000);
+  assert(selected.length <= 4000);
   assert(selected.includes("karbondioksit ve su"));
   assert(selected.length < source.length);
 });
