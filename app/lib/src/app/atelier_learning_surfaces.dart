@@ -439,6 +439,12 @@ class AtelierResult extends StatelessWidget {
     return answerInMemory.trim().isEmpty ? 'Yanıt metni bu oturumda yok.' : answerInMemory.trim();
   }
 
+  String get _nextActionLabel => switch (result.nextAction.kind) {
+    NextLearningActionKind.reviewSourceThenRecall => 'Kaynağı gözden geçir',
+    NextLearningActionKind.retryRecallWithoutHint => 'İpucusuz tekrar dene',
+    NextLearningActionKind.repeatRecallLater => 'Bugünlük tamamla',
+  };
+
   @override
   Widget build(BuildContext context) {
     final excerpt = result.sourceExcerpt;
@@ -661,7 +667,7 @@ class AtelierResult extends StatelessWidget {
               minimumSize: const Size.fromHeight(52),
             ),
             icon: const Icon(Icons.arrow_forward_rounded),
-            label: const Text('Sıradaki adıma geç'),
+            label: Text(_nextActionLabel),
           ),
         ),
       ],
