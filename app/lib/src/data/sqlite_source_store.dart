@@ -516,18 +516,22 @@ FROM summary_jobs
   }
 
   Future<void> clearSummaryJob({required AuthenticatedLearner learner, required MaterialId materialId}) async {
-    await _database.transaction((transaction) async {
-      await transaction.delete(
-        'summary_jobs',
-        where: 'learner_id = ? AND material_id = ?',
-        whereArgs: [learner.id.value, materialId.value],
-      );
-      await transaction.delete(
-        'server_material_bindings',
-        where: 'learner_id = ? AND material_id = ?',
-        whereArgs: [learner.id.value, materialId.value],
-      );
-    });
+    await _database.delete(
+      'summary_jobs',
+      where: 'learner_id = ? AND material_id = ?',
+      whereArgs: [learner.id.value, materialId.value],
+    );
+  }
+
+  Future<void> clearServerMaterialBinding({
+    required AuthenticatedLearner learner,
+    required MaterialId materialId,
+  }) async {
+    await _database.delete(
+      'server_material_bindings',
+      where: 'learner_id = ? AND material_id = ?',
+      whereArgs: [learner.id.value, materialId.value],
+    );
   }
 
   Future<void> saveSummaryJob({
