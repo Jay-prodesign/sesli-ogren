@@ -1,3 +1,19 @@
+# EXECUTION CORRECTION — OUTCOME BATCH / DEVELOPMENT FIRST (2026-10-09)
+
+This section supersedes conflicting micro-task, per-commit stop, routine micro-QA, and historical execution-cursor instructions below. It changes execution cadence, NOT product scope, acceptance authority, or protected gates.
+
+**Current priority:** LA-0039 + LA-0040 remain open. Complete one coherent, source-grounded, visually compelling Home → real source Reader/Listen → source-hidden Recall → truthful correct/unknown/hinted feedback with source proof → evidence-backed next action → reopen/resume. Do not mistake additional navigation shortcuts or mode buttons for the signature learning payoff. Work on the verified current product branch PR #13; do not switch to an unintegrated visual branch without lineage review.
+
+**Unit of work = user-visible outcome batch, not file/task/commit.** Each execution run should integrate several connected parts of this experience: layout, callbacks, data/truth, state/error/recovery, and continuation. Before ending, select the next meaningful authorized independent development task and execute it. No arbitrary one-commit, one-test, or one-tool-call stopping point. If one gate blocks a task, move to another in-scope task.
+
+**Development-first QA cadence:** no test per button, no full suite per cosmetic change, no screenshot/CI loop per commit. While coding, immediately prevent material security, source/evidence corruption, navigation and compile hazards. At the cohesive visual/product milestone, run one bounded integration/learning-truth/build pass and repair failures. Broad responsive, accessibility, physical Android/iOS and release regression follow the visual-direction decision and release readiness. Unrun checks remain explicitly UNVERIFIED; do not declare DONE from source writes alone.
+
+**Task/governance simplification:** keep existing LA-0039/LA-0040 IDs and acceptance. Do not create a task or exec plan for each small UI action; keep subordinate changes within the active outcome batch. Update TASKS/EXECUTION_STATE only at meaningful state transitions, not after each commit. Older M5, CMD-0002 three-treatment, and visual-proof instructions below are historical wherever superseded by the canonical batch-first cursor; Founder visual approval remains required for visual lock, but does not freeze independent development.
+
+**Completion criterion:** actual integrated, distinctive first-session learning journey and truthful resumed continuation; one milestone verification; Founder visual decision at a reviewable candidate. Protected merge, release, secrets, spending, data/security and publication decisions remain reserved. Never represent code changes as tested mobile behavior.
+
+---
+
 # CURRENT CONTROLLING CURSOR — LA-0040 BATCH-FIRST VISUAL COMPLETION (FOUNDER CORRECTION, 2026-10-08)
 
 **Supersedes earlier micro-cursors, frequent micro-QA and premature responsive work anywhere below.** Founder identified the process itself as incorrect: small isolated UI tweaks, committing after nearly every cosmetic edit, triggering all CI/screenshots repeatedly, and reworking 320px/1.5x before the primary art direction was good. This is a binding Learning App workflow correction, not a new product feature/task.
