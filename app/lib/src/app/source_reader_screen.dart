@@ -28,14 +28,14 @@ class _SourceReaderScreenState extends State<SourceReaderScreen> {
   final TextEditingController _search = TextEditingController();
   final ScrollController _readingScroll = ScrollController();
   double _readingProgress = 0;
+  double _fontSize = 17;
+  bool _showSearch = false;
 
   @override
   void initState() {
     super.initState();
     _readingScroll.addListener(_updateReadingProgress);
   }
-  double _fontSize = 17;
-  bool _showSearch = false;
 
   @override
   void dispose() {
