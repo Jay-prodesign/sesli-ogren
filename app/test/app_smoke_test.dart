@@ -252,6 +252,28 @@ void main() {
     expect(find.textContaining('Neden:'), findsNothing);
   });
 
+  testWidgets('empty shell workspace request opens first material creation', (tester) async {
+    final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
+    addTearDown(store.close);
+    final runtime = AppRuntime(
+      learner: AppRuntime.localM5LearnerFixture,
+      store: store,
+      ingest: SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor()),
+      recall: RecallLearningService(sourceStore: store, learningStore: store.learningTruthStore()),
+      telemetry: store.operationalTelemetry(),
+    );
+    await tester.pumpWidget(MaterialApp(
+      home: MediaQuery(
+        data: const MediaQueryData(disableAnimations: true),
+        child: ProductShellScreen(runtime: runtime),
+      ),
+    ));
+    await pumpUntilFound(tester, find.text('İlk materyalini ekle'));
+    await tapVisible(tester, find.text('Materyal ekle'));
+    await pumpUntilFound(tester, find.text('Çalışma materyalini ekle'));
+    expect(find.text('Çalışma materyalini ekle'), findsOneWidget);
+  });
+
   testWidgets('full product shell opens one coherent grounded material workspace', (tester) async {
     final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
     addTearDown(store.close);
