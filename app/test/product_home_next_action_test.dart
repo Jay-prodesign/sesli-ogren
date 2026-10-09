@@ -62,8 +62,8 @@ Future<AppRuntime> _runtimeWithEvidence({
 }
 
 Widget _testApp(Widget home) => MaterialApp(
-      home: MediaQuery(data: const MediaQueryData(disableAnimations: true), child: home),
-    );
+  home: MediaQuery(data: const MediaQueryData(disableAnimations: true), child: home),
+);
 
 void main() {
   testWidgets('Home review action opens the persisted repair continuation', (tester) async {
@@ -95,7 +95,7 @@ void main() {
     );
     addTearDown(runtime.close);
 
-    await tester.pumpWidget(MaterialApp(home: ProductShellScreen(runtime: runtime)));
+    await tester.pumpWidget(_testApp(ProductShellScreen(runtime: runtime)));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
 

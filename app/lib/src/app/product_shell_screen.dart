@@ -6,6 +6,7 @@ import '../learning/recall_learning_service.dart';
 import '../generation/supabase_source_summary_gateway.dart';
 import 'app_runtime.dart';
 import 'app_theme.dart';
+import 'atelier_learning_surfaces.dart';
 import 'companion_view.dart';
 import 'learning_slice_screen.dart';
 import 'la0040_visual_treatments.dart';
@@ -337,7 +338,9 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final living = LivingDeskReviewScope.active(context);
     return Scaffold(
+      backgroundColor: living ? AtelierStyle.canvas : null,
       body: SafeArea(
         child: FutureBuilder<_HomeSnapshot>(
           future: _snapshot,
@@ -424,7 +427,7 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
           },
         ),
       ),
-      bottomNavigationBar: LivingDeskReviewScope.active(context)
+      bottomNavigationBar: living
           ? NavigationBarTheme(
               data: NavigationBarThemeData(
                 backgroundColor: const Color(0xFFF5F4F0),
@@ -515,7 +518,7 @@ class _HomeSurface extends StatelessWidget {
                   const SizedBox(height: 2),
                   Text(
                     hasMaterial ? _headerLine(data.continuation) : 'Kendi materyalini aktif öğrenmeye dönüştür.',
-                    style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+                    style: theme.textTheme.bodyMedium?.copyWith(color: muted),
                   ),
                 ],
               ),
@@ -539,7 +542,7 @@ class _HomeSurface extends StatelessWidget {
               Expanded(child: Text('Çalışma yolları', style: theme.textTheme.titleMedium)),
               Text(
                 'Aynı kaynakla',
-                style: theme.textTheme.labelMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+                style: theme.textTheme.labelMedium?.copyWith(color: muted),
               ),
             ],
           ),
@@ -951,23 +954,47 @@ class _LibrarySurfaceState extends State<_LibrarySurface> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final living = LivingDeskReviewScope.active(context);
     final visibleMaterials = _visibleMaterials;
     final hasQuery = _searchController.text.trim().isNotEmpty;
+    final accent = living ? AtelierStyle.teal : theme.colorScheme.primary;
+    final ink = living ? AtelierStyle.ink : theme.colorScheme.onSurface;
+    final muted = living ? AtelierStyle.muted : theme.colorScheme.onSurfaceVariant;
+    final paper = living ? AtelierStyle.paper : theme.colorScheme.surface;
     return ListView(
       key: const ValueKey('library-material-list'),
       controller: _listController,
       padding: const EdgeInsets.fromLTRB(20, 24, 20, 32),
       children: [
+        if (living) ...[
+          Text(
+            'KAYNAKLARIN',
+            style: theme.textTheme.labelSmall?.copyWith(
+              color: accent,
+              fontWeight: FontWeight.w900,
+              letterSpacing: 0.9,
+            ),
+          ),
+          const SizedBox(height: 7),
+        ],
         Row(
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
-            Expanded(child: Text('Kütüphane', style: theme.textTheme.headlineMedium)),
+            Expanded(
+              child: Text(
+                'Kütüphane',
+                style: theme.textTheme.headlineMedium?.copyWith(
+                  color: ink,
+                  fontWeight: living ? FontWeight.w900 : null,
+                ),
+              ),
+            ),
             if (widget.data.materials.isNotEmpty)
               Text(
                 hasQuery
                     ? '${visibleMaterials.length} / ${widget.data.materials.length} materyal'
                     : '${widget.data.materials.length} materyal',
-                style: theme.textTheme.labelMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+                style: theme.textTheme.labelMedium?.copyWith(color: muted),
               ),
           ],
         ),
@@ -985,7 +1012,9 @@ class _LibrarySurfaceState extends State<_LibrarySurface> {
             textInputAction: TextInputAction.search,
             decoration: InputDecoration(
               hintText: 'Materyal ara',
-              prefixIcon: const Icon(Icons.search_rounded),
+              filled: living,
+              fillColor: living ? paper : null,
+              prefixIcon: Icon(Icons.search_rounded, color: living ? accent : null),
               suffixIcon: hasQuery
                   ? IconButton(
                       tooltip: 'Aramayı temizle',
@@ -1055,6 +1084,7 @@ class _LibraryMaterialCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final living = LivingDeskReviewScope.active(context);
     final mediaIcon = material.mediaType == SourceMediaType.pdf ? Icons.picture_as_pdf_rounded : Icons.notes_rounded;
     final mediaLabel = material.mediaType == SourceMediaType.pdf ? 'PDF' : 'Metin';
     final state = continuation?.state.kind ?? RecallStateKind.notAssessed;
@@ -1066,8 +1096,32 @@ class _LibraryMaterialCard extends StatelessWidget {
     };
     final nextReason =
         continuation?.nextAction.reasonText ?? 'İlk aktif hatırlama denemesi öğrenme durumunu görünür kılar.';
+    final resolvedStateSoft = living
+        ? switch (state) {
+            RecallStateKind.notAssessed => AtelierStyle.canvas,
+            RecallStateKind.developing => AtelierStyle.mint,
+            RecallStateKind.retrievedOnce => AtelierStyle.mint,
+            RecallStateKind.needsReview => const Color(0xFFFFF1D9),
+          }
+        : stateSoft;
+    final resolvedStateAccent = living
+        ? switch (state) {
+            RecallStateKind.notAssessed => AtelierStyle.muted,
+            RecallStateKind.developing => AtelierStyle.teal,
+            RecallStateKind.retrievedOnce => AtelierStyle.teal,
+            RecallStateKind.needsReview => const Color(0xFF9A623E),
+          }
+        : stateAccent;
 
     return Card(
+      elevation: 0,
+      color: living ? AtelierStyle.paper : null,
+      shape: living
+          ? RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(18),
+              side: const BorderSide(color: AtelierStyle.line),
+            )
+          : null,
       child: InkWell(
         onTap: onPressed,
         borderRadius: BorderRadius.circular(18),
@@ -1075,9 +1129,9 @@ class _LibraryMaterialCard extends StatelessWidget {
           children: [
             Container(
               height: 5,
-              decoration: const BoxDecoration(
-                color: AppPalette.primary,
-                borderRadius: BorderRadius.vertical(top: Radius.circular(18)),
+              decoration: BoxDecoration(
+                color: living ? AtelierStyle.teal : AppPalette.primary,
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(18)),
               ),
             ),
             Padding(
@@ -1086,10 +1140,13 @@ class _LibraryMaterialCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   DecoratedBox(
-                    decoration: BoxDecoration(color: AppPalette.primarySoft, borderRadius: BorderRadius.circular(14)),
+                    decoration: BoxDecoration(
+                      color: living ? AtelierStyle.mint : AppPalette.primarySoft,
+                      borderRadius: BorderRadius.circular(14),
+                    ),
                     child: Padding(
                       padding: const EdgeInsets.all(11),
-                      child: Icon(mediaIcon, color: AppPalette.primary, size: 22),
+                      child: Icon(mediaIcon, color: living ? AtelierStyle.teal : AppPalette.primary, size: 22),
                     ),
                   ),
                   const SizedBox(width: 13),
@@ -1100,7 +1157,7 @@ class _LibraryMaterialCard extends StatelessWidget {
                         Text(
                           mediaLabel.toUpperCase(),
                           style: theme.textTheme.labelSmall?.copyWith(
-                            color: AppPalette.inkMuted,
+                            color: living ? AtelierStyle.muted : AppPalette.inkMuted,
                             fontWeight: FontWeight.w800,
                             letterSpacing: 0.45,
                           ),
@@ -1114,13 +1171,13 @@ class _LibraryMaterialCard extends StatelessWidget {
                         ),
                         const SizedBox(height: 9),
                         DecoratedBox(
-                          decoration: BoxDecoration(color: stateSoft, borderRadius: BorderRadius.circular(999)),
+                          decoration: BoxDecoration(color: resolvedStateSoft, borderRadius: BorderRadius.circular(999)),
                           child: Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
                             child: Text(
                               stateLabel,
                               style: theme.textTheme.labelSmall?.copyWith(
-                                color: stateAccent,
+                                color: resolvedStateAccent,
                                 fontWeight: FontWeight.w800,
                               ),
                             ),
@@ -1140,9 +1197,9 @@ class _LibraryMaterialCard extends StatelessWidget {
               ),
             ),
             DecoratedBox(
-              decoration: const BoxDecoration(
-                color: AppPalette.primaryDark,
-                borderRadius: BorderRadius.vertical(bottom: Radius.circular(18)),
+              decoration: BoxDecoration(
+                color: living ? AtelierStyle.ink : AppPalette.primaryDark,
+                borderRadius: const BorderRadius.vertical(bottom: Radius.circular(18)),
               ),
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(15, 12, 15, 13),
@@ -1150,10 +1207,17 @@ class _LibraryMaterialCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     DecoratedBox(
-                      decoration: BoxDecoration(color: AppPalette.momentum, borderRadius: BorderRadius.circular(999)),
-                      child: const Padding(
-                        padding: EdgeInsets.all(6),
-                        child: Icon(Icons.arrow_forward_rounded, color: AppPalette.momentumInk, size: 16),
+                      decoration: BoxDecoration(
+                        color: living ? AtelierStyle.mark : AppPalette.momentum,
+                        borderRadius: BorderRadius.circular(999),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(6),
+                        child: Icon(
+                          Icons.arrow_forward_rounded,
+                          color: living ? AtelierStyle.ink : AppPalette.momentumInk,
+                          size: 16,
+                        ),
                       ),
                     ),
                     const SizedBox(width: 9),
@@ -1293,9 +1357,16 @@ class _PrimaryCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final living = LivingDeskReviewScope.active(context);
     return Card(
       elevation: 0,
-      color: theme.colorScheme.primaryContainer.withValues(alpha: 0.55),
+      color: living ? AtelierStyle.paper : theme.colorScheme.primaryContainer.withValues(alpha: 0.55),
+      shape: living
+          ? RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(18),
+              side: const BorderSide(color: AtelierStyle.line),
+            )
+          : null,
       child: Padding(
         padding: const EdgeInsets.all(22),
         child: Column(

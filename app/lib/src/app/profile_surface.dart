@@ -4,6 +4,8 @@ import 'package:flutter/services.dart';
 import '../account/account_overview_gateway.dart';
 import 'app_runtime.dart';
 import 'app_theme.dart';
+import 'atelier_learning_surfaces.dart';
+import 'living_study_desk_home.dart';
 
 const _configuredSupportEmail = String.fromEnvironment('SUPPORT_EMAIL');
 
@@ -149,6 +151,10 @@ class _ProfileSurfaceState extends State<ProfileSurface> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final living = LivingDeskReviewScope.active(context);
+    final accent = living ? AtelierStyle.teal : AppPalette.primary;
+    final ink = living ? AtelierStyle.ink : theme.colorScheme.onSurface;
+    final muted = living ? AtelierStyle.muted : theme.colorScheme.onSurfaceVariant;
     return ListView(
       key: const ValueKey('profile-surface'),
       padding: const EdgeInsets.fromLTRB(20, 24, 20, 36),
@@ -156,17 +162,23 @@ class _ProfileSurfaceState extends State<ProfileSurface> {
         Text(
           'HESAP VE AYARLAR',
           style: theme.textTheme.labelSmall?.copyWith(
-            color: AppPalette.primary,
+            color: accent,
             fontWeight: FontWeight.w800,
             letterSpacing: 0.8,
           ),
         ),
         const SizedBox(height: 7),
-        Text('Profil ve Ayarlar', style: theme.textTheme.headlineMedium),
+        Text(
+          'Profil ve Ayarlar',
+          style: theme.textTheme.headlineMedium?.copyWith(
+            color: ink,
+            fontWeight: living ? FontWeight.w900 : null,
+          ),
+        ),
         const SizedBox(height: 6),
         Text(
           'Hesap, plan ve doğrulanabilir kullanım bilgilerin.',
-          style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+          style: theme.textTheme.bodyMedium?.copyWith(color: muted),
         ),
         const SizedBox(height: 22),
         FutureBuilder<AccountOverview?>(
@@ -317,6 +329,8 @@ class _AccountOverviewCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final living = LivingDeskReviewScope.active(context);
+    final hero = living ? AtelierStyle.ink : AppPalette.primaryDark;
     final planLabel = switch (overview.plan) {
       'free' => 'Ücretsiz plan',
       'premium' => 'Premium plan',
@@ -327,10 +341,10 @@ class _AccountOverviewCard extends StatelessWidget {
 
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: AppPalette.primaryDark,
+        color: hero,
         borderRadius: BorderRadius.circular(26),
         boxShadow: [
-          BoxShadow(color: AppPalette.primaryDark.withValues(alpha: 0.14), blurRadius: 24, offset: const Offset(0, 12)),
+          BoxShadow(color: hero.withValues(alpha: 0.14), blurRadius: 24, offset: const Offset(0, 12)),
         ],
       ),
       child: Padding(
@@ -392,7 +406,7 @@ class _AccountOverviewCard extends StatelessWidget {
             Text(
               'KULLANIM',
               style: theme.textTheme.labelSmall?.copyWith(
-                color: const Color(0xFFAFC0FF),
+                color: living ? AtelierStyle.mark : const Color(0xFFAFC0FF),
                 fontWeight: FontWeight.w800,
                 letterSpacing: 0.7,
               ),
@@ -448,7 +462,14 @@ class _ProfileSectionLabel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Text(text, style: Theme.of(context).textTheme.titleMedium);
+    final living = LivingDeskReviewScope.active(context);
+    return Text(
+      text,
+      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+        color: living ? AtelierStyle.ink : null,
+        fontWeight: living ? FontWeight.w800 : null,
+      ),
+    );
   }
 }
 
@@ -459,11 +480,12 @@ class _ProfilePanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final living = LivingDeskReviewScope.active(context);
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: AppPalette.surface,
+        color: living ? AtelierStyle.paper : AppPalette.surface,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppPalette.outline),
+        border: Border.all(color: living ? AtelierStyle.line : AppPalette.outline),
       ),
       child: Column(children: children),
     );
@@ -488,16 +510,20 @@ class _ProfileTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final living = LivingDeskReviewScope.active(context);
+    final destructive = iconForeground == AppPalette.destructive;
+    final resolvedBackground = living && !destructive ? AtelierStyle.mint : iconBackground;
+    final resolvedForeground = living && !destructive ? AtelierStyle.teal : iconForeground;
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 15, 16, 14),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           DecoratedBox(
-            decoration: BoxDecoration(color: iconBackground, borderRadius: BorderRadius.circular(12)),
+            decoration: BoxDecoration(color: resolvedBackground, borderRadius: BorderRadius.circular(12)),
             child: Padding(
               padding: const EdgeInsets.all(9),
-              child: Icon(icon, color: iconForeground, size: 20),
+              child: Icon(icon, color: resolvedForeground, size: 20),
             ),
           ),
           const SizedBox(width: 13),
@@ -505,11 +531,20 @@ class _ProfileTile extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title, style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700)),
+                Text(
+                  title,
+                  style: theme.textTheme.titleSmall?.copyWith(
+                    color: living ? AtelierStyle.ink : null,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
                 const SizedBox(height: 4),
                 Text(
                   subtitle,
-                  style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant, height: 1.4),
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: living ? AtelierStyle.muted : theme.colorScheme.onSurfaceVariant,
+                    height: 1.4,
+                  ),
                 ),
               ],
             ),
