@@ -67,11 +67,15 @@ class _MaterialWorkspaceScreenState extends State<MaterialWorkspaceScreen> {
     return _WorkspaceSnapshot(material: material, source: source, extracted: extracted, continuation: continuation);
   }
 
-  Future<void> _openQuickRecap() => Navigator.of(context).push<void>(
-    MaterialPageRoute(
-      builder: (_) => QuickRecapScreen(runtime: widget.runtime, materialId: widget.materialId),
-    ),
-  );
+  Future<void> _openQuickRecap() async {
+    await Navigator.of(context).push<void>(
+      MaterialPageRoute(
+        builder: (_) => QuickRecapScreen(runtime: widget.runtime, materialId: widget.materialId),
+      ),
+    );
+    if (!mounted) return;
+    setState(() => _snapshot = _load());
+  }
 
   Future<void> _openRecall() async {
     final treatment = LearningVisualTreatmentScope.maybeOf(context);
