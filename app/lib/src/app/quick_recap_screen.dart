@@ -363,8 +363,8 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> with WidgetsBinding
         'Hızlı özet — $title',
         'AI tarafından oluşturulan özet · Sesli Öğren',
         summary,
-        if (status.keyPoints.isNotEmpty) 'Önemli noktalar:\\n${status.keyPoints.map((point) => '• $point').join('\\n')}',
-      ].join('\\n\\n');
+        if (status.keyPoints.isNotEmpty) 'Önemli noktalar:\n${status.keyPoints.map((point) => '• $point').join('\n')}',
+      ].join('\n\n');
       await Clipboard.setData(ClipboardData(text: text));
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
