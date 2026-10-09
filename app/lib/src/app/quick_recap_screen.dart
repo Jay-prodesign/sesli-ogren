@@ -348,9 +348,9 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> with WidgetsBinding
           if (_busy) const LinearProgressIndicator(),
           if (_jobId != null && status?.summary == null) ...[
             Text(_statusLabel(status), style: Theme.of(context).textTheme.titleMedium),
-            if (_statusDetail(status) case final detail?) ...[
+            if (_statusDetail(status) != null) ...[
               const SizedBox(height: 6),
-              Text(detail),
+              Text(_statusDetail(status)!),
             ],
             if (status?.state == 'QUEUED' || status?.state == 'PROCESSING') ...[
               const SizedBox(height: 12),
@@ -362,7 +362,9 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> with WidgetsBinding
               const SizedBox(height: 8),
               OutlinedButton(
                 onPressed: _dispatching ? null : _dispatchCurrent,
-                child: Text(status?.state == 'PROCESSING' ? 'Sunucuyu yeniden kontrol et' : 'İşlemi başlatmayı tekrar dene'),
+                child: Text(
+                  status?.state == 'PROCESSING' ? 'Sunucuyu yeniden kontrol et' : 'İşlemi başlatmayı tekrar dene',
+                ),
               ),
             ],
             if (status?.state == 'FAILED_RETRYABLE' && status?.failureClass != 'reconciliation_required') ...[
