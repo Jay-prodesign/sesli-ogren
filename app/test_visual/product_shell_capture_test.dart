@@ -5,6 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:sesli_ogren/src/app/app_runtime.dart';
 import 'package:sesli_ogren/src/app/app_theme.dart';
 import 'package:sesli_ogren/src/app/product_shell_screen.dart';
+import 'package:sesli_ogren/src/app/material_workspace_screen.dart';
 import 'package:sesli_ogren/src/data/pdf_text_extractor.dart';
 import 'package:sesli_ogren/src/data/source_ingest_service.dart';
 import 'package:sesli_ogren/src/data/sqlite_source_store.dart';
@@ -70,6 +71,18 @@ void main() {
       expect(find.byKey(const ValueKey('home-surface')), findsOneWidget);
       expect(tester.takeException(), isNull);
       await expectLater(find.byType(Scaffold).first, matchesGoldenFile('goldens/product_shell_home_${populated ? 'populated' : 'empty'}_390x844.png'));
+      if (populated) {
+        await tester.tap(find.byKey(const ValueKey('home-continuation-hero')));
+        for (var i = 0; i < 30; i++) {
+          await tester.pump(const Duration(milliseconds: 100));
+          if (find.byType(MaterialWorkspaceScreen).evaluate().isNotEmpty) break;
+        }
+        expect(find.byType(MaterialWorkspaceScreen), findsOneWidget);
+        expect(tester.takeException(), isNull);
+        await expectLater(find.byType(Scaffold).last, matchesGoldenFile('goldens/product_shell_workspace_populated_390x844.png'));
+        await tester.pageBack();
+        await tester.pump(const Duration(milliseconds: 400));
+      }
       await tester.tap(find.text('Kütüphane').last);
       await tester.pump(const Duration(milliseconds: 400));
       expect(tester.takeException(), isNull);
