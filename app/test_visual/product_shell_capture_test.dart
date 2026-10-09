@@ -10,7 +10,6 @@ import 'package:sesli_ogren/src/data/source_ingest_service.dart';
 import 'package:sesli_ogren/src/data/sqlite_source_store.dart';
 import 'package:sesli_ogren/src/learning/recall_learning_service.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
-import 'dart:typed_data';
 
 class _NoPdf implements PdfTextExtractor {
   const _NoPdf();
