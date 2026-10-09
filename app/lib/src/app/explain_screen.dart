@@ -10,6 +10,14 @@ import 'app_runtime.dart';
 import 'app_theme.dart';
 import 'explain_back_screen.dart';
 import 'learning_slice_screen.dart';
+import 'la0040_visual_treatments.dart';
+import 'living_study_desk_home.dart';
+
+Widget _preserveExplainExperience(BuildContext context, Widget screen) {
+  final treatment = LearningVisualTreatmentScope.maybeOf(context);
+  if (treatment != null) return LearningVisualTreatmentScope(treatment: treatment, child: screen);
+  return LivingDeskReviewScope.active(context) ? LivingDeskReviewScope(child: screen) : screen;
+}
 
 class ExplainScreen extends StatefulWidget {
   const ExplainScreen({
@@ -296,7 +304,8 @@ class _Ready extends StatelessWidget {
                   style: FilledButton.styleFrom(backgroundColor: Colors.white, foregroundColor: AppPalette.primaryDark),
                   onPressed: () => Navigator.of(context).push<void>(
                     MaterialPageRoute(
-                      builder: (_) => ExplainBackScreen(runtime: runtime, source: source),
+                      builder: (_) =>
+                          _preserveExplainExperience(context, ExplainBackScreen(runtime: runtime, source: source)),
                     ),
                   ),
                   icon: const Icon(Icons.record_voice_over_outlined),
@@ -310,7 +319,10 @@ class _Ready extends StatelessWidget {
                   ),
                   onPressed: () => Navigator.of(context).push<void>(
                     MaterialPageRoute(
-                      builder: (_) => LearningSliceScreen(runtime: runtime, materialId: source.identity.materialId),
+                      builder: (_) => _preserveExplainExperience(
+                        context,
+                        LearningSliceScreen(runtime: runtime, materialId: source.identity.materialId),
+                      ),
                     ),
                   ),
                   icon: const Icon(Icons.psychology_alt_outlined),

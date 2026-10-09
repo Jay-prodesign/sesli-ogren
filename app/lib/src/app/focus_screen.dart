@@ -12,6 +12,8 @@ import 'companion_view.dart';
 import 'explain_back_screen.dart';
 import 'explain_screen.dart';
 import 'learning_slice_screen.dart';
+import 'la0040_visual_treatments.dart';
+import 'living_study_desk_home.dart';
 
 String _foldTurkish(String value) =>
     value.replaceAll('I', 'i').replaceAll('ı', 'i').toLowerCase().replaceAll('\u0307', '');
@@ -36,6 +38,12 @@ class FocusScreen extends StatefulWidget {
 
 class _FocusScreenState extends State<FocusScreen> {
   final question = TextEditingController();
+
+  Widget _preserveProductExperience(Widget screen) {
+    final treatment = LearningVisualTreatmentScope.maybeOf(context);
+    if (treatment != null) return LearningVisualTreatmentScope(treatment: treatment, child: screen);
+    return LivingDeskReviewScope.active(context) ? LivingDeskReviewScope(child: screen) : screen;
+  }
   FocusHelpResult? help;
   bool busy = false;
 
@@ -47,19 +55,21 @@ class _FocusScreenState extends State<FocusScreen> {
 
   Future<void> _openDirectExplanation() => Navigator.of(context).push<void>(
     MaterialPageRoute(
-      builder: (_) => ExplainScreen(runtime: widget.runtime, source: widget.source),
+      builder: (_) => _preserveProductExperience(ExplainScreen(runtime: widget.runtime, source: widget.source)),
     ),
   );
 
   Future<void> _openRecall() => Navigator.of(context).push<void>(
     MaterialPageRoute(
-      builder: (_) => LearningSliceScreen(runtime: widget.runtime, materialId: widget.source.identity.materialId),
+      builder: (_) => _preserveProductExperience(
+        LearningSliceScreen(runtime: widget.runtime, materialId: widget.source.identity.materialId),
+      ),
     ),
   );
 
   Future<void> _openExplainBack() => Navigator.of(context).push<void>(
     MaterialPageRoute(
-      builder: (_) => ExplainBackScreen(runtime: widget.runtime, source: widget.source),
+      builder: (_) => _preserveProductExperience(ExplainBackScreen(runtime: widget.runtime, source: widget.source)),
     ),
   );
 
