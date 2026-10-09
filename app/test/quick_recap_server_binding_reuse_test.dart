@@ -129,7 +129,8 @@ void main() {
     await tester.tap(find.text('Özeti kopyala'));
     await tester.pumpAndSettle();
     expect(copiedText, contains('Kaynağa bağlı kısa özet.'));
-    expect(copiedText, contains('Biyoloji notu'));
+    expect(copiedText, contains('Hızlı özet —'));
+    expect(copiedText, contains('Sesli Öğren'));
     expect(copiedText, contains('AI tarafından oluşturulan özet'));
     expect(copiedText, contains('Aynı server material yeniden kullanıldı.'));
     expect(find.text('Özet panoya kopyalandı'), findsOneWidget);
@@ -172,6 +173,7 @@ void main() {
     await tester.tap(find.text('Özet oluştur'));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 200));
+    await tester.pump();
     expect(find.textContaining('Sunucuya ulaşılamadı'), findsOneWidget);
     expect(find.text('İşlemi başlatmayı tekrar dene'), findsOneWidget);
   });
