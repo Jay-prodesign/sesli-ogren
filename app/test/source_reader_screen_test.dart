@@ -52,7 +52,7 @@ void main() {
 
     await tester.tap(find.byTooltip('Okuma ve öğrenme seçenekleri'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Hızlı özet'));
+    await tester.tap(find.text('Hızlı özet').last);
     await tester.pump();
     expect(recap, 1);
   });
