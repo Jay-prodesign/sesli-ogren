@@ -65,17 +65,19 @@ select pg_temp.denied(
 );
 
 select pg_temp.denied(
-  $$select * from public.submit_text_summary('Bad id', 'text', 'bad id with spaces')$$,
+  $select * from public.submit_text_summary('Bad id', 'text', 'bad id with spaces')$,
   'invalid_client_source_id',
   'unsafe client source identity rejected'
 );
 
+reset role;
 update public.entitlements
 set limits = '{"summary_daily": 0}'
 where account_id = :user_c;
 
+set role authenticated;
 select pg_temp.denied(
-  $$select * from public.submit_text_summary(
+  $select * from public.submit_text_summary(
     'Quota blocked',
     'Bu içerik quota hatasında sunucuda yetim material bırakmamalıdır.',
     'sv_22222222222222222222222222222222'
@@ -84,6 +86,7 @@ select pg_temp.denied(
   'quota failure propagated'
 );
 
+reset role;
 select pg_temp.ok(
   (select count(*) = 1 from public.materials where account_id = :user_c),
   'quota failure leaves no orphan material'
