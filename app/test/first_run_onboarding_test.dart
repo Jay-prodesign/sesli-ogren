@@ -6,9 +6,7 @@ void main() {
   testWidgets('first run no longer blocks real product behind a feature tour', (tester) async {
     await tester.pumpWidget(
       const MaterialApp(
-        home: FirstRunOnboardingGate(
-          child: Scaffold(body: Text('APP_READY')),
-        ),
+        home: FirstRunOnboardingGate(child: Scaffold(body: Text('APP_READY'))),
       ),
     );
 
