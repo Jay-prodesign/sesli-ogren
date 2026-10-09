@@ -98,7 +98,7 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> with WidgetsBinding
       });
       await _refresh();
       if (mounted && _jobId != null && !(_status?.isTerminal ?? false)) {
-        if (_status?.state == 'QUEUED') {
+        if (_status?.state == 'QUEUED' || _status?.state == 'PROCESSING') {
           unawaited(_dispatchCurrent());
         }
         _startPolling();
@@ -115,7 +115,15 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> with WidgetsBinding
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed && _jobId != null) {
-      _refresh();
+      unawaited(_refreshAndRecover());
+    }
+  }
+
+  Future<void> _refreshAndRecover() async {
+    await _refresh();
+    if (!mounted || _jobId == null || (_status?.isTerminal ?? false)) return;
+    if (_status?.state == 'QUEUED' || _status?.state == 'PROCESSING') {
+      await _dispatchCurrent();
     }
   }
 
@@ -170,7 +178,7 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> with WidgetsBinding
         });
         await _refresh();
         if (mounted && _jobId != null && !(_status?.isTerminal ?? false)) {
-          if (_status?.state == 'QUEUED') {
+          if (_status?.state == 'QUEUED' || _status?.state == 'PROCESSING') {
             unawaited(_dispatchCurrent());
           }
           _startPolling();
@@ -299,11 +307,15 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> with WidgetsBinding
             Text('İş durumu: ${status?.state ?? "Gönderildi"}'),
             const SizedBox(height: 12),
             OutlinedButton(onPressed: _dispatching ? null : _refresh, child: const Text('Durumu yenile')),
-            if (status?.state == 'QUEUED') ...[
+            if (status?.state == 'QUEUED' || status?.state == 'PROCESSING') ...[
               const SizedBox(height: 8),
               OutlinedButton(
                 onPressed: _dispatching ? null : _dispatchCurrent,
-                child: const Text('İşlemi başlatmayı tekrar dene'),
+                child: Text(
+                  status?.state == 'PROCESSING'
+                      ? 'İşlem takıldıysa güvenle kontrol et'
+                      : 'İşlemi başlatmayı tekrar dene',
+                ),
               ),
             ],
             if (status?.state == 'FAILED_RETRYABLE' && status?.failureClass != 'reconciliation_required') ...[
