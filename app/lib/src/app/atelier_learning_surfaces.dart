@@ -65,10 +65,7 @@ class AtelierWorkspace extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 17),
-              if (sourceText.trim().isNotEmpty) ...[
-                const _ReaderCue(),
-                const SizedBox(height: 12),
-              ],
+              if (sourceText.trim().isNotEmpty) ...[const _ReaderCue(), const SizedBox(height: 12)],
               const Divider(color: AtelierStyle.line),
               const SizedBox(height: 14),
               if (sourceText.trim().isEmpty)
@@ -209,12 +206,7 @@ class _ReaderCue extends StatelessWidget {
       const SizedBox(width: 5),
       Text(
         label,
-        style: const TextStyle(
-          color: AtelierStyle.ink,
-          fontSize: 10,
-          fontWeight: FontWeight.w900,
-          letterSpacing: 0.8,
-        ),
+        style: const TextStyle(color: AtelierStyle.ink, fontSize: 10, fontWeight: FontWeight.w900, letterSpacing: 0.8),
       ),
     ],
   );
