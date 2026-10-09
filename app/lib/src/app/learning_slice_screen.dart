@@ -158,7 +158,7 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
       await _ingestPdfFile(file);
     } catch (_) {
       if (!mounted) return;
-      setState(() => _inlineError = 'PDF seçilemedi. Lütfen yeniden dene.');
+      setState(() => _inlineError = 'PDF seçici açılamadı. Yeniden deneyebilirsin.');
     } finally {
       _setBusy(false);
     }
