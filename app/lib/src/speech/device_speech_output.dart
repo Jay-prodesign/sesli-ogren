@@ -30,6 +30,20 @@ final class DeviceSpeechOutput implements SpeechOutput {
 
   Future<void> _configure(String locale) async {
     if (_configuredLocale == locale) return;
+
+    if (!kIsWeb && defaultTargetPlatform == TargetPlatform.iOS) {
+      await _tts.setSharedInstance(true);
+      await _tts.autoStopSharedSession(false);
+      await _tts.setIosAudioCategory(
+        IosTextToSpeechAudioCategory.playback,
+        const [
+          IosTextToSpeechAudioCategoryOptions.allowBluetoothA2DP,
+          IosTextToSpeechAudioCategoryOptions.allowAirPlay,
+        ],
+        IosTextToSpeechAudioMode.spokenAudio,
+      );
+    }
+
     await _tts.setLanguage(locale);
     await _tts.setSpeechRate(0.46);
     await _tts.setPitch(1.0);
