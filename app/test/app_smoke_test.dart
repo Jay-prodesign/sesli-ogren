@@ -899,19 +899,10 @@ void main() {
   });
 
   testWidgets('unknown Recall repairs from the focused source and retries directly', (tester) async {
-    final store = await SqliteSourceStore.open(
-      factory: databaseFactoryFfiNoIsolate,
-      path: inMemoryDatabasePath,
-    );
+    final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
     addTearDown(store.close);
-    final ingest = SourceIngestService(
-      store: store,
-      pdfTextExtractor: const _UnusedPdfExtractor(),
-    );
-    final recall = RecallLearningService(
-      sourceStore: store,
-      learningStore: store.learningTruthStore(),
-    );
+    final ingest = SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor());
+    final recall = RecallLearningService(sourceStore: store, learningStore: store.learningTruthStore());
     final runtime = AppRuntime(
       learner: AppRuntime.localM5LearnerFixture,
       store: store,
@@ -929,14 +920,8 @@ void main() {
           'Mitokondri hücresel solunumla kullanılabilir enerji üretimine katkı sağlar.',
       sourceName: 'Biyoloji onarım notu',
     );
-    final prompt = await recall.createCurrentPrompt(
-      learner: runtime.learner,
-      materialId: AppRuntime.primaryMaterialId,
-    );
-    final action = await store.learningTruthStore().recallAction(
-      learner: runtime.learner,
-      actionId: prompt.id,
-    );
+    final prompt = await recall.createCurrentPrompt(learner: runtime.learner, materialId: AppRuntime.primaryMaterialId);
+    final action = await store.learningTruthStore().recallAction(learner: runtime.learner, actionId: prompt.id);
     expect(action, isNotNull);
 
     await tester.pumpWidget(testShell(runtime));
