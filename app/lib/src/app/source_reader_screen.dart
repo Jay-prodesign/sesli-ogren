@@ -74,11 +74,21 @@ class _SourceReaderScreenState extends State<SourceReaderScreen> {
             tooltip: 'Okuma ve öğrenme seçenekleri',
             onSelected: (action) {
               switch (action) {
-                case 'listen': widget.onListen?.call();
-                case 'recap': widget.onRecap?.call();
-                case 'recall': widget.onRecall?.call();
-                case 'smaller': setState(() => _fontSize = (_fontSize - 1).clamp(14.0, 26.0));
-                case 'larger': setState(() => _fontSize = (_fontSize + 1).clamp(14.0, 26.0));
+                case 'listen':
+                  widget.onListen?.call();
+                  break;
+                case 'recap':
+                  widget.onRecap?.call();
+                  break;
+                case 'recall':
+                  widget.onRecall?.call();
+                  break;
+                case 'smaller':
+                  setState(() => _fontSize = (_fontSize - 1).clamp(14.0, 26.0));
+                  break;
+                case 'larger':
+                  setState(() => _fontSize = (_fontSize + 1).clamp(14.0, 26.0));
+                  break;
               }
             },
             itemBuilder: (_) => [
