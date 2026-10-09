@@ -313,6 +313,12 @@ void main() {
     await tapVisible(tester, find.text('İpucu ver'));
     await pumpUntilFound(tester, find.textContaining('Kaynak ipucu:'));
     expect(find.textContaining('karbondioksit'), findsWidgets);
+    await tester.scrollUntilVisible(
+      find.textContaining('öğrenme kanıtı oluşturmaz'),
+      -220,
+      scrollable: find.byType(Scrollable).last,
+    );
+    await tester.pump(const Duration(milliseconds: 200));
     expect(find.textContaining('öğrenme kanıtı oluşturmaz'), findsOneWidget);
     Navigator.of(tester.element(find.textContaining('öğrenme kanıtı oluşturmaz'))).pop();
     await tester.pump(const Duration(milliseconds: 300));

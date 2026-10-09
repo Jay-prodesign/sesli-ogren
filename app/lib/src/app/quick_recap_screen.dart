@@ -272,8 +272,8 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> with WidgetsBinding
         _jobId = submission.jobId;
         _submittedSourceVersion = source.identity.sourceVersionId;
       });
-      unawaited(_dispatchCurrent());
       await _refresh();
+      await _dispatchCurrent();
       if (mounted && _jobId != null && !(_status?.isTerminal ?? false)) {
         _startPolling();
       }
