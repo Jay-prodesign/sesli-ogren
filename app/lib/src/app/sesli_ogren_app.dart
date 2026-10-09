@@ -118,18 +118,18 @@ class _SesliOgrenAppState extends State<SesliOgrenApp> {
                 if (snapshot.hasData) {
                   final runtime = snapshot.data!;
                   return FirstRunOnboardingGate(
-                    child: const bool.fromEnvironment('LA0040_ATELIER_PREVIEW', defaultValue: false)
-                        ? LivingDeskReviewScope(
+                    child: const bool.fromEnvironment('LA0040_LEGACY_SHELL', defaultValue: false)
+                        ? ProductShellScreen(
+                            runtime: runtime,
+                            onAccountDeleted: _handleAccountDeleted,
+                            onSignOut: _handleSignOut,
+                          )
+                        : LivingDeskReviewScope(
                             child: ProductShellScreen(
                               runtime: runtime,
                               onAccountDeleted: _handleAccountDeleted,
                               onSignOut: _handleSignOut,
                             ),
-                          )
-                        : ProductShellScreen(
-                            runtime: runtime,
-                            onAccountDeleted: _handleAccountDeleted,
-                            onSignOut: _handleSignOut,
                           ),
                   );
                 }
