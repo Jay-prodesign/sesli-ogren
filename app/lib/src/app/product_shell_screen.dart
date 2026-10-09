@@ -1164,7 +1164,18 @@ class _PrimaryCard extends StatelessWidget {
             const SizedBox(height: 8),
             Text(body),
             const SizedBox(height: 18),
-            FilledButton.icon(onPressed: onPressed, icon: Icon(icon), label: Text(buttonLabel)),
+            FilledButton.icon(
+              onPressed: onPressed,
+              icon: Icon(icon),
+              label: Text(
+                buttonLabel,
+                style: theme.textTheme.labelLarge?.copyWith(
+                  fontFamily: 'Roboto',
+                  fontWeight: FontWeight.w700,
+                  color: Colors.white,
+                ),
+              ),
+            ),
           ],
         ),
       ),
