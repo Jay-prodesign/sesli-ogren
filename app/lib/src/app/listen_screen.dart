@@ -9,11 +9,12 @@ import 'app_theme.dart';
 import 'companion_view.dart';
 
 class ListenScreen extends StatefulWidget {
-  const ListenScreen({required this.runtime, required this.materialId, this.speechOutput, super.key});
+  const ListenScreen({required this.runtime, required this.materialId, this.speechOutput, this.onRecall, super.key});
 
   final AppRuntime runtime;
   final MaterialId materialId;
   final SpeechOutput? speechOutput;
+  final VoidCallback? onRecall;
 
   @override
   State<ListenScreen> createState() => _ListenScreenState();
@@ -344,6 +345,18 @@ class _ListenScreenState extends State<ListenScreen> {
                     const SizedBox(height: 8),
                     OutlinedButton(onPressed: () => _play(source, fromChunk: 0), child: const Text('Baştan dinle')),
                   ],
+                ],
+                if (widget.onRecall != null) ...[
+                  const SizedBox(height: 12),
+                  OutlinedButton.icon(
+                    onPressed: () async {
+                      await _stop();
+                      if (!mounted) return;
+                      widget.onRecall?.call();
+                    },
+                    icon: const Icon(Icons.psychology_alt_outlined),
+                    label: const Text('Şimdi hatırlamayı dene'),
+                  ),
                 ],
                 const SizedBox(height: 10),
                 Text(

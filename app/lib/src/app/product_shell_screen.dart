@@ -116,7 +116,14 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
     if (material == null || !mounted) return;
     await Navigator.of(context).push<void>(
       MaterialPageRoute(
-        builder: (_) => ListenScreen(runtime: widget.runtime, materialId: material.id),
+        builder: (_) => ListenScreen(
+          runtime: widget.runtime,
+          materialId: material.id,
+          onRecall: () {
+            Navigator.of(context).pop();
+            _openLearning();
+          },
+        ),
       ),
     );
   }
