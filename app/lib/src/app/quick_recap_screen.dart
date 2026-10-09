@@ -28,19 +28,47 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> with WidgetsBinding
   bool _busy = false;
   bool _restoring = true;
   bool _checking = false;
+  bool _dispatching = false;
   Timer? _pollTimer;
 
   Future<void> _dispatchCurrent() async {
     final id = _jobId;
-    if (id == null || !mounted) return;
-    setState(() => _error = null);
+    if (id == null || !mounted || _dispatching) return;
+    setState(() {
+      _dispatching = true;
+      _error = null;
+    });
     final accepted = await _gateway.dispatch(id);
     if (!mounted || _jobId != id) return;
+    setState(() => _dispatching = false);
     if (!accepted) {
       setState(() => _error = 'Özet kuyruğa alındı ancak sunucu işlemi başlatılamadı. Tekrar deneyebilirsin.');
       return;
     }
     await _refresh();
+  }
+
+  Future<void> _retryCurrent() async {
+    final id = _jobId;
+    if (id == null || !mounted || _dispatching) return;
+    setState(() {
+      _dispatching = true;
+      _error = null;
+    });
+    final accepted = await _gateway.retry(id);
+    if (!mounted || _jobId != id) return;
+    setState(() => _dispatching = false);
+    if (!accepted) {
+      setState(
+        () => _error =
+            'Bu özet işi güvenli biçimde yeniden sıraya alınamadı. Daha sonra tekrar dene veya sunucu durumunu kontrol et.',
+      );
+      return;
+    }
+    await _refresh();
+    if (mounted && _jobId == id && !(_status?.isTerminal ?? false)) {
+      _startPolling();
+    }
   }
 
   @override
@@ -269,10 +297,25 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> with WidgetsBinding
           if (_jobId != null && status?.summary == null) ...[
             Text('İş durumu: ${status?.state ?? "Gönderildi"}'),
             const SizedBox(height: 12),
-            OutlinedButton(onPressed: _refresh, child: const Text('Durumu yenile')),
+            OutlinedButton(onPressed: _dispatching ? null : _refresh, child: const Text('Durumu yenile')),
             if (status?.state == 'QUEUED') ...[
               const SizedBox(height: 8),
-              OutlinedButton(onPressed: _dispatchCurrent, child: const Text('İşlemi başlatmayı tekrar dene')),
+              OutlinedButton(
+                onPressed: _dispatching ? null : _dispatchCurrent,
+                child: const Text('İşlemi başlatmayı tekrar dene'),
+              ),
+            ],
+            if (status?.state == 'FAILED_RETRYABLE' && status?.failureClass != 'reconciliation_required') ...[
+              const SizedBox(height: 8),
+              FilledButton.icon(
+                onPressed: _dispatching ? null : _retryCurrent,
+                icon: const Icon(Icons.refresh_rounded),
+                label: const Text('Güvenli yeniden dene'),
+              ),
+            ],
+            if (_dispatching) ...[
+              const SizedBox(height: 8),
+              const LinearProgressIndicator(),
             ],
           ],
           if (status?.summary != null) ...[
@@ -315,8 +358,14 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> with WidgetsBinding
               ],
             ),
           ],
-          if (status?.state.startsWith('FAILED') == true)
-            const Text('Özet üretimi başarısız oldu. Aynı işi otomatik yeniden göndermiyoruz.'),
+          if (status?.failureClass == 'reconciliation_required')
+            const Text(
+              'Önceki model çağrısının sonucu belirsiz. Çifte üretim veya çifte ücret riskini önlemek için otomatik yeniden deneme kapalı.',
+            )
+          else if (status?.state == 'FAILED_FINAL')
+            const Text('Özet üretimi tamamlanamadı. Aynı işi otomatik yeniden göndermiyoruz.')
+          else if (status?.state == 'FAILED_RETRYABLE')
+            const Text('Özet üretimi geçici olarak başarısız oldu. Güvenli yeniden deneme kullanılabilir.'),
           if (_error != null) Text(_error!, style: TextStyle(color: Theme.of(context).colorScheme.error)),
         ],
       ),

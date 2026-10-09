@@ -48,6 +48,20 @@ class SupabaseSourceSummaryGateway {
     }
   }
 
+  /// Explicit retry is permitted only when the canonical server job says the
+  /// prior attempt is retryable. Ambiguous provider outcomes remain blocked by
+  /// retry_generation_job and require reconciliation instead of blind resend.
+  Future<bool> retry(String jobId) async {
+    try {
+      final client = await SupabaseLearnerAuth.clientForAuthenticatedRuntime();
+      if (client.auth.currentSession == null) return false;
+      await client.rpc<String>('retry_generation_job', params: {'p_job_id': jobId});
+      return dispatch(jobId);
+    } catch (_) {
+      return false;
+    }
+  }
+
   Future<ServerSummarySubmission> submit({required SourceIngestResult source}) async {
     final normalizedText = source.extractedContent.normalizedText.trim();
     if (normalizedText.isEmpty || normalizedText.length > 200000) {
