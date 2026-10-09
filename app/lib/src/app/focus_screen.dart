@@ -33,11 +33,104 @@ class _FocusScreenState extends State<FocusScreen> {
     ),
   );
 
+  FocusHelpResult _localSourceHint() {
+    final source = widget.sourceText.trim();
+    final learnerQuestion = question.text.trim();
+    if (learnerQuestion.isEmpty) {
+      return const FocusHelpUnavailable('İpucu için takıldığın noktayı kısa bir cümleyle yaz.');
+    }
+    if (source.isEmpty) {
+      return const FocusHelpUnavailable('Güncel kaynak metni olmadığı için güvenilir ipucu veremiyoruz.');
+    }
+
+    final stopWords = <String>{
+      'acaba',
+      'ama',
+      'bana',
+      'bunu',
+      'burada',
+      'daha',
+      'diye',
+      'gibi',
+      'hangi',
+      'icin',
+      'için',
+      'kadar',
+      'kim',
+      'mi',
+      'mı',
+      'mu',
+      'mü',
+      'nasil',
+      'nasıl',
+      'neden',
+      'nedir',
+      'olan',
+      'olarak',
+      've',
+      'veya',
+      'şey',
+    };
+    final terms = RegExp(r'[A-Za-zÇĞİÖŞÜçğıöşü0-9]+')
+        .allMatches(learnerQuestion.toLowerCase())
+        .map((match) => match.group(0)!)
+        .where((term) => term.length >= 4 && !stopWords.contains(term))
+        .toSet();
+
+    if (terms.isEmpty) {
+      return const FocusHelpUnavailable(
+        'Sorunu biraz daha somutlaştır. Kaynakta geçen bir kavramı veya terimi yazarsan ilgili bölümü gösterebiliriz.',
+      );
+    }
+
+    final segments = source
+        .split(RegExp(r'(?:[.!?]+\s+)|(?:\n+)'))
+        .map((segment) => segment.trim())
+        .where((segment) => segment.length >= 12)
+        .toList(growable: false);
+
+    String? best;
+    var bestScore = 0;
+    for (final segment in segments) {
+      final normalized = segment.toLowerCase();
+      final score = terms.where(normalized.contains).length;
+      if (score > bestScore) {
+        best = segment;
+        bestScore = score;
+      }
+    }
+
+    if (best == null || bestScore == 0) {
+      return const FocusHelpUnavailable(
+        'Soruna kaynakta güvenle bağlayabildiğimiz bir bölüm bulamadık. Sorunda kaynaktaki anahtar terimlerden birini kullan.',
+      );
+    }
+
+    final excerpt = best.length <= 280 ? best : '${best.substring(0, 277).trimRight()}…';
+    return FocusHelpReady(
+      sourceVersionId: widget.source.identity.sourceVersionId,
+      sourceContentDigest: widget.source.identity.contentDigest,
+      text: 'Kaynak ipucu: “$excerpt”\n\nBu bölümdeki ilişkiyi kendi cümlelerinle yeniden kurmayı dene.',
+      executionRef: 'local:source-cue-v1',
+    );
+  }
+
   Future<void> request(FocusHelpKind kind) async {
     setState(() {
       busy = true;
       help = null;
     });
+
+    if (kind == FocusHelpKind.hint && widget.runtime.focusHelp is UnavailableFocusHelpGateway) {
+      final result = _localSourceHint();
+      if (!mounted) return;
+      setState(() {
+        busy = false;
+        help = result;
+      });
+      return;
+    }
+
     final result = await widget.runtime.focusHelp.help(
       FocusHelpRequest(
         materialId: widget.source.identity.materialId,
