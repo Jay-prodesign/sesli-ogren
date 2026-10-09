@@ -36,8 +36,8 @@ jobs:
         with:
           channel: stable
           flutter-version: ${{ steps.flutter_pin.outputs.version }}
-          cache: false
-          pub-cache: false
+          cache: true
+          pub-cache: true
       - run: flutter pub get
       - name: Canonical format
         run: |
