@@ -25,16 +25,8 @@ void main() {
       final bytes = await File(path).readAsBytes();
       await (FontLoader(name)..addFont(Future.value(ByteData.sublistView(bytes)))).load();
     }
-    // Widget tests otherwise fall back to Ahem for unregistered weights.
-    // Register regular and bold under the same family used by Material.
-    final roboto = FontLoader('Roboto');
-    for (final path in [
-      '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf',
-      '/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf',
-    ]) {
-      roboto.addFont(Future.value(ByteData.sublistView(await File(path).readAsBytes())));
-    }
-    await roboto.load();
+    // Load a legible font for every weight used by Material's button labels.
+    await load('Roboto', '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf');
     final root = Platform.environment['FLUTTER_ROOT']!;
     await load('MaterialIcons', '$root/bin/cache/artifacts/material_fonts/MaterialIcons-Regular.otf');
   });
@@ -76,9 +68,11 @@ void main() {
         if (find.byKey(const ValueKey('home-surface')).evaluate().isNotEmpty) break;
       }
       expect(find.byKey(const ValueKey('home-surface')), findsOneWidget);
+      expect(tester.takeException(), isNull);
       await expectLater(find.byType(Scaffold).first, matchesGoldenFile('goldens/product_shell_home_${populated ? 'populated' : 'empty'}_390x844.png'));
       await tester.tap(find.text('Kütüphane').last);
       await tester.pump(const Duration(milliseconds: 400));
+      expect(tester.takeException(), isNull);
       await expectLater(find.byType(Scaffold).first, matchesGoldenFile('goldens/product_shell_library_${populated ? 'populated' : 'empty'}_390x844.png'));
     });
   }
