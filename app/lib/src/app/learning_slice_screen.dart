@@ -1069,8 +1069,7 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
         materialId: widget.materialId,
       );
       if (!mounted) return;
-      if (source == null ||
-          source.identity.sourceVersionId != continuation.state.sourceVersionId) {
+      if (source == null || source.identity.sourceVersionId != continuation.state.sourceVersionId) {
         _showRecoverableError();
         return;
       }
@@ -1107,10 +1106,7 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      Text(
-                        'Bu bölümü yeniden kur',
-                        style: Theme.of(sheetContext).textTheme.titleLarge,
-                      ),
+                      Text('Bu bölümü yeniden kur', style: Theme.of(sheetContext).textTheme.titleLarge),
                       const SizedBox(height: 8),
                       const Text(
                         'Son denemende zorlandığın kaynak bölümüne odaklan. '
@@ -1121,9 +1117,7 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
                         child: Semantics(
                           container: true,
                           label: 'Kaynak bölümü',
-                          child: SingleChildScrollView(
-                            child: SelectableText(excerpt),
-                          ),
+                          child: SingleChildScrollView(child: SelectableText(excerpt)),
                         ),
                       ),
                       const SizedBox(height: 12),
