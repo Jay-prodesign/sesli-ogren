@@ -23,7 +23,7 @@ class _UnusedPdfExtractor implements PdfTextExtractor {
 void main() {
   sqfliteFfiInit();
 
-  testWidgets('Material Workspace Açıkla opens grounded generated explanation, not Explain-Back', (tester) async {
+  testWidgets('Material Workspace Açıkla opens active Explain-back, not generated teaching', (tester) async {
     final store = await SqliteSourceStore.open(
       factory: databaseFactoryFfiNoIsolate,
       path: inMemoryDatabasePath,
@@ -60,11 +60,12 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('Kaynağa bağlı açıklama al.'), findsOneWidget);
+    expect(find.text('Kendi cümlelerinle anlat ve geri bildirim al.'), findsOneWidget);
     await tester.tap(find.text('Açıkla'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Açıklama henüz hazır değil'), findsOneWidget);
-    expect(find.text('Kendi cümlelerinle anlat'), findsNothing);
+    expect(find.text('Kendi cümlelerinle anlat'), findsOneWidget);
+    expect(find.text('Anlatımımı değerlendir'), findsOneWidget);
+    expect(find.text('Kaynağına dayalı açıklama'), findsNothing);
   });
 }
