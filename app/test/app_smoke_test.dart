@@ -134,11 +134,7 @@ void main() {
   sqfliteFfiInit();
 
   testWidgets('production app routes a missing restored session to passwordless account entry', (tester) async {
-    await tester.pumpWidget(
-      SesliOgrenApp(
-        restoreSession: () async => null,
-      ),
-    );
+    await tester.pumpWidget(SesliOgrenApp(restoreSession: () async => null));
     await pumpUntilFound(tester, find.text('Öğrenme alanına gir'));
 
     expect(find.text('Öğrenme alanına gir'), findsOneWidget);
