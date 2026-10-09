@@ -33,13 +33,14 @@
   "git": {
     "branch": "feat/full-product-shell-continuity",
     "base_sha": "d9088dd9bcf4a07a0841c617fbaa0651160e6c79",
-    "head_sha": "7e121ab6e354f4d808b21228da0a46329af8078c",
+    "head_sha": "e4f4d61f99e36d3f3d7c6483679052e5053812d8",
     "head_sha_semantics": "Last resolved live branch HEAD before this state-file commit; resolve branch API for exact current HEAD because updating this file necessarily advances the branch.",
     "pr_number": 13,
     "pr_url": "https://github.com/Jay-prodesign/sesli-ogren/pull/13",
     "pr_state": "OPEN_DRAFT_UNMERGED",
     "merged": false,
-    "main_role": "DEFAULT_BRANCH_NOT_RUNNABLE_PRODUCT_SELECTOR"
+    "main_role": "DEFAULT_BRANCH_NOT_RUNNABLE_PRODUCT_SELECTOR",
+    "head_sha_note": "Fresh live branch head after focused source-repair UI + regression test batch; resolve live branch API before the next mutation."
   },
   "next_handoff": {
     "id": "LA-0039_LA-0040_INTEGRATED_OUTCOME",
@@ -76,7 +77,7 @@
     ]
   },
   "protected_gate": "Merge/release/deploy/publication, paid-provider/spend activation, credentials/secrets, destructive real-user-data operation, licensing/visibility change, serious irreversible product/architecture pivot, and cross-project mutation require applicable explicit owner authority.",
-  "next_action": "Repair the current learning_slice_screen canonical-format failure, run/observe the relevant grouped product checks, then continue the highest-value integrated source→learn→evidence→next-action→resume product improvement and subsequent dependency-ready roadmap work without a routine review stop.",
+  "next_action": "Verify the focused source-repair→retry batch with canonical format/analyze/widget checks, fix any failure, then continue the next dependency-ready LA-0039/LA-0040 product outcome without a routine review stop.",
   "canonical_source_refs": [
     "CURRENT_EXECUTION_STATE — Learning App",
     "MASTER_ROADMAP — Learning App",
@@ -96,13 +97,17 @@
     ]
   },
   "last_command_id": "CMD-0002",
-  "last_acknowledged_command_id": "CMD-0001",
+  "last_acknowledged_command_id": "CMD-0002",
   "last_return_id": "RET-0001",
-  "command_processing_status": "UNREAD",
+  "command_processing_status": "ACKNOWLEDGED",
   "command_ledger": {
     "CMD-0001": {
       "status": "ANSWERED",
       "return_id": "RET-0001"
+    },
+    "CMD-0002": {
+      "status": "ACKNOWLEDGED",
+      "note": "Historical visual-fail command has been read; rejected tournament/pre-build stop language is superseded by the current integrated LA-0039 + LA-0040 cursor."
     }
   },
   "history_rule": "Prior M4/M5, Round 7, GLS, candidate-tournament, pause, per-agent and SHA-bound evidence records remain in dedicated files and git history. They are historical where they conflict with this live cursor and must not be treated as active stop conditions."
