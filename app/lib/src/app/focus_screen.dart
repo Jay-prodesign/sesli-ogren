@@ -4,6 +4,7 @@ import '../domain/learning_contracts.dart';
 import '../learning/focus_help_gateway.dart';
 import 'app_runtime.dart';
 import 'app_theme.dart';
+import 'explain_screen.dart';
 import 'companion_view.dart';
 
 class FocusScreen extends StatefulWidget {
@@ -25,6 +26,12 @@ class _FocusScreenState extends State<FocusScreen> {
     question.dispose();
     super.dispose();
   }
+
+  Future<void> _openDirectExplanation() => Navigator.of(context).push<void>(
+    MaterialPageRoute(
+      builder: (_) => ExplainScreen(runtime: widget.runtime, source: widget.source),
+    ),
+  );
 
   Future<void> request(FocusHelpKind kind) async {
     setState(() {
@@ -163,7 +170,7 @@ class _FocusScreenState extends State<FocusScreen> {
               const SizedBox(width: 8),
               Expanded(
                 child: FilledButton.icon(
-                  onPressed: busy ? null : () => request(FocusHelpKind.directExplanation),
+                  onPressed: busy ? null : _openDirectExplanation,
                   icon: const Icon(Icons.auto_awesome_outlined),
                   label: const Text('Doğrudan açıkla'),
                 ),
