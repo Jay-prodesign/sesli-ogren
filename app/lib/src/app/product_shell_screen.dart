@@ -192,12 +192,12 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
     );
   }
 
-  void _openRecallFromCurrentRoute(MaterialId materialId) {
+  void _openRecallFromCurrentRoute(BuildContext routeContext, MaterialId materialId) {
     if (!mounted) return;
     final treatment = LearningVisualTreatmentScope.maybeOf(context);
     final livingReview = LivingDeskReviewScope.active(context);
     final screen = LearningSliceScreen(runtime: widget.runtime, materialId: materialId);
-    Navigator.of(context).pushReplacement<void, void>(
+    Navigator.of(routeContext).pushReplacement<void, void>(
       MaterialPageRoute(
         builder: (_) => treatment != null
             ? LearningVisualTreatmentScope(treatment: treatment, child: screen)
@@ -213,10 +213,10 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
     if (material == null || !mounted) return;
     await Navigator.of(context).push<void>(
       MaterialPageRoute(
-        builder: (_) => ListenScreen(
+        builder: (listenContext) => ListenScreen(
           runtime: widget.runtime,
           materialId: material.id,
-          onRecall: () => _openRecallFromCurrentRoute(material.id),
+          onRecall: () => _openRecallFromCurrentRoute(listenContext, material.id),
         ),
       ),
     );
