@@ -157,27 +157,34 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
       if (!mounted) return;
 
       // Replace the reader route with its chosen learning activity. This avoids
-      // racing a pop against a new push on the same Navigator.
+      // racing a pop against a new push on the same Navigator. Capture the
+      // product-experience scope before the route leaves this subtree.
+      final treatment = LearningVisualTreatmentScope.maybeOf(context);
+      final livingReview = LivingDeskReviewScope.active(context);
       await Navigator.of(context).push<void>(
         MaterialPageRoute(
-          builder: (readerContext) => SourceReaderScreen(
-            title: material.title,
-            sourceText: extracted?.normalizedText ?? '',
-            onListen: () => _replaceReaderWith(
-              readerContext,
-              Builder(
-                builder: (listenContext) => ListenScreen(
-                  runtime: widget.runtime,
-                  materialId: selected,
-                  onRecall: () => _openRecallFromCurrentRoute(listenContext, selected),
+          builder: (readerContext) {
+            final screen = SourceReaderScreen(
+              title: material.title,
+              sourceText: extracted?.normalizedText ?? '',
+              onListen: () => _replaceReaderWith(
+                readerContext,
+                Builder(
+                  builder: (listenContext) => ListenScreen(
+                    runtime: widget.runtime,
+                    materialId: selected,
+                    onRecall: () => _openRecallFromCurrentRoute(listenContext, selected),
+                  ),
                 ),
               ),
-            ),
-            onRecap: () =>
-                _replaceReaderWith(readerContext, QuickRecapScreen(runtime: widget.runtime, materialId: selected)),
-            onRecall: () =>
-                _replaceReaderWith(readerContext, LearningSliceScreen(runtime: widget.runtime, materialId: selected)),
-          ),
+              onRecap: () =>
+                  _replaceReaderWith(readerContext, QuickRecapScreen(runtime: widget.runtime, materialId: selected)),
+              onRecall: () =>
+                  _replaceReaderWith(readerContext, LearningSliceScreen(runtime: widget.runtime, materialId: selected)),
+            );
+            if (treatment != null) return LearningVisualTreatmentScope(treatment: treatment, child: screen);
+            return livingReview ? LivingDeskReviewScope(child: screen) : screen;
+          },
         ),
       );
       if (mounted) setState(_refresh);
@@ -218,13 +225,19 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
   Future<void> _openListen() async {
     final material = (await _snapshot).material;
     if (material == null || !mounted) return;
+    final treatment = LearningVisualTreatmentScope.maybeOf(context);
+    final livingReview = LivingDeskReviewScope.active(context);
     await Navigator.of(context).push<void>(
       MaterialPageRoute(
-        builder: (listenContext) => ListenScreen(
-          runtime: widget.runtime,
-          materialId: material.id,
-          onRecall: () => _openRecallFromCurrentRoute(listenContext, material.id),
-        ),
+        builder: (listenContext) {
+          final screen = ListenScreen(
+            runtime: widget.runtime,
+            materialId: material.id,
+            onRecall: () => _openRecallFromCurrentRoute(listenContext, material.id),
+          );
+          if (treatment != null) return LearningVisualTreatmentScope(treatment: treatment, child: screen);
+          return livingReview ? LivingDeskReviewScope(child: screen) : screen;
+        },
       ),
     );
     if (!mounted) return;

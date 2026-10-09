@@ -29,6 +29,12 @@ class MaterialWorkspaceScreen extends StatefulWidget {
 class _MaterialWorkspaceScreenState extends State<MaterialWorkspaceScreen> {
   late Future<_WorkspaceSnapshot?> _snapshot;
 
+  Widget _preserveProductExperience(Widget screen) {
+    final treatment = LearningVisualTreatmentScope.maybeOf(context);
+    if (treatment != null) return LearningVisualTreatmentScope(treatment: treatment, child: screen);
+    return LivingDeskReviewScope.active(context) ? LivingDeskReviewScope(child: screen) : screen;
+  }
+
   @override
   void initState() {
     super.initState();
@@ -65,21 +71,23 @@ class _MaterialWorkspaceScreenState extends State<MaterialWorkspaceScreen> {
   Future<void> _openSourceReader(_WorkspaceSnapshot data) async {
     await Navigator.of(context).push<void>(
       MaterialPageRoute(
-        builder: (_) => SourceReaderScreen(
-          title: data.material.title,
-          sourceText: data.extracted?.normalizedText ?? '',
-          onListen: () {
-            Navigator.of(context).pop();
-            _openListen();
-          },
-          onRecap: () {
-            Navigator.of(context).pop();
-            _openQuickRecap();
-          },
-          onRecall: () {
-            Navigator.of(context).pop();
-            _openRecall();
-          },
+        builder: (_) => _preserveProductExperience(
+          SourceReaderScreen(
+            title: data.material.title,
+            sourceText: data.extracted?.normalizedText ?? '',
+            onListen: () {
+              Navigator.of(context).pop();
+              _openListen();
+            },
+            onRecap: () {
+              Navigator.of(context).pop();
+              _openQuickRecap();
+            },
+            onRecall: () {
+              Navigator.of(context).pop();
+              _openRecall();
+            },
+          ),
         ),
       ),
     );
@@ -101,7 +109,8 @@ class _MaterialWorkspaceScreenState extends State<MaterialWorkspaceScreen> {
   Future<void> _openQuickRecap() async {
     await Navigator.of(context).push<void>(
       MaterialPageRoute(
-        builder: (_) => QuickRecapScreen(runtime: widget.runtime, materialId: widget.materialId),
+        builder: (_) =>
+            _preserveProductExperience(QuickRecapScreen(runtime: widget.runtime, materialId: widget.materialId)),
       ),
     );
     if (!mounted) return;
@@ -131,13 +140,15 @@ class _MaterialWorkspaceScreenState extends State<MaterialWorkspaceScreen> {
     final navigator = Navigator.of(context);
     await navigator.push<void>(
       MaterialPageRoute(
-        builder: (listenContext) => ListenScreen(
-          runtime: widget.runtime,
-          materialId: widget.materialId,
-          onRecall: () {
-            Navigator.of(listenContext).pop();
-            _openRecall();
-          },
+        builder: (listenContext) => _preserveProductExperience(
+          ListenScreen(
+            runtime: widget.runtime,
+            materialId: widget.materialId,
+            onRecall: () {
+              Navigator.of(listenContext).pop();
+              _openRecall();
+            },
+          ),
         ),
       ),
     );
@@ -150,8 +161,9 @@ class _MaterialWorkspaceScreenState extends State<MaterialWorkspaceScreen> {
   Future<void> _openFocus(_WorkspaceSnapshot data) async {
     await Navigator.of(context).push<void>(
       MaterialPageRoute(
-        builder: (_) =>
-            FocusScreen(runtime: widget.runtime, source: data.source, sourceText: data.extracted?.normalizedText ?? ''),
+        builder: (_) => _preserveProductExperience(
+          FocusScreen(runtime: widget.runtime, source: data.source, sourceText: data.extracted?.normalizedText ?? ''),
+        ),
       ),
     );
     if (!mounted) return;
@@ -163,7 +175,7 @@ class _MaterialWorkspaceScreenState extends State<MaterialWorkspaceScreen> {
   Future<void> _openExplain(SourceVersionRecord source) async {
     await Navigator.of(context).push<void>(
       MaterialPageRoute(
-        builder: (_) => ExplainBackScreen(runtime: widget.runtime, source: source),
+        builder: (_) => _preserveProductExperience(ExplainBackScreen(runtime: widget.runtime, source: source)),
       ),
     );
     if (!mounted) return;

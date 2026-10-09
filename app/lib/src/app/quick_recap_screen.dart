@@ -9,6 +9,8 @@ import '../generation/supabase_source_summary_gateway.dart';
 import 'app_runtime.dart';
 import 'listen_screen.dart';
 import 'learning_slice_screen.dart';
+import 'la0040_visual_treatments.dart';
+import 'living_study_desk_home.dart';
 import 'explain_back_screen.dart';
 import 'source_reader_screen.dart';
 
@@ -30,6 +32,12 @@ class QuickRecapScreen extends StatefulWidget {
 
 class _QuickRecapScreenState extends State<QuickRecapScreen> with WidgetsBindingObserver {
   SupabaseSourceSummaryGateway get _gateway => widget.summaryGateway;
+
+  Widget _preserveProductExperience(Widget screen) {
+    final treatment = LearningVisualTreatmentScope.maybeOf(context);
+    if (treatment != null) return LearningVisualTreatmentScope(treatment: treatment, child: screen);
+    return LivingDeskReviewScope.active(context) ? LivingDeskReviewScope(child: screen) : screen;
+  }
   String? _jobId;
   SourceVersionId? _submittedSourceVersion;
   ServerSummaryStatus? _status;
@@ -423,22 +431,26 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> with WidgetsBinding
       if (!mounted) return;
       await Navigator.of(context).push<void>(
         MaterialPageRoute(
-          builder: (_) => SourceReaderScreen(
-            title: material.title,
-            sourceText: extracted?.normalizedText ?? '',
-            onListen: () {
-              Navigator.of(context).pop();
-              Navigator.of(context).push<void>(
-                MaterialPageRoute(
-                  builder: (_) => ListenScreen(runtime: widget.runtime, materialId: widget.materialId),
-                ),
-              );
-            },
-            onRecap: () => Navigator.of(context).pop(),
-            onRecall: () {
-              Navigator.of(context).pop();
-              _openRecall();
-            },
+          builder: (_) => _preserveProductExperience(
+            SourceReaderScreen(
+              title: material.title,
+              sourceText: extracted?.normalizedText ?? '',
+              onListen: () {
+                Navigator.of(context).pop();
+                Navigator.of(context).push<void>(
+                  MaterialPageRoute(
+                    builder: (_) => _preserveProductExperience(
+                      ListenScreen(runtime: widget.runtime, materialId: widget.materialId),
+                    ),
+                  ),
+                );
+              },
+              onRecap: () => Navigator.of(context).pop(),
+              onRecall: () {
+                Navigator.of(context).pop();
+                _openRecall();
+              },
+            ),
           ),
         ),
       );
@@ -451,7 +463,8 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> with WidgetsBinding
 
   Future<void> _openRecall() => Navigator.of(context).push<void>(
     MaterialPageRoute(
-      builder: (_) => LearningSliceScreen(runtime: widget.runtime, materialId: widget.materialId),
+      builder: (_) =>
+          _preserveProductExperience(LearningSliceScreen(runtime: widget.runtime, materialId: widget.materialId)),
     ),
   );
 
@@ -463,7 +476,7 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> with WidgetsBinding
     if (!mounted || source == null) return;
     await Navigator.of(context).push<void>(
       MaterialPageRoute(
-        builder: (_) => ExplainBackScreen(runtime: widget.runtime, source: source),
+        builder: (_) => _preserveProductExperience(ExplainBackScreen(runtime: widget.runtime, source: source)),
       ),
     );
   }
@@ -549,16 +562,18 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> with WidgetsBinding
                     ].join('\n\n');
                     Navigator.of(context).push<void>(
                       MaterialPageRoute(
-                        builder: (routeContext) => ListenScreen(
-                          runtime: widget.runtime,
-                          materialId: widget.materialId,
-                          textOverride: recapText,
-                          titleOverride: 'Hızlı özet',
-                          persistProgress: false,
-                          onRecall: () {
-                            Navigator.of(routeContext).pop();
-                            _openRecall();
-                          },
+                        builder: (routeContext) => _preserveProductExperience(
+                          ListenScreen(
+                            runtime: widget.runtime,
+                            materialId: widget.materialId,
+                            textOverride: recapText,
+                            titleOverride: 'Hızlı özet',
+                            persistProgress: false,
+                            onRecall: () {
+                              Navigator.of(routeContext).pop();
+                              _openRecall();
+                            },
+                          ),
                         ),
                       ),
                     );
