@@ -431,12 +431,10 @@ class _ListenScreenState extends State<ListenScreen> {
                 if (widget.onRecall != null) ...[
                   const SizedBox(height: 12),
                   OutlinedButton.icon(
-                    onPressed: () async {
-                      try {
-                        await _stop();
-                      } catch (_) {
-                        // A device speech-stop failure must not trap the learner in Listen.
-                      }
+                    onPressed: () {
+                      // Stop playback without blocking the navigation gesture on a
+                      // platform TTS response. Disposal also stops any active speech.
+                      unawaited(_stop().catchError((Object _) {}));
                       if (!mounted) return;
                       widget.onRecall?.call();
                     },
