@@ -181,11 +181,9 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
     final wrapped = treatment != null
         ? LearningVisualTreatmentScope(treatment: treatment, child: destination)
         : livingReview
-            ? LivingDeskReviewScope(child: destination)
-            : destination;
-    Navigator.of(readerContext).pushReplacement<void, void>(
-      MaterialPageRoute(builder: (_) => wrapped),
-    );
+        ? LivingDeskReviewScope(child: destination)
+        : destination;
+    Navigator.of(readerContext).pushReplacement<void, void>(MaterialPageRoute(builder: (_) => wrapped));
   }
 
   void _openRecallFromCurrentRoute(BuildContext routeContext, MaterialId materialId) {
@@ -198,8 +196,8 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
         builder: (_) => treatment != null
             ? LearningVisualTreatmentScope(treatment: treatment, child: screen)
             : livingReview
-                ? LivingDeskReviewScope(child: screen)
-                : screen,
+            ? LivingDeskReviewScope(child: screen)
+            : screen,
       ),
     );
   }
