@@ -1,5 +1,9 @@
 import { deepStrictEqual as assertEquals, ok as assert } from "node:assert/strict";
-import { selectRelevantSourceContext, splitSourceText } from "./source_context.ts";
+import {
+  isPartialSourceContext,
+  selectRelevantSourceContext,
+  splitSourceText,
+} from "./source_context.ts";
 
 Deno.test("splitSourceText keeps short sources intact and deterministically bounds long chunks", () => {
   assertEquals(splitSourceText("Birinci cümle. İkinci cümle.", 1000), ["Birinci cümle. İkinci cümle."]);
@@ -50,4 +54,20 @@ Deno.test("selectRelevantSourceContext samples a long source safely when query h
 Deno.test("selectRelevantSourceContext leaves short source byte-for-byte except newline normalization", () => {
   const source = "Birinci satır.\r\nİkinci satır.";
   assertEquals(selectRelevantSourceContext(source, "ikinci", 4000), "Birinci satır.\nİkinci satır.");
+});
+
+
+Deno.test("isPartialSourceContext distinguishes full from bounded source context", () => {
+  const shortSource = "Birinci satır.\nİkinci satır.";
+  assertEquals(
+    isPartialSourceContext(shortSource, selectRelevantSourceContext(shortSource, "ikinci", 4000)),
+    false,
+  );
+
+  const longSource = Array.from(
+    { length: 120 },
+    (_, index) => `Bölüm ${index}. Fotosentez, hücre ve enerji dönüşümü hakkında ayrıntılı kaynak metni.`,
+  ).join("\n\n");
+  const selected = selectRelevantSourceContext(longSource, "fotosentez enerji dönüşümü", 4000);
+  assertEquals(isPartialSourceContext(longSource, selected), true);
 });

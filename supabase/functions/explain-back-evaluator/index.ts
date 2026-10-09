@@ -1,5 +1,8 @@
 import { createClient } from "npm:@supabase/supabase-js@2.117.2";
-import { selectRelevantSourceContext } from "../_shared/source_context.ts";
+import {
+  isPartialSourceContext,
+  selectRelevantSourceContext,
+} from "../_shared/source_context.ts";
 
 const corsHeaders = {
   "access-control-allow-origin": "*",
@@ -180,6 +183,19 @@ Deno.serve(async (request: Request) => {
     return reply(200, "failed_final");
   }
 
+  const sourceContext = selectRelevantSourceContext(
+    fullSourceText,
+    learnerResponse,
+    32000,
+  );
+  const sourceContextIsPartial = isPartialSourceContext(
+    fullSourceText,
+    sourceContext,
+  );
+  const allowedEvaluationKinds = sourceContextIsPartial
+    ? ["gap_detected", "not_evaluable"]
+    : ["sufficient", "gap_detected", "not_evaluable"];
+
   try {
     await rpc("mark_explain_back_dispatched", {
       p_account_id: user.id,
@@ -220,7 +236,7 @@ Deno.serve(async (request: Request) => {
                 properties: {
                   evaluation_kind: {
                     type: "string",
-                    enum: ["sufficient", "gap_detected", "not_evaluable"],
+                    enum: allowedEvaluationKinds,
                   },
                   feedback: { type: "string" },
                   targeted_repair: { type: "string" },
@@ -232,18 +248,15 @@ Deno.serve(async (request: Request) => {
             {
               role: "system",
               content:
-                "Evaluate the learner's explanation only against the supplied source. Do not infer mastery. Be conservative. Use not_evaluable when the response is too vague or cannot be grounded. If there is a gap, give one specific repair. Respond in " +
+                "Evaluate the learner's explanation only against the supplied source. Do not infer mastery. Be conservative. Use not_evaluable when the response is too vague or cannot be grounded. If source_context_is_partial is true, the supplied passages do not cover the whole source: never judge the explanation sufficient; return gap_detected only for a visible grounded gap, otherwise return not_evaluable. If there is a gap, give one specific repair. Respond in " +
                 outputLocale +
                 " using the required JSON.",
             },
             {
               role: "user",
               content: JSON.stringify({
-                source: selectRelevantSourceContext(
-                  fullSourceText,
-                  learnerResponse,
-                  32000,
-                ),
+                source: sourceContext,
+                source_context_is_partial: sourceContextIsPartial,
                 learner_response: learnerResponse,
               }),
             },
@@ -269,7 +282,7 @@ Deno.serve(async (request: Request) => {
         ? content.targeted_repair.trim()
         : "";
       if (
-        ["sufficient", "gap_detected", "not_evaluable"].includes(kind) &&
+        allowedEvaluationKinds.includes(kind) &&
         feedback.length >= 1 &&
         feedback.length <= 4000 &&
         repair.length <= 4000

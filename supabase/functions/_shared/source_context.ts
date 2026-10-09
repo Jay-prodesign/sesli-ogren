@@ -131,3 +131,10 @@ export function selectRelevantSourceContext(source: string, query: string, maxCh
     .slice(0, maxChars)
     .trim();
 }
+
+
+export function isPartialSourceContext(source: string, selectedContext: string): boolean {
+  const normalizedSource = source.replace(/\r\n?/g, "\n").trim();
+  const normalizedContext = selectedContext.replace(/\r\n?/g, "\n").trim();
+  return normalizedContext.length < normalizedSource.length;
+}
