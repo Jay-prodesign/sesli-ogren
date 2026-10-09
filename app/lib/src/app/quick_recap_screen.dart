@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../domain/learning_contracts.dart';
 import '../generation/supabase_source_summary_gateway.dart';
@@ -348,6 +349,35 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> with WidgetsBinding
     };
   }
 
+  Future<void> _copySummary(ServerSummaryStatus status) async {
+    final summary = status.summary;
+    if (summary == null || summary.trim().isEmpty) return;
+    try {
+      final material = await widget.runtime.store.material(
+        learner: widget.runtime.learner,
+        materialId: widget.materialId,
+      );
+      if (!mounted) return;
+      final title = material?.title.trim().isNotEmpty == true ? material!.title : 'Öğrenme materyali';
+      final text = [
+        'Hızlı özet — $title',
+        'AI tarafından oluşturulan özet · Sesli Öğren',
+        summary,
+        if (status.keyPoints.isNotEmpty) 'Önemli noktalar:\\n${status.keyPoints.map((point) => '• $point').join('\\n')}',
+      ].join('\\n\\n');
+      await Clipboard.setData(ClipboardData(text: text));
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Özet panoya kopyalandı')),
+      );
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Özet kopyalanamadı. Tekrar deneyebilirsin.')),
+      );
+    }
+  }
+
   Future<void> _openRecall() => Navigator.of(context).push<void>(
     MaterialPageRoute(
       builder: (_) => LearningSliceScreen(runtime: widget.runtime, materialId: widget.materialId),
@@ -425,6 +455,11 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> with WidgetsBinding
               spacing: 8,
               runSpacing: 8,
               children: [
+                OutlinedButton.icon(
+                  onPressed: () => _copySummary(status),
+                  icon: const Icon(Icons.copy_outlined),
+                  label: const Text('Özeti kopyala'),
+                ),
                 OutlinedButton.icon(
                   onPressed: () {
                     final recapText = <String>[
