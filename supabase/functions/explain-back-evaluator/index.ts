@@ -1,4 +1,5 @@
 import { createClient } from "npm:@supabase/supabase-js@2.117.2";
+import { selectRelevantSourceContext } from "../_shared/source_context.ts";
 
 const corsHeaders = {
   "access-control-allow-origin": "*",
@@ -163,8 +164,8 @@ Deno.serve(async (request: Request) => {
   }
 
   const leaseToken = String(claim.lease_token);
-  const sourceText = String(claim.source_text ?? "");
-  if (!sourceText.trim()) {
+  const fullSourceText = String(claim.source_text ?? "");
+  if (!fullSourceText.trim()) {
     try {
       await rpc("fail_explain_back_attempt", {
         p_account_id: user.id,
@@ -238,7 +239,11 @@ Deno.serve(async (request: Request) => {
             {
               role: "user",
               content: JSON.stringify({
-                source: sourceText,
+                source: selectRelevantSourceContext(
+                  fullSourceText,
+                  learnerResponse,
+                  32000,
+                ),
                 learner_response: learnerResponse,
               }),
             },
