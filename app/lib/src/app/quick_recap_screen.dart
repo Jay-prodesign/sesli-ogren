@@ -215,10 +215,7 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> with WidgetsBinding
           if (!removed) {
             throw const ServerSummarySubmissionException('Previous server source could not be removed.');
           }
-          await widget.runtime.store.clearSummaryJob(
-            learner: widget.runtime.learner,
-            materialId: widget.materialId,
-          );
+          await widget.runtime.store.clearSummaryJob(learner: widget.runtime.learner, materialId: widget.materialId);
           await widget.runtime.store.clearServerMaterialBinding(
             learner: widget.runtime.learner,
             materialId: widget.materialId,
@@ -245,10 +242,7 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> with WidgetsBinding
       if (currentSource?.identity.sourceVersionId != source.identity.sourceVersionId) {
         final removed = await _gateway.deleteServerMaterial(submission.materialId);
         if (removed) {
-          await widget.runtime.store.clearSummaryJob(
-            learner: widget.runtime.learner,
-            materialId: widget.materialId,
-          );
+          await widget.runtime.store.clearSummaryJob(learner: widget.runtime.learner, materialId: widget.materialId);
           await widget.runtime.store.clearServerMaterialBinding(
             learner: widget.runtime.learner,
             materialId: widget.materialId,
