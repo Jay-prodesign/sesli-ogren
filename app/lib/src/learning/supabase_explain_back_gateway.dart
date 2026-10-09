@@ -95,6 +95,29 @@ class SupabaseExplainBackGateway implements ExplainBackGateway {
         targetedRepair: (row['targeted_repair'] as String?)?.trim() ?? '',
         executionRef: evaluatorRef,
       );
+    } on FunctionException catch (error) {
+      final details = error.details;
+      final functionStatus = details is Map ? details['status'] as String? : null;
+      if (error.status == 429 || functionStatus == 'quota_exceeded') {
+        return const ExplainBackUnavailable(
+          'Bugünkü anlatım değerlendirme limitine ulaştın. Yeni değerlendirmeler günlük limit yenilendiğinde açılır.',
+        );
+      }
+      if (functionStatus == 'evaluator_not_configured') {
+        return const ExplainBackUnavailable(
+          'Anlatım değerlendirme servisi henüz etkin değil. Yanıtını öğrenme kanıtı olarak kaydetmiyoruz.',
+        );
+      }
+      if (functionStatus == 'stale_source') {
+        return const ExplainBackUnavailable('Kaynak değişti; güncel kaynakla yeniden dene.');
+      }
+      if (functionStatus == 'source_unavailable') {
+        return const ExplainBackUnavailable('Güncel kaynak kullanılamıyor.');
+      }
+      if (functionStatus == 'attempt_id_reused') {
+        return const ExplainBackUnavailable('Bu deneme kimliği farklı bir yanıtla yeniden kullanılamaz.');
+      }
+      return const ExplainBackUnavailable('Değerlendirme servisine şu anda ulaşılamıyor.');
     } on PostgrestException catch (error) {
       if (error.message.contains('stale_source')) {
         return const ExplainBackUnavailable('Kaynak değişti; güncel kaynakla yeniden dene.');
