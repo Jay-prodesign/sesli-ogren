@@ -155,7 +155,7 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
       _setBusy(false);
     }
     if (continuationToAdvance != null && mounted) {
-      await _activateContinuation(continuationToAdvance!);
+      await _activateContinuation(continuationToAdvance);
     }
   }
 
