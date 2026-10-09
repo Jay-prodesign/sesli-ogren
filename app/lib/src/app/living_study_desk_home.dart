@@ -133,7 +133,7 @@ class LivingStudyDeskHome extends StatelessWidget {
         const Text(
           'Kendi kaynağın.\nGerçek hatırlama.',
           key: ValueKey('la0040-atelier-home-promise'),
-          style: TextStyle(color: _ink, fontSize: 31, height: 1.05, fontWeight: FontWeight.w900, letterSpacing: -1.2),
+          style: TextStyle(color: _ink, fontSize: 29, height: 1.12, fontWeight: FontWeight.w900, letterSpacing: -1.2),
         ),
         const SizedBox(height: 9),
         const Text(
@@ -347,7 +347,7 @@ class LivingStudyDeskHome extends StatelessWidget {
     children: [
       const Text(
         'Kendi kaynağını\ncanlandıralım.',
-        style: TextStyle(color: _ink, fontSize: 35, height: 1.12, fontWeight: FontWeight.w800, letterSpacing: -1.3),
+        style: TextStyle(color: _ink, fontSize: 31, height: 1.15, fontWeight: FontWeight.w800, letterSpacing: -1.3),
       ),
       const SizedBox(height: 13),
       const Text(
@@ -358,7 +358,10 @@ class LivingStudyDeskHome extends StatelessWidget {
       Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          const CompanionView(state: CompanionVisualState.idle, size: 148),
+          const Flexible(
+            flex: 0,
+            child: CompanionView(state: CompanionVisualState.idle, size: 104),
+          ),
           const SizedBox(width: 8),
           const Expanded(
             child: Column(
@@ -418,7 +421,7 @@ class LivingStudyDeskHome extends StatelessWidget {
         width: double.infinity,
         child: FilledButton.icon(
           key: const ValueKey('la0040-living-add'),
-          onPressed: onOpenLearning,
+          onPressed: onOpenWorkspace,
           icon: const Icon(Icons.add_rounded),
           label: const Text('İlk materyalini ekle'),
           style: FilledButton.styleFrom(
