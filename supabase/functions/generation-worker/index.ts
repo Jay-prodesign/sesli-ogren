@@ -1,5 +1,9 @@
 import { createClient } from "npm:@supabase/supabase-js@2.117.2";
 
+declare const EdgeRuntime: {
+  waitUntil(promise: Promise<unknown>): void;
+};
+
 const corsHeaders = {
   "access-control-allow-origin": "*",
   "access-control-allow-headers":
@@ -111,155 +115,171 @@ Deno.serve(async (request) => {
     return data;
   };
 
-  let job: Record<string, unknown> | null = null;
-  try {
-    const result = targetJobId
-      ? await rpc("claim_generation_job_by_id", {
-          p_job_id: targetJobId,
-          p_lease_seconds: 120,
-        })
-      : await rpc("claim_generation_job", { p_lease_seconds: 120 });
-    job = Array.isArray(result) ? (result[0] ?? null) : result;
-    if (!job) return reply(200, targetJobId ? "not_runnable" : "idle");
-
-    const attempt = String(job.attempt_id);
-    const lease = String(job.lease_token);
-    if (job.generation_contract !== "summary.v1") {
-      await rpc("fail_generation_attempt", {
+  const runGeneration = async (): Promise<Response> => {
+    let job: Record<string, unknown> | null = null;
+    try {
+      const result = targetJobId
+        ? await rpc("claim_generation_job_by_id", {
+            p_job_id: targetJobId,
+            p_lease_seconds: 120,
+          })
+        : await rpc("claim_generation_job", { p_lease_seconds: 120 });
+      job = Array.isArray(result) ? (result[0] ?? null) : result;
+      if (!job) return reply(200, targetJobId ? "not_runnable" : "idle");
+  
+      const attempt = String(job.attempt_id);
+      const lease = String(job.lease_token);
+      if (job.generation_contract !== "summary.v1") {
+        await rpc("fail_generation_attempt", {
+          p_attempt_id: attempt,
+          p_lease_token: lease,
+          p_failure_class: "final",
+          p_provider_ref: null,
+        });
+        return reply(200, "unsupported_contract");
+      }
+  
+      await rpc("mark_attempt_dispatched", {
         p_attempt_id: attempt,
         p_lease_token: lease,
-        p_failure_class: "final",
-        p_provider_ref: null,
+        p_adapter_ref: "fetch-chat:" + model,
       });
-      return reply(200, "unsupported_contract");
-    }
-
-    await rpc("mark_attempt_dispatched", {
-      p_attempt_id: attempt,
-      p_lease_token: lease,
-      p_adapter_ref: "fetch-chat:" + model,
-    });
-
-    let failure: "retryable" | "final" | "ambiguous" = "ambiguous";
-    let providerRef: string | null = null;
-    try {
-      const controller = new AbortController();
-      const timer = setTimeout(() => controller.abort(), 60000);
-      const started = performance.now();
-      let response: Response;
+  
+      let failure: "retryable" | "final" | "ambiguous" = "ambiguous";
+      let providerRef: string | null = null;
       try {
-        response = await fetch(
-          base.replace(/\/$/, "") + "/chat/completions",
-          {
-            method: "POST",
-            signal: controller.signal,
-            headers: {
-              authorization: "Bearer " + providerKey,
-              "content-type": "application/json",
-              "idempotency-key": String(job.attempt_idempotency_key),
-            },
-            body: JSON.stringify({
-              model,
-              response_format: {
-                type: "json_schema",
-                json_schema: {
-                  name: "summary_v1",
-                  strict: true,
-                  schema: {
-                    type: "object",
-                    additionalProperties: false,
-                    required: ["summary", "key_points", "language"],
-                    properties: {
-                      summary: { type: "string" },
-                      key_points: {
-                        type: "array",
-                        items: { type: "string" },
-                        maxItems: 30,
+        const controller = new AbortController();
+        const timer = setTimeout(() => controller.abort(), 60000);
+        const started = performance.now();
+        let response: Response;
+        try {
+          response = await fetch(
+            base.replace(/\/$/, "") + "/chat/completions",
+            {
+              method: "POST",
+              signal: controller.signal,
+              headers: {
+                authorization: "Bearer " + providerKey,
+                "content-type": "application/json",
+                "idempotency-key": String(job.attempt_idempotency_key),
+              },
+              body: JSON.stringify({
+                model,
+                response_format: {
+                  type: "json_schema",
+                  json_schema: {
+                    name: "summary_v1",
+                    strict: true,
+                    schema: {
+                      type: "object",
+                      additionalProperties: false,
+                      required: ["summary", "key_points", "language"],
+                      properties: {
+                        summary: { type: "string" },
+                        key_points: {
+                          type: "array",
+                          items: { type: "string" },
+                          maxItems: 30,
+                        },
+                        language: { type: "string" },
                       },
-                      language: { type: "string" },
                     },
                   },
                 },
-              },
-              messages: [
-                {
-                  role: "system",
-                  content:
-                    "Summarize the provided study material in Turkish. Use only the source text. Do not invent facts. Respond with the required JSON.",
-                },
-                { role: "user", content: String(job.normalized_text) },
-              ],
-            }),
-          },
-        );
-      } finally {
-        clearTimeout(timer);
-      }
-
-      providerRef = response.headers.get("x-request-id");
-      if (!response.ok) {
-        failure =
-          [408, 409, 429].includes(response.status) ||
-            response.status >= 500
-            ? "retryable"
-            : "final";
-      } else {
-        const providerBody = await response.json();
-        providerRef =
-          providerRef ??
-          (typeof providerBody.id === "string" ? providerBody.id : null);
-        const content = JSON.parse(
-          providerBody?.choices?.[0]?.message?.content ?? "null",
-        );
-        if (
-          typeof content?.summary === "string" &&
-          content.summary.trim().length > 0 &&
-          content.summary.length <= 20000 &&
-          typeof content?.language === "string" &&
-          content.language.length > 0 &&
-          Array.isArray(content.key_points) &&
-          content.key_points.length <= 30 &&
-          content.key_points.every(
-            (value: unknown) =>
-              typeof value === "string" && value.trim().length > 0,
-          )
-        ) {
-          try {
-            await rpc("complete_generation_attempt", {
-              p_attempt_id: attempt,
-              p_lease_token: lease,
-              p_content: content,
-              p_provider_ref: providerRef ?? "unknown",
-              p_usage: {
-                total_tokens: Number(providerBody?.usage?.total_tokens ?? 0),
-                cost_class: "metered",
-              },
-              p_latency_ms: Math.round(performance.now() - started),
-            });
-          } catch {
-            console.error("generation-worker:completion_rpc_failed");
-            return reply(502, "completion_not_confirmed");
-          }
-          return reply(200, "succeeded");
+                messages: [
+                  {
+                    role: "system",
+                    content:
+                      "Summarize the provided study material in Turkish. Use only the source text. Do not invent facts. Respond with the required JSON.",
+                  },
+                  { role: "user", content: String(job.normalized_text) },
+                ],
+              }),
+            },
+          );
+        } finally {
+          clearTimeout(timer);
         }
-        failure = "final";
+  
+        providerRef = response.headers.get("x-request-id");
+        if (!response.ok) {
+          failure =
+            [408, 409, 429].includes(response.status) ||
+              response.status >= 500
+              ? "retryable"
+              : "final";
+        } else {
+          const providerBody = await response.json();
+          providerRef =
+            providerRef ??
+            (typeof providerBody.id === "string" ? providerBody.id : null);
+          const content = JSON.parse(
+            providerBody?.choices?.[0]?.message?.content ?? "null",
+          );
+          if (
+            typeof content?.summary === "string" &&
+            content.summary.trim().length > 0 &&
+            content.summary.length <= 20000 &&
+            typeof content?.language === "string" &&
+            content.language.length > 0 &&
+            Array.isArray(content.key_points) &&
+            content.key_points.length <= 30 &&
+            content.key_points.every(
+              (value: unknown) =>
+                typeof value === "string" && value.trim().length > 0,
+            )
+          ) {
+            try {
+              await rpc("complete_generation_attempt", {
+                p_attempt_id: attempt,
+                p_lease_token: lease,
+                p_content: content,
+                p_provider_ref: providerRef ?? "unknown",
+                p_usage: {
+                  total_tokens: Number(providerBody?.usage?.total_tokens ?? 0),
+                  cost_class: "metered",
+                },
+                p_latency_ms: Math.round(performance.now() - started),
+              });
+            } catch {
+              console.error("generation-worker:completion_rpc_failed");
+              return reply(502, "completion_not_confirmed");
+            }
+            return reply(200, "succeeded");
+          }
+          failure = "final";
+        }
+      } catch {
+        // Ambiguous provider outcome: never automatically resend.
       }
-    } catch {
-      // Ambiguous provider outcome: never automatically resend.
+  
+      await rpc("fail_generation_attempt", {
+        p_attempt_id: attempt,
+        p_lease_token: lease,
+        p_failure_class: failure,
+        p_provider_ref: providerRef,
+      });
+      return reply(200, "failed");
+    } catch (error) {
+      console.error(
+        "generation-worker:",
+        error instanceof Error ? error.message.split(":")[0] : "unknown_error",
+      );
+      return reply(502, "worker_error");
     }
+  };
 
-    await rpc("fail_generation_attempt", {
-      p_attempt_id: attempt,
-      p_lease_token: lease,
-      p_failure_class: failure,
-      p_provider_ref: providerRef,
-    });
-    return reply(200, "failed");
-  } catch (error) {
-    console.error(
-      "generation-worker:",
-      error instanceof Error ? error.message.split(":")[0] : "unknown_error",
+  if (!schedulerAuthorized && targetJobId) {
+    EdgeRuntime.waitUntil(
+      runGeneration().catch((error) => {
+        console.error(
+          "generation-worker:background:",
+          error instanceof Error ? error.message.split(":")[0] : "unknown_error",
+        );
+      }),
     );
-    return reply(502, "worker_error");
+    return reply(202, "accepted");
   }
+
+  return await runGeneration();
 });
