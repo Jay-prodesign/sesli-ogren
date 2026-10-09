@@ -950,6 +950,15 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
               ),
             ),
           ),
+          const SizedBox(height: 12),
+          Text(
+            result.evidence.assistance == RecallAssistance.hint
+                ? 'Bu denemede ipucu kullanıldı.'
+                : result.evidence.assistance == RecallAssistance.answerExposed
+                    ? 'Yanıt önceden gösterildi; bağımsız hatırlama kanıtı oluşmadı.'
+                    : 'Bu değerlendirme yalnızca bu denemeyi gösterir.',
+            style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+          ),
           const SizedBox(height: 20),
           DecoratedBox(
             decoration: BoxDecoration(
@@ -1094,11 +1103,14 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text('03 / 03  ·  SONRAKİ ADIM', style: Theme.of(context).textTheme.labelMedium?.copyWith(
-            color: Theme.of(context).colorScheme.primary,
-            fontWeight: FontWeight.w800,
-            letterSpacing: 1.1,
-          )),
+          Text(
+            '03 / 03  ·  SONRAKİ ADIM',
+            style: Theme.of(context).textTheme.labelMedium?.copyWith(
+              color: Theme.of(context).colorScheme.primary,
+              fontWeight: FontWeight.w800,
+              letterSpacing: 1.1,
+            ),
+          ),
           const SizedBox(height: 12),
           Text(title, style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w800)),
           const SizedBox(height: 10),
@@ -1189,9 +1201,11 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
                   const SizedBox(height: 6),
                   const Text('Önce metni incele. Hazır olduğunda kapatıp yeniden hatırla.'),
                   const SizedBox(height: 16),
-                  Expanded(child: SingleChildScrollView(
-                    child: SelectableText(sourceText),
-                  )),
+                  Expanded(
+                    child: SingleChildScrollView(
+                      child: SelectableText(sourceText),
+                    ),
+                  ),
                   const SizedBox(height: 12),
                   FilledButton(
                     onPressed: () => Navigator.of(sheetContext).pop(),
