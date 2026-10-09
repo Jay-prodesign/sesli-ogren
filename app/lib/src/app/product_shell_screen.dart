@@ -155,7 +155,9 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
           materialId: material.id,
           onRecall: () {
             Navigator.of(context).pop();
-            _openLearningFor(material.id);
+            if (mounted) {
+              _openLearningFor(material.id);
+            }
           },
         ),
       ),
