@@ -187,8 +187,7 @@ class _MaterialWorkspaceScreenState extends State<MaterialWorkspaceScreen> {
         child: FutureBuilder<_WorkspaceSnapshot?>(
           future: _snapshot,
           builder: (context, snapshot) {
-            if (snapshot.hasError ||
-                (snapshot.connectionState == ConnectionState.done && snapshot.data == null)) {
+            if (snapshot.hasError || (snapshot.connectionState == ConnectionState.done && snapshot.data == null)) {
               return Center(
                 child: Padding(
                   padding: const EdgeInsets.all(24),
