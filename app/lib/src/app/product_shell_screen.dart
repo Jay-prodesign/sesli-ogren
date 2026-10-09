@@ -450,6 +450,7 @@ class _HomeSurface extends StatelessWidget {
             title: _nextTitle(data.continuation),
             reason: _nextReason(data.continuation),
             onPressed: onOpenWorkspace,
+            onStartRecall: onOpenLearning,
           ),
           const SizedBox(height: 22),
           Row(
@@ -551,12 +552,13 @@ class _FirstMaterialHero extends StatelessWidget {
 }
 
 class _ContinueHero extends StatelessWidget {
-  const _ContinueHero({required this.data, required this.title, required this.reason, required this.onPressed});
+  const _ContinueHero({required this.data, required this.title, required this.reason, required this.onPressed, required this.onStartRecall});
 
   final _HomeSnapshot data;
   final String title;
   final String reason;
   final VoidCallback onPressed;
+  final VoidCallback onStartRecall;
 
   @override
   Widget build(BuildContext context) {
@@ -699,9 +701,9 @@ class _ContinueHero extends StatelessWidget {
                           backgroundColor: Colors.white,
                           foregroundColor: AppPalette.primaryDark,
                         ),
-                        onPressed: onPressed,
+                        onPressed: onStartRecall,
                         icon: const Icon(Icons.arrow_forward_rounded),
-                        label: Text('Çalışmaya devam et', style: theme.textTheme.labelLarge?.copyWith(fontFamily: 'Roboto', color: AppPalette.primaryDark, fontWeight: FontWeight.w700)),
+                        label: Text('Hatırlamaya geç', style: theme.textTheme.labelLarge?.copyWith(fontFamily: 'Roboto', color: AppPalette.primaryDark, fontWeight: FontWeight.w700)),
                       ),
                     ],
                   ),
