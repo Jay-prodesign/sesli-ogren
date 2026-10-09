@@ -30,7 +30,7 @@ class ProductShellScreen extends StatefulWidget {
 
 class _ProductShellScreenState extends State<ProductShellScreen> {
   int _index = 0;
-  bool _deletingMaterial = false;
+  MaterialId? _deletingMaterialId;
   late Future<_HomeSnapshot> _snapshot;
 
   @override
@@ -210,9 +210,9 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
         ],
       ),
     );
-    if (confirmed != true || !mounted || _deletingMaterial) return;
+    if (confirmed != true || !mounted || _deletingMaterialId != null) return;
 
-    setState(() => _deletingMaterial = true);
+    setState(() => _deletingMaterialId = material.id);
     try {
       final serverMaterialId = await widget.runtime.store.summaryServerMaterialId(
         learner: widget.runtime.learner,
@@ -249,7 +249,7 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
       );
       setState(_refresh);
     } finally {
-      if (mounted) setState(() => _deletingMaterial = false);
+      if (mounted) setState(() => _deletingMaterialId = null);
     }
   }
 
@@ -352,7 +352,7 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
                           onOpenLearning: _openLearning,
                           onOpenWorkspace: _openWorkspace,
                           onDeleteMaterial: _deleteMaterial,
-                          isDeletingMaterial: _deletingMaterial,
+                          deletingMaterialId: _deletingMaterialId,
                         ),
                       ),
                       TickerMode(
@@ -836,14 +836,14 @@ class _LibrarySurface extends StatefulWidget {
     required this.onOpenLearning,
     required this.onOpenWorkspace,
     required this.onDeleteMaterial,
-    required this.isDeletingMaterial,
+    required this.deletingMaterialId,
   });
 
   final _HomeSnapshot data;
   final VoidCallback onOpenLearning;
   final ValueChanged<MaterialId> onOpenWorkspace;
   final ValueChanged<MaterialRecord> onDeleteMaterial;
-  final bool isDeletingMaterial;
+  final MaterialId? deletingMaterialId;
 
   @override
   State<_LibrarySurface> createState() => _LibrarySurfaceState();
@@ -945,6 +945,7 @@ class _LibrarySurfaceState extends State<_LibrarySurface> {
               continuation: _continuationFor(material.id),
               onPressed: () => widget.onOpenWorkspace(material.id),
               onDelete: () => widget.onDeleteMaterial(material),
+              isDeleting: widget.deletingMaterialId == material.id,
             ),
             const SizedBox(height: 10),
           ],
@@ -966,12 +967,14 @@ class _LibraryMaterialCard extends StatelessWidget {
     required this.continuation,
     required this.onPressed,
     required this.onDelete,
+    required this.isDeleting,
   });
 
   final MaterialRecord material;
   final LearningContinuation? continuation;
   final VoidCallback onPressed;
   final VoidCallback onDelete;
+  final bool isDeleting;
 
   @override
   Widget build(BuildContext context) {
@@ -1052,8 +1055,8 @@ class _LibraryMaterialCard extends StatelessWidget {
                   ),
                   IconButton(
                     tooltip: 'Materyali sil',
-                    onPressed: widget.isDeletingMaterial ? null : onDelete,
-                    icon: widget.isDeletingMaterial
+                    onPressed: isDeleting ? null : onDelete,
+                    icon: isDeleting
                         ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2))
                         : const Icon(Icons.delete_outline_rounded),
                   ),
