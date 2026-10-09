@@ -159,24 +159,17 @@ select public.delete_material(:'material_a'::uuid);
 reset role;
 
 select pg_temp.ok(
-  (
-    select state = 'CANCELLED'
-       and not (request_context ? 'question')
-       and request_context ? 'question_digest'
-    from public.generation_jobs
-    where id = :'job_cancel'::uuid
+  not exists(
+    select 1 from public.generation_jobs where id = :'job_cancel'::uuid
   ),
-  'material deletion cancels queued Focus work and removes plaintext question'
+  'material deletion removes queued Focus work and its plaintext request payload'
 );
 
 select pg_temp.ok(
-  (
-    select state = 'CANCELLED'
-       and not (request_context ? 'question')
-    from public.generation_jobs
-    where id = :'job_retry'::uuid
+  not exists(
+    select 1 from public.generation_jobs where id = :'job_retry'::uuid
   ),
-  'later cancellation also minimizes a previously retryable Focus question'
+  'material deletion removes previously retryable Focus work and its plaintext request payload'
 );
 
 rollback;
