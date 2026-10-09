@@ -127,7 +127,7 @@ Deno.serve(async (request: Request) => {
   });
   const rpc = async (name: string, params: Record<string, unknown>) => {
     const { data, error } = await db.rpc(name, params);
-    if (error) throw new Error(name + ":" + error.code);
+    if (error) throw new Error(name + ":" + error.code + ":" + error.message);
     return data;
   };
 
@@ -139,7 +139,10 @@ Deno.serve(async (request: Request) => {
       p_lease_seconds: 120,
     });
     claim = Array.isArray(result) ? (result[0] ?? null) : result;
-  } catch {
+  } catch (error) {
+    if (error instanceof Error && error.message.includes("quota_exceeded")) {
+      return reply(429, "quota_exceeded");
+    }
     return reply(502, "claim_failed");
   }
 
