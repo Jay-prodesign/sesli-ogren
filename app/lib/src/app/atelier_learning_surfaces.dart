@@ -246,66 +246,30 @@ class AtelierRecall extends StatelessWidget {
         style: TextStyle(color: AtelierStyle.teal, fontWeight: FontWeight.w900, fontSize: 11, letterSpacing: 1),
       ),
       const SizedBox(height: 12),
-      LayoutBuilder(
-        builder: (context, constraints) {
-          final compactHeader = constraints.maxWidth < 330 || MediaQuery.textScalerOf(context).scale(1) > 1.3;
-          const title = Text(
-            'Hatırlama sırası sende.',
-            style: TextStyle(
-              color: AtelierStyle.ink,
-              fontSize: 29,
-              height: 1.08,
-              fontWeight: FontWeight.w900,
-              letterSpacing: -0.8,
+      const Text(
+        'Hatırlama sırası sende.',
+        style: TextStyle(
+          color: AtelierStyle.ink,
+          fontSize: 29,
+          height: 1.08,
+          fontWeight: FontWeight.w900,
+          letterSpacing: -0.8,
+        ),
+      ),
+      const SizedBox(height: 10),
+      const Row(
+        key: ValueKey('la0040-recall-companion-guidance'),
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          CompanionView(state: CompanionVisualState.think, size: 52),
+          SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              'D/Knot: Kaynağı kapattık. Hatırladığını yaz; yardım istersen seçenekler aşağıda.',
+              style: TextStyle(color: AtelierStyle.muted, fontSize: 13, height: 1.4),
             ),
-          );
-          const guidance = Row(
-            key: ValueKey('la0040-recall-companion-guidance'),
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Icon(Icons.chat_bubble_outline_rounded, color: AtelierStyle.teal, size: 18),
-              SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  'D/Knot: Hatırladığın kadarını yaz. Yardım istersen aşağıdaki seçenekleri kullan.',
-                  style: TextStyle(color: AtelierStyle.muted, fontSize: 13, height: 1.42),
-                ),
-              ),
-            ],
-          );
-          if (compactHeader) {
-            return const Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                title,
-                SizedBox(height: 10),
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    CompanionView(state: CompanionVisualState.think, size: 64),
-                    SizedBox(width: 10),
-                    Expanded(child: guidance),
-                  ],
-                ),
-              ],
-            );
-          }
-          return const Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(child: title),
-                  SizedBox(width: 10),
-                  CompanionView(state: CompanionVisualState.think, size: 90),
-                ],
-              ),
-              SizedBox(height: 6),
-              guidance,
-            ],
-          );
-        },
+          ),
+        ],
       ),
       const SizedBox(height: 16),
       Container(
@@ -485,59 +449,24 @@ class AtelierResult extends StatelessWidget {
           style: TextStyle(color: AtelierStyle.teal, fontSize: 11, letterSpacing: 1, fontWeight: FontWeight.w900),
         ),
         const SizedBox(height: 10),
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(
-              child: Text(
-                _heading,
-                style: const TextStyle(
-                  color: AtelierStyle.ink,
-                  fontWeight: FontWeight.w900,
-                  fontSize: 27,
-                  height: 1.17,
-                ),
-              ),
-            ),
-            CompanionView(
-              state:
-                  result.evidence.outcome == RecallOutcome.correct &&
-                      result.evidence.assistance == RecallAssistance.none
-                  ? CompanionVisualState.success
-                  : result.evidence.outcome == RecallOutcome.helpedCorrect
-                  ? CompanionVisualState.correct
-                  : CompanionVisualState.think,
-              size: 90,
-            ),
-          ],
+        Text(
+          _heading,
+          style: const TextStyle(
+            color: AtelierStyle.ink,
+            fontWeight: FontWeight.w900,
+            fontSize: 29,
+            height: 1.12,
+            letterSpacing: -0.6,
+          ),
         ),
-        const SizedBox(height: 10),
+        const SizedBox(height: 8),
         Text(
           result.evidence.outcome == RecallOutcome.correct && result.evidence.assistance == RecallAssistance.none
               ? 'Tek bir bağımsız deneme, henüz ustalık değil.'
               : 'Bu sonuç denemeni ve varsa aldığın yardımı yansıtır.',
           style: const TextStyle(color: AtelierStyle.muted, fontSize: 14, height: 1.42),
         ),
-        const SizedBox(height: 13),
-        Row(
-          key: const ValueKey('la0040-result-companion-reflection'),
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Icon(Icons.auto_awesome_outlined, color: AtelierStyle.teal, size: 18),
-            const SizedBox(width: 9),
-            Expanded(
-              child: Text(
-                independent
-                    ? 'D/Knot: Kendi başına hatırladın. Kalıcı olup olmadığını sonraki denemeler gösterecek.'
-                    : assisted
-                    ? 'D/Knot: İpucundan yararlandın. Kaynakla karşılaştırıp sonra yeniden deneyebilirsin.'
-                    : 'D/Knot: Bu deneme, sonraki çalışmanda nereye odaklanacağını gösteriyor.',
-                style: const TextStyle(color: AtelierStyle.muted, fontSize: 13, height: 1.42),
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 18),
+        const SizedBox(height: 16),
         const Text(
           'ÖNCE SENİN YANITIN',
           style: TextStyle(color: AtelierStyle.muted, fontSize: 11, fontWeight: FontWeight.w900, letterSpacing: 1),
@@ -644,6 +573,32 @@ class AtelierResult extends StatelessWidget {
                 ],
               ],
             ),
+          ),
+        ),
+        const SizedBox(height: 14),
+        Container(
+          key: const ValueKey('la0040-result-companion-reflection'),
+          padding: const EdgeInsets.fromLTRB(13, 11, 13, 11),
+          decoration: BoxDecoration(
+            color: AtelierStyle.mint,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Icon(Icons.auto_awesome_outlined, color: AtelierStyle.teal, size: 18),
+              const SizedBox(width: 9),
+              Expanded(
+                child: Text(
+                  independent
+                      ? 'D/Knot: Bunu kendi başına hatırladın. Kalıcılığı sonraki bağımsız deneme gösterecek.'
+                      : assisted
+                      ? 'D/Knot: İpucundan yararlandın. Şimdi kaynakla bağı güçlendirip yeniden deneyebilirsin.'
+                      : 'D/Knot: Kanıt, bir sonraki çalışmanda nereye dönmen gerektiğini gösteriyor.',
+                  style: const TextStyle(color: AtelierStyle.ink, fontSize: 13, height: 1.4, fontWeight: FontWeight.w600),
+                ),
+              ),
+            ],
           ),
         ),
         const SizedBox(height: 18),
