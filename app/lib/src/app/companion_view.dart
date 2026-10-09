@@ -41,7 +41,7 @@ class _CompanionViewState extends State<CompanionView> with SingleTickerProvider
     final reduced =
         (media?.disableAnimations ?? false) ||
         (media?.accessibleNavigation ?? false) ||
-        !TickerMode.of(context);
+        !TickerMode.valuesOf(context).enabled;
     if (reduced == _reducedMotion) {
       return;
     }
