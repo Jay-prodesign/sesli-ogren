@@ -24,6 +24,7 @@ class _ListenScreenState extends State<ListenScreen> {
   late Future<_ListenSource> _source;
   bool _speaking = false;
   bool _startedPlayback = false;
+  bool _startingPlayback = false;
   String? _error;
   int? _resumeChunkOverride;
   int _currentChunkIndex = 0;
@@ -77,6 +78,7 @@ class _ListenScreenState extends State<ListenScreen> {
       _error = null;
       _currentChunkIndex = safeStart;
       _startedPlayback = false;
+      _startingPlayback = true;
     });
     await _playChunk(source, safeStart, token);
   }
@@ -92,6 +94,7 @@ class _ListenScreenState extends State<ListenScreen> {
         setState(() {
           _speaking = true;
           _startedPlayback = true;
+          _startingPlayback = false;
           _currentChunkIndex = index;
           _resumeChunkOverride = index;
         });
@@ -105,6 +108,7 @@ class _ListenScreenState extends State<ListenScreen> {
         if (!mounted || token != _playToken) return;
         setState(() {
           _speaking = false;
+          _startingPlayback = false;
           _error = 'Bu cihazda Türkçe ses başlatılamadı. Metin yine kullanılabilir.';
         });
       },
@@ -119,6 +123,8 @@ class _ListenScreenState extends State<ListenScreen> {
       if (!mounted || token != _playToken) return;
       setState(() {
         _speaking = false;
+        _startedPlayback = false;
+        _startingPlayback = false;
         _resumeChunkOverride = 0;
         _currentChunkIndex = 0;
       });
@@ -150,6 +156,7 @@ class _ListenScreenState extends State<ListenScreen> {
     if (mounted) setState(() {
       _speaking = false;
       _startedPlayback = false;
+      _startingPlayback = false;
     });
   }
 
@@ -325,8 +332,8 @@ class _ListenScreenState extends State<ListenScreen> {
                   Text(_error!, style: TextStyle(color: theme.colorScheme.error)),
                 ],
                 const SizedBox(height: 18),
-                if (_speaking)
-                  FilledButton.icon(onPressed: _stop, icon: const Icon(Icons.stop_rounded), label: const Text('Durdur'))
+                if (_speaking || _startingPlayback)
+                  FilledButton.icon(onPressed: _stop, icon: const Icon(Icons.stop_rounded), label: Text(_startingPlayback ? 'Başlatmayı iptal et' : 'Durdur'))
                 else ...[
                   FilledButton.icon(
                     onPressed: () => _play(source),
