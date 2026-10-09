@@ -1,3 +1,6 @@
+import 'dart:convert';
+
+import 'package:crypto/crypto.dart';
 import 'package:flutter/material.dart';
 
 import '../domain/learning_contracts.dart';
@@ -9,18 +12,22 @@ import 'explain_back_screen.dart';
 import 'learning_slice_screen.dart';
 
 class ExplainScreen extends StatefulWidget {
-  const ExplainScreen({required this.runtime, required this.source, super.key});
+  const ExplainScreen({
+    required this.runtime,
+    required this.source,
+    this.summaryGateway = const SupabaseSourceSummaryGateway(),
+    super.key,
+  });
 
   final AppRuntime runtime;
   final SourceVersionRecord source;
+  final SupabaseSourceSummaryGateway summaryGateway;
 
   @override
   State<ExplainScreen> createState() => _ExplainScreenState();
 }
 
 class _ExplainScreenState extends State<ExplainScreen> {
-  static const _summaryGateway = SupabaseSourceSummaryGateway();
-
   late Future<GroundedExplainResult> _result;
 
   @override
@@ -47,6 +54,18 @@ class _ExplainScreenState extends State<ExplainScreen> {
         return const GroundedExplainUnavailable(reason: GroundedExplainUnavailableReason.staleSource);
       }
 
+      final extracted = await widget.runtime.store.extractedContentForSource(
+        learner: widget.runtime.learner,
+        sourceVersionId: widget.source.identity.sourceVersionId,
+      );
+      if (extracted == null || !extracted.isValid) {
+        return const GroundedExplainUnavailable(reason: GroundedExplainUnavailableReason.sourceUnavailable);
+      }
+      if (extracted.sourceContentDigest != widget.source.identity.contentDigest) {
+        return const GroundedExplainUnavailable(reason: GroundedExplainUnavailableReason.staleSource);
+      }
+      final groundingContentHash = sha256.convert(utf8.encode(extracted.normalizedText.trim())).toString();
+
       var serverMaterialId = await widget.runtime.store.summaryServerMaterialId(
         learner: widget.runtime.learner,
         materialId: widget.source.identity.materialId,
@@ -64,7 +83,7 @@ class _ExplainScreenState extends State<ExplainScreen> {
           materialId: widget.source.identity.materialId,
         );
         if (staleServerMaterialId != null) {
-          final removed = await _summaryGateway.deleteServerMaterial(staleServerMaterialId);
+          final removed = await widget.summaryGateway.deleteServerMaterial(staleServerMaterialId);
           if (!removed) {
             return const GroundedExplainUnavailable(reason: GroundedExplainUnavailableReason.temporaryFailure);
           }
@@ -78,18 +97,11 @@ class _ExplainScreenState extends State<ExplainScreen> {
           learner: widget.runtime.learner,
           materialId: widget.source.identity.materialId,
         );
-        final extracted = await widget.runtime.store.extractedContentForSource(
-          learner: widget.runtime.learner,
-          sourceVersionId: widget.source.identity.sourceVersionId,
-        );
-        if (material == null || extracted == null || !extracted.isValid) {
+        if (material == null) {
           return const GroundedExplainUnavailable(reason: GroundedExplainUnavailableReason.sourceUnavailable);
         }
-        if (extracted.sourceContentDigest != widget.source.identity.contentDigest) {
-          return const GroundedExplainUnavailable(reason: GroundedExplainUnavailableReason.staleSource);
-        }
 
-        final submission = await _summaryGateway.submit(
+        final submission = await widget.summaryGateway.submit(
           source: SourceIngestResult(
             material: material,
             sourceVersion: widget.source,
@@ -103,7 +115,7 @@ class _ExplainScreenState extends State<ExplainScreen> {
         );
         if (sourceAfterSubmission?.identity.sourceVersionId != widget.source.identity.sourceVersionId ||
             sourceAfterSubmission?.identity.contentDigest != widget.source.identity.contentDigest) {
-          await _summaryGateway.deleteServerMaterial(submission.materialId);
+          await widget.summaryGateway.deleteServerMaterial(submission.materialId);
           return const GroundedExplainUnavailable(reason: GroundedExplainUnavailableReason.staleSource);
         }
 
@@ -124,19 +136,19 @@ class _ExplainScreenState extends State<ExplainScreen> {
         return const GroundedExplainUnavailable(reason: GroundedExplainUnavailableReason.sourceUnavailable);
       }
 
-      final summaryStatus = await _summaryGateway.status(boundSummaryJobId);
+      final summaryStatus = await widget.summaryGateway.status(boundSummaryJobId);
       if (summaryStatus.state == 'FAILED_FINAL' ||
           summaryStatus.state == 'CANCELLED' ||
           summaryStatus.failureClass == 'reconciliation_required') {
         return const GroundedExplainUnavailable(reason: GroundedExplainUnavailableReason.temporaryFailure);
       }
       if (summaryStatus.state == 'FAILED_RETRYABLE') {
-        final accepted = await _summaryGateway.retry(boundSummaryJobId);
+        final accepted = await widget.summaryGateway.retry(boundSummaryJobId);
         if (!accepted) {
           return const GroundedExplainUnavailable(reason: GroundedExplainUnavailableReason.temporaryFailure);
         }
       } else if (summaryStatus.state == 'QUEUED' || summaryStatus.state == 'PROCESSING') {
-        final accepted = await _summaryGateway.dispatch(boundSummaryJobId);
+        final accepted = await widget.summaryGateway.dispatch(boundSummaryJobId);
         if (!accepted) {
           return const GroundedExplainUnavailable(reason: GroundedExplainUnavailableReason.temporaryFailure);
         }
@@ -147,6 +159,7 @@ class _ExplainScreenState extends State<ExplainScreen> {
           materialId: MaterialId(boundServerMaterialId),
           sourceVersionId: widget.source.identity.sourceVersionId,
           sourceContentDigest: widget.source.identity.contentDigest,
+          groundingContentHash: groundingContentHash,
           outputLocale: 'tr-TR',
         ),
       );
