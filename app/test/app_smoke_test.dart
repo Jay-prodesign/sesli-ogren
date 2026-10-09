@@ -941,6 +941,54 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  testWidgets('auto-advances the persisted Home next action into focused source repair', (tester) async {
+    final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
+    addTearDown(store.close);
+    final ingest = SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor());
+    final recall = RecallLearningService(sourceStore: store, learningStore: store.learningTruthStore());
+    final runtime = AppRuntime(
+      learner: AppRuntime.localM5LearnerFixture,
+      store: store,
+      ingest: ingest,
+      recall: recall,
+      telemetry: store.operationalTelemetry(),
+    );
+
+    await ingest.ingestPastedText(
+      learner: runtime.learner,
+      materialId: AppRuntime.primaryMaterialId,
+      text:
+          'Fotosentez sırasında klorofil ışık enerjisini kimyasal enerjiye dönüştürmeye yardımcı olur. '
+          'Bitkiler bu süreçte karbondioksit kullanır ve oksijen açığa çıkarır.',
+      sourceName: 'Biyoloji devam notu',
+    );
+
+    await tester.pumpWidget(testShell(runtime));
+    await pumpUntilFound(tester, find.text('Hatırla'));
+    await tapVisible(tester, find.text('Bilmiyorum'));
+    await pumpUntilFound(tester, find.text('Geri bildirim'));
+
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.pump();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: MediaQuery(
+          data: const MediaQueryData(disableAnimations: true),
+          child: LearningSliceScreen(
+            key: const ValueKey('auto-advance-needs-review'),
+            runtime: runtime,
+            autoAdvanceContinuation: true,
+          ),
+        ),
+      ),
+    );
+
+    await pumpUntilFound(tester, find.text('Bu bölümü yeniden kur'));
+    expect(find.text('Önce kaynağı gözden geçir'), findsNothing);
+    expect(find.text('Kaynağı kapat ve yeniden dene'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('Reduced Motion keeps the learning slice usable', (tester) async {
     final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
     addTearDown(store.close);
