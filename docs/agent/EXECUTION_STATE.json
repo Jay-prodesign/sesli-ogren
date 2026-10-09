@@ -16,7 +16,7 @@
   },
   "lifecycle_stage": "M5 Golden Learning Slice — ADMITTED / EXECUTABLE under D-071; physical mobile-readiness deferred to final gate under D-068",
   "status": "IN_PROGRESS",
-  "active_milestone": "Repository M2 post-M5 continuity — LA-0040 SECOND FOUNDER VISUAL FAIL / ALL THREE UI TREATMENTS REJECTED",
+  "active_milestone": "Post-M5 commercial-product completion — LA-0039 + LA-0040 integrated outcome batch",
   "architecture_proof": {
     "disposition": "ARCHITECTURE_PROOF_PASS / GO_ADAPT",
     "reviewed_head_sha": "0327d2e5b854df1c9923c65ed88f77151cfe9eed",
@@ -437,5 +437,47 @@
     },
     "companion": "KEEP canonical D/Knot. Generated non-canonical plush concept rejected; current evidence supports stateful/sparse integration rather than identity redesign/removal.",
     "authority": "docs/design/LA-0040_AUDIENCE_BRAND_VISUAL_DIRECTION_LOCK.md"
+  },
+  "current_execution_authority": {
+    "as_of": "2026-10-09",
+    "current_product_truth": "Source-grounded, voice-enabled personal learning product; learner-owned PDF/text → authoritative source/version/provenance → Listen or source-hidden active recall → truthful correct/unknown/hinted result with source evidence → explainable next action → persistence/reopen/recovery.",
+    "current_goal": "Complete the coherent LA-0039 + LA-0040 first-session and resumed learning journey with premium real-Flutter visual execution; do not add isolated shortcuts as substitutes.",
+    "current_branch": "feat/full-product-shell-continuity",
+    "current_head_sha": "761087f6ab062f4da1b47340d0851909eaa33ce3",
+    "pr": 13,
+    "pr_status": "open, unmerged, unreleased",
+    "verified": {
+      "bootstrap_validation": "PASS at 761087f6",
+      "la0040_visual_capture": "PASS at 761087f6",
+      "product_bounded_validation": "FAIL — Canonical format step",
+      "account_deletion_bounded_validation": "FAIL — SQL tests 87 and 89; test 89 syntax error",
+      "android_ios_release_compile": "IN_PROGRESS at last observation"
+    },
+    "executable_now": [
+      "Continue integrated LA-0039/LA-0040 product work on current branch",
+      "Fix relevant formatting/integration errors within the current batch",
+      "Repair account-deletion SQL validation failures independently where safe",
+      "Continue independent approved backend, recovery, settings, accessibility and commercial-readiness work"
+    ],
+    "gate_classification": {
+      "current_and_real": [
+        "Protected merge/release/publication; spending; legal/financial commitments; secrets; destructive real-user-data operations; serious irreversible product/architecture pivot",
+        "D-068 physical Android/iOS/mobile readiness before release",
+        "D-070 locked D/Knot identity",
+        "D-076 provenance and licensing restrictions"
+      ],
+      "narrow": [
+        "Founder visual disposition blocks visual lock/closure only, not implementation or independent work",
+        "Missing external fresh-user/device evidence blocks only the corresponding evidence claim/release gate"
+      ],
+      "superseded": [
+        "Historical zero-based discovery active and M4/M5 re-admission claims where they conflict with D-053/D-054 and later accepted D-070–D-076 decisions",
+        "Old M3 pre-admission and paused/not-executable descriptions contradicted by admitted current execution"
+      ],
+      "historical": [
+        "Older Founder-review labels and candidate tournaments after supersession; preserve as history, not active stop conditions"
+      ]
+    },
+    "next_action": "Implement the next coherent user-visible source→learn→evidence→next-action→resume improvement, integrate connected UI/state/error handling, then continue to the next safe authorized outcome. Do not stop after one file, commit or test."
   }
 }
