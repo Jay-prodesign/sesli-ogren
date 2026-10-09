@@ -49,6 +49,12 @@ class _FocusGateway implements FocusHelpGateway {
   }
 }
 
+Future<void> _tapVisible(WidgetTester tester, Finder finder) async {
+  await tester.ensureVisible(finder);
+  await tester.pump();
+  await tester.tap(finder);
+}
+
 Future<void> _pumpUntilFound(WidgetTester tester, Finder finder, {int maxPumps = 80}) async {
   for (var i = 0; i < maxPumps; i++) {
     await tester.pump(const Duration(milliseconds: 20));
@@ -100,7 +106,7 @@ void main() {
     );
 
     await tester.enterText(find.byType(TextField), 'Karbondioksit burada ne işe yarıyor?');
-    await tester.tap(find.text('Sorumu açıkla'));
+    await _tapVisible(tester, find.text('Sorumu açıkla'));
     await _pumpUntilFound(tester, find.textContaining('Karbondioksit, kaynakta'));
 
     expect(focus.lastRequest, isNotNull);

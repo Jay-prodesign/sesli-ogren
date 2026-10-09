@@ -64,6 +64,32 @@ class _RecordingSourceGateway extends SupabaseSourceSummaryGateway {
   }
 }
 
+Future<void> _tapVisible(WidgetTester tester, Finder finder) async {
+  await tester.ensureVisible(finder);
+  await tester.pump();
+  await tester.tap(finder);
+}
+
+Future<void> _pumpUntilFound(WidgetTester tester, Finder finder, {int maxPumps = 100}) async {
+  for (var i = 0; i < maxPumps; i++) {
+    await tester.pump(const Duration(milliseconds: 20));
+    if (finder.evaluate().isNotEmpty) return;
+  }
+  fail('Expected Explain-back widget was not reached within bounded pumps.');
+}
+
+Future<void> _pumpUntilCondition(
+  WidgetTester tester,
+  bool Function() condition, {
+  int maxPumps = 100,
+}) async {
+  for (var i = 0; i < maxPumps; i++) {
+    await tester.pump(const Duration(milliseconds: 20));
+    if (condition()) return;
+  }
+  fail('Expected Explain-back condition was not reached within bounded pumps.');
+}
+
 void main() {
   sqfliteFfiInit();
 
@@ -110,8 +136,8 @@ void main() {
       ),
     );
     await tester.enterText(find.byType(TextField), 'Fotosentezde ışık enerjisi kimyasal enerjiye dönüşür.');
-    await tester.tap(find.text('Anlatımımı değerlendir'));
-    await tester.pumpAndSettle();
+    await _tapVisible(tester, find.text('Anlatımımı değerlendir'));
+    await _pumpUntilFound(tester, find.text('Temel fikir doğru, bir bağlantı eksik.'));
 
     expect(find.text('Temel fikir doğru, bir bağlantı eksik.'), findsOneWidget);
     expect(explainBack.lastRequest, isNotNull);
@@ -125,11 +151,11 @@ void main() {
     expect(explainBack.lastRequest!.groundingContentHash, expectedGroundingHash);
 
     final firstAttemptId = explainBack.lastRequest!.attemptId;
-    await tester.tap(find.text('Tekrar kendi cümlelerimle anlat'));
-    await tester.pumpAndSettle();
+    await _tapVisible(tester, find.text('Tekrar kendi cümlelerimle anlat'));
+    await _pumpUntilFound(tester, find.text('Anlatımımı değerlendir'));
     await tester.enterText(find.byType(TextField), 'Fotosentezde ışık enerjisi kimyasal enerjiye dönüşür.');
-    await tester.tap(find.text('Anlatımımı değerlendir'));
-    await tester.pumpAndSettle();
+    await _tapVisible(tester, find.text('Anlatımımı değerlendir'));
+    await _pumpUntilCondition(tester, () => explainBack.requests.length == 2);
 
     expect(explainBack.requests, hasLength(2));
     expect(explainBack.lastRequest!.attemptId, firstAttemptId);
@@ -179,8 +205,11 @@ void main() {
       ),
     );
     await tester.enterText(find.byType(TextField), 'Fotosentez ışık enerjisini kimyasal enerjiye dönüştürür.');
-    await tester.tap(find.text('Anlatımımı değerlendir'));
-    await tester.pumpAndSettle();
+    await _tapVisible(tester, find.text('Anlatımımı değerlendir'));
+    await _pumpUntilCondition(
+      tester,
+      () => sourceGateway.ensureCalls == 1 && explainBack.lastRequest != null,
+    );
 
     expect(sourceGateway.deletedServerMaterialIds, [oldServerMaterialId]);
     expect(sourceGateway.ensureCalls, 1);

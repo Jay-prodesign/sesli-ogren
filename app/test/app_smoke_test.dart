@@ -298,25 +298,25 @@ void main() {
     expect(find.text('Hatırla ile devam'), findsOneWidget);
 
     await tester.scrollUntilVisible(find.text('Odaklan'), 260, scrollable: find.byType(Scrollable).last);
-    await tester.pumpAndSettle();
+    await tester.pump(const Duration(milliseconds: 300));
     expect(find.text('Odaklan'), findsOneWidget);
     await tapVisible(tester, find.text('Odaklan').last);
-    await pumpUntilFound(tester, find.text('Kısa odak oturumu'));
+    await pumpUntilFound(tester, find.text('KISA ODAK · 3 ADIM'));
     expect(find.text('İpucu ver'), findsOneWidget);
-    expect(find.text('Doğrudan açıkla'), findsOneWidget);
+    expect(find.text('Sorumu açıkla'), findsOneWidget);
     await tester.enterText(find.byType(TextField), 'Fotosentezde karbondioksit nasıl kullanılır?');
     await tapVisible(tester, find.text('İpucu ver'));
     await pumpUntilFound(tester, find.textContaining('Kaynak ipucu:'));
     expect(find.textContaining('karbondioksit'), findsWidgets);
     expect(find.textContaining('öğrenme kanıtı oluşturmaz'), findsOneWidget);
     Navigator.of(tester.element(find.textContaining('öğrenme kanıtı oluşturmaz'))).pop();
-    await tester.pumpAndSettle();
+    await tester.pump(const Duration(milliseconds: 300));
     await pumpUntilFound(tester, find.byType(MaterialWorkspaceScreen));
     await tester.scrollUntilVisible(find.text('Kaynağa hızlı bakış'), 260, scrollable: find.byType(Scrollable).last);
-    await tester.pumpAndSettle();
+    await tester.pump(const Duration(milliseconds: 300));
     expect(find.text('Kaynağa hızlı bakış'), findsOneWidget);
     await tester.scrollUntilVisible(find.text('Açıkla'), -260, scrollable: find.byType(Scrollable).last);
-    await tester.pumpAndSettle();
+    await tester.pump(const Duration(milliseconds: 300));
     expect(find.text('Açıkla'), findsOneWidget);
     await tapVisible(tester, find.text('Açıkla'));
     await pumpUntilFound(tester, find.text('Anlatımımı değerlendir'));
@@ -324,7 +324,7 @@ void main() {
     expect(find.textContaining('öğrenme kanıtı veya ustalık iddiası oluşturmaz'), findsOneWidget);
     expect(find.text('Kaynağına dayalı açıklama'), findsNothing);
     Navigator.of(tester.element(find.text('Anlatımımı değerlendir'))).pop();
-    await tester.pumpAndSettle();
+    await tester.pump(const Duration(milliseconds: 300));
     expect(find.text('Hatırla'), findsWidgets);
     expect(find.text('Dinle'), findsOneWidget);
   });
@@ -457,7 +457,7 @@ void main() {
     await pumpUntilFound(tester, find.text('Dinleme devam notu'));
     expect(find.textContaining('bölüm 2 / 2'), findsOneWidget);
     await tester.drag(find.byType(Scrollable).last, const Offset(0, -620));
-    await tester.pumpAndSettle();
+    await tester.pump(const Duration(milliseconds: 300));
     await pumpUntilFound(tester, find.text('Kaldığın yerden dinle'));
 
     await tapVisible(tester, find.text('Kaldığın yerden dinle'));
@@ -525,7 +525,7 @@ void main() {
     expect(find.textContaining('bölüm 2 / 2'), findsNothing);
 
     await tester.drag(find.byType(Scrollable).last, const Offset(0, -620));
-    await tester.pumpAndSettle();
+    await tester.pump(const Duration(milliseconds: 300));
     await tapVisible(tester, find.text('Dinlemeye başla'));
     await tester.pump();
     expect(speech.lastText, recap);

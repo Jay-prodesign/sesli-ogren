@@ -55,6 +55,20 @@ Future<AppRuntime> _runtime(
   );
 }
 
+Future<void> _tapVisible(WidgetTester tester, Finder finder) async {
+  await tester.ensureVisible(finder);
+  await tester.pump();
+  await tester.tap(finder);
+}
+
+Future<void> _pumpUntilFound(WidgetTester tester, Finder finder, {int maxPumps = 80}) async {
+  for (var i = 0; i < maxPumps; i++) {
+    await tester.pump(const Duration(milliseconds: 20));
+    if (finder.evaluate().isNotEmpty) return;
+  }
+  fail('Expected Focus widget was not reached within bounded pumps.');
+}
+
 void main() {
   sqfliteFfiInit();
 
@@ -87,8 +101,8 @@ void main() {
     );
 
     await tester.enterText(find.byType(TextField), 'Karbondioksit bu süreçte nasıl kullanılır?');
-    await tester.tap(find.text('İpucu ver'));
-    await tester.pump();
+    await _tapVisible(tester, find.text('İpucu ver'));
+    await _pumpUntilFound(tester, find.textContaining('Kaynak ipucu:'));
 
     expect(find.textContaining('Kaynak ipucu:'), findsOneWidget);
     expect(find.textContaining('karbondioksit ve su kullanır'), findsWidgets);
@@ -124,8 +138,8 @@ void main() {
     );
 
     await tester.enterText(find.byType(TextField), 'Karbondioksit bu süreçte nasıl kullanılır?');
-    await tester.tap(find.text('İpucu ver'));
-    await tester.pumpAndSettle();
+    await _tapVisible(tester, find.text('İpucu ver'));
+    await _pumpUntilFound(tester, find.textContaining('Kaynak ipucu:'));
 
     expect(find.textContaining('Kaynak ipucu:'), findsOneWidget);
     expect(find.textContaining('karbondioksit ve su kullanır'), findsWidgets);
@@ -157,8 +171,8 @@ void main() {
     );
 
     await tester.enterText(find.byType(TextField), 'Mitokondriyal ribozomların alt birimi nedir?');
-    await tester.tap(find.text('İpucu ver'));
-    await tester.pump();
+    await _tapVisible(tester, find.text('İpucu ver'));
+    await _pumpUntilFound(tester, find.textContaining('kaynakta güvenle bağlayabildiğimiz bir bölüm bulamadık'));
 
     expect(find.textContaining('kaynakta güvenle bağlayabildiğimiz bir bölüm bulamadık'), findsOneWidget);
     expect(find.textContaining('Kaynak ipucu:'), findsNothing);

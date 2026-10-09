@@ -20,6 +20,20 @@ class _UnusedPdfExtractor implements PdfTextExtractor {
   }
 }
 
+Future<void> _pumpUntilFound(WidgetTester tester, Finder finder, {int maxPumps = 80}) async {
+  for (var i = 0; i < maxPumps; i++) {
+    await tester.pump(const Duration(milliseconds: 20));
+    if (finder.evaluate().isNotEmpty) return;
+  }
+  fail('Expected workspace widget was not reached within bounded pumps.');
+}
+
+Future<void> _tapVisible(WidgetTester tester, Finder finder) async {
+  await tester.ensureVisible(finder);
+  await tester.pump();
+  await tester.tap(finder);
+}
+
 void main() {
   sqfliteFfiInit();
 
@@ -49,11 +63,11 @@ void main() {
         home: MaterialWorkspaceScreen(runtime: runtime, materialId: materialId),
       ),
     );
-    await tester.pumpAndSettle();
+    await _pumpUntilFound(tester, find.text('Kendi cümlelerinle anlat ve geri bildirim al.'));
 
     expect(find.text('Kendi cümlelerinle anlat ve geri bildirim al.'), findsOneWidget);
-    await tester.tap(find.text('Açıkla'));
-    await tester.pumpAndSettle();
+    await _tapVisible(tester, find.text('Açıkla'));
+    await _pumpUntilFound(tester, find.text('Anlatımımı değerlendir'));
 
     expect(find.text('Kendi cümlelerinle anlat'), findsOneWidget);
     expect(find.text('Anlatımımı değerlendir'), findsOneWidget);

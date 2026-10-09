@@ -44,6 +44,17 @@ class _ExplainBackScreenState extends State<ExplainBackScreen> {
     if (response.isEmpty || _submitting) return;
     setState(() => _submitting = true);
 
+    if (widget.runtime.explainBack is UnavailableExplainBackGateway) {
+      if (!mounted) return;
+      setState(() {
+        _submitting = false;
+        _result = const ExplainBackUnavailable(
+          'Güvenilir anlamsal değerlendirme servisi henüz etkin değil.',
+        );
+      });
+      return;
+    }
+
     ExplainBackResult result;
     try {
       final currentSource = await widget.runtime.store.currentSourceVersion(
