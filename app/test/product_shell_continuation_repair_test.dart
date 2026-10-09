@@ -142,7 +142,7 @@ void main() {
 
     await tester.tap(find.byTooltip('Okuma ve öğrenme seçenekleri'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Kaynağı dinle'));
+    await tester.tap(find.text('Kaynağı dinle').last);
     // Listen may show a continuously animated playback indicator; waiting for
     // every scheduled frame to settle would never complete.
     await _pumpUntilFound(tester, find.byType(ListenScreen));
