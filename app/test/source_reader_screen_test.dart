@@ -14,7 +14,7 @@ void main() {
       MaterialApp(
         home: SourceReaderScreen(
           title: 'Biyoloji notu',
-          sourceText: 'Fotosentez ışık enerjisini kullanır. Fotosentez bitkilerde gerçekleşir.',
+          sourceText: 'İlk bölüm. Fotosentez ışık enerjisini kullanır. Fotosentez bitkilerde gerçekleşir.',
           onListen: () => listened++,
           onRecap: () => recap++,
           onRecall: () => recalled++,
