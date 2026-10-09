@@ -5,12 +5,27 @@ begin;
 \set user_b '''d9000000-0000-4000-8000-000000000002'''
 
 create or replace function pg_temp.ok(v boolean, msg text)
-returns void language plpgsql as $$
+returns void language plpgsql as $
 begin
   if v is distinct from true then
     raise exception 'material_erasure_assert_failed: %', msg;
   end if;
-end $$;
+end $;
+
+create or replace function pg_temp.expect_material_delete_denied(p_material uuid)
+returns void language plpgsql as $
+begin
+  begin
+    perform public.delete_material(p_material);
+    raise exception 'cross_owner_delete_unexpectedly_succeeded';
+  exception
+    when others then
+      if sqlerrm = 'material_not_found' then
+        return;
+      end if;
+      raise;
+  end;
+end $;
 
 insert into auth.users (id, email) values
   (:user_a, 'material-erasure-a@example.test'),
@@ -144,21 +159,7 @@ select pg_temp.ok(
 
 select set_config('request.jwt.claim.sub', :user_b, false);
 set role authenticated;
-do $$
-begin
-  begin
-    perform public.delete_material(:'material_a'::uuid);
-    raise exception 'cross_owner_delete_unexpectedly_succeeded';
-  exception
-    when no_data_found then
-      null;
-    when others then
-      if sqlerrm <> 'material_not_found' then
-        raise;
-      end if;
-  end;
-end
-$$;
+select pg_temp.expect_material_delete_denied(:'material_a'::uuid);
 reset role;
 
 rollback;
