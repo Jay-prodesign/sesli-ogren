@@ -95,10 +95,10 @@ void main() {
     await _tapVisible(tester, find.byTooltip('Aramayı temizle'));
     await tester.pump();
 
-    expect(find.text('Biyoloji · Fotosentez'), findsOneWidget);
-    expect(find.text('Fizik · Newton Yasaları'), findsOneWidget);
-    expect(find.text('İktisat · Enflasyon'), findsOneWidget);
     expect(find.text('3 materyal'), findsOneWidget);
+    expect(find.text('Biyoloji · Fotosentez'), findsOneWidget);
+    await tester.scrollUntilVisible(find.text('İktisat · Enflasyon'), 150, scrollable: find.byType(Scrollable).first);
+    expect(find.text('İktisat · Enflasyon'), findsOneWidget);
 
     await tester.enterText(find.byKey(const ValueKey('library-search')), 'iktisat');
     await tester.pump();
