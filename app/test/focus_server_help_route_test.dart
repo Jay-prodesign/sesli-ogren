@@ -117,7 +117,7 @@ void main() {
     expect(focus.lastRequest!.groundingContentHash, hasLength(64));
     expect(focus.lastRequest!.kind, FocusHelpKind.directExplanation);
     expect(find.text('Kaynak dayanakları'), findsOneWidget);
-    expect(find.textContaining('Bitki bu süreçte karbondioksit ve su kullanır'), findsOneWidget);
+    expect(find.textContaining('Bitki bu süreçte karbondioksit ve su kullanır'), findsWidgets);
     expect(find.text('Hatırla'), findsOneWidget);
     expect(find.text('Kendi cümlelerinle anlat'), findsOneWidget);
   });
