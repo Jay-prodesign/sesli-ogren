@@ -1,5 +1,11 @@
 import 'package:flutter/material.dart';
 
+String _foldTurkishSearch(String value) => value
+    .replaceAll('I', 'i')
+    .replaceAll('ı', 'i')
+    .toLowerCase()
+    .replaceAll('\u0307', '');
+
 /// Read the complete locally extracted source without sending it to a model.
 class SourceReaderScreen extends StatefulWidget {
   const SourceReaderScreen({
@@ -36,14 +42,14 @@ class _SourceReaderScreenState extends State<SourceReaderScreen> {
   Widget build(BuildContext context) {
     final query = _search.text.trim();
     final source = widget.sourceText.trim();
-    final needle = query.toLowerCase();
+    final needle = _foldTurkishSearch(query);
     final foldedBuffer = StringBuffer();
     final foldedStarts = <int>[];
     final foldedEnds = <int>[];
     var sourceOffset = 0;
     for (final rune in source.runes) {
       final original = String.fromCharCode(rune);
-      final folded = original.toLowerCase();
+      final folded = _foldTurkishSearch(original);
       foldedBuffer.write(folded);
       for (var unit = 0; unit < folded.length; unit++) {
         foldedStarts.add(sourceOffset);
