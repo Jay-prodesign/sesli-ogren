@@ -742,12 +742,12 @@ class _LibrarySurfaceState extends State<_LibrarySurface> {
     setState(() => _query = '');
   }
 
+  String _searchKey(String value) => value.replaceAll('İ', 'i').replaceAll('I', 'ı').toLowerCase();
+
   List<MaterialRecord> get _visibleMaterials {
-    final query = _query.trim().toLowerCase();
+    final query = _searchKey(_query.trim());
     if (query.isEmpty) return widget.data.materials;
-    return widget.data.materials
-        .where((material) => material.title.toLowerCase().contains(query))
-        .toList(growable: false);
+    return widget.data.materials.where((material) => _searchKey(material.title).contains(query)).toList(growable: false);
   }
 
   @override

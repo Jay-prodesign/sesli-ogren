@@ -63,9 +63,9 @@ void main() {
     );
     await ingest.ingestPastedText(
       learner: runtime.learner,
-      materialId: const MaterialId('library-history'),
-      text: 'Sanayi Devrimi üretim biçimlerini dönüştürdü.',
-      sourceName: 'Tarih · Sanayi Devrimi',
+      materialId: const MaterialId('library-economics'),
+      text: 'Enflasyon fiyatlar genel düzeyindeki artışı ifade eder.',
+      sourceName: 'İktisat · Enflasyon',
     );
 
     await tester.pumpWidget(
@@ -85,7 +85,7 @@ void main() {
 
     expect(find.text('Fizik · Newton Yasaları'), findsOneWidget);
     expect(find.text('Biyoloji · Fotosentez'), findsNothing);
-    expect(find.text('Tarih · Sanayi Devrimi'), findsNothing);
+    expect(find.text('İktisat · Enflasyon'), findsNothing);
     expect(find.text('1 / 3 materyal'), findsOneWidget);
 
     await tester.enterText(find.byKey(const ValueKey('library-search')), 'astronomi');
@@ -97,7 +97,14 @@ void main() {
 
     expect(find.text('Biyoloji · Fotosentez'), findsOneWidget);
     expect(find.text('Fizik · Newton Yasaları'), findsOneWidget);
-    expect(find.text('Tarih · Sanayi Devrimi'), findsOneWidget);
+    expect(find.text('İktisat · Enflasyon'), findsOneWidget);
     expect(find.text('3 materyal'), findsOneWidget);
+
+    await tester.enterText(find.byKey(const ValueKey('library-search')), 'iktisat');
+    await tester.pump();
+
+    expect(find.text('İktisat · Enflasyon'), findsOneWidget);
+    expect(find.text('Biyoloji · Fotosentez'), findsNothing);
+    expect(find.text('Fizik · Newton Yasaları'), findsNothing);
   });
 }
