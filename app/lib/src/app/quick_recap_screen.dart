@@ -120,14 +120,8 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> {
         }
         return;
       }
-      final serverMaterialId = await widget.runtime.store.summaryServerMaterialId(
-        learner: widget.runtime.learner,
-        materialId: widget.materialId,
-        sourceVersionId: source.identity.sourceVersionId,
-      );
       final submission = await _gateway.submit(
         source: SourceIngestResult(material: material, sourceVersion: source, extractedContent: extracted),
-        existingServerMaterialId: serverMaterialId,
       );
       await widget.runtime.store.saveSummaryJob(
         learner: widget.runtime.learner,
@@ -185,6 +179,7 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> {
         }
         return;
       }
+      if (_jobId != id || !mounted) return;
       if (status.isTerminal) {
         _pollTimer?.cancel();
       }
