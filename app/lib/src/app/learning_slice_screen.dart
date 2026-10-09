@@ -36,6 +36,8 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
   String? _supportText;
   String? _inlineError;
   bool _busy = false;
+  bool _answerWasRevealed = false;
+  bool _submittedUnknown = false;
 
   @override
   void initState() {
@@ -217,6 +219,7 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
   }
 
   Future<void> _saveSource() async {
+    if (_busy) return;
     final text = _sourceController.text;
     if (text.trim().isEmpty) {
       setState(() => _inlineError = 'Çalışmak istediğin metni ekle.');
@@ -309,6 +312,8 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
       if (!mounted) return;
       _answerController.clear();
       setState(() {
+        _answerWasRevealed = false;
+        _submittedUnknown = false;
         _prompt = prompt;
         _result = null;
         _continuation = null;
@@ -370,6 +375,7 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
       if (!mounted) return;
       setState(() {
         _supportText = 'Yanıt: ${support.text}';
+        _answerWasRevealed = true;
         _answerController.text = support.text;
         _inlineError = null;
       });
@@ -432,6 +438,7 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
       if (!mounted) return;
       setState(() {
         _result = result;
+        _submittedUnknown = unknown;
         _phase = _SlicePhase.result;
         _inlineError = null;
       });
@@ -868,7 +875,11 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
     if (LivingDeskReviewScope.active(context)) {
       return AtelierResult(
         result: result,
-        answerInMemory: _answerController.text,
+        answerInMemory: _submittedUnknown
+            ? ''
+            : _answerWasRevealed
+                ? 'Yanıt gösterildi; bu metin öğrencinin bağımsız yanıtı değil.'
+                : _answerController.text,
         onContinue: () {
           setState(() {
             _continuation = LearningContinuation(state: result.state, nextAction: result.nextAction);
@@ -940,9 +951,13 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
           ),
           const SizedBox(height: 8),
           SelectableText(
-            _answerController.text.trim().isEmpty
-                ? 'Bu denemede yazılı yanıt verilmedi.'
-                : _answerController.text.trim(),
+            _submittedUnknown
+                ? 'Bilmiyorum seçildi.'
+                : _answerWasRevealed
+                    ? 'Yanıt gösterildi; bu metin öğrencinin bağımsız yanıtı değil.'
+                    : _answerController.text.trim().isEmpty
+                        ? 'Bu denemede yazılı yanıt verilmedi.'
+                        : _answerController.text.trim(),
             style: theme.textTheme.titleMedium?.copyWith(height: 1.45),
           ),
           const SizedBox(height: 20),
