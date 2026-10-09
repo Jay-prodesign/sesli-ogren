@@ -487,6 +487,72 @@ void main() {
     );
   });
 
+  testWidgets('Quick Recap Listen speaks recap text without overwriting source resume', (tester) async {
+    final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
+    addTearDown(store.close);
+    final ingest = SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor());
+    final runtime = AppRuntime(
+      learner: AppRuntime.localM5LearnerFixture,
+      store: store,
+      ingest: ingest,
+      recall: RecallLearningService(sourceStore: store, learningStore: store.learningTruthStore()),
+      telemetry: store.operationalTelemetry(),
+    );
+    const materialId = MaterialId('listen-recap');
+    final sourceText = List.generate(90, (index) => 'kaynak$index').join(' ');
+    await ingest.ingestPastedText(
+      learner: runtime.learner,
+      materialId: materialId,
+      text: sourceText,
+      sourceName: 'Uzun kaynak notu',
+    );
+    final source = await store.currentSourceVersion(learner: runtime.learner, materialId: materialId);
+    expect(source, isNotNull);
+    await store.saveListenResumeChunk(
+      learner: runtime.learner,
+      materialId: materialId,
+      sourceVersionId: source!.identity.sourceVersionId,
+      chunkIndex: 1,
+      updatedAt: DateTime.utc(2026, 10, 9, 9),
+    );
+
+    const recap = 'Fotosentez ışık enerjisini kimyasal enerjiye dönüştürmeye yardımcı olur.';
+    final speech = _FakeSpeechOutput();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: ListenScreen(
+          runtime: runtime,
+          materialId: materialId,
+          speechOutput: speech,
+          textOverride: recap,
+          titleOverride: 'Quick Recap',
+          persistProgress: false,
+        ),
+      ),
+    );
+    await pumpUntilFound(tester, find.text('Quick Recap'));
+    expect(find.text('Quick Recap özeti'), findsOneWidget);
+    expect(find.text(recap), findsOneWidget);
+    expect(find.textContaining('bölüm 2 / 2'), findsNothing);
+
+    await tester.drag(find.byType(Scrollable).last, const Offset(0, -620));
+    await tester.pumpAndSettle();
+    await tapVisible(tester, find.text('Dinlemeye başla'));
+    await tester.pump();
+    expect(speech.lastText, recap);
+
+    speech.complete();
+    await tester.pump();
+    expect(
+      await store.listenResumeChunk(
+        learner: runtime.learner,
+        materialId: materialId,
+        sourceVersionId: source.identity.sourceVersionId,
+      ),
+      1,
+    );
+  });
+
   testWidgets('Progress reports canonical unassessed state without invented mastery', (tester) async {
     final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
     addTearDown(store.close);
