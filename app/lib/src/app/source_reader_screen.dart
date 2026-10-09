@@ -30,6 +30,7 @@ class _SourceReaderScreenState extends State<SourceReaderScreen> {
   double _readingProgress = 0;
   double _fontSize = 17;
   bool _showSearch = false;
+  bool _showLearningActions = true;
 
   @override
   void initState() {
@@ -231,7 +232,39 @@ class _SourceReaderScreenState extends State<SourceReaderScreen> {
               ),
               LinearProgressIndicator(value: _readingProgress, minHeight: 3),
             ],
-            if (source.isNotEmpty && widget.onRecall != null)
+            if (source.isNotEmpty && (widget.onListen != null || widget.onRecap != null || widget.onRecall != null))
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 8, 20, 4),
+                child: Row(
+                  children: [
+                    Expanded(child: Text('Kaynakla çalış', style: Theme.of(context).textTheme.titleSmall)),
+                    IconButton(
+                      tooltip: _showLearningActions ? 'Öğrenme araçlarını gizle' : 'Öğrenme araçlarını göster',
+                      onPressed: () => setState(() => _showLearningActions = !_showLearningActions),
+                      icon: Icon(_showLearningActions ? Icons.expand_less : Icons.expand_more),
+                    ),
+                  ],
+                ),
+              ),
+            if (source.isNotEmpty && _showLearningActions && widget.onListen != null)
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
+                child: OutlinedButton.icon(
+                  onPressed: widget.onListen,
+                  icon: const Icon(Icons.headphones_rounded),
+                  label: const Text('Kaynağı dinle'),
+                ),
+              ),
+            if (source.isNotEmpty && _showLearningActions && widget.onRecap != null)
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
+                child: OutlinedButton.icon(
+                  onPressed: widget.onRecap,
+                  icon: const Icon(Icons.auto_awesome),
+                  label: const Text('Hızlı özet'),
+                ),
+              ),
+            if (source.isNotEmpty && _showLearningActions && widget.onRecall != null)
               Padding(
                 padding: const EdgeInsets.fromLTRB(20, 8, 20, 8),
                 child: FilledButton.icon(
