@@ -154,7 +154,7 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> with WidgetsBinding
         _submittedSourceVersion = source.identity.sourceVersionId;
       });
       await _refresh();
-      if (mounted && !(_status?.isTerminal ?? false)) {
+      if (mounted && _jobId != null && !(_status?.isTerminal ?? false)) {
         _startPolling();
       }
     } catch (_) {
@@ -165,7 +165,7 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> with WidgetsBinding
   }
 
   Future<void> _refresh() async {
-    if (_checking) return;
+    if (_checking || !mounted) return;
     if (_busy && _jobId == null) return;
     final id = _jobId;
     if (id == null) return;
@@ -176,6 +176,7 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> with WidgetsBinding
         learner: widget.runtime.learner,
         materialId: widget.materialId,
       );
+      if (!mounted || _jobId != id) return;
       if (currentSource?.identity.sourceVersionId != _submittedSourceVersion) {
         _pollTimer?.cancel();
         if (mounted) {
@@ -199,7 +200,7 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> with WidgetsBinding
         });
       }
     } catch (_) {
-      if (mounted) setState(() => _error = 'Özet durumu alınamadı. Tekrar deneyebilirsin.');
+      if (mounted && _jobId == id) setState(() => _error = 'Özet durumu alınamadı. Tekrar deneyebilirsin.');
     } finally {
       _checking = false;
     }
