@@ -281,10 +281,14 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
   }
 
   Future<void> _openRecallSafely() async {
+    if (_busy) return;
+    _setBusy(true);
     try {
       await _openRecall();
     } catch (_) {
       _showRecoverableError();
+    } finally {
+      _setBusy(false);
     }
   }
 
