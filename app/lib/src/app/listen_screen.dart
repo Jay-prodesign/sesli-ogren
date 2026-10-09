@@ -26,6 +26,7 @@ class _ListenScreenState extends State<ListenScreen> {
   bool _speaking = false;
   bool _startedPlayback = false;
   bool _startingPlayback = false;
+  bool _finishedListening = false;
   String? _error;
   int? _resumeChunkOverride;
   int _currentChunkIndex = 0;
@@ -80,6 +81,7 @@ class _ListenScreenState extends State<ListenScreen> {
       _currentChunkIndex = safeStart;
       _startedPlayback = false;
       _startingPlayback = true;
+      _finishedListening = false;
     });
     await _playChunk(source, safeStart, token);
   }
@@ -126,6 +128,7 @@ class _ListenScreenState extends State<ListenScreen> {
         _speaking = false;
         _startedPlayback = false;
         _startingPlayback = false;
+        _finishedListening = true;
         _resumeChunkOverride = 0;
         _currentChunkIndex = 0;
       });
@@ -193,7 +196,9 @@ class _ListenScreenState extends State<ListenScreen> {
             final resumeChunk = _resumeChunkOverride ?? source.resumeChunk;
             final hasResume = resumeChunk > 0;
             final visibleChunk = _speaking ? _currentChunkIndex : resumeChunk;
-            final progress = _speaking || _startedPlayback || hasResume
+            final progress = _finishedListening
+                ? 1.0
+                : _speaking || _startedPlayback || hasResume
                 ? (visibleChunk + 1) / source.chunks.length
                 : 0.0;
 
@@ -269,7 +274,9 @@ class _ListenScreenState extends State<ListenScreen> {
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          progress == 0
+                          _finishedListening
+                              ? 'Tüm bölümler dinlendi · Hatırlamayı deneyebilirsin'
+                              : progress == 0
                               ? 'Dinleme henüz başlamadı · ${source.chunks.length} bölüm'
                               : 'Dinleme konumu: bölüm ${visibleChunk + 1} / ${source.chunks.length}',
                           style: theme.textTheme.bodySmall?.copyWith(color: Colors.white.withValues(alpha: 0.72)),
@@ -360,7 +367,7 @@ class _ListenScreenState extends State<ListenScreen> {
                       widget.onRecall?.call();
                     },
                     icon: const Icon(Icons.psychology_alt_outlined),
-                    label: const Text('Şimdi hatırlamayı dene'),
+                    label: Text(_finishedListening ? 'Dinlemeyi bitirdin · Şimdi hatırla' : 'Şimdi hatırlamayı dene'),
                   ),
                 ],
                 const SizedBox(height: 10),
