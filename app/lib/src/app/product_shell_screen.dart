@@ -99,7 +99,9 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
   }
 
   Future<void> _openLearning() async {
-    final materialId = (await _snapshot).material?.id ?? widget.runtime.newMaterialId();
+    final snapshot = await _snapshot;
+    if (!mounted) return;
+    final materialId = snapshot.material?.id ?? widget.runtime.newMaterialId();
     await _openLearningFor(materialId);
   }
 
@@ -121,7 +123,7 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
 
   Future<void> _openWorkspace([MaterialId? materialId]) async {
     final selected = materialId ?? (await _snapshot).material?.id;
-    if (selected == null || !mounted) return;
+    if (!mounted || selected == null) return;
     final treatment = LearningVisualTreatmentScope.maybeOf(context);
     await Navigator.of(context).push<void>(
       MaterialPageRoute(
@@ -138,19 +140,28 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
 
   Future<void> _openListen() async {
     final material = (await _snapshot).material;
-    if (material == null || !mounted) return;
+    if (!mounted || material == null) return;
+    final materialId = material.id;
+    var continueToRecall = false;
     await Navigator.of(context).push<void>(
       MaterialPageRoute(
-        builder: (_) => ListenScreen(
+        builder: (listenContext) => ListenScreen(
           runtime: widget.runtime,
-          materialId: material.id,
+          materialId: materialId,
           onRecall: () {
-            Navigator.of(context).pop();
-            _openLearningFor(material.id);
+            continueToRecall = true;
+            Navigator.of(listenContext).pop();
           },
         ),
       ),
     );
+    if (!mounted) return;
+    // The player may have saved a resume checkpoint even when the user
+    // returns without starting Recall.
+    setState(_refresh);
+    if (continueToRecall) {
+      await _openLearningFor(materialId);
+    }
   }
 
   Future<void> _deleteMaterial(MaterialRecord material) async {
@@ -446,6 +457,9 @@ class _HomeSurface extends StatelessWidget {
             title: _nextTitle(data.continuation),
             reason: _nextReason(data.continuation),
             onPressed: onOpenWorkspace,
+            onStartRecall: data.continuation?.state.kind == RecallStateKind.needsReview
+                ? onOpenWorkspace
+                : onOpenLearning,
           ),
           const SizedBox(height: 22),
           Row(
@@ -547,12 +561,13 @@ class _FirstMaterialHero extends StatelessWidget {
 }
 
 class _ContinueHero extends StatelessWidget {
-  const _ContinueHero({required this.data, required this.title, required this.reason, required this.onPressed});
+  const _ContinueHero({required this.data, required this.title, required this.reason, required this.onPressed, required this.onStartRecall});
 
   final _HomeSnapshot data;
   final String title;
   final String reason;
   final VoidCallback onPressed;
+  final VoidCallback onStartRecall;
 
   @override
   Widget build(BuildContext context) {
@@ -695,9 +710,13 @@ class _ContinueHero extends StatelessWidget {
                           backgroundColor: Colors.white,
                           foregroundColor: AppPalette.primaryDark,
                         ),
-                        onPressed: onPressed,
+                        onPressed: onStartRecall,
                         icon: const Icon(Icons.arrow_forward_rounded),
-                        label: Text('Çalışmaya devam et', style: theme.textTheme.labelLarge?.copyWith(fontFamily: 'Roboto', color: AppPalette.primaryDark, fontWeight: FontWeight.w700)),
+                        label: Text(
+                          data.continuation?.state.kind == RecallStateKind.needsReview
+                              ? 'Kaynağı tekrar aç'
+                              : 'Hatırlamaya geç',
+                          style: theme.textTheme.labelLarge?.copyWith(fontFamily: 'Roboto', color: AppPalette.primaryDark, fontWeight: FontWeight.w700)),
                       ),
                     ],
                   ),
