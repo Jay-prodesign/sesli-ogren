@@ -177,7 +177,7 @@ class _AccountEntryScreenState extends State<AccountEntryScreen> {
                   ],
                   const SizedBox(height: 18),
                   Text(
-                    'Hesabın, materyal ve öğrenme geçmişini aynı kimlikle geri açabilmek için kullanılır.',
+                    'Hesabın, bu cihazdaki materyal ve öğrenme geçmişini doğru kullanıcıyla ayrı tutmak için kullanılır.',
                     style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant),
                     textAlign: TextAlign.center,
                   ),
