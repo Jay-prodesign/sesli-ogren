@@ -216,8 +216,10 @@ void main() {
     expect(find.text('Kaynakla karşılaştır'), findsOneWidget);
     expect(find.text('Sıradaki adım'), findsOneWidget);
     await tapVisible(tester, find.text('Sıradaki adıma geç'));
-    await pumpUntilFound(tester, find.text('Devam noktası'));
-    expect(find.text('Devam noktası'), findsOneWidget);
+    await pumpUntilFound(tester, find.text('03 / 03  ·  SONRAKİ ADIM'));
+    expect(find.text('03 / 03  ·  SONRAKİ ADIM'), findsOneWidget);
+    expect(find.text('Bugünlük iyi bir adım'), findsOneWidget);
+    expect(find.text('Çalışmayı bitir'), findsOneWidget);
 
     final events = await store.operationalTelemetry().events(learner: runtime.learner);
     expect(
@@ -248,9 +250,9 @@ void main() {
         ),
       ),
     );
-    await pumpUntilFound(tester, find.text('Devam noktası'));
+    await pumpUntilFound(tester, find.text('03 / 03  ·  SONRAKİ ADIM'));
 
-    expect(find.text('Devam noktası'), findsOneWidget);
+    expect(find.text('03 / 03  ·  SONRAKİ ADIM'), findsOneWidget);
     expect(find.textContaining('ONE_UNASSISTED_RETRIEVAL_OBSERVED'), findsNothing);
     expect(find.textContaining('Neden:'), findsNothing);
   });
