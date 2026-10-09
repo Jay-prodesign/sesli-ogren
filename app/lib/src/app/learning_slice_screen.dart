@@ -233,6 +233,7 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
       return;
     }
 
+    _setBusy(true);
     final stopwatch = Stopwatch()..start();
     await _recordEvent(
       OperationalEvent(
@@ -242,7 +243,6 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
         createdAt: DateTime.now().toUtc(),
       ),
     );
-    _setBusy(true);
     try {
       if (mounted) setState(() => _inlineError = null);
       final ingestResult = await widget.runtime.ingest.ingestPastedText(
@@ -400,6 +400,7 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
       return;
     }
 
+    _setBusy(true);
     final stopwatch = Stopwatch()..start();
     await _recordEvent(
       OperationalEvent(
@@ -412,7 +413,6 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
         createdAt: DateTime.now().toUtc(),
       ),
     );
-    _setBusy(true);
     try {
       final result = await widget.runtime.recall.submit(
         learner: widget.runtime.learner,
