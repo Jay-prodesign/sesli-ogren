@@ -37,6 +37,35 @@ Future<void> _tapVisible(WidgetTester tester, Finder finder) async {
 void main() {
   sqfliteFfiInit();
 
+  testWidgets('Missing material shows a recoverable workspace error', (tester) async {
+    final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
+    addTearDown(store.close);
+
+    final ingest = SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor());
+    final runtime = AppRuntime(
+      learner: AppRuntime.localM5LearnerFixture,
+      store: store,
+      ingest: ingest,
+      recall: RecallLearningService(sourceStore: store, learningStore: store.learningTruthStore()),
+      telemetry: store.operationalTelemetry(),
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: MaterialWorkspaceScreen(
+          runtime: runtime,
+          materialId: const MaterialId('missing-workspace-material'),
+        ),
+      ),
+    );
+    await _pumpUntilFound(tester, find.text('Materyal açılamadı.'));
+    expect(find.text('Tekrar dene'), findsOneWidget);
+
+    await tester.tap(find.text('Tekrar dene'));
+    await _pumpUntilFound(tester, find.text('Materyal açılamadı.'));
+    expect(find.text('Tekrar dene'), findsOneWidget);
+  });
+
   testWidgets('Material Workspace Açıkla opens active Explain-back, not generated teaching', (tester) async {
     final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
     addTearDown(store.close);
