@@ -107,7 +107,7 @@ class _SourceReaderScreenState extends State<SourceReaderScreen> {
         const SizedBox(height: 16),
         RichText(
           text: TextSpan(
-            style: TextStyle(color: ink, fontSize: _fontSize, height: 1.65),
+            style: theme.textTheme.bodyLarge?.copyWith(color: ink, fontSize: _fontSize, height: 1.65),
             children: spans,
           ),
         ),
