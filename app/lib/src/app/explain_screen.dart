@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../domain/learning_contracts.dart';
 import '../generation/grounded_explain_gateway.dart';
+import '../generation/supabase_source_summary_gateway.dart';
 import 'app_runtime.dart';
 import 'app_theme.dart';
 import 'explain_back_screen.dart';
@@ -18,6 +19,8 @@ class ExplainScreen extends StatefulWidget {
 }
 
 class _ExplainScreenState extends State<ExplainScreen> {
+  static const _summaryGateway = SupabaseSourceSummaryGateway();
+
   late Future<GroundedExplainResult> _result;
 
   @override
@@ -26,14 +29,89 @@ class _ExplainScreenState extends State<ExplainScreen> {
     _result = _request();
   }
 
-  Future<GroundedExplainResult> _request() => widget.runtime.explain.explain(
-    GroundedExplainRequest(
-      materialId: widget.source.identity.materialId,
-      sourceVersionId: widget.source.identity.sourceVersionId,
-      sourceContentDigest: widget.source.identity.contentDigest,
-      outputLocale: 'tr-TR',
-    ),
-  );
+  Future<GroundedExplainResult> _request() async {
+    try {
+      final currentSource = await widget.runtime.store.currentSourceVersion(
+        learner: widget.runtime.learner,
+        materialId: widget.source.identity.materialId,
+      );
+      if (currentSource == null) {
+        return const GroundedExplainUnavailable(reason: GroundedExplainUnavailableReason.sourceUnavailable);
+      }
+      if (currentSource.identity.sourceVersionId != widget.source.identity.sourceVersionId ||
+          currentSource.identity.contentDigest != widget.source.identity.contentDigest) {
+        return const GroundedExplainUnavailable(reason: GroundedExplainUnavailableReason.staleSource);
+      }
+
+      var serverMaterialId = await widget.runtime.store.summaryServerMaterialId(
+        learner: widget.runtime.learner,
+        materialId: widget.source.identity.materialId,
+        sourceVersionId: widget.source.identity.sourceVersionId,
+      );
+      var summaryJobId = await widget.runtime.store.summaryJobId(
+        learner: widget.runtime.learner,
+        materialId: widget.source.identity.materialId,
+        sourceVersionId: widget.source.identity.sourceVersionId,
+      );
+
+      if (serverMaterialId == null || summaryJobId == null) {
+        final material = await widget.runtime.store.material(
+          learner: widget.runtime.learner,
+          materialId: widget.source.identity.materialId,
+        );
+        final extracted = await widget.runtime.store.extractedContentForSource(
+          learner: widget.runtime.learner,
+          sourceVersionId: widget.source.identity.sourceVersionId,
+        );
+        if (material == null || extracted == null || !extracted.isValid) {
+          return const GroundedExplainUnavailable(reason: GroundedExplainUnavailableReason.sourceUnavailable);
+        }
+        if (extracted.sourceContentDigest != widget.source.identity.contentDigest) {
+          return const GroundedExplainUnavailable(reason: GroundedExplainUnavailableReason.staleSource);
+        }
+
+        final submission = await _summaryGateway.submit(
+          source: SourceIngestResult(
+            material: material,
+            sourceVersion: widget.source,
+            extractedContent: extracted,
+          ),
+        );
+
+        final sourceAfterSubmission = await widget.runtime.store.currentSourceVersion(
+          learner: widget.runtime.learner,
+          materialId: widget.source.identity.materialId,
+        );
+        if (sourceAfterSubmission?.identity.sourceVersionId != widget.source.identity.sourceVersionId ||
+            sourceAfterSubmission?.identity.contentDigest != widget.source.identity.contentDigest) {
+          return const GroundedExplainUnavailable(reason: GroundedExplainUnavailableReason.staleSource);
+        }
+
+        await widget.runtime.store.saveSummaryJob(
+          learner: widget.runtime.learner,
+          materialId: widget.source.identity.materialId,
+          sourceVersionId: widget.source.identity.sourceVersionId,
+          serverMaterialId: submission.materialId,
+          jobId: submission.jobId,
+        );
+        serverMaterialId = submission.materialId;
+        summaryJobId = submission.jobId;
+      }
+
+      await _summaryGateway.dispatch(summaryJobId);
+
+      return widget.runtime.explain.explain(
+        GroundedExplainRequest(
+          materialId: MaterialId(serverMaterialId),
+          sourceVersionId: widget.source.identity.sourceVersionId,
+          sourceContentDigest: widget.source.identity.contentDigest,
+          outputLocale: 'tr-TR',
+        ),
+      );
+    } catch (_) {
+      return const GroundedExplainUnavailable(reason: GroundedExplainUnavailableReason.temporaryFailure);
+    }
+  }
 
   void _retry() => setState(() => _result = _request());
 
