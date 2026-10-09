@@ -47,12 +47,12 @@ class LivingStudyDeskHome extends StatelessWidget {
   static const _line = Color(0xFFD5E3DC);
 
   String get _nextStep {
-    if (continuation == null) return 'İlk hatırlama denemeni yap';
-    return switch (continuation!.state.kind) {
-      RecallStateKind.notAssessed => 'Henüz denemedin',
-      RecallStateKind.needsReview => 'Kaynağa dön ve yeniden dene',
-      RecallStateKind.developing => 'Bir kez daha hatırlamayı dene',
-      RecallStateKind.retrievedOnce => 'Hatırlamanı sağlamlaştır',
+    final action = continuation?.nextAction.kind;
+    return switch (action) {
+      NextLearningActionKind.reviewSourceThenRecall => 'Kaynağa dön, sonra yeniden dene',
+      NextLearningActionKind.retryRecallWithoutHint => 'İpucusuz bir kez daha dene',
+      NextLearningActionKind.repeatRecallLater => 'Bugünlük tamam. Kaynağın burada.',
+      null => 'İlk hatırlama denemeni yap',
     };
   }
 
@@ -61,12 +61,20 @@ class LivingStudyDeskHome extends StatelessWidget {
   String get _nextActionCta {
     final action = continuation?.nextAction.kind;
     return switch (action) {
-      NextLearningActionKind.reviewSourceThenRecall => 'Kaynak onarımını aç',
-      NextLearningActionKind.retryRecallWithoutHint => 'İpucusuz denemeyi aç',
-      NextLearningActionKind.repeatRecallLater => 'Bugünlük adımı aç',
+      NextLearningActionKind.reviewSourceThenRecall => 'Kaynağı gözden geçir',
+      NextLearningActionKind.retryRecallWithoutHint => 'İpucusuz tekrar dene',
+      NextLearningActionKind.repeatRecallLater => 'Kaynağa dön',
       null => 'Hatırlamayı dene',
     };
   }
+
+  VoidCallback get _nextActionHandler =>
+      continuation?.nextAction.kind == NextLearningActionKind.repeatRecallLater ? onOpenWorkspace : onOpenLearning;
+
+  IconData get _nextActionIcon =>
+      continuation?.nextAction.kind == NextLearningActionKind.repeatRecallLater
+      ? Icons.auto_stories_outlined
+      : Icons.psychology_alt_outlined;
 
   String get _preview {
     final source = sourceText?.trim() ?? '';
@@ -306,8 +314,8 @@ class LivingStudyDeskHome extends StatelessWidget {
             width: double.infinity,
             child: FilledButton.icon(
               key: const ValueKey('la0040-living-continue'),
-              onPressed: onOpenLearning,
-              icon: const Icon(Icons.psychology_alt_outlined, size: 20),
+              onPressed: _nextActionHandler,
+              icon: Icon(_nextActionIcon, size: 20),
               label: Text(_nextActionCta),
               style: FilledButton.styleFrom(
                 backgroundColor: _ink,
