@@ -52,7 +52,18 @@ class _MaterialWorkspaceScreenState extends State<MaterialWorkspaceScreen> {
       learner: widget.runtime.learner,
       sourceVersionId: source.identity.sourceVersionId,
     );
-    final continuation = await widget.runtime.recall.reopen(learner: widget.runtime.learner, materialId: material.id);
+    LearningContinuation? continuation;
+    try {
+      continuation = await widget.runtime.recall.reopen(
+        learner: widget.runtime.learner,
+        materialId: material.id,
+      );
+    } on RecallLearningException {
+      continuation = await widget.runtime.recall.repairContinuation(
+        learner: widget.runtime.learner,
+        materialId: material.id,
+      );
+    }
     return _WorkspaceSnapshot(material: material, source: source, extracted: extracted, continuation: continuation);
   }
 
