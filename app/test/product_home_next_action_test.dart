@@ -61,6 +61,10 @@ Future<AppRuntime> _runtimeWithEvidence({
   return runtime;
 }
 
+Widget _testApp(Widget home) => MaterialApp(
+      home: MediaQuery(data: const MediaQueryData(disableAnimations: true), child: home),
+    );
+
 void main() {
   testWidgets('Home review action opens the persisted repair continuation', (tester) async {
     final runtime = await _runtimeWithEvidence(
@@ -69,13 +73,15 @@ void main() {
     );
     addTearDown(runtime.close);
 
-    await tester.pumpWidget(MaterialApp(home: ProductShellScreen(runtime: runtime)));
-    await tester.pumpAndSettle();
+    await tester.pumpWidget(_testApp(ProductShellScreen(runtime: runtime)));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
 
     final action = find.text('Kaynağı gözden geçir');
     expect(action, findsOneWidget);
     await tester.tap(action);
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
 
     expect(find.text('Bu bölümü yeniden kur'), findsOneWidget);
     expect(find.text('Kaynağı kapat ve yeniden dene'), findsOneWidget);
@@ -90,12 +96,14 @@ void main() {
     addTearDown(runtime.close);
 
     await tester.pumpWidget(MaterialApp(home: ProductShellScreen(runtime: runtime)));
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
 
     final action = find.text('Kaynağa dön');
     expect(action, findsOneWidget);
     await tester.tap(action);
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
 
     expect(find.text('Biyoloji çalışma notu'), findsWidgets);
     expect(find.text('Öğrenme durumu'), findsOneWidget);
@@ -108,29 +116,30 @@ void main() {
     );
     addTearDown(runtime.close);
 
-    await tester.pumpWidget(
-      MaterialApp(
-        home: LivingDeskReviewScope(child: ProductShellScreen(runtime: runtime)),
-      ),
-    );
-    await tester.pumpAndSettle();
+    await tester.pumpWidget(_testApp(LivingDeskReviewScope(child: ProductShellScreen(runtime: runtime))));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
 
     await tester.tap(find.text('Kaynağa dön'));
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
     expect(find.byType(MaterialWorkspaceScreen), findsOneWidget);
     expect(LivingDeskReviewScope.active(tester.element(find.byType(MaterialWorkspaceScreen))), isTrue);
 
     await tester.tap(find.byTooltip('Quick Recap'));
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
     expect(find.byType(QuickRecapScreen), findsOneWidget);
     expect(LivingDeskReviewScope.active(tester.element(find.byType(QuickRecapScreen))), isTrue);
 
     Navigator.of(tester.element(find.byType(QuickRecapScreen))).pop();
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
     expect(find.byType(MaterialWorkspaceScreen), findsOneWidget);
 
     await tester.tap(find.text('Dinle').last);
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
     expect(find.byType(ListenScreen), findsOneWidget);
     expect(LivingDeskReviewScope.active(tester.element(find.byType(ListenScreen))), isTrue);
   });

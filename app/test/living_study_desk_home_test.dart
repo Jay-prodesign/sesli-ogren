@@ -50,8 +50,10 @@ void main() {
   }) async {
     await tester.pumpWidget(
       MaterialApp(
-        home: Scaffold(
-          body: LivingStudyDeskHome(
+        home: MediaQuery(
+          data: const MediaQueryData(disableAnimations: true),
+          child: Scaffold(
+            body: LivingStudyDeskHome(
             material: material,
             continuation: continuation,
             sourceText: 'Fotosentez sırasında klorofil ışık enerjisinin yakalanmasına yardım eder.',
@@ -59,12 +61,13 @@ void main() {
             onOpenWorkspace: onOpenWorkspace,
             onOpenLearning: onOpenLearning,
             onOpenListen: () {},
-            onOpenMaterial: (_) {},
+              onOpenMaterial: (_) {},
+            ),
           ),
         ),
       ),
     );
-    await tester.pumpAndSettle();
+    await tester.pump();
   }
 
   testWidgets('completed Recall returns Home CTA to the source instead of reopening the completed step', (

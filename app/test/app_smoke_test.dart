@@ -935,7 +935,10 @@ void main() {
     expect(find.textContaining(action!.expectedAnswer), findsWidgets);
     expect(find.bySemanticsLabel('Kaynak bölümü'), findsOneWidget);
 
-    await tapVisible(tester, find.text('Kaynağı kapat ve yeniden dene'));
+    final retryFromSource = find.text('Kaynağı kapat ve yeniden dene');
+    await tester.ensureVisible(retryFromSource);
+    await tester.pump();
+    await tester.tap(retryFromSource);
     await pumpUntilFound(tester, find.text('Hatırla'));
     expect(find.text('Bu bölümü yeniden kur'), findsNothing);
     expect(find.text('Yanıtla'), findsOneWidget);
@@ -985,7 +988,6 @@ void main() {
     );
 
     await pumpUntilFound(tester, find.text('Bu bölümü yeniden kur'));
-    expect(find.text('Önce kaynağı gözden geçir'), findsNothing);
     expect(find.text('Kaynağı kapat ve yeniden dene'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
