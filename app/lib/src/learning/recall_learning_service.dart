@@ -12,7 +12,7 @@ class RecallLearningService {
   const RecallLearningService({required this._sourceStore, required this._learningStore, DateTime Function()? now})
     : _now = now ?? DateTime.now;
 
-  static const promptRuleVersion = 'recall-cloze-v1';
+  static const promptRuleVersion = 'recall-cloze-v2';
   static const evidenceRuleVersion = RecallTruthPolicy.evidenceRuleVersion;
   static const stateRuleVersion = RecallTruthPolicy.stateRuleVersion;
   static const nextActionPolicyVersion = RecallTruthPolicy.nextActionPolicyVersion;
@@ -37,10 +37,20 @@ class RecallLearningService {
       throw const RecallLearningException('Current source has no valid extracted content for recall.');
     }
 
+    final evidence = await _learningStore.evidenceForMaterial(
+      learner: learner,
+      materialId: materialId,
+      sourceVersionId: source.identity.sourceVersionId,
+    );
+    final independentRetrievals = evidence
+        .where((item) => item.outcome == RecallOutcome.correct && item.assistance == RecallAssistance.none)
+        .length;
+
     final action = _buildAction(
       materialId: materialId,
       sourceVersionId: source.identity.sourceVersionId,
       extracted: extracted,
+      candidateOrdinal: independentRetrievals,
       now: _now().toUtc(),
     );
     final persisted = await _learningStore.persistRecallAction(learner: learner, action: action);
@@ -320,12 +330,14 @@ class RecallLearningService {
     required MaterialId materialId,
     required SourceVersionId sourceVersionId,
     required ExtractedContentRecord extracted,
+    required int candidateOrdinal,
     required DateTime now,
   }) {
-    final candidate = _findCandidate(extracted.normalizedText);
-    if (candidate == null) {
+    final candidates = _findCandidates(extracted.normalizedText);
+    if (candidates.isEmpty) {
       throw const RecallLearningException('Source does not contain a suitable bounded recall prompt.');
     }
+    final candidate = candidates[candidateOrdinal % candidates.length];
 
     SourceAnchor? sourceAnchor;
     for (final anchor in extracted.anchors) {
@@ -363,45 +375,47 @@ class RecallLearningService {
     );
   }
 
-  static _RecallCandidate? _findCandidate(String text) {
-    final scan = text.length <= 2400 ? text : text.substring(0, 2400);
-    final chunks = scan.split(RegExp(r'[.!?]+'));
-    var searchOffset = 0;
-    for (final rawChunk in chunks) {
-      final sentence = rawChunk.trim();
-      if (sentence.length < 20) {
-        searchOffset += rawChunk.length + 1;
-        continue;
-      }
-      final sentenceStart = text.indexOf(sentence, searchOffset);
-      if (sentenceStart < 0) {
-        searchOffset += rawChunk.length + 1;
-        continue;
-      }
+  static List<_RecallCandidate> _findCandidates(String text) {
+    const maxCandidatePool = 64;
+    const maxSentenceCharacters = 1200;
+    final candidates = <_RecallCandidate>[];
 
+    for (final sentenceMatch in RegExp(r'[^.!?\n]+[.!?]?').allMatches(text)) {
+      final rawSentence = sentenceMatch.group(0)!;
+      final leftTrimmed = rawSentence.trimLeft();
+      final sentence = leftTrimmed.trimRight();
+      if (sentence.length < 20 || sentence.length > maxSentenceCharacters) continue;
+
+      final leadingWhitespace = rawSentence.length - leftTrimmed.length;
+      final sentenceStart = sentenceMatch.start + leadingWhitespace;
       final matches = RegExp(r'[A-Za-zÇĞİÖŞÜçğıöşü]+').allMatches(sentence).where((match) {
         final word = match.group(0)!;
         return word.length >= 5 && !_stopWords.contains(RecallTruthPolicy.normalizeAnswer(word));
       }).toList();
+      if (matches.isEmpty) continue;
 
-      if (matches.isNotEmpty) {
-        matches.sort((a, b) {
-          final lengthOrder = b.group(0)!.length.compareTo(a.group(0)!.length);
-          return lengthOrder != 0 ? lengthOrder : a.start.compareTo(b.start);
-        });
-        final selected = matches.first;
-        return _RecallCandidate(
+      matches.sort((a, b) {
+        final lengthOrder = b.group(0)!.length.compareTo(a.group(0)!.length);
+        return lengthOrder != 0 ? lengthOrder : a.start.compareTo(b.start);
+      });
+      final selected = matches.first;
+      candidates.add(
+        _RecallCandidate(
           sentence: sentence,
           sentenceStart: sentenceStart,
           sentenceEnd: sentenceStart + sentence.length,
           wordStartInSentence: selected.start,
           wordEndInSentence: selected.end,
           expectedAnswer: selected.group(0)!,
-        );
-      }
-      searchOffset = sentenceStart + sentence.length + 1;
+        ),
+      );
     }
-    return null;
+
+    if (candidates.length <= maxCandidatePool) return candidates;
+    return List<_RecallCandidate>.generate(maxCandidatePool, (index) {
+      final sourceIndex = ((index * (candidates.length - 1)) / (maxCandidatePool - 1)).round();
+      return candidates[sourceIndex];
+    }, growable: false);
   }
 
   static void _validateAttemptId(RecallAttemptId attemptId) {
