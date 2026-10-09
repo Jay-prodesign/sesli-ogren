@@ -172,6 +172,24 @@ abstract final class SesliOgrenTheme {
         ),
       ),
       dividerTheme: const DividerThemeData(color: AppPalette.outline, thickness: 1, space: 1),
+      iconTheme: const IconThemeData(color: AppPalette.ink, size: 22),
+      snackBarTheme: SnackBarThemeData(
+        backgroundColor: AppPalette.primaryDark,
+        contentTextStyle: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+        behavior: SnackBarBehavior.floating,
+      ),
+      bottomSheetTheme: const BottomSheetThemeData(
+        backgroundColor: AppPalette.surface,
+        surfaceTintColor: Colors.transparent,
+        showDragHandle: true,
+        dragHandleColor: AppPalette.outline,
+      ),
+      dialogTheme: DialogThemeData(
+        backgroundColor: AppPalette.surface,
+        surfaceTintColor: Colors.transparent,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+      ),
     );
   }
 }
