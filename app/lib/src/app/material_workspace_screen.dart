@@ -5,7 +5,7 @@ import '../domain/learning_truth.dart';
 import 'app_runtime.dart';
 import 'app_theme.dart';
 import 'companion_view.dart';
-import 'explain_screen.dart';
+import 'explain_back_screen.dart';
 import 'focus_screen.dart';
 import 'learning_slice_screen.dart';
 import 'la0040_visual_treatments.dart';
@@ -99,7 +99,7 @@ class _MaterialWorkspaceScreenState extends State<MaterialWorkspaceScreen> {
 
   Future<void> _openExplain(SourceVersionRecord source) => Navigator.of(context).push<void>(
     MaterialPageRoute(
-      builder: (_) => ExplainScreen(runtime: widget.runtime, source: source),
+      builder: (_) => ExplainBackScreen(runtime: widget.runtime, source: source),
     ),
   );
 
@@ -265,9 +265,9 @@ class _WorkspaceBody extends StatelessWidget {
                 SizedBox(
                   width: tileWidth,
                   child: _StudyToolTile(
-                    icon: Icons.auto_awesome_outlined,
+                    icon: Icons.record_voice_over_outlined,
                     title: 'Açıkla',
-                    body: 'Kaynağa bağlı açıklama al.',
+                    body: 'Kendi cümlelerinle anlat ve geri bildirim al.',
                     tone: _StudyToolTone.warm,
                     onPressed: onExplain,
                   ),
