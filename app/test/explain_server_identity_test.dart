@@ -102,7 +102,7 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
-        home: ExplainScreen(runtime: runtime, source: source, summaryGateway: const _SucceededSummaryGateway()),
+        home: ExplainScreen(runtime: runtime, source: source, summaryGateway: serverMaterialGateway),
       ),
     );
     await _pumpUntilFound(tester, find.text('Sunucu materyaline bağlı açıklama'));
