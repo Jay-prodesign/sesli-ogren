@@ -220,7 +220,6 @@ CREATE TABLE sentinel (
     const sourceB = SourceVersionId('source-b');
 
     try {
-      store = await SqliteSourceStore.open(factory: databaseFactoryFfi, path: path);
       database = await databaseFactoryFfi.openDatabase(path);
       await database.insert('materials', {
         'learner_id': 'owner',
@@ -234,6 +233,7 @@ CREATE TABLE sentinel (
       });
       await database.close();
       database = null;
+      store = await SqliteSourceStore.open(factory: databaseFactoryFfi, path: path);
 
       await store.saveSummaryJob(
         learner: owner,
