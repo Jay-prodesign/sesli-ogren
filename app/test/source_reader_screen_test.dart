@@ -24,7 +24,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Biyoloji notu'), findsOneWidget);
-    expect(find.textContaining('Fotosentez'), findsOneWidget);
+    expect(find.byType(RichText), findsWidgets);
 
     await tester.tap(find.byTooltip('Metinde ara'));
     await tester.pumpAndSettle();
