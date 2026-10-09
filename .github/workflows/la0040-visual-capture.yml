@@ -9,6 +9,7 @@ on:
       - "app/lib/src/app/learning_slice_screen.dart"
       - "app/lib/src/app/material_workspace_screen.dart"
       - "app/lib/src/app/listen_screen.dart"
+      - "app/lib/src/app/source_reader_screen.dart"
       - "app/test_visual/**"
       - ".github/workflows/la0040-visual-capture.yml"
   workflow_dispatch:
