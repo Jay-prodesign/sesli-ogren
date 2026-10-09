@@ -287,6 +287,25 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> with WidgetsBinding
     }
   }
 
+  String _statusLabel(ServerSummaryStatus? status) {
+    return switch (status?.state) {
+      'QUEUED' => 'Özet sıraya alındı',
+      'PROCESSING' => 'Özet hazırlanıyor',
+      'FAILED_RETRYABLE' => 'Geçici bir sorun oluştu',
+      'FAILED_FINAL' => 'Özet oluşturulamadı',
+      'CANCELLED' => 'Özet işlemi iptal edildi',
+      _ => 'Özet isteği gönderildi',
+    };
+  }
+
+  String? _statusDetail(ServerSummaryStatus? status) {
+    return switch (status?.state) {
+      'QUEUED' => 'Hazırlama işlemi başlatılıyor.',
+      'PROCESSING' => 'Kaynağın sunucuda işleniyor. Bu ekranda kalmak zorunda değilsin.',
+      _ => null,
+    };
+  }
+
   Future<void> _openRecall() => Navigator.of(context).push<void>(
     MaterialPageRoute(
       builder: (_) => LearningSliceScreen(runtime: widget.runtime, materialId: widget.materialId),
@@ -317,7 +336,7 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> with WidgetsBinding
           Text('Kaynağına bağlı AI özeti', style: Theme.of(context).textTheme.headlineSmall),
           const SizedBox(height: 12),
           const Text(
-            'Bu özellik yalnızca sunucunun gerçekten ürettiği özetleri gösterir. Model bağlantısı kurulana kadar sonuç üretilemez.',
+            'Özet yalnızca güncel kaynak metninden üretilir. Kaynak değişirse eski sonuç kullanılmaz.',
           ),
           const SizedBox(height: 20),
           if (_jobId == null)
@@ -328,18 +347,22 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> with WidgetsBinding
             ),
           if (_busy) const LinearProgressIndicator(),
           if (_jobId != null && status?.summary == null) ...[
-            Text('İş durumu: ${status?.state ?? "Gönderildi"}'),
+            Text(_statusLabel(status), style: Theme.of(context).textTheme.titleMedium),
+            if (_statusDetail(status) case final detail?) ...[
+              const SizedBox(height: 6),
+              Text(detail),
+            ],
+            if (status?.state == 'QUEUED' || status?.state == 'PROCESSING') ...[
+              const SizedBox(height: 12),
+              const LinearProgressIndicator(),
+            ],
             const SizedBox(height: 12),
             OutlinedButton(onPressed: _dispatching ? null : _refresh, child: const Text('Durumu yenile')),
             if (status?.state == 'QUEUED' || status?.state == 'PROCESSING') ...[
               const SizedBox(height: 8),
               OutlinedButton(
                 onPressed: _dispatching ? null : _dispatchCurrent,
-                child: Text(
-                  status?.state == 'PROCESSING'
-                      ? 'İşlem takıldıysa güvenle kontrol et'
-                      : 'İşlemi başlatmayı tekrar dene',
-                ),
+                child: Text(status?.state == 'PROCESSING' ? 'Sunucuyu yeniden kontrol et' : 'İşlemi başlatmayı tekrar dene'),
               ),
             ],
             if (status?.state == 'FAILED_RETRYABLE' && status?.failureClass != 'reconciliation_required') ...[
