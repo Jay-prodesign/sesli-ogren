@@ -122,10 +122,11 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
   }
 
   Future<void> _openWorkspace([MaterialId? materialId]) async {
-    final selected = materialId ?? (await _snapshot).material?.id;
+    final snapshot = materialId == null ? await _snapshot : null;
     if (!mounted) return;
+    final selected = materialId ?? snapshot?.material?.id;
     if (selected == null) {
-      await _openLearning();
+      await _openLearningFor(widget.runtime.newMaterialId());
       return;
     }
     final treatment = LearningVisualTreatmentScope.maybeOf(context);
@@ -157,6 +158,8 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
         ),
       ),
     );
+    if (!mounted) return;
+    setState(_refresh);
   }
 
   Future<void> _deleteMaterial(MaterialRecord material) async {
