@@ -36,15 +36,29 @@ class _SourceReaderScreenState extends State<SourceReaderScreen> {
   Widget build(BuildContext context) {
     final query = _search.text.trim();
     final source = widget.sourceText.trim();
-    final lower = source.toLowerCase();
     final needle = query.toLowerCase();
-    final matches = <int>[];
+    final foldedBuffer = StringBuffer();
+    final foldedStarts = <int>[];
+    final foldedEnds = <int>[];
+    var sourceOffset = 0;
+    for (final rune in source.runes) {
+      final original = String.fromCharCode(rune);
+      final folded = original.toLowerCase();
+      foldedBuffer.write(folded);
+      for (var unit = 0; unit < folded.length; unit++) {
+        foldedStarts.add(sourceOffset);
+        foldedEnds.add(sourceOffset + original.length);
+      }
+      sourceOffset += original.length;
+    }
+    final foldedSource = foldedBuffer.toString();
+    final matches = <({int start, int end})>[];
     if (needle.isNotEmpty) {
       var from = 0;
-      while (from < lower.length && matches.length < 2000) {
-        final at = lower.indexOf(needle, from);
+      while (from < foldedSource.length && matches.length < 2000) {
+        final at = foldedSource.indexOf(needle, from);
         if (at < 0) break;
-        matches.add(at);
+        matches.add((start: foldedStarts[at], end: foldedEnds[at + needle.length - 1]));
         from = at + needle.length;
       }
     }
@@ -54,18 +68,18 @@ class _SourceReaderScreenState extends State<SourceReaderScreen> {
       spans.add(TextSpan(text: source));
     } else {
       var cursor = 0;
-      for (final at in matches) {
-        if (at > cursor) spans.add(TextSpan(text: source.substring(cursor, at)));
+      for (final match in matches) {
+        if (match.start > cursor) spans.add(TextSpan(text: source.substring(cursor, match.start)));
         spans.add(
           TextSpan(
-            text: source.substring(at, at + needle.length),
+            text: source.substring(match.start, match.end),
             style: TextStyle(
               backgroundColor: Theme.of(context).colorScheme.tertiaryContainer,
               fontWeight: FontWeight.w700,
             ),
           ),
         );
-        cursor = at + needle.length;
+        cursor = match.end;
       }
       if (cursor < source.length) spans.add(TextSpan(text: source.substring(cursor)));
     }
