@@ -619,6 +619,12 @@ CREATE TABLE IF NOT EXISTS learner_preferences (
 
   static Future<void> _upgradeListenRatePreferenceSchema(Database db) async {
     final columns = await db.rawQuery('PRAGMA table_info(learner_preferences)');
+    if (columns.isEmpty) {
+      // Recover safely from legacy/partial databases whose earlier migration
+      // did not create the preferences table; preserve all other user data.
+      await _upgradeLearnerPreferencesSchema(db);
+      return;
+    }
     final hasListenRate = columns.any((column) => column['name'] == 'listen_rate');
     if (!hasListenRate) {
       await db.execute(
