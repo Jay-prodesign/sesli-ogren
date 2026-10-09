@@ -352,6 +352,7 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
                           onOpenLearning: _openLearning,
                           onOpenWorkspace: _openWorkspace,
                           onDeleteMaterial: _deleteMaterial,
+                          isDeletingMaterial: _deletingMaterial,
                         ),
                       ),
                       TickerMode(
@@ -835,12 +836,14 @@ class _LibrarySurface extends StatefulWidget {
     required this.onOpenLearning,
     required this.onOpenWorkspace,
     required this.onDeleteMaterial,
+    required this.isDeletingMaterial,
   });
 
   final _HomeSnapshot data;
   final VoidCallback onOpenLearning;
   final ValueChanged<MaterialId> onOpenWorkspace;
   final ValueChanged<MaterialRecord> onDeleteMaterial;
+  final bool isDeletingMaterial;
 
   @override
   State<_LibrarySurface> createState() => _LibrarySurfaceState();
@@ -1049,8 +1052,14 @@ class _LibraryMaterialCard extends StatelessWidget {
                   ),
                   IconButton(
                     tooltip: 'Materyali sil',
-                    onPressed: onDelete,
-                    icon: const Icon(Icons.delete_outline_rounded),
+                    onPressed: widget.isDeletingMaterial ? null : onDelete,
+                    icon: widget.isDeletingMaterial
+                        ? const SizedBox(
+                            width: 18,
+                            height: 18,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : const Icon(Icons.delete_outline_rounded),
                   ),
                 ],
               ),
