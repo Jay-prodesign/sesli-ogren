@@ -3,3 +3,6 @@ verify_jwt = true
 
 [functions.generation-worker]
 verify_jwt = true
+
+[functions.explain-back-evaluator]
+verify_jwt = true
