@@ -247,8 +247,7 @@ class AtelierRecall extends StatelessWidget {
       const SizedBox(height: 12),
       LayoutBuilder(
         builder: (context, constraints) {
-          final compactHeader =
-              constraints.maxWidth < 330 || MediaQuery.textScalerOf(context).scale(1) > 1.3;
+          final compactHeader = constraints.maxWidth < 330 || MediaQuery.textScalerOf(context).scale(1) > 1.3;
           const title = Text(
             'Hatırlama sırası sende.',
             style: TextStyle(
