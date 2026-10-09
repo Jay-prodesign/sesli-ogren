@@ -106,11 +106,7 @@ class _ExplainBackScreenState extends State<ExplainBackScreen> {
             }
 
             serverMaterialId = await _sourceGateway.ensureServerMaterial(
-              source: SourceIngestResult(
-                material: material,
-                sourceVersion: currentSource,
-                extractedContent: extracted,
-              ),
+              source: SourceIngestResult(material: material, sourceVersion: currentSource, extractedContent: extracted),
             );
 
             final sourceAfterBinding = await widget.runtime.store.currentSourceVersion(
@@ -141,11 +137,7 @@ class _ExplainBackScreenState extends State<ExplainBackScreen> {
           final attemptDigest = sha256
               .convert(
                 utf8.encode(
-                  jsonEncode([
-                    widget.runtime.learner.id.value,
-                    widget.source.identity.sourceVersionId.value,
-                    response,
-                  ]),
+                  jsonEncode([widget.runtime.learner.id.value, widget.source.identity.sourceVersionId.value, response]),
                 ),
               )
               .toString();
