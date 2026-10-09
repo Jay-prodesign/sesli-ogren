@@ -116,8 +116,29 @@ class _MaterialWorkspaceScreenState extends State<MaterialWorkspaceScreen> {
           future: _snapshot,
           builder: (context, snapshot) {
             if (snapshot.hasError) {
-              return const Center(
-                child: Padding(padding: EdgeInsets.all(24), child: Text('Materyal açılamadı.')),
+              return Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(24),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.sync_problem_outlined, size: 40),
+                      const SizedBox(height: 12),
+                      const Text('Materyal açılamadı.', textAlign: TextAlign.center),
+                      const SizedBox(height: 8),
+                      const Text(
+                        'Kaynağın silinmedi. Bağlantıyı veya yerel veriyi yeniden okumayı deneyebilirsin.',
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 16),
+                      OutlinedButton.icon(
+                        onPressed: () => setState(() => _snapshot = _load()),
+                        icon: const Icon(Icons.refresh_rounded),
+                        label: const Text('Tekrar dene'),
+                      ),
+                    ],
+                  ),
+                ),
               );
             }
             if (!snapshot.hasData) {
