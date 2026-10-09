@@ -87,6 +87,7 @@ void main() {
       materialId: localMaterialId,
     );
     expect(source, isNotNull);
+    final boundSource = source!;
 
     const serverMaterialId = '11111111-1111-4111-8111-111111111111';
     final serverMaterialGateway = _RecordingServerMaterialGateway(serverMaterialId);
@@ -102,7 +103,7 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
-        home: ExplainScreen(runtime: runtime, source: source, summaryGateway: serverMaterialGateway),
+        home: ExplainScreen(runtime: runtime, source: boundSource, summaryGateway: serverMaterialGateway),
       ),
     );
     await _pumpUntilFound(tester, find.text('Sunucu materyaline bağlı açıklama'));
@@ -112,7 +113,7 @@ void main() {
       await store.summaryJobId(
         learner: AppRuntime.localM5LearnerFixture,
         materialId: localMaterialId,
-        sourceVersionId: source.identity.sourceVersionId,
+        sourceVersionId: boundSource.identity.sourceVersionId,
       ),
       isNull,
     );
@@ -120,18 +121,18 @@ void main() {
       await store.summaryServerMaterialId(
         learner: AppRuntime.localM5LearnerFixture,
         materialId: localMaterialId,
-        sourceVersionId: source.identity.sourceVersionId,
+        sourceVersionId: boundSource.identity.sourceVersionId,
       ),
       serverMaterialId,
     );
     expect(explain.lastRequest, isNotNull);
     expect(explain.lastRequest!.materialId.value, serverMaterialId);
-    expect(explain.lastRequest!.sourceVersionId, source.identity.sourceVersionId);
-    expect(explain.lastRequest!.sourceContentDigest, source.identity.contentDigest);
+    expect(explain.lastRequest!.sourceVersionId, boundSource.identity.sourceVersionId);
+    expect(explain.lastRequest!.sourceContentDigest, boundSource.identity.contentDigest);
     final expectedGroundingHash = sha256
         .convert(utf8.encode('Fotosentez ışık enerjisinin kimyasal enerjiye dönüşmesine yardımcı olur.'))
         .toString();
     expect(explain.lastRequest!.groundingContentHash, expectedGroundingHash);
-    expect(explain.lastRequest!.groundingContentHash, isNot(source.identity.contentDigest));
+    expect(explain.lastRequest!.groundingContentHash, isNot(boundSource.identity.contentDigest));
   });
 }
