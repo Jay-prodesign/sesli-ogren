@@ -48,9 +48,7 @@ class _ExplainBackScreenState extends State<ExplainBackScreen> {
       if (!mounted) return;
       setState(() {
         _submitting = false;
-        _result = const ExplainBackUnavailable(
-          'Güvenilir anlamsal değerlendirme servisi henüz etkin değil.',
-        );
+        _result = const ExplainBackUnavailable('Güvenilir anlamsal değerlendirme servisi henüz etkin değil.');
       });
       return;
     }
