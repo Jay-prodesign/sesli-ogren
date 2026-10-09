@@ -33,6 +33,13 @@ void main() {
     expect(find.text('1 eşleşme'), findsOneWidget);
     expect(tester.takeException(), isNull);
 
+    await tester.tap(find.byTooltip('Aramayı temizle'));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byType(TextField), 'IŞIK');
+    await tester.pumpAndSettle();
+    expect(find.text('1 eşleşme'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+
     await tester.tap(find.text('Okuduklarını hatırla'));
     await tester.pump();
     expect(recalled, 1);
