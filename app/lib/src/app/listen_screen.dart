@@ -23,6 +23,7 @@ class _ListenScreenState extends State<ListenScreen> {
   late final SpeechOutput _speech;
   late Future<_ListenSource> _source;
   bool _speaking = false;
+  bool _startedPlayback = false;
   String? _error;
   int? _resumeChunkOverride;
   int _currentChunkIndex = 0;
@@ -75,6 +76,7 @@ class _ListenScreenState extends State<ListenScreen> {
     setState(() {
       _error = null;
       _currentChunkIndex = safeStart;
+      _startedPlayback = false;
     });
     await _playChunk(source, safeStart, token);
   }
@@ -89,6 +91,7 @@ class _ListenScreenState extends State<ListenScreen> {
         if (!mounted || token != _playToken) return;
         setState(() {
           _speaking = true;
+          _startedPlayback = true;
           _currentChunkIndex = index;
           _resumeChunkOverride = index;
         });
@@ -144,7 +147,10 @@ class _ListenScreenState extends State<ListenScreen> {
   Future<void> _stop() async {
     _playToken++;
     await _speech.stop();
-    if (mounted) setState(() => _speaking = false);
+    if (mounted) setState(() {
+      _speaking = false;
+      _startedPlayback = false;
+    });
   }
 
   @override
@@ -178,6 +184,9 @@ class _ListenScreenState extends State<ListenScreen> {
             final resumeChunk = _resumeChunkOverride ?? source.resumeChunk;
             final hasResume = resumeChunk > 0;
             final visibleChunk = _speaking ? _currentChunkIndex : resumeChunk;
+            final progress = _speaking || _startedPlayback || hasResume
+                ? (visibleChunk + 1) / source.chunks.length
+                : 0.0;
 
             return ListView(
               padding: const EdgeInsets.fromLTRB(20, 16, 20, 36),
@@ -244,14 +253,16 @@ class _ListenScreenState extends State<ListenScreen> {
                           borderRadius: BorderRadius.circular(999),
                           child: LinearProgressIndicator(
                             minHeight: 6,
-                            value: (visibleChunk + 1) / source.chunks.length,
+                            value: progress,
                             backgroundColor: Colors.white.withValues(alpha: 0.12),
                             color: AppPalette.signal,
                           ),
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          'Dinleme konumu: bölüm ${visibleChunk + 1} / ${source.chunks.length}',
+                          progress == 0
+                              ? 'Dinleme henüz başlamadı · ${source.chunks.length} bölüm'
+                              : 'Dinleme konumu: bölüm ${visibleChunk + 1} / ${source.chunks.length}',
                           style: theme.textTheme.bodySmall?.copyWith(color: Colors.white.withValues(alpha: 0.72)),
                         ),
                       ],
