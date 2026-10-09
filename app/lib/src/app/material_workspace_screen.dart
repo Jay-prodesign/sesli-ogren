@@ -110,12 +110,19 @@ class _MaterialWorkspaceScreenState extends State<MaterialWorkspaceScreen> {
     setState(() => _snapshot = _load());
   }
 
-  Future<void> _openFocus(_WorkspaceSnapshot data) => Navigator.of(context).push<void>(
-    MaterialPageRoute(
-      builder: (_) =>
-          FocusScreen(runtime: widget.runtime, source: data.source, sourceText: data.extracted?.normalizedText ?? ''),
-    ),
-  );
+  Future<void> _openFocus(_WorkspaceSnapshot data) async {
+    await Navigator.of(context).push<void>(
+      MaterialPageRoute(
+        builder: (_) => FocusScreen(
+          runtime: widget.runtime,
+          source: data.source,
+          sourceText: data.extracted?.normalizedText ?? '',
+        ),
+      ),
+    );
+    if (!mounted) return;
+    setState(() => _snapshot = _load());
+  }
 
   Future<void> _openExplain(SourceVersionRecord source) async {
     await Navigator.of(context).push<void>(
