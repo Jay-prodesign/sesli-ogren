@@ -7,7 +7,7 @@ import '../generation/supabase_source_summary_gateway.dart';
 import 'app_runtime.dart';
 import 'listen_screen.dart';
 import 'learning_slice_screen.dart';
-import 'explain_screen.dart';
+import 'explain_back_screen.dart';
 
 /// Source-grounded summary UI. No synthetic AI output is ever shown as genuine.
 class QuickRecapScreen extends StatefulWidget {
@@ -341,7 +341,7 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> with WidgetsBinding
     if (!mounted || source == null) return;
     await Navigator.of(context).push<void>(
       MaterialPageRoute(
-        builder: (_) => ExplainScreen(runtime: widget.runtime, source: source),
+        builder: (_) => ExplainBackScreen(runtime: widget.runtime, source: source),
       ),
     );
   }
@@ -436,8 +436,8 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> with WidgetsBinding
                 ),
                 OutlinedButton.icon(
                   onPressed: _openExplain,
-                  icon: const Icon(Icons.auto_awesome_outlined),
-                  label: const Text('Açıkla'),
+                  icon: const Icon(Icons.record_voice_over_outlined),
+                  label: const Text('Kendi cümlelerinle açıkla'),
                 ),
               ],
             ),
