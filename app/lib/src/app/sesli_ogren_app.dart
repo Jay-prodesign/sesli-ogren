@@ -13,7 +13,10 @@ import 'product_shell_screen.dart';
 import 'living_study_desk_home.dart';
 
 class SesliOgrenApp extends StatefulWidget {
-  const SesliOgrenApp({super.key});
+  const SesliOgrenApp({this.restoreSession, super.key});
+
+  /// Test/review seam only. Production uses the real Supabase restore path.
+  final Future<AuthenticatedLearner?> Function()? restoreSession;
 
   @override
   State<SesliOgrenApp> createState() => _SesliOgrenAppState();
@@ -31,7 +34,8 @@ class _SesliOgrenAppState extends State<SesliOgrenApp> {
   }
 
   void _openRuntime() {
-    _runtimeFuture = SupabaseLearnerAuth.restoreSession().then((learner) async {
+    final restoreSession = widget.restoreSession ?? SupabaseLearnerAuth.restoreSession;
+    _runtimeFuture = restoreSession().then((learner) async {
       if (learner == null) return null;
       return _openRuntimeForLearner(learner);
     });
