@@ -148,8 +148,11 @@ void main() {
     await _pumpUntilFound(tester, find.byType(ListenScreen));
     expect(find.byType(ListenScreen), findsOneWidget);
 
-    await _pumpUntilFound(tester, find.text('Şimdi hatırlamayı dene'));
-    await tester.ensureVisible(find.text('Şimdi hatırlamayı dene'));
+    await tester.scrollUntilVisible(
+      find.text('Şimdi hatırlamayı dene'),
+      180,
+      scrollable: find.descendant(of: find.byType(ListenScreen), matching: find.byType(Scrollable)),
+    );
     await tester.tap(find.text('Şimdi hatırlamayı dene'));
     await _pumpUntilFound(tester, find.byType(LearningSliceScreen));
     expect(find.byType(LearningSliceScreen), findsOneWidget);
