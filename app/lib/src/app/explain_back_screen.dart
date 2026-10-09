@@ -11,17 +11,23 @@ import 'app_theme.dart';
 import 'companion_view.dart';
 
 class ExplainBackScreen extends StatefulWidget {
-  const ExplainBackScreen({required this.runtime, required this.source, super.key});
+  const ExplainBackScreen({
+    required this.runtime,
+    required this.source,
+    this.sourceGateway = const SupabaseSourceSummaryGateway(),
+    super.key,
+  });
 
   final AppRuntime runtime;
   final SourceVersionRecord source;
+  final SupabaseSourceSummaryGateway sourceGateway;
 
   @override
   State<ExplainBackScreen> createState() => _ExplainBackScreenState();
 }
 
 class _ExplainBackScreenState extends State<ExplainBackScreen> {
-  static const _sourceGateway = SupabaseSourceSummaryGateway();
+  SupabaseSourceSummaryGateway get _sourceGateway => widget.sourceGateway;
 
   final _controller = TextEditingController();
   ExplainBackResult? _result;
@@ -74,6 +80,28 @@ class _ExplainBackScreenState extends State<ExplainBackScreen> {
           );
 
           if (serverMaterialId == null) {
+            final staleServerMaterialId = await widget.runtime.store.summaryServerMaterialId(
+              learner: widget.runtime.learner,
+              materialId: widget.source.identity.materialId,
+            );
+            if (staleServerMaterialId != null) {
+              final removed = await _sourceGateway.deleteServerMaterial(staleServerMaterialId);
+              if (!removed) {
+                result = const ExplainBackUnavailable('Önceki kaynak kopyası güvenli biçimde temizlenemedi.');
+                if (mounted) {
+                  setState(() {
+                    _submitting = false;
+                    _result = result;
+                  });
+                }
+                return;
+              }
+              await widget.runtime.store.clearSummaryJob(
+                learner: widget.runtime.learner,
+                materialId: widget.source.identity.materialId,
+              );
+            }
+
             serverMaterialId = await _sourceGateway.ensureServerMaterial(
               source: SourceIngestResult(
                 material: material,
