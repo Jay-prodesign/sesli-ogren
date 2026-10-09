@@ -123,32 +123,6 @@ class LivingStudyDeskHome extends StatelessWidget {
     );
   }
 
-  Widget _journeyStep(IconData icon, String number, String title, bool emphasized) {
-    return Expanded(
-      child: Column(
-        children: [
-          Container(
-            width: 38,
-            height: 38,
-            decoration: BoxDecoration(
-              color: emphasized ? _accent : _canvas,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: emphasized ? _accent : _line),
-            ),
-            child: Icon(icon, size: 19, color: emphasized ? Colors.white : _sub),
-          ),
-          const SizedBox(height: 6),
-          Text(
-            '$number · $title',
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: TextStyle(color: emphasized ? _ink : _sub, fontSize: 10, fontWeight: FontWeight.w800),
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget _populated(BuildContext context) {
     final current = material!;
     final hasRecallEvidence = continuation != null && continuation!.state.kind != RecallStateKind.notAssessed;
@@ -258,47 +232,6 @@ class LivingStudyDeskHome extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 18),
-        Semantics(
-          label: 'Öğrenme yolu: önce kaynağı incele, sonra hatırla',
-          child: Container(
-            key: const ValueKey('la0040-learning-journey'),
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 15),
-            decoration: BoxDecoration(
-              color: _paper,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: _line),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  'BUGÜNKÜ ÖĞRENME YOLUN',
-                  style: TextStyle(color: _accent, fontSize: 10, fontWeight: FontWeight.w900, letterSpacing: 1),
-                ),
-                const SizedBox(height: 12),
-                Row(
-                  children: [
-                    _journeyStep(Icons.menu_book_rounded, '01', 'İncele', true),
-                    const SizedBox(width: 6),
-                    const Icon(Icons.chevron_right_rounded, color: _sub, size: 18),
-                    _journeyStep(Icons.psychology_alt_outlined, '02', 'Hatırla', hasRecallEvidence),
-                    const SizedBox(width: 6),
-                    const Icon(Icons.chevron_right_rounded, color: _sub, size: 18),
-                    _journeyStep(Icons.auto_awesome_outlined, '03', 'Pekiştir', false),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                Text(
-                  hasRecallEvidence
-                      ? 'Hatırlama denemen kaydedildi. Sonraki adımını aşağıdan açabilirsin.'
-                      : 'Önce kaynağı incele. Hazır olduğunda ekrana bakmadan hatırlamayı dene.',
-                  style: const TextStyle(color: _sub, fontSize: 12, height: 1.45),
-                ),
-              ],
-            ),
-          ),
-        ),
-        const SizedBox(height: 18),
         Container(
           key: const ValueKey('la0040-source-to-recall-thread'),
           padding: const EdgeInsets.fromLTRB(5, 1, 0, 0),
@@ -313,7 +246,7 @@ class LivingStudyDeskHome extends StatelessWidget {
                     const SizedBox(height: 2),
                     const Icon(Icons.arrow_downward_rounded, color: _accent, size: 19),
                     const SizedBox(height: 1),
-                    const CompanionView(state: CompanionVisualState.think, size: 76),
+                    CompanionView(state: hasRecallEvidence ? CompanionVisualState.idle : CompanionVisualState.think, size: 76),
                   ],
                 ),
               ),
