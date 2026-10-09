@@ -245,9 +245,10 @@ void main() {
         ),
       ),
     );
-    await pumpUntilFound(tester, find.text('Devam noktası'));
+    await pumpUntilFound(tester, find.text('Bugünlük iyi bir adım'));
 
-    expect(find.text('Devam noktası'), findsOneWidget);
+    expect(find.text('Bugünlük iyi bir adım'), findsOneWidget);
+    expect(find.text('Çalışmayı bitir'), findsOneWidget);
     expect(find.textContaining('ONE_UNASSISTED_RETRIEVAL_OBSERVED'), findsNothing);
     expect(find.textContaining('Neden:'), findsNothing);
   });
