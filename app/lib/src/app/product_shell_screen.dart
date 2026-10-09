@@ -74,12 +74,7 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
             sourceVersionId: source.identity.sourceVersionId,
           );
     final progress = await Future.wait(
-      materials.map(
-        (item) async => ProgressItem(
-          material: item,
-          continuation: await _continuationFor(item.id),
-        ),
-      ),
+      materials.map((item) async => ProgressItem(material: item, continuation: await _continuationFor(item.id))),
     );
     LearningContinuation? continuation;
     for (final item in progress) {
