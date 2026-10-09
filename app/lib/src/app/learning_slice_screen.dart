@@ -15,10 +15,16 @@ import 'atelier_learning_surfaces.dart';
 enum _SlicePhase { loading, source, recall, result, continuation, error }
 
 class LearningSliceScreen extends StatefulWidget {
-  const LearningSliceScreen({required this.runtime, this.materialId = AppRuntime.primaryMaterialId, super.key});
+  const LearningSliceScreen({
+    required this.runtime,
+    this.materialId = AppRuntime.primaryMaterialId,
+    this.autoAdvanceContinuation = false,
+    super.key,
+  });
 
   final AppRuntime runtime;
   final MaterialId materialId;
+  final bool autoAdvanceContinuation;
 
   @override
   State<LearningSliceScreen> createState() => _LearningSliceScreenState();
@@ -64,6 +70,7 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
   }
 
   Future<void> _restore() async {
+    LearningContinuation? continuationToAdvance;
     final stopwatch = Stopwatch()..start();
     await _recordEvent(
       OperationalEvent(
@@ -112,6 +119,7 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
           _phase = _SlicePhase.continuation;
           _inlineError = null;
         });
+        if (widget.autoAdvanceContinuation) continuationToAdvance = continuation;
       } else {
         await _openRecall();
       }
@@ -145,6 +153,9 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
       });
     } finally {
       _setBusy(false);
+    }
+    if (continuationToAdvance != null && mounted) {
+      await _activateContinuation(continuationToAdvance!);
     }
   }
 
@@ -1063,8 +1074,13 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
       _continuation = continuation;
       _inlineError = null;
     });
+    await _activateContinuation(continuation);
+  }
+
+  Future<void> _activateContinuation(LearningContinuation continuation) async {
     switch (continuation.nextAction.kind) {
       case NextLearningActionKind.reviewSourceThenRecall:
+        if (!mounted) return;
         setState(() => _phase = _SlicePhase.continuation);
         await _reviewContinuationSource();
       case NextLearningActionKind.retryRecallWithoutHint:
