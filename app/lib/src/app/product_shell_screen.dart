@@ -563,7 +563,7 @@ class _ContinueHero extends StatelessWidget {
 
     return Material(
       color: AppPalette.surface,
-      borderRadius: BorderRadius.circular(24),
+      borderRadius: BorderRadius.circular(28),
       clipBehavior: Clip.antiAlias,
       child: InkWell(
         key: const ValueKey('home-continuation-hero'),
@@ -571,13 +571,13 @@ class _ContinueHero extends StatelessWidget {
         child: DecoratedBox(
           decoration: BoxDecoration(
             border: Border.all(color: AppPalette.outline),
-            borderRadius: BorderRadius.circular(24),
+            borderRadius: BorderRadius.circular(28),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Padding(
-                padding: const EdgeInsets.fromLTRB(18, 18, 18, 16),
+                padding: const EdgeInsets.fromLTRB(22, 24, 22, 22),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -604,7 +604,7 @@ class _ContinueHero extends StatelessWidget {
                                 style: theme.textTheme.labelSmall?.copyWith(
                                   color: AppPalette.inkMuted,
                                   fontWeight: FontWeight.w900,
-                                  letterSpacing: 0.55,
+                                  letterSpacing: 1.35,
                                 ),
                               ),
                               const SizedBox(height: 4),
@@ -612,7 +612,7 @@ class _ContinueHero extends StatelessWidget {
                                 material.title,
                                 maxLines: 2,
                                 overflow: TextOverflow.ellipsis,
-                                style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
+                                style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800, height: 1.2, letterSpacing: -0.35),
                               ),
                             ],
                           ),
@@ -652,7 +652,7 @@ class _ContinueHero extends StatelessWidget {
               DecoratedBox(
                 decoration: const BoxDecoration(color: AppPalette.primaryDark),
                 child: Padding(
-                  padding: const EdgeInsets.fromLTRB(18, 17, 18, 18),
+                  padding: const EdgeInsets.fromLTRB(22, 23, 22, 24),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
