@@ -26,6 +26,37 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> {
   Timer? _pollTimer;
 
   @override
+  void initState() {
+    super.initState();
+    _restore();
+  }
+
+  Future<void> _restore() async {
+    try {
+      final source = await widget.runtime.store.currentSourceVersion(
+        learner: widget.runtime.learner,
+        materialId: widget.materialId,
+      );
+      if (source == null) return;
+      final id = await widget.runtime.store.summaryJobId(
+        learner: widget.runtime.learner,
+        materialId: widget.materialId,
+        sourceVersionId: source.identity.sourceVersionId,
+      );
+      if (!mounted || id == null) return;
+      setState(() => _jobId = id);
+      await _refresh();
+      if (mounted && !(_status?.isTerminal ?? false)) {
+        _startPolling();
+      }
+    } catch (_) {
+      if (mounted) {
+        setState(() => _error = 'Önceki özet işi yüklenemedi.');
+      }
+    }
+  }
+
+  @override
   void dispose() {
     _pollTimer?.cancel();
     super.dispose();
@@ -64,6 +95,13 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> {
       if (extracted == null) throw StateError('Source text unavailable');
       final submission = await _gateway.submit(
         source: SourceIngestResult(material: material, sourceVersion: source, extractedContent: extracted),
+      );
+      await widget.runtime.store.saveSummaryJob(
+        learner: widget.runtime.learner,
+        materialId: widget.materialId,
+        sourceVersionId: source.identity.sourceVersionId,
+        serverMaterialId: submission.materialId,
+        jobId: submission.jobId,
       );
       if (!mounted) return;
       setState(() => _jobId = submission.jobId);

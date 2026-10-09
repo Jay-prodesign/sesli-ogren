@@ -36,7 +36,7 @@ class SqliteSourceStore implements SourceStore {
     final database = await selectedFactory.openDatabase(
       databasePath,
       options: OpenDatabaseOptions(
-        version: 8,
+        version: 9,
         onConfigure: (db) => db.execute('PRAGMA foreign_keys = ON'),
         onUpgrade: (db, oldVersion, newVersion) async {
           if (oldVersion < 2) {
@@ -59,6 +59,9 @@ class SqliteSourceStore implements SourceStore {
           }
           if (oldVersion < 8) {
             await _upgradeLearnerPreferencesSchema(db);
+          }
+          if (oldVersion < 9) {
+            await _upgradeSummaryJobsSchema(db);
           }
         },
         onCreate: (db, version) async {
@@ -260,6 +263,7 @@ CREATE TABLE learner_preferences (
   CHECK (onboarding_completed IN (0, 1))
 )
 ''');
+          await _upgradeSummaryJobsSchema(db);
           await db.execute('''
 CREATE TABLE operational_events (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -318,6 +322,56 @@ ON extracted_contents (learner_id, source_version_id, invalidated_at_utc)
       ),
     );
     return SqliteSourceStore._(database);
+  }
+
+  static Future<void> _upgradeSummaryJobsSchema(Database db) async {
+    await db.execute('''
+CREATE TABLE IF NOT EXISTS summary_jobs (
+  learner_id TEXT NOT NULL,
+  material_id TEXT NOT NULL,
+  source_version_id TEXT NOT NULL,
+  server_material_id TEXT NOT NULL,
+  job_id TEXT NOT NULL,
+  PRIMARY KEY (learner_id, material_id),
+  FOREIGN KEY (learner_id, material_id)
+    REFERENCES materials (learner_id, material_id) ON DELETE CASCADE
+)
+''');
+  }
+
+  Future<String?> summaryJobId({
+    required AuthenticatedLearner learner,
+    required MaterialId materialId,
+    required SourceVersionId sourceVersionId,
+  }) async {
+    final rows = await _database.query(
+      'summary_jobs',
+      columns: ['job_id'],
+      where: 'learner_id = ? AND material_id = ? AND source_version_id = ?',
+      whereArgs: [learner.id.value, materialId.value, sourceVersionId.value],
+      limit: 1,
+    );
+    return rows.isEmpty ? null : rows.first['job_id']! as String;
+  }
+
+  Future<void> saveSummaryJob({
+    required AuthenticatedLearner learner,
+    required MaterialId materialId,
+    required SourceVersionId sourceVersionId,
+    required String serverMaterialId,
+    required String jobId,
+  }) async {
+    await _database.insert(
+      'summary_jobs',
+      {
+        'learner_id': learner.id.value,
+        'material_id': materialId.value,
+        'source_version_id': sourceVersionId.value,
+        'server_material_id': serverMaterialId,
+        'job_id': jobId,
+      },
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
   }
 
   static Future<void> _upgradeActiveRecallAttemptSchema(Database db) async {
