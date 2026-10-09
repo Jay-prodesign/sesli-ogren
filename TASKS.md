@@ -214,7 +214,7 @@ Next unallocated ID: **LA-0041**.
 
 ##### LA-0022 — M5 checkpoint evidence, independent review and disposition
 
-- Status: HISTORICAL / SUPERSEDED AS ACTIVE CURSOR — M5 checkpoint record retained for history; current execution is governed by `docs/agent/EXECUTION_STATE.json` and the active LA-0039/LA-0040 integrated outcome.
+- Status: CANCELLED
 - Depends on: LA-0021
 - Owner: Brain
 - Executor: ChatGPT (temporary reversible engineering authority)
