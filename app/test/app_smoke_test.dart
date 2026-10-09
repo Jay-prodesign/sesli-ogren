@@ -281,6 +281,7 @@ void main() {
     expect(find.text('Henüz bilmiyorum'), findsOneWidget);
     expect(find.text('Kaynak bağlamı'), findsOneWidget);
     expect(find.text('İpucusuz hatırladın'), findsNothing);
+    expect(find.text('Bu değerlendirme yalnızca bu denemeyi gösterir.'), findsOneWidget);
     await tapVisible(tester, find.text('Sıradaki adıma geç'));
     await pumpUntilFound(tester, find.text('Önce kaynağı gözden geçir'));
     expect(find.text('Kaynağı gözden geçir'), findsOneWidget);
@@ -318,6 +319,7 @@ void main() {
     await pumpUntilFound(tester, find.text('Gösterilen yanıt'));
     expect(find.text('Senin yanıtın'), findsNothing);
     expect(find.text('İpucusuz hatırladın'), findsNothing);
+    expect(find.textContaining('bağımsız hatırlama kanıtı oluşmadı'), findsOneWidget);
     await tapVisible(tester, find.text('Sıradaki adıma geç'));
     await pumpUntilFound(tester, find.text('Bir kez daha hatırla'));
     expect(find.text('İpucusuz yeniden dene'), findsOneWidget);
