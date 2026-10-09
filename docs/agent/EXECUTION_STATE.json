@@ -10,11 +10,11 @@
     "default_branch": "main"
   },
   "mission": {
-    "id": "M5_GOLDEN_LEARNING_SLICE",
-    "title": "M5 Golden Learning Slice — admitted production-shaped vertical slice",
-    "executor": "ChatGPT (Founder-authorized reversible engineering delegate; Claude/Codex may resume only after fresh-read)"
+    "id": "LA-0039_LA-0040_INTEGRATED_OUTCOME",
+    "title": "Post-M5 commercial product completion — integrated source-grounded learning journey",
+    "executor": "Founder-authorized active ChatGPT/Codex executor; Claude is optional after fresh-read, not a waiting dependency"
   },
-  "lifecycle_stage": "M5 Golden Learning Slice — ADMITTED / EXECUTABLE under D-071; physical mobile-readiness deferred to final gate under D-068",
+  "lifecycle_stage": "Post-M5 commercial-product completion; current integrated outcome executable, physical mobile/release evidence deferred to final release readiness",
   "status": "IN_PROGRESS",
   "active_milestone": "Post-M5 commercial-product completion — LA-0039 + LA-0040 integrated outcome batch",
   "architecture_proof": {
@@ -56,13 +56,14 @@
     "LA-0037": "DONE",
     "LA-0038": "DONE",
     "LA-0039": "IN_PROGRESS",
-    "LA-0040": "IN_PROGRESS"
+    "LA-0040": "IN_PROGRESS",
+    "LA0022": "CLOSED_FOR_M5_DEVELOPMENT; deferred D-068 release evidence remains a release gate"
   },
   "git": {
     "branch": "feat/full-product-shell-continuity",
     "base_sha": "84e96dce5b3cc9f32af3f459d422b652d0e86624",
-    "head_sha": "93cd80be370e7a08f29358f175831a53bc474403",
-    "head_sha_note": "Validated runtime head for LA-0040 final pre-Founder gate: bootstrap 37737380112 PASS; account-deletion 37737380121 PASS; product-bounded 37737380119 PASS. Full visual capture 37737373695 PASS; artifact 11532626337.",
+    "head_sha": "Resolve from live branch API; latest product-code baseline 761087f6ab062f4da1b47340d0851909eaa33ce3; later commits are governance-state reconciliation only",
+    "head_sha_note": "Do not treat historical validation SHAs as current product validation. Read live branch HEAD and Actions for current status.",
     "pr_number": 13,
     "pr_url": "https://github.com/Jay-prodesign/sesli-ogren/pull/13",
     "merged": false,
@@ -93,11 +94,12 @@
     "current_task": "LA-0040"
   },
   "blockers": [
-    "Live Supabase anonymous-auth evidence remains BLOCKED because GitHub protected client config is absent: SUPABASE_URL and SUPABASE_PUBLISHABLE_KEY are not configured for the validation environment. Only these client-safe values may be used; never service-role credentials.",
-    "Physical iOS/Android speech/accessibility/performance/orientation checks remain deferred under D-068 and mandatory before release-candidate/public-release claims."
+    "Supabase client-safe auth validation lacks configured SUPABASE_URL and SUPABASE_PUBLISHABLE_KEY in the validation environment; this blocks only that external configuration evidence, not independent product implementation.",
+    "Physical iOS/Android speech/accessibility/performance/orientation checks remain deferred under D-068 and mandatory before release readiness claims.",
+    "Product-bounded validation currently fails the canonical format step; account-deletion SQL tests 87 and 89 fail, with test 89 syntax error. Fix the relevant code/workflow/test issues as an independent repair batch; do not let them block unrelated product implementation."
   ],
   "protected_gate": "Merge, release, deploy, paid providers, credentials/secrets, licensing posture, production mutation: Product Owner only",
-  "next_action": "Execute CMD-0002 Founder visual FAIL corrective cursor: reconcile LA-0039/LA-0040 current state, write compact Experience Fidelity Contract, compare 3 real Flutter visual treatments on identical source/truth, implement one signature payoff anchor and seek explicit Founder review. Do not mark visual DONE, merge, deploy or release.",
+  "next_action": "Continue a cohesive implementation batch on feat/full-product-shell-continuity: finish source→learn→evidence→next-action→resume continuity and fix connected error/recovery/integration defects. Visual Founder disposition gates only visual lock/closure; implementation continues. Do not stop after a commit or bounded CI failure.",
   "canonical_source_refs": [
     "CURRENT_EXECUTION_STATE — Learning App",
     "Founder visual/companion correction — 2026-10-07 (supersedes D-070 companion visual lock for LA-0040 evaluation)",
@@ -162,8 +164,8 @@
   "founder_visual_decision": {
     "decision_id": "D-070 + Founder visual/companion correction 2026-10-07",
     "companion": "KEEP CANONICAL D/KNOT — full-packet evidence supports stateful/sparse integration; no HIGH/BLOCKER redesign/removal trigger remains",
-    "product_visual": "VQG_PASS__FOUNDER_VISUAL_LOCK_PENDING",
-    "reason": "The full current-feature visual packet passes VQG-01 with no visual BLOCKER/HIGH, including narrow/long-title/text-scale stress. Internal evidence supports commercial-quality coherence but cannot substitute for the protected Founder taste/lock or real-user love evidence.",
+    "product_visual": "REWORK — Founder visual lock/closure remains explicitly reserved; current work continues autonomously and this gate does not block implementation.",
+    "reason": "A visual candidate previously failed Founder review. Rework autonomously; request Founder disposition only when a materially improved representative runtime candidate is ready. No component-level approvals.",
     "affected": [
       "colors",
       "typography",
@@ -253,7 +255,7 @@
       "before admission of a major new product/learning tranche"
     ],
     "propagation": "CHANGE -> BLAST-RADIUS ANALYSIS -> AFFECTED/UNAFFECTED -> REVALIDATE/UPDATE_REQUIRED/NO_CHANGE",
-    "current_effect": "Founder contradictory visual/UX evidence triggered the D-074 premise-audit path. LA-0039 is the active Tier-A product-experience correction; do not broaden unrelated feature scope.",
+    "current_effect": "LA-0039/LA-0040 integrated product completion is executable. Tier-A governs material unresolved premise/admission decisions only; it does not create an approval gate for routine reversible implementation or block independent tasks.",
     "post_m5_intent": "Superseded by active LA-0039 World-Class Experience / Golden Product Slice. Further premise audits remain trigger-based, not automatic bureaucracy."
   },
   "asset_governance_overlay": {
@@ -420,7 +422,7 @@
     "remaining_gate": "Founder representative runtime visual review; LA-0039 remains IN_PROGRESS until that review is accepted."
   },
   "audience_visual_lock": {
-    "status": "VQG_PASS_FOUNDER_VISUAL_LOCK_PENDING",
+    "status": "REWORK_IN_PROGRESS_FOUNDER_LOCK_ONLY",
     "primary_audience": "Broad learner-owned-material product; Turkish high-school students (grades 9–12 / approx. ages 14–18) are the priority-weighted initial commercial segment, not the exclusive target",
     "theme": "Living Visual Learning Studio / Student Momentum — VQG-01 PASS; Founder visual lock pending",
     "voice": "smart study partner; direct, respectful, evidence-aware, calm under failure, energetic in action; informal singular Turkish 'sen'",
