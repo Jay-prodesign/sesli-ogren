@@ -258,7 +258,7 @@ class LivingStudyDeskHome extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        hasRecallEvidence ? 'DENEMEN KAYITLI · SIRADAKİ ADIM' : 'ŞİMDİ KAYNAĞI KAPAT',
+                        hasRecallEvidence ? 'DENEMEN KAYITLI · SIRADAKİ ADIM' : 'KAYNAĞINDAN ÖĞREN',
                         style: const TextStyle(
                           color: _accent,
                           fontSize: 10,
@@ -295,7 +295,7 @@ class LivingStudyDeskHome extends StatelessWidget {
               key: const ValueKey('la0040-living-continue'),
               onPressed: onOpenLearning,
               icon: const Icon(Icons.psychology_alt_outlined, size: 20),
-              label: Text(hasRecallEvidence ? 'Hatırlamaya devam et' : 'Hatırlamayı dene'),
+              label: Text(hasRecallEvidence ? 'Sonraki öğrenme adımını aç' : 'Hatırlamayı dene'),
               style: FilledButton.styleFrom(
                 backgroundColor: _ink,
                 foregroundColor: Colors.white,
