@@ -62,11 +62,12 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> {
     if (id == null) return;
     try {
       final status = await _gateway.status(id);
-      if (mounted)
+      if (mounted) {
         setState(() {
           _status = status;
           _error = null;
         });
+      }
     } catch (_) {
       if (mounted) setState(() => _error = 'Özet durumu alınamadı. Tekrar deneyebilirsin.');
     }
