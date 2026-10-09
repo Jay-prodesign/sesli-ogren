@@ -1,3 +1,23 @@
+# CURRENT HANDOFF — SINGLE ACTIVE CURSOR (2026-10-09)
+
+**Active mission:** LA-0039_LA-0040_INTEGRATED_OUTCOME — complete the post-M5 source-grounded learning journey in the existing approved product corridor.
+
+**Current product truth:** Sesli Öğren is a source-grounded, voice-enabled personal learning product—not a generic AI wrapper, dashboard, or generated-content viewer. Preserve canonical learner/source/version/provenance and D/Knot identity. The learner journey is learner-owned PDF/text → authoritative source/version → Listen or source-hidden active recall → truthful result with evidence → explainable next action → persistence/reopen/recovery.
+
+**Live code:** branch `feat/full-product-shell-continuity`, PR #13 open and unmerged. Resolve current HEAD from the live branch API; do not treat a stale SHA or older CI result as current proof. The latest code batch added source-reader actions from Quick Recap and a widget test for local search, recall, Listen and recap callbacks. Current SQL repair batch fixes invalid dollar quoting in test 89 and aligns test 87 with migration 0017’s deletion contract. CI is still in progress on a nearby earlier SHA; latest source-reader test has not yet been validated.
+
+**Verified truth:** at code HEAD `6406de220bedb4e73595fdf213a3637d32958eb2`, account-deletion bounded validation passed after the SQL fixes. Bootstrap validation failed because the current-state record lacked the validator-required `git.head_sha`, included a stale `LA0022` key absent from TASKS.md, and this handoff did not name the active mission. Those are control-plane alignment defects, not reasons to stop product implementation. The current branch has since advanced; do not claim all current code passes. Physical device/fresh-user evidence is not available here and must not be claimed.
+
+**Current gates:** CURRENT & REAL — protected merge/release/publication, spending, legal/financial commitment, secrets, destructive real-user-data actions, serious irreversible pivot; D-068 physical device readiness before release; D-070 D/Knot identity; D-076 provenance/licensing. NARROW — Founder visual disposition blocks visual lock/closure only. SUPERSEDED — old zero-based discovery and re-admission gates contradicted by D-053/D-054 and later accepted D-070–D-076 decisions. HISTORICAL — older gate labels and evidence packets after supersession. Missing external evidence blocks only its associated claim/release gate.
+
+**Executable now:** (1) validate/fix current Flutter source-reader and recap continuity; (2) finish and verify SQL privacy-erasure tests; (3) repair current bootstrap control-plane validation without restoring the stale LA-0022 cursor; (4) continue the integrated learning journey, error/recovery, settings, accessibility and commercial-readiness work. After every meaningful result, continue to the next safe executable outcome; no one-file/one-test/one-commit stop.
+
+**Next action:** inspect live CI failures, fix them, run the relevant product tests, then continue the highest-value source→learn→evidence→resume improvement. Do not merge or release without its protected authorization.
+
+---
+
+## Historical handoff material (reference only; not the active cursor)
+
 # EXECUTION CORRECTION — OUTCOME BATCH / DEVELOPMENT FIRST (2026-10-09)
 
 This section supersedes conflicting micro-task, per-commit stop, routine micro-QA, and historical execution-cursor instructions below. It changes execution cadence, NOT product scope, acceptance authority, or protected gates.
