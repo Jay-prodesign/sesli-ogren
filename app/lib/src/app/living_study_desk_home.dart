@@ -107,12 +107,7 @@ class LivingStudyDeskHome extends StatelessWidget {
                         if (!compactHeader)
                           const Text(
                             'ÇALIŞMA MASAN',
-                            style: TextStyle(
-                              color: _sub,
-                              fontSize: 10,
-                              fontWeight: FontWeight.w800,
-                              letterSpacing: 1,
-                            ),
+                            style: TextStyle(color: _sub, fontSize: 10, fontWeight: FontWeight.w800, letterSpacing: 1),
                           ),
                       ],
                     );
@@ -137,13 +132,7 @@ class LivingStudyDeskHome extends StatelessWidget {
         const Text(
           'Kendi kaynağın.\nGerçek hatırlama.',
           key: ValueKey('la0040-atelier-home-promise'),
-          style: TextStyle(
-            color: _ink,
-            fontSize: 31,
-            height: 1.05,
-            fontWeight: FontWeight.w900,
-            letterSpacing: -1.2,
-          ),
+          style: TextStyle(color: _ink, fontSize: 31, height: 1.05, fontWeight: FontWeight.w900, letterSpacing: -1.2),
         ),
         const SizedBox(height: 9),
         const Text(
@@ -157,10 +146,7 @@ class LivingStudyDeskHome extends StatelessWidget {
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(8, 9, 0, 0),
                 child: DecoratedBox(
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFE2E9E3),
-                    borderRadius: BorderRadius.circular(13),
-                  ),
+                  decoration: BoxDecoration(color: const Color(0xFFE2E9E3), borderRadius: BorderRadius.circular(13)),
                 ),
               ),
             ),
@@ -292,10 +278,7 @@ class LivingStudyDeskHome extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 6),
-                      Text(
-                        _why,
-                        style: const TextStyle(color: _sub, fontSize: 13, height: 1.42),
-                      ),
+                      Text(_why, style: const TextStyle(color: _sub, fontSize: 13, height: 1.42)),
                     ],
                   ),
                 ),
