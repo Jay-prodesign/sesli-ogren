@@ -151,6 +151,10 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
         ),
       ),
     );
+    // Listen can update the source-bound resume checkpoint. Rebuild Home and
+    // Progress after returning so the learner sees the latest continuation.
+    if (!mounted) return;
+    setState(_refresh);
   }
 
   Future<void> _deleteMaterial(MaterialRecord material) async {
