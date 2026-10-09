@@ -1094,23 +1094,23 @@ class _ContextCard extends StatelessWidget {
     final soft = isListen ? AppPalette.signalSoft : AppPalette.primarySoft;
     final accent = isListen ? AppPalette.signal : AppPalette.primary;
     return Material(
-      color: soft.withValues(alpha: 0.42),
+      color: AppPalette.surface,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
-        side: BorderSide(color: accent.withValues(alpha: 0.14)),
+        borderRadius: BorderRadius.circular(24),
+        side: const BorderSide(color: AppPalette.outline),
       ),
       clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: onPressed,
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 16, 14, 15),
+          padding: const EdgeInsets.fromLTRB(19, 20, 18, 20),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               DecoratedBox(
                 decoration: BoxDecoration(
-                  color: AppPalette.surface,
-                  borderRadius: BorderRadius.circular(12),
+                  color: soft,
+                  borderRadius: BorderRadius.circular(14),
                   border: Border.all(color: accent.withValues(alpha: 0.10)),
                 ),
                 child: Padding(
@@ -1118,9 +1118,9 @@ class _ContextCard extends StatelessWidget {
                   child: Icon(icon, size: 20, color: accent),
                 ),
               ),
-              const SizedBox(height: 14),
-              Text(title, style: theme.textTheme.titleMedium),
-              const SizedBox(height: 4),
+              const SizedBox(height: 20),
+              Text(title, style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800, letterSpacing: -0.3)),
+              const SizedBox(height: 7),
               Text(
                 body,
                 style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant, height: 1.35),
@@ -1153,9 +1153,10 @@ class _PrimaryCard extends StatelessWidget {
     final theme = Theme.of(context);
     return Card(
       elevation: 0,
-      color: theme.colorScheme.primaryContainer.withValues(alpha: 0.55),
+      color: AppPalette.surface,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24), side: const BorderSide(color: AppPalette.outline)),
       child: Padding(
-        padding: const EdgeInsets.all(22),
+        padding: const EdgeInsets.all(24),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
