@@ -26,10 +26,12 @@ class _UnusedPdfExtractor implements PdfTextExtractor {
 
 class _RecordingExplainBackGateway implements ExplainBackGateway {
   ExplainBackRequest? lastRequest;
+  final List<ExplainBackRequest> requests = <ExplainBackRequest>[];
 
   @override
   Future<ExplainBackResult> evaluate(ExplainBackRequest request) async {
     lastRequest = request;
+    requests.add(request);
     return ExplainBackEvaluated(
       attemptId: request.attemptId,
       sourceVersionId: request.sourceVersionId,
@@ -131,6 +133,19 @@ void main() {
         .convert(utf8.encode('Fotosentez ışık enerjisini kimyasal enerjiye dönüştürür.'))
         .toString();
     expect(explainBack.lastRequest!.groundingContentHash, expectedGroundingHash);
+
+    final firstAttemptId = explainBack.lastRequest!.attemptId;
+    await tester.tap(find.text('Tekrar kendi cümlelerimle anlat'));
+    await tester.pumpAndSettle();
+    await tester.enterText(
+      find.byType(TextField),
+      'Fotosentezde ışık enerjisi kimyasal enerjiye dönüşür.',
+    );
+    await tester.tap(find.text('Anlatımımı değerlendir'));
+    await tester.pumpAndSettle();
+
+    expect(explainBack.requests, hasLength(2));
+    expect(explainBack.lastRequest!.attemptId, firstAttemptId);
   });
 
   testWidgets('Explain-back deletes stale server source before rebinding a newer local source', (tester) async {
