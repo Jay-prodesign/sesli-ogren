@@ -719,6 +719,7 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
           TextField(
             key: const ValueKey('pasted-material-text'),
             controller: _sourceController,
+            enabled: !_busy,
             minLines: 7,
             maxLines: 14,
             textCapitalization: TextCapitalization.sentences,
