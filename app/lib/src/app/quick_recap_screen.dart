@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:share_plus/share_plus.dart';
 
 import '../domain/learning_contracts.dart';
 import '../generation/supabase_source_summary_gateway.dart';
@@ -349,6 +350,32 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> with WidgetsBinding
     };
   }
 
+  Future<void> _shareSummary(ServerSummaryStatus status) async {
+    final summary = status.summary;
+    if (summary == null || summary.trim().isEmpty) return;
+    try {
+      final material = await widget.runtime.store.material(
+        learner: widget.runtime.learner,
+        materialId: widget.materialId,
+      );
+      if (!mounted) return;
+      final title = material?.title.trim().isNotEmpty == true ? material!.title : 'Öğrenme materyali';
+      final text = [
+        'Hızlı özet — $title',
+        'AI tarafından oluşturulan özet · Sesli Öğren',
+        summary,
+        if (status.keyPoints.isNotEmpty)
+          'Önemli noktalar:\n${status.keyPoints.map((point) => '• $point').join('\n')}',
+      ].join('\n\n');
+      await SharePlus.instance.share(ShareParams(text: text, subject: 'Hızlı özet — $title'));
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Özet paylaşılamadı. Tekrar deneyebilirsin.')),
+      );
+    }
+  }
+
   Future<void> _copySummary(ServerSummaryStatus status) async {
     final summary = status.summary;
     if (summary == null || summary.trim().isEmpty) return;
@@ -455,6 +482,11 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> with WidgetsBinding
               spacing: 8,
               runSpacing: 8,
               children: [
+                OutlinedButton.icon(
+                  onPressed: () => _shareSummary(status),
+                  icon: const Icon(Icons.share_outlined),
+                  label: const Text('Paylaş'),
+                ),
                 OutlinedButton.icon(
                   onPressed: () => _copySummary(status),
                   icon: const Icon(Icons.copy_outlined),
