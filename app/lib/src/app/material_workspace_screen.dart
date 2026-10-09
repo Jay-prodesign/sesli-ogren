@@ -58,7 +58,7 @@ class _MaterialWorkspaceScreenState extends State<MaterialWorkspaceScreen> {
         learner: widget.runtime.learner,
         materialId: material.id,
       );
-    } on RecallLearningException {
+    } on Exception {
       continuation = await widget.runtime.recall.repairContinuation(
         learner: widget.runtime.learner,
         materialId: material.id,
