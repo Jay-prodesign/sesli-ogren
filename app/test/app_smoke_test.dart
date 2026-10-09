@@ -294,6 +294,35 @@ void main() {
     expect(find.text('Yanıtla'), findsOneWidget);
   });
 
+  testWidgets('revealed answer is never presented as independent recall', (tester) async {
+    final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
+    addTearDown(store.close);
+    final runtime = AppRuntime(
+      learner: AppRuntime.localM5LearnerFixture,
+      store: store,
+      ingest: SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor()),
+      recall: RecallLearningService(sourceStore: store, learningStore: store.learningTruthStore()),
+      telemetry: store.operationalTelemetry(),
+    );
+    await runtime.ingest.ingestPastedText(
+      learner: runtime.learner,
+      materialId: AppRuntime.primaryMaterialId,
+      text: 'Fotosentez ışık enerjisini kimyasal enerjiye dönüştürür. Klorofil bitkilerde ışığın soğurulmasını sağlar.',
+      sourceName: 'Biyoloji',
+    );
+    await tester.pumpWidget(testShell(runtime));
+    await pumpUntilFound(tester, find.text('Hatırla'));
+    await tapVisible(tester, find.text('Yanıtı göster'));
+    await pumpUntilFound(tester, find.textContaining('Yanıt:'));
+    await tapVisible(tester, find.text('Yanıtla'));
+    await pumpUntilFound(tester, find.text('Gösterilen yanıt'));
+    expect(find.text('Senin yanıtın'), findsNothing);
+    expect(find.text('İpucusuz hatırladın'), findsNothing);
+    await tapVisible(tester, find.text('Sıradaki adıma geç'));
+    await pumpUntilFound(tester, find.text('Bir kez daha hatırla'));
+    expect(find.text('İpucusuz yeniden dene'), findsOneWidget);
+  });
+
   testWidgets('empty shell workspace request opens first material creation', (tester) async {
     final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
     addTearDown(store.close);
