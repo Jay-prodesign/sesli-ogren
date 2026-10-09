@@ -7,6 +7,27 @@ import '../domain/learning_contracts.dart';
 class SupabaseSourceSummaryGateway {
   const SupabaseSourceSummaryGateway();
 
+  Future<ServerSummaryStatus> status(String jobId) async {
+    final client = await SupabaseLearnerAuth.clientForAuthenticatedRuntime();
+    if (client.auth.currentSession == null) {
+      throw const ServerSummarySubmissionException('Authentication required.');
+    }
+    final rows = await client.from('generation_jobs').select('state,failure_class').eq('id', jobId).limit(1);
+    if (rows.isEmpty) throw const ServerSummarySubmissionException('Summary job not found.');
+    final state = rows.first['state'] as String;
+    if (state == 'SUCCEEDED') {
+      final artifacts = await client.from('artifacts').select('content').eq('generation_job_id', jobId).eq('status', 'available').limit(1);
+      if (artifacts.isEmpty) return const ServerSummaryStatus(state: 'PROCESSING');
+      final content = Map<String, dynamic>.from(artifacts.first['content'] as Map);
+      return ServerSummaryStatus(
+        state: state,
+        summary: content['summary'] as String?,
+        keyPoints: (content['key_points'] as List<dynamic>? ?? const []).whereType<String>().toList(growable: false),
+      );
+    }
+    return ServerSummaryStatus(state: state, failureClass: rows.first['failure_class'] as String?);
+  }
+
   Future<ServerSummarySubmission> submit({required SourceIngestResult source}) async {
     final normalizedText = source.extractedContent.normalizedText.trim();
     if (normalizedText.isEmpty || normalizedText.length > 200000) {
@@ -47,4 +68,14 @@ class ServerSummarySubmissionException implements Exception {
   const ServerSummarySubmissionException(this.message);
 
   final String message;
+}
+
+class ServerSummaryStatus {
+  const ServerSummaryStatus({required this.state, this.summary, this.keyPoints = const [], this.failureClass});
+  final String state;
+  final String? summary;
+  final List<String> keyPoints;
+  final String? failureClass;
+  bool get isTerminal => state == 'SUCCEEDED' || state == 'FAILED_FINAL' ||
+      state == 'FAILED_RETRYABLE' || state == 'CANCELLED';
 }

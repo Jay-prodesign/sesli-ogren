@@ -12,6 +12,7 @@ import 'la0040_visual_treatments.dart';
 import 'living_study_desk_home.dart';
 import 'atelier_learning_surfaces.dart';
 import 'listen_screen.dart';
+import 'quick_recap_screen.dart';
 
 class MaterialWorkspaceScreen extends StatefulWidget {
   const MaterialWorkspaceScreen({required this.runtime, required this.materialId, super.key});
@@ -54,6 +55,12 @@ class _MaterialWorkspaceScreenState extends State<MaterialWorkspaceScreen> {
     final continuation = await widget.runtime.recall.reopen(learner: widget.runtime.learner, materialId: material.id);
     return _WorkspaceSnapshot(material: material, source: source, extracted: extracted, continuation: continuation);
   }
+
+  Future<void> _openQuickRecap() => Navigator.of(context).push<void>(
+    MaterialPageRoute(
+      builder: (_) => QuickRecapScreen(runtime: widget.runtime, materialId: widget.materialId),
+    ),
+  );
 
   Future<void> _openRecall() async {
     final treatment = LearningVisualTreatmentScope.maybeOf(context);
@@ -118,6 +125,7 @@ class _MaterialWorkspaceScreenState extends State<MaterialWorkspaceScreen> {
             return _WorkspaceBody(
               data: snapshot.data!,
               onRecall: _openRecall,
+              onQuickRecap: _openQuickRecap,
               onListen: _openListen,
               onExplain: () => _openExplain(snapshot.data!.source),
               onFocus: () => _openFocus(snapshot.data!),
@@ -133,6 +141,7 @@ class _WorkspaceBody extends StatelessWidget {
   const _WorkspaceBody({
     required this.data,
     required this.onRecall,
+    required this.onQuickRecap,
     required this.onListen,
     required this.onExplain,
     required this.onFocus,
@@ -140,6 +149,7 @@ class _WorkspaceBody extends StatelessWidget {
 
   final _WorkspaceSnapshot data;
   final VoidCallback onRecall;
+  final VoidCallback onQuickRecap;
   final VoidCallback onListen;
   final VoidCallback onExplain;
   final VoidCallback onFocus;
@@ -203,6 +213,8 @@ class _WorkspaceBody extends StatelessWidget {
             ),
           ],
         ),
+        const SizedBox(height: 12),
+        OutlinedButton.icon(onPressed: onQuickRecap, icon: const Icon(Icons.auto_awesome), label: const Text('Quick Recap — AI özet')),
         const SizedBox(height: 24),
         Text('Öğrenme durumu', style: theme.textTheme.titleMedium),
         const SizedBox(height: 10),
