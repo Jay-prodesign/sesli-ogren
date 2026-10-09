@@ -1,10 +1,7 @@
 import 'package:flutter/material.dart';
 
-String _foldTurkishSearch(String value) => value
-    .replaceAll('I', 'i')
-    .replaceAll('ı', 'i')
-    .toLowerCase()
-    .replaceAll('\u0307', '');
+String _foldTurkishSearch(String value) =>
+    value.replaceAll('I', 'i').replaceAll('ı', 'i').toLowerCase().replaceAll('\u0307', '');
 
 /// Read the complete locally extracted source without sending it to a model.
 class SourceReaderScreen extends StatefulWidget {
