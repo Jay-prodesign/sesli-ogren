@@ -69,7 +69,6 @@ String _outcome(RecallAttemptResult r) => switch (r.evidence.outcome) {
   RecallOutcome.partial => 'Kısmen hatırlandı',
   RecallOutcome.incorrect => 'Tekrar denemen gerekiyor',
   RecallOutcome.unknown => 'Henüz yanıt veremedin',
-  _ => 'Yanıtın değerlendirildi',
 };
 
 class _Colors {
