@@ -10,6 +10,7 @@ import 'app_runtime.dart';
 import 'listen_screen.dart';
 import 'learning_slice_screen.dart';
 import 'explain_back_screen.dart';
+import 'source_reader_screen.dart';
 
 /// Source-grounded summary UI. No synthetic AI output is ever shown as genuine.
 class QuickRecapScreen extends StatefulWidget {
@@ -409,6 +410,38 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> with WidgetsBinding
     }
   }
 
+  Future<void> _openOriginalSource() async {
+    try {
+      final material = await widget.runtime.store.material(
+        learner: widget.runtime.learner,
+        materialId: widget.materialId,
+      );
+      final source = await widget.runtime.store.currentSourceVersion(
+        learner: widget.runtime.learner,
+        materialId: widget.materialId,
+      );
+      if (material == null || source == null || !mounted) return;
+      final extracted = await widget.runtime.store.extractedContentForSource(
+        learner: widget.runtime.learner,
+        sourceVersionId: source.identity.sourceVersionId,
+      );
+      if (!mounted) return;
+      await Navigator.of(context).push<void>(
+        MaterialPageRoute(
+          builder: (_) => SourceReaderScreen(
+            title: material.title,
+            sourceText: extracted?.normalizedText ?? '',
+          ),
+        ),
+      );
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Kaynak metni açılamadı. Tekrar deneyebilirsin.')),
+      );
+    }
+  }
+
   Future<void> _openRecall() => Navigator.of(context).push<void>(
     MaterialPageRoute(
       builder: (_) => LearningSliceScreen(runtime: widget.runtime, materialId: widget.materialId),
@@ -486,6 +519,11 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> with WidgetsBinding
               spacing: 8,
               runSpacing: 8,
               children: [
+                OutlinedButton.icon(
+                  onPressed: _openOriginalSource,
+                  icon: const Icon(Icons.menu_book_outlined),
+                  label: const Text('Kaynağı oku'),
+                ),
                 OutlinedButton.icon(
                   onPressed: () => _shareSummary(status),
                   icon: const Icon(Icons.share_outlined),
