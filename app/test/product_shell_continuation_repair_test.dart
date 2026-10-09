@@ -5,6 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:sesli_ogren/src/app/app_runtime.dart';
 import 'package:sesli_ogren/src/app/product_shell_screen.dart';
 import 'package:sesli_ogren/src/app/learning_slice_screen.dart';
+import 'package:sesli_ogren/src/app/listen_screen.dart';
 import 'package:sesli_ogren/src/app/source_reader_screen.dart';
 import 'package:sesli_ogren/src/data/pdf_text_extractor.dart';
 import 'package:sesli_ogren/src/data/source_ingest_service.dart';
@@ -106,6 +107,50 @@ void main() {
     await tester.tap(find.byTooltip('Son kaynağı oku'));
     await tester.pumpAndSettle();
     expect(find.byType(SourceReaderScreen), findsOneWidget);
+    await tester.pageBack();
+    await tester.pumpAndSettle();
+    expect(find.byType(ProductShellScreen), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('reader to Listen to Recall keeps the active route and returns to Library', (tester) async {
+    final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
+    addTearDown(store.close);
+    final ingest = SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor());
+    const learner = AppRuntime.localM5LearnerFixture;
+    await ingest.ingestPastedText(
+      learner: learner,
+      materialId: const MaterialId('reader-listen-recall-material'),
+      text: 'Fotosentez bitkilerde gerçekleşir ve ışık enerjisi kullanır.',
+      sourceName: 'Biyoloji · Fotosentez',
+    );
+    final runtime = AppRuntime(
+      learner: learner,
+      store: store,
+      ingest: ingest,
+      recall: RecallLearningService(sourceStore: store, learningStore: store.learningTruthStore()),
+      telemetry: store.operationalTelemetry(),
+    );
+
+    await tester.pumpWidget(MaterialApp(home: ProductShellScreen(runtime: runtime)));
+    await _pumpUntilFound(tester, find.text('Biyoloji · Fotosentez'));
+    await tester.tap(find.text('Kütüphane').last);
+    await tester.pumpAndSettle();
+    await tester.tap(find.byTooltip('Son kaynağı oku'));
+    await tester.pumpAndSettle();
+    expect(find.byType(SourceReaderScreen), findsOneWidget);
+
+    await tester.tap(find.byTooltip('Okuma ve öğrenme seçenekleri'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Kaynağı dinle'));
+    await tester.pumpAndSettle();
+    expect(find.byType(ListenScreen), findsOneWidget);
+
+    await _pumpUntilFound(tester, find.text('Şimdi hatırlamayı dene'));
+    await tester.ensureVisible(find.text('Şimdi hatırlamayı dene'));
+    await tester.tap(find.text('Şimdi hatırlamayı dene'));
+    await _pumpUntilFound(tester, find.byType(LearningSliceScreen));
+    expect(find.byType(LearningSliceScreen), findsOneWidget);
     await tester.pageBack();
     await tester.pumpAndSettle();
     expect(find.byType(ProductShellScreen), findsOneWidget);
