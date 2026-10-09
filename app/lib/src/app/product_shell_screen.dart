@@ -864,7 +864,8 @@ class _LibrarySurfaceState extends State<_LibrarySurface> {
     setState(() => _query = '');
   }
 
-  String _searchKey(String value) => value.replaceAll('İ', 'i').replaceAll('I', 'ı').toLowerCase();
+  String _searchKey(String value) =>
+      value.replaceAll('I', 'i').replaceAll('ı', 'i').toLowerCase().replaceAll('\u0307', '');
 
   List<MaterialRecord> get _visibleMaterials {
     final query = _searchKey(_query.trim());
