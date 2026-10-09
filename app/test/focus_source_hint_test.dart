@@ -26,8 +26,7 @@ class _UnavailableServerFocusGateway implements FocusHelpGateway {
   const _UnavailableServerFocusGateway();
 
   @override
-  Future<FocusHelpResult> help(FocusHelpRequest request) async =>
-      const FocusHelpUnavailable('simulated server outage');
+  Future<FocusHelpResult> help(FocusHelpRequest request) async => const FocusHelpUnavailable('simulated server outage');
 }
 
 class _SourceGateway extends SupabaseSourceSummaryGateway {
