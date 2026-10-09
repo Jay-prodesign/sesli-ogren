@@ -32,7 +32,6 @@ class _ExplainBackScreenState extends State<ExplainBackScreen> {
   final _controller = TextEditingController();
   ExplainBackResult? _result;
   bool _submitting = false;
-  int _attemptOrdinal = 0;
 
   @override
   void dispose() {
@@ -135,11 +134,14 @@ class _ExplainBackScreenState extends State<ExplainBackScreen> {
             );
           }
 
-          final ordinal = _attemptOrdinal++;
           final attemptDigest = sha256
               .convert(
                 utf8.encode(
-                  '${widget.runtime.learner.id.value}\u0000${widget.source.identity.sourceVersionId.value}\u0000$ordinal\u0000$response',
+                  jsonEncode([
+                    widget.runtime.learner.id.value,
+                    widget.source.identity.sourceVersionId.value,
+                    response,
+                  ]),
                 ),
               )
               .toString();
