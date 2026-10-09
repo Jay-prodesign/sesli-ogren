@@ -55,6 +55,28 @@ Future<void> _pumpUntilFound(WidgetTester tester, Finder finder, {int maxPumps =
 void main() {
   sqfliteFfiInit();
 
+  testWidgets('first material action opens the real source-entry flow', (tester) async {
+    final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
+    addTearDown(store.close);
+    final ingest = SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor());
+    const learner = AppRuntime.localM5LearnerFixture;
+    final runtime = AppRuntime(
+      learner: learner,
+      store: store,
+      ingest: ingest,
+      recall: RecallLearningService(sourceStore: store, learningStore: store.learningTruthStore()),
+      telemetry: store.operationalTelemetry(),
+    );
+
+    await tester.pumpWidget(MaterialApp(home: ProductShellScreen(runtime: runtime)));
+    await _pumpUntilFound(tester, find.text('Materyal ekle'));
+    await tester.tap(find.text('Materyal ekle'));
+    await tester.pumpAndSettle();
+    expect(find.byType(ProductShellScreen), findsOneWidget);
+    expect(find.text('Kütüphane şu anda yüklenemedi.'), findsNothing);
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('product shell repairs stale continuation without blocking the library', (tester) async {
     final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
     addTearDown(store.close);
