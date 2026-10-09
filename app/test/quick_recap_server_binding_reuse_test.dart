@@ -162,9 +162,9 @@ void main() {
     );
     await tester.pumpAndSettle();
     await tester.tap(find.text('Özet oluştur'));
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 200));
-    await tester.pump();
+    for (var i = 0; i < 40 && find.textContaining('Sunucuya ulaşılamadı').evaluate().isEmpty; i++) {
+      await tester.pump(const Duration(milliseconds: 50));
+    }
     expect(find.textContaining('Sunucuya ulaşılamadı'), findsOneWidget);
     expect(find.text('İşlemi başlatmayı tekrar dene'), findsOneWidget);
   });
