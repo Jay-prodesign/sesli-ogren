@@ -92,9 +92,8 @@ void main() {
     await tester.pump();
     expect(find.text('Eşleşen materyal bulunamadı'), findsOneWidget);
 
-    await _tapVisible(tester, find.byTooltip('Aramayı temizle'));
-    await tester.pumpAndSettle();
-    await tester.scrollUntilVisible(find.text('Biyoloji · Fotosentez'), 240, scrollable: find.byType(Scrollable).last);
+    await _tapVisible(tester, find.widgetWithText(FilledButton, 'Aramayı temizle'));
+    await tester.pump(const Duration(milliseconds: 100));
 
     expect(find.text('Biyoloji · Fotosentez'), findsOneWidget);
     expect(find.text('Fizik · Newton Yasaları'), findsOneWidget);
