@@ -874,12 +874,7 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
             : _answerWasRevealed
             ? 'Yanıt gösterildi; bu metin öğrencinin bağımsız yanıtı değil.'
             : _answerController.text,
-        onContinue: () {
-          setState(() {
-            _continuation = LearningContinuation(state: result.state, nextAction: result.nextAction);
-            _phase = _SlicePhase.continuation;
-          });
-        },
+        onContinue: () => _continueFromResult(result),
       );
     }
     if (candidate != null) {
@@ -1034,17 +1029,37 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
           ),
           const SizedBox(height: 18),
           FilledButton(
-            onPressed: () {
-              setState(() {
-                _continuation = LearningContinuation(state: result.state, nextAction: result.nextAction);
-                _phase = _SlicePhase.continuation;
-              });
-            },
-            child: const Text('Sıradaki adıma geç'),
+            onPressed: () => _continueFromResult(result),
+            child: Text(_resultActionLabel(result.nextAction.kind)),
           ),
         ],
       ),
     );
+  }
+
+  String _resultActionLabel(NextLearningActionKind kind) => switch (kind) {
+    NextLearningActionKind.reviewSourceThenRecall => 'Kaynağı gözden geçir',
+    NextLearningActionKind.retryRecallWithoutHint => 'İpucusuz tekrar dene',
+    NextLearningActionKind.repeatRecallLater => 'Bugünlük tamamla',
+  };
+
+  Future<void> _continueFromResult(RecallAttemptResult result) async {
+    if (_busy) return;
+    final continuation = LearningContinuation(state: result.state, nextAction: result.nextAction);
+    setState(() {
+      _continuation = continuation;
+      _inlineError = null;
+    });
+    switch (continuation.nextAction.kind) {
+      case NextLearningActionKind.reviewSourceThenRecall:
+        setState(() => _phase = _SlicePhase.continuation);
+        await _reviewContinuationSource();
+      case NextLearningActionKind.retryRecallWithoutHint:
+        await _openRecall();
+      case NextLearningActionKind.repeatRecallLater:
+        if (!mounted) return;
+        setState(() => _phase = _SlicePhase.continuation);
+    }
   }
 
   String _focusedSourceReview(String text, SourceAnchor anchor) {
