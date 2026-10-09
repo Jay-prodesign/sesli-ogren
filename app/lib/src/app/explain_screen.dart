@@ -108,7 +108,23 @@ class _ExplainScreenState extends State<ExplainScreen> {
         return const GroundedExplainUnavailable(reason: GroundedExplainUnavailableReason.sourceUnavailable);
       }
 
-      await _summaryGateway.dispatch(boundSummaryJobId);
+      final summaryStatus = await _summaryGateway.status(boundSummaryJobId);
+      if (summaryStatus.state == 'FAILED_FINAL' ||
+          summaryStatus.state == 'CANCELLED' ||
+          summaryStatus.failureClass == 'reconciliation_required') {
+        return const GroundedExplainUnavailable(reason: GroundedExplainUnavailableReason.temporaryFailure);
+      }
+      if (summaryStatus.state == 'FAILED_RETRYABLE') {
+        final accepted = await _summaryGateway.retry(boundSummaryJobId);
+        if (!accepted) {
+          return const GroundedExplainUnavailable(reason: GroundedExplainUnavailableReason.temporaryFailure);
+        }
+      } else if (summaryStatus.state == 'QUEUED' || summaryStatus.state == 'PROCESSING') {
+        final accepted = await _summaryGateway.dispatch(boundSummaryJobId);
+        if (!accepted) {
+          return const GroundedExplainUnavailable(reason: GroundedExplainUnavailableReason.temporaryFailure);
+        }
+      }
 
       return widget.runtime.explain.explain(
         GroundedExplainRequest(
