@@ -198,7 +198,7 @@ void main() {
     await tester.pumpWidget(
       _phoneFrame(FocusScreen(runtime: runtime, source: source!, sourceText: extracted!.normalizedText)),
     );
-    await _pumpUntilFound(tester, find.text('Kısa odak oturumu'));
+    await _pumpUntilFound(tester, find.text('Odaklan'));
     await tester.pump(const Duration(milliseconds: 200));
     await expectLater(find.byType(Scaffold).first, matchesGoldenFile('goldens/la0040_focus.png'));
 
