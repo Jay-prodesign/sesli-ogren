@@ -78,7 +78,12 @@ class _CompanionViewState extends State<CompanionView> with SingleTickerProvider
               final listeningBeat = math.sin(t * math.pi * 4);
               final thinkingDrift = math.sin(t * math.pi * 2 - math.pi / 3);
               final pose = switch (widget.state) {
-                CompanionVisualState.idle => (angle: 0.0, dx: 0.0, dy: -1.7 * wave, scale: 1.0 + 0.014 * wave),
+                CompanionVisualState.idle => (
+                  angle: 0.0,
+                  dx: 0.0,
+                  dy: -1.7 * wave,
+                  scale: 1.0 + 0.014 * wave,
+                ),
                 CompanionVisualState.listen => (
                   angle: 0.045 + 0.008 * listeningBeat,
                   dx: 1.1,
