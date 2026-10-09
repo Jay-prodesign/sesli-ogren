@@ -573,7 +573,7 @@ void main() {
     await pumpUntilFound(tester, find.text('Henüz ölçülmedi'));
     expect(find.text('İlerleme notu'), findsOneWidget);
     expect(find.text('Henüz ölçülmedi'), findsOneWidget);
-    expect(find.textContaining('yapay olarak artırmaz'), findsOneWidget);
+    expect(find.textContaining('kendi başına hatırladığında kaydedilir'), findsOneWidget);
     expect(find.textContaining('%'), findsNothing);
   });
 
