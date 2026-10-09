@@ -5,6 +5,9 @@ import 'package:flutter/material.dart';
 import '../domain/learning_contracts.dart';
 import '../generation/supabase_source_summary_gateway.dart';
 import 'app_runtime.dart';
+import 'listen_screen.dart';
+import 'learning_slice_screen.dart';
+import 'explain_screen.dart';
 
 /// Source-grounded summary UI. No synthetic AI output is ever shown as genuine.
 class QuickRecapScreen extends StatefulWidget {
@@ -140,6 +143,25 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> {
     }
   }
 
+  Future<void> _openRecall() => Navigator.of(context).push<void>(
+    MaterialPageRoute(
+      builder: (_) => LearningSliceScreen(runtime: widget.runtime, materialId: widget.materialId),
+    ),
+  );
+
+  Future<void> _openExplain() async {
+    final source = await widget.runtime.store.currentSourceVersion(
+      learner: widget.runtime.learner,
+      materialId: widget.materialId,
+    );
+    if (!mounted || source == null) return;
+    await Navigator.of(context).push<void>(
+      MaterialPageRoute(
+        builder: (_) => ExplainScreen(runtime: widget.runtime, source: source),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final status = _status;
@@ -172,6 +194,39 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> {
             for (final point in status.keyPoints)
               Padding(padding: const EdgeInsets.only(bottom: 8), child: Text('• $point')),
             const Text('AI tarafından oluşturuldu · Kaynak metne dayalı'),
+          const SizedBox(height: 20),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              OutlinedButton.icon(
+                onPressed: () => Navigator.of(context).push<void>(
+                  MaterialPageRoute(
+                    builder: (routeContext) => ListenScreen(
+                      runtime: widget.runtime,
+                      materialId: widget.materialId,
+                      onRecall: () {
+                        Navigator.of(routeContext).pop();
+                        _openRecall();
+                      },
+                    ),
+                  ),
+                ),
+                icon: const Icon(Icons.headphones),
+                label: const Text('Dinle'),
+              ),
+              OutlinedButton.icon(
+                onPressed: _openRecall,
+                icon: const Icon(Icons.psychology_alt_outlined),
+                label: const Text('Hatırla'),
+              ),
+              OutlinedButton.icon(
+                onPressed: _openExplain,
+                icon: const Icon(Icons.auto_awesome_outlined),
+                label: const Text('Açıkla'),
+              ),
+            ],
+          ),
           ],
           if (status?.state.startsWith('FAILED') == true)
             const Text('Özet üretimi başarısız oldu. Aynı işi otomatik yeniden göndermiyoruz.'),
