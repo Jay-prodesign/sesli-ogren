@@ -281,6 +281,17 @@ void main() {
     expect(find.text('Henüz bilmiyorum'), findsOneWidget);
     expect(find.text('Kaynak bağlamı'), findsOneWidget);
     expect(find.text('İpucusuz hatırladın'), findsNothing);
+    await tapVisible(tester, find.text('Sıradaki adıma geç'));
+    await pumpUntilFound(tester, find.text('Önce kaynağı gözden geçir'));
+    expect(find.text('Kaynağı gözden geçir'), findsOneWidget);
+    await tapVisible(tester, find.text('Kaynağı gözden geçir'));
+    await pumpUntilFound(tester, find.text('Kaynağın'));
+    expect(find.textContaining('Bitkiler fotosentez sırasında'), findsWidgets);
+    await tapVisible(tester, find.text('Kaynağı kapat'));
+    await pumpUntilFound(tester, find.text('Önce kaynağı gözden geçir'));
+    await tapVisible(tester, find.text('Kaynağa bakmadan tekrar dene'));
+    await pumpUntilFound(tester, find.text('Hatırla'));
+    expect(find.text('Yanıtla'), findsOneWidget);
   });
 
   testWidgets('empty shell workspace request opens first material creation', (tester) async {
