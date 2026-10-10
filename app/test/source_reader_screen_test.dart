@@ -58,6 +58,42 @@ void main() {
     expect(recap, 1);
   });
 
+  testWidgets('source reader restores and reports a durable reading position', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(390, 500));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    final reported = <double>[];
+    final longSource = List<String>.generate(
+      90,
+      (index) => 'Bölüm ${index + 1}: Fotosentez ışık enerjisini kimyasal enerjiye dönüştürür.',
+    ).join(' ');
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: SourceReaderScreen(
+          title: 'Uzun biyoloji notu',
+          sourceText: longSource,
+          initialProgress: 0.5,
+          onProgressChanged: (progress) async {
+            reported.add(progress);
+          },
+        ),
+      ),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50));
+
+    final scrollable = tester.state<ScrollableState>(find.byType(Scrollable).last);
+    expect(scrollable.position.maxScrollExtent, greaterThan(0));
+    final restored = scrollable.position.pixels / scrollable.position.maxScrollExtent;
+    expect(restored, closeTo(0.5, 0.08));
+
+    await tester.drag(find.byType(Scrollable).last, const Offset(0, -240));
+    await tester.pump();
+    expect(reported, isNotEmpty);
+    expect(reported.last, greaterThan(0.5));
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('empty source returns to the material instead of trapping the learner', (tester) async {
     await tester.pumpWidget(
       MaterialApp(

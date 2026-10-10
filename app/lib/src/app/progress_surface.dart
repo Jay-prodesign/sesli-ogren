@@ -12,11 +12,26 @@ class ProgressItem {
     required this.continuation,
     this.listenActivityAt,
     this.listenResumeChunk = 0,
+    this.readerActivityAt,
+    this.readerResumeProgress = 0,
   });
   final MaterialRecord material;
   final LearningContinuation? continuation;
   final DateTime? listenActivityAt;
   final int listenResumeChunk;
+  final DateTime? readerActivityAt;
+  final double readerResumeProgress;
+
+  bool get hasReaderResume => continuation == null && readerResumeProgress > 0.02 && readerResumeProgress < 0.95;
+  bool get hasListenResume => continuation == null && listenResumeChunk > 0;
+
+  bool get prefersReaderResume {
+    if (!hasReaderResume) return false;
+    if (!hasListenResume) return true;
+    if (readerActivityAt == null) return false;
+    if (listenActivityAt == null) return true;
+    return !readerActivityAt!.isBefore(listenActivityAt!);
+  }
 }
 
 class ProgressSurface extends StatelessWidget {
@@ -134,7 +149,9 @@ class _ProgressCard extends StatelessWidget {
     };
     final reason =
         item.continuation?.nextAction.reasonText ??
-        (item.listenResumeChunk > 0
+        (item.prefersReaderResume
+            ? 'Okuma konumun kayıtlı. Okumak öğrenme kanıtı değil; kaldığın yerden devam edip sonra hatırlayabilirsin.'
+            : item.hasListenResume
             ? 'Dinleme konumun kayıtlı. Bu bir öğrenme kanıtı değil; kaldığın yerden dinlemeye devam edebilirsin.'
             : 'Aktif hatırlama henüz öğrenme kanıtı üretmedi.');
     final (legacyAccent, legacySoft, icon) = switch (state) {

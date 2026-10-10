@@ -8,6 +8,7 @@ import 'package:sesli_ogren/src/app/living_study_desk_home.dart';
 import 'package:sesli_ogren/src/app/listen_screen.dart';
 import 'package:sesli_ogren/src/app/material_workspace_screen.dart';
 import 'package:sesli_ogren/src/app/quick_recap_screen.dart';
+import 'package:sesli_ogren/src/app/source_reader_screen.dart';
 import 'package:sesli_ogren/src/data/pdf_text_extractor.dart';
 import 'package:sesli_ogren/src/data/source_ingest_service.dart';
 import 'package:sesli_ogren/src/data/sqlite_source_store.dart';
@@ -195,4 +196,50 @@ void main() {
     expect(find.byType(ListenScreen), findsOneWidget);
     expect(LivingDeskReviewScope.active(tester.element(find.byType(ListenScreen))), isTrue);
   });
+
+  testWidgets('Home resumes the exact Reader source position before passive alternatives', (tester) async {
+    usePhoneViewport(tester);
+    final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
+    addTearDown(store.close);
+    final ingest = SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor());
+    final runtime = AppRuntime(
+      learner: AppRuntime.localM5LearnerFixture,
+      store: store,
+      ingest: ingest,
+      recall: RecallLearningService(sourceStore: store, learningStore: store.learningTruthStore()),
+      telemetry: store.operationalTelemetry(),
+    );
+    const materialId = AppRuntime.primaryMaterialId;
+    final source = await ingest.ingestPastedText(
+      learner: runtime.learner,
+      materialId: materialId,
+      text: List<String>.generate(
+        80,
+        (index) => 'Bölüm ${index + 1}: Fotosentez ışık enerjisini dönüştürür.',
+      ).join(' '),
+      sourceName: 'Uzun biyoloji notu',
+    );
+    await store.saveReaderResumeProgress(
+      learner: runtime.learner,
+      materialId: materialId,
+      sourceVersionId: source.sourceVersion.identity.sourceVersionId,
+      progress: 0.47,
+      updatedAt: DateTime.utc(2026, 10, 10, 9),
+    );
+
+    await tester.pumpWidget(_testApp(LivingDeskReviewScope(child: ProductShellScreen(runtime: runtime))));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 150));
+
+    expect(find.text('Okumaya kaldığın yerden devam et'), findsOneWidget);
+    final action = find.text('Okumaya devam et');
+    expect(action, findsOneWidget);
+    await tapVisible(tester, action);
+    await pumpUntilFound(tester, find.byType(SourceReaderScreen));
+
+    expect(find.byType(SourceReaderScreen), findsOneWidget);
+    expect(find.text('Uzun biyoloji notu'), findsWidgets);
+    expect(tester.takeException(), isNull);
+  });
+
 }

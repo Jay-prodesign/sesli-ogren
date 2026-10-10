@@ -80,11 +80,27 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
                 materialId: item.id,
                 sourceVersionId: source.identity.sourceVersionId,
               );
+        final readerActivityAt = source == null
+            ? null
+            : await widget.runtime.store.readerResumeUpdatedAt(
+                learner: widget.runtime.learner,
+                materialId: item.id,
+                sourceVersionId: source.identity.sourceVersionId,
+              );
+        final readerResumeProgress = source == null
+            ? 0.0
+            : await widget.runtime.store.readerResumeProgress(
+                learner: widget.runtime.learner,
+                materialId: item.id,
+                sourceVersionId: source.identity.sourceVersionId,
+              );
         return ProgressItem(
           material: item,
           continuation: continuation,
           listenActivityAt: listenActivityAt,
           listenResumeChunk: listenResumeChunk,
+          readerActivityAt: readerActivityAt,
+          readerResumeProgress: readerResumeProgress,
         );
       }),
     );
@@ -108,6 +124,8 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
       extracted: extracted,
       continuation: continuation,
       listenResumeChunk: active.listenResumeChunk,
+      readerResumeProgress: active.readerResumeProgress,
+      readerResumePreferred: active.prefersReaderResume,
       materials: sortedProgress.map((item) => item.material).toList(growable: false),
       progress: sortedProgress,
     );
@@ -119,6 +137,8 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
     if (learningAt != null && learningAt.isAfter(latest)) latest = learningAt;
     final listenAt = item.listenActivityAt;
     if (listenAt != null && listenAt.isAfter(latest)) latest = listenAt;
+    final readerAt = item.readerActivityAt;
+    if (readerAt != null && readerAt.isAfter(latest)) latest = readerAt;
     return latest;
   }
 
@@ -172,7 +192,11 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
       await _openWorkspace(materialId);
       return;
     }
-    if (continuation == null && (progressItem?.listenResumeChunk ?? 0) > 0) {
+    if (continuation == null && progressItem?.prefersReaderResume == true) {
+      await _openSourceReader(materialId);
+      return;
+    }
+    if (continuation == null && progressItem?.hasListenResume == true) {
       await _openListenFor(materialId);
       return;
     }
@@ -210,6 +234,11 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
         learner: widget.runtime.learner,
         sourceVersionId: source.identity.sourceVersionId,
       );
+      final initialReaderProgress = await widget.runtime.store.readerResumeProgress(
+        learner: widget.runtime.learner,
+        materialId: selected,
+        sourceVersionId: source.identity.sourceVersionId,
+      );
       if (!mounted) return;
 
       // Replace the reader route with its chosen learning activity. This avoids
@@ -223,6 +252,14 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
             final screen = SourceReaderScreen(
               title: material.title,
               sourceText: extracted?.normalizedText ?? '',
+              initialProgress: initialReaderProgress,
+              onProgressChanged: (progress) => widget.runtime.store.saveReaderResumeProgress(
+                learner: widget.runtime.learner,
+                materialId: selected,
+                sourceVersionId: source.identity.sourceVersionId,
+                progress: progress,
+                updatedAt: DateTime.now().toUtc(),
+              ),
               onListen: () => _replaceReaderWith(
                 readerContext,
                 Builder(
@@ -454,6 +491,7 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
                           onOpenLearning: _openNextLearningAction,
                           onOpenListen: _openListen,
                           onOpenWorkspace: () => _openWorkspace(),
+                          onOpenReader: () => _openSourceReader(),
                           onOpenMaterial: (id) => _openWorkspace(id),
                         ),
                       ),
@@ -513,6 +551,7 @@ class _HomeSurface extends StatelessWidget {
     required this.onOpenLearning,
     required this.onOpenListen,
     required this.onOpenWorkspace,
+    required this.onOpenReader,
     required this.onOpenMaterial,
   });
 
@@ -520,6 +559,7 @@ class _HomeSurface extends StatelessWidget {
   final VoidCallback onOpenLearning;
   final VoidCallback onOpenListen;
   final VoidCallback onOpenWorkspace;
+  final VoidCallback onOpenReader;
   final ValueChanged<MaterialId> onOpenMaterial;
 
   @override
@@ -529,9 +569,12 @@ class _HomeSurface extends StatelessWidget {
         material: data.material,
         continuation: data.continuation,
         listenResumeChunk: data.listenResumeChunk,
+        readerResumeProgress: data.readerResumeProgress,
+        readerResumePreferred: data.readerResumePreferred,
         sourceText: data.extracted?.normalizedText,
         otherMaterials: data.materials.where((item) => item.id != data.material?.id).toList(),
         onOpenWorkspace: onOpenWorkspace,
+        onOpenReader: onOpenReader,
         onOpenLearning: onOpenLearning,
         onOpenListen: onOpenListen,
         onOpenMaterial: onOpenMaterial,
@@ -1120,6 +1163,8 @@ class _LibrarySurfaceState extends State<_LibrarySurface> {
               material: material,
               continuation: _continuationFor(material.id),
               listenResumeChunk: _progressFor(material.id)?.listenResumeChunk ?? 0,
+              readerResumeProgress: _progressFor(material.id)?.readerResumeProgress ?? 0,
+              readerResumePreferred: _progressFor(material.id)?.prefersReaderResume ?? false,
               onPressed: () => widget.onOpenWorkspace(material.id),
               onContinue: () => widget.onContinueMaterial(material.id),
               onDelete: () => widget.onDeleteMaterial(material),
@@ -1146,6 +1191,8 @@ class _LibraryMaterialCard extends StatelessWidget {
     required this.material,
     required this.continuation,
     required this.listenResumeChunk,
+    required this.readerResumeProgress,
+    required this.readerResumePreferred,
     required this.onPressed,
     required this.onContinue,
     required this.onDelete,
@@ -1155,12 +1202,21 @@ class _LibraryMaterialCard extends StatelessWidget {
   final MaterialRecord material;
   final LearningContinuation? continuation;
   final int listenResumeChunk;
+  final double readerResumeProgress;
+  final bool readerResumePreferred;
   final VoidCallback onPressed;
   final VoidCallback onContinue;
   final VoidCallback onDelete;
   final bool isDeleting;
 
+  bool get _hasReaderResume =>
+      continuation == null &&
+      readerResumePreferred &&
+      readerResumeProgress > 0.02 &&
+      readerResumeProgress < 0.95;
+
   String get _continueLabel {
+    if (_hasReaderResume) return 'Okumaya devam et';
     if (continuation == null && listenResumeChunk > 0) return 'Dinlemeye devam et';
     return switch (continuation?.nextAction.kind) {
       NextLearningActionKind.reviewSourceThenRecall => 'Kaynağı gözden geçir ve yeniden dene',
@@ -1185,7 +1241,9 @@ class _LibraryMaterialCard extends StatelessWidget {
     };
     final nextReason =
         continuation?.nextAction.reasonText ??
-        (listenResumeChunk > 0
+        (_hasReaderResume
+            ? 'Okuma konumun kayıtlı. Okumak öğrenme kanıtı oluşturmaz; kaldığın yerden devam edebilirsin.'
+            : listenResumeChunk > 0
             ? 'Dinleme konumun kayıtlı. Dinlemek öğrenme kanıtı oluşturmaz; kaldığın yerden devam edebilirsin.'
             : 'İlk aktif hatırlama denemesi öğrenme durumunu görünür kılar.');
     final resolvedStateSoft = living
@@ -1492,6 +1550,8 @@ class _HomeSnapshot {
     this.extracted,
     this.continuation,
     this.listenResumeChunk = 0,
+    this.readerResumeProgress = 0,
+    this.readerResumePreferred = false,
     this.materials = const [],
     this.progress = const [],
   });
@@ -1501,6 +1561,8 @@ class _HomeSnapshot {
   final ExtractedContentRecord? extracted;
   final LearningContinuation? continuation;
   final int listenResumeChunk;
+  final double readerResumeProgress;
+  final bool readerResumePreferred;
   final List<MaterialRecord> materials;
   final List<ProgressItem> progress;
 }

@@ -25,9 +25,12 @@ class LivingStudyDeskHome extends StatelessWidget {
     required this.material,
     required this.continuation,
     this.listenResumeChunk = 0,
+    this.readerResumeProgress = 0,
+    this.readerResumePreferred = false,
     required this.sourceText,
     required this.otherMaterials,
     required this.onOpenWorkspace,
+    this.onOpenReader,
     required this.onOpenLearning,
     required this.onOpenListen,
     required this.onOpenMaterial,
@@ -37,9 +40,12 @@ class LivingStudyDeskHome extends StatelessWidget {
   final MaterialRecord? material;
   final LearningContinuation? continuation;
   final int listenResumeChunk;
+  final double readerResumeProgress;
+  final bool readerResumePreferred;
   final String? sourceText;
   final List<MaterialRecord> otherMaterials;
   final VoidCallback onOpenWorkspace;
+  final VoidCallback? onOpenReader;
   final VoidCallback onOpenLearning;
   final VoidCallback onOpenListen;
   final ValueChanged<MaterialId> onOpenMaterial;
@@ -51,9 +57,16 @@ class LivingStudyDeskHome extends StatelessWidget {
   static const _accent = Color(0xFF0A716A);
   static const _line = Color(0xFFD5E3DC);
 
-  bool get _hasListenResume => continuation == null && listenResumeChunk > 0;
+  bool get _hasReaderResume =>
+      continuation == null &&
+      readerResumePreferred &&
+      readerResumeProgress > 0.02 &&
+      readerResumeProgress < 0.95;
+
+  bool get _hasListenResume => continuation == null && !_hasReaderResume && listenResumeChunk > 0;
 
   String get _nextStep {
+    if (_hasReaderResume) return 'Okumaya kaldığın yerden devam et';
     if (_hasListenResume) return 'Dinlemeye kaldığın yerden devam et';
     final action = continuation?.nextAction.kind;
     return switch (action) {
@@ -65,6 +78,9 @@ class LivingStudyDeskHome extends StatelessWidget {
   }
 
   String get _why {
+    if (_hasReaderResume) {
+      return 'Okuma konumun bu kaynakta kayıtlı. Okumak öğrenme kanıtı oluşturmaz; ardından hatırlamayı deneyebilirsin.';
+    }
     if (_hasListenResume) {
       return 'Dinleme konumun bu kaynakta kayıtlı. Dinlemek öğrenme kanıtı oluşturmaz; ardından hatırlamayı deneyebilirsin.';
     }
@@ -72,6 +88,7 @@ class LivingStudyDeskHome extends StatelessWidget {
   }
 
   String get _continuationLabel {
+    if (_hasReaderResume) return 'OKUMA KONUMUN KAYITLI';
     if (_hasListenResume) return 'DİNLEME KONUMUN KAYITLI';
     if (continuation == null) return 'KAYNAĞINDAN ÖĞREN';
     return continuation!.nextAction.kind == NextLearningActionKind.repeatRecallLater
@@ -80,6 +97,7 @@ class LivingStudyDeskHome extends StatelessWidget {
   }
 
   String get _nextActionCta {
+    if (_hasReaderResume) return 'Okumaya devam et';
     if (_hasListenResume) return 'Dinlemeye devam et';
     final action = continuation?.nextAction.kind;
     return switch (action) {
@@ -91,11 +109,13 @@ class LivingStudyDeskHome extends StatelessWidget {
   }
 
   VoidCallback get _nextActionHandler {
+    if (_hasReaderResume) return onOpenReader ?? onOpenWorkspace;
     if (_hasListenResume) return onOpenListen;
     return continuation?.nextAction.kind == NextLearningActionKind.repeatRecallLater ? onOpenWorkspace : onOpenLearning;
   }
 
   IconData get _nextActionIcon {
+    if (_hasReaderResume) return Icons.menu_book_outlined;
     if (_hasListenResume) return Icons.headphones_rounded;
     return continuation?.nextAction.kind == NextLearningActionKind.repeatRecallLater
         ? Icons.auto_stories_outlined
@@ -369,9 +389,9 @@ class LivingStudyDeskHome extends StatelessWidget {
           alignment: Alignment.center,
           child: TextButton.icon(
             key: const ValueKey('la0040-living-listen'),
-            onPressed: _hasListenResume ? onOpenLearning : onOpenListen,
-            icon: Icon(_hasListenResume ? Icons.psychology_alt_outlined : Icons.headphones_rounded, size: 18),
-            label: Text(_hasListenResume ? 'Şimdi hatırlamayı dene' : 'Önce dinlemek istiyorum'),
+            onPressed: (_hasReaderResume || _hasListenResume) ? onOpenLearning : onOpenListen,
+            icon: Icon((_hasReaderResume || _hasListenResume) ? Icons.psychology_alt_outlined : Icons.headphones_rounded, size: 18),
+            label: Text((_hasReaderResume || _hasListenResume) ? 'Şimdi hatırlamayı dene' : 'Önce dinlemek istiyorum'),
             style: TextButton.styleFrom(foregroundColor: _accent),
           ),
         ),

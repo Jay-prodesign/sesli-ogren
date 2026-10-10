@@ -69,12 +69,27 @@ class _MaterialWorkspaceScreenState extends State<MaterialWorkspaceScreen> {
   }
 
   Future<void> _openSourceReader(_WorkspaceSnapshot data) async {
+    final sourceVersionId = data.source.identity.sourceVersionId;
+    final initialProgress = await widget.runtime.store.readerResumeProgress(
+      learner: widget.runtime.learner,
+      materialId: data.material.id,
+      sourceVersionId: sourceVersionId,
+    );
+    if (!mounted) return;
     await Navigator.of(context).push<void>(
       MaterialPageRoute(
         builder: (_) => _preserveProductExperience(
           SourceReaderScreen(
             title: data.material.title,
             sourceText: data.extracted?.normalizedText ?? '',
+            initialProgress: initialProgress,
+            onProgressChanged: (progress) => widget.runtime.store.saveReaderResumeProgress(
+              learner: widget.runtime.learner,
+              materialId: data.material.id,
+              sourceVersionId: sourceVersionId,
+              progress: progress,
+              updatedAt: DateTime.now().toUtc(),
+            ),
             onListen: () {
               Navigator.of(context).pop();
               _openListen();

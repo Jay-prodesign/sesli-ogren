@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import 'atelier_learning_surfaces.dart';
@@ -9,6 +11,8 @@ class SourceReaderScreen extends StatefulWidget {
   const SourceReaderScreen({
     required this.title,
     required this.sourceText,
+    this.initialProgress = 0,
+    this.onProgressChanged,
     this.onListen,
     this.onRecap,
     this.onRecall,
@@ -17,6 +21,8 @@ class SourceReaderScreen extends StatefulWidget {
 
   final String title;
   final String sourceText;
+  final double initialProgress;
+  final Future<void> Function(double progress)? onProgressChanged;
   final VoidCallback? onListen;
   final VoidCallback? onRecap;
   final VoidCallback? onRecall;
@@ -29,12 +35,18 @@ class _SourceReaderScreenState extends State<SourceReaderScreen> {
   final TextEditingController _search = TextEditingController();
   final ScrollController _readingScroll = ScrollController();
   double _readingProgress = 0;
+  double _lastReportedProgress = 0;
   double _fontSize = 17;
   bool _showSearch = false;
+  bool _sourceFitsViewport = false;
+  bool _initialProgressRestored = false;
+  bool _progressSaveWarningShown = false;
 
   @override
   void initState() {
     super.initState();
+    _readingProgress = widget.initialProgress.clamp(0.0, 1.0);
+    _lastReportedProgress = _readingProgress;
     _readingScroll.addListener(_updateReadingProgress);
     _scheduleReadingProgressUpdate();
   }
@@ -42,14 +54,20 @@ class _SourceReaderScreenState extends State<SourceReaderScreen> {
   @override
   void didUpdateWidget(covariant SourceReaderScreen oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.sourceText != widget.sourceText) {
-      _readingProgress = 0;
+    if (oldWidget.sourceText != widget.sourceText || oldWidget.initialProgress != widget.initialProgress) {
+      _readingProgress = widget.initialProgress.clamp(0.0, 1.0);
+      _lastReportedProgress = _readingProgress;
+      _sourceFitsViewport = false;
+      _initialProgressRestored = false;
       _scheduleReadingProgressUpdate();
     }
   }
 
   @override
   void dispose() {
+    if (!_sourceFitsViewport) {
+      _reportProgress(_readingProgress, force: true);
+    }
     _readingScroll.dispose();
     _search.dispose();
     super.dispose();
@@ -58,18 +76,51 @@ class _SourceReaderScreenState extends State<SourceReaderScreen> {
   void _scheduleReadingProgressUpdate() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
+      _restoreInitialProgress();
       _updateReadingProgress();
     });
+  }
+
+  void _restoreInitialProgress() {
+    if (_initialProgressRestored || !_readingScroll.hasClients) return;
+    final max = _readingScroll.position.maxScrollExtent;
+    _initialProgressRestored = true;
+    if (max <= 0 || widget.initialProgress <= 0) return;
+    _readingScroll.jumpTo((max * widget.initialProgress.clamp(0.0, 1.0)).clamp(0.0, max));
+  }
+
+  void _reportProgress(double progress, {bool force = false}) {
+    final callback = widget.onProgressChanged;
+    if (callback == null || _sourceFitsViewport) return;
+    if (!force && (progress - _lastReportedProgress).abs() < 0.05 && progress != 0 && progress != 1) return;
+    _lastReportedProgress = progress;
+    unawaited(
+      callback(progress).catchError((Object _) {
+        if (!mounted || _progressSaveWarningShown) return;
+        _progressSaveWarningShown = true;
+        ScaffoldMessenger.maybeOf(context)?.showSnackBar(
+          const SnackBar(content: Text('Okuma konumu kaydedilemedi. Kaynağın kendisi korunuyor.')),
+        );
+      }),
+    );
   }
 
   void _updateReadingProgress() {
     if (!_readingScroll.hasClients) return;
     final position = _readingScroll.position;
     final max = position.maxScrollExtent;
-    final progress = max <= 0 ? 1.0 : (position.pixels / max).clamp(0.0, 1.0);
-    if ((progress - _readingProgress).abs() >= 0.01 || progress == 0 || progress == 1.0) {
-      setState(() => _readingProgress = progress);
+    final fitsViewport = max <= 0;
+    final progress = fitsViewport ? 1.0 : (position.pixels / max).clamp(0.0, 1.0);
+    if ((progress - _readingProgress).abs() >= 0.01 ||
+        fitsViewport != _sourceFitsViewport ||
+        progress == 0 ||
+        progress == 1.0) {
+      setState(() {
+        _readingProgress = progress;
+        _sourceFitsViewport = fitsViewport;
+      });
     }
+    if (!fitsViewport) _reportProgress(progress);
   }
 
   void _setReadingFontSize(double value) {
@@ -270,7 +321,9 @@ class _SourceReaderScreenState extends State<SourceReaderScreen> {
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
-                        'Metindeki konum · %${(_readingProgress * 100).round()}',
+                        _sourceFitsViewport
+                            ? 'Kaynağın tamamı ekranda'
+                            : 'Metindeki konum · %${(_readingProgress * 100).round()}',
                         style: TextStyle(color: living ? AtelierStyle.muted : null),
                       ),
                     ),
@@ -292,8 +345,10 @@ class _SourceReaderScreenState extends State<SourceReaderScreen> {
                 minHeight: living ? 4 : 3,
                 color: accent,
                 backgroundColor: living ? line : null,
-                semanticsLabel: 'Okuma ilerlemesi',
-                semanticsValue: '${(_readingProgress * 100).round()}',
+                semanticsLabel: _sourceFitsViewport ? 'Kaynak görünümü' : 'Okuma konumu',
+                semanticsValue: _sourceFitsViewport
+                    ? 'Kaynağın tamamı ekranda'
+                    : 'Yüzde ${(_readingProgress * 100).round()}',
               ),
             ],
             Expanded(
