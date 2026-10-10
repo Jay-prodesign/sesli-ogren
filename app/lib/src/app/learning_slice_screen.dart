@@ -1355,14 +1355,19 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
     }
   }
 
-  String _focusedSourceReview(String text, SourceAnchor anchor) {
+  _FocusedSourceReview _focusedSourceReview(String text, SourceAnchor anchor) {
     const contextRadius = 220;
-    final start = (anchor.startOffset - contextRadius).clamp(0, text.length);
-    final end = (anchor.endOffset + contextRadius).clamp(0, text.length);
-    var excerpt = text.substring(start, end).trim();
-    if (start > 0) excerpt = '…$excerpt';
-    if (end < text.length) excerpt = '$excerpt…';
-    return excerpt;
+    final focusStart = anchor.startOffset.clamp(0, text.length);
+    final focusEnd = anchor.endOffset.clamp(focusStart, text.length);
+    final excerptStart = (focusStart - contextRadius).clamp(0, text.length);
+    final excerptEnd = (focusEnd + contextRadius).clamp(0, text.length);
+    return _FocusedSourceReview(
+      prefix: text.substring(excerptStart, focusStart),
+      focus: text.substring(focusStart, focusEnd),
+      suffix: text.substring(focusEnd, excerptEnd),
+      leadingEllipsis: excerptStart > 0,
+      trailingEllipsis: excerptEnd < text.length,
+    );
   }
 
   Future<void> _reviewContinuationSource() async {
@@ -1421,11 +1426,45 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
                         'Hazır olduğunda kaynağı kapatıp aynı hatırlamayı yeniden dene.',
                       ),
                       const SizedBox(height: 16),
+                      AtelierSourceTrustStrip(sourceVersion: source),
+                      const SizedBox(height: 12),
                       Expanded(
                         child: Semantics(
                           container: true,
-                          label: 'Kaynak bölümü',
-                          child: SingleChildScrollView(child: SelectableText(excerpt)),
+                          label: 'Kaynak bölümü. Çalışılacak cümle vurgulandı.',
+                          child: SingleChildScrollView(
+                            child: DecoratedBox(
+                              decoration: BoxDecoration(
+                                color: AtelierStyle.paper,
+                                borderRadius: BorderRadius.circular(14),
+                                border: Border.all(color: AtelierStyle.line),
+                              ),
+                              child: Padding(
+                                padding: const EdgeInsets.all(16),
+                                child: SelectableText.rich(
+                                  TextSpan(
+                                    style: Theme.of(sheetContext).textTheme.bodyLarge?.copyWith(
+                                      color: AtelierStyle.ink,
+                                      height: 1.55,
+                                    ),
+                                    children: [
+                                      if (excerpt.leadingEllipsis) const TextSpan(text: '…'),
+                                      TextSpan(text: excerpt.prefix),
+                                      TextSpan(
+                                        text: excerpt.focus,
+                                        style: const TextStyle(
+                                          backgroundColor: AtelierStyle.mark,
+                                          fontWeight: FontWeight.w800,
+                                        ),
+                                      ),
+                                      TextSpan(text: excerpt.suffix),
+                                      if (excerpt.trailingEllipsis) const TextSpan(text: '…'),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
                         ),
                       ),
                       const SizedBox(height: 12),
@@ -1559,6 +1598,22 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
     RecallOutcome.incorrect => 'Bu kez eşleşmedi. Bu bir etiket değil; yalnızca bu denemenin sonucu.',
     RecallOutcome.unknown => 'Bu denemede değerlendirilebilir bir yanıt yok. Durumun bilinmiyor olarak kaldı.',
   };
+}
+
+class _FocusedSourceReview {
+  const _FocusedSourceReview({
+    required this.prefix,
+    required this.focus,
+    required this.suffix,
+    required this.leadingEllipsis,
+    required this.trailingEllipsis,
+  });
+
+  final String prefix;
+  final String focus;
+  final String suffix;
+  final bool leadingEllipsis;
+  final bool trailingEllipsis;
 }
 
 class _SurfaceCard extends StatelessWidget {

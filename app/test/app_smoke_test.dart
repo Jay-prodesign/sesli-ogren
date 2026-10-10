@@ -1149,7 +1149,8 @@ void main() {
     await pumpUntilFound(tester, find.text('Bu bölümü yeniden kur'));
 
     expect(find.textContaining(action!.expectedAnswer), findsWidgets);
-    expect(find.bySemanticsLabel('Kaynak bölümü'), findsOneWidget);
+    expect(find.bySemanticsLabel('Kaynak bölümü. Çalışılacak cümle vurgulandı.'), findsOneWidget);
+    expect(find.byKey(const ValueKey('atelier-source-trust')), findsOneWidget);
 
     final retryFromSource = find.byKey(const ValueKey('focused-source-retry'));
     await tester.pump(const Duration(milliseconds: 450));
