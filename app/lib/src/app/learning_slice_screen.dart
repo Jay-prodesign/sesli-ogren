@@ -698,7 +698,7 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
                         ],
                         DecoratedBox(
                           decoration: BoxDecoration(
-                            color: compactResultHeader ? AppPalette.successSoft : AppPalette.primarySoft,
+                            color: compactResultHeader ? AtelierStyle.mint : AtelierStyle.mint,
                             borderRadius: BorderRadius.circular(18),
                           ),
                           child: Padding(
@@ -1164,18 +1164,18 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
           Row(
             children: [
               DecoratedBox(
-                decoration: BoxDecoration(color: AppPalette.primarySoft, borderRadius: BorderRadius.circular(999)),
+                decoration: BoxDecoration(color: AtelierStyle.mint, borderRadius: BorderRadius.circular(999)),
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                   child: Text(
                     'KAYNAĞA BAKMADAN',
                     style: Theme.of(context).textTheme.labelSmall
-                        ?.copyWith(color: AppPalette.primary, fontWeight: FontWeight.w900, letterSpacing: 0.45),
+                        ?.copyWith(color: AtelierStyle.teal, fontWeight: FontWeight.w900, letterSpacing: 0.45),
                   ),
                 ),
               ),
               const Spacer(),
-              const Icon(Icons.psychology_alt_outlined, color: AppPalette.primary, size: 20),
+              const Icon(Icons.psychology_alt_outlined, color: AtelierStyle.teal, size: 20),
             ],
           ),
           const SizedBox(height: 14),
@@ -1237,9 +1237,9 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
           TextSpan(
             text: excerpt.substring(match.start, match.end),
             style: const TextStyle(
-              backgroundColor: AppPalette.signalSoft,
+              backgroundColor: AtelierStyle.mint,
               fontWeight: FontWeight.w800,
-              color: AppPalette.primaryDark,
+              color: AtelierStyle.ink,
             ),
           ),
           if (match.end < excerpt.length) TextSpan(text: excerpt.substring(match.end)),
@@ -1286,7 +1286,7 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
         children: [
           DecoratedBox(
             decoration: BoxDecoration(
-              color: isIndependent ? AppPalette.successSoft : AppPalette.attentionSoft,
+              color: isIndependent ? AtelierStyle.mint : AppPalette.attentionSoft,
               borderRadius: BorderRadius.circular(18),
             ),
             child: Padding(
@@ -1296,7 +1296,7 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
                 children: [
                   Icon(
                     isIndependent ? Icons.check_circle_rounded : Icons.lightbulb_outline_rounded,
-                    color: isIndependent ? AppPalette.success : AppPalette.attention,
+                    color: isIndependent ? AtelierStyle.teal : AppPalette.attention,
                   ),
                   const SizedBox(width: 11),
                   Expanded(
@@ -1320,7 +1320,7 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
           Text(
             'SENİN DENEMEN',
             style: theme.textTheme.labelSmall?.copyWith(
-              color: AppPalette.inkMuted,
+              color: AtelierStyle.muted,
               fontWeight: FontWeight.w800,
               letterSpacing: 1,
             ),
@@ -1341,13 +1341,13 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
             children: [
               Expanded(child: Text('Kaynakla karşılaştır', style: theme.textTheme.titleMedium)),
               DecoratedBox(
-                decoration: BoxDecoration(color: AppPalette.signalSoft, borderRadius: BorderRadius.circular(999)),
+                decoration: BoxDecoration(color: AtelierStyle.mint, borderRadius: BorderRadius.circular(999)),
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
                   child: Text(
                     'KAYNAK',
                     style: theme.textTheme.labelSmall?.copyWith(
-                      color: AppPalette.signal,
+                      color: AtelierStyle.teal,
                       fontWeight: FontWeight.w900,
                       letterSpacing: 0.4,
                     ),
@@ -1359,22 +1359,22 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
           const SizedBox(height: 10),
           DecoratedBox(
             decoration: BoxDecoration(
-              color: AppPalette.surfaceMuted,
+              color: AtelierStyle.paper,
               borderRadius: BorderRadius.circular(18),
-              border: Border.all(color: AppPalette.outline),
+              border: Border.all(color: AtelierStyle.line),
             ),
             child: Padding(
               padding: const EdgeInsets.all(16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Doğru ifade', style: theme.textTheme.labelMedium?.copyWith(color: AppPalette.inkMuted)),
+                  Text('Doğru ifade', style: theme.textTheme.labelMedium?.copyWith(color: AtelierStyle.muted)),
                   const SizedBox(height: 6),
                   Text(result.correctAnswer, style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800)),
                   const SizedBox(height: 14),
-                  Container(height: 1, color: AppPalette.outline),
+                  Container(height: 1, color: AtelierStyle.line),
                   const SizedBox(height: 13),
-                  Text('Kaynak bağlamı', style: theme.textTheme.labelMedium?.copyWith(color: AppPalette.inkMuted)),
+                  Text('Kaynak bağlamı', style: theme.textTheme.labelMedium?.copyWith(color: AtelierStyle.muted)),
                   const SizedBox(height: 5),
                   _sourceProofText(context, result),
                 ],
@@ -1383,17 +1383,17 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
           ),
           const SizedBox(height: 20),
           DecoratedBox(
-            decoration: BoxDecoration(color: AppPalette.primaryDark, borderRadius: BorderRadius.circular(18)),
+            decoration: BoxDecoration(color: AtelierStyle.ink, borderRadius: BorderRadius.circular(18)),
             child: Padding(
               padding: const EdgeInsets.all(16),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   DecoratedBox(
-                    decoration: BoxDecoration(color: AppPalette.momentum, borderRadius: BorderRadius.circular(999)),
+                    decoration: BoxDecoration(color: AtelierStyle.mark, borderRadius: BorderRadius.circular(999)),
                     child: const Padding(
                       padding: EdgeInsets.all(7),
-                      child: Icon(Icons.arrow_forward_rounded, color: AppPalette.momentumInk, size: 17),
+                      child: Icon(Icons.arrow_forward_rounded, color: AtelierStyle.ink, size: 17),
                     ),
                   ),
                   const SizedBox(width: 11),
