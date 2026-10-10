@@ -31,7 +31,6 @@ class _SourceReaderScreenState extends State<SourceReaderScreen> {
   double _readingProgress = 0;
   double _fontSize = 17;
   bool _showSearch = false;
-  bool _showLearningActions = true;
 
   @override
   void initState() {
@@ -254,82 +253,13 @@ class _SourceReaderScreenState extends State<SourceReaderScreen> {
                 backgroundColor: living ? line : null,
               ),
             ],
-            if (source.isNotEmpty && (widget.onListen != null || widget.onRecap != null || widget.onRecall != null))
-              Padding(
-                padding: const EdgeInsets.fromLTRB(20, 8, 20, 4),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        'Kaynakla çalış',
-                        style: theme.textTheme.titleSmall?.copyWith(
-                          color: ink,
-                          fontWeight: living ? FontWeight.w800 : null,
-                        ),
-                      ),
-                    ),
-                    IconButton(
-                      tooltip: _showLearningActions ? 'Öğrenme araçlarını gizle' : 'Öğrenme araçlarını göster',
-                      onPressed: () => setState(() => _showLearningActions = !_showLearningActions),
-                      icon: Icon(_showLearningActions ? Icons.expand_less : Icons.expand_more),
-                    ),
-                  ],
-                ),
-              ),
-            if (source.isNotEmpty &&
-                _showLearningActions &&
-                (widget.onListen != null || widget.onRecap != null || widget.onRecall != null))
-              Padding(
-                padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
-                child: Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: [
-                    if (widget.onListen != null)
-                      OutlinedButton.icon(
-                        style: living
-                            ? OutlinedButton.styleFrom(
-                                foregroundColor: accent,
-                                side: BorderSide(color: line),
-                                backgroundColor: paper,
-                              )
-                            : null,
-                        onPressed: widget.onListen,
-                        icon: const Icon(Icons.headphones_rounded),
-                        label: const Text('Dinle'),
-                      ),
-                    if (widget.onRecap != null)
-                      OutlinedButton.icon(
-                        style: living
-                            ? OutlinedButton.styleFrom(
-                                foregroundColor: accent,
-                                side: BorderSide(color: line),
-                                backgroundColor: paper,
-                              )
-                            : null,
-                        onPressed: widget.onRecap,
-                        icon: const Icon(Icons.auto_awesome),
-                        label: const Text('Özet'),
-                      ),
-                    if (widget.onRecall != null)
-                      FilledButton.icon(
-                        style: living
-                            ? FilledButton.styleFrom(backgroundColor: AtelierStyle.ink, foregroundColor: Colors.white)
-                            : null,
-                        onPressed: widget.onRecall,
-                        icon: const Icon(Icons.psychology_alt_outlined),
-                        label: const Text('Hatırla'),
-                      ),
-                  ],
-                ),
-              ),
             Expanded(
               child: source.isEmpty
                   ? const Center(child: Text('Bu kaynak için okunabilir metin bulunamadı.'))
                   : SelectionArea(
                       child: ListView(
                         controller: _readingScroll,
-                        padding: const EdgeInsets.fromLTRB(20, 16, 20, 48),
+                        padding: const EdgeInsets.fromLTRB(20, 16, 20, 28),
                         children: [
                           if (living)
                             DecoratedBox(
@@ -346,6 +276,50 @@ class _SourceReaderScreenState extends State<SourceReaderScreen> {
                       ),
                     ),
             ),
+            if (source.isNotEmpty && (widget.onListen != null || widget.onRecap != null || widget.onRecall != null))
+              DecoratedBox(
+                decoration: BoxDecoration(
+                  color: paper,
+                  border: Border(top: BorderSide(color: line)),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 10),
+                  child: Row(
+                    children: [
+                      if (widget.onListen != null)
+                        IconButton.filledTonal(
+                          tooltip: 'Kaynağı dinle',
+                          onPressed: widget.onListen,
+                          icon: const Icon(Icons.headphones_rounded),
+                        ),
+                      if (widget.onListen != null && (widget.onRecap != null || widget.onRecall != null))
+                        const SizedBox(width: 8),
+                      if (widget.onRecap != null)
+                        IconButton.filledTonal(
+                          tooltip: 'Hızlı özet',
+                          onPressed: widget.onRecap,
+                          icon: const Icon(Icons.auto_awesome),
+                        ),
+                      if (widget.onRecap != null && widget.onRecall != null) const SizedBox(width: 10),
+                      if (widget.onRecall != null)
+                        Expanded(
+                          child: FilledButton.icon(
+                            style: living
+                                ? FilledButton.styleFrom(
+                                    backgroundColor: AtelierStyle.ink,
+                                    foregroundColor: Colors.white,
+                                    minimumSize: const Size.fromHeight(48),
+                                  )
+                                : FilledButton.styleFrom(minimumSize: const Size.fromHeight(48)),
+                            onPressed: widget.onRecall,
+                            icon: const Icon(Icons.psychology_alt_outlined),
+                            label: const Text('Hatırla'),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+              ),
           ],
         ),
       ),

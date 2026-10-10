@@ -300,6 +300,35 @@ void main() {
     await expectLater(find.byType(Scaffold), matchesGoldenFile('goldens/la0040_source_reader_390x844.png'));
   });
 
+  testWidgets('LA-0040 real source Reader survives 320px + large type', (tester) async {
+    tester.view.physicalSize = const Size(320, 700);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        debugShowCheckedModeBanner: false,
+        home: MediaQuery(
+          data: const MediaQueryData(textScaler: TextScaler.linear(1.5), disableAnimations: true),
+          child: LivingDeskReviewScope(
+            child: SourceReaderScreen(
+              title: material.title,
+              sourceText: source,
+              onListen: () {},
+              onRecap: () {},
+              onRecall: () {},
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(find.text('Hatırla'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+    await expectLater(find.byType(Scaffold), matchesGoldenFile('goldens/la0040_source_reader_320_text150.png'));
+  });
+
   testWidgets('LA-0040 source-hidden Recall', (tester) async {
     final controller = TextEditingController();
     addTearDown(controller.dispose);
