@@ -475,8 +475,6 @@ void main() {
     );
     await pumpUntilFound(tester, find.text('Dinleme devam notu'));
     expect(find.textContaining('bölüm 2 / 2'), findsOneWidget);
-    await tester.drag(find.byType(Scrollable).last, const Offset(0, -620));
-    await tester.pump(const Duration(milliseconds: 300));
     await pumpUntilFound(tester, find.text('Kaldığın yerden dinle'));
     expect(find.text('Kaldığın yerden dinle').hitTestable(), findsOneWidget);
     expect(find.byKey(const ValueKey('listen-source-transcript')), findsOneWidget);

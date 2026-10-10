@@ -36,7 +36,7 @@ class ListenScreen extends StatefulWidget {
 
 class _ListenScreenState extends State<ListenScreen> {
   late final SpeechOutput _speech;
-  late Future<_ListenSource> _source;
+  late Future<_ListenSource?> _source;
   bool _speaking = false;
   bool _startedPlayback = false;
   bool _startingPlayback = false;
@@ -54,13 +54,13 @@ class _ListenScreenState extends State<ListenScreen> {
     _source = _load();
   }
 
-  Future<_ListenSource> _load() async {
+  Future<_ListenSource?> _load() async {
     final version = await widget.runtime.store.currentSourceVersion(
       learner: widget.runtime.learner,
       materialId: widget.materialId,
     );
     if (version == null) {
-      throw StateError('listen_source_missing');
+      return null;
     }
     final overrideText = widget.textOverride?.trim();
     String text;
@@ -72,7 +72,7 @@ class _ListenScreenState extends State<ListenScreen> {
         sourceVersionId: version.identity.sourceVersionId,
       );
       if (extracted == null || !extracted.isValid || extracted.normalizedText.trim().isEmpty) {
-        throw StateError('listen_content_missing');
+        return null;
       }
       text = extracted.normalizedText.trim();
     }
@@ -263,10 +263,13 @@ class _ListenScreenState extends State<ListenScreen> {
         foregroundColor: living ? AtelierStyle.ink : null,
       ),
       body: SafeArea(
-        child: FutureBuilder<_ListenSource>(
+        child: FutureBuilder<_ListenSource?>(
           future: _source,
           builder: (context, snapshot) {
-            if (snapshot.hasError) {
+            if (snapshot.connectionState != ConnectionState.done) {
+              return const Center(child: CircularProgressIndicator());
+            }
+            if (snapshot.hasError || snapshot.data == null) {
               return Center(
                 child: Padding(
                   padding: const EdgeInsets.all(24),
@@ -292,9 +295,6 @@ class _ListenScreenState extends State<ListenScreen> {
                   ),
                 ),
               );
-            }
-            if (!snapshot.hasData) {
-              return const Center(child: CircularProgressIndicator());
             }
             final source = snapshot.data!;
             final resumeChunk = _resumeChunkOverride ?? source.resumeChunk;
