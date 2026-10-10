@@ -213,14 +213,16 @@ class _ReaderCue extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Semantics(
-    label: 'Önce kaynağı oku, sonra kaynağı kapat ve kendi sözlerinle hatırla.',
+    label: 'Önce kaynağı oku, sonra kapat, hatırla ve sonucu kaynak kanıtıyla karşılaştır.',
     child: Row(
       children: [
-        _step(Icons.auto_stories_outlined, 'OKU'),
+        _step(Icons.auto_stories_outlined, 'KAYNAK'),
         _arrow(),
         _step(Icons.visibility_off_outlined, 'KAPAT'),
         _arrow(),
-        _step(Icons.record_voice_over_outlined, 'ANLAT'),
+        _step(Icons.psychology_alt_outlined, 'HATIRLA'),
+        _arrow(),
+        _step(Icons.find_in_page_outlined, 'KANIT'),
       ],
     ),
   );
@@ -237,9 +239,19 @@ class _ReaderCue extends StatelessWidget {
     children: [
       Icon(icon, color: AtelierStyle.teal, size: 18),
       const SizedBox(width: 5),
-      Text(
-        label,
-        style: const TextStyle(color: AtelierStyle.ink, fontSize: 10, fontWeight: FontWeight.w900, letterSpacing: 0.8),
+      Flexible(
+        child: Text(
+          label,
+          maxLines: 1,
+          overflow: TextOverflow.fade,
+          softWrap: false,
+          style: const TextStyle(
+            color: AtelierStyle.ink,
+            fontSize: 9,
+            fontWeight: FontWeight.w900,
+            letterSpacing: 0.55,
+          ),
+        ),
       ),
     ],
   );
