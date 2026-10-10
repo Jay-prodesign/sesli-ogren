@@ -23,6 +23,13 @@ class _UnusedPdfExtractor implements PdfTextExtractor {
 
 class _RecordingSpeechOutput implements SpeechOutput {
   double? lastRateMultiplier;
+  VoidCallback? _onDone;
+
+  void finishCurrentChunk() {
+    final callback = _onDone;
+    _onDone = null;
+    callback?.call();
+  }
 
   @override
   Future<void> speak(
@@ -34,6 +41,7 @@ class _RecordingSpeechOutput implements SpeechOutput {
     double rateMultiplier = 1.0,
   }) async {
     lastRateMultiplier = rateMultiplier;
+    _onDone = onDone;
     onStart();
   }
 
@@ -174,6 +182,11 @@ void main() {
     await _tapVisible(tester, find.text('Dinlemeye başla'));
     await tester.pump();
     expect(firstSpeech.lastRateMultiplier, 1.25);
+    expect(tester.getSemantics(find.bySemanticsLabel('Dinleme ilerlemesi')).value, '%0');
+
+    firstSpeech.finishCurrentChunk();
+    await _pumpUntilFound(tester, find.text('Tüm bölümler dinlendi · Hatırlamayı deneyebilirsin'));
+    expect(tester.getSemantics(find.bySemanticsLabel('Dinleme ilerlemesi')).value, '%100');
 
     await tester.pumpWidget(const SizedBox.shrink());
     await tester.pump();

@@ -308,12 +308,17 @@ class _ListenScreenState extends State<ListenScreen> {
             final resumeChunk = _resumeChunkOverride ?? source.resumeChunk;
             final hasResume = resumeChunk > 0;
             final playbackRate = _playbackRate ?? source.playbackRate;
-            final visibleChunk = _speaking ? _currentChunkIndex : resumeChunk;
-            final progress = _finishedListening
-                ? 1.0
-                : _speaking || _startedPlayback || hasResume
-                ? (visibleChunk + 1) / source.chunks.length
-                : 0.0;
+            final visibleChunk = _speaking || _startingPlayback ? _currentChunkIndex : resumeChunk;
+            final completedChunks = _finishedListening
+                ? source.chunks.length
+                : _speaking || _startingPlayback
+                ? _currentChunkIndex
+                : hasResume
+                ? resumeChunk
+                : 0;
+            final progress = source.chunks.isEmpty
+                ? 0.0
+                : (completedChunks / source.chunks.length).clamp(0.0, 1.0);
 
             return ListView(
               padding: const EdgeInsets.fromLTRB(20, 16, 20, 36),
@@ -387,9 +392,11 @@ class _ListenScreenState extends State<ListenScreen> {
                           child: Text(
                             _finishedListening
                                 ? 'Tüm bölümler dinlendi · Hatırlamayı deneyebilirsin'
-                                : progress == 0
-                                ? 'Dinleme henüz başlamadı · ${source.chunks.length} bölüm'
-                                : 'Dinleme konumu: bölüm ${visibleChunk + 1} / ${source.chunks.length}',
+                                : _speaking || _startingPlayback
+                                ? 'Dinleniyor: bölüm ${visibleChunk + 1} / ${source.chunks.length} · $completedChunks bölüm tamamlandı'
+                                : hasResume
+                                ? 'Kaldığın yer: bölüm ${resumeChunk + 1} / ${source.chunks.length} · $completedChunks bölüm tamamlandı'
+                                : 'Dinleme henüz başlamadı · ${source.chunks.length} bölüm',
                             style: theme.textTheme.bodySmall?.copyWith(color: Colors.white.withValues(alpha: 0.72)),
                           ),
                         ),
