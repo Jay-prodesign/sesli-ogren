@@ -574,7 +574,7 @@ void main() {
         home: LivingDeskReviewScope(child: ProductShellScreen(runtime: runtime)),
       ),
     );
-    for (var i = 0; i < 40 && find.text('Kendi kaynağın.\nGerçek hatırlama.').evaluate().isEmpty; i++) {
+    for (var i = 0; i < 40 && find.text('Kaldığın yer hazır.').evaluate().isEmpty; i++) {
       await tester.pump(const Duration(milliseconds: 30));
     }
     expect(tester.takeException(), isNull);

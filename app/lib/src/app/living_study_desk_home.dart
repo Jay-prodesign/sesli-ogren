@@ -77,12 +77,12 @@ class LivingStudyDeskHome extends StatelessWidget {
 
   String get _why {
     if (_hasReaderResume) {
-      return 'Okuma konumun bu kaynakta kayıtlı. Okumak öğrenme kanıtı oluşturmaz; ardından hatırlamayı deneyebilirsin.';
+      return 'Okuma konumun kayıtlı. Devam et; hazır olduğunda kaynağı kapatıp hatırlamayı dene.';
     }
     if (_hasListenResume) {
-      return 'Dinleme konumun bu kaynakta kayıtlı. Dinlemek öğrenme kanıtı oluşturmaz; ardından hatırlamayı deneyebilirsin.';
+      return 'Dinleme konumun kayıtlı. Devam et; hazır olduğunda kaynağı kapatıp hatırlamayı dene.';
     }
-    return continuation?.nextAction.reasonText ?? 'Kaynağından bir hatırlama denemesiyle ne bildiğini gör.';
+    return continuation?.nextAction.reasonText ?? 'Kaynağa bakmadan kısa bir hatırlama denemesi yap.';
   }
 
   String get _continuationLabel {
@@ -125,10 +125,10 @@ class LivingStudyDeskHome extends StatelessWidget {
   String? get _evidenceHeadline {
     final state = continuation?.state.kind;
     return switch (state) {
-      RecallStateKind.retrievedOnce => 'Bir bağımsız geri çağırma gözlemi var',
-      RecallStateKind.developing => 'Bu deneme henüz bağımsız başarı değil',
-      RecallStateKind.needsReview => 'Son deneme kaynak onarımı istiyor',
-      RecallStateKind.notAssessed => 'Henüz bağımsız geri çağırma kanıtı yok',
+      RecallStateKind.retrievedOnce => 'Kendi başına hatırladın',
+      RecallStateKind.developing => 'İpucuyla ilerledin',
+      RecallStateKind.needsReview => 'Bu bölüm bir tur daha istiyor',
+      RecallStateKind.notAssessed => 'Henüz bağımsız deneme yok',
       null => null,
     };
   }
@@ -136,12 +136,12 @@ class LivingStudyDeskHome extends StatelessWidget {
   String? get _evidenceDetail {
     final state = continuation?.state.kind;
     return switch (state) {
-      RecallStateKind.retrievedOnce => 'Bu tek başına ustalık kanıtı değil. Sonraki bağımsız deneme aynı bilgiyi yeniden kurup kuramadığını gösterecek.',
+      RecallStateKind.retrievedOnce => 'İlk bağımsız hatırlaman kaydedildi. Kalıcılığı sonraki deneme gösterecek.',
       RecallStateKind.developing =>
-        'İpucu veya kısmi geri çağırma yardımcı oldu; sistem bunu ustalık saymadan ipucusuz tekrarı öne çıkarıyor.',
+        'Bu denemede yardım kullandın. Sıradaki hedef, aynı bilgiyi ipucusuz geri çağırmak.',
       RecallStateKind.needsReview =>
-        'Yanlış eşleşme bir etiket değil. İlgili kaynak bölümüne dönüp ardından yeniden hatırlayabilirsin.',
-      RecallStateKind.notAssessed => 'Bilmiyorum demek veya yanıtı görmek bağımsız geri çağırma sayılmaz; kaynak ve kanıt kaydı birbirinden ayrı tutulur.',
+        'Bu bölüm henüz oturmadı. Kaynağa dönüp kısa bir onarım yap, sonra yeniden dene.',
+      RecallStateKind.notAssessed => 'Henüz bağımsız bir hatırlama denemen yok.',
       null => null,
     };
   }
@@ -230,13 +230,13 @@ class LivingStudyDeskHome extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text(
-          'Kendi kaynağın.\nGerçek hatırlama.',
+          'Kaldığın yer hazır.',
           key: ValueKey('la0040-atelier-home-promise'),
           style: TextStyle(color: _ink, fontSize: 31, height: 1.05, fontWeight: FontWeight.w900, letterSpacing: -1.2),
         ),
         const SizedBox(height: 9),
         const Text(
-          'Kaldığın yer ve sıradaki gerçek adım tek akışta.',
+          'Kaynağın, son denemen ve sıradaki adım tek yerde.',
           style: TextStyle(color: _sub, fontSize: 15, height: 1.45),
         ),
         const SizedBox(height: 17),
@@ -325,7 +325,7 @@ class LivingStudyDeskHome extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      hasActiveContinuation ? _continuationLabel : 'SIRADAKİ GERÇEK ADIM',
+                      hasActiveContinuation ? _continuationLabel : 'ŞİMDİ',
                       style: const TextStyle(
                         color: _accent,
                         fontSize: 10,

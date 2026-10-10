@@ -95,8 +95,8 @@ void main() {
       onOpenLearning: () => learningOpens++,
     );
 
-    expect(find.text('Bir bağımsız geri çağırma gözlemi var'), findsOneWidget);
-    expect(find.textContaining('tek başına ustalık kanıtı değil'), findsOneWidget);
+    expect(find.text('Kendi başına hatırladın'), findsOneWidget);
+    expect(find.textContaining('Kalıcılığı sonraki deneme gösterecek'), findsOneWidget);
     expect(find.byKey(const ValueKey('la0040-home-evidence-payoff')), findsOneWidget);
     expect(find.text('Bu deneme tamam. Kaynağın burada.'), findsOneWidget);
     expect(find.text('Kaynağa dön'), findsOneWidget);
@@ -119,8 +119,8 @@ void main() {
       onOpenLearning: () => learningOpens++,
     );
 
-    expect(find.text('Henüz bağımsız geri çağırma kanıtı yok'), findsOneWidget);
-    expect(find.textContaining('Bilmiyorum demek veya yanıtı görmek'), findsOneWidget);
+    expect(find.text('Henüz bağımsız deneme yok'), findsOneWidget);
+    expect(find.textContaining('Henüz bağımsız bir hatırlama denemen yok'), findsOneWidget);
     expect(find.text('DENEMEN KAYITLI · SIRADAKİ ADIM'), findsOneWidget);
     expect(find.text('Kaynağa dön, sonra yeniden dene'), findsOneWidget);
     expect(find.text('Kaynağı gözden geçir'), findsOneWidget);

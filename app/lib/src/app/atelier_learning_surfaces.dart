@@ -137,7 +137,7 @@ class AtelierWorkspace extends StatelessWidget {
   String get _activeStepReason {
     final action = continuation?.nextAction;
     if (action != null) return action.reasonText;
-    return 'Okumak ve dinlemek hazırlık adımıdır. İlk öğrenme kanıtın kaynağı kapatıp hatırlamayı denediğinde oluşur.';
+    return 'Önce kaynağı gözden geçir. Hazır olduğunda kapatıp hatırlamayı dene.';
   }
 
   String get _activeStepLabel {
@@ -289,7 +289,7 @@ class AtelierWorkspace extends StatelessWidget {
                             const SizedBox(width: 7),
                             const Expanded(
                               child: Text(
-                                'SIRADAKİ GERÇEK ADIM',
+                                'ŞİMDİ',
                                 style: TextStyle(
                                   color: AtelierStyle.teal,
                                   fontSize: 10,
@@ -414,7 +414,7 @@ class AtelierWorkspace extends StatelessWidget {
                           Icon(_activeStepIcon, color: AtelierStyle.mark, size: 18),
                           const SizedBox(width: 7),
                           const Text(
-                            'SIRADAKİ GERÇEK ADIM',
+                            'ŞİMDİ',
                             style: TextStyle(
                               color: AtelierStyle.mark,
                               fontSize: 10,
@@ -713,14 +713,14 @@ class AtelierRecall extends StatelessWidget {
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
       const Text(
-        'KAYNAK EKRANI KAPALI · ŞİMDİ SEN',
+        'KAYNAK KAPALI · ŞİMDİ SEN',
         style: TextStyle(color: AtelierStyle.teal, fontWeight: FontWeight.w900, fontSize: 11, letterSpacing: 1),
       ),
       const SizedBox(height: 10),
       const AtelierLearningRail(phase: AtelierLearningPhase.recall),
       const SizedBox(height: 14),
       const Text(
-        'Hatırlama sırası sende.',
+        'Aklında ne kaldı?',
         style: TextStyle(
           color: AtelierStyle.ink,
           fontSize: 29,
@@ -738,7 +738,7 @@ class AtelierRecall extends StatelessWidget {
           SizedBox(width: 10),
           Expanded(
             child: Text(
-              'D/Knot: Kaynağı kapattık. Sorunun istediği kısa kavramı hatırla; yardım istersen seçenekler aşağıda.',
+              'Kaynağı kapattık. Sorunun istediği kısa kavramı hatırlamaya çalış. Takılırsan yardım alabilirsin.',
               style: TextStyle(color: AtelierStyle.muted, fontSize: 13, height: 1.4),
             ),
           ),
@@ -789,7 +789,7 @@ class AtelierRecall extends StatelessWidget {
           SizedBox(width: 7),
           Expanded(
             child: Text(
-              'Kaynak, yanıtını gönderene veya “Yanıtı göster” seçeneğini kullanana kadar gizli kalır.',
+              'Kaynak, yanıtını gönderene veya yanıtı görene kadar kapalı kalır.',
               style: TextStyle(color: AtelierStyle.muted, fontSize: 13, height: 1.4),
             ),
           ),
@@ -797,7 +797,7 @@ class AtelierRecall extends StatelessWidget {
       ),
       const SizedBox(height: 16),
       const Text(
-        'KISA YANITIN',
+        'HATIRLADIĞIN',
         style: TextStyle(color: AtelierStyle.muted, fontWeight: FontWeight.w900, fontSize: 11, letterSpacing: 1),
       ),
       const SizedBox(height: 7),
@@ -813,9 +813,9 @@ class AtelierRecall extends StatelessWidget {
         onSubmitted: busy ? null : (_) => onSubmit(),
         textCapitalization: TextCapitalization.none,
         decoration: InputDecoration(
-          labelText: 'Kısa yanıtın',
-          hintText: 'Sorunun beklediği kavramı veya terimi yaz…',
-          helperText: 'Bu adım tek, kısa bir kaynak kavramını karşılaştırır.',
+          labelText: 'Hatırladığın',
+          hintText: 'Kısa kavramı veya terimi yaz…',
+          helperText: 'Tek bir kısa kavramı kaynakla karşılaştıracağız.',
           filled: true,
           fillColor: AtelierStyle.paper,
           border: OutlineInputBorder(borderRadius: BorderRadius.circular(13)),
@@ -852,7 +852,7 @@ class AtelierRecall extends StatelessWidget {
             foregroundColor: Colors.white,
             minimumSize: const Size.fromHeight(52),
           ),
-          child: const Text('Yanıtı karşılaştır'),
+          child: const Text('Kaynakla karşılaştır'),
         ),
       ),
       const SizedBox(height: 9),
@@ -883,7 +883,7 @@ class AtelierResult extends StatelessWidget {
   final SourceVersionRecord? sourceVersion;
 
   String get _heading => switch (result.evidence.outcome) {
-    RecallOutcome.correct when result.evidence.assistance == RecallAssistance.none => 'Bir kez bağımsız hatırladın',
+    RecallOutcome.correct when result.evidence.assistance == RecallAssistance.none => 'Kendi başına hatırladın',
     RecallOutcome.helpedCorrect => 'İpucuyla doğru yanıt',
     RecallOutcome.answerExposed => 'Yanıtı gördün',
     RecallOutcome.unknown => 'Bu kez bilmiyorum dedin',
@@ -964,7 +964,7 @@ class AtelierResult extends StatelessWidget {
         const SizedBox(height: 8),
         Text(
           result.evidence.outcome == RecallOutcome.correct && result.evidence.assistance == RecallAssistance.none
-              ? 'Tek bir bağımsız deneme, henüz ustalık değil.'
+              ? 'İyi başlangıç. Kalıcılığı sonraki bağımsız deneme gösterecek.'
               : 'Bu sonuç denemeni ve varsa aldığın yardımı yansıtır.',
           style: const TextStyle(color: AtelierStyle.muted, fontSize: 14, height: 1.42),
         ),
@@ -1101,10 +1101,10 @@ class AtelierResult extends StatelessWidget {
               Expanded(
                 child: Text(
                   independent
-                      ? 'D/Knot: Bunu kendi başına hatırladın. Kalıcılığı sonraki bağımsız deneme gösterecek.'
+                      ? 'Bunu kendi başına hatırladın. Kalıcılığı sonraki bağımsız deneme gösterecek.'
                       : assisted
-                      ? 'D/Knot: İpucundan yararlandın. Şimdi kaynakla bağı güçlendirip yeniden deneyebilirsin.'
-                      : 'D/Knot: Kanıt, bir sonraki çalışmanda nereye dönmen gerektiğini gösteriyor.',
+                      ? 'İpucu işe yaradı. Şimdi kaynakla bağı güçlendirip bir kez de ipucusuz dene.'
+                      : 'Kaynak, bir sonraki çalışmanda nereye dönmen gerektiğini gösteriyor.',
                   style: const TextStyle(
                     color: AtelierStyle.ink,
                     fontSize: 13,
@@ -1118,7 +1118,7 @@ class AtelierResult extends StatelessWidget {
         ),
         const SizedBox(height: 18),
         const Text(
-          'SIRADAKİ GERÇEK ADIM',
+          'SIRADAKİ ADIM',
           style: TextStyle(color: AtelierStyle.teal, fontWeight: FontWeight.w900, fontSize: 11, letterSpacing: 1),
         ),
         const SizedBox(height: 8),
