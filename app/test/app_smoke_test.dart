@@ -946,9 +946,8 @@ void main() {
     await tester.pump(const Duration(milliseconds: 450));
     expect(retryFromSource, findsOneWidget);
     await tester.tap(retryFromSource);
-    await tester.pump(const Duration(milliseconds: 450));
+    await pumpUntilGone(tester, find.text('Bu bölümü yeniden kur'));
     await pumpUntilFound(tester, find.text('Hatırla'));
-    expect(find.text('Bu bölümü yeniden kur'), findsNothing);
     expect(find.text('Yanıtla'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });

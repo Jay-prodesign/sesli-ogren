@@ -40,7 +40,7 @@ void main() {
     expect(find.text('1 eşleşme'), findsOneWidget);
     expect(tester.takeException(), isNull);
 
-    await tester.tap(find.text('Okuduklarını hatırla'));
+    await tester.tap(find.text('Hatırla'));
     await tester.pump();
     expect(recalled, 1);
 

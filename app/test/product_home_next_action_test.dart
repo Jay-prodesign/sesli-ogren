@@ -139,7 +139,7 @@ void main() {
 
     await tapVisible(tester, find.text('Kaynağa dön'));
     await tester.pump();
-    await tester.pump(const Duration(milliseconds: 100));
+    await tester.pump(const Duration(milliseconds: 450));
     expect(find.byType(MaterialWorkspaceScreen), findsOneWidget);
     expect(LivingDeskReviewScope.active(tester.element(find.byType(MaterialWorkspaceScreen))), isTrue);
 

@@ -276,48 +276,54 @@ class _SourceReaderScreenState extends State<SourceReaderScreen> {
                   ],
                 ),
               ),
-            if (source.isNotEmpty && _showLearningActions && widget.onListen != null)
+            if (source.isNotEmpty &&
+                _showLearningActions &&
+                (widget.onListen != null || widget.onRecap != null || widget.onRecall != null))
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
-                child: OutlinedButton.icon(
-                  style: living
-                      ? OutlinedButton.styleFrom(
-                          foregroundColor: accent,
-                          side: BorderSide(color: line),
-                          backgroundColor: paper,
-                        )
-                      : null,
-                  onPressed: widget.onListen,
-                  icon: const Icon(Icons.headphones_rounded),
-                  label: const Text('Kaynağı dinle'),
-                ),
-              ),
-            if (source.isNotEmpty && _showLearningActions && widget.onRecap != null)
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
-                child: OutlinedButton.icon(
-                  style: living
-                      ? OutlinedButton.styleFrom(
-                          foregroundColor: accent,
-                          side: BorderSide(color: line),
-                          backgroundColor: paper,
-                        )
-                      : null,
-                  onPressed: widget.onRecap,
-                  icon: const Icon(Icons.auto_awesome),
-                  label: const Text('Hızlı özet'),
-                ),
-              ),
-            if (source.isNotEmpty && _showLearningActions && widget.onRecall != null)
-              Padding(
-                padding: const EdgeInsets.fromLTRB(20, 8, 20, 8),
-                child: FilledButton.icon(
-                  style: living
-                      ? FilledButton.styleFrom(backgroundColor: AtelierStyle.ink, foregroundColor: Colors.white)
-                      : null,
-                  onPressed: widget.onRecall,
-                  icon: const Icon(Icons.psychology_alt_outlined),
-                  label: const Text('Okuduklarını hatırla'),
+                padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
+                child: Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    if (widget.onListen != null)
+                      OutlinedButton.icon(
+                        style: living
+                            ? OutlinedButton.styleFrom(
+                                foregroundColor: accent,
+                                side: BorderSide(color: line),
+                                backgroundColor: paper,
+                              )
+                            : null,
+                        onPressed: widget.onListen,
+                        icon: const Icon(Icons.headphones_rounded),
+                        label: const Text('Dinle'),
+                      ),
+                    if (widget.onRecap != null)
+                      OutlinedButton.icon(
+                        style: living
+                            ? OutlinedButton.styleFrom(
+                                foregroundColor: accent,
+                                side: BorderSide(color: line),
+                                backgroundColor: paper,
+                              )
+                            : null,
+                        onPressed: widget.onRecap,
+                        icon: const Icon(Icons.auto_awesome),
+                        label: const Text('Özet'),
+                      ),
+                    if (widget.onRecall != null)
+                      FilledButton.icon(
+                        style: living
+                            ? FilledButton.styleFrom(
+                                backgroundColor: AtelierStyle.ink,
+                                foregroundColor: Colors.white,
+                              )
+                            : null,
+                        onPressed: widget.onRecall,
+                        icon: const Icon(Icons.psychology_alt_outlined),
+                        label: const Text('Hatırla'),
+                      ),
+                  ],
                 ),
               ),
             Expanded(
