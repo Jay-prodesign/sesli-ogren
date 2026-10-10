@@ -16,10 +16,6 @@ on:
 permissions:
   contents: read
 
-concurrency:
-  group: product-platform-build-validation-${{ github.ref }}
-  cancel-in-progress: true
-
 jobs:
   milestone-gate:
     name: Milestone CI gate
