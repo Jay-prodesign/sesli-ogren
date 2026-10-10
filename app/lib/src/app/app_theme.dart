@@ -7,30 +7,35 @@ import 'package:flutter/material.dart';
 /// state. They are not a generic design system and should grow only when
 /// Sesli Öğren has a concrete experience need.
 abstract final class AppPalette {
-  static const canvas = Color(0xFFF5F7F4);
-  static const surface = Color(0xFFFFFDF9);
-  static const surfaceMuted = Color(0xFFE8F3EC);
-  static const ink = Color(0xFF15313A);
-  static const inkMuted = Color(0xFF52696B);
+  // LA-0040 Founder-locked Visual Learning Studio × Student Momentum roles.
+  static const canvas = Color(0xFFF7F8FC);
+  static const surface = Color(0xFFFFFFFF);
+  static const surfaceMuted = Color(0xFFF2F4F7);
+  static const ink = Color(0xFF111827);
+  static const inkMuted = Color(0xFF667085);
 
-  static const primary = Color(0xFF0A716A);
-  static const primaryDark = Color(0xFF15313A);
-  static const primarySoft = Color(0xFFE8F3EC);
+  // Pulse Blue is the primary brand/action anchor.
+  static const primary = Color(0xFF3657FF);
+  static const primaryDark = Color(0xFF14224A);
+  static const primarySoft = Color(0xFFEEF1FF);
 
-  static const signal = Color(0xFF0A716A);
-  static const signalSoft = Color(0xFFE8F3EC);
-  static const momentum = Color(0xFFE0F0AF);
-  static const momentumInk = Color(0xFF15313A);
+  // Signal Aqua belongs to Listen/supportive states, not primary CTAs.
+  static const signal = Color(0xFF20BFA9);
+  static const signalSoft = Color(0xFFE6F8F4);
 
-  static const success = Color(0xFF0A716A);
-  static const successSoft = Color(0xFFE8F3EC);
+  // Volt Lime is a bounded momentum/highlight cue.
+  static const momentum = Color(0xFFC9F45D);
+  static const momentumInk = Color(0xFF14224A);
 
-  static const attention = Color(0xFFA9560A);
+  static const success = Color(0xFF138A72);
+  static const successSoft = Color(0xFFE7F5F1);
+
+  static const attention = Color(0xFFE99024);
   static const attentionAccent = Color(0xFFE99024);
-  static const attentionSoft = Color(0xFFFFEEDB);
+  static const attentionSoft = Color(0xFFFFF3E4);
 
   static const destructive = Color(0xFFD64550);
-  static const outline = Color(0xFFD5E3DC);
+  static const outline = Color(0xFFE4E7EC);
 }
 
 abstract final class SesliOgrenTheme {
@@ -44,7 +49,7 @@ abstract final class SesliOgrenTheme {
       secondary: AppPalette.signal,
       onSecondary: Colors.white,
       secondaryContainer: AppPalette.signalSoft,
-      onSecondaryContainer: const Color(0xFF075E54),
+      onSecondaryContainer: const Color(0xFF0A5E53),
       tertiary: AppPalette.attention,
       tertiaryContainer: AppPalette.attentionSoft,
       error: AppPalette.destructive,
@@ -52,12 +57,12 @@ abstract final class SesliOgrenTheme {
       onSurface: AppPalette.ink,
       onSurfaceVariant: AppPalette.inkMuted,
       outline: AppPalette.outline,
-      outlineVariant: const Color(0xFFE7E8ED),
+      outlineVariant: const Color(0xFFEEF0F4),
       surfaceContainerLowest: AppPalette.canvas,
       surfaceContainerLow: AppPalette.surface,
       surfaceContainer: AppPalette.surfaceMuted,
-      surfaceContainerHigh: const Color(0xFFE9ECF4),
-      surfaceContainerHighest: const Color(0xFFE1E5EF),
+      surfaceContainerHigh: const Color(0xFFEFF2F8),
+      surfaceContainerHighest: const Color(0xFFE7EBF3),
     );
 
     final text = base.textTheme.copyWith(
