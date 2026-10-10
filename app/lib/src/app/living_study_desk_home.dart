@@ -235,220 +235,130 @@ class LivingStudyDeskHome extends StatelessWidget {
         ),
         const SizedBox(height: 9),
         const Text(
-          'Kaynağı aç. Sonra kapatıp kendi cümlelerinle geri çağır.',
+          'Kaldığın yer ve sıradaki gerçek adım tek akışta.',
           style: TextStyle(color: _sub, fontSize: 15, height: 1.45),
         ),
-        const SizedBox(height: 19),
-        Stack(
-          children: [
-            Positioned.fill(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(8, 9, 0, 0),
-                child: DecoratedBox(
-                  decoration: BoxDecoration(color: const Color(0xFFE2E9E3), borderRadius: BorderRadius.circular(13)),
-                ),
+        const SizedBox(height: 17),
+        Material(
+          color: _paper,
+          borderRadius: BorderRadius.circular(14),
+          clipBehavior: Clip.antiAlias,
+          child: InkWell(
+            key: const ValueKey('la0040-living-material-open'),
+            onTap: onOpenWorkspace,
+            child: Container(
+              width: double.infinity,
+              padding: const EdgeInsets.fromLTRB(16, 14, 15, 14),
+              decoration: const BoxDecoration(
+                border: Border(left: BorderSide(color: _accent, width: 3)),
               ),
-            ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(0, 0, 8, 9),
-              child: Material(
-                color: _paper,
-                elevation: 0,
-                borderRadius: BorderRadius.circular(13),
-                clipBehavior: Clip.antiAlias,
-                child: InkWell(
-                  key: const ValueKey('la0040-living-material-open'),
-                  onTap: onOpenWorkspace,
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(21, 18, 20, 19),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Icon(Icons.auto_stories_outlined, color: _accent, size: 21),
+                  const SizedBox(width: 11),
+                  Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Row(
-                          children: [
-                            const Icon(Icons.auto_stories_outlined, color: _accent, size: 18),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              child: Text(
-                                _type(current),
-                                style: const TextStyle(
-                                  color: _accent,
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.w900,
-                                  letterSpacing: 1.05,
-                                ),
-                              ),
-                            ),
-                            const Icon(Icons.north_east_rounded, color: _sub, size: 18),
-                          ],
+                        Text(
+                          _type(current),
+                          style: const TextStyle(
+                            color: _accent,
+                            fontSize: 9.5,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: 0.9,
+                          ),
                         ),
-                        const SizedBox(height: 14),
-                        Container(width: 66, height: 3, color: _accent),
-                        const SizedBox(height: 13),
+                        const SizedBox(height: 4),
                         Text(
                           current.title,
-                          maxLines: 3,
+                          maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: const TextStyle(
-                            fontSize: 27,
-                            height: 1.1,
-                            letterSpacing: -0.8,
+                            fontSize: 19,
+                            height: 1.18,
+                            letterSpacing: -0.35,
                             fontWeight: FontWeight.w900,
                             color: _ink,
                           ),
                         ),
-                        const SizedBox(height: 14),
-                        const Divider(color: _line, height: 1),
-                        const SizedBox(height: 13),
+                        const SizedBox(height: 5),
                         Text(
                           _preview,
-                          maxLines: 4,
+                          maxLines: 2,
                           overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(fontSize: 15, color: _sub, height: 1.5),
-                        ),
-                        const SizedBox(height: 17),
-                        const Row(
-                          children: [
-                            Text(
-                              'KAYNAĞI AÇ',
-                              style: TextStyle(
-                                color: _accent,
-                                fontWeight: FontWeight.w900,
-                                fontSize: 11,
-                                letterSpacing: 0.8,
-                              ),
-                            ),
-                            SizedBox(width: 7),
-                            Icon(Icons.arrow_forward_rounded, size: 18, color: _accent),
-                          ],
+                          style: const TextStyle(fontSize: 13, color: _sub, height: 1.4),
                         ),
                       ],
                     ),
                   ),
-                ),
-              ),
-            ),
-          ],
-        ),
-        if (_evidenceHeadline != null) ...[
-          const SizedBox(height: 17),
-          Semantics(
-            container: true,
-            label: 'Öğrenme kanıtı. $_evidenceHeadline. $_evidenceDetail',
-            child: ExcludeSemantics(
-              child: Container(
-                key: const ValueKey('la0040-home-evidence-payoff'),
-                width: double.infinity,
-                padding: const EdgeInsets.fromLTRB(14, 12, 14, 13),
-                decoration: BoxDecoration(
-                  color: _paper,
-                  borderRadius: BorderRadius.circular(13),
-                  border: Border.all(color: _line),
-                ),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Icon(_evidenceIcon, color: _accent, size: 20),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            'SON DENEMENDEN',
-                            style: TextStyle(
-                              color: _accent,
-                              fontSize: 9.5,
-                              fontWeight: FontWeight.w900,
-                              letterSpacing: 0.9,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            _evidenceHeadline!,
-                            style: const TextStyle(color: _ink, fontSize: 15, fontWeight: FontWeight.w900),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(_evidenceDetail!, style: const TextStyle(color: _sub, fontSize: 12.5, height: 1.38)),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
+                  const SizedBox(width: 8),
+                  const Icon(Icons.arrow_forward_rounded, color: _accent, size: 19),
+                ],
               ),
             ),
           ),
-        ],
-        const SizedBox(height: 18),
+        ),
+        const SizedBox(height: 16),
         Container(
           key: const ValueKey('la0040-source-to-recall-thread'),
-          padding: const EdgeInsets.fromLTRB(5, 1, 0, 0),
+          padding: const EdgeInsets.fromLTRB(2, 0, 0, 0),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               SizedBox(
-                width: 74,
-                child: Column(
-                  children: [
-                    Container(width: 2, height: 24, color: _accent),
-                    const SizedBox(height: 2),
-                    const Icon(Icons.arrow_downward_rounded, color: _accent, size: 19),
-                    const SizedBox(height: 1),
-                    CompanionView(
-                      state: _hasListenResume
-                          ? CompanionVisualState.listen
-                          : hasRecallEvidence
-                          ? CompanionVisualState.idle
-                          : CompanionVisualState.think,
-                      size: 76,
-                    ),
-                  ],
+                width: 62,
+                child: CompanionView(
+                  state: _hasListenResume
+                      ? CompanionVisualState.listen
+                      : hasRecallEvidence
+                      ? CompanionVisualState.idle
+                      : CompanionVisualState.think,
+                  size: 60,
                 ),
               ),
-              const SizedBox(width: 8),
+              const SizedBox(width: 9),
               Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.only(top: 5),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        hasActiveContinuation ? _continuationLabel : 'KAYNAĞINDAN ÖĞREN',
-                        style: const TextStyle(
-                          color: _accent,
-                          fontSize: 10,
-                          fontWeight: FontWeight.w900,
-                          letterSpacing: 0.95,
-                        ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      hasActiveContinuation ? _continuationLabel : 'SIRADAKİ GERÇEK ADIM',
+                      style: const TextStyle(
+                        color: _accent,
+                        fontSize: 10,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: 0.9,
                       ),
-                      const SizedBox(height: 7),
-                      Semantics(
-                        header: true,
-                        label: 'Sıradaki öğrenme adımı',
-                        value: _nextStep,
-                        child: ExcludeSemantics(
-                          child: Text(
-                            _nextStep,
-                            style: const TextStyle(
-                              color: _ink,
-                              fontSize: 22,
-                              height: 1.16,
-                              fontWeight: FontWeight.w900,
-                              letterSpacing: -0.35,
-                            ),
+                    ),
+                    const SizedBox(height: 6),
+                    Semantics(
+                      header: true,
+                      label: 'Sıradaki öğrenme adımı',
+                      value: _nextStep,
+                      child: ExcludeSemantics(
+                        child: Text(
+                          _nextStep,
+                          style: const TextStyle(
+                            color: _ink,
+                            fontSize: 22,
+                            height: 1.16,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: -0.35,
                           ),
                         ),
                       ),
-                      const SizedBox(height: 6),
-                      Text(_why, style: const TextStyle(color: _sub, fontSize: 13, height: 1.42)),
-                    ],
-                  ),
+                    ),
+                    const SizedBox(height: 5),
+                    Text(_why, style: const TextStyle(color: _sub, fontSize: 13, height: 1.4)),
+                  ],
                 ),
               ),
             ],
           ),
         ),
-        const SizedBox(height: 13),
+        const SizedBox(height: 12),
         KeyedSubtree(
           key: const ValueKey('la0040-living-next-step-open'),
           child: SizedBox(
@@ -467,7 +377,7 @@ class LivingStudyDeskHome extends StatelessWidget {
             ),
           ),
         ),
-        const SizedBox(height: 7),
+        const SizedBox(height: 6),
         Align(
           alignment: Alignment.center,
           child: TextButton.icon(
@@ -481,15 +391,61 @@ class LivingStudyDeskHome extends StatelessWidget {
             style: TextButton.styleFrom(foregroundColor: _accent),
           ),
         ),
-        if (otherMaterials.isNotEmpty) ...[
-          const SizedBox(height: 24),
-          const Divider(color: _line),
-          const SizedBox(height: 15),
-          const Text(
-            'Diğer materyallerin',
-            style: TextStyle(color: _ink, fontSize: 18, fontWeight: FontWeight.w900),
+        if (_evidenceHeadline != null) ...[
+          const SizedBox(height: 12),
+          Semantics(
+            container: true,
+            label: 'Öğrenme kanıtı. $_evidenceHeadline. $_evidenceDetail',
+            child: ExcludeSemantics(
+              child: Container(
+                key: const ValueKey('la0040-home-evidence-payoff'),
+                width: double.infinity,
+                padding: const EdgeInsets.fromLTRB(13, 11, 13, 12),
+                decoration: BoxDecoration(
+                  color: _paper,
+                  borderRadius: BorderRadius.circular(13),
+                  border: Border.all(color: _line),
+                ),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Icon(_evidenceIcon, color: _accent, size: 19),
+                    const SizedBox(width: 9),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'SON DENEMENDEN',
+                            style: TextStyle(
+                              color: _accent,
+                              fontSize: 9.5,
+                              fontWeight: FontWeight.w900,
+                              letterSpacing: 0.9,
+                            ),
+                          ),
+                          const SizedBox(height: 3),
+                          Text(
+                            _evidenceHeadline!,
+                            style: const TextStyle(color: _ink, fontSize: 14.5, fontWeight: FontWeight.w900),
+                          ),
+                          const SizedBox(height: 3),
+                          Text(_evidenceDetail!, style: const TextStyle(color: _sub, fontSize: 12.5, height: 1.35)),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
           ),
-          const SizedBox(height: 7),
+        ],
+        if (otherMaterials.isNotEmpty) ...[
+          const SizedBox(height: 22),
+          const Divider(color: _line),
+          const SizedBox(height: 13),
+          const Text('Diğer materyallerin', style: TextStyle(color: _ink, fontSize: 17, fontWeight: FontWeight.w900)),
+          const SizedBox(height: 5),
           for (final item in otherMaterials.take(3))
             Material(
               color: Colors.transparent,

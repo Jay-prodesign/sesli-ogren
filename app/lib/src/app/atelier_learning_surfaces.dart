@@ -903,7 +903,7 @@ class AtelierResult extends StatelessWidget {
   String get _nextActionLabel => switch (result.nextAction.kind) {
     NextLearningActionKind.reviewSourceThenRecall => 'Kaynağı gözden geçir',
     NextLearningActionKind.retryRecallWithoutHint => 'İpucusuz tekrar dene',
-    NextLearningActionKind.repeatRecallLater => 'Bu denemeyi tamamla',
+    NextLearningActionKind.repeatRecallLater => 'Denemeyi bitir · devamını kaydet',
   };
 
   @override
