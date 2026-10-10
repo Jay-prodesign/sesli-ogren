@@ -121,6 +121,40 @@ class AtelierWorkspace extends StatelessWidget {
   final VoidCallback onExplain;
   final VoidCallback onFocus;
 
+  String get _activeStepTitle {
+    final action = continuation?.nextAction.kind;
+    return switch (action) {
+      NextLearningActionKind.reviewSourceThenRecall => 'Kaynak onarımın hazır',
+      NextLearningActionKind.retryRecallWithoutHint => 'İpucusuz tekrarın hazır',
+      NextLearningActionKind.repeatRecallLater => 'Bugünlük planın hazır',
+      null => 'İlk aktif denemeni yap',
+    };
+  }
+
+  String get _activeStepReason {
+    final action = continuation?.nextAction;
+    if (action != null) return action.reasonText;
+    return 'Okumak ve dinlemek hazırlık adımıdır. İlk öğrenme kanıtın kaynağı kapatıp hatırlamayı denediğinde oluşur.';
+  }
+
+  String get _activeStepLabel {
+    return switch (continuation?.nextAction.kind) {
+      NextLearningActionKind.reviewSourceThenRecall => 'Kaynağı gözden geçir',
+      NextLearningActionKind.retryRecallWithoutHint => 'İpucusuz tekrar dene',
+      NextLearningActionKind.repeatRecallLater => 'Devam planını aç',
+      null => 'Kaynağı kapat · Hatırla',
+    };
+  }
+
+  IconData get _activeStepIcon {
+    return switch (continuation?.nextAction.kind) {
+      NextLearningActionKind.reviewSourceThenRecall => Icons.auto_stories_outlined,
+      NextLearningActionKind.retryRecallWithoutHint => Icons.refresh_rounded,
+      NextLearningActionKind.repeatRecallLater => Icons.event_available_outlined,
+      null => Icons.psychology_alt_outlined,
+    };
+  }
+
   @override
   Widget build(BuildContext context) => ColoredBox(
     key: const ValueKey('la0040-atelier-workspace'),
@@ -241,13 +275,27 @@ class AtelierWorkspace extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Expanded(
-                    child: Text(
-                      'Kaynağınla devam et',
-                      style: TextStyle(color: Colors.white, fontWeight: FontWeight.w800),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          _activeStepTitle,
+                          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w900),
+                        ),
+                        const SizedBox(height: 3),
+                        Text(
+                          _activeStepReason,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(color: Color(0xFFC7D5D2), fontSize: 12, height: 1.3),
+                        ),
+                      ],
                     ),
                   ),
+                  const SizedBox(width: 8),
                   TextButton(
                     onPressed: onExplain,
                     style: TextButton.styleFrom(foregroundColor: Colors.white),
@@ -283,11 +331,17 @@ class AtelierWorkspace extends StatelessWidget {
                         backgroundColor: AtelierStyle.mark,
                         foregroundColor: AtelierStyle.ink,
                       ),
-                      icon: const Icon(Icons.psychology_alt_outlined),
-                      label: const Text('Hatırla'),
+                      icon: Icon(_activeStepIcon),
+                      label: Text(_activeStepLabel),
                     ),
                   ),
                 ],
+              ),
+              const SizedBox(height: 7),
+              const Text(
+                'Bu akışta öğrenme durumunu aktif Hatırla denemesi günceller; okuma ve dinleme hazırlık olarak kalır.',
+                textAlign: TextAlign.center,
+                style: TextStyle(color: Color(0xFFB6C8C4), fontSize: 11, height: 1.35),
               ),
             ],
           ),

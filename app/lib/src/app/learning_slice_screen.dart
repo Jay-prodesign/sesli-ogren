@@ -856,7 +856,7 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
                 minimumSize: const Size.fromHeight(52),
               ),
               icon: const Icon(Icons.auto_stories_outlined),
-              label: Text(_editingExistingSource ? 'Yeni sürümü ekle ve aç' : 'Kaynağı ekle ve aç'),
+              label: Text(_editingExistingSource ? 'Yeni sürümü ekle · çalışma alanını aç' : 'Kaynağı ekle · çalışma alanını aç'),
             ),
           ],
         ),
