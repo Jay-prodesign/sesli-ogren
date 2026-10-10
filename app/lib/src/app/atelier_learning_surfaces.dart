@@ -316,8 +316,6 @@ class AtelierWorkspace extends StatelessWidget {
               const SizedBox(height: 3),
               Text(
                 _activeStepReason,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
                 style: const TextStyle(color: Color(0xFFC7D5D2), fontSize: 12, height: 1.3),
               ),
               const SizedBox(height: 10),
@@ -333,32 +331,56 @@ class AtelierWorkspace extends StatelessWidget {
                 label: Text(_activeStepLabel),
               ),
               const SizedBox(height: 7),
-              Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton.icon(
-                      key: const ValueKey('la0040-atelier-workspace-listen'),
-                      onPressed: onListen,
-                      icon: const Icon(Icons.headphones_rounded),
-                      label: const Text('Dinle'),
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: Colors.white,
-                        side: const BorderSide(color: Color(0xFF8EA9A3)),
-                      ),
+              LayoutBuilder(
+                builder: (context, constraints) {
+                  final compactActions =
+                      constraints.maxWidth < 340 || MediaQuery.textScalerOf(context).scale(1) > 1.2;
+                  final listen = OutlinedButton.icon(
+                    key: const ValueKey('la0040-atelier-workspace-listen'),
+                    onPressed: onListen,
+                    icon: const Icon(Icons.headphones_rounded),
+                    label: const Text('Dinle'),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: Colors.white,
+                      side: const BorderSide(color: Color(0xFF8EA9A3)),
                     ),
-                  ),
-                  const SizedBox(width: 7),
-                  TextButton(
+                  );
+                  final explain = TextButton.icon(
                     onPressed: onExplain,
                     style: TextButton.styleFrom(foregroundColor: Colors.white),
-                    child: const Text('Açıkla'),
-                  ),
-                  IconButton(
+                    icon: const Icon(Icons.record_voice_over_outlined),
+                    label: const Text('Açıkla'),
+                  );
+                  final focus = TextButton.icon(
                     onPressed: onFocus,
-                    tooltip: 'Odaklan',
-                    icon: const Icon(Icons.center_focus_strong, color: Colors.white),
-                  ),
-                ],
+                    style: TextButton.styleFrom(foregroundColor: Colors.white),
+                    icon: const Icon(Icons.center_focus_strong),
+                    label: const Text('Odaklan'),
+                  );
+                  if (compactActions) {
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        listen,
+                        const SizedBox(height: 4),
+                        Wrap(
+                          alignment: WrapAlignment.center,
+                          spacing: 4,
+                          runSpacing: 2,
+                          children: [explain, focus],
+                        ),
+                      ],
+                    );
+                  }
+                  return Row(
+                    children: [
+                      Expanded(child: listen),
+                      const SizedBox(width: 7),
+                      explain,
+                      focus,
+                    ],
+                  );
+                },
               ),
               const SizedBox(height: 4),
               const Text(
@@ -871,16 +893,18 @@ class AtelierResult extends StatelessWidget {
           AtelierSourceTrustStrip(sourceVersion: sourceVersion!),
         ],
         const SizedBox(height: 13),
-        Center(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 15),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Icon(Icons.arrow_downward_rounded, color: AtelierStyle.teal, size: 20),
-                const SizedBox(width: 8),
-                const Text(
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 15),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Icon(Icons.arrow_downward_rounded, color: AtelierStyle.teal, size: 20),
+              const SizedBox(width: 8),
+              const Expanded(
+                child: Text(
                   'ŞİMDİ KAYNAĞINDAKİ KANIT',
+                  textAlign: TextAlign.center,
+                  softWrap: true,
                   style: TextStyle(
                     color: AtelierStyle.teal,
                     fontSize: 11,
@@ -888,8 +912,9 @@ class AtelierResult extends StatelessWidget {
                     letterSpacing: 1,
                   ),
                 ),
-              ],
-            ),
+              ),
+              const SizedBox(width: 28),
+            ],
           ),
         ),
         TweenAnimationBuilder<double>(

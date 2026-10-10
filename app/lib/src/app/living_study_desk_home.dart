@@ -541,28 +541,43 @@ class LivingStudyDeskHome extends StatelessWidget {
       const SizedBox(height: 9),
       const Text('PDF veya kendi metnin · kendi kaynağınla başla', style: TextStyle(color: _sub, fontSize: 13)),
       const SizedBox(height: 17),
-      const Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          CompanionView(state: CompanionVisualState.idle, size: 104),
-          SizedBox(width: 10),
-          Expanded(
-            child: Column(
+      LayoutBuilder(
+        builder: (context, constraints) {
+          final compactCompanion =
+              constraints.maxWidth < 330 || MediaQuery.textScalerOf(context).scale(1) > 1.25;
+          const copy = Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Merhaba, ben D/Knot.',
+                style: TextStyle(color: _ink, fontSize: 18, fontWeight: FontWeight.w900),
+              ),
+              SizedBox(height: 6),
+              Text(
+                'Kaynağını görünür tutacağım. Öğrenme durumun yalnız kendi hatırlama denemelerinle değişecek.',
+                style: TextStyle(color: _sub, fontSize: 14, height: 1.4),
+              ),
+            ],
+          );
+          if (compactCompanion) {
+            return const Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  'Merhaba, ben D/Knot.',
-                  style: TextStyle(color: _ink, fontSize: 18, fontWeight: FontWeight.w900),
-                ),
-                SizedBox(height: 6),
-                Text(
-                  'Kaynağını görünür tutacağım. Öğrenme durumun yalnız kendi hatırlama denemelerinle değişecek.',
-                  style: TextStyle(color: _sub, fontSize: 14, height: 1.4),
-                ),
+                CompanionView(state: CompanionVisualState.idle, size: 88),
+                SizedBox(height: 8),
+                copy,
               ],
-            ),
-          ),
-        ],
+            );
+          }
+          return const Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              CompanionView(state: CompanionVisualState.idle, size: 104),
+              SizedBox(width: 10),
+              Expanded(child: copy),
+            ],
+          );
+        },
       ),
       const SizedBox(height: 17),
       Container(
