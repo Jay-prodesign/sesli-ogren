@@ -103,6 +103,31 @@ void main() {
     expect(find.text('Kaynağı kapat ve yeniden dene'), findsOneWidget);
   });
 
+  testWidgets('Library continuation opens the canonical repair step', (tester) async {
+    usePhoneViewport(tester);
+    final runtime = await _runtimeWithEvidence(
+      disposition: RecallResponseDisposition.unknown,
+      submitCorrectAnswer: false,
+    );
+    addTearDown(runtime.close);
+
+    await tester.pumpWidget(_testApp(LivingDeskReviewScope(child: ProductShellScreen(runtime: runtime))));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 150));
+
+    await tapVisible(tester, find.text('Kütüphane'));
+    await tester.pump(const Duration(milliseconds: 150));
+    final continueAction = find.byKey(
+      ValueKey('library-continue-${AppRuntime.primaryMaterialId.value}'),
+    );
+    expect(continueAction, findsOneWidget);
+    await tapVisible(tester, continueAction);
+    await tester.pump(const Duration(milliseconds: 450));
+
+    expect(find.text('Bu bölümü yeniden kur'), findsOneWidget);
+    expect(find.text('Kaynağı kapat ve yeniden dene'), findsOneWidget);
+  });
+
   testWidgets('Home completed action returns to the source workspace instead of replaying Recall', (tester) async {
     usePhoneViewport(tester);
     final runtime = await _runtimeWithEvidence(

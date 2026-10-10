@@ -126,6 +126,23 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
     }
   }
 
+  Future<void> _openMaterialNextAction(MaterialId materialId) async {
+    final snapshot = await _snapshot;
+    if (!mounted) return;
+    LearningContinuation? continuation;
+    for (final item in snapshot.progress) {
+      if (item.material.id == materialId) {
+        continuation = item.continuation;
+        break;
+      }
+    }
+    if (continuation?.nextAction.kind == NextLearningActionKind.repeatRecallLater) {
+      await _openWorkspace(materialId);
+      return;
+    }
+    await _openLearningFor(materialId, autoAdvanceContinuation: continuation != null);
+  }
+
   Future<void> _openWorkspace([MaterialId? materialId]) async {
     final selected = materialId ?? (await _snapshot).material?.id;
     if (selected == null || !mounted) return;
@@ -405,13 +422,14 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
                           data: data,
                           onOpenLearning: _openLearning,
                           onOpenWorkspace: _openWorkspace,
+                          onContinueMaterial: _openMaterialNextAction,
                           onDeleteMaterial: _deleteMaterial,
                           deletingMaterialId: _deletingMaterialId,
                         ),
                       ),
                       TickerMode(
                         enabled: _index == 2,
-                        child: ProgressSurface(items: data.progress, onOpenMaterial: _openWorkspace),
+                        child: ProgressSurface(items: data.progress, onOpenMaterial: _openMaterialNextAction),
                       ),
                       TickerMode(
                         enabled: _index == 3,
@@ -912,6 +930,7 @@ class _LibrarySurface extends StatefulWidget {
     required this.data,
     required this.onOpenLearning,
     required this.onOpenWorkspace,
+    required this.onContinueMaterial,
     required this.onDeleteMaterial,
     required this.deletingMaterialId,
   });
@@ -919,6 +938,7 @@ class _LibrarySurface extends StatefulWidget {
   final _HomeSnapshot data;
   final VoidCallback onOpenLearning;
   final ValueChanged<MaterialId> onOpenWorkspace;
+  final ValueChanged<MaterialId> onContinueMaterial;
   final ValueChanged<MaterialRecord> onDeleteMaterial;
   final MaterialId? deletingMaterialId;
 
@@ -1047,6 +1067,7 @@ class _LibrarySurfaceState extends State<_LibrarySurface> {
               material: material,
               continuation: _continuationFor(material.id),
               onPressed: () => widget.onOpenWorkspace(material.id),
+              onContinue: () => widget.onContinueMaterial(material.id),
               onDelete: () => widget.onDeleteMaterial(material),
               isDeleting: widget.deletingMaterialId == material.id,
             ),
@@ -1069,6 +1090,7 @@ class _LibraryMaterialCard extends StatelessWidget {
     required this.material,
     required this.continuation,
     required this.onPressed,
+    required this.onContinue,
     required this.onDelete,
     required this.isDeleting,
   });
@@ -1076,8 +1098,16 @@ class _LibraryMaterialCard extends StatelessWidget {
   final MaterialRecord material;
   final LearningContinuation? continuation;
   final VoidCallback onPressed;
+  final VoidCallback onContinue;
   final VoidCallback onDelete;
   final bool isDeleting;
+
+  String get _continueLabel => switch (continuation?.nextAction.kind) {
+    NextLearningActionKind.reviewSourceThenRecall => 'Kaynağı gözden geçir ve yeniden dene',
+    NextLearningActionKind.retryRecallWithoutHint => 'İpucusuz tekrar dene',
+    NextLearningActionKind.repeatRecallLater => 'Kaynağa dön',
+    null => 'İlk hatırlamayı dene',
+  };
 
   @override
   Widget build(BuildContext context) {
@@ -1114,138 +1144,147 @@ class _LibraryMaterialCard extends StatelessWidget {
     return Card(
       elevation: 0,
       color: living ? AtelierStyle.paper : null,
+      clipBehavior: Clip.antiAlias,
       shape: living
           ? RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(18),
               side: const BorderSide(color: AtelierStyle.line),
             )
           : null,
-      child: InkWell(
-        onTap: onPressed,
-        borderRadius: BorderRadius.circular(18),
-        child: Column(
-          children: [
-            Container(
-              height: 5,
-              decoration: BoxDecoration(
-                color: living ? AtelierStyle.teal : AppPalette.primary,
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(18)),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 14, 8, 15),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  DecoratedBox(
-                    decoration: BoxDecoration(
-                      color: living ? AtelierStyle.mint : AppPalette.primarySoft,
-                      borderRadius: BorderRadius.circular(14),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(11),
-                      child: Icon(mediaIcon, color: living ? AtelierStyle.teal : AppPalette.primary, size: 22),
-                    ),
+      child: Column(
+        children: [
+          InkWell(
+            onTap: onPressed,
+            child: Column(
+              children: [
+                Container(height: 5, color: living ? AtelierStyle.teal : AppPalette.primary),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 14, 8, 15),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      DecoratedBox(
+                        decoration: BoxDecoration(
+                          color: living ? AtelierStyle.mint : AppPalette.primarySoft,
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(11),
+                          child: Icon(mediaIcon, color: living ? AtelierStyle.teal : AppPalette.primary, size: 22),
+                        ),
+                      ),
+                      const SizedBox(width: 13),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              mediaLabel.toUpperCase(),
+                              style: theme.textTheme.labelSmall?.copyWith(
+                                color: living ? AtelierStyle.muted : AppPalette.inkMuted,
+                                fontWeight: FontWeight.w800,
+                                letterSpacing: 0.45,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              material.title,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
+                            ),
+                            const SizedBox(height: 9),
+                            DecoratedBox(
+                              decoration: BoxDecoration(
+                                color: resolvedStateSoft,
+                                borderRadius: BorderRadius.circular(999),
+                              ),
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
+                                child: Text(
+                                  stateLabel,
+                                  style: theme.textTheme.labelSmall?.copyWith(
+                                    color: resolvedStateAccent,
+                                    fontWeight: FontWeight.w800,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      IconButton(
+                        tooltip: 'Materyali sil',
+                        onPressed: isDeleting ? null : onDelete,
+                        icon: isDeleting
+                            ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2))
+                            : const Icon(Icons.delete_outline_rounded),
+                      ),
+                    ],
                   ),
-                  const SizedBox(width: 13),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          mediaLabel.toUpperCase(),
-                          style: theme.textTheme.labelSmall?.copyWith(
-                            color: living ? AtelierStyle.muted : AppPalette.inkMuted,
-                            fontWeight: FontWeight.w800,
-                            letterSpacing: 0.45,
+                ),
+              ],
+            ),
+          ),
+          Semantics(
+            button: true,
+            label: '${material.title} için sıradaki öğrenme adımına devam et',
+            child: InkWell(
+              key: ValueKey('library-continue-${material.id.value}'),
+              onTap: onContinue,
+              child: DecoratedBox(
+                decoration: BoxDecoration(color: living ? AtelierStyle.ink : AppPalette.primaryDark),
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(15, 12, 15, 13),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      DecoratedBox(
+                        decoration: BoxDecoration(
+                          color: living ? AtelierStyle.mark : AppPalette.momentum,
+                          borderRadius: BorderRadius.circular(999),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(6),
+                          child: Icon(
+                            Icons.arrow_forward_rounded,
+                            color: living ? AtelierStyle.ink : AppPalette.momentumInk,
+                            size: 16,
                           ),
                         ),
-                        const SizedBox(height: 4),
-                        Text(
-                          material.title,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
-                        ),
-                        const SizedBox(height: 9),
-                        DecoratedBox(
-                          decoration: BoxDecoration(color: resolvedStateSoft, borderRadius: BorderRadius.circular(999)),
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
-                            child: Text(
-                              stateLabel,
-                              style: theme.textTheme.labelSmall?.copyWith(
-                                color: resolvedStateAccent,
+                      ),
+                      const SizedBox(width: 9),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              _continueLabel,
+                              style: theme.textTheme.labelMedium?.copyWith(
+                                color: Colors.white,
                                 fontWeight: FontWeight.w800,
                               ),
                             ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  IconButton(
-                    tooltip: 'Materyali sil',
-                    onPressed: isDeleting ? null : onDelete,
-                    icon: isDeleting
-                        ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2))
-                        : const Icon(Icons.delete_outline_rounded),
-                  ),
-                ],
-              ),
-            ),
-            DecoratedBox(
-              decoration: BoxDecoration(
-                color: living ? AtelierStyle.ink : AppPalette.primaryDark,
-                borderRadius: const BorderRadius.vertical(bottom: Radius.circular(18)),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(15, 12, 15, 13),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    DecoratedBox(
-                      decoration: BoxDecoration(
-                        color: living ? AtelierStyle.mark : AppPalette.momentum,
-                        borderRadius: BorderRadius.circular(999),
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(6),
-                        child: Icon(
-                          Icons.arrow_forward_rounded,
-                          color: living ? AtelierStyle.ink : AppPalette.momentumInk,
-                          size: 16,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 9),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Kaldığın yer',
-                            style: theme.textTheme.labelSmall?.copyWith(
-                              color: Colors.white.withValues(alpha: 0.68),
-                              fontWeight: FontWeight.w800,
+                            const SizedBox(height: 3),
+                            Text(
+                              nextReason,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: Colors.white.withValues(alpha: 0.72),
+                                height: 1.35,
+                              ),
                             ),
-                          ),
-                          const SizedBox(height: 3),
-                          Text(
-                            nextReason,
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                            style: theme.textTheme.bodySmall?.copyWith(color: Colors.white, height: 1.4),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

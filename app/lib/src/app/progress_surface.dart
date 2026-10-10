@@ -162,6 +162,7 @@ class _ProgressCard extends StatelessWidget {
             )
           : null,
       child: InkWell(
+        key: ValueKey('progress-continue-${item.material.id.value}'),
         onTap: onPressed,
         borderRadius: BorderRadius.circular(18),
         child: Column(
@@ -244,7 +245,7 @@ class _ProgressCard extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Sıradaki adım',
+                            'Sıradaki adıma devam et',
                             style: theme.textTheme.labelSmall?.copyWith(
                               color: Colors.white.withValues(alpha: 0.68),
                               fontWeight: FontWeight.w800,

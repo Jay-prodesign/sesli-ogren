@@ -93,7 +93,6 @@ class _MaterialWorkspaceScreenState extends State<MaterialWorkspaceScreen> {
     );
   }
 
-
   Future<void> _openQuickRecap() async {
     await Navigator.of(context).push<void>(
       MaterialPageRoute(
