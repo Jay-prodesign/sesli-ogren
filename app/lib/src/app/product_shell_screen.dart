@@ -148,6 +148,12 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
     await _openLearningFor(materialId);
   }
 
+  Future<void> _openNewMaterial() async {
+    final materialId = widget.runtime.newMaterialId();
+    if (!mounted) return;
+    await _openLearningFor(materialId);
+  }
+
   Future<void> _openNextLearningAction() async {
     final materialId = (await _snapshot).material?.id ?? widget.runtime.newMaterialId();
     if (!mounted) return;
@@ -528,7 +534,7 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
                     enabled: _index == 1,
                     child: _LibrarySurface(
                       data: data,
-                      onOpenLearning: _openLearning,
+                      onAddMaterial: _openNewMaterial,
                       onOpenWorkspace: _openWorkspace,
                       onContinueMaterial: _openMaterialNextAction,
                       onDeleteMaterial: _deleteMaterial,
@@ -580,7 +586,7 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
 class _HomeSurface extends StatelessWidget {
   const _HomeSurface({
     required this.data,
-    required this.onOpenLearning,
+    required this.onAddMaterial,
     required this.onOpenListen,
     required this.onOpenWorkspace,
     required this.onOpenReader,
@@ -588,7 +594,7 @@ class _HomeSurface extends StatelessWidget {
   });
 
   final _HomeSnapshot data;
-  final VoidCallback onOpenLearning;
+  final VoidCallback onAddMaterial;
   final VoidCallback onOpenListen;
   final VoidCallback onOpenWorkspace;
   final VoidCallback onOpenReader;
@@ -1123,26 +1129,37 @@ class _LibrarySurfaceState extends State<_LibrarySurface> {
           ),
           const SizedBox(height: 7),
         ],
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
-            Expanded(
-              child: Text(
-                'Kütüphane',
-                style: theme.textTheme.headlineMedium?.copyWith(
-                  color: ink,
-                  fontWeight: living ? FontWeight.w900 : null,
-                ),
+        LayoutBuilder(
+          builder: (context, constraints) {
+            final compactHeader =
+                constraints.maxWidth < 340 || MediaQuery.textScalerOf(context).scale(1) > 1.25;
+            final title = Text(
+              'Kütüphane',
+              style: theme.textTheme.headlineMedium?.copyWith(
+                color: ink,
+                fontWeight: living ? FontWeight.w900 : null,
               ),
-            ),
-            if (widget.data.materials.isNotEmpty)
-              Text(
-                hasQuery
-                    ? '${visibleMaterials.length} / ${widget.data.materials.length} materyal'
-                    : '${widget.data.materials.length} materyal',
-                style: theme.textTheme.labelMedium?.copyWith(color: muted),
-              ),
-          ],
+            );
+            final count = widget.data.materials.isEmpty
+                ? null
+                : Text(
+                    hasQuery
+                        ? '${visibleMaterials.length} / ${widget.data.materials.length} materyal'
+                        : '${widget.data.materials.length} materyal',
+                    style: theme.textTheme.labelMedium?.copyWith(color: muted),
+                  );
+            if (compactHeader) {
+              return Column(
+                key: const ValueKey('library-header-stacked'),
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [title, if (count != null) ...[const SizedBox(height: 6), count]],
+              );
+            }
+            return Row(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [Expanded(child: title), if (count != null) count],
+            );
+          },
         ),
         const SizedBox(height: 6),
         Text(
@@ -1150,7 +1167,17 @@ class _LibrarySurfaceState extends State<_LibrarySurface> {
           style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
         ),
         if (widget.data.materials.isNotEmpty) ...[
-          const SizedBox(height: 16),
+          const SizedBox(height: 14),
+          SizedBox(
+            width: double.infinity,
+            child: OutlinedButton.icon(
+              key: const ValueKey('library-add-material'),
+              onPressed: widget.onAddMaterial,
+              icon: const Icon(Icons.add_rounded),
+              label: const Text('Yeni kaynak ekle'),
+            ),
+          ),
+          const SizedBox(height: 12),
           TextField(
             key: const ValueKey('library-search'),
             controller: _searchController,
@@ -1174,7 +1201,7 @@ class _LibrarySurfaceState extends State<_LibrarySurface> {
         ],
         const SizedBox(height: 24),
         if (widget.data.materials.isEmpty)
-          _LibraryFirstSourceCard(onPressed: widget.onOpenLearning)
+          _LibraryFirstSourceCard(onPressed: widget.onAddMaterial)
         else if (visibleMaterials.isEmpty)
           _PrimaryCard(
             title: 'Eşleşen materyal bulunamadı',
