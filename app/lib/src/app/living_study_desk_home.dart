@@ -517,6 +517,23 @@ class LivingStudyDeskHome extends StatelessWidget {
         ),
       ),
       const SizedBox(height: 18),
+      Semantics(
+        label: 'Öğrenme yolu: kaynağını ekle, oku veya dinle, ardından kaynağa bakmadan hatırla',
+        child: Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            for (final step in ['01  Kaynak ekle', '02  Oku / dinle', '03  Hatırla'])
+              Chip(
+                label: Text(step),
+                backgroundColor: _paper,
+                side: const BorderSide(color: _line),
+                labelStyle: const TextStyle(color: _ink, fontSize: 12, fontWeight: FontWeight.w700),
+              ),
+          ],
+        ),
+      ),
+      const SizedBox(height: 18),
       Container(
         width: double.infinity,
         padding: const EdgeInsets.fromLTRB(15, 13, 15, 14),
