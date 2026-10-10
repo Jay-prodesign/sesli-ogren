@@ -1,1 +1,0 @@
-Write permission diagnostic. No production changes.
