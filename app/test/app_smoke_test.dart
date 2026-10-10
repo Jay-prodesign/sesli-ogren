@@ -1551,10 +1551,7 @@ void main() {
       serverMaterialId: '55555555-5555-4555-8555-555555555555',
       jobId: '66666666-6666-4666-8666-666666666666',
     );
-    final prompt = await recall.createCurrentPrompt(
-      learner: runtime.learner,
-      materialId: AppRuntime.primaryMaterialId,
-    );
+    final prompt = await recall.createCurrentPrompt(learner: runtime.learner, materialId: AppRuntime.primaryMaterialId);
     final session = await recall.openAttempt(learner: runtime.learner, actionId: prompt.id);
     await recall.submit(
       learner: runtime.learner,
@@ -1593,10 +1590,7 @@ void main() {
     expect(current!.identity.sourceVersionId, isNot(original.sourceVersion.identity.sourceVersionId));
     expect(gateway.deletedMaterialIds, ['55555555-5555-4555-8555-555555555555']);
     expect(
-      await store.summaryServerMaterialId(
-        learner: runtime.learner,
-        materialId: AppRuntime.primaryMaterialId,
-      ),
+      await store.summaryServerMaterialId(learner: runtime.learner, materialId: AppRuntime.primaryMaterialId),
       isNull,
     );
     expect(
