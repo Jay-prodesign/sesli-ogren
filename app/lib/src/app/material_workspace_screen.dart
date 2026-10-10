@@ -93,18 +93,6 @@ class _MaterialWorkspaceScreenState extends State<MaterialWorkspaceScreen> {
     );
   }
 
-  Future<void> _readCurrentSource() async {
-    try {
-      final data = await _snapshot;
-      if (!mounted) return;
-      if (data == null) throw StateError('workspace_source_missing');
-      await _openSourceReader(data);
-    } catch (_) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text('Kaynak metni açılamadı. Tekrar deneyebilirsin.')));
-    }
-  }
 
   Future<void> _openQuickRecap() async {
     await Navigator.of(context).push<void>(

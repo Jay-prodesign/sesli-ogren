@@ -199,6 +199,9 @@ void main() {
       AtelierWorkspace(
         material: material,
         sourceText: source,
+        continuation: continuation,
+        onReadSource: () {},
+        onQuickRecap: () {},
         onRecall: () {},
         onListen: () {},
         onExplain: () {},
