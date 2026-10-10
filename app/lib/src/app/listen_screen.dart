@@ -231,6 +231,8 @@ class _ListenScreenState extends State<ListenScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final living = LivingDeskReviewScope.active(context);
+    final compactHero =
+        MediaQuery.sizeOf(context).width < 340 || MediaQuery.textScalerOf(context).scale(1) > 1.25;
     final hero = living ? AtelierStyle.ink : AppPalette.primaryDark;
     final accent = living ? AtelierStyle.teal : AppPalette.signal;
     final accentSoft = living ? AtelierStyle.mint : AppPalette.signalSoft;
@@ -312,6 +314,36 @@ class _ListenScreenState extends State<ListenScreen> {
                 ? resumeChunk
                 : 0;
             final progress = source.chunks.isEmpty ? 0.0 : (completedChunks / source.chunks.length).clamp(0.0, 1.0);
+            final companionBadge = DecoratedBox(
+              decoration: BoxDecoration(color: accentSoft, borderRadius: BorderRadius.circular(16)),
+              child: Padding(
+                padding: const EdgeInsets.all(5),
+                child: CompanionView(
+                  state: _speaking ? CompanionVisualState.speak : CompanionVisualState.listen,
+                  size: 52,
+                ),
+              ),
+            );
+            final listeningBadge = DecoratedBox(
+              decoration: BoxDecoration(color: accent, borderRadius: BorderRadius.circular(999)),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
+                child: Text(
+                  _speaking ? 'ŞİMDİ DİNLİYORSUN' : 'DİNLEME',
+                  style: theme.textTheme.labelSmall?.copyWith(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 0.4,
+                  ),
+                ),
+              ),
+            );
+            final sourceTitle = Text(
+              source.name,
+              maxLines: compactHero ? 4 : 2,
+              overflow: TextOverflow.ellipsis,
+              style: theme.textTheme.titleLarge?.copyWith(color: Colors.white),
+            );
 
             return ListView(
               padding: const EdgeInsets.fromLTRB(20, 16, 20, 36),
@@ -323,50 +355,29 @@ class _ListenScreenState extends State<ListenScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            DecoratedBox(
-                              decoration: BoxDecoration(color: accentSoft, borderRadius: BorderRadius.circular(16)),
-                              child: Padding(
-                                padding: const EdgeInsets.all(5),
-                                child: CompanionView(
-                                  state: _speaking ? CompanionVisualState.speak : CompanionVisualState.listen,
-                                  size: 52,
+                        if (compactHero) ...[
+                          Wrap(
+                            spacing: 11,
+                            runSpacing: 8,
+                            crossAxisAlignment: WrapCrossAlignment.center,
+                            children: [companionBadge, listeningBadge],
+                          ),
+                          const SizedBox(height: 10),
+                          sourceTitle,
+                        ] else
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              companionBadge,
+                              const SizedBox(width: 11),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [listeningBadge, const SizedBox(height: 9), sourceTitle],
                                 ),
                               ),
-                            ),
-                            const SizedBox(width: 11),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  DecoratedBox(
-                                    decoration: BoxDecoration(color: accent, borderRadius: BorderRadius.circular(999)),
-                                    child: Padding(
-                                      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
-                                      child: Text(
-                                        _speaking ? 'ŞİMDİ DİNLİYORSUN' : 'DİNLEME',
-                                        style: theme.textTheme.labelSmall?.copyWith(
-                                          color: Colors.white,
-                                          fontWeight: FontWeight.w900,
-                                          letterSpacing: 0.4,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                  const SizedBox(height: 9),
-                                  Text(
-                                    source.name,
-                                    maxLines: 2,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: theme.textTheme.titleLarge?.copyWith(color: Colors.white),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
+                            ],
+                          ),
                         const SizedBox(height: 12),
                         ClipRRect(
                           borderRadius: BorderRadius.circular(999),

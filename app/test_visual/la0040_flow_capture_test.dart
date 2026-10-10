@@ -278,6 +278,53 @@ void main() {
     await expectLater(find.byType(Scaffold), matchesGoldenFile('goldens/la0040_listen_390x844.png'));
   });
 
+  testWidgets('LA-0040 source-first Listen survives 320px + large type', (tester) async {
+    tester.view.physicalSize = const Size(320, 700);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
+    addTearDown(store.close);
+    final ingest = SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor());
+    final runtime = AppRuntime(
+      learner: AppRuntime.localM5LearnerFixture,
+      store: store,
+      ingest: ingest,
+      recall: RecallLearningService(sourceStore: store, learningStore: store.learningTruthStore()),
+      telemetry: store.operationalTelemetry(),
+    );
+    const listenMaterialId = MaterialId('visual-listen-large-type');
+    const longTitle = 'Fotosentez: ışık enerjisi ve hücresel dönüşüm için uzun çalışma notu';
+    await ingest.ingestPastedText(
+      learner: runtime.learner,
+      materialId: listenMaterialId,
+      text: source,
+      sourceName: longTitle,
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        debugShowCheckedModeBanner: false,
+        home: MediaQuery(
+          data: const MediaQueryData(textScaler: TextScaler.linear(1.5), disableAnimations: true),
+          child: LivingDeskReviewScope(
+            child: ListenScreen(
+              runtime: runtime,
+              materialId: listenMaterialId,
+              speechOutput: const _NoopSpeechOutput(),
+              onRecall: () {},
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pump(const Duration(milliseconds: 500));
+    expect(find.text(longTitle), findsOneWidget);
+    expect(tester.takeException(), isNull);
+    await expectLater(find.byType(Scaffold), matchesGoldenFile('goldens/la0040_listen_320_text150.png'));
+  });
+
   testWidgets('LA-0040 real source Reader', (tester) async {
     tester.view.physicalSize = const Size(390, 844);
     tester.view.devicePixelRatio = 1;
