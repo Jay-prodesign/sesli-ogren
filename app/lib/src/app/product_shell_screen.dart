@@ -59,9 +59,24 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
     final livingReview = context.getElementForInheritedWidgetOfExactType<LivingDeskReviewScope>() != null;
     final materials = await widget.runtime.store.activeMaterials(learner: widget.runtime.learner);
     if (materials.isEmpty) return const _HomeSnapshot();
-    final material = materials.reduce(
-      (current, candidate) => candidate.updatedAt.isAfter(current.updatedAt) ? candidate : current,
+    final progress = await Future.wait(
+      materials.map((item) async => ProgressItem(material: item, continuation: await _continuationFor(item.id))),
     );
+    final active = progress.reduce((current, candidate) {
+      final currentLearningAt = current.continuation?.state.updatedAt;
+      final candidateLearningAt = candidate.continuation?.state.updatedAt;
+      final currentAt =
+          currentLearningAt != null && currentLearningAt.isAfter(current.material.updatedAt)
+          ? currentLearningAt
+          : current.material.updatedAt;
+      final candidateAt =
+          candidateLearningAt != null && candidateLearningAt.isAfter(candidate.material.updatedAt)
+          ? candidateLearningAt
+          : candidate.material.updatedAt;
+      return candidateAt.isAfter(currentAt) ? candidate : current;
+    });
+    final material = active.material;
+    final continuation = active.continuation;
     final source = await widget.runtime.store.currentSourceVersion(
       learner: widget.runtime.learner,
       materialId: material.id,
@@ -72,16 +87,6 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
             learner: widget.runtime.learner,
             sourceVersionId: source.identity.sourceVersionId,
           );
-    final progress = await Future.wait(
-      materials.map((item) async => ProgressItem(material: item, continuation: await _continuationFor(item.id))),
-    );
-    LearningContinuation? continuation;
-    for (final item in progress) {
-      if (item.material.id == material.id) {
-        continuation = item.continuation;
-        break;
-      }
-    }
     return _HomeSnapshot(
       material: material,
       source: source,

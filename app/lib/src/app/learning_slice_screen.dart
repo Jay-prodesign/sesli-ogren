@@ -1074,6 +1074,13 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
       _continuation = continuation;
       _inlineError = null;
     });
+    if (continuation.nextAction.kind == NextLearningActionKind.repeatRecallLater) {
+      final popped = await Navigator.of(context).maybePop();
+      if (!popped && mounted) {
+        setState(() => _phase = _SlicePhase.continuation);
+      }
+      return;
+    }
     await _activateContinuation(continuation);
   }
 

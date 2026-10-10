@@ -348,22 +348,28 @@ void main() {
     expect(find.text('Dinle'), findsOneWidget);
   });
 
-  testWidgets('Home resumes the most recently active material', (tester) async {
+  testWidgets('Home resumes the most recently studied material, not merely the newest upload', (tester) async {
     final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
     addTearDown(store.close);
     var now = DateTime.utc(2026, 10, 6, 9);
     final ingest = SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor(), now: () => now);
+    final recall = RecallLearningService(
+      sourceStore: store,
+      learningStore: store.learningTruthStore(),
+      now: () => now,
+    );
     final runtime = AppRuntime(
       learner: AppRuntime.localM5LearnerFixture,
       store: store,
       ingest: ingest,
-      recall: RecallLearningService(sourceStore: store, learningStore: store.learningTruthStore()),
+      recall: recall,
       telemetry: store.operationalTelemetry(),
     );
 
+    const olderId = MaterialId('older-material');
     await ingest.ingestPastedText(
       learner: runtime.learner,
-      materialId: const MaterialId('older-material'),
+      materialId: olderId,
       text: 'Eski materyal için yeterince uzun ve anlamlı bir çalışma metni.',
       sourceName: 'Eski materyal',
     );
@@ -371,17 +377,29 @@ void main() {
     await ingest.ingestPastedText(
       learner: runtime.learner,
       materialId: const MaterialId('recent-material'),
-      text: 'Son çalışılan materyal için yeterince uzun ve anlamlı bir çalışma metni.',
-      sourceName: 'Son materyal',
+      text: 'Yeni yüklenen materyal için yeterince uzun ve anlamlı bir çalışma metni.',
+      sourceName: 'Yeni materyal',
+    );
+
+    now = DateTime.utc(2026, 10, 6, 11);
+    final prompt = await recall.createCurrentPrompt(learner: runtime.learner, materialId: olderId);
+    final session = await recall.openAttempt(learner: runtime.learner, actionId: prompt.id);
+    final action = await store.learningTruthStore().recallAction(learner: runtime.learner, actionId: prompt.id);
+    await recall.submit(
+      learner: runtime.learner,
+      actionId: prompt.id,
+      attemptId: session.attempt.attemptId,
+      disposition: RecallResponseDisposition.answer,
+      answer: action!.expectedAnswer,
     );
 
     await tester.pumpWidget(MaterialApp(home: ProductShellScreen(runtime: runtime)));
     await pumpUntilFound(tester, find.text('KALDIĞIN MATERYAL'));
     await tapVisible(tester, find.text('Çalışmaya devam et'));
-    await pumpUntilFound(tester, find.text('Son materyal'));
+    await pumpUntilFound(tester, find.text('Eski materyal'));
 
-    expect(find.text('Son materyal'), findsWidgets);
-    expect(find.text('Eski materyal'), findsNothing);
+    expect(find.text('Eski materyal'), findsWidgets);
+    expect(find.text('Yeni materyal'), findsNothing);
   });
 
   testWidgets('Library deletion removes the selected material and Home falls back safely', (tester) async {
