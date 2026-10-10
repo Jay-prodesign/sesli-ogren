@@ -304,6 +304,11 @@ void main() {
         onFocus: () {},
       ),
     );
+    expect(
+      find.byKey(const ValueKey('la0040-atelier-workspace-update-source')),
+      findsOneWidget,
+      reason: 'source-update-control-visible',
+    );
   });
 
   testWidgets('LA-0040 Workspace survives 320px + large type', (tester) async {
