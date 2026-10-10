@@ -70,6 +70,61 @@ void main() {
     expect((await store.activeMaterials(learner: learnerA)).map((item) => item.id), [older]);
   });
 
+  test('reader progress is learner and source-version scoped', () async {
+    final first = await service.ingestPastedText(
+      learner: learnerA,
+      materialId: material,
+      text: 'Uzun bir kaynak metninin ilk sürümü.',
+    );
+    final firstUpdatedAt = DateTime.utc(2026, 10, 10, 8);
+    await store.saveReaderResumeProgress(
+      learner: learnerA,
+      materialId: material,
+      sourceVersionId: first.sourceVersion.identity.sourceVersionId,
+      progress: 0.42,
+      updatedAt: firstUpdatedAt,
+    );
+
+    expect(
+      await store.readerResumeProgress(
+        learner: learnerA,
+        materialId: material,
+        sourceVersionId: first.sourceVersion.identity.sourceVersionId,
+      ),
+      closeTo(0.42, 0.0001),
+    );
+    expect(
+      await store.readerResumeUpdatedAt(
+        learner: learnerA,
+        materialId: material,
+        sourceVersionId: first.sourceVersion.identity.sourceVersionId,
+      ),
+      firstUpdatedAt,
+    );
+    expect(
+      await store.readerResumeProgress(
+        learner: learnerB,
+        materialId: material,
+        sourceVersionId: first.sourceVersion.identity.sourceVersionId,
+      ),
+      0,
+    );
+
+    final second = await service.ingestPastedText(
+      learner: learnerA,
+      materialId: material,
+      text: 'Uzun bir kaynak metninin yeni ve farklı sürümü.',
+    );
+    expect(
+      await store.readerResumeProgress(
+        learner: learnerA,
+        materialId: material,
+        sourceVersionId: second.sourceVersion.identity.sourceVersionId,
+      ),
+      0,
+    );
+  });
+
   test('same pasted source retry is idempotent', () async {
     const sourceText = '  İlk satır\r\nİkinci satır  ';
     final first = await service.ingestPastedText(learner: learnerA, materialId: material, text: sourceText);

@@ -56,6 +56,26 @@ abstract interface class SourceStore {
     required DateTime updatedAt,
   });
 
+  Future<double> readerResumeProgress({
+    required AuthenticatedLearner learner,
+    required MaterialId materialId,
+    required SourceVersionId sourceVersionId,
+  });
+
+  Future<DateTime?> readerResumeUpdatedAt({
+    required AuthenticatedLearner learner,
+    required MaterialId materialId,
+    required SourceVersionId sourceVersionId,
+  });
+
+  Future<void> saveReaderResumeProgress({
+    required AuthenticatedLearner learner,
+    required MaterialId materialId,
+    required SourceVersionId sourceVersionId,
+    required double progress,
+    required DateTime updatedAt,
+  });
+
   Future<void> deleteMaterial({
     required AuthenticatedLearner learner,
     required MaterialId materialId,

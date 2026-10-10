@@ -36,7 +36,7 @@ class SqliteSourceStore implements SourceStore {
     final database = await selectedFactory.openDatabase(
       databasePath,
       options: OpenDatabaseOptions(
-        version: 12,
+        version: 13,
         onConfigure: (db) => db.execute('PRAGMA foreign_keys = ON'),
         onUpgrade: (db, oldVersion, newVersion) async {
           if (oldVersion < 2) {
@@ -71,6 +71,9 @@ class SqliteSourceStore implements SourceStore {
           }
           if (oldVersion < 12) {
             await _upgradeListenRatePreferenceSchema(db);
+          }
+          if (oldVersion < 13) {
+            await _upgradeReaderProgressSchema(db);
           }
         },
         onCreate: (db, version) async {
@@ -262,6 +265,20 @@ CREATE TABLE listen_progress (
     REFERENCES source_versions (learner_id, source_version_id)
     ON DELETE CASCADE,
   CHECK (chunk_index >= 0)
+)
+''');
+          await db.execute('''
+CREATE TABLE reader_progress (
+  learner_id TEXT NOT NULL,
+  material_id TEXT NOT NULL,
+  source_version_id TEXT NOT NULL,
+  progress REAL NOT NULL,
+  updated_at_utc TEXT NOT NULL,
+  PRIMARY KEY (learner_id, material_id),
+  FOREIGN KEY (learner_id, source_version_id)
+    REFERENCES source_versions (learner_id, source_version_id)
+    ON DELETE CASCADE,
+  CHECK (progress >= 0.0 AND progress <= 1.0)
 )
 ''');
           await db.execute('''
@@ -600,6 +617,23 @@ CREATE TABLE IF NOT EXISTS listen_progress (
     REFERENCES source_versions (learner_id, source_version_id)
     ON DELETE CASCADE,
   CHECK (chunk_index >= 0)
+)
+''');
+  }
+
+  static Future<void> _upgradeReaderProgressSchema(Database db) async {
+    await db.execute('''
+CREATE TABLE IF NOT EXISTS reader_progress (
+  learner_id TEXT NOT NULL,
+  material_id TEXT NOT NULL,
+  source_version_id TEXT NOT NULL,
+  progress REAL NOT NULL,
+  updated_at_utc TEXT NOT NULL,
+  PRIMARY KEY (learner_id, material_id),
+  FOREIGN KEY (learner_id, source_version_id)
+    REFERENCES source_versions (learner_id, source_version_id)
+    ON DELETE CASCADE,
+  CHECK (progress >= 0.0 AND progress <= 1.0)
 )
 ''');
   }
@@ -1016,6 +1050,61 @@ LIMIT 1
       'material_id': materialId.value,
       'source_version_id': sourceVersionId.value,
       'chunk_index': chunkIndex,
+      'updated_at_utc': updatedAt.toUtc().toIso8601String(),
+    }, conflictAlgorithm: ConflictAlgorithm.replace);
+  }
+
+  @override
+  Future<double> readerResumeProgress({
+    required AuthenticatedLearner learner,
+    required MaterialId materialId,
+    required SourceVersionId sourceVersionId,
+  }) async {
+    final rows = await _database.query(
+      'reader_progress',
+      columns: ['progress'],
+      where: 'learner_id = ? AND material_id = ? AND source_version_id = ?',
+      whereArgs: [learner.id.value, materialId.value, sourceVersionId.value],
+      limit: 1,
+    );
+    if (rows.isEmpty) return 0;
+    return (rows.single['progress']! as num).toDouble().clamp(0.0, 1.0);
+  }
+
+  @override
+  Future<DateTime?> readerResumeUpdatedAt({
+    required AuthenticatedLearner learner,
+    required MaterialId materialId,
+    required SourceVersionId sourceVersionId,
+  }) async {
+    final rows = await _database.query(
+      'reader_progress',
+      columns: ['updated_at_utc'],
+      where: 'learner_id = ? AND material_id = ? AND source_version_id = ?',
+      whereArgs: [learner.id.value, materialId.value, sourceVersionId.value],
+      limit: 1,
+    );
+    if (rows.isEmpty) return null;
+    final raw = rows.single['updated_at_utc'];
+    return raw is String ? DateTime.parse(raw).toUtc() : null;
+  }
+
+  @override
+  Future<void> saveReaderResumeProgress({
+    required AuthenticatedLearner learner,
+    required MaterialId materialId,
+    required SourceVersionId sourceVersionId,
+    required double progress,
+    required DateTime updatedAt,
+  }) async {
+    if (!progress.isFinite || progress < 0 || progress > 1) {
+      throw ArgumentError.value(progress, 'progress', 'must be finite and between 0 and 1');
+    }
+    await _database.insert('reader_progress', {
+      'learner_id': learner.id.value,
+      'material_id': materialId.value,
+      'source_version_id': sourceVersionId.value,
+      'progress': progress,
       'updated_at_utc': updatedAt.toUtc().toIso8601String(),
     }, conflictAlgorithm: ConflictAlgorithm.replace);
   }
