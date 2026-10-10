@@ -38,7 +38,6 @@ class _ListenScreenState extends State<ListenScreen> {
   late final SpeechOutput _speech;
   late Future<_ListenSource?> _source;
   bool _speaking = false;
-  bool _startedPlayback = false;
   bool _startingPlayback = false;
   bool _finishedListening = false;
   String? _error;
@@ -105,7 +104,6 @@ class _ListenScreenState extends State<ListenScreen> {
     setState(() {
       _error = null;
       _currentChunkIndex = safeStart;
-      _startedPlayback = false;
       _startingPlayback = true;
       _finishedListening = false;
     });
@@ -122,7 +120,6 @@ class _ListenScreenState extends State<ListenScreen> {
         if (!mounted || token != _playToken) return;
         setState(() {
           _speaking = true;
-          _startedPlayback = true;
           _startingPlayback = false;
           _currentChunkIndex = index;
           _resumeChunkOverride = index;
@@ -153,7 +150,6 @@ class _ListenScreenState extends State<ListenScreen> {
       if (!mounted || token != _playToken) return;
       setState(() {
         _speaking = false;
-        _startedPlayback = false;
         _startingPlayback = false;
         _finishedListening = true;
         _resumeChunkOverride = 0;
@@ -210,7 +206,6 @@ class _ListenScreenState extends State<ListenScreen> {
     if (mounted) {
       setState(() {
         _speaking = false;
-        _startedPlayback = false;
         _startingPlayback = false;
       });
     }
