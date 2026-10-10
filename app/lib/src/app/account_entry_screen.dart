@@ -188,14 +188,14 @@ class _AccountEntryScreenState extends State<AccountEntryScreen> {
                         ),
                         const SizedBox(height: 10),
                         const Text(
-                          'PDF veya metnini ekle. Oku ya da dinle. Sonra kaynağı kapatıp kendi cümlelerinle hatırla.',
+                          'PDF veya metnini ekle. Kaynağı aç, kapatıp hatırla; sonra yanıtını kaynak kanıtıyla karşılaştır.',
                           style: TextStyle(color: Color(0xFFDCE8E5), fontSize: 14, height: 1.45),
                         ),
                         const SizedBox(height: 18),
                         const Row(
                           children: [
                             Expanded(
-                              child: _EntryJourneyStep(icon: Icons.auto_stories_outlined, label: 'KAYNAĞIN'),
+                              child: _EntryJourneyStep(icon: Icons.auto_stories_outlined, label: 'KAYNAK'),
                             ),
                             _EntryJourneyArrow(),
                             Expanded(
@@ -204,6 +204,10 @@ class _AccountEntryScreenState extends State<AccountEntryScreen> {
                             _EntryJourneyArrow(),
                             Expanded(
                               child: _EntryJourneyStep(icon: Icons.psychology_alt_outlined, label: 'HATIRLA'),
+                            ),
+                            _EntryJourneyArrow(),
+                            Expanded(
+                              child: _EntryJourneyStep(icon: Icons.find_in_page_outlined, label: 'KANIT'),
                             ),
                           ],
                         ),
@@ -276,6 +280,11 @@ class _AccountEntryScreenState extends State<AccountEntryScreen> {
                             backgroundColor: AtelierStyle.teal,
                             foregroundColor: Colors.white,
                             minimumSize: const Size.fromHeight(54),
+                            textStyle: const TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w900,
+                              letterSpacing: 0.05,
+                            ),
                           ),
                           onPressed: _busy ? null : (_codeRequested ? _verifyCode : _requestCode),
                           child: Text(
@@ -284,6 +293,7 @@ class _AccountEntryScreenState extends State<AccountEntryScreen> {
                                 : _codeRequested
                                 ? 'Giriş yap'
                                 : 'Kod gönder',
+                            style: const TextStyle(color: Colors.white),
                           ),
                         ),
                         if (_codeRequested) ...[
@@ -332,7 +342,10 @@ class _EntryJourneyStep extends StatelessWidget {
       Text(
         label,
         textAlign: TextAlign.center,
-        style: const TextStyle(color: Colors.white, fontSize: 9, fontWeight: FontWeight.w900, letterSpacing: 0.7),
+        maxLines: 1,
+        overflow: TextOverflow.fade,
+        softWrap: false,
+        style: const TextStyle(color: Colors.white, fontSize: 8, fontWeight: FontWeight.w900, letterSpacing: 0.4),
       ),
     ],
   );
