@@ -221,24 +221,84 @@ class _AccountEntryScreenState extends State<AccountEntryScreen> {
                           style: TextStyle(color: Color(0xFFDCE8E5), fontSize: 14, height: 1.45),
                         ),
                         const SizedBox(height: 18),
-                        const Row(
-                          children: [
-                            Expanded(
-                              child: _EntryJourneyStep(icon: Icons.auto_stories_outlined, label: 'KAYNAK'),
-                            ),
-                            _EntryJourneyArrow(),
-                            Expanded(
-                              child: _EntryJourneyStep(icon: Icons.visibility_off_outlined, label: 'KAPAT'),
-                            ),
-                            _EntryJourneyArrow(),
-                            Expanded(
-                              child: _EntryJourneyStep(icon: Icons.psychology_alt_outlined, label: 'HATIRLA'),
-                            ),
-                            _EntryJourneyArrow(),
-                            Expanded(
-                              child: _EntryJourneyStep(icon: Icons.find_in_page_outlined, label: 'KANIT'),
-                            ),
-                          ],
+                        LayoutBuilder(
+                          builder: (context, constraints) {
+                            final compactJourney =
+                                constraints.maxWidth < 300 || MediaQuery.textScalerOf(context).scale(1) > 1.25;
+                            if (compactJourney) {
+                              return const Column(
+                                key: ValueKey('account-entry-journey-compact'),
+                                children: [
+                                  Row(
+                                    children: [
+                                      Expanded(
+                                        child: _EntryJourneyStep(
+                                          icon: Icons.auto_stories_outlined,
+                                          label: 'KAYNAK',
+                                        ),
+                                      ),
+                                      _EntryJourneyArrow(),
+                                      Expanded(
+                                        child: _EntryJourneyStep(
+                                          icon: Icons.visibility_off_outlined,
+                                          label: 'KAPAT',
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  SizedBox(height: 12),
+                                  Row(
+                                    children: [
+                                      Expanded(
+                                        child: _EntryJourneyStep(
+                                          icon: Icons.psychology_alt_outlined,
+                                          label: 'HATIRLA',
+                                        ),
+                                      ),
+                                      _EntryJourneyArrow(),
+                                      Expanded(
+                                        child: _EntryJourneyStep(
+                                          icon: Icons.find_in_page_outlined,
+                                          label: 'KANIT',
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              );
+                            }
+                            return const Row(
+                              children: [
+                                Expanded(
+                                  child: _EntryJourneyStep(
+                                    icon: Icons.auto_stories_outlined,
+                                    label: 'KAYNAK',
+                                  ),
+                                ),
+                                _EntryJourneyArrow(),
+                                Expanded(
+                                  child: _EntryJourneyStep(
+                                    icon: Icons.visibility_off_outlined,
+                                    label: 'KAPAT',
+                                  ),
+                                ),
+                                _EntryJourneyArrow(),
+                                Expanded(
+                                  child: _EntryJourneyStep(
+                                    icon: Icons.psychology_alt_outlined,
+                                    label: 'HATIRLA',
+                                  ),
+                                ),
+                                _EntryJourneyArrow(),
+                                Expanded(
+                                  child: _EntryJourneyStep(
+                                    icon: Icons.find_in_page_outlined,
+                                    label: 'KANIT',
+                                  ),
+                                ),
+                              ],
+                            );
+                          },
                         ),
                       ],
                     ),

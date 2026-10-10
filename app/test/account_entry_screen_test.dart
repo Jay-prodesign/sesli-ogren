@@ -61,6 +61,35 @@ void main() {
     expect(openedLearner?.id.value, 'account-entry-user');
   });
 
+  testWidgets('account entry journey stays readable on narrow large-text layouts', (tester) async {
+    tester.view.physicalSize = const Size(320, 700);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: MediaQuery(
+          data: const MediaQueryData(textScaler: TextScaler.linear(1.6)),
+          child: AccountEntryScreen(
+            requestOtp: (_) async {},
+            verifyOtp: ({required email, required token}) async =>
+                const AuthenticatedLearner(id: LearnerId('large-text-user')),
+            onAuthenticated: (_) async {},
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    expect(find.byKey(const ValueKey('account-entry-journey-compact')), findsOneWidget);
+    expect(find.text('KAYNAK'), findsOneWidget);
+    expect(find.text('KAPAT'), findsOneWidget);
+    expect(find.text('HATIRLA'), findsOneWidget);
+    expect(find.text('KANIT'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('account entry rejects malformed email before requesting an OTP', (tester) async {
     usePhoneViewport(tester);
     var requestCalls = 0;
