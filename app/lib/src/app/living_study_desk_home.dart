@@ -458,14 +458,14 @@ class LivingStudyDeskHome extends StatelessWidget {
                 Icon(Icons.auto_stories_outlined, color: _accent, size: 20),
                 SizedBox(width: 8),
                 Text(
-                  'İLK 60 SANİYE',
+                  'İLK ÖĞRENME DÖNGÜN',
                   style: TextStyle(color: _accent, fontSize: 10, fontWeight: FontWeight.w900, letterSpacing: 0.9),
                 ),
               ],
             ),
             SizedBox(height: 12),
             Text(
-              'Kaynağı aç → oku veya dinle → kaynağı kapat → hatırla.',
+              'Kaynağı aç → oku veya dinle → kapat → hatırla → kaynak kanıtıyla karşılaştır.',
               style: TextStyle(fontSize: 18, color: _ink, fontWeight: FontWeight.w800, height: 1.3),
             ),
           ],
