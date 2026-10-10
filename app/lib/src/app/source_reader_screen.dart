@@ -314,10 +314,7 @@ class _SourceReaderScreenState extends State<SourceReaderScreen> {
                     if (widget.onRecall != null)
                       FilledButton.icon(
                         style: living
-                            ? FilledButton.styleFrom(
-                                backgroundColor: AtelierStyle.ink,
-                                foregroundColor: Colors.white,
-                              )
+                            ? FilledButton.styleFrom(backgroundColor: AtelierStyle.ink, foregroundColor: Colors.white)
                             : null,
                         onPressed: widget.onRecall,
                         icon: const Icon(Icons.psychology_alt_outlined),
