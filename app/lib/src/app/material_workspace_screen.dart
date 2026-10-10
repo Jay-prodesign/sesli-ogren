@@ -113,8 +113,9 @@ class _MaterialWorkspaceScreenState extends State<MaterialWorkspaceScreen> {
     final data = await _load();
     if (!mounted) return;
     if (data == null) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text('Kaynak açılamadı. Materyali yeniden yükleyip tekrar deneyebilirsin.')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Kaynak açılamadı. Materyali yeniden yükleyip tekrar deneyebilirsin.')),
+      );
       return;
     }
     await _openSourceReader(data);
