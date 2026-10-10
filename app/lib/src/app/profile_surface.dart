@@ -452,34 +452,40 @@ class _AccountOverviewCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                DecoratedBox(
-                  decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(13),
-                  ),
-                  child: const Padding(
-                    padding: EdgeInsets.all(10),
-                    child: Icon(Icons.workspace_premium_outlined, color: Colors.white),
-                  ),
-                ),
-                const SizedBox(width: 13),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(planLabel, style: theme.textTheme.titleLarge?.copyWith(color: Colors.white)),
-                      const SizedBox(height: 4),
-                      Text(
-                        statusLabel,
-                        style: theme.textTheme.bodyMedium?.copyWith(color: Colors.white.withValues(alpha: 0.76)),
+            LayoutBuilder(
+              builder: (context, constraints) {
+                final stackHeader =
+                    constraints.maxWidth < 340 || MediaQuery.textScalerOf(context).scale(16) >= 22;
+                final identity = Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    DecoratedBox(
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(13),
                       ),
-                    ],
-                  ),
-                ),
-                DecoratedBox(
+                      child: const Padding(
+                        padding: EdgeInsets.all(10),
+                        child: Icon(Icons.workspace_premium_outlined, color: Colors.white),
+                      ),
+                    ),
+                    const SizedBox(width: 13),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(planLabel, style: theme.textTheme.titleLarge?.copyWith(color: Colors.white)),
+                          const SizedBox(height: 4),
+                          Text(
+                            statusLabel,
+                            style: theme.textTheme.bodyMedium?.copyWith(color: Colors.white.withValues(alpha: 0.76)),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                );
+                final badge = DecoratedBox(
                   decoration: BoxDecoration(
                     color: active
                         ? const Color(0xFFB8F1E2).withValues(alpha: 0.18)
@@ -497,8 +503,19 @@ class _AccountOverviewCard extends StatelessWidget {
                       ),
                     ),
                   ),
-                ),
-              ],
+                );
+                if (stackHeader) {
+                  return Column(
+                    key: const ValueKey('profile-account-header-stacked'),
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [identity, const SizedBox(height: 12), badge],
+                  );
+                }
+                return Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [Expanded(child: identity), const SizedBox(width: 10), badge],
+                );
+              },
             ),
             const SizedBox(height: 18),
             Divider(color: Colors.white.withValues(alpha: 0.15)),

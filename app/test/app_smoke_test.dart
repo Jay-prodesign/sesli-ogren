@@ -140,6 +140,8 @@ class _FakeSpeechOutput implements SpeechOutput {
   Future<void> dispose() async {}
 }
 
+void _noopMaterialOpen(MaterialId _) {}
+
 void usePhoneViewport(WidgetTester tester) {
   tester.view.physicalSize = const Size(390, 844);
   tester.view.devicePixelRatio = 1;
@@ -242,6 +244,52 @@ void main() {
     expect(find.byIcon(Icons.library_books_outlined), findsOneWidget);
     expect(find.byIcon(Icons.insights_outlined), findsOneWidget);
     expect(find.byIcon(Icons.person_outline_rounded), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('Progress and Profile headers stay readable on narrow large-text layouts', (tester) async {
+    tester.view.physicalSize = const Size(320, 700);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: MediaQuery(
+          data: MediaQueryData(textScaler: TextScaler.linear(1.6)),
+          child: Scaffold(body: ProgressSurface(items: [], onOpenMaterial: _noopMaterialOpen)),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    expect(find.byKey(const ValueKey('progress-header-stacked')), findsOneWidget);
+    expect(find.text('KANITA DAYALI'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+
+    final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
+    addTearDown(store.close);
+    final runtime = AppRuntime(
+      learner: AppRuntime.localM5LearnerFixture,
+      store: store,
+      ingest: SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor()),
+      recall: RecallLearningService(sourceStore: store, learningStore: store.learningTruthStore()),
+      telemetry: store.operationalTelemetry(),
+      accountOverview: const _ReadyAccountOverviewGateway(),
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: MediaQuery(
+          data: const MediaQueryData(textScaler: TextScaler.linear(1.6)),
+          child: Scaffold(body: ProfileSurface(runtime: runtime)),
+        ),
+      ),
+    );
+    await pumpUntilFound(tester, find.byKey(const ValueKey('profile-account-header-stacked')));
+
+    expect(find.text('Ücretsiz plan'), findsOneWidget);
+    expect(find.text('AKTİF'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 

@@ -57,18 +57,18 @@ class ProgressSurface extends StatelessWidget {
           ),
           const SizedBox(height: 7),
         ],
-        Row(
-          children: [
-            Expanded(
-              child: Text(
-                'İlerleme',
-                style: theme.textTheme.headlineMedium?.copyWith(
-                  color: ink,
-                  fontWeight: living ? FontWeight.w900 : null,
-                ),
+        LayoutBuilder(
+          builder: (context, constraints) {
+            final stackHeader =
+                constraints.maxWidth < 340 || MediaQuery.textScalerOf(context).scale(16) >= 22;
+            final title = Text(
+              'İlerleme',
+              style: theme.textTheme.headlineMedium?.copyWith(
+                color: ink,
+                fontWeight: living ? FontWeight.w900 : null,
               ),
-            ),
-            DecoratedBox(
+            );
+            final badge = DecoratedBox(
               decoration: BoxDecoration(color: soft, borderRadius: BorderRadius.circular(999)),
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
@@ -81,8 +81,16 @@ class ProgressSurface extends StatelessWidget {
                   ),
                 ),
               ),
-            ),
-          ],
+            );
+            if (stackHeader) {
+              return Column(
+                key: const ValueKey('progress-header-stacked'),
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [title, const SizedBox(height: 10), badge],
+              );
+            }
+            return Row(children: [Expanded(child: title), badge]);
+          },
         ),
         const SizedBox(height: 8),
         Text(
