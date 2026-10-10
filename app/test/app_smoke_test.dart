@@ -439,7 +439,9 @@ void main() {
     expect(find.text('Yeni materyal'), findsNothing);
   });
 
-  testWidgets('durable Listen checkpoint resumes across Home, Library and Progress without creating mastery', (tester) async {
+  testWidgets('durable Listen checkpoint resumes across Home, Library and Progress without creating mastery', (
+    tester,
+  ) async {
     final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
     addTearDown(store.close);
     var now = DateTime.utc(2026, 10, 6, 9);
@@ -478,7 +480,9 @@ void main() {
     );
 
     await tester.pumpWidget(
-      MaterialApp(home: LivingDeskReviewScope(child: ProductShellScreen(runtime: runtime))),
+      MaterialApp(
+        home: LivingDeskReviewScope(child: ProductShellScreen(runtime: runtime)),
+      ),
     );
     await pumpUntilFound(tester, find.text('Dinlemeye devam et'));
     expect(find.text('Dinlenen eski materyal'), findsWidgets);
@@ -599,11 +603,7 @@ void main() {
     );
     await pumpUntilFound(tester, find.text('Dinleme devam notu'));
     expect(find.textContaining('bölüm 2 / 2'), findsOneWidget);
-    await tester.scrollUntilVisible(
-      find.text('Kaldığın yerden dinle'),
-      240,
-      scrollable: find.byType(Scrollable).last,
-    );
+    await tester.scrollUntilVisible(find.text('Kaldığın yerden dinle'), 240, scrollable: find.byType(Scrollable).last);
     await tester.pump();
     expect(find.text('Kaldığın yerden dinle').hitTestable(), findsOneWidget);
     expect(find.byKey(const ValueKey('listen-source-transcript')), findsOneWidget);
