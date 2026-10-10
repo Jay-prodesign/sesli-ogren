@@ -170,6 +170,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         debugShowCheckedModeBanner: false,
+        theme: SesliOgrenTheme.light(),
         home: MediaQuery(
           data: MediaQueryData(textScaler: textScaler, disableAnimations: true),
           child: Scaffold(body: child),
@@ -271,6 +272,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         debugShowCheckedModeBanner: false,
+        theme: SesliOgrenTheme.light(),
         home: MediaQuery(
           data: const MediaQueryData(disableAnimations: true),
           child: LivingDeskReviewScope(child: LearningSliceScreen(runtime: runtime)),
@@ -379,6 +381,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         debugShowCheckedModeBanner: false,
+        theme: SesliOgrenTheme.light(),
         home: LivingDeskReviewScope(
           child: ListenScreen(
             runtime: runtime,
@@ -422,6 +425,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         debugShowCheckedModeBanner: false,
+        theme: SesliOgrenTheme.light(),
         home: MediaQuery(
           data: const MediaQueryData(textScaler: TextScaler.linear(1.5), disableAnimations: true),
           child: LivingDeskReviewScope(
@@ -450,6 +454,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         debugShowCheckedModeBanner: false,
+        theme: SesliOgrenTheme.light(),
         home: LivingDeskReviewScope(
           child: SourceReaderScreen(
             title: material.title,
@@ -476,6 +481,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         debugShowCheckedModeBanner: false,
+        theme: SesliOgrenTheme.light(),
         home: MediaQuery(
           data: const MediaQueryData(textScaler: TextScaler.linear(1.5), disableAnimations: true),
           child: LivingDeskReviewScope(
@@ -565,8 +571,7 @@ void main() {
       MaterialApp(
         debugShowCheckedModeBanner: false,
         theme: SesliOgrenTheme.light(),
-        home: const SizedBox.shrink(),
-        builder: (context, _) => LivingDeskReviewScope(child: ProductShellScreen(runtime: runtime)),
+        home: LivingDeskReviewScope(child: ProductShellScreen(runtime: runtime)),
       ),
     );
     for (var i = 0; i < 40 && find.text('Kendi kaynağın.\nGerçek hatırlama.').evaluate().isEmpty; i++) {
