@@ -508,7 +508,7 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
                           onOpenListen: _openListen,
                           onOpenWorkspace: () => _openWorkspace(),
                           onOpenReader: () => _openSourceReader(),
-                          onOpenMaterial: (id) => _openWorkspace(id),
+                          onOpenMaterial: _openMaterialNextAction,
                         ),
                       ),
                       TickerMode(
