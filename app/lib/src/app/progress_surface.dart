@@ -31,11 +31,7 @@ class ProgressSurface extends StatelessWidget {
         if (living) ...[
           Text(
             'ÖĞRENME KANITIN',
-            style: theme.textTheme.labelSmall?.copyWith(
-              color: accent,
-              fontWeight: FontWeight.w900,
-              letterSpacing: 0.9,
-            ),
+            style: theme.textTheme.labelSmall?.copyWith(color: accent, fontWeight: FontWeight.w900, letterSpacing: 0.9),
           ),
           const SizedBox(height: 7),
         ],
@@ -213,10 +209,7 @@ class _ProgressCard extends StatelessWidget {
                   ),
                   Padding(
                     padding: const EdgeInsets.only(top: 8),
-                    child: Icon(
-                      Icons.chevron_right_rounded,
-                      color: living ? AtelierStyle.muted : AppPalette.inkMuted,
-                    ),
+                    child: Icon(Icons.chevron_right_rounded, color: living ? AtelierStyle.muted : AppPalette.inkMuted),
                   ),
                 ],
               ),
