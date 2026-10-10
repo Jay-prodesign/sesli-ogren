@@ -129,7 +129,7 @@ class AtelierWorkspace extends StatelessWidget {
     return switch (action) {
       NextLearningActionKind.reviewSourceThenRecall => 'Kaynak onarımın hazır',
       NextLearningActionKind.retryRecallWithoutHint => 'İpucusuz tekrarın hazır',
-      NextLearningActionKind.repeatRecallLater => 'Bugünlük planın hazır',
+      NextLearningActionKind.repeatRecallLater => 'Bu deneme kaydedildi',
       null => 'İlk aktif denemeni yap',
     };
   }
@@ -144,7 +144,7 @@ class AtelierWorkspace extends StatelessWidget {
     return switch (continuation?.nextAction.kind) {
       NextLearningActionKind.reviewSourceThenRecall => 'Kaynağı gözden geçir',
       NextLearningActionKind.retryRecallWithoutHint => 'İpucusuz tekrar dene',
-      NextLearningActionKind.repeatRecallLater => 'Devam planını aç',
+      NextLearningActionKind.repeatRecallLater => 'Kaynağa dön',
       null => 'Kaynağı kapat · Hatırla',
     };
   }
@@ -153,7 +153,7 @@ class AtelierWorkspace extends StatelessWidget {
     return switch (continuation?.nextAction.kind) {
       NextLearningActionKind.reviewSourceThenRecall => Icons.auto_stories_outlined,
       NextLearningActionKind.retryRecallWithoutHint => Icons.refresh_rounded,
-      NextLearningActionKind.repeatRecallLater => Icons.event_available_outlined,
+      NextLearningActionKind.repeatRecallLater => Icons.auto_stories_outlined,
       null => Icons.psychology_alt_outlined,
     };
   }
@@ -166,9 +166,46 @@ class AtelierWorkspace extends StatelessWidget {
 
   bool get _sourcePreviewIsTrimmed => sourceText.trim().replaceAll(RegExp(r'\s+'), ' ').length > 640;
 
+  void _showOtherStudyPaths(BuildContext context) {
+    showModalBottomSheet<void>(
+      context: context,
+      showDragHandle: true,
+      builder: (sheetContext) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 4, 16, 18),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: const Icon(Icons.record_voice_over_outlined),
+                title: const Text('Kendi cümlelerinle açıkla'),
+                subtitle: const Text('Kaynağa bağlı aktif açıklama çalışması.'),
+                onTap: () {
+                  Navigator.of(sheetContext).pop();
+                  onExplain();
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.center_focus_strong),
+                title: const Text('Odaklan'),
+                subtitle: const Text('Kaynağın bir bölümünü daha yakından çalış.'),
+                onTap: () {
+                  Navigator.of(sheetContext).pop();
+                  onFocus();
+                },
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final compactSurface = MediaQuery.sizeOf(context).width < 340 || MediaQuery.textScalerOf(context).scale(1) > 1.25;
+    final primaryAction =
+        continuation?.nextAction.kind == NextLearningActionKind.repeatRecallLater ? onReadSource : onRecall;
     return ColoredBox(
       key: const ValueKey('la0040-atelier-workspace'),
       color: AtelierStyle.canvas,
@@ -284,14 +321,9 @@ class AtelierWorkspace extends StatelessWidget {
                               label: const Text('Dinle'),
                             ),
                             TextButton.icon(
-                              onPressed: onExplain,
-                              icon: const Icon(Icons.record_voice_over_outlined),
-                              label: const Text('Açıkla'),
-                            ),
-                            TextButton.icon(
-                              onPressed: onFocus,
-                              icon: const Icon(Icons.center_focus_strong),
-                              label: const Text('Odaklan'),
+                              onPressed: () => _showOtherStudyPaths(context),
+                              icon: const Icon(Icons.more_horiz_rounded),
+                              label: const Text('Diğer yollar'),
                             ),
                           ],
                         ),
@@ -363,7 +395,7 @@ class AtelierWorkspace extends StatelessWidget {
             child: compactSurface
                 ? FilledButton.icon(
                     key: const ValueKey('la0040-atelier-workspace-recall'),
-                    onPressed: onRecall,
+                    onPressed: primaryAction,
                     style: FilledButton.styleFrom(
                       backgroundColor: AtelierStyle.mark,
                       foregroundColor: AtelierStyle.ink,
@@ -404,7 +436,7 @@ class AtelierWorkspace extends StatelessWidget {
                       const SizedBox(height: 10),
                       FilledButton.icon(
                         key: const ValueKey('la0040-atelier-workspace-recall'),
-                        onPressed: onRecall,
+                        onPressed: primaryAction,
                         style: FilledButton.styleFrom(
                           backgroundColor: AtelierStyle.mark,
                           foregroundColor: AtelierStyle.ink,
@@ -428,17 +460,11 @@ class AtelierWorkspace extends StatelessWidget {
                               side: const BorderSide(color: Color(0xFF8EA9A3)),
                             ),
                           );
-                          final explain = TextButton.icon(
-                            onPressed: onExplain,
+                          final more = TextButton.icon(
+                            onPressed: () => _showOtherStudyPaths(context),
                             style: TextButton.styleFrom(foregroundColor: Colors.white),
-                            icon: const Icon(Icons.record_voice_over_outlined),
-                            label: const Text('Açıkla'),
-                          );
-                          final focus = TextButton.icon(
-                            onPressed: onFocus,
-                            style: TextButton.styleFrom(foregroundColor: Colors.white),
-                            icon: const Icon(Icons.center_focus_strong),
-                            label: const Text('Odaklan'),
+                            icon: const Icon(Icons.more_horiz_rounded),
+                            label: const Text('Diğer yollar'),
                           );
                           if (compactActions) {
                             return Column(
@@ -446,12 +472,7 @@ class AtelierWorkspace extends StatelessWidget {
                               children: [
                                 listen,
                                 const SizedBox(height: 4),
-                                Wrap(
-                                  alignment: WrapAlignment.center,
-                                  spacing: 4,
-                                  runSpacing: 2,
-                                  children: [explain, focus],
-                                ),
+                                Center(child: more),
                               ],
                             );
                           }
@@ -459,8 +480,7 @@ class AtelierWorkspace extends StatelessWidget {
                             children: [
                               Expanded(child: listen),
                               const SizedBox(width: 7),
-                              explain,
-                              focus,
+                              more,
                             ],
                           );
                         },
