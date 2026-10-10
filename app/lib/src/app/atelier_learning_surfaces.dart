@@ -718,30 +718,6 @@ class AtelierResult extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 14),
-                Text(
-                  result.correctAnswer,
-                  style: const TextStyle(color: Colors.white, fontSize: 25, height: 1.2, fontWeight: FontWeight.w900),
-                ),
-                const SizedBox(height: 15),
-                const Divider(color: Color(0xFF486068), height: 1),
-                const SizedBox(height: 14),
-                SelectableText.rich(
-                  TextSpan(children: spans),
-                  style: const TextStyle(color: Color(0xFFE4EDEC), fontSize: 16, height: 1.54),
-                ),
-                if (match == null) ...[
-                  const SizedBox(height: 10),
-                  const Text(
-                    'Bu alıntıda doğru ifadeye birebir vurgu bulunamadı.',
-                    style: TextStyle(color: Color(0xFFC7D6D4), fontSize: 12, height: 1.4),
-                  ),
-                ],
-              ],
-            ),
-          ),
-          ),
-        ),
-        const SizedBox(height: 14),
         Container(
           key: const ValueKey('la0040-result-companion-reflection'),
           padding: const EdgeInsets.fromLTRB(13, 11, 13, 11),
