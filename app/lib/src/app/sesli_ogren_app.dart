@@ -287,7 +287,7 @@ class _RuntimeErrorScreenState extends State<_RuntimeErrorScreen> {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const CompanionView(state: CompanionVisualState.correct, size: 96),
+                      const CompanionView(state: CompanionVisualState.think, size: 96),
                       const SizedBox(height: 20),
                       Text(
                         configurationError

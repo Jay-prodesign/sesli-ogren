@@ -205,6 +205,8 @@ void main() {
 
     expect(find.text('Güvenli öğrenme oturumu açılamadı.'), findsOneWidget);
     expect(find.text('Yeniden dene'), findsOneWidget);
+    expect(find.bySemanticsLabel('Düğüm düşünüyor'), findsOneWidget);
+    expect(find.bySemanticsLabel('Düğüm destek oluyor'), findsNothing);
     expect(find.text('Kod doğrulanamadı. Yeni bir kod isteyebilirsin.'), findsNothing);
   });
 
