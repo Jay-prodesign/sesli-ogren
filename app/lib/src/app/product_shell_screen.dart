@@ -73,11 +73,7 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
                 materialId: item.id,
                 sourceVersionId: source.identity.sourceVersionId,
               );
-        return ProgressItem(
-          material: item,
-          continuation: continuation,
-          listenActivityAt: listenActivityAt,
-        );
+        return ProgressItem(material: item, continuation: continuation, listenActivityAt: listenActivityAt);
       }),
     );
     final sortedProgress = [...progress]..sort((a, b) => _activityAt(b).compareTo(_activityAt(a)));

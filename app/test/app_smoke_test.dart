@@ -467,10 +467,7 @@ void main() {
       sourceName: 'Yeni yüklenen materyal',
     );
 
-    final listenedSource = await store.currentSourceVersion(
-      learner: runtime.learner,
-      materialId: listenedId,
-    );
+    final listenedSource = await store.currentSourceVersion(learner: runtime.learner, materialId: listenedId);
     expect(listenedSource, isNotNull);
     await store.saveListenResumeChunk(
       learner: runtime.learner,

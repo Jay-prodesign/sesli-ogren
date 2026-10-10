@@ -316,9 +316,7 @@ class _ListenScreenState extends State<ListenScreen> {
                 : hasResume
                 ? resumeChunk
                 : 0;
-            final progress = source.chunks.isEmpty
-                ? 0.0
-                : (completedChunks / source.chunks.length).clamp(0.0, 1.0);
+            final progress = source.chunks.isEmpty ? 0.0 : (completedChunks / source.chunks.length).clamp(0.0, 1.0);
 
             return ListView(
               padding: const EdgeInsets.fromLTRB(20, 16, 20, 36),
