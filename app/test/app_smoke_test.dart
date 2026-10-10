@@ -11,6 +11,7 @@ import 'package:sesli_ogren/src/app/living_study_desk_home.dart';
 import 'package:sesli_ogren/src/app/material_workspace_screen.dart';
 import 'package:sesli_ogren/src/app/product_shell_screen.dart';
 import 'package:sesli_ogren/src/app/profile_surface.dart';
+import 'package:sesli_ogren/src/app/progress_surface.dart';
 import 'package:sesli_ogren/src/app/sesli_ogren_app.dart';
 import 'package:sesli_ogren/src/data/pdf_text_extractor.dart';
 import 'package:sesli_ogren/src/data/source_ingest_service.dart';
