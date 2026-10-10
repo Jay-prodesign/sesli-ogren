@@ -10,7 +10,15 @@ import 'app_runtime.dart';
 import 'app_theme.dart';
 import 'atelier_learning_surfaces.dart';
 import 'companion_view.dart';
+import 'la0040_visual_treatments.dart';
+import 'learning_slice_screen.dart';
 import 'living_study_desk_home.dart';
+
+Widget _preserveExplainBackExperience(BuildContext context, Widget screen) {
+  final treatment = LearningVisualTreatmentScope.maybeOf(context);
+  if (treatment != null) return LearningVisualTreatmentScope(treatment: treatment, child: screen);
+  return LivingDeskReviewScope.active(context) ? LivingDeskReviewScope(child: screen) : screen;
+}
 
 class ExplainBackScreen extends StatefulWidget {
   const ExplainBackScreen({
@@ -179,10 +187,32 @@ class _ExplainBackScreenState extends State<ExplainBackScreen> {
     });
   }
 
-  void _retry() => setState(() {
+  void _retryUnavailable() => setState(() {
+    _result = null;
+  });
+
+  void _startFreshAttempt() => setState(() {
     _result = null;
     _controller.clear();
   });
+
+  Future<void> _openRecall() async {
+    final sourceUpdated = await Navigator.of(context).push<bool>(
+      MaterialPageRoute<bool>(
+        builder: (_) => _preserveExplainBackExperience(
+          context,
+          LearningSliceScreen(runtime: widget.runtime, materialId: widget.source.identity.materialId),
+        ),
+      ),
+    );
+    if (sourceUpdated == true && mounted) {
+      Navigator.of(context).pop();
+    }
+  }
+
+  void _backToMaterial() {
+    Navigator.of(context).maybePop();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -268,8 +298,14 @@ class _ExplainBackScreenState extends State<ExplainBackScreen> {
                 onPressed: _submitting ? null : _submit,
                 child: Text(_submitting ? 'Değerlendiriliyor…' : 'Anlatımımı değerlendir'),
               ),
-            if (result is ExplainBackUnavailable) _UnavailableResult(reason: result.reason, onRetry: _retry),
-            if (result is ExplainBackEvaluated) _EvaluatedResult(result: result, onRetry: _retry),
+            if (result is ExplainBackUnavailable)
+              _UnavailableResult(
+                reason: result.reason,
+                onRetry: _retryUnavailable,
+                onRecall: _openRecall,
+                onBack: _backToMaterial,
+              ),
+            if (result is ExplainBackEvaluated) _EvaluatedResult(result: result, onRetry: _startFreshAttempt),
           ],
         ),
       ),
@@ -278,9 +314,16 @@ class _ExplainBackScreenState extends State<ExplainBackScreen> {
 }
 
 class _UnavailableResult extends StatelessWidget {
-  const _UnavailableResult({required this.reason, required this.onRetry});
+  const _UnavailableResult({
+    required this.reason,
+    required this.onRetry,
+    required this.onRecall,
+    required this.onBack,
+  });
   final String reason;
   final VoidCallback onRetry;
+  final VoidCallback onRecall;
+  final VoidCallback onBack;
 
   @override
   Widget build(BuildContext context) => DecoratedBox(
@@ -307,7 +350,18 @@ class _UnavailableResult extends StatelessWidget {
           const SizedBox(height: 8),
           const Text('Yanıtını doğru/yanlış diye tahmin etmiyoruz ve bunu öğrenme kanıtı olarak kaydetmiyoruz.'),
           const SizedBox(height: 12),
-          OutlinedButton(onPressed: onRetry, child: const Text('Yeniden dene')),
+          FilledButton.icon(
+            onPressed: onRetry,
+            icon: const Icon(Icons.refresh_rounded),
+            label: const Text('Aynı yanıtla yeniden dene'),
+          ),
+          const SizedBox(height: 8),
+          OutlinedButton.icon(
+            onPressed: onRecall,
+            icon: const Icon(Icons.psychology_alt_outlined),
+            label: const Text('Hatırla ile devam et'),
+          ),
+          TextButton(onPressed: onBack, child: const Text('Materyale dön')),
         ],
       ),
     ),

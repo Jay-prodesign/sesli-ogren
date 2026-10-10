@@ -148,6 +148,31 @@ class _ExplainScreenState extends State<ExplainScreen> {
 
   void _retry() => setState(() => _result = _request());
 
+  Future<void> _openRecallFromRecovery() async {
+    final sourceUpdated = await Navigator.of(context).push<bool>(
+      MaterialPageRoute<bool>(
+        builder: (_) => _preserveExplainExperience(
+          context,
+          LearningSliceScreen(runtime: widget.runtime, materialId: widget.source.identity.materialId),
+        ),
+      ),
+    );
+    if (sourceUpdated == true && mounted) {
+      Navigator.of(context).pop();
+    }
+  }
+
+  void _backToMaterial() {
+    Navigator.of(context).maybePop();
+  }
+
+  Widget _unavailable(GroundedExplainUnavailableReason reason) => _Unavailable(
+    reason: reason,
+    onRetry: _retry,
+    onBack: _backToMaterial,
+    onRecall: reason == GroundedExplainUnavailableReason.sourceUnavailable ? null : _openRecallFromRecovery,
+  );
+
   @override
   Widget build(BuildContext context) {
     final living = LivingDeskReviewScope.active(context);
@@ -163,7 +188,7 @@ class _ExplainScreenState extends State<ExplainScreen> {
           future: _result,
           builder: (context, snapshot) {
             if (snapshot.hasError) {
-              return _Unavailable(reason: GroundedExplainUnavailableReason.temporaryFailure, onRetry: _retry);
+              return _unavailable(GroundedExplainUnavailableReason.temporaryFailure);
             }
             if (!snapshot.hasData) {
               return const Center(child: CircularProgressIndicator());
@@ -171,11 +196,11 @@ class _ExplainScreenState extends State<ExplainScreen> {
             final result = snapshot.data!;
             if (result is GroundedExplainReady) {
               if (!result.matches(widget.source.identity)) {
-                return _Unavailable(reason: GroundedExplainUnavailableReason.staleSource, onRetry: _retry);
+                return _unavailable(GroundedExplainUnavailableReason.staleSource);
               }
               return _Ready(result: result, runtime: widget.runtime, source: widget.source);
             }
-            return _Unavailable(reason: (result as GroundedExplainUnavailable).reason, onRetry: _retry);
+            return _unavailable((result as GroundedExplainUnavailable).reason);
           },
         ),
       ),
@@ -364,10 +389,17 @@ class _Ready extends StatelessWidget {
 }
 
 class _Unavailable extends StatelessWidget {
-  const _Unavailable({required this.reason, required this.onRetry});
+  const _Unavailable({
+    required this.reason,
+    required this.onRetry,
+    required this.onBack,
+    required this.onRecall,
+  });
 
   final GroundedExplainUnavailableReason reason;
   final VoidCallback onRetry;
+  final VoidCallback onBack;
+  final VoidCallback? onRecall;
 
   @override
   Widget build(BuildContext context) {
@@ -404,10 +436,22 @@ class _Unavailable extends StatelessWidget {
             Text(title, style: Theme.of(context).textTheme.titleLarge, textAlign: TextAlign.center),
             const SizedBox(height: 8),
             Text(body, textAlign: TextAlign.center),
-            if (retryable) ...[
-              const SizedBox(height: 18),
-              OutlinedButton(onPressed: onRetry, child: const Text('Yeniden dene')),
-            ],
+            const SizedBox(height: 18),
+            if (retryable)
+              FilledButton.icon(
+                onPressed: onRetry,
+                icon: const Icon(Icons.refresh_rounded),
+                label: const Text('Yeniden dene'),
+              ),
+            if (retryable) const SizedBox(height: 8),
+            if (onRecall != null)
+              OutlinedButton.icon(
+                onPressed: onRecall,
+                icon: const Icon(Icons.psychology_alt_outlined),
+                label: const Text('Hatırla ile devam et'),
+              ),
+            if (onRecall != null) const SizedBox(height: 4),
+            TextButton(onPressed: onBack, child: const Text('Materyale dön')),
           ],
         ),
       ),

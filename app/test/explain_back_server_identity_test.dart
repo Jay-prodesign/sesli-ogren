@@ -89,6 +89,53 @@ Future<void> _pumpUntilCondition(WidgetTester tester, bool Function() condition,
 void main() {
   sqfliteFfiInit();
 
+  testWidgets('Explain-back failure preserves the learner response and offers Recall recovery', (tester) async {
+    final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
+    addTearDown(store.close);
+
+    final ingest = SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor());
+    const materialId = MaterialId('explain-back-recovery-material');
+    await ingest.ingestPastedText(
+      learner: AppRuntime.localM5LearnerFixture,
+      materialId: materialId,
+      text: 'Fotosentez sırasında klorofil ışığın soğurulmasına yardım eder.',
+      sourceName: 'Kurtarma notu',
+    );
+    final source = await store.currentSourceVersion(
+      learner: AppRuntime.localM5LearnerFixture,
+      materialId: materialId,
+    );
+    expect(source, isNotNull);
+
+    final runtime = AppRuntime(
+      learner: AppRuntime.localM5LearnerFixture,
+      store: store,
+      ingest: ingest,
+      recall: RecallLearningService(sourceStore: store, learningStore: store.learningTruthStore()),
+      telemetry: store.operationalTelemetry(),
+    );
+
+    await tester.pumpWidget(MaterialApp(home: ExplainBackScreen(runtime: runtime, source: source!)));
+    const response = 'Klorofil ışığı soğurur ve fotosentezin enerji dönüşümüne yardım eder.';
+    await tester.enterText(find.byType(TextField), response);
+    await _tapVisible(tester, find.text('Anlatımımı değerlendir'));
+    await _pumpUntilFound(tester, find.text('Henüz güvenilir değerlendirme yok'));
+
+    expect(find.text('Aynı yanıtla yeniden dene'), findsOneWidget);
+    expect(find.text('Hatırla ile devam et'), findsOneWidget);
+
+    await _tapVisible(tester, find.text('Aynı yanıtla yeniden dene'));
+    await _pumpUntilFound(tester, find.text('Anlatımımı değerlendir'));
+    final field = tester.widget<TextField>(find.byType(TextField));
+    expect(field.controller?.text, response);
+
+    await _tapVisible(tester, find.text('Anlatımımı değerlendir'));
+    await _pumpUntilFound(tester, find.text('Hatırla ile devam et'));
+    await _tapVisible(tester, find.text('Hatırla ile devam et'));
+    await _pumpUntilFound(tester, find.text('Hatırla'));
+    expect(find.text('Hatırla'), findsOneWidget);
+  });
+
   testWidgets('Explain-back uses server material UUID and normalized grounding hash', (tester) async {
     final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
     addTearDown(store.close);

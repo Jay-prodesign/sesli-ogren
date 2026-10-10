@@ -70,6 +70,43 @@ Future<void> _pumpUntilFound(WidgetTester tester, Finder finder, {int maxPumps =
 void main() {
   sqfliteFfiInit();
 
+  testWidgets('Explain provider failure keeps the learner moving through Recall or back to the material', (tester) async {
+    final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
+    addTearDown(store.close);
+
+    final ingest = SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor());
+    const materialId = MaterialId('explain-recovery-material');
+    await ingest.ingestPastedText(
+      learner: AppRuntime.localM5LearnerFixture,
+      materialId: materialId,
+      text: 'Fotosentez sırasında klorofil ışığın soğurulmasına yardım eder.',
+      sourceName: 'Kurtarma notu',
+    );
+    final source = await store.currentSourceVersion(
+      learner: AppRuntime.localM5LearnerFixture,
+      materialId: materialId,
+    );
+    expect(source, isNotNull);
+
+    final runtime = AppRuntime(
+      learner: AppRuntime.localM5LearnerFixture,
+      store: store,
+      ingest: ingest,
+      recall: RecallLearningService(sourceStore: store, learningStore: store.learningTruthStore()),
+      telemetry: store.operationalTelemetry(),
+    );
+
+    await tester.pumpWidget(MaterialApp(home: ExplainScreen(runtime: runtime, source: source!)));
+    await _pumpUntilFound(tester, find.text('Açıklama henüz hazır değil'));
+
+    expect(find.text('Hatırla ile devam et'), findsOneWidget);
+    expect(find.text('Materyale dön'), findsOneWidget);
+
+    await tester.tap(find.text('Hatırla ile devam et'));
+    await _pumpUntilFound(tester, find.text('Hatırla'));
+    expect(find.text('Hatırla'), findsOneWidget);
+  });
+
   testWidgets('Explain uses persisted server material identity for a local source', (tester) async {
     final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
     addTearDown(store.close);
