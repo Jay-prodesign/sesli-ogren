@@ -402,6 +402,16 @@ void main() {
     expect(extractor.calls, 0);
   });
 
+  test('PDF byte-size preflight rejects oversize before any bytes need processing', () {
+    final extractor = _RecordingPdfExtractor();
+    final bounded = SourceIngestService(store: store, pdfTextExtractor: extractor, maxPdfBytes: 5);
+
+    expect(() => bounded.validatePdfByteSize(6), throwsA(isA<SourceIngestException>()));
+    expect(() => bounded.validatePdfByteSize(0), throwsA(isA<SourceIngestException>()));
+    expect(() => bounded.validatePdfByteSize(5), returnsNormally);
+    expect(extractor.calls, 0);
+  });
+
   test('oversized PDF fails before parser execution', () async {
     final extractor = _RecordingPdfExtractor();
     final bounded = SourceIngestService(store: store, pdfTextExtractor: extractor, maxPdfBytes: 5);

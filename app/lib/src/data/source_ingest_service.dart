@@ -60,6 +60,15 @@ class SourceIngestService {
     );
   }
 
+  void validatePdfByteSize(int byteSize) {
+    if (byteSize <= 0) {
+      throw const SourceIngestException('PDF cannot be empty.');
+    }
+    if (byteSize > maxPdfBytes) {
+      throw const SourceIngestException('PDF exceeds the bounded M5 byte safety limit.');
+    }
+  }
+
   Future<SourceIngestResult> ingestPdf({
     required AuthenticatedLearner learner,
     required MaterialId materialId,
@@ -67,12 +76,7 @@ class SourceIngestService {
     required String originalName,
   }) async {
     _requireIdentity(learner: learner, materialId: materialId);
-    if (bytes.isEmpty) {
-      throw const SourceIngestException('PDF cannot be empty.');
-    }
-    if (bytes.length > maxPdfBytes) {
-      throw const SourceIngestException('PDF exceeds the bounded M5 byte safety limit.');
-    }
+    validatePdfByteSize(bytes.length);
     if (!_hasPdfHeader(bytes)) {
       throw const SourceIngestException('Selected file is not a supported PDF source.');
     }

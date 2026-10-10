@@ -261,6 +261,19 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
     }
     if (file == null || !mounted) return;
 
+    try {
+      widget.runtime.ingest.validatePdfByteSize(file.size);
+    } on SourceIngestException {
+      if (!mounted) return;
+      final maxMegabytes = (widget.runtime.ingest.maxPdfBytes / (1024 * 1024)).floor();
+      setState(() {
+        _inlineError = file!.size <= 0
+            ? 'Seçtiğin PDF boş görünüyor. Başka bir dosya seç veya metni doğrudan yapıştır.'
+            : 'Bu PDF güvenli dosya sınırını aşıyor. En fazla $maxMegabytes MB olan bir PDF seç.';
+      });
+      return;
+    }
+
     final stopwatch = Stopwatch()..start();
     await _recordEvent(
       OperationalEvent(
