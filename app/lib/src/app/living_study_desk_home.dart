@@ -490,14 +490,14 @@ class LivingStudyDeskHome extends StatelessWidget {
     builder: (context, constraints) {
       final compact = constraints.maxWidth < 340 || MediaQuery.textScalerOf(context).scale(1) > 1.25;
       final companion = Container(
-        width: compact ? 72 : 84,
-        height: compact ? 72 : 84,
+        width: compact ? 58 : 84,
+        height: compact ? 58 : 84,
         decoration: BoxDecoration(
           color: const Color(0xFF24434A),
-          borderRadius: BorderRadius.circular(24),
+          borderRadius: BorderRadius.circular(compact ? 18 : 24),
           border: Border.all(color: const Color(0xFF3A5A60)),
         ),
-        child: Center(child: CompanionView(state: CompanionVisualState.idle, size: compact ? 64 : 74)),
+        child: Center(child: CompanionView(state: CompanionVisualState.idle, size: compact ? 52 : 74)),
       );
       final promise = Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -513,10 +513,10 @@ class LivingStudyDeskHome extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            'Bir sayfa getir.\nGerisini birlikte çalışalım.',
+            'Bir sayfa getir.\nBirlikte çalışalım.',
             style: TextStyle(
               color: Colors.white,
-              fontSize: compact ? 28 : 32,
+              fontSize: compact ? 25 : 32,
               height: 1.05,
               fontWeight: FontWeight.w900,
               letterSpacing: -1.1,
@@ -524,7 +524,7 @@ class LivingStudyDeskHome extends StatelessWidget {
           ),
           const SizedBox(height: 10),
           const Text(
-            'PDF ya da metin. Önce kaynağın görünür kalır; sonra kapatıp gerçekten neyi hatırladığını görürsün.',
+            'PDF ya da metin. Sonra kaynağı kapatıp neyi gerçekten hatırladığını gör.',
             style: TextStyle(color: Color(0xFFD1DFDC), fontSize: 14, height: 1.45),
           ),
         ],
@@ -546,7 +546,7 @@ class LivingStudyDeskHome extends StatelessWidget {
               children: [
                 if (compact) ...[
                   Align(alignment: Alignment.centerLeft, child: companion),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 12),
                   promise,
                 ] else
                   Row(
