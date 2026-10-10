@@ -65,6 +65,19 @@ class _ReadyAccountOverviewGateway implements AccountOverviewGateway {
   );
 }
 
+class _UnverifiedPlanOverviewGateway implements AccountOverviewGateway {
+  const _UnverifiedPlanOverviewGateway();
+
+  @override
+  Future<AccountOverview?> load({required AuthenticatedLearner learner}) async => const AccountOverview(
+    locale: 'tr-TR',
+    accountStatus: 'active',
+    plan: 'unrecognized-plan',
+    entitlementStatus: 'active',
+    usage: [],
+  );
+}
+
 class _FakeSpeechOutput implements SpeechOutput {
   String? lastText;
   double? lastRateMultiplier;
@@ -636,6 +649,26 @@ void main() {
     );
     await tester.pump(const Duration(milliseconds: 300));
     expect(find.textContaining('Hesap silme tüm hesap ve öğrenme verilerini kapsar'), findsOneWidget);
+  });
+
+  testWidgets('Profile fails closed when an active entitlement has an unrecognized plan', (tester) async {
+    final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
+    addTearDown(store.close);
+    final runtime = AppRuntime(
+      learner: AppRuntime.localM5LearnerFixture,
+      store: store,
+      ingest: SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor()),
+      recall: RecallLearningService(sourceStore: store, learningStore: store.learningTruthStore()),
+      telemetry: store.operationalTelemetry(),
+      accountOverview: const _UnverifiedPlanOverviewGateway(),
+    );
+
+    await tester.pumpWidget(MaterialApp(home: ProfileSurface(runtime: runtime)));
+    await pumpUntilFound(tester, find.text('Plan doğrulanamadı'));
+
+    expect(find.text('Plan veya erişim durumu doğrulanamadı'), findsOneWidget);
+    expect(find.text('AKTİF'), findsNothing);
+    expect(find.text('DOĞRULANAMADI'), findsOneWidget);
   });
 
   testWidgets('Profile exposes configured support contact without inventing one', (tester) async {

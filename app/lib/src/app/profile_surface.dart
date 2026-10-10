@@ -324,13 +324,37 @@ class _AccountOverviewCard extends StatelessWidget {
     final theme = Theme.of(context);
     final living = LivingDeskReviewScope.active(context);
     final hero = living ? AtelierStyle.ink : AppPalette.primaryDark;
+    final knownPlan = switch (overview.plan) {
+      'free' || 'premium' || 'tester' => true,
+      _ => false,
+    };
     final planLabel = switch (overview.plan) {
       'free' => 'Ücretsiz plan',
       'premium' => 'Premium plan',
       'tester' => 'Test planı',
       _ => 'Plan doğrulanamadı',
     };
-    final active = overview.entitlementStatus == 'active';
+    final accountLabel = switch (overview.accountStatus) {
+      'active' => null,
+      'deletion_requested' => 'Hesap silme isteği bekliyor',
+      'deleted' => 'Hesap silindi',
+      _ => 'Hesap durumu doğrulanamadı',
+    };
+    final entitlementLabel = switch (overview.entitlementStatus) {
+      'active' => knownPlan ? 'Plan etkin' : 'Plan veya erişim durumu doğrulanamadı',
+      'expired' => 'Plan süresi doldu',
+      'revoked' => 'Plan erişimi kaldırıldı',
+      _ => 'Plan durumu doğrulanamadı',
+    };
+    final active = accountLabel == null && knownPlan && overview.entitlementStatus == 'active';
+    final statusLabel = accountLabel ?? entitlementLabel;
+    final badgeLabel = active
+        ? 'AKTİF'
+        : switch (overview.entitlementStatus) {
+            'expired' when accountLabel == null => 'SÜRESİ DOLDU',
+            'revoked' when accountLabel == null => 'KAPALI',
+            _ => 'DOĞRULANAMADI',
+          };
 
     return DecoratedBox(
       decoration: BoxDecoration(
@@ -364,7 +388,7 @@ class _AccountOverviewCard extends StatelessWidget {
                       Text(planLabel, style: theme.textTheme.titleLarge?.copyWith(color: Colors.white)),
                       const SizedBox(height: 4),
                       Text(
-                        active ? 'Plan etkin' : 'Plan durumu: ${overview.entitlementStatus}',
+                        statusLabel,
                         style: theme.textTheme.bodyMedium?.copyWith(color: Colors.white.withValues(alpha: 0.76)),
                       ),
                     ],
@@ -380,7 +404,7 @@ class _AccountOverviewCard extends StatelessWidget {
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                     child: Text(
-                      active ? 'AKTİF' : 'DURUM',
+                      badgeLabel,
                       style: theme.textTheme.labelSmall?.copyWith(
                         color: active ? const Color(0xFFB8F1E2) : Colors.white70,
                         fontWeight: FontWeight.w800,
