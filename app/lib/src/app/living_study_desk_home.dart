@@ -684,7 +684,7 @@ class _FirstRunStep extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      constraints: BoxConstraints(minHeight: compact ? 72 : 116),
+      height: compact ? 72 : 116,
       padding: EdgeInsets.fromLTRB(12, compact ? 10 : 12, 12, compact ? 10 : 13),
       decoration: BoxDecoration(
         color: LivingStudyDeskHome._paper,
