@@ -478,6 +478,8 @@ void main() {
     await tester.drag(find.byType(Scrollable).last, const Offset(0, -620));
     await tester.pump(const Duration(milliseconds: 300));
     await pumpUntilFound(tester, find.text('Kaldığın yerden dinle'));
+    expect(find.text('Kaldığın yerden dinle').hitTestable(), findsOneWidget);
+    expect(find.byKey(const ValueKey('listen-source-transcript')), findsOneWidget);
 
     await tapVisible(tester, find.text('Kaldığın yerden dinle'));
     await tester.pump();
@@ -543,8 +545,7 @@ void main() {
     expect(find.text(recap), findsOneWidget);
     expect(find.textContaining('bölüm 2 / 2'), findsNothing);
 
-    await tester.drag(find.byType(Scrollable).last, const Offset(0, -620));
-    await tester.pump(const Duration(milliseconds: 300));
+    expect(find.text('Dinlemeye başla').hitTestable(), findsOneWidget);
     await tapVisible(tester, find.text('Dinlemeye başla'));
     await tester.pump();
     expect(speech.lastText, recap);

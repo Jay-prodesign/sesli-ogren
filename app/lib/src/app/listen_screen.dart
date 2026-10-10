@@ -377,33 +377,6 @@ class _ListenScreenState extends State<ListenScreen> {
                   ),
                 ),
                 const SizedBox(height: 18),
-                DecoratedBox(
-                  decoration: BoxDecoration(
-                    color: surface,
-                    borderRadius: BorderRadius.circular(18),
-                    border: Border.all(color: line),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(18, 17, 18, 18),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Icon(Icons.article_outlined, color: accent, size: 18),
-                            const SizedBox(width: 7),
-                            Text(
-                              widget.textOverride?.trim().isNotEmpty == true ? 'Quick Recap özeti' : 'Kaynak metni',
-                              style: theme.textTheme.labelMedium?.copyWith(color: accent, fontWeight: FontWeight.w800),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 12),
-                        Text(source.text, style: theme.textTheme.bodyLarge?.copyWith(height: 1.58, color: ink)),
-                      ],
-                    ),
-                  ),
-                ),
                 const SizedBox(height: 18),
                 Text(
                   'Dinleme hızı',
@@ -494,6 +467,36 @@ class _ListenScreenState extends State<ListenScreen> {
                   textAlign: TextAlign.center,
                   style: theme.textTheme.bodySmall?.copyWith(color: muted),
                 ),
+                const SizedBox(height: 22),
+                DecoratedBox(
+                  key: const ValueKey('listen-source-transcript'),
+                  decoration: BoxDecoration(
+                    color: surface,
+                    borderRadius: BorderRadius.circular(18),
+                    border: Border.all(color: line),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(18, 17, 18, 18),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Icon(Icons.article_outlined, color: accent, size: 18),
+                            const SizedBox(width: 7),
+                            Text(
+                              widget.textOverride?.trim().isNotEmpty == true ? 'Quick Recap özeti' : 'Kaynak metni',
+                              style: theme.textTheme.labelMedium?.copyWith(color: accent, fontWeight: FontWeight.w800),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 12),
+                        Text(source.text, style: theme.textTheme.bodyLarge?.copyWith(height: 1.58, color: ink)),
+                      ],
+                    ),
+                  ),
+                ),
+
               ],
             );
           },
