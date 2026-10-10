@@ -225,10 +225,7 @@ void main() {
   });
 
   testWidgets('learning continuation failure uses unresolved companion state', (tester) async {
-    final store = await SqliteSourceStore.open(
-      factory: databaseFactoryFfiNoIsolate,
-      path: inMemoryDatabasePath,
-    );
+    final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
     final runtime = AppRuntime(
       learner: AppRuntime.localM5LearnerFixture,
       store: store,

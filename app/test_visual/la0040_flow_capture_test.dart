@@ -533,10 +533,7 @@ void main() {
       text: source,
       sourceName: material.title,
     );
-    final currentSource = await store.currentSourceVersion(
-      learner: runtime.learner,
-      materialId: toolMaterialId,
-    );
+    final currentSource = await store.currentSourceVersion(learner: runtime.learner, materialId: toolMaterialId);
     expect(currentSource, isNotNull);
     final sourceForTools = currentSource!;
 
@@ -556,18 +553,12 @@ void main() {
       await expectLater(find.byType(Scaffold), matchesGoldenFile('goldens/$name.png'));
     }
 
-    await captureScreen(
-      'la0040_quick_recap_390x844',
-      QuickRecapScreen(runtime: runtime, materialId: toolMaterialId),
-    );
+    await captureScreen('la0040_quick_recap_390x844', QuickRecapScreen(runtime: runtime, materialId: toolMaterialId));
     await captureScreen(
       'la0040_focus_390x844',
       FocusScreen(runtime: runtime, source: sourceForTools, sourceText: source),
     );
-    await captureScreen(
-      'la0040_explain_back_390x844',
-      ExplainBackScreen(runtime: runtime, source: sourceForTools),
-    );
+    await captureScreen('la0040_explain_back_390x844', ExplainBackScreen(runtime: runtime, source: sourceForTools));
   });
 
   testWidgets('LA-0040 source-hidden Recall', (tester) async {

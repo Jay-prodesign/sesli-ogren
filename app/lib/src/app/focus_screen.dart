@@ -442,8 +442,7 @@ class _FocusScreenState extends State<FocusScreen> {
           ),
           LayoutBuilder(
             builder: (context, constraints) {
-              final stackActions =
-                  constraints.maxWidth < 340 || MediaQuery.textScalerOf(context).scale(1) > 1.25;
+              final stackActions = constraints.maxWidth < 340 || MediaQuery.textScalerOf(context).scale(1) > 1.25;
               final hintButton = OutlinedButton.icon(
                 onPressed: busy ? null : () => request(FocusHelpKind.hint),
                 icon: const Icon(Icons.lightbulb_outline_rounded),
