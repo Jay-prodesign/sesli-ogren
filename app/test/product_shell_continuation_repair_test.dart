@@ -80,17 +80,21 @@ void main() {
         home: LivingDeskReviewScope(child: ProductShellScreen(runtime: runtime)),
       ),
     );
-    await _pumpUntilFound(tester, find.text('İlk kaynağını ekle'));
-    await tester.tap(find.text('İlk kaynağını ekle'));
+    await _pumpUntilFound(tester, find.text('Kaynak ekle'));
+    await tester.tap(find.text('Kaynak ekle'));
     await _pumpUntilFound(tester, find.byType(LearningSliceScreen));
     await _pumpUntilFound(tester, find.text('İLK KAYNAĞIN'));
+    await tester.tap(find.text('Metin yapıştır'));
+    await tester.pump();
 
-    await tester.enterText(find.byKey(const ValueKey('pasted-material-title')), 'Biyoloji · Fotosentez');
     await tester.enterText(
       find.byKey(const ValueKey('pasted-material-text')),
       'Fotosentez sırasında klorofil ışık enerjisinin soğurulmasına yardım eder.',
     );
-    await tester.tap(find.text('Kaynağı ekle · çalışma alanını aç'));
+    await tester.tap(find.text('Başlık ekle · isteğe bağlı'));
+    await tester.pump();
+    await tester.enterText(find.byKey(const ValueKey('pasted-material-title')), 'Biyoloji · Fotosentez');
+    await tester.tap(find.text('Metni ekle · çalışma alanını aç'));
     await _pumpUntilFound(tester, find.byType(MaterialWorkspaceScreen));
 
     expect(find.text('Biyoloji · Fotosentez'), findsWidgets);

@@ -229,7 +229,10 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
         learner: widget.runtime.learner,
         materialId: selected,
       );
-      if (material == null || source == null || !mounted) return;
+      if (!mounted) return;
+      if (material == null || source == null) {
+        throw StateError('source_reader_material_or_source_missing');
+      }
       final extracted = await widget.runtime.store.extractedContentForSource(
         learner: widget.runtime.learner,
         sourceVersionId: source.identity.sourceVersionId,

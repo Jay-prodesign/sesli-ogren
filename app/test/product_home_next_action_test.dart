@@ -135,7 +135,7 @@ void main() {
     expect(find.text('Kaynağı kapat ve yeniden dene'), findsOneWidget);
   });
 
-  testWidgets('Home completed action returns to the source workspace instead of replaying Recall', (tester) async {
+  testWidgets('Home completed action returns directly to the current source instead of replaying Recall', (tester) async {
     usePhoneViewport(tester);
     final runtime = await _runtimeWithEvidence(
       disposition: RecallResponseDisposition.answer,
@@ -154,8 +154,8 @@ void main() {
     await tester.pump(const Duration(milliseconds: 100));
 
     expect(find.text('Biyoloji çalışma notu'), findsWidgets);
-    expect(find.text('Öğrenme durumu'), findsOneWidget);
-    expect(find.byType(MaterialWorkspaceScreen), findsOneWidget);
+    expect(find.byType(SourceReaderScreen), findsOneWidget);
+    expect(find.byType(LearningSliceScreen), findsNothing);
   });
   testWidgets('source-first scope survives Home to Workspace, Recap and Listen routes', (tester) async {
     usePhoneViewport(tester);
@@ -169,7 +169,9 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
 
-    await tapVisible(tester, find.text('Kaynağa dön'));
+    final workspaceEntry = find.byKey(const ValueKey('la0040-living-material-open'));
+    expect(workspaceEntry, findsOneWidget);
+    await tapVisible(tester, workspaceEntry);
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 450));
     expect(find.byType(MaterialWorkspaceScreen), findsOneWidget);
