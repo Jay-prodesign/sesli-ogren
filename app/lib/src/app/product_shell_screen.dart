@@ -112,8 +112,8 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
   Future<void> _openLearningFor(MaterialId materialId, {bool autoAdvanceContinuation = false}) async {
     if (!mounted) return;
     final treatment = LearningVisualTreatmentScope.maybeOf(context);
-    await Navigator.of(context).push<void>(
-      MaterialPageRoute(
+    final sourceAdded = await Navigator.of(context).push<bool>(
+      MaterialPageRoute<bool>(
         builder: (_) {
           final screen = LearningSliceScreen(
             runtime: widget.runtime,
@@ -127,6 +127,9 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
     );
     if (!mounted) return;
     setState(_refresh);
+    if (sourceAdded == true) {
+      await _openWorkspace(materialId);
+    }
   }
 
   Future<void> _openWorkspace([MaterialId? materialId]) async {

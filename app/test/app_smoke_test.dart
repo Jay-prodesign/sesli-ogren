@@ -169,7 +169,7 @@ void main() {
 
     expect(find.text('Sesli Öğren'), findsOneWidget);
     expect(find.text('Çalışma materyalini ekle'), findsOneWidget);
-    expect(find.text('Hatırlama başlat'), findsOneWidget);
+    expect(find.text('Kaynağı ekle ve aç'), findsOneWidget);
     expect(find.text('İpucu'), findsNothing);
   });
 
@@ -1039,6 +1039,6 @@ void main() {
     await pumpUntilFound(tester, find.text('Çalışma materyalini ekle'));
 
     expect(find.text('Çalışma materyalini ekle'), findsOneWidget);
-    expect(find.text('Hatırlama başlat'), findsOneWidget);
+    expect(find.text('Kaynağı ekle ve aç'), findsOneWidget);
   });
 }

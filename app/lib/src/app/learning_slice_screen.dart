@@ -705,6 +705,121 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
   };
 
   Widget _sourceCard(BuildContext context) {
+    if (LivingDeskReviewScope.active(context)) {
+      return Container(
+        key: const ValueKey('source'),
+        padding: const EdgeInsets.fromLTRB(20, 19, 20, 21),
+        decoration: BoxDecoration(
+          color: AtelierStyle.paper,
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(color: AtelierStyle.line),
+          boxShadow: const [BoxShadow(color: Color(0x0B15313A), blurRadius: 18, offset: Offset(0, 8))],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            const Text(
+              'İLK KAYNAĞIN',
+              style: TextStyle(
+                color: AtelierStyle.teal,
+                fontSize: 11,
+                fontWeight: FontWeight.w900,
+                letterSpacing: 1,
+              ),
+            ),
+            const SizedBox(height: 9),
+            const Text(
+              'Bir sayfa getir.\nOnu birlikte çalışalım.',
+              style: TextStyle(
+                color: AtelierStyle.ink,
+                fontSize: 28,
+                height: 1.08,
+                fontWeight: FontWeight.w900,
+                letterSpacing: -0.8,
+              ),
+            ),
+            const SizedBox(height: 10),
+            const Text(
+              'PDF seç veya notunu yapıştır. Kaynak önce çalışma alanında açılır; sonra kaynağı kapatıp hatırlarsın.',
+              style: TextStyle(color: AtelierStyle.muted, fontSize: 14, height: 1.45),
+            ),
+            const SizedBox(height: 14),
+            const Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                CompanionView(state: CompanionVisualState.idle, size: 54),
+                SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    'D/Knot: Önce ne çalıştığını görelim. Öğrenme kanıtı ancak sen hatırlamayı denediğinde oluşur.',
+                    style: TextStyle(color: AtelierStyle.muted, fontSize: 13, height: 1.4),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            OutlinedButton.icon(
+              onPressed: _busy ? null : _pickPdf,
+              icon: const Icon(Icons.picture_as_pdf_outlined),
+              label: const Text('PDF’den kaynak ekle'),
+            ),
+            const Padding(
+              padding: EdgeInsets.symmetric(vertical: 12),
+              child: Row(
+                children: [
+                  Expanded(child: Divider(color: AtelierStyle.line)),
+                  Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 10),
+                    child: Text('veya kendi metnin', style: TextStyle(color: AtelierStyle.muted, fontSize: 12)),
+                  ),
+                  Expanded(child: Divider(color: AtelierStyle.line)),
+                ],
+              ),
+            ),
+            TextField(
+              key: const ValueKey('pasted-material-title'),
+              controller: _titleController,
+              enabled: !_busy,
+              maxLength: 120,
+              textCapitalization: TextCapitalization.sentences,
+              decoration: const InputDecoration(
+                labelText: 'Başlık (isteğe bağlı)',
+                hintText: 'Örn. Biyoloji · Fotosentez',
+                border: OutlineInputBorder(),
+              ),
+            ),
+            const SizedBox(height: 8),
+            TextField(
+              key: const ValueKey('pasted-material-text'),
+              controller: _sourceController,
+              enabled: !_busy,
+              minLines: 6,
+              maxLines: 12,
+              textCapitalization: TextCapitalization.sentences,
+              decoration: const InputDecoration(
+                labelText: 'Kaynak metni',
+                hintText: 'Notunu veya çalışmak istediğin bölümü buraya yapıştır.',
+                border: OutlineInputBorder(),
+                alignLabelWithHint: true,
+              ),
+            ),
+            if (_inlineError != null) ...[const SizedBox(height: 12), _InlineNotice(text: _inlineError!)],
+            const SizedBox(height: 16),
+            FilledButton.icon(
+              onPressed: _busy ? null : _saveSource,
+              style: FilledButton.styleFrom(
+                backgroundColor: AtelierStyle.ink,
+                foregroundColor: Colors.white,
+                minimumSize: const Size.fromHeight(52),
+              ),
+              icon: const Icon(Icons.auto_stories_outlined),
+              label: const Text('Kaynağı ekle ve aç'),
+            ),
+          ],
+        ),
+      );
+    }
+
     return _SurfaceCard(
       key: const ValueKey('source'),
       child: Column(
@@ -712,9 +827,7 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
         children: [
           Text('Çalışma materyalini ekle', style: Theme.of(context).textTheme.titleLarge),
           const SizedBox(height: 8),
-          const Text(
-            'PDF seçebilir veya metni doğrudan yapıştırabilirsin. Kaynak sürümü öğrenme kanıtından ayrı tutulur.',
-          ),
+          const Text('PDF seçebilir veya metni doğrudan yapıştırabilirsin.'),
           const SizedBox(height: 18),
           OutlinedButton.icon(
             onPressed: _busy ? null : _pickPdf,
@@ -763,7 +876,7 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
           FilledButton.icon(
             onPressed: _busy ? null : _saveSource,
             icon: const Icon(Icons.arrow_forward_rounded),
-            label: const Text('Hatırlama başlat'),
+            label: const Text('Kaynağı ekle ve aç'),
           ),
         ],
       ),

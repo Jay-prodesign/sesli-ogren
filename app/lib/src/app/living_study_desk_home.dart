@@ -380,76 +380,17 @@ class LivingStudyDeskHome extends StatelessWidget {
       ),
       const SizedBox(height: 13),
       const Text(
-        'Bir PDF ya da metin ekle. Okumaya, dinlemeye ve hatırlamaya aynı yerden başla.',
+        'Bir PDF ya da metin ekle. Önce kaynağın açılır; sonra dinler, kapatır ve gerçekten hatırlarsın.',
         style: TextStyle(fontSize: 16, color: _sub, height: 1.48),
       ),
       const SizedBox(height: 18),
-      Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          const CompanionView(state: CompanionVisualState.idle, size: 148),
-          const SizedBox(width: 8),
-          const Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Merhaba, ben D/Knot.',
-                  style: TextStyle(color: _ink, fontSize: 18, fontWeight: FontWeight.w900),
-                ),
-                SizedBox(height: 7),
-                Text(
-                  'Kaynağını birlikte keşfedelim. Sonra ne kadarını hatırladığını göreceğiz.',
-                  style: TextStyle(color: _sub, fontSize: 14, height: 1.4),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-      const SizedBox(height: 18),
-      Container(
-        width: double.infinity,
-        padding: const EdgeInsets.fromLTRB(24, 23, 24, 29),
-        decoration: BoxDecoration(
-          color: _paper,
-          borderRadius: BorderRadius.circular(18),
-          border: Border.all(color: _line),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Row(
-              children: [
-                Icon(Icons.menu_book_outlined, color: _accent, size: 22),
-                SizedBox(width: 9),
-                Text(
-                  'SENİN ÇALIŞMA SAYFAN',
-                  style: TextStyle(color: _accent, fontSize: 11, fontWeight: FontWeight.w800, letterSpacing: 0.9),
-                ),
-              ],
-            ),
-            const SizedBox(height: 29),
-            const Text(
-              'İlk materyalin\nburada açılacak.',
-              style: TextStyle(fontSize: 25, color: _ink, fontWeight: FontWeight.w800, height: 1.17),
-            ),
-            const SizedBox(height: 25),
-            for (var i = 0; i < 3; i++) ...[
-              Container(height: 2, width: i == 2 ? 126 : double.infinity, color: _line),
-              const SizedBox(height: 15),
-            ],
-          ],
-        ),
-      ),
-      const SizedBox(height: 23),
       SizedBox(
         width: double.infinity,
         child: FilledButton.icon(
           key: const ValueKey('la0040-living-add'),
           onPressed: onOpenLearning,
           icon: const Icon(Icons.add_rounded),
-          label: const Text('İlk materyalini ekle'),
+          label: const Text('İlk kaynağını ekle'),
           style: FilledButton.styleFrom(
             backgroundColor: _ink,
             foregroundColor: Colors.white,
@@ -458,9 +399,58 @@ class LivingStudyDeskHome extends StatelessWidget {
           ),
         ),
       ),
-      const SizedBox(height: 13),
-      const Center(
-        child: Text('PDF veya kendi metnin', style: TextStyle(color: _sub, fontSize: 13)),
+      const SizedBox(height: 9),
+      const Text('PDF veya kendi metnin · birkaç saniyede başla', style: TextStyle(color: _sub, fontSize: 13)),
+      const SizedBox(height: 17),
+      const Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          CompanionView(state: CompanionVisualState.idle, size: 104),
+          SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Merhaba, ben D/Knot.', style: TextStyle(color: _ink, fontSize: 18, fontWeight: FontWeight.w900)),
+                SizedBox(height: 6),
+                Text(
+                  'Kaynağını görünür tutacağım. Öğrenme durumun yalnız kendi hatırlama denemelerinle değişecek.',
+                  style: TextStyle(color: _sub, fontSize: 14, height: 1.4),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+      const SizedBox(height: 17),
+      Container(
+        width: double.infinity,
+        padding: const EdgeInsets.fromLTRB(21, 18, 21, 21),
+        decoration: BoxDecoration(
+          color: _paper,
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(color: _line),
+        ),
+        child: const Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(Icons.auto_stories_outlined, color: _accent, size: 20),
+                SizedBox(width: 8),
+                Text(
+                  'İLK 60 SANİYE',
+                  style: TextStyle(color: _accent, fontSize: 10, fontWeight: FontWeight.w900, letterSpacing: 0.9),
+                ),
+              ],
+            ),
+            SizedBox(height: 12),
+            Text(
+              'Kaynağı aç → oku veya dinle → kaynağı kapat → hatırla.',
+              style: TextStyle(fontSize: 18, color: _ink, fontWeight: FontWeight.w800, height: 1.3),
+            ),
+          ],
+        ),
       ),
     ],
   );
