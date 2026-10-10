@@ -30,16 +30,17 @@ jobs:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
           persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
           fetch-depth: 1
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
       - id: check
         shell: bash
         run: |
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ] || git log -1 --pretty=%B | grep -Fq "[milestone-ci]"; then
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ] || git log -1 --pretty=%B | grep -Fq "[platform-ci]"; then
             echo "run_full=true" >> "$GITHUB_OUTPUT"
           else
             echo "run_full=false" >> "$GITHUB_OUTPUT"
-            echo "Skipping full milestone validation for routine commit."
+            echo "Skipping Android/iOS build matrix unless this is a platform milestone."
           fi
 
   android-release-compile:
@@ -55,6 +56,7 @@ jobs:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
           persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
       - id: flutter_pin
         working-directory: .
         shell: bash
@@ -87,6 +89,7 @@ jobs:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
           persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
       - id: flutter_pin
         working-directory: .
         shell: bash
