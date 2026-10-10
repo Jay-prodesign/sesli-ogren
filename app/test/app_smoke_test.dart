@@ -486,8 +486,16 @@ void main() {
       ),
     );
     await pumpUntilFound(tester, find.text('Dinlemeye devam et'));
-    expect(find.text('Dinlenen eski materyal'), findsWidgets);
-    expect(find.text('Yeni yüklenen materyal'), findsNothing);
+    final activeMaterialCard = find.byKey(const ValueKey('la0040-living-material-open'));
+    expect(
+      find.descendant(of: activeMaterialCard, matching: find.text('Dinlenen eski materyal')),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(of: activeMaterialCard, matching: find.text('Yeni yüklenen materyal')),
+      findsNothing,
+    );
+    expect(find.text('Yeni yüklenen materyal'), findsOneWidget);
 
     await tapVisible(tester, find.text('Dinlemeye devam et'));
     await pumpUntilFound(tester, find.byType(ListenScreen));
