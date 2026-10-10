@@ -395,6 +395,12 @@ def check_execution_coherence(r: Report, state: dict | None) -> None:
             f"{rel}: does not name active mission {mission_id}",
         )
 
+    tasks_top = live_texts.get("TASKS.md", "")[:3000]
+    r.check(
+        bool(mission_id) and mission_id in tasks_top,
+        f"TASKS.md: top live-cursor block does not name active mission {mission_id}",
+    )
+
     stale_assertions = {
         "AGENTS.md": [
             "During the current M5 checkpoint, LA-0022 remains the only active cursor",
@@ -431,6 +437,22 @@ def check_execution_coherence(r: Report, state: dict | None) -> None:
         r.check(
             "IN_PROGRESS" in engineer_return and "not a stop condition" in engineer_return,
             "ENGINEER_RETURN.md: latest consolidated evidence must preserve IN_PROGRESS continuation semantics",
+        )
+        r.check(
+            "not an automatic run stop" in live_texts.get("AGENTS.md", "").lower(),
+            "AGENTS.md: task completion must not become an automatic run stop",
+        )
+        r.check(
+            "task-status change is never an automatic execution stop" in live_texts.get("TASKS.md", "").lower(),
+            "TASKS.md: task status bookkeeping must not become an execution stop",
+        )
+        r.check(
+            "continue" in str(state.get("next_action", "")).lower(),
+            "EXECUTION_STATE.json: IN_PROGRESS next_action must explicitly continue beyond the immediate check",
+        )
+        r.check(
+            "blocked dependency does not stop independent admitted work" in engineer_return.lower(),
+            "ENGINEER_RETURN.md: blocker isolation semantics are missing",
         )
 
 

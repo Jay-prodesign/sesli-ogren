@@ -23,6 +23,14 @@ numbering: lifecycle "M3" is this M0, and lifecycle "M4" is this M1.
 
 Next unallocated ID: **LA-0041**.
 
+**Live execution cursor (2026-10-10): `LA-0039_LA-0040_INTEGRATED_OUTCOME`.**
+This task map is an inventory, not a selector. Historical milestone, review,
+admission, `NOT_EXECUTABLE`, or old-current wording below cannot reopen a closed
+checkpoint or stop the integrated outcome. Resolve live sequencing from Drive
+`CURRENT_EXECUTION_STATE` and repo `CURRENT_HANDOFF.md` /
+`EXECUTION_STATE.json`, then continue through the next dependency-ready admitted
+outcome.
+
 ---
 
 ## Milestone M0 — Repository & Agent Bootstrap

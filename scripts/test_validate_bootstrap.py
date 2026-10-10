@@ -175,6 +175,23 @@ class ValidatorNegativeTests(unittest.TestCase):
         )
         self.assertFailsWith(r"ENGINEER_RETURN\.md: does not name active mission")
 
+    def test_tasks_top_must_name_live_mission(self) -> None:
+        mission = self.state()["mission"]["id"]
+        self.edit("TASKS.md", mission, "LA-0999_STALE_MISSION")
+        self.assertFailsWith(r"TASKS\.md: top live-cursor block does not name active mission")
+
+    def test_task_completion_cannot_become_run_stop(self) -> None:
+        self.edit(
+            "AGENTS.md",
+            "moving a task to `DONE` is not an automatic run stop",
+            "moving a task to `DONE` is an automatic run stop",
+        )
+        self.assertFailsWith(r"task completion must not become an automatic run stop")
+
+    def test_in_progress_next_action_must_continue(self) -> None:
+        self.set_state(next_action="Finish the current check and wait.")
+        self.assertFailsWith(r"IN_PROGRESS next_action must explicitly continue")
+
     # --- D-024 reuse -------------------------------------------------------
     def test_register_missing(self) -> None:
         (self.root / "docs/provenance/OPEN_SOURCE_REUSE_REGISTER.md").unlink()

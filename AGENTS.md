@@ -40,6 +40,13 @@ A newer decision supersedes older wording only when it says so explicitly
 (example: **D-023** makes this repository **PUBLIC**, superseding earlier
 private-repository wording).
 
+**Live-cursor selection rule:** execution selection always starts from Drive
+`CURRENT_EXECUTION_STATE` plus repo `CURRENT_HANDOFF.md` / `EXECUTION_STATE.json`.
+Older task, handoff, command, return, review, milestone, or evidence text may
+remain for audit, but historical words such as `CURRENT`, `ACTIVE`,
+`NOT_EXECUTABLE`, `WAIT`, `CHECKPOINT`, or `FOUNDER REVIEW` do not become live
+stop conditions unless the single current cursor explicitly points to them.
+
 ## 3. Sources of truth
 
 - **Google Drive** is product and governance truth (index, execution state,
@@ -223,8 +230,7 @@ candidate(s) from the Brain-approved harvest, or state `NO_APPROVED_CANDIDATE`.
 
 ## 13. Brain ↔ Engineer command / return bus (D-026)
 
-The durable, repository-local mailbox between Brain and the Primary Engineer.
-The Product Owner is **not** the routine message courier. Full protocol:
+The durable, repository-local mailbox for an explicitly delegated Brain↔Engineer path. It is an optional/historical transport, not the live task selector and not a mandatory routine checkpoint. The Product Owner is **not** the routine message courier. Full protocol:
 [`docs/agent/README.md`](docs/agent/README.md).
 
 1. **Role separation.**
@@ -398,8 +404,9 @@ Asset governance is tiered:
 
 D-075 refines D-066 and does not weaken canonical master authority, provenance,
 SOURCE VISUAL PASS vs PRODUCTION ASSET PASS, app integration, or device QA.
-D/Knot remains locked under D-070. During LA-0022, this section does not
-authorize new asset breadth or reopen character discovery.
+D/Knot remains locked under D-070. The historical LA-0022 checkpoint does not
+select current work or reopen character discovery; current asset work follows the
+single live outcome and demonstrated runtime need.
 
 
 ## 16. Agent credit efficiency
