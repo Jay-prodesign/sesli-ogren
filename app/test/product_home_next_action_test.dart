@@ -147,18 +147,18 @@ void main() {
     expect(quickRecapButton, findsOneWidget);
     await tester.tap(quickRecapButton);
     await tester.pump();
-    await tester.pump(const Duration(milliseconds: 100));
+    await tester.pump(const Duration(milliseconds: 450));
     expect(find.byType(QuickRecapScreen), findsOneWidget);
     expect(LivingDeskReviewScope.active(tester.element(find.byType(QuickRecapScreen))), isTrue);
 
     Navigator.of(tester.element(find.byType(QuickRecapScreen))).pop();
     await tester.pump();
-    await tester.pump(const Duration(milliseconds: 100));
+    await tester.pump(const Duration(milliseconds: 450));
     expect(find.byType(MaterialWorkspaceScreen), findsOneWidget);
 
     await tapVisible(tester, find.text('Dinle').last);
     await tester.pump();
-    await tester.pump(const Duration(milliseconds: 100));
+    await tester.pump(const Duration(milliseconds: 450));
     expect(find.byType(ListenScreen), findsOneWidget);
     expect(LivingDeskReviewScope.active(tester.element(find.byType(ListenScreen))), isTrue);
   });

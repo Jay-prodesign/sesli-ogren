@@ -943,10 +943,10 @@ void main() {
     expect(find.bySemanticsLabel('Kaynak bölümü'), findsOneWidget);
 
     final retryFromSource = find.text('Kaynağı kapat ve yeniden dene');
-    await tester.pumpAndSettle();
+    await tester.pump(const Duration(milliseconds: 450));
     expect(retryFromSource, findsOneWidget);
     await tester.tap(retryFromSource);
-    await tester.pumpAndSettle();
+    await tester.pump(const Duration(milliseconds: 450));
     await pumpUntilFound(tester, find.text('Hatırla'));
     expect(find.text('Bu bölümü yeniden kur'), findsNothing);
     expect(find.text('Yanıtla'), findsOneWidget);
