@@ -14,11 +14,12 @@ import 'product_shell_screen.dart';
 import 'living_study_desk_home.dart';
 
 class SesliOgrenApp extends StatefulWidget {
-  const SesliOgrenApp({this.restoreSession, this.openRuntime, super.key});
+  const SesliOgrenApp({this.restoreSession, this.openRuntime, this.signOutSession, super.key});
 
-  /// Test/review seams only. Production uses real Supabase restore and AppRuntime.open.
+  /// Test/review seams only. Production uses real Supabase restore, sign-out and AppRuntime.open.
   final Future<AuthenticatedLearner?> Function()? restoreSession;
   final Future<AppRuntime> Function(AuthenticatedLearner learner)? openRuntime;
+  final Future<void> Function()? signOutSession;
 
   @override
   State<SesliOgrenApp> createState() => _SesliOgrenAppState();
@@ -86,8 +87,23 @@ class _SesliOgrenAppState extends State<SesliOgrenApp> {
     setState(() => _accountDeleted = true);
   }
 
+  Future<void> _signOutSession() =>
+      (widget.signOutSession ?? SupabaseLearnerAuth.signOutCurrentSession)();
+
   Future<void> _handleSignOut() async {
-    await SupabaseLearnerAuth.signOutCurrentSession();
+    await _signOutSession();
+    final runtime = _runtime;
+    if (runtime != null) {
+      await runtime.close();
+    }
+    if (!mounted) return;
+    _runtime = null;
+    _accountDeleted = false;
+    setState(() => _runtimeFuture = Future.value(null));
+  }
+
+  Future<void> _returnToAccountEntryAfterRuntimeFailure() async {
+    await _signOutSession();
     final runtime = _runtime;
     if (runtime != null) {
       await runtime.close();
@@ -136,7 +152,13 @@ class _SesliOgrenAppState extends State<SesliOgrenApp> {
                   );
                 }
                 if (snapshot.hasError) {
-                  return _RuntimeErrorScreen(error: snapshot.error!, onRetry: _retryRuntime);
+                  return _RuntimeErrorScreen(
+                    error: snapshot.error!,
+                    onRetry: _retryRuntime,
+                    onUseAnotherAccount: snapshot.error is LearnerAuthConfigurationException
+                        ? null
+                        : _returnToAccountEntryAfterRuntimeFailure,
+                  );
                 }
                 return const _RuntimeLoadingScreen();
               },
@@ -211,14 +233,47 @@ class _RuntimeLoadingScreen extends StatelessWidget {
   }
 }
 
-class _RuntimeErrorScreen extends StatelessWidget {
-  const _RuntimeErrorScreen({required this.error, required this.onRetry});
+class _RuntimeErrorScreen extends StatefulWidget {
+  const _RuntimeErrorScreen({
+    required this.error,
+    required this.onRetry,
+    required this.onUseAnotherAccount,
+  });
 
   final Object error;
   final VoidCallback onRetry;
+  final Future<void> Function()? onUseAnotherAccount;
+
+  @override
+  State<_RuntimeErrorScreen> createState() => _RuntimeErrorScreenState();
+}
+
+class _RuntimeErrorScreenState extends State<_RuntimeErrorScreen> {
+  bool _switchingAccount = false;
+  String? _switchError;
+
+  Future<void> _useAnotherAccount() async {
+    final callback = widget.onUseAnotherAccount;
+    if (callback == null || _switchingAccount) return;
+    setState(() {
+      _switchingAccount = true;
+      _switchError = null;
+    });
+    try {
+      await callback();
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        _switchError = 'Oturum güvenle kapatılamadı. Mevcut hesap açık kalıyor; tekrar deneyebilirsin.';
+      });
+    } finally {
+      if (mounted) setState(() => _switchingAccount = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    final configurationError = widget.error is LearnerAuthConfigurationException;
     return Scaffold(
       body: SafeArea(
         child: Center(
@@ -240,7 +295,7 @@ class _RuntimeErrorScreen extends StatelessWidget {
                       const CompanionView(state: CompanionVisualState.correct, size: 96),
                       const SizedBox(height: 20),
                       Text(
-                        error is LearnerAuthConfigurationException
+                        configurationError
                             ? 'Uygulama bağlantısı henüz yapılandırılmadı.'
                             : 'Güvenli öğrenme oturumu açılamadı.',
                         style: Theme.of(context).textTheme.titleLarge,
@@ -248,20 +303,44 @@ class _RuntimeErrorScreen extends StatelessWidget {
                       ),
                       const SizedBox(height: 10),
                       Text(
-                        error is LearnerAuthConfigurationException
+                        configurationError
                             ? 'Öğrenme verisi açılmadı. Güvenli bağlantı yapılandırması gerekiyor.'
-                            : 'Öğrenme verisi açılmadan yeniden deneyebilirsin.',
+                            : 'Öğrenme verisi açılmadan yeniden deneyebilir veya başka bir hesapla giriş yapabilirsin.',
                         textAlign: TextAlign.center,
                       ),
+                      if (_switchError != null) ...[
+                        const SizedBox(height: 12),
+                        Semantics(
+                          liveRegion: true,
+                          child: Text(
+                            _switchError!,
+                            style: TextStyle(color: Theme.of(context).colorScheme.error),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      ],
                       const SizedBox(height: 20),
                       FilledButton(
                         style: FilledButton.styleFrom(
                           backgroundColor: AtelierStyle.teal,
                           foregroundColor: Colors.white,
                         ),
-                        onPressed: onRetry,
+                        onPressed: _switchingAccount ? null : widget.onRetry,
                         child: const Text('Yeniden dene'),
                       ),
+                      if (widget.onUseAnotherAccount != null) ...[
+                        const SizedBox(height: 8),
+                        TextButton.icon(
+                          onPressed: _switchingAccount ? null : _useAnotherAccount,
+                          icon: _switchingAccount
+                              ? const SizedBox.square(
+                                  dimension: 18,
+                                  child: CircularProgressIndicator(strokeWidth: 2),
+                                )
+                              : const Icon(Icons.switch_account_outlined),
+                          label: Text(_switchingAccount ? 'Oturum kapatılıyor…' : 'Başka hesapla giriş yap'),
+                        ),
+                      ],
                     ],
                   ),
                 ),

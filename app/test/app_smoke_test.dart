@@ -243,6 +243,46 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  testWidgets('runtime failure can safely return to account entry for another account', (tester) async {
+    var signOutCalls = 0;
+    await tester.pumpWidget(
+      SesliOgrenApp(
+        restoreSession: () async => const AuthenticatedLearner(id: LearnerId('runtime-switch-user')),
+        openRuntime: (_) async => throw StateError('local runtime failed'),
+        signOutSession: () async {
+          signOutCalls += 1;
+        },
+      ),
+    );
+    await pumpUntilFound(tester, find.text('Güvenli öğrenme oturumu açılamadı.'));
+
+    expect(find.text('Başka hesapla giriş yap'), findsOneWidget);
+    await tester.tap(find.text('Başka hesapla giriş yap'));
+    await pumpUntilFound(tester, find.text('Öğrenme alanına gir'));
+
+    expect(signOutCalls, 1);
+    expect(find.text('Kod gönder'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('runtime failure keeps current account when sign-out recovery fails', (tester) async {
+    await tester.pumpWidget(
+      SesliOgrenApp(
+        restoreSession: () async => const AuthenticatedLearner(id: LearnerId('runtime-switch-fail-user')),
+        openRuntime: (_) async => throw StateError('local runtime failed'),
+        signOutSession: () async => throw StateError('sign out unavailable'),
+      ),
+    );
+    await pumpUntilFound(tester, find.text('Güvenli öğrenme oturumu açılamadı.'));
+
+    await tester.tap(find.text('Başka hesapla giriş yap'));
+    await pumpUntilFound(tester, find.textContaining('Mevcut hesap açık kalıyor'));
+
+    expect(find.text('Güvenli öğrenme oturumu açılamadı.'), findsOneWidget);
+    expect(find.text('Öğrenme alanına gir'), findsNothing);
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('Profile stays available when the learning-library snapshot cannot load', (tester) async {
     final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
     final runtime = AppRuntime(
