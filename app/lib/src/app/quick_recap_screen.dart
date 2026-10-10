@@ -769,45 +769,46 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> with WidgetsBinding
               ),
             ),
             const SizedBox(height: 8),
-            Row(
+            Wrap(
+              key: const ValueKey('quick-recap-utility-actions'),
+              spacing: 8,
+              runSpacing: 8,
+              crossAxisAlignment: WrapCrossAlignment.center,
               children: [
-                Expanded(
-                  child: OutlinedButton.icon(
-                    style: outlineStyle,
-                    onPressed: () {
-                      final recapText = <String>[
-                        status.summary!,
-                        if (status.keyPoints.isNotEmpty) 'Önemli noktalar:\n${status.keyPoints.join('\n')}',
-                      ].join('\n\n');
-                      Navigator.of(context).push<void>(
-                        MaterialPageRoute(
-                          builder: (routeContext) => _preserveProductExperience(
-                            ListenScreen(
-                              runtime: widget.runtime,
-                              materialId: widget.materialId,
-                              textOverride: recapText,
-                              titleOverride: 'Hızlı özet',
-                              persistProgress: false,
-                              onRecall: () {
-                                Navigator.of(routeContext).pop();
-                                _openRecall();
-                              },
-                              onReadSource: () {
-                                Navigator.of(routeContext).pop();
-                                WidgetsBinding.instance.addPostFrameCallback((_) {
-                                  if (mounted) _openOriginalSource();
-                                });
-                              },
-                            ),
+                OutlinedButton.icon(
+                  style: outlineStyle,
+                  onPressed: () {
+                    final recapText = <String>[
+                      status.summary!,
+                      if (status.keyPoints.isNotEmpty) 'Önemli noktalar:\n${status.keyPoints.join('\n')}',
+                    ].join('\n\n');
+                    Navigator.of(context).push<void>(
+                      MaterialPageRoute(
+                        builder: (routeContext) => _preserveProductExperience(
+                          ListenScreen(
+                            runtime: widget.runtime,
+                            materialId: widget.materialId,
+                            textOverride: recapText,
+                            titleOverride: 'Hızlı özet',
+                            persistProgress: false,
+                            onRecall: () {
+                              Navigator.of(routeContext).pop();
+                              _openRecall();
+                            },
+                            onReadSource: () {
+                              Navigator.of(routeContext).pop();
+                              WidgetsBinding.instance.addPostFrameCallback((_) {
+                                if (mounted) _openOriginalSource();
+                              });
+                            },
                           ),
                         ),
-                      );
-                    },
-                    icon: const Icon(Icons.headphones_rounded),
-                    label: const Text('Özeti dinle'),
-                  ),
+                      ),
+                    );
+                  },
+                  icon: const Icon(Icons.headphones_rounded),
+                  label: const Text('Özeti dinle'),
                 ),
-                const SizedBox(width: 8),
                 PopupMenuButton<String>(
                   tooltip: 'Diğer özet araçları',
                   onSelected: (action) {

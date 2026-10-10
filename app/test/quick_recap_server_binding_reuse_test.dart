@@ -181,6 +181,47 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  testWidgets('Quick Recap keeps summary utilities usable on narrow large-text layouts', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(320, 700));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
+    addTearDown(store.close);
+    final ingest = SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor());
+    const materialId = MaterialId('quick-recap-narrow-large-text');
+    await ingest.ingestPastedText(
+      learner: AppRuntime.localM5LearnerFixture,
+      materialId: materialId,
+      text: 'Fotosentez ışık enerjisini kimyasal enerjiye dönüştürmeye yardım eder.',
+      sourceName: 'Dar ekran biyoloji notu',
+    );
+    final runtime = AppRuntime(
+      learner: AppRuntime.localM5LearnerFixture,
+      store: store,
+      ingest: ingest,
+      recall: RecallLearningService(sourceStore: store, learningStore: store.learningTruthStore()),
+      telemetry: store.operationalTelemetry(),
+    );
+    final gateway = _RecordingSummaryGateway(serverMaterialId: '11111111-1111-4111-8111-111111111111');
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: MediaQuery(
+          data: const MediaQueryData(textScaler: TextScaler.linear(1.6)),
+          child: QuickRecapScreen(runtime: runtime, materialId: materialId, summaryGateway: gateway),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Özet oluştur'));
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const ValueKey('quick-recap-utility-actions')), findsOneWidget);
+    expect(find.text('Özeti dinle'), findsOneWidget);
+    expect(find.text('Diğer araçlar'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('Quick Recap shows recoverable error when dispatch throws', (tester) async {
     final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
     addTearDown(store.close);
