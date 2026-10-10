@@ -353,11 +353,7 @@ void main() {
     addTearDown(store.close);
     var now = DateTime.utc(2026, 10, 6, 9);
     final ingest = SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor(), now: () => now);
-    final recall = RecallLearningService(
-      sourceStore: store,
-      learningStore: store.learningTruthStore(),
-      now: () => now,
-    );
+    final recall = RecallLearningService(sourceStore: store, learningStore: store.learningTruthStore(), now: () => now);
     final runtime = AppRuntime(
       learner: AppRuntime.localM5LearnerFixture,
       store: store,

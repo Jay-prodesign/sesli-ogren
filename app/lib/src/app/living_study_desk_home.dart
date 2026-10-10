@@ -411,7 +411,10 @@ class LivingStudyDeskHome extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Merhaba, ben D/Knot.', style: TextStyle(color: _ink, fontSize: 18, fontWeight: FontWeight.w900)),
+                Text(
+                  'Merhaba, ben D/Knot.',
+                  style: TextStyle(color: _ink, fontSize: 18, fontWeight: FontWeight.w900),
+                ),
                 SizedBox(height: 6),
                 Text(
                   'Kaynağını görünür tutacağım. Öğrenme durumun yalnız kendi hatırlama denemelerinle değişecek.',

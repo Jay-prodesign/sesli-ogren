@@ -62,19 +62,8 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
     final progress = await Future.wait(
       materials.map((item) async => ProgressItem(material: item, continuation: await _continuationFor(item.id))),
     );
-    final active = progress.reduce((current, candidate) {
-      final currentLearningAt = current.continuation?.state.updatedAt;
-      final candidateLearningAt = candidate.continuation?.state.updatedAt;
-      final currentAt =
-          currentLearningAt != null && currentLearningAt.isAfter(current.material.updatedAt)
-          ? currentLearningAt
-          : current.material.updatedAt;
-      final candidateAt =
-          candidateLearningAt != null && candidateLearningAt.isAfter(candidate.material.updatedAt)
-          ? candidateLearningAt
-          : candidate.material.updatedAt;
-      return candidateAt.isAfter(currentAt) ? candidate : current;
-    });
+    final sortedProgress = [...progress]..sort((a, b) => _activityAt(b).compareTo(_activityAt(a)));
+    final active = sortedProgress.first;
     final material = active.material;
     final continuation = active.continuation;
     final source = await widget.runtime.store.currentSourceVersion(
@@ -92,9 +81,14 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
       source: source,
       extracted: extracted,
       continuation: continuation,
-      materials: materials,
-      progress: progress,
+      materials: sortedProgress.map((item) => item.material).toList(growable: false),
+      progress: sortedProgress,
     );
+  }
+
+  DateTime _activityAt(ProgressItem item) {
+    final learningAt = item.continuation?.state.updatedAt;
+    return learningAt != null && learningAt.isAfter(item.material.updatedAt) ? learningAt : item.material.updatedAt;
   }
 
   Future<void> _openLearning() async {
@@ -1004,7 +998,7 @@ class _LibrarySurfaceState extends State<_LibrarySurface> {
         ),
         const SizedBox(height: 6),
         Text(
-          'Kaynakların, kaldığın yer ve öğrenme devamın tek yerde.',
+          'Kaynakların ve kaldığın yer tek yerde. Son aktiviten en üstte.',
           style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
         ),
         if (widget.data.materials.isNotEmpty) ...[

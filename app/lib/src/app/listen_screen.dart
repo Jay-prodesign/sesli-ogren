@@ -523,7 +523,6 @@ class _ListenScreenState extends State<ListenScreen> {
                   textAlign: TextAlign.center,
                   style: theme.textTheme.bodySmall?.copyWith(color: muted),
                 ),
-
               ],
             );
           },

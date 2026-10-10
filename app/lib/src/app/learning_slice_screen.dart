@@ -720,12 +720,7 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
           children: [
             const Text(
               'İLK KAYNAĞIN',
-              style: TextStyle(
-                color: AtelierStyle.teal,
-                fontSize: 11,
-                fontWeight: FontWeight.w900,
-                letterSpacing: 1,
-              ),
+              style: TextStyle(color: AtelierStyle.teal, fontSize: 11, fontWeight: FontWeight.w900, letterSpacing: 1),
             ),
             const SizedBox(height: 9),
             const Text(

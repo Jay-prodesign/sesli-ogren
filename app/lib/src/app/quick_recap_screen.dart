@@ -598,11 +598,8 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> with WidgetsBinding
                         Expanded(
                           child: Text(
                             'AI TARAFINDAN ÜRETİLDİ · ORİJİNAL KAYNAK DEĞİL',
-                            style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                              color: accent,
-                              fontWeight: FontWeight.w900,
-                              letterSpacing: 0.65,
-                            ),
+                            style: Theme.of(context).textTheme.labelSmall
+                                ?.copyWith(color: accent, fontWeight: FontWeight.w900, letterSpacing: 0.65),
                           ),
                         ),
                       ],
@@ -616,10 +613,8 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> with WidgetsBinding
                       const SizedBox(height: 16),
                       Text(
                         'Önemli noktalar',
-                        style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                          color: ink,
-                          fontWeight: FontWeight.w800,
-                        ),
+                        style: Theme.of(context).textTheme.titleSmall
+                            ?.copyWith(color: ink, fontWeight: FontWeight.w800),
                       ),
                       const SizedBox(height: 8),
                       for (final point in status.keyPoints)
@@ -628,7 +623,10 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> with WidgetsBinding
                           child: Row(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text('• ', style: TextStyle(color: accent, fontWeight: FontWeight.w900)),
+                              Text(
+                                '• ',
+                                style: TextStyle(color: accent, fontWeight: FontWeight.w900),
+                              ),
                               Expanded(child: Text(point)),
                             ],
                           ),
@@ -658,10 +656,7 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> with WidgetsBinding
             const SizedBox(height: 10),
             Text(
               'Buradan devam et',
-              style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                color: muted,
-                fontWeight: FontWeight.w700,
-              ),
+              style: Theme.of(context).textTheme.labelMedium?.copyWith(color: muted, fontWeight: FontWeight.w700),
             ),
             const SizedBox(height: 8),
             Wrap(
