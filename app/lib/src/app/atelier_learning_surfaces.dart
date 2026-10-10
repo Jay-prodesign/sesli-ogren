@@ -380,7 +380,9 @@ class AtelierRecall extends StatelessWidget {
         'KAYNAK EKRANI KAPALI · ŞİMDİ SEN',
         style: TextStyle(color: AtelierStyle.teal, fontWeight: FontWeight.w900, fontSize: 11, letterSpacing: 1),
       ),
-      const SizedBox(height: 12),
+      const SizedBox(height: 10),
+      const AtelierLearningRail(phase: AtelierLearningPhase.recall),
+      const SizedBox(height: 14),
       const Text(
         'Hatırlama sırası sende.',
         style: TextStyle(
@@ -597,6 +599,8 @@ class AtelierResult extends StatelessWidget {
           style: TextStyle(color: AtelierStyle.teal, fontSize: 11, letterSpacing: 1, fontWeight: FontWeight.w900),
         ),
         const SizedBox(height: 10),
+        const AtelierLearningRail(phase: AtelierLearningPhase.evidence),
+        const SizedBox(height: 14),
         Semantics(
           header: true,
           liveRegion: true,

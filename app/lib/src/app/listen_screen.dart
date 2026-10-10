@@ -347,6 +347,10 @@ class _ListenScreenState extends State<ListenScreen> {
             return ListView(
               padding: const EdgeInsets.fromLTRB(20, 16, 20, 36),
               children: [
+                if (living) ...[
+                  const AtelierLearningRail(phase: AtelierLearningPhase.source),
+                  const SizedBox(height: 12),
+                ],
                 DecoratedBox(
                   decoration: BoxDecoration(color: hero, borderRadius: BorderRadius.circular(living ? 20 : 24)),
                   child: Padding(

@@ -138,6 +138,10 @@ class _SourceReaderScreenState extends State<SourceReaderScreen> {
           widget.title,
           style: theme.textTheme.titleLarge?.copyWith(color: ink, fontWeight: living ? FontWeight.w900 : null),
         ),
+        if (living) ...[
+          const SizedBox(height: 14),
+          const AtelierLearningRail(phase: AtelierLearningPhase.source),
+        ],
         const SizedBox(height: 16),
         RichText(
           text: TextSpan(
@@ -351,12 +355,15 @@ class _SourceReaderScreenState extends State<SourceReaderScreen> {
                     ),
             ),
             if (source.isNotEmpty && (widget.onListen != null || widget.onRecap != null || widget.onRecall != null))
-              DecoratedBox(
-                decoration: BoxDecoration(
-                  color: paper,
-                  border: Border(top: BorderSide(color: line)),
-                ),
-                child: Padding(
+              Semantics(
+                container: true,
+                label: 'Kaynak açık. Hatırla düğmesi kaynağı kapatıp aktif denemeyi başlatır.',
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: paper,
+                    border: Border(top: BorderSide(color: line)),
+                  ),
+                  child: Padding(
                   padding: const EdgeInsets.fromLTRB(16, 8, 16, 10),
                   child: Row(
                     children: [
@@ -406,6 +413,7 @@ class _SourceReaderScreenState extends State<SourceReaderScreen> {
                   ),
                 ),
               ),
+            ),
           ],
         ),
       ),
