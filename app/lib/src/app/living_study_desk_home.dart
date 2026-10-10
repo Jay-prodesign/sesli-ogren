@@ -410,7 +410,7 @@ class LivingStudyDeskHome extends StatelessWidget {
         ),
       ),
       const SizedBox(height: 9),
-      const Text('PDF veya kendi metnin · birkaç saniyede başla', style: TextStyle(color: _sub, fontSize: 13)),
+      const Text('PDF veya kendi metnin · kendi kaynağınla başla', style: TextStyle(color: _sub, fontSize: 13)),
       const SizedBox(height: 17),
       const Row(
         crossAxisAlignment: CrossAxisAlignment.center,

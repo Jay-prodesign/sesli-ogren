@@ -309,7 +309,7 @@ class _ProfileSurfaceState extends State<ProfileSurface> {
               icon: Icons.privacy_tip_outlined,
               title: 'Gizlilik ve veriler',
               subtitle: switch (_resolvedOverview?.accountStatus) {
-                'deletion_requested' => 'Hesap silme isteği sunucuda bekliyor. Aynı destructive isteği tekrar göndermiyoruz; süreç tamamlanana kadar bu durum korunur.',
+                'deletion_requested' => 'Hesap silme isteği sunucuda bekliyor. Aynı silme isteğini tekrar göndermiyoruz; süreç tamamlanana kadar bu durum korunur.',
                 'deleted' =>
                   'Sunucu hesabı silinmiş olarak bildiriyor. Bu ekrandan yeni bir silme isteği gönderilmiyor.',
                 _ => 'Tek tek materyalleri Kütüphane’den silebilirsin. Hesap silme tüm hesap ve öğrenme verilerini kapsar.',

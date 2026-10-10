@@ -715,11 +715,11 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
   String _subtitle() => switch (_phase) {
     _SlicePhase.loading => 'Öğrenme durumunu hazırlıyorum.',
     _SlicePhase.source =>
-      _editingExistingSource ? 'Kaynağının yeni sürümünü güvenle ekle.' : 'Kendi materyalinle başlayalım.',
+      _editingExistingSource ? 'Kaynağının yeni sürümünü ekle.' : 'Kendi materyalinle başlayalım.',
     _SlicePhase.recall => 'Kaynaktan hatırlamayı dene.',
     _SlicePhase.result => 'Yanıtını kaynakla karşılaştırdım.',
     _SlicePhase.continuation => 'Bir sonraki adımın hazır.',
-    _SlicePhase.error => 'Kaynağın güvende; devam durumunu onarabiliriz.',
+    _SlicePhase.error => 'Devam bilgisini doğrulayıp yeniden bağlayabiliriz.',
   };
 
   Widget _phaseBody(BuildContext context) => switch (_phase) {
