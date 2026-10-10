@@ -449,97 +449,101 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
     ],
   );
 
+  Widget _buildBody() {
+    if (_index == 3) {
+      return ProfileSurface(
+        runtime: widget.runtime,
+        onAccountDeleted: widget.onAccountDeleted,
+        onSignOut: widget.onSignOut,
+      );
+    }
+
+    return FutureBuilder<_HomeSnapshot>(
+      future: _snapshot,
+      builder: (context, snapshot) {
+        if (snapshot.hasError) {
+          return Center(
+            child: Padding(
+              padding: const EdgeInsets.all(28),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(Icons.sync_problem_rounded, size: 40),
+                  const SizedBox(height: 12),
+                  Text(
+                    'Kütüphane şu anda yüklenemedi.',
+                    style: Theme.of(context).textTheme.titleMedium,
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 8),
+                  const Text(
+                    'Bu yükleme hatası kaynaklarının silindiği anlamına gelmez. Yerel öğrenme durumunu yeniden okumayı deneyebilirsin.',
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 16),
+                  OutlinedButton.icon(
+                    onPressed: () => setState(_refresh),
+                    icon: const Icon(Icons.refresh_rounded),
+                    label: const Text('Tekrar dene'),
+                  ),
+                ],
+              ),
+            ),
+          );
+        }
+        if (!snapshot.hasData) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        final data = snapshot.data!;
+        return Column(
+          children: [
+            if (_index == 1 && data.material != null)
+              Align(alignment: Alignment.centerRight, child: _readerShortcut(data)),
+            Expanded(
+              child: IndexedStack(
+                index: _index,
+                children: [
+                  TickerMode(
+                    enabled: _index == 0,
+                    child: _HomeSurface(
+                      data: data,
+                      onOpenLearning: _openNextLearningAction,
+                      onOpenListen: _openListen,
+                      onOpenWorkspace: () => _openWorkspace(),
+                      onOpenReader: () => _openSourceReader(),
+                      onOpenMaterial: _openMaterialNextAction,
+                    ),
+                  ),
+                  TickerMode(
+                    enabled: _index == 1,
+                    child: _LibrarySurface(
+                      data: data,
+                      onOpenLearning: _openLearning,
+                      onOpenWorkspace: _openWorkspace,
+                      onContinueMaterial: _openMaterialNextAction,
+                      onDeleteMaterial: _deleteMaterial,
+                      deletingMaterialId: _deletingMaterialId,
+                    ),
+                  ),
+                  TickerMode(
+                    enabled: _index == 2,
+                    child: ProgressSurface(items: data.progress, onOpenMaterial: _openMaterialNextAction),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final living = LivingDeskReviewScope.active(context);
     return Scaffold(
       backgroundColor: living ? AtelierStyle.canvas : null,
-      body: SafeArea(
-        child: _index == 3
-            ? ProfileSurface(
-                runtime: widget.runtime,
-                onAccountDeleted: widget.onAccountDeleted,
-                onSignOut: widget.onSignOut,
-              )
-            : FutureBuilder<_HomeSnapshot>(
-                future: _snapshot,
-                builder: (context, snapshot) {
-            if (snapshot.hasError) {
-              return Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(28),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Icon(Icons.sync_problem_rounded, size: 40),
-                      const SizedBox(height: 12),
-                      Text(
-                        'Kütüphane şu anda yüklenemedi.',
-                        style: Theme.of(context).textTheme.titleMedium,
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 8),
-                      const Text(
-                        'Bu yükleme hatası kaynaklarının silindiği anlamına gelmez. Yerel öğrenme durumunu yeniden okumayı deneyebilirsin.',
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 16),
-                      OutlinedButton.icon(
-                        onPressed: () => setState(_refresh),
-                        icon: const Icon(Icons.refresh_rounded),
-                        label: const Text('Tekrar dene'),
-                      ),
-                    ],
-                  ),
-                ),
-              );
-            }
-            if (!snapshot.hasData) {
-              return const Center(child: CircularProgressIndicator());
-            }
-            final data = snapshot.data!;
-            return Column(
-              children: [
-                if (_index == 1 && data.material != null)
-                  Align(alignment: Alignment.centerRight, child: _readerShortcut(data)),
-                Expanded(
-                  child: IndexedStack(
-                    index: _index,
-                    children: [
-                      TickerMode(
-                        enabled: _index == 0,
-                        child: _HomeSurface(
-                          data: data,
-                          onOpenLearning: _openNextLearningAction,
-                          onOpenListen: _openListen,
-                          onOpenWorkspace: () => _openWorkspace(),
-                          onOpenReader: () => _openSourceReader(),
-                          onOpenMaterial: _openMaterialNextAction,
-                        ),
-                      ),
-                      TickerMode(
-                        enabled: _index == 1,
-                        child: _LibrarySurface(
-                          data: data,
-                          onOpenLearning: _openLearning,
-                          onOpenWorkspace: _openWorkspace,
-                          onContinueMaterial: _openMaterialNextAction,
-                          onDeleteMaterial: _deleteMaterial,
-                          deletingMaterialId: _deletingMaterialId,
-                        ),
-                      ),
-                      TickerMode(
-                        enabled: _index == 2,
-                        child: ProgressSurface(items: data.progress, onOpenMaterial: _openMaterialNextAction),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-                    );
-                  },
-                ),
-      ),
+      body: SafeArea(child: _buildBody()),
       bottomNavigationBar: living
           ? NavigationBarTheme(
               data: NavigationBarThemeData(
