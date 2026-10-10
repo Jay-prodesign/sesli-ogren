@@ -189,7 +189,7 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
     }
     final continuation = progressItem?.continuation;
     if (continuation?.nextAction.kind == NextLearningActionKind.repeatRecallLater) {
-      await _openWorkspace(materialId);
+      await _openSourceReader(materialId);
       return;
     }
     if (continuation == null && progressItem?.prefersReaderResume == true) {

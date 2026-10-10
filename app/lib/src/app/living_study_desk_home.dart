@@ -108,7 +108,9 @@ class LivingStudyDeskHome extends StatelessWidget {
   VoidCallback get _nextActionHandler {
     if (_hasReaderResume) return onOpenReader ?? onOpenWorkspace;
     if (_hasListenResume) return onOpenListen;
-    return continuation?.nextAction.kind == NextLearningActionKind.repeatRecallLater ? onOpenWorkspace : onOpenLearning;
+    return continuation?.nextAction.kind == NextLearningActionKind.repeatRecallLater
+        ? onOpenReader ?? onOpenWorkspace
+        : onOpenLearning;
   }
 
   IconData get _nextActionIcon {
