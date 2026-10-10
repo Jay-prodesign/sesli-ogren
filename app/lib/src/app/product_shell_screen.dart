@@ -969,11 +969,7 @@ class _LibrarySurfaceState extends State<_LibrarySurface> {
         if (living) ...[
           Text(
             'KAYNAKLARIN',
-            style: theme.textTheme.labelSmall?.copyWith(
-              color: accent,
-              fontWeight: FontWeight.w900,
-              letterSpacing: 0.9,
-            ),
+            style: theme.textTheme.labelSmall?.copyWith(color: accent, fontWeight: FontWeight.w900, letterSpacing: 0.9),
           ),
           const SizedBox(height: 7),
         ],
