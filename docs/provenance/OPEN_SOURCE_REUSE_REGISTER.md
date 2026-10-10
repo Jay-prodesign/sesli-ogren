@@ -234,13 +234,31 @@ custom code, record it here with a concrete reason, as AGENTS.md §12 requires:
 | --- | --- |
 | Task ID | LA-0022 |
 | Upstream repository | https://github.com/supabase/supabase-flutter |
-| Exact tag / commit / version | supabase_flutter 2.17.2 exact-pinned in `app/pubspec.yaml`; lock/transitive resolution PASS in M5 bounded validation run 37334117375; live project auth evidence remains blocked only by missing client-safe project URL/publishable key |
+| Exact tag / commit / version | supabase_flutter 2.17.2 exact-pinned in `app/pubspec.yaml`; lock/transitive resolution PASS in M5 bounded validation run 37334117375; client-safe project configuration is external runtime evidence and does not alter the dependency audit |
 | License | MIT |
 | Reuse class | DEPENDENCY |
 | Dependency / files / modules used | Flutter client bootstrap + persisted Auth session + anonymous authenticated user creation only |
 | Material modifications | none |
 | Copyright / license / NOTICE obligations | Preserve MIT/package attribution through Flutter notice surface |
 | Security/config boundary | Project URL + publishable key supplied via Flutter `--dart-define`; no secret/service-role key in repository. Anonymous sign-in must be explicitly enabled in the selected Supabase project; public-release anti-abuse/captcha posture remains a later release gate. |
-| Audit status | APPROVED FOR M5 IMPLEMENTATION / LIVE PROJECT CONFIG PENDING |
+| Audit status | APPROVED |
 | Approving decision / task | D-024; canonical Supabase Auth direction; D-071 / LA-0022 |
 | Recorded | 2026-10-04 by ChatGPT (Brain delegate) |
+
+
+### REUSE-0012 — `file_picker` native PDF intake
+
+| Field | Value |
+| --- | --- |
+| Task ID | LA-0024 |
+| Upstream repository | https://github.com/miguelpruivo/flutter_file_picker |
+| Exact tag / commit / version | file_picker 13.1.0 exact-pinned in `app/pubspec.yaml`; deterministic transitive resolution captured in `app/pubspec.lock`; bounded Flutter checkpoint PASS on 2026-10-05 |
+| License | MIT |
+| Reuse class | DEPENDENCY |
+| Dependency / files / modules used | Native single-file picker only, restricted to PDF extension; selected bytes are handed to the existing `SourceIngestService.ingestPdf` pipeline |
+| Material modifications | none |
+| Copyright / license / NOTICE obligations | Preserve MIT/package attribution through Flutter-generated bundled notices |
+| Security/config boundary | Picker does not become source truth. Existing PDF header, byte-limit, extraction, source-version and learner-scoping checks remain authoritative after selection. |
+| Audit status | APPROVED |
+| Approving decision / task | D-076 provenance-safe benchmark/harvest rule; post-M5 full-product development |
+| Recorded | 2026-10-05 by ChatGPT |

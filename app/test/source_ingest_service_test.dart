@@ -6,6 +6,8 @@ import 'package:sesli_ogren/src/data/source_ingest_service.dart';
 import 'package:sesli_ogren/src/data/sqlite_source_store.dart';
 import 'package:sesli_ogren/src/domain/authenticated_learner.dart';
 import 'package:sesli_ogren/src/domain/learning_contracts.dart';
+import 'package:sesli_ogren/src/domain/learning_truth.dart';
+import 'package:sesli_ogren/src/learning/recall_learning_service.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 class _UnusedPdfExtractor implements PdfTextExtractor {
@@ -51,6 +53,80 @@ void main() {
 
   tearDown(() => store.close());
 
+  test('active materials are learner scoped, newest first, and exclude deleted', () async {
+    const older = MaterialId('material-older');
+    const newer = MaterialId('material-newer');
+    await service.ingestPastedText(learner: learnerA, materialId: older, text: 'Older');
+    service = SourceIngestService(
+      store: store,
+      pdfTextExtractor: const _UnusedPdfExtractor(),
+      now: () => DateTime.utc(2026, 10, 4, 11),
+    );
+    await service.ingestPastedText(learner: learnerA, materialId: newer, text: 'Newer');
+    await service.ingestPastedText(learner: learnerB, materialId: const MaterialId('other-user'), text: 'Private');
+
+    expect((await store.activeMaterials(learner: learnerA)).map((item) => item.id), [newer, older]);
+    expect(await store.activeMaterials(learner: learnerB), hasLength(1));
+
+    await store.deleteMaterial(learner: learnerA, materialId: newer, deletedAt: DateTime.utc(2026, 10, 4, 12));
+    expect((await store.activeMaterials(learner: learnerA)).map((item) => item.id), [older]);
+  });
+
+  test('reader progress is learner and source-version scoped', () async {
+    final first = await service.ingestPastedText(
+      learner: learnerA,
+      materialId: material,
+      text: 'Uzun bir kaynak metninin ilk sürümü.',
+    );
+    final firstUpdatedAt = DateTime.utc(2026, 10, 10, 8);
+    await store.saveReaderResumeProgress(
+      learner: learnerA,
+      materialId: material,
+      sourceVersionId: first.sourceVersion.identity.sourceVersionId,
+      progress: 0.42,
+      updatedAt: firstUpdatedAt,
+    );
+
+    expect(
+      await store.readerResumeProgress(
+        learner: learnerA,
+        materialId: material,
+        sourceVersionId: first.sourceVersion.identity.sourceVersionId,
+      ),
+      closeTo(0.42, 0.0001),
+    );
+    expect(
+      await store.readerResumeUpdatedAt(
+        learner: learnerA,
+        materialId: material,
+        sourceVersionId: first.sourceVersion.identity.sourceVersionId,
+      ),
+      firstUpdatedAt,
+    );
+    expect(
+      await store.readerResumeProgress(
+        learner: learnerB,
+        materialId: material,
+        sourceVersionId: first.sourceVersion.identity.sourceVersionId,
+      ),
+      0,
+    );
+
+    final second = await service.ingestPastedText(
+      learner: learnerA,
+      materialId: material,
+      text: 'Uzun bir kaynak metninin yeni ve farklı sürümü.',
+    );
+    expect(
+      await store.readerResumeProgress(
+        learner: learnerA,
+        materialId: material,
+        sourceVersionId: second.sourceVersion.identity.sourceVersionId,
+      ),
+      0,
+    );
+  });
+
   test('same pasted source retry is idempotent', () async {
     const sourceText = '  İlk satır\r\nİkinci satır  ';
     final first = await service.ingestPastedText(learner: learnerA, materialId: material, text: sourceText);
@@ -88,6 +164,80 @@ void main() {
     expect(
       (await store.currentSourceVersion(learner: learnerA, materialId: material))!.identity.sourceVersionId,
       second.sourceVersion.identity.sourceVersionId,
+    );
+  });
+
+  test('new source clears passive resume but preserves old evidence as historical truth', () async {
+    final first = await service.ingestPastedText(
+      learner: learnerA,
+      materialId: material,
+      text: 'Klorofil ışık enerjisinin soğurulmasına yardım eder. Bitkiler enerji üretir.',
+    );
+    final firstSourceId = first.sourceVersion.identity.sourceVersionId;
+    await store.saveReaderResumeProgress(
+      learner: learnerA,
+      materialId: material,
+      sourceVersionId: firstSourceId,
+      progress: 0.58,
+      updatedAt: DateTime.utc(2026, 10, 10, 8),
+    );
+    await store.saveListenResumeChunk(
+      learner: learnerA,
+      materialId: material,
+      sourceVersionId: firstSourceId,
+      chunkIndex: 2,
+      updatedAt: DateTime.utc(2026, 10, 10, 8, 5),
+    );
+
+    final recall = RecallLearningService(sourceStore: store, learningStore: store.learningTruthStore());
+    final prompt = await recall.createCurrentPrompt(learner: learnerA, materialId: material);
+    final action = await store.learningTruthStore().recallAction(learner: learnerA, actionId: prompt.id);
+    expect(action, isNotNull);
+    final attempt = await recall.openAttempt(learner: learnerA, actionId: prompt.id);
+    await recall.submit(
+      learner: learnerA,
+      actionId: prompt.id,
+      attemptId: attempt.attempt.attemptId,
+      disposition: RecallResponseDisposition.answer,
+      answer: action!.expectedAnswer,
+    );
+    expect(
+      await store.learningTruthStore().evidenceForMaterial(
+        learner: learnerA,
+        materialId: material,
+        sourceVersionId: firstSourceId,
+      ),
+      isNotEmpty,
+    );
+
+    final second = await service.ingestPastedText(
+      learner: learnerA,
+      materialId: material,
+      text: 'Mitokondri hücresel solunumla kullanılabilir enerji üretimine katkı sağlar. Yeni kaynak sürümü.',
+    );
+    final secondSourceId = second.sourceVersion.identity.sourceVersionId;
+
+    expect(
+      await store.readerResumeProgress(learner: learnerA, materialId: material, sourceVersionId: secondSourceId),
+      0,
+    );
+    expect(await store.listenResumeChunk(learner: learnerA, materialId: material, sourceVersionId: secondSourceId), 0);
+    expect(await recall.reopen(learner: learnerA, materialId: material), isNull);
+    expect(
+      await store.learningTruthStore().evidenceForMaterial(
+        learner: learnerA,
+        materialId: material,
+        sourceVersionId: secondSourceId,
+      ),
+      isEmpty,
+    );
+    expect(
+      await store.learningTruthStore().evidenceForMaterial(
+        learner: learnerA,
+        materialId: material,
+        sourceVersionId: firstSourceId,
+      ),
+      isNotEmpty,
     );
   });
 
@@ -149,6 +299,26 @@ void main() {
       service.ingestPastedText(learner: learnerA, materialId: material, text: 'Delete and do not resurrect'),
       throwsA(isA<SourceStoreConflict>()),
     );
+  });
+
+  test('learner purge removes only the selected learner local data', () async {
+    const sharedMaterial = MaterialId('shared-local-material');
+    await service.ingestPastedText(
+      learner: learnerA,
+      materialId: sharedMaterial,
+      text: 'Learner A local data must be purged.',
+    );
+    await service.ingestPastedText(
+      learner: learnerB,
+      materialId: sharedMaterial,
+      text: 'Learner B local data must remain.',
+    );
+
+    await store.purgeLearnerData(learner: learnerA);
+
+    expect(await store.material(learner: learnerA, materialId: sharedMaterial), isNull);
+    expect(await store.activeMaterials(learner: learnerA), isEmpty);
+    expect(await store.material(learner: learnerB, materialId: sharedMaterial), isNotNull);
   });
 
   test('oversized pasted text fails before persistence', () async {

@@ -2,15 +2,24 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:sesli_ogren/src/account/account_deletion_gateway.dart';
+import 'package:sesli_ogren/src/account/account_overview_gateway.dart';
 import 'package:sesli_ogren/src/app/app_runtime.dart';
 import 'package:sesli_ogren/src/app/learning_slice_screen.dart';
+import 'package:sesli_ogren/src/app/listen_screen.dart';
+import 'package:sesli_ogren/src/app/living_study_desk_home.dart';
+import 'package:sesli_ogren/src/app/material_workspace_screen.dart';
+import 'package:sesli_ogren/src/app/product_shell_screen.dart';
+import 'package:sesli_ogren/src/app/profile_surface.dart';
 import 'package:sesli_ogren/src/app/sesli_ogren_app.dart';
-import 'package:sesli_ogren/src/auth/supabase_learner_auth.dart';
 import 'package:sesli_ogren/src/data/pdf_text_extractor.dart';
 import 'package:sesli_ogren/src/data/source_ingest_service.dart';
 import 'package:sesli_ogren/src/data/sqlite_source_store.dart';
 import 'package:sesli_ogren/src/learning/recall_learning_service.dart';
+import 'package:sesli_ogren/src/speech/device_speech_output.dart';
+import 'package:sesli_ogren/src/domain/authenticated_learner.dart';
 import 'package:sesli_ogren/src/domain/learning_truth.dart';
+import 'package:sesli_ogren/src/domain/learning_contracts.dart';
 import 'package:sesli_ogren/src/domain/operational_event.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
@@ -23,12 +32,126 @@ class _UnusedPdfExtractor implements PdfTextExtractor {
   }
 }
 
+class _RecordingAccountDeletionGateway implements AccountDeletionGateway {
+  int calls = 0;
+
+  @override
+  Future<void> deleteAccount({required AuthenticatedLearner learner}) async {
+    calls += 1;
+  }
+}
+
+class _FailingAccountDeletionGateway implements AccountDeletionGateway {
+  const _FailingAccountDeletionGateway();
+
+  @override
+  Future<void> deleteAccount({required AuthenticatedLearner learner}) {
+    throw const AccountDeletionException('test failure');
+  }
+}
+
+class _ReadyAccountOverviewGateway implements AccountOverviewGateway {
+  const _ReadyAccountOverviewGateway();
+
+  @override
+  Future<AccountOverview?> load({required AuthenticatedLearner learner}) async => AccountOverview(
+    locale: 'tr-TR',
+    accountStatus: 'active',
+    plan: 'free',
+    entitlementStatus: 'active',
+    usage: [
+      AccountUsageEntry(periodStart: DateTime.utc(2026, 10, 1), capability: 'grounded_explain', consumed: 3),
+      AccountUsageEntry(periodStart: DateTime.utc(2026, 10, 1), capability: 'focus', consumed: 2),
+    ],
+  );
+}
+
+class _UnverifiedPlanOverviewGateway implements AccountOverviewGateway {
+  const _UnverifiedPlanOverviewGateway();
+
+  @override
+  Future<AccountOverview?> load({required AuthenticatedLearner learner}) async => const AccountOverview(
+    locale: 'tr-TR',
+    accountStatus: 'active',
+    plan: 'unrecognized-plan',
+    entitlementStatus: 'active',
+    usage: [],
+  );
+}
+
+class _PendingDeletionOverviewGateway implements AccountOverviewGateway {
+  const _PendingDeletionOverviewGateway();
+
+  @override
+  Future<AccountOverview?> load({required AuthenticatedLearner learner}) async => const AccountOverview(
+    locale: 'tr-TR',
+    accountStatus: 'deletion_requested',
+    plan: 'free',
+    entitlementStatus: 'active',
+    usage: [],
+  );
+}
+
+class _UnknownUsageOverviewGateway implements AccountOverviewGateway {
+  const _UnknownUsageOverviewGateway();
+
+  @override
+  Future<AccountOverview?> load({required AuthenticatedLearner learner}) async => AccountOverview(
+    locale: 'unexpected-locale',
+    accountStatus: 'active',
+    plan: 'free',
+    entitlementStatus: 'active',
+    usage: [
+      AccountUsageEntry(periodStart: DateTime.utc(2026, 10, 1), capability: 'internal_future_capability', consumed: 7),
+    ],
+  );
+}
+
+class _FakeSpeechOutput implements SpeechOutput {
+  String? lastText;
+  double? lastRateMultiplier;
+  VoidCallback? _onDone;
+
+  @override
+  Future<void> speak(
+    String text, {
+    required String locale,
+    required VoidCallback onStart,
+    required VoidCallback onDone,
+    required ValueChanged<Object> onError,
+    double rateMultiplier = 1.0,
+  }) async {
+    lastText = text;
+    lastRateMultiplier = rateMultiplier;
+    _onDone = onDone;
+    onStart();
+  }
+
+  void complete() {
+    final callback = _onDone;
+    _onDone = null;
+    callback?.call();
+  }
+
+  @override
+  Future<void> stop() async {}
+
+  @override
+  Future<void> dispose() async {}
+}
+
+void usePhoneViewport(WidgetTester tester) {
+  tester.view.physicalSize = const Size(390, 844);
+  tester.view.devicePixelRatio = 1;
+  addTearDown(tester.view.resetPhysicalSize);
+  addTearDown(tester.view.resetDevicePixelRatio);
+}
+
 Widget testShell(AppRuntime runtime) {
   return MaterialApp(
-    home: MediaQuery(
-      data: const MediaQueryData(disableAnimations: true),
-      child: LearningSliceScreen(runtime: runtime),
-    ),
+    builder: (context, child) =>
+        MediaQuery(data: MediaQuery.of(context).copyWith(disableAnimations: true), child: child!),
+    home: LearningSliceScreen(runtime: runtime),
   );
 }
 
@@ -43,24 +166,46 @@ Future<void> pumpUntilFound(WidgetTester tester, Finder finder, {int maxPumps = 
 }
 
 Future<void> tapVisible(WidgetTester tester, Finder finder) async {
-  await tester.ensureVisible(finder);
+  await tester.scrollUntilVisible(finder, 240, scrollable: find.byType(Scrollable).last);
   await tester.pump();
   await tester.tap(finder);
+}
+
+Future<void> pumpUntilGone(WidgetTester tester, Finder finder, {int maxPumps = 100}) async {
+  for (var i = 0; i < maxPumps; i++) {
+    await tester.pump(const Duration(milliseconds: 20));
+    if (finder.evaluate().isEmpty) {
+      return;
+    }
+  }
+  fail('Expected widget did not disappear within bounded pumps.');
 }
 
 void main() {
   sqfliteFfiInit();
 
-  test('production auth fails closed when Supabase config is absent', () async {
-    await expectLater(SupabaseLearnerAuth.authenticate(), throwsA(isA<LearnerAuthConfigurationException>()));
+  testWidgets('production app routes a missing restored session to passwordless account entry', (tester) async {
+    await tester.pumpWidget(SesliOgrenApp(restoreSession: () async => null));
+    await pumpUntilFound(tester, find.text('Öğrenme alanına gir'));
+
+    expect(find.text('Öğrenme alanına gir'), findsOneWidget);
+    expect(find.text('Kod gönder'), findsOneWidget);
+    expect(find.textContaining('Şifre gerekmiyor'), findsOneWidget);
+    expect(find.text('Uygulama bağlantısı henüz yapılandırılmadı.'), findsNothing);
   });
 
-  testWidgets('production app does not open learner data without auth config', (tester) async {
-    await tester.pumpWidget(const SesliOgrenApp());
-    await pumpUntilFound(tester, find.text('Uygulama bağlantısı henüz yapılandırılmadı.'));
+  testWidgets('runtime opening failure is not mislabeled as an OTP failure', (tester) async {
+    await tester.pumpWidget(
+      SesliOgrenApp(
+        restoreSession: () async => const AuthenticatedLearner(id: LearnerId('runtime-error-user')),
+        openRuntime: (_) async => throw StateError('local runtime failed'),
+      ),
+    );
+    await pumpUntilFound(tester, find.text('Güvenli öğrenme oturumu açılamadı.'));
 
-    expect(find.text('Uygulama bağlantısı henüz yapılandırılmadı.'), findsOneWidget);
-    expect(find.textContaining('Öğrenme verisi açılmadı'), findsOneWidget);
+    expect(find.text('Güvenli öğrenme oturumu açılamadı.'), findsOneWidget);
+    expect(find.text('Yeniden dene'), findsOneWidget);
+    expect(find.text('Kod doğrulanamadı. Yeni bir kod isteyebilirsin.'), findsNothing);
   });
 
   testWidgets('production learning slice boots at truthful source entry', (tester) async {
@@ -80,7 +225,7 @@ void main() {
 
     expect(find.text('Sesli Öğren'), findsOneWidget);
     expect(find.text('Çalışma materyalini ekle'), findsOneWidget);
-    expect(find.text('Hatırlama başlat'), findsOneWidget);
+    expect(find.text('Kaynağı ekle ve aç'), findsOneWidget);
     expect(find.text('İpucu'), findsNothing);
   });
 
@@ -128,9 +273,10 @@ void main() {
 
     expect(find.text('İpucusuz hatırladın'), findsOneWidget);
     expect(find.text('Sıradaki adım'), findsOneWidget);
-    await tapVisible(tester, find.text('Devam et'));
-    await pumpUntilFound(tester, find.text('Devam noktası'));
-    expect(find.text('Devam noktası'), findsOneWidget);
+    await tapVisible(tester, find.text('Bu denemeyi tamamla'));
+    await pumpUntilFound(tester, find.text('Bu deneme kaydedildi'));
+    expect(find.text('Bu deneme kaydedildi'), findsOneWidget);
+    expect(find.text('Çalışmayı bitir'), findsOneWidget);
 
     final events = await store.operationalTelemetry().events(learner: runtime.learner);
     expect(
@@ -161,11 +307,797 @@ void main() {
         ),
       ),
     );
-    await pumpUntilFound(tester, find.text('Devam noktası'));
+    await pumpUntilFound(tester, find.text('Bu deneme kaydedildi'));
 
-    expect(find.text('Devam noktası'), findsOneWidget);
+    expect(find.text('Bu deneme kaydedildi'), findsOneWidget);
+    expect(find.text('Çalışmayı bitir'), findsOneWidget);
     expect(find.textContaining('ONE_UNASSISTED_RETRIEVAL_OBSERVED'), findsNothing);
     expect(find.textContaining('Neden:'), findsNothing);
+  });
+
+  testWidgets('full product shell opens one coherent grounded material workspace', (tester) async {
+    final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
+    addTearDown(store.close);
+
+    final ingest = SourceIngestService(
+      store: store,
+      pdfTextExtractor: const _UnusedPdfExtractor(),
+      now: () => DateTime.utc(2026, 10, 5, 19),
+    );
+    final runtime = AppRuntime(
+      learner: AppRuntime.localM5LearnerFixture,
+      store: store,
+      ingest: ingest,
+      recall: RecallLearningService(sourceStore: store, learningStore: store.learningTruthStore()),
+      telemetry: store.operationalTelemetry(),
+    );
+
+    await ingest.ingestPastedText(
+      learner: runtime.learner,
+      materialId: AppRuntime.primaryMaterialId,
+      text:
+          'Fotosentez, bitkilerin ışık enerjisini kullanarak karbondioksit ve sudan '
+          'kimyasal enerji depolamasına yardımcı olan süreçtir.',
+      sourceName: 'Fotosentez çalışma notu',
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: MediaQuery(
+          data: const MediaQueryData(disableAnimations: true),
+          child: ProductShellScreen(runtime: runtime),
+        ),
+      ),
+    );
+    await pumpUntilFound(tester, find.text('KALDIĞIN MATERYAL'));
+
+    expect(find.text('Kütüphane'), findsOneWidget);
+    expect(find.byKey(const ValueKey('home-continuation-hero')), findsOneWidget);
+    expect(find.text('KALDIĞIN MATERYAL'), findsOneWidget);
+    expect(find.text('Fotosentez çalışma notu'), findsWidgets);
+
+    await tapVisible(tester, find.text('Fotosentez çalışma notu').last);
+    await pumpUntilFound(tester, find.text('Öğrenme durumu'));
+
+    expect(find.text('Öğrenme durumu'), findsOneWidget);
+    expect(find.text('Henüz ölçülmedi'), findsWidgets);
+    expect(find.text('SIRADAKİ ADIM'), findsOneWidget);
+    expect(find.text('Hatırla ile devam'), findsOneWidget);
+
+    await tester.scrollUntilVisible(find.text('Odaklan'), 260, scrollable: find.byType(Scrollable).last);
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(find.text('Odaklan'), findsOneWidget);
+    await tapVisible(tester, find.text('Odaklan').last);
+    await pumpUntilFound(tester, find.text('KISA ODAK · 3 ADIM'));
+    expect(find.byKey(const ValueKey('focus-source-trust')), findsOneWidget);
+    expect(find.text('Fotosentez çalışma notu'), findsWidgets);
+    await tester.scrollUntilVisible(find.text('İpucu ver'), 220, scrollable: find.byType(Scrollable).last);
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(find.text('İpucu ver'), findsOneWidget);
+    expect(find.text('Sorumu açıkla'), findsOneWidget);
+    await tester.enterText(find.byType(TextField), 'Fotosentezde karbondioksit nasıl kullanılır?');
+    await tapVisible(tester, find.text('İpucu ver'));
+    await pumpUntilFound(tester, find.textContaining('Kaynak ipucu:'));
+    expect(find.textContaining('karbondioksit'), findsWidgets);
+    await tester.scrollUntilVisible(
+      find.textContaining('öğrenme kanıtı oluşturmaz'),
+      -220,
+      scrollable: find.byType(Scrollable).last,
+    );
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(find.textContaining('öğrenme kanıtı oluşturmaz'), findsOneWidget);
+    Navigator.of(tester.element(find.textContaining('öğrenme kanıtı oluşturmaz'))).pop();
+    await tester.pump(const Duration(milliseconds: 300));
+    await pumpUntilFound(tester, find.byType(MaterialWorkspaceScreen));
+    await tester.scrollUntilVisible(find.text('Kaynağa hızlı bakış'), 260, scrollable: find.byType(Scrollable).last);
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(find.text('Kaynağa hızlı bakış'), findsOneWidget);
+    await tester.scrollUntilVisible(find.text('Açıkla'), -260, scrollable: find.byType(Scrollable).last);
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(find.text('Açıkla'), findsOneWidget);
+    await tapVisible(tester, find.text('Açıkla'));
+    await pumpUntilFound(tester, find.text('Anlatımımı değerlendir'));
+    expect(find.text('Kendi cümlelerinle anlat'), findsOneWidget);
+    expect(find.textContaining('öğrenme kanıtı veya ustalık iddiası oluşturmaz'), findsOneWidget);
+    expect(find.text('Kaynağına dayalı açıklama'), findsNothing);
+    Navigator.of(tester.element(find.text('Anlatımımı değerlendir'))).pop();
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(find.text('Hatırla'), findsWidgets);
+    expect(find.text('Dinle'), findsOneWidget);
+  });
+
+  testWidgets('Home resumes the most recently studied material, not merely the newest upload', (tester) async {
+    final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
+    addTearDown(store.close);
+    var now = DateTime.utc(2026, 10, 6, 9);
+    final ingest = SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor(), now: () => now);
+    final recall = RecallLearningService(sourceStore: store, learningStore: store.learningTruthStore(), now: () => now);
+    final runtime = AppRuntime(
+      learner: AppRuntime.localM5LearnerFixture,
+      store: store,
+      ingest: ingest,
+      recall: recall,
+      telemetry: store.operationalTelemetry(),
+    );
+
+    const olderId = MaterialId('older-material');
+    await ingest.ingestPastedText(
+      learner: runtime.learner,
+      materialId: olderId,
+      text: 'Eski materyal için yeterince uzun ve anlamlı bir çalışma metni.',
+      sourceName: 'Eski materyal',
+    );
+    now = DateTime.utc(2026, 10, 6, 10);
+    await ingest.ingestPastedText(
+      learner: runtime.learner,
+      materialId: const MaterialId('recent-material'),
+      text: 'Yeni yüklenen materyal için yeterince uzun ve anlamlı bir çalışma metni.',
+      sourceName: 'Yeni materyal',
+    );
+
+    now = DateTime.utc(2026, 10, 6, 11);
+    final prompt = await recall.createCurrentPrompt(learner: runtime.learner, materialId: olderId);
+    final session = await recall.openAttempt(learner: runtime.learner, actionId: prompt.id);
+    final action = await store.learningTruthStore().recallAction(learner: runtime.learner, actionId: prompt.id);
+    await recall.submit(
+      learner: runtime.learner,
+      actionId: prompt.id,
+      attemptId: session.attempt.attemptId,
+      disposition: RecallResponseDisposition.answer,
+      answer: action!.expectedAnswer,
+    );
+
+    await tester.pumpWidget(MaterialApp(home: ProductShellScreen(runtime: runtime)));
+    await pumpUntilFound(tester, find.text('KALDIĞIN MATERYAL'));
+    await tapVisible(tester, find.text('Kaynağa dön'));
+    await pumpUntilFound(tester, find.text('Eski materyal'));
+
+    expect(find.text('Eski materyal'), findsWidgets);
+    expect(find.text('Yeni materyal'), findsNothing);
+  });
+
+  testWidgets('durable Listen checkpoint resumes across Home, Library and Progress without creating mastery', (
+    tester,
+  ) async {
+    final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
+    addTearDown(store.close);
+    var now = DateTime.utc(2026, 10, 6, 9);
+    final ingest = SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor(), now: () => now);
+    final runtime = AppRuntime(
+      learner: AppRuntime.localM5LearnerFixture,
+      store: store,
+      ingest: ingest,
+      recall: RecallLearningService(sourceStore: store, learningStore: store.learningTruthStore()),
+      telemetry: store.operationalTelemetry(),
+    );
+
+    const listenedId = MaterialId('listened-older-material');
+    await ingest.ingestPastedText(
+      learner: runtime.learner,
+      materialId: listenedId,
+      text: List.filled(90, 'Dinlenen eski materyalin kaynak içeriği.').join(' '),
+      sourceName: 'Dinlenen eski materyal',
+    );
+    now = DateTime.utc(2026, 10, 6, 10);
+    await ingest.ingestPastedText(
+      learner: runtime.learner,
+      materialId: const MaterialId('newer-upload-material'),
+      text: 'Daha yeni yüklenen fakat henüz çalışılmayan materyal.',
+      sourceName: 'Yeni yüklenen materyal',
+    );
+
+    final listenedSource = await store.currentSourceVersion(learner: runtime.learner, materialId: listenedId);
+    expect(listenedSource, isNotNull);
+    await store.saveListenResumeChunk(
+      learner: runtime.learner,
+      materialId: listenedId,
+      sourceVersionId: listenedSource!.identity.sourceVersionId,
+      chunkIndex: 1,
+      updatedAt: DateTime.utc(2026, 10, 6, 11),
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: LivingDeskReviewScope(child: ProductShellScreen(runtime: runtime)),
+      ),
+    );
+    await pumpUntilFound(tester, find.text('Dinlemeye devam et'));
+    final activeMaterialCard = find.byKey(const ValueKey('la0040-living-material-open'));
+    expect(find.descendant(of: activeMaterialCard, matching: find.text('Dinlenen eski materyal')), findsOneWidget);
+    expect(find.descendant(of: activeMaterialCard, matching: find.text('Yeni yüklenen materyal')), findsNothing);
+    expect(find.text('Yeni yüklenen materyal'), findsOneWidget);
+
+    await tapVisible(tester, find.text('Dinlemeye devam et'));
+    await pumpUntilFound(tester, find.byType(ListenScreen));
+    expect(find.text('Dinlenen eski materyal'), findsWidgets);
+    await tester.pageBack();
+    await tester.pump(const Duration(milliseconds: 450));
+    await pumpUntilFound(tester, find.text('Kütüphane').hitTestable());
+
+    await tapVisible(tester, find.text('Kütüphane').hitTestable().last);
+    final libraryContinue = find.byKey(ValueKey('library-continue-${listenedId.value}'));
+    await pumpUntilFound(tester, libraryContinue);
+    expect(find.text('Dinlemeye devam et'), findsOneWidget);
+    await tapVisible(tester, libraryContinue);
+    await pumpUntilFound(tester, find.byType(ListenScreen));
+    await tester.pageBack();
+    await tester.pump(const Duration(milliseconds: 450));
+    await pumpUntilFound(tester, find.text('İlerleme').hitTestable());
+
+    await tapVisible(tester, find.text('İlerleme').hitTestable().last);
+    final progressContinue = find.byKey(ValueKey('progress-continue-${listenedId.value}'));
+    await pumpUntilFound(tester, progressContinue);
+    expect(find.text('Henüz ölçülmedi'), findsWidgets);
+    expect(find.textContaining('Dinleme konumun kayıtlı'), findsOneWidget);
+    await tapVisible(tester, progressContinue);
+    await pumpUntilFound(tester, find.byType(ListenScreen));
+  });
+
+  testWidgets('Library deletion removes the selected material and Home falls back safely', (tester) async {
+    final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
+    addTearDown(store.close);
+    var now = DateTime.utc(2026, 10, 6, 11);
+    final ingest = SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor(), now: () => now);
+    final runtime = AppRuntime(
+      learner: AppRuntime.localM5LearnerFixture,
+      store: store,
+      ingest: ingest,
+      recall: RecallLearningService(sourceStore: store, learningStore: store.learningTruthStore()),
+      telemetry: store.operationalTelemetry(),
+    );
+
+    await ingest.ingestPastedText(
+      learner: runtime.learner,
+      materialId: const MaterialId('delete-older'),
+      text: 'Silme sonrası güvenli geri dönüş için eski materyal içeriği.',
+      sourceName: 'Korunacak materyal',
+    );
+    now = DateTime.utc(2026, 10, 6, 12);
+    await ingest.ingestPastedText(
+      learner: runtime.learner,
+      materialId: const MaterialId('delete-recent'),
+      text: 'Silinecek son materyal için yeterince uzun bir çalışma metni.',
+      sourceName: 'Silinecek materyal',
+    );
+
+    await tester.pumpWidget(MaterialApp(home: ProductShellScreen(runtime: runtime)));
+    await pumpUntilFound(tester, find.text('Kütüphane'));
+    await tapVisible(tester, find.text('Kütüphane').last);
+    await pumpUntilFound(tester, find.text('Silinecek materyal'));
+
+    final recentCard = find.ancestor(of: find.text('Silinecek materyal'), matching: find.byType(Card));
+    final deleteButton = find.descendant(of: recentCard, matching: find.byTooltip('Materyali sil'));
+    expect(deleteButton, findsOneWidget);
+    await tapVisible(tester, deleteButton);
+    await pumpUntilFound(tester, find.text('Materyali sil?'));
+    await tapVisible(tester, find.text('Sil'));
+    await pumpUntilFound(tester, find.text('Materyal silindi.'));
+    await pumpUntilGone(tester, find.text('Silinecek materyal'));
+
+    expect(find.text('Silinecek materyal'), findsNothing);
+    expect(find.text('Korunacak materyal'), findsOneWidget);
+    expect(await store.material(learner: runtime.learner, materialId: const MaterialId('delete-recent')), isNull);
+
+    await tapVisible(tester, find.text('Ana Sayfa').last);
+    await pumpUntilFound(tester, find.text('KALDIĞIN MATERYAL'));
+    await tapVisible(tester, find.text('Çalışmaya devam et'));
+    await pumpUntilFound(tester, find.text('Korunacak materyal'));
+    expect(find.text('Korunacak materyal'), findsWidgets);
+  });
+
+  testWidgets('Listen resumes the exact current source from a durable chunk checkpoint', (tester) async {
+    final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
+    addTearDown(store.close);
+    final ingest = SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor());
+    final runtime = AppRuntime(
+      learner: AppRuntime.localM5LearnerFixture,
+      store: store,
+      ingest: ingest,
+      recall: RecallLearningService(sourceStore: store, learningStore: store.learningTruthStore()),
+      telemetry: store.operationalTelemetry(),
+    );
+    final text = List.generate(90, (index) => 'kelime$index').join(' ');
+    await ingest.ingestPastedText(
+      learner: runtime.learner,
+      materialId: const MaterialId('listen-resume'),
+      text: text,
+      sourceName: 'Dinleme devam notu',
+    );
+    final source = await store.currentSourceVersion(
+      learner: runtime.learner,
+      materialId: const MaterialId('listen-resume'),
+    );
+    expect(source, isNotNull);
+    await store.saveListenResumeChunk(
+      learner: runtime.learner,
+      materialId: const MaterialId('listen-resume'),
+      sourceVersionId: source!.identity.sourceVersionId,
+      chunkIndex: 1,
+      updatedAt: DateTime.utc(2026, 10, 7, 8),
+    );
+
+    final speech = _FakeSpeechOutput();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: ListenScreen(runtime: runtime, materialId: const MaterialId('listen-resume'), speechOutput: speech),
+      ),
+    );
+    await pumpUntilFound(tester, find.text('Dinleme devam notu'));
+    expect(find.textContaining('bölüm 2 / 2'), findsOneWidget);
+    await tester.scrollUntilVisible(find.text('Kaldığın yerden dinle'), 240, scrollable: find.byType(Scrollable).last);
+    await tester.pump();
+    expect(find.text('Kaldığın yerden dinle').hitTestable(), findsOneWidget);
+    expect(find.byKey(const ValueKey('listen-source-transcript')), findsOneWidget);
+
+    await tapVisible(tester, find.text('Kaldığın yerden dinle'));
+    await tester.pump();
+    expect(speech.lastText, isNotNull);
+
+    speech.complete();
+    await pumpUntilFound(tester, find.text('Dinlemeye başla'));
+    expect(
+      await store.listenResumeChunk(
+        learner: runtime.learner,
+        materialId: const MaterialId('listen-resume'),
+        sourceVersionId: source.identity.sourceVersionId,
+      ),
+      0,
+    );
+  });
+
+  testWidgets('Quick Recap Listen speaks recap text without overwriting source resume', (tester) async {
+    final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
+    addTearDown(store.close);
+    final ingest = SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor());
+    final runtime = AppRuntime(
+      learner: AppRuntime.localM5LearnerFixture,
+      store: store,
+      ingest: ingest,
+      recall: RecallLearningService(sourceStore: store, learningStore: store.learningTruthStore()),
+      telemetry: store.operationalTelemetry(),
+    );
+    const materialId = MaterialId('listen-recap');
+    final sourceText = List.generate(90, (index) => 'kaynak$index').join(' ');
+    await ingest.ingestPastedText(
+      learner: runtime.learner,
+      materialId: materialId,
+      text: sourceText,
+      sourceName: 'Uzun kaynak notu',
+    );
+    final source = await store.currentSourceVersion(learner: runtime.learner, materialId: materialId);
+    expect(source, isNotNull);
+    await store.saveListenResumeChunk(
+      learner: runtime.learner,
+      materialId: materialId,
+      sourceVersionId: source!.identity.sourceVersionId,
+      chunkIndex: 1,
+      updatedAt: DateTime.utc(2026, 10, 9, 9),
+    );
+
+    const recap = 'Fotosentez ışık enerjisini kimyasal enerjiye dönüştürmeye yardımcı olur.';
+    final speech = _FakeSpeechOutput();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: ListenScreen(
+          runtime: runtime,
+          materialId: materialId,
+          speechOutput: speech,
+          textOverride: recap,
+          titleOverride: 'Quick Recap',
+          persistProgress: false,
+        ),
+      ),
+    );
+    await pumpUntilFound(tester, find.text('Quick Recap'));
+    expect(find.text('Quick Recap özeti'), findsOneWidget);
+    expect(find.text(recap), findsOneWidget);
+    expect(find.textContaining('bölüm 2 / 2'), findsNothing);
+
+    expect(find.text('Dinlemeye başla').hitTestable(), findsOneWidget);
+    await tapVisible(tester, find.text('Dinlemeye başla'));
+    await tester.pump();
+    expect(speech.lastText, recap);
+
+    speech.complete();
+    await tester.pump();
+    expect(
+      await store.listenResumeChunk(
+        learner: runtime.learner,
+        materialId: materialId,
+        sourceVersionId: source.identity.sourceVersionId,
+      ),
+      1,
+    );
+  });
+
+  testWidgets('Progress reports canonical unassessed state without invented mastery', (tester) async {
+    final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
+    addTearDown(store.close);
+    final ingest = SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor());
+    final runtime = AppRuntime(
+      learner: AppRuntime.localM5LearnerFixture,
+      store: store,
+      ingest: ingest,
+      recall: RecallLearningService(sourceStore: store, learningStore: store.learningTruthStore()),
+      telemetry: store.operationalTelemetry(),
+    );
+    await ingest.ingestPastedText(
+      learner: runtime.learner,
+      materialId: AppRuntime.primaryMaterialId,
+      text: 'Aktif kanıt oluşmadan ilerleme ustalık iddiası yapmamalıdır.',
+      sourceName: 'İlerleme notu',
+    );
+
+    await tester.pumpWidget(MaterialApp(home: ProductShellScreen(runtime: runtime)));
+    await pumpUntilFound(tester, find.text('İlerleme'));
+    await tapVisible(tester, find.text('İlerleme').last);
+    await pumpUntilFound(tester, find.text('Henüz ölçülmedi'));
+    expect(find.text('İlerleme notu'), findsOneWidget);
+    expect(find.text('Henüz ölçülmedi'), findsOneWidget);
+    expect(find.textContaining('yapay olarak artırmaz'), findsOneWidget);
+    expect(find.textContaining('%'), findsNothing);
+  });
+
+  testWidgets('Profile shows only verified plan and usage data', (tester) async {
+    final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
+    addTearDown(store.close);
+    final runtime = AppRuntime(
+      learner: AppRuntime.localM5LearnerFixture,
+      store: store,
+      ingest: SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor()),
+      recall: RecallLearningService(sourceStore: store, learningStore: store.learningTruthStore()),
+      telemetry: store.operationalTelemetry(),
+      accountOverview: const _ReadyAccountOverviewGateway(),
+    );
+
+    await tester.pumpWidget(MaterialApp(home: ProductShellScreen(runtime: runtime)));
+    await pumpUntilFound(tester, find.text('Profil'));
+    await tapVisible(tester, find.text('Profil').last);
+    await pumpUntilFound(tester, find.text('Profil ve Ayarlar'));
+
+    expect(find.text('Ücretsiz plan'), findsOneWidget);
+    expect(find.text('Plan etkin'), findsOneWidget);
+    expect(find.text('Kaynağa dayalı açıklama'), findsOneWidget);
+    expect(find.text('3 işlem'), findsOneWidget);
+    expect(find.text('Odak AI yardımı'), findsOneWidget);
+    expect(find.text('2 işlem'), findsOneWidget);
+    expect(find.text('Dil: Türkçe'), findsOneWidget);
+    await tester.scrollUntilVisible(find.text('Cihazın Türkçe sesi'), 260, scrollable: find.byType(Scrollable).last);
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(find.text('Cihazın Türkçe sesi'), findsOneWidget);
+    await tester.scrollUntilVisible(
+      find.textContaining('Hesap silme tüm hesap ve öğrenme verilerini kapsar'),
+      260,
+      scrollable: find.byType(Scrollable).last,
+    );
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(find.textContaining('Hesap silme tüm hesap ve öğrenme verilerini kapsar'), findsOneWidget);
+  });
+
+  testWidgets('Profile fails closed when an active entitlement has an unrecognized plan', (tester) async {
+    final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
+    addTearDown(store.close);
+    final runtime = AppRuntime(
+      learner: AppRuntime.localM5LearnerFixture,
+      store: store,
+      ingest: SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor()),
+      recall: RecallLearningService(sourceStore: store, learningStore: store.learningTruthStore()),
+      telemetry: store.operationalTelemetry(),
+      accountOverview: const _UnverifiedPlanOverviewGateway(),
+    );
+
+    await tester.pumpWidget(MaterialApp(home: ProfileSurface(runtime: runtime)));
+    await pumpUntilFound(tester, find.text('Plan doğrulanamadı'));
+
+    expect(find.text('Plan veya erişim durumu doğrulanamadı'), findsOneWidget);
+    expect(find.text('AKTİF'), findsNothing);
+    expect(find.text('DOĞRULANAMADI'), findsOneWidget);
+  });
+
+  testWidgets('Profile blocks duplicate account deletion while server deletion is pending', (tester) async {
+    usePhoneViewport(tester);
+    final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
+    addTearDown(store.close);
+    final deletion = _RecordingAccountDeletionGateway();
+    final runtime = AppRuntime(
+      learner: AppRuntime.localM5LearnerFixture,
+      store: store,
+      ingest: SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor()),
+      recall: RecallLearningService(sourceStore: store, learningStore: store.learningTruthStore()),
+      telemetry: store.operationalTelemetry(),
+      accountOverview: const _PendingDeletionOverviewGateway(),
+      accountDeletion: deletion,
+    );
+
+    await tester.pumpWidget(MaterialApp(home: ProfileSurface(runtime: runtime)));
+    await pumpUntilFound(tester, find.text('Hesap silme isteği bekliyor'));
+    await tester.scrollUntilVisible(
+      find.text('Silme isteği zaten bekliyor'),
+      260,
+      scrollable: find.byType(Scrollable).last,
+    );
+    await tester.pump(const Duration(milliseconds: 200));
+
+    final destructiveButton = tester.widget<OutlinedButton>(
+      find.widgetWithText(OutlinedButton, 'Silme isteği zaten bekliyor'),
+    );
+    expect(destructiveButton.onPressed, isNull);
+    expect(deletion.calls, 0);
+    expect(find.textContaining('Aynı silme isteğini tekrar göndermiyoruz'), findsOneWidget);
+  });
+
+  testWidgets('Profile hides unknown backend capability and locale keys', (tester) async {
+    usePhoneViewport(tester);
+    final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
+    addTearDown(store.close);
+    final runtime = AppRuntime(
+      learner: AppRuntime.localM5LearnerFixture,
+      store: store,
+      ingest: SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor()),
+      recall: RecallLearningService(sourceStore: store, learningStore: store.learningTruthStore()),
+      telemetry: store.operationalTelemetry(),
+      accountOverview: const _UnknownUsageOverviewGateway(),
+    );
+
+    await tester.pumpWidget(MaterialApp(home: ProfileSurface(runtime: runtime)));
+    await pumpUntilFound(tester, find.text('Diğer kullanım'));
+
+    expect(find.text('internal_future_capability'), findsNothing);
+    expect(find.text('unexpected-locale'), findsNothing);
+    expect(find.text('Diğer kullanım'), findsOneWidget);
+    expect(find.text('7 işlem'), findsOneWidget);
+    expect(find.textContaining('kalan hak veya limit tahmini değildir'), findsOneWidget);
+    expect(find.text('Dil: Doğrulanamadı'), findsOneWidget);
+  });
+
+  testWidgets('Profile exposes configured support contact without inventing one', (tester) async {
+    final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
+    addTearDown(store.close);
+    final runtime = AppRuntime(
+      learner: AppRuntime.localM5LearnerFixture,
+      store: store,
+      ingest: SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor()),
+      recall: RecallLearningService(sourceStore: store, learningStore: store.learningTruthStore()),
+      telemetry: store.operationalTelemetry(),
+      accountOverview: const _ReadyAccountOverviewGateway(),
+    );
+
+    String? copiedSupportEmail;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: ProfileSurface(
+            runtime: runtime,
+            supportEmail: 'destek@example.com',
+            clipboardWriter: (value) async {
+              copiedSupportEmail = value;
+            },
+          ),
+        ),
+      ),
+    );
+    await pumpUntilFound(tester, find.text('Profil ve Ayarlar'));
+    await tester.drag(find.byType(Scrollable).last, const Offset(0, -900));
+    await tester.pump(const Duration(milliseconds: 300));
+
+    expect(find.text('destek@example.com'), findsOneWidget);
+    await tapVisible(tester, find.text('Destek e-postasını kopyala'));
+    await tester.pump(const Duration(milliseconds: 100));
+
+    expect(copiedSupportEmail, 'destek@example.com');
+  });
+
+  testWidgets('Profile keeps support usable when clipboard write fails', (tester) async {
+    final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
+    addTearDown(store.close);
+    final runtime = AppRuntime(
+      learner: AppRuntime.localM5LearnerFixture,
+      store: store,
+      ingest: SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor()),
+      recall: RecallLearningService(sourceStore: store, learningStore: store.learningTruthStore()),
+      telemetry: store.operationalTelemetry(),
+      accountOverview: const _ReadyAccountOverviewGateway(),
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: ProfileSurface(
+            runtime: runtime,
+            supportEmail: 'destek@example.com',
+            clipboardWriter: (_) async => throw StateError('clipboard unavailable'),
+          ),
+        ),
+      ),
+    );
+    await pumpUntilFound(tester, find.text('Profil ve Ayarlar'));
+    await tester.drag(find.byType(Scrollable).last, const Offset(0, -900));
+    await tester.pump(const Duration(milliseconds: 300));
+
+    await tapVisible(tester, find.text('Destek e-postasını kopyala'));
+    await tester.pump(const Duration(milliseconds: 100));
+
+    expect(find.textContaining('Destek e-postası kopyalanamadı'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('Profile fails closed when support contact is not configured', (tester) async {
+    final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
+    addTearDown(store.close);
+    final runtime = AppRuntime(
+      learner: AppRuntime.localM5LearnerFixture,
+      store: store,
+      ingest: SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor()),
+      recall: RecallLearningService(sourceStore: store, learningStore: store.learningTruthStore()),
+      telemetry: store.operationalTelemetry(),
+      accountOverview: const _ReadyAccountOverviewGateway(),
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: ProfileSurface(runtime: runtime, supportEmail: ''),
+      ),
+    );
+    await pumpUntilFound(tester, find.text('Profil ve Ayarlar'));
+    await tester.drag(find.byType(Scrollable).last, const Offset(0, -900));
+    await tester.pump(const Duration(milliseconds: 300));
+
+    expect(find.textContaining('Destek iletişim kanalı henüz yapılandırılmadı'), findsOneWidget);
+    expect(find.text('Destek e-postasını kopyala'), findsNothing);
+  });
+
+  testWidgets('Profile sign out requires confirmation and preserves learner local data', (tester) async {
+    final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
+    addTearDown(store.close);
+    final ingest = SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor());
+    var signOutCalls = 0;
+    final runtime = AppRuntime(
+      learner: AppRuntime.localM5LearnerFixture,
+      store: store,
+      ingest: ingest,
+      recall: RecallLearningService(sourceStore: store, learningStore: store.learningTruthStore()),
+      telemetry: store.operationalTelemetry(),
+      accountOverview: const _ReadyAccountOverviewGateway(),
+    );
+    await ingest.ingestPastedText(
+      learner: runtime.learner,
+      materialId: AppRuntime.primaryMaterialId,
+      text: 'Çıkış yapmak bu learner verisini silmemelidir.',
+      sourceName: 'Korunacak oturum verisi',
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: ProductShellScreen(
+          runtime: runtime,
+          onSignOut: () async {
+            signOutCalls += 1;
+          },
+        ),
+      ),
+    );
+    await pumpUntilFound(tester, find.text('Profil'));
+    await tapVisible(tester, find.text('Profil').last);
+    await pumpUntilFound(tester, find.text('Profil ve Ayarlar'));
+    await tester.drag(find.byType(Scrollable).last, const Offset(0, -420));
+    await tester.pump(const Duration(milliseconds: 300));
+    await tapVisible(tester, find.text('Bu cihazda çıkış yap'));
+    await pumpUntilFound(tester, find.text('Bu cihazda çıkış yap?'));
+
+    expect(signOutCalls, 0);
+    await tapVisible(tester, find.text('Çıkış yap'));
+    await tester.pump(const Duration(milliseconds: 100));
+
+    expect(signOutCalls, 1);
+    expect(await store.material(learner: runtime.learner, materialId: AppRuntime.primaryMaterialId), isNotNull);
+  });
+
+  testWidgets('account deletion requires explicit confirmation and purges local data after remote success', (
+    tester,
+  ) async {
+    final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
+    addTearDown(store.close);
+    final ingest = SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor());
+    final deletion = _RecordingAccountDeletionGateway();
+    var deletedCallback = false;
+    final runtime = AppRuntime(
+      learner: AppRuntime.localM5LearnerFixture,
+      store: store,
+      ingest: ingest,
+      recall: RecallLearningService(sourceStore: store, learningStore: store.learningTruthStore()),
+      telemetry: store.operationalTelemetry(),
+      accountOverview: const _ReadyAccountOverviewGateway(),
+      accountDeletion: deletion,
+    );
+    await ingest.ingestPastedText(
+      learner: runtime.learner,
+      materialId: AppRuntime.primaryMaterialId,
+      text: 'Hesap silme sonrası bu yerel veri kalmamalıdır.',
+      sourceName: 'Silinecek hesap verisi',
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: ProductShellScreen(runtime: runtime, onAccountDeleted: () => deletedCallback = true),
+      ),
+    );
+    await pumpUntilFound(tester, find.text('Profil'));
+    await tapVisible(tester, find.text('Profil').last);
+    await pumpUntilFound(tester, find.text('Profil ve Ayarlar'));
+    await tester.drag(find.byType(Scrollable).last, const Offset(0, -720));
+    await tester.pump(const Duration(milliseconds: 300));
+    await tapVisible(tester, find.text('Hesabımı ve verilerimi sil'));
+    await pumpUntilFound(tester, find.text('Hesabı ve verileri sil?'));
+    await tapVisible(tester, find.text('Devam et'));
+    await pumpUntilFound(tester, find.text('Son onay'));
+    await tapVisible(tester, find.text('Kalıcı olarak sil'));
+
+    for (var i = 0; i < 20 && !deletedCallback; i++) {
+      await tester.pump(const Duration(milliseconds: 20));
+    }
+
+    expect(deletion.calls, 1);
+    expect(deletedCallback, isTrue);
+    expect(await store.activeMaterials(learner: runtime.learner), isEmpty);
+  });
+
+  test('failed remote account deletion preserves local learner data', () async {
+    final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
+    addTearDown(store.close);
+    final ingest = SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor());
+    final runtime = AppRuntime(
+      learner: AppRuntime.localM5LearnerFixture,
+      store: store,
+      ingest: ingest,
+      recall: RecallLearningService(sourceStore: store, learningStore: store.learningTruthStore()),
+      telemetry: store.operationalTelemetry(),
+      accountDeletion: const _FailingAccountDeletionGateway(),
+    );
+    await ingest.ingestPastedText(
+      learner: runtime.learner,
+      materialId: AppRuntime.primaryMaterialId,
+      text: 'Remote silme başarısızsa yerel veri korunmalıdır.',
+    );
+
+    await expectLater(runtime.deleteAccount(), throwsA(isA<AccountDeletionException>()));
+    expect(await store.material(learner: runtime.learner, materialId: AppRuntime.primaryMaterialId), isNotNull);
+  });
+
+  testWidgets('workspace Explain stays active self-explanation and fails closed without evaluator', (tester) async {
+    final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
+    addTearDown(store.close);
+    final ingest = SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor());
+    final runtime = AppRuntime(
+      learner: AppRuntime.localM5LearnerFixture,
+      store: store,
+      ingest: ingest,
+      recall: RecallLearningService(sourceStore: store, learningStore: store.learningTruthStore()),
+      telemetry: store.operationalTelemetry(),
+    );
+    await ingest.ingestPastedText(
+      learner: runtime.learner,
+      materialId: AppRuntime.primaryMaterialId,
+      text: 'Fotosentez ışık enerjisinin kimyasal enerjiye dönüşmesine yardımcı olur.',
+      sourceName: 'Biyoloji notu',
+    );
+
+    await tester.pumpWidget(MaterialApp(home: ProductShellScreen(runtime: runtime)));
+    await pumpUntilFound(tester, find.text('Biyoloji notu'));
+    await tapVisible(tester, find.text('Biyoloji notu').last);
+    await pumpUntilFound(tester, find.text('Açıkla'));
+    await tapVisible(tester, find.text('Açıkla'));
+    await pumpUntilFound(tester, find.text('Anlatımımı değerlendir'));
+
+    expect(find.text('Kendi cümlelerinle anlat'), findsOneWidget);
+    expect(find.text('Kaynağına dayalı açıklama'), findsNothing);
+    expect(find.textContaining('öğrenme kanıtı veya ustalık iddiası oluşturmaz'), findsOneWidget);
+
+    await tester.enterText(find.byType(TextField), 'Fotosentez ışık enerjisini kimyasal enerjiye dönüştürür.');
+    await tapVisible(tester, find.text('Anlatımımı değerlendir'));
+    await pumpUntilFound(tester, find.text('Henüz güvenilir değerlendirme yok'));
+
+    expect(find.textContaining('öğrenme kanıtı olarak kaydetmiyoruz'), findsOneWidget);
+    expect(find.text('Anlatımında temel fikirler görünüyor'), findsNothing);
   });
 
   testWidgets('answer exposure survives close and reopen without becoming independent', (tester) async {
@@ -232,6 +1164,151 @@ void main() {
     expect(find.textContaining('geri çağırma başarısı olarak sayılmadı'), findsOneWidget);
   });
 
+  testWidgets('unknown Recall repairs from the focused source and retries directly', (tester) async {
+    usePhoneViewport(tester);
+    final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
+    addTearDown(store.close);
+    final ingest = SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor());
+    final recall = RecallLearningService(sourceStore: store, learningStore: store.learningTruthStore());
+    final runtime = AppRuntime(
+      learner: AppRuntime.localM5LearnerFixture,
+      store: store,
+      ingest: ingest,
+      recall: recall,
+      telemetry: store.operationalTelemetry(),
+    );
+
+    await ingest.ingestPastedText(
+      learner: runtime.learner,
+      materialId: AppRuntime.primaryMaterialId,
+      text:
+          'Fotosentez sırasında klorofil ışık enerjisini kimyasal enerjiye dönüştürmeye yardımcı olur. '
+          'Bitkiler bu süreçte karbondioksit kullanır ve oksijen açığa çıkarır. '
+          'Mitokondri hücresel solunumla kullanılabilir enerji üretimine katkı sağlar.',
+      sourceName: 'Biyoloji onarım notu',
+    );
+    final prompt = await recall.createCurrentPrompt(learner: runtime.learner, materialId: AppRuntime.primaryMaterialId);
+    final action = await store.learningTruthStore().recallAction(learner: runtime.learner, actionId: prompt.id);
+    expect(action, isNotNull);
+
+    await tester.pumpWidget(testShell(runtime));
+    await pumpUntilFound(tester, find.text('Hatırla'));
+    await tapVisible(tester, find.text('Bilmiyorum'));
+    await pumpUntilFound(tester, find.text('Geri bildirim'));
+    await tapVisible(tester, find.text('Kaynağı gözden geçir'));
+    await pumpUntilFound(tester, find.text('Bu bölümü yeniden kur'));
+
+    expect(find.textContaining(action!.expectedAnswer), findsWidgets);
+    expect(find.bySemanticsLabel('Kaynak bölümü. Çalışılacak cümle vurgulandı.'), findsOneWidget);
+    expect(find.byKey(const ValueKey('atelier-source-trust')), findsOneWidget);
+
+    final retryFromSource = find.byKey(const ValueKey('focused-source-retry'));
+    await tester.pump(const Duration(milliseconds: 450));
+    expect(retryFromSource, findsOneWidget);
+    await tapVisible(tester, retryFromSource);
+    await pumpUntilGone(tester, find.text('Bu bölümü yeniden kur'));
+    await pumpUntilFound(tester, find.text('Hatırla'));
+    expect(find.text('Yanıtla'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('auto-advances the persisted Home next action into focused source repair', (tester) async {
+    usePhoneViewport(tester);
+    final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
+    addTearDown(store.close);
+    final ingest = SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor());
+    final recall = RecallLearningService(sourceStore: store, learningStore: store.learningTruthStore());
+    final runtime = AppRuntime(
+      learner: AppRuntime.localM5LearnerFixture,
+      store: store,
+      ingest: ingest,
+      recall: recall,
+      telemetry: store.operationalTelemetry(),
+    );
+
+    await ingest.ingestPastedText(
+      learner: runtime.learner,
+      materialId: AppRuntime.primaryMaterialId,
+      text:
+          'Fotosentez sırasında klorofil ışık enerjisini kimyasal enerjiye dönüştürmeye yardımcı olur. '
+          'Bitkiler bu süreçte karbondioksit kullanır ve oksijen açığa çıkarır.',
+      sourceName: 'Biyoloji devam notu',
+    );
+
+    await tester.pumpWidget(testShell(runtime));
+    await pumpUntilFound(tester, find.text('Hatırla'));
+    await tapVisible(tester, find.text('Bilmiyorum'));
+    await pumpUntilFound(tester, find.text('Geri bildirim'));
+
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.pump();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: MediaQuery(
+          data: const MediaQueryData(disableAnimations: true),
+          child: LearningSliceScreen(
+            key: const ValueKey('auto-advance-needs-review'),
+            runtime: runtime,
+            autoAdvanceContinuation: true,
+          ),
+        ),
+      ),
+    );
+
+    await pumpUntilFound(tester, find.text('Bu bölümü yeniden kur'));
+    expect(find.text('Kaynağı kapat ve yeniden dene'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('source acquisition asks for one source path before showing the text form', (tester) async {
+    tester.view.physicalSize = const Size(320, 700);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
+    addTearDown(store.close);
+    final runtime = AppRuntime(
+      learner: AppRuntime.localM5LearnerFixture,
+      store: store,
+      ingest: SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor()),
+      recall: RecallLearningService(sourceStore: store, learningStore: store.learningTruthStore()),
+      telemetry: store.operationalTelemetry(),
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: MediaQuery(
+          data: const MediaQueryData(textScaler: TextScaler.linear(1.5), disableAnimations: true),
+          child: LivingDeskReviewScope(child: LearningSliceScreen(runtime: runtime)),
+        ),
+      ),
+    );
+    await pumpUntilFound(tester, find.text('PDF seç'));
+
+    expect(find.text('PDF seç'), findsOneWidget);
+    expect(find.text('Metin yapıştır'), findsOneWidget);
+    expect(find.byKey(const ValueKey('pasted-material-text')), findsNothing);
+
+    await tapVisible(tester, find.text('Metin yapıştır'));
+    await tester.pump();
+
+    expect(find.byKey(const ValueKey('pasted-material-text')), findsOneWidget);
+    expect(find.byKey(const ValueKey('pasted-material-title')), findsNothing);
+    expect(find.text('Başlık ekle · isteğe bağlı'), findsOneWidget);
+    expect(find.text('Metni ekle · çalışma alanını aç'), findsOneWidget);
+
+    await tester.enterText(
+      find.byKey(const ValueKey('pasted-material-text')),
+      'Fotosentez ve ışık. Klorofil, ışık enerjisinin yakalanmasına yardım eder.',
+    );
+    await tapVisible(tester, find.text('Metni ekle · çalışma alanını aç'));
+    await pumpUntilFound(tester, find.text('Hatırla'));
+
+    final material = await store.material(learner: runtime.learner, materialId: AppRuntime.primaryMaterialId);
+    expect(material, isNotNull);
+    expect(material!.title, 'Fotosentez ve ışık');
+  });
+
   testWidgets('Reduced Motion keeps the learning slice usable', (tester) async {
     final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
     addTearDown(store.close);
@@ -254,6 +1331,6 @@ void main() {
     await pumpUntilFound(tester, find.text('Çalışma materyalini ekle'));
 
     expect(find.text('Çalışma materyalini ekle'), findsOneWidget);
-    expect(find.text('Hatırlama başlat'), findsOneWidget);
+    expect(find.text('Kaynağı ekle ve aç'), findsOneWidget);
   });
 }

@@ -67,8 +67,11 @@ void main() {
   test('creating Recall prompt exposes no answer and creates no learning truth', () async {
     final prompt = await recall.createCurrentPrompt(learner: learnerA, materialId: materialId);
 
-    expect(prompt.promptText, contains('_____'));
+    expect(prompt.promptText, startsWith('_____ sırasında'));
     expect(prompt.anchor.startOffset, greaterThanOrEqualTo(0));
+    expect(prompt.ruleVersion, RecallLearningService.promptRuleVersion);
+    final action = await storedAction(prompt);
+    expect(action.expectedAnswer, 'Fotosentez');
 
     final learningStore = sourceStore.learningTruthStore();
     final source = await sourceStore.currentSourceVersion(learner: learnerA, materialId: materialId);
@@ -254,6 +257,36 @@ void main() {
         nextAction: fakeNext,
       ),
       throwsA(isA<LearningTruthConflict>()),
+    );
+  });
+
+  test('Turkish singular concept is accepted for a plural source token', () {
+    expect(
+      RecallTruthPolicy.evaluate(
+        expectedAnswer: 'Ribozomlar',
+        response: 'Ribozom',
+        disposition: RecallResponseDisposition.answer,
+        assistance: RecallAssistance.none,
+      ),
+      RecallOutcome.correct,
+    );
+    expect(
+      RecallTruthPolicy.evaluate(
+        expectedAnswer: 'Bitkiler',
+        response: 'Bitki',
+        disposition: RecallResponseDisposition.answer,
+        assistance: RecallAssistance.hint,
+      ),
+      RecallOutcome.helpedCorrect,
+    );
+    expect(
+      RecallTruthPolicy.evaluate(
+        expectedAnswer: 'Klorofil',
+        response: 'Kloro',
+        disposition: RecallResponseDisposition.answer,
+        assistance: RecallAssistance.none,
+      ),
+      RecallOutcome.incorrect,
     );
   });
 

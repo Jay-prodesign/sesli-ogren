@@ -1,0 +1,83 @@
+name: la0040-visual-capture
+
+on:
+  pull_request:
+    paths:
+      - "app/lib/src/app/companion_view.dart"
+      - "app/lib/src/app/living_study_desk_home.dart"
+      - "app/lib/src/app/atelier_learning_surfaces.dart"
+      - "app/lib/src/app/learning_slice_screen.dart"
+      - "app/lib/src/app/material_workspace_screen.dart"
+      - "app/lib/src/app/listen_screen.dart"
+      - "app/lib/src/app/source_reader_screen.dart"
+      - "app/lib/src/app/account_entry_screen.dart"
+      - "app/test_visual/**"
+      - ".github/workflows/la0040-visual-capture.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  milestone-gate:
+    name: Milestone CI gate
+    runs-on: ubuntu-latest
+    outputs:
+      run_full: ${{ steps.check.outputs.run_full }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+          fetch-depth: 1
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - id: check
+        shell: bash
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ] || git log -1 --pretty=%B | grep -Fq "[visual-ci]"; then
+            echo "run_full=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "run_full=false" >> "$GITHUB_OUTPUT"
+            echo "Skipping visual capture unless this is a visual milestone."
+          fi
+
+  capture:
+    needs: milestone-gate
+    if: needs.milestone-gate.outputs.run_full == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: app
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - id: flutter_pin
+        working-directory: .
+        shell: bash
+        run: |
+          version="$(tr -d '[:space:]' < .flutter-version)"
+          test -n "$version"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
+        with:
+          channel: stable
+          flutter-version: ${{ steps.flutter_pin.outputs.version }}
+          cache: true
+          pub-cache: true
+      - name: Install deterministic screenshot font
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y fonts-dejavu-core
+      - run: flutter pub get
+      - name: Render 390x844 visual review frames
+        run: flutter test --update-goldens test_visual --reporter expanded
+      - name: Upload review frames
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: la0040-visual-390x844
+          path: app/test_visual/goldens/*.png
+          if-no-files-found: warn
+          retention-days: 7

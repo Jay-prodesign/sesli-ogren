@@ -1,10 +1,20 @@
+import '../account/account_deletion_gateway.dart';
+import '../account/account_overview_gateway.dart';
+import '../account/supabase_account_deletion_gateway.dart';
+import '../account/supabase_account_overview_gateway.dart';
 import '../data/operational_telemetry.dart';
 import '../data/pdf_text_extractor.dart';
 import '../data/source_ingest_service.dart';
 import '../data/sqlite_source_store.dart';
 import '../domain/authenticated_learner.dart';
 import '../domain/learning_contracts.dart';
+import '../learning/explain_back_gateway.dart';
+import '../learning/focus_help_gateway.dart';
 import '../learning/recall_learning_service.dart';
+import '../learning/supabase_explain_back_gateway.dart';
+import '../learning/supabase_focus_help_gateway.dart';
+import '../generation/grounded_explain_gateway.dart';
+import '../generation/supabase_grounded_explain_gateway.dart';
 
 class AppRuntime {
   AppRuntime({
@@ -13,6 +23,11 @@ class AppRuntime {
     required this.ingest,
     required this.recall,
     required this.telemetry,
+    this.explain = const UnavailableGroundedExplainGateway(),
+    this.explainBack = const UnavailableExplainBackGateway(),
+    this.focusHelp = const UnavailableFocusHelpGateway(),
+    this.accountOverview = const UnavailableAccountOverviewGateway(),
+    this.accountDeletion = const UnavailableAccountDeletionGateway(),
   });
 
   /// Explicit M5 fixture only. It is not a production authentication claim.
@@ -20,11 +35,19 @@ class AppRuntime {
 
   static const primaryMaterialId = MaterialId('m5-primary-material');
 
+  MaterialId newMaterialId() =>
+      MaterialId('material_${DateTime.now().toUtc().microsecondsSinceEpoch}_${learner.id.value.hashCode.abs()}');
+
   final AuthenticatedLearner learner;
   final SqliteSourceStore store;
   final SourceIngestService ingest;
   final RecallLearningService recall;
   final OperationalTelemetry telemetry;
+  final GroundedExplainGateway explain;
+  final ExplainBackGateway explainBack;
+  final FocusHelpGateway focusHelp;
+  final AccountOverviewGateway accountOverview;
+  final AccountDeletionGateway accountDeletion;
 
   static Future<AppRuntime> open({required AuthenticatedLearner learner}) async {
     final store = await SqliteSourceStore.open();
@@ -36,7 +59,17 @@ class AppRuntime {
       ingest: ingest,
       recall: recall,
       telemetry: store.operationalTelemetry(),
+      explain: const SupabaseGroundedExplainGateway(),
+      explainBack: const SupabaseExplainBackGateway(),
+      focusHelp: const SupabaseFocusHelpGateway(),
+      accountOverview: const SupabaseAccountOverviewGateway(),
+      accountDeletion: const SupabaseAccountDeletionGateway(),
     );
+  }
+
+  Future<void> deleteAccount() async {
+    await accountDeletion.deleteAccount(learner: learner);
+    await store.purgeLearnerData(learner: learner);
   }
 
   Future<void> close() => store.close();

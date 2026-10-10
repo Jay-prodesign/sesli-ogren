@@ -36,7 +36,7 @@ class SqliteSourceStore implements SourceStore {
     final database = await selectedFactory.openDatabase(
       databasePath,
       options: OpenDatabaseOptions(
-        version: 6,
+        version: 13,
         onConfigure: (db) => db.execute('PRAGMA foreign_keys = ON'),
         onUpgrade: (db, oldVersion, newVersion) async {
           if (oldVersion < 2) {
@@ -53,6 +53,27 @@ class SqliteSourceStore implements SourceStore {
           }
           if (oldVersion < 6) {
             await _upgradeActiveRecallAttemptSchema(db);
+          }
+          if (oldVersion < 7) {
+            await _upgradeListenProgressSchema(db);
+          }
+          if (oldVersion < 8) {
+            await _upgradeLearnerPreferencesSchema(db);
+          }
+          if (oldVersion < 9) {
+            await _upgradeSummaryJobsSchema(db);
+          }
+          if (oldVersion < 10) {
+            await _upgradeSummaryCacheSchema(db);
+          }
+          if (oldVersion < 11) {
+            await _upgradeServerMaterialBindingSchema(db);
+          }
+          if (oldVersion < 12) {
+            await _upgradeListenRatePreferenceSchema(db);
+          }
+          if (oldVersion < 13) {
+            await _upgradeReaderProgressSchema(db);
           }
         },
         onCreate: (db, version) async {
@@ -233,6 +254,47 @@ CREATE TABLE active_recall_attempts (
 )
 ''');
           await db.execute('''
+CREATE TABLE listen_progress (
+  learner_id TEXT NOT NULL,
+  material_id TEXT NOT NULL,
+  source_version_id TEXT NOT NULL,
+  chunk_index INTEGER NOT NULL,
+  updated_at_utc TEXT NOT NULL,
+  PRIMARY KEY (learner_id, material_id),
+  FOREIGN KEY (learner_id, source_version_id)
+    REFERENCES source_versions (learner_id, source_version_id)
+    ON DELETE CASCADE,
+  CHECK (chunk_index >= 0)
+)
+''');
+          await db.execute('''
+CREATE TABLE reader_progress (
+  learner_id TEXT NOT NULL,
+  material_id TEXT NOT NULL,
+  source_version_id TEXT NOT NULL,
+  progress REAL NOT NULL,
+  updated_at_utc TEXT NOT NULL,
+  PRIMARY KEY (learner_id, material_id),
+  FOREIGN KEY (learner_id, source_version_id)
+    REFERENCES source_versions (learner_id, source_version_id)
+    ON DELETE CASCADE,
+  CHECK (progress >= 0.0 AND progress <= 1.0)
+)
+''');
+          await db.execute('''
+CREATE TABLE learner_preferences (
+  learner_id TEXT PRIMARY KEY,
+  onboarding_completed INTEGER NOT NULL DEFAULT 0,
+  listen_rate REAL NOT NULL DEFAULT 1.0,
+  updated_at_utc TEXT NOT NULL,
+  CHECK (onboarding_completed IN (0, 1)),
+  CHECK (listen_rate >= 0.75 AND listen_rate <= 1.5)
+)
+''');
+          await _upgradeSummaryJobsSchema(db);
+          await _upgradeSummaryCacheSchema(db);
+          await _upgradeServerMaterialBindingSchema(db);
+          await db.execute('''
 CREATE TABLE operational_events (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   learner_id TEXT NOT NULL,
@@ -292,6 +354,238 @@ ON extracted_contents (learner_id, source_version_id, invalidated_at_utc)
     return SqliteSourceStore._(database);
   }
 
+  static Future<void> _upgradeSummaryJobsSchema(Database db) async {
+    await db.execute('''
+CREATE TABLE IF NOT EXISTS summary_jobs (
+  learner_id TEXT NOT NULL,
+  material_id TEXT NOT NULL,
+  source_version_id TEXT NOT NULL,
+  server_material_id TEXT NOT NULL,
+  job_id TEXT NOT NULL,
+  summary_text TEXT,
+  key_points_json TEXT,
+  summary_cached_at_utc TEXT,
+  PRIMARY KEY (learner_id, material_id),
+  FOREIGN KEY (learner_id, material_id)
+    REFERENCES materials (learner_id, material_id) ON DELETE CASCADE
+)
+''');
+  }
+
+  static Future<void> _upgradeSummaryCacheSchema(Database db) async {
+    final columns = await db.rawQuery('PRAGMA table_info(summary_jobs)');
+    final names = columns.map((row) => row['name'] as String).toSet();
+
+    Future<void> add(String name, String sql) async {
+      if (!names.contains(name)) {
+        await db.execute(sql);
+      }
+    }
+
+    await add('summary_text', 'ALTER TABLE summary_jobs ADD COLUMN summary_text TEXT');
+    await add('key_points_json', 'ALTER TABLE summary_jobs ADD COLUMN key_points_json TEXT');
+    await add('summary_cached_at_utc', 'ALTER TABLE summary_jobs ADD COLUMN summary_cached_at_utc TEXT');
+  }
+
+  static Future<void> _upgradeServerMaterialBindingSchema(Database db) async {
+    await db.execute('''
+CREATE TABLE IF NOT EXISTS server_material_bindings (
+  learner_id TEXT NOT NULL,
+  material_id TEXT NOT NULL,
+  source_version_id TEXT NOT NULL,
+  server_material_id TEXT NOT NULL,
+  PRIMARY KEY (learner_id, material_id),
+  FOREIGN KEY (learner_id, material_id)
+    REFERENCES materials (learner_id, material_id) ON DELETE CASCADE,
+  FOREIGN KEY (learner_id, source_version_id)
+    REFERENCES source_versions (learner_id, source_version_id) ON DELETE CASCADE
+)
+''');
+
+    final prerequisiteTables = await db.rawQuery(
+      "SELECT name FROM sqlite_master WHERE type = 'table' "
+      "AND name IN ('materials', 'source_versions', 'summary_jobs')",
+    );
+    final prerequisiteNames = prerequisiteTables.map((row) => row['name'] as String).toSet();
+    if (!prerequisiteNames.containsAll({'materials', 'source_versions', 'summary_jobs'})) {
+      return;
+    }
+
+    await db.execute('''
+INSERT OR REPLACE INTO server_material_bindings (
+  learner_id,
+  material_id,
+  source_version_id,
+  server_material_id
+)
+SELECT learner_id, material_id, source_version_id, server_material_id
+FROM summary_jobs
+''');
+  }
+
+  Future<String?> summaryJobId({
+    required AuthenticatedLearner learner,
+    required MaterialId materialId,
+    required SourceVersionId sourceVersionId,
+  }) async {
+    final rows = await _database.query(
+      'summary_jobs',
+      columns: ['job_id'],
+      where: 'learner_id = ? AND material_id = ? AND source_version_id = ?',
+      whereArgs: [learner.id.value, materialId.value, sourceVersionId.value],
+      limit: 1,
+    );
+    return rows.isEmpty ? null : rows.first['job_id']! as String;
+  }
+
+  Future<String?> summaryServerMaterialId({
+    required AuthenticatedLearner learner,
+    required MaterialId materialId,
+    SourceVersionId? sourceVersionId,
+  }) async {
+    final where = sourceVersionId == null
+        ? 'learner_id = ? AND material_id = ?'
+        : 'learner_id = ? AND material_id = ? AND source_version_id = ?';
+    final whereArgs = sourceVersionId == null
+        ? <Object?>[learner.id.value, materialId.value]
+        : <Object?>[learner.id.value, materialId.value, sourceVersionId.value];
+
+    final bindings = await _database.query(
+      'server_material_bindings',
+      columns: ['server_material_id'],
+      where: where,
+      whereArgs: whereArgs,
+      limit: 1,
+    );
+    if (bindings.isNotEmpty) return bindings.first['server_material_id']! as String;
+
+    final legacyRows = await _database.query(
+      'summary_jobs',
+      columns: ['server_material_id'],
+      where: where,
+      whereArgs: whereArgs,
+      limit: 1,
+    );
+    return legacyRows.isEmpty ? null : legacyRows.first['server_material_id']! as String;
+  }
+
+  Future<void> saveServerMaterialBinding({
+    required AuthenticatedLearner learner,
+    required MaterialId materialId,
+    required SourceVersionId sourceVersionId,
+    required String serverMaterialId,
+  }) async {
+    await _database.insert('server_material_bindings', {
+      'learner_id': learner.id.value,
+      'material_id': materialId.value,
+      'source_version_id': sourceVersionId.value,
+      'server_material_id': serverMaterialId,
+    }, conflictAlgorithm: ConflictAlgorithm.replace);
+  }
+
+  Future<CachedSummaryResult?> cachedSummaryResult({
+    required AuthenticatedLearner learner,
+    required MaterialId materialId,
+    required SourceVersionId sourceVersionId,
+  }) async {
+    final rows = await _database.query(
+      'summary_jobs',
+      columns: ['summary_text', 'key_points_json', 'summary_cached_at_utc'],
+      where: 'learner_id = ? AND material_id = ? AND source_version_id = ?',
+      whereArgs: [learner.id.value, materialId.value, sourceVersionId.value],
+      limit: 1,
+    );
+    if (rows.isEmpty) return null;
+
+    final row = rows.first;
+    final summary = row['summary_text'] as String?;
+    final keyPointsJson = row['key_points_json'] as String?;
+    final cachedAtRaw = row['summary_cached_at_utc'] as String?;
+    if (summary == null || summary.trim().isEmpty || keyPointsJson == null || cachedAtRaw == null) {
+      return null;
+    }
+
+    try {
+      final decoded = jsonDecode(keyPointsJson);
+      final cachedAt = DateTime.tryParse(cachedAtRaw);
+      if (decoded is! List || decoded.any((value) => value is! String) || cachedAt == null) {
+        return null;
+      }
+      return CachedSummaryResult(summary: summary, keyPoints: decoded.cast<String>(), cachedAt: cachedAt.toUtc());
+    } catch (_) {
+      return null;
+    }
+  }
+
+  Future<bool> saveCachedSummaryResult({
+    required AuthenticatedLearner learner,
+    required MaterialId materialId,
+    required SourceVersionId sourceVersionId,
+    required String jobId,
+    required String summary,
+    required List<String> keyPoints,
+    required DateTime cachedAt,
+  }) async {
+    final normalizedSummary = summary.trim();
+    if (normalizedSummary.isEmpty) return false;
+    final normalizedPoints = keyPoints.map((point) => point.trim()).where((point) => point.isNotEmpty).toList();
+
+    final changed = await _database.update(
+      'summary_jobs',
+      {
+        'summary_text': normalizedSummary,
+        'key_points_json': jsonEncode(normalizedPoints),
+        'summary_cached_at_utc': cachedAt.toUtc().toIso8601String(),
+      },
+      where: 'learner_id = ? AND material_id = ? AND source_version_id = ? AND job_id = ?',
+      whereArgs: [learner.id.value, materialId.value, sourceVersionId.value, jobId],
+    );
+    return changed == 1;
+  }
+
+  Future<void> clearSummaryJob({required AuthenticatedLearner learner, required MaterialId materialId}) async {
+    await _database.delete(
+      'summary_jobs',
+      where: 'learner_id = ? AND material_id = ?',
+      whereArgs: [learner.id.value, materialId.value],
+    );
+  }
+
+  Future<void> clearServerMaterialBinding({
+    required AuthenticatedLearner learner,
+    required MaterialId materialId,
+  }) async {
+    await _database.delete(
+      'server_material_bindings',
+      where: 'learner_id = ? AND material_id = ?',
+      whereArgs: [learner.id.value, materialId.value],
+    );
+  }
+
+  Future<void> saveSummaryJob({
+    required AuthenticatedLearner learner,
+    required MaterialId materialId,
+    required SourceVersionId sourceVersionId,
+    required String serverMaterialId,
+    required String jobId,
+  }) async {
+    await _database.transaction((transaction) async {
+      await transaction.insert('server_material_bindings', {
+        'learner_id': learner.id.value,
+        'material_id': materialId.value,
+        'source_version_id': sourceVersionId.value,
+        'server_material_id': serverMaterialId,
+      }, conflictAlgorithm: ConflictAlgorithm.replace);
+      await transaction.insert('summary_jobs', {
+        'learner_id': learner.id.value,
+        'material_id': materialId.value,
+        'source_version_id': sourceVersionId.value,
+        'server_material_id': serverMaterialId,
+        'job_id': jobId,
+      }, conflictAlgorithm: ConflictAlgorithm.replace);
+    });
+  }
+
   static Future<void> _upgradeActiveRecallAttemptSchema(Database db) async {
     await db.execute('''
 CREATE TABLE IF NOT EXISTS active_recall_attempts (
@@ -308,6 +602,71 @@ CREATE TABLE IF NOT EXISTS active_recall_attempts (
     ON DELETE CASCADE
 )
 ''');
+  }
+
+  static Future<void> _upgradeListenProgressSchema(Database db) async {
+    await db.execute('''
+CREATE TABLE IF NOT EXISTS listen_progress (
+  learner_id TEXT NOT NULL,
+  material_id TEXT NOT NULL,
+  source_version_id TEXT NOT NULL,
+  chunk_index INTEGER NOT NULL,
+  updated_at_utc TEXT NOT NULL,
+  PRIMARY KEY (learner_id, material_id),
+  FOREIGN KEY (learner_id, source_version_id)
+    REFERENCES source_versions (learner_id, source_version_id)
+    ON DELETE CASCADE,
+  CHECK (chunk_index >= 0)
+)
+''');
+  }
+
+  static Future<void> _upgradeReaderProgressSchema(Database db) async {
+    await db.execute('''
+CREATE TABLE IF NOT EXISTS reader_progress (
+  learner_id TEXT NOT NULL,
+  material_id TEXT NOT NULL,
+  source_version_id TEXT NOT NULL,
+  progress REAL NOT NULL,
+  updated_at_utc TEXT NOT NULL,
+  PRIMARY KEY (learner_id, material_id),
+  FOREIGN KEY (learner_id, source_version_id)
+    REFERENCES source_versions (learner_id, source_version_id)
+    ON DELETE CASCADE,
+  CHECK (progress >= 0.0 AND progress <= 1.0)
+)
+''');
+  }
+
+  static Future<void> _upgradeLearnerPreferencesSchema(Database db) async {
+    await db.execute('''
+CREATE TABLE IF NOT EXISTS learner_preferences (
+  learner_id TEXT PRIMARY KEY,
+  onboarding_completed INTEGER NOT NULL DEFAULT 0,
+  listen_rate REAL NOT NULL DEFAULT 1.0,
+  updated_at_utc TEXT NOT NULL,
+  CHECK (onboarding_completed IN (0, 1)),
+  CHECK (listen_rate >= 0.75 AND listen_rate <= 1.5)
+)
+''');
+  }
+
+  static Future<void> _upgradeListenRatePreferenceSchema(Database db) async {
+    final columns = await db.rawQuery('PRAGMA table_info(learner_preferences)');
+    if (columns.isEmpty) {
+      // Recover safely from legacy/partial databases whose earlier migration
+      // did not create the preferences table; preserve all other user data.
+      await _upgradeLearnerPreferencesSchema(db);
+      return;
+    }
+    final hasListenRate = columns.any((column) => column['name'] == 'listen_rate');
+    if (!hasListenRate) {
+      await db.execute(
+        'ALTER TABLE learner_preferences '
+        'ADD COLUMN listen_rate REAL NOT NULL DEFAULT 1.0 '
+        'CHECK (listen_rate >= 0.75 AND listen_rate <= 1.5)',
+      );
+    }
   }
 
   static Future<void> _upgradeOperationalTelemetrySchema(Database db) async {
@@ -563,6 +922,17 @@ JOIN learner_evidence e
   }
 
   @override
+  Future<List<MaterialRecord>> activeMaterials({required AuthenticatedLearner learner}) async {
+    final rows = await _database.query(
+      'materials',
+      where: 'learner_id = ? AND lifecycle_status = ? AND deleted_at_utc IS NULL',
+      whereArgs: [learner.id.value, MaterialLifecycleStatus.active.name],
+      orderBy: 'updated_at_utc DESC, material_id ASC',
+    );
+    return rows.map(_materialFromRow).toList(growable: false);
+  }
+
+  @override
   Future<SourceVersionRecord?> currentSourceVersion({
     required AuthenticatedLearner learner,
     required MaterialId materialId,
@@ -628,6 +998,115 @@ LIMIT 1
       limit: 1,
     );
     return rows.isEmpty ? null : _extractedFromRow(rows.single);
+  }
+
+  @override
+  Future<int> listenResumeChunk({
+    required AuthenticatedLearner learner,
+    required MaterialId materialId,
+    required SourceVersionId sourceVersionId,
+  }) async {
+    final rows = await _database.query(
+      'listen_progress',
+      columns: ['chunk_index'],
+      where: 'learner_id = ? AND material_id = ? AND source_version_id = ?',
+      whereArgs: [learner.id.value, materialId.value, sourceVersionId.value],
+      limit: 1,
+    );
+    return rows.isEmpty ? 0 : rows.single['chunk_index']! as int;
+  }
+
+  @override
+  Future<DateTime?> listenResumeUpdatedAt({
+    required AuthenticatedLearner learner,
+    required MaterialId materialId,
+    required SourceVersionId sourceVersionId,
+  }) async {
+    final rows = await _database.query(
+      'listen_progress',
+      columns: ['updated_at_utc'],
+      where: 'learner_id = ? AND material_id = ? AND source_version_id = ?',
+      whereArgs: [learner.id.value, materialId.value, sourceVersionId.value],
+      limit: 1,
+    );
+    if (rows.isEmpty) return null;
+    final raw = rows.single['updated_at_utc'];
+    return raw is String ? DateTime.parse(raw).toUtc() : null;
+  }
+
+  @override
+  Future<void> saveListenResumeChunk({
+    required AuthenticatedLearner learner,
+    required MaterialId materialId,
+    required SourceVersionId sourceVersionId,
+    required int chunkIndex,
+    required DateTime updatedAt,
+  }) async {
+    if (chunkIndex < 0) {
+      throw ArgumentError.value(chunkIndex, 'chunkIndex', 'must be non-negative');
+    }
+    await _database.insert('listen_progress', {
+      'learner_id': learner.id.value,
+      'material_id': materialId.value,
+      'source_version_id': sourceVersionId.value,
+      'chunk_index': chunkIndex,
+      'updated_at_utc': updatedAt.toUtc().toIso8601String(),
+    }, conflictAlgorithm: ConflictAlgorithm.replace);
+  }
+
+  @override
+  Future<double> readerResumeProgress({
+    required AuthenticatedLearner learner,
+    required MaterialId materialId,
+    required SourceVersionId sourceVersionId,
+  }) async {
+    final rows = await _database.query(
+      'reader_progress',
+      columns: ['progress'],
+      where: 'learner_id = ? AND material_id = ? AND source_version_id = ?',
+      whereArgs: [learner.id.value, materialId.value, sourceVersionId.value],
+      limit: 1,
+    );
+    if (rows.isEmpty) return 0;
+    return (rows.single['progress']! as num).toDouble().clamp(0.0, 1.0);
+  }
+
+  @override
+  Future<DateTime?> readerResumeUpdatedAt({
+    required AuthenticatedLearner learner,
+    required MaterialId materialId,
+    required SourceVersionId sourceVersionId,
+  }) async {
+    final rows = await _database.query(
+      'reader_progress',
+      columns: ['updated_at_utc'],
+      where: 'learner_id = ? AND material_id = ? AND source_version_id = ?',
+      whereArgs: [learner.id.value, materialId.value, sourceVersionId.value],
+      limit: 1,
+    );
+    if (rows.isEmpty) return null;
+    final raw = rows.single['updated_at_utc'];
+    return raw is String ? DateTime.parse(raw).toUtc() : null;
+  }
+
+  @override
+  Future<void> saveReaderResumeProgress({
+    required AuthenticatedLearner learner,
+    required MaterialId materialId,
+    required SourceVersionId sourceVersionId,
+    required double progress,
+    required DateTime updatedAt,
+  }) async {
+    if (!progress.isFinite || progress < 0 || progress > 1) {
+      throw ArgumentError.value(progress, 'progress', 'must be finite and between 0 and 1');
+    }
+    await _database.insert('reader_progress', {
+      'learner_id': learner.id.value,
+      'material_id': materialId.value,
+      'source_version_id': sourceVersionId.value,
+      'progress': progress,
+      'updated_at_utc': updatedAt.toUtc().toIso8601String(),
+    }, conflictAlgorithm: ConflictAlgorithm.replace);
   }
 
   @override
@@ -753,6 +1232,22 @@ LIMIT 1
         );
       }
 
+      if (previousSourceId != null) {
+        // Passive resume positions describe the superseded source, not the material
+        // abstractly. Remove them when the authoritative source changes so a new
+        // source can never inherit an old Reader/Listen position.
+        await transaction.delete(
+          'listen_progress',
+          where: 'learner_id = ? AND material_id = ?',
+          whereArgs: [learner.id.value, material.id.value],
+        );
+        await transaction.delete(
+          'reader_progress',
+          where: 'learner_id = ? AND material_id = ?',
+          whereArgs: [learner.id.value, material.id.value],
+        );
+      }
+
       await transaction.delete(
         'active_recall_attempts',
         where: 'learner_id = ? AND material_id = ?',
@@ -823,7 +1318,22 @@ LIMIT 1
       }
 
       await transaction.delete(
+        'summary_jobs',
+        where: 'learner_id = ? AND material_id = ?',
+        whereArgs: [learner.id.value, materialId.value],
+      );
+      await transaction.delete(
+        'server_material_bindings',
+        where: 'learner_id = ? AND material_id = ?',
+        whereArgs: [learner.id.value, materialId.value],
+      );
+      await transaction.delete(
         'active_recall_attempts',
+        where: 'learner_id = ? AND material_id = ?',
+        whereArgs: [learner.id.value, materialId.value],
+      );
+      await transaction.delete(
+        'listen_progress',
         where: 'learner_id = ? AND material_id = ?',
         whereArgs: [learner.id.value, materialId.value],
       );
@@ -860,6 +1370,85 @@ LIMIT 1
         where: 'learner_id = ? AND material_id = ? AND revoked_at_utc IS NULL',
         whereArgs: [learner.id.value, materialId.value],
       );
+    });
+  }
+
+  Future<bool> onboardingCompleted({required AuthenticatedLearner learner}) async {
+    final rows = await _database.query(
+      'learner_preferences',
+      columns: ['onboarding_completed'],
+      where: 'learner_id = ?',
+      whereArgs: [learner.id.value],
+      limit: 1,
+    );
+    if (rows.isEmpty) return false;
+    return rows.single['onboarding_completed'] == 1;
+  }
+
+  Future<void> markOnboardingCompleted({required AuthenticatedLearner learner, required DateTime updatedAt}) async {
+    await _database.rawInsert(
+      '''
+INSERT INTO learner_preferences (learner_id, onboarding_completed, updated_at_utc)
+VALUES (?, 1, ?)
+ON CONFLICT(learner_id) DO UPDATE SET
+  onboarding_completed = 1,
+  updated_at_utc = excluded.updated_at_utc
+''',
+      [learner.id.value, updatedAt.toUtc().toIso8601String()],
+    );
+  }
+
+  Future<double> listenRate({required AuthenticatedLearner learner}) async {
+    final rows = await _database.query(
+      'learner_preferences',
+      columns: ['listen_rate'],
+      where: 'learner_id = ?',
+      whereArgs: [learner.id.value],
+      limit: 1,
+    );
+    if (rows.isEmpty) return 1.0;
+    final raw = rows.single['listen_rate'];
+    if (raw is! num) return 1.0;
+    final value = raw.toDouble();
+    return const <double>[0.75, 1.0, 1.25, 1.5].contains(value) ? value : 1.0;
+  }
+
+  Future<void> saveListenRate({
+    required AuthenticatedLearner learner,
+    required double rate,
+    required DateTime updatedAt,
+  }) async {
+    if (!const <double>[0.75, 1.0, 1.25, 1.5].contains(rate)) {
+      throw ArgumentError.value(rate, 'rate', 'Unsupported listening rate.');
+    }
+    await _database.rawInsert(
+      '''
+INSERT INTO learner_preferences (learner_id, listen_rate, updated_at_utc)
+VALUES (?, ?, ?)
+ON CONFLICT(learner_id) DO UPDATE SET
+  listen_rate = excluded.listen_rate,
+  updated_at_utc = excluded.updated_at_utc
+''',
+      [learner.id.value, rate, updatedAt.toUtc().toIso8601String()],
+    );
+  }
+
+  @override
+  Future<void> purgeLearnerData({required AuthenticatedLearner learner}) {
+    return _database.transaction((transaction) async {
+      final id = learner.id.value;
+      await transaction.delete('learner_preferences', where: 'learner_id = ?', whereArgs: [id]);
+      await transaction.delete('active_recall_attempts', where: 'learner_id = ?', whereArgs: [id]);
+      await transaction.delete('recall_attempt_support', where: 'learner_id = ?', whereArgs: [id]);
+      await transaction.delete('next_learning_actions', where: 'learner_id = ?', whereArgs: [id]);
+      await transaction.delete('learner_states', where: 'learner_id = ?', whereArgs: [id]);
+      await transaction.delete('learner_evidence', where: 'learner_id = ?', whereArgs: [id]);
+      await transaction.delete('recall_actions', where: 'learner_id = ?', whereArgs: [id]);
+      await transaction.delete('listen_progress', where: 'learner_id = ?', whereArgs: [id]);
+      await transaction.delete('extracted_contents', where: 'learner_id = ?', whereArgs: [id]);
+      await transaction.delete('source_versions', where: 'learner_id = ?', whereArgs: [id]);
+      await transaction.delete('materials', where: 'learner_id = ?', whereArgs: [id]);
+      await transaction.delete('operational_events', where: 'learner_id = ?', whereArgs: [id]);
     });
   }
 
@@ -1848,4 +2437,12 @@ class SqliteOperationalTelemetry implements OperationalTelemetry {
         })
         .toList(growable: false);
   }
+}
+
+class CachedSummaryResult {
+  const CachedSummaryResult({required this.summary, required this.keyPoints, required this.cachedAt});
+
+  final String summary;
+  final List<String> keyPoints;
+  final DateTime cachedAt;
 }

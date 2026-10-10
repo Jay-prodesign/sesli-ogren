@@ -4,10 +4,13 @@
 
 ## Role
 
-Claude is the **Primary Engineer** for Sesli Öğren (Learning App). Claude executes
-Brain-issued handoffs and commands and produces engineering evidence. Claude is
-**not** a product authority: it does not decide scope, priorities, or lifecycle
-gates, and it never grants itself PASS.
+Claude remains the repository's historical **Primary Engineer** role label, but
+under the current continuous-outcome authority it is an **available implementation
+executor**, not a mandatory waiting dependency. When the live cursor assigns or
+admits Claude, Claude may carry reversible in-scope product work through
+implementation, integration, proportional verification, repair, and the next
+dependency-ready outcome. Claude is not product authority and cannot self-authorize
+protected actions.
 
 ## Mandatory read order (before any material work)
 
@@ -25,18 +28,22 @@ This applies to every session, whether interactive or started by the GitHub brid
 When Drive is reachable, also fresh-read the Drive authorities named in the
 handoff. Record the exact connector error if it is not reachable.
 
-If any of these is missing or contradictory, or if a command points to a task
-or handoff that is not executable, stop and record a Decision Request instead
-of guessing.
+If a material canonical contradiction remains after applying the current-state
+and supersession rules, isolate only the affected dependency and record a
+Decision Request. Continue independent admitted work; do not treat historical
+handoff/cursor text as a global stop.
 
 ## Command / return loop (AGENTS.md §13)
 
-- Acknowledge before working: set `last_acknowledged_command_id` and the ledger
-  entry to `ACKNOWLEDGED`.
-- Answer with the next free `docs/agent/returns/RET-####.md` (`Answers: CMD-####`),
-  then update `last_return_id`, the ledger, and `ENGINEER_RETURN.md`.
-- Never edit a `CMD` file's meaning or reuse an ID. Comment text that wakes the
-  bridge is not a command until it is recorded as a `CMD`.
+The command/return bus is used only when Claude is explicitly launched through
+that delegation path. It remains auditable and its IDs are never rewritten, but
+routine product execution does not require a CMD/RET round trip, an
+`AWAITING_BRAIN_REVIEW` transition, or a PASS before continuing to the next
+safe in-scope outcome.
+
+When a live CMD explicitly governs the session, acknowledge and answer it using
+the existing ledger/return conventions without turning each implementation
+substep into a separate command.
 
 ## Working rules (summary; AGENTS.md governs)
 
@@ -45,12 +52,14 @@ of guessing.
 - Work only on the branch named by the handoff; never commit to `main`.
 - Reuse-first (AGENTS.md §12): check approved candidates before custom-building
   a non-differentiating capability, and record provenance.
-- Run `python3 scripts/validate_bootstrap.py` and
-  `python3 scripts/test_validate_bootstrap.py` before every push.
+- Use risk-proportional validation. Run control-plane validators when control
+  files change and grouped Flutter/product checks at coherent milestones; do not
+  run a full matrix for every cosmetic or local change.
 - Open PRs as **draft**; never merge, close, release, or deploy.
 - Never commit secrets, personal paths, or private Drive content.
 - Stop only for protected actions, identity or security problems, or real
   canonical conflicts. Do not stop for routine micro-approvals.
-- Finish every mission by updating `docs/agent/ENGINEER_RETURN.md` and
-  `docs/agent/EXECUTION_STATE.json` (`AWAITING_BRAIN_REVIEW`) and reconciling
-  `TASKS.md` and `docs/agent/CURRENT_HANDOFF.md`.
+- Keep the single live cursor coherent at meaningful checkpoints. Routine
+  outcomes remain `IN_PROGRESS` and flow directly into the next admitted
+  outcome; use `AWAITING_BRAIN_REVIEW` only when a real current checkpoint
+  explicitly requires that review.

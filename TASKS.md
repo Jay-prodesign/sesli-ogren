@@ -21,7 +21,7 @@ Milestone numbering follows the program sequence in
 M1 = Architecture Proof, …). Drive lifecycle-stage labels use a different
 numbering: lifecycle "M3" is this M0, and lifecycle "M4" is this M1.
 
-Next unallocated ID: **LA-0024**.
+Next unallocated ID: **LA-0041**.
 
 ---
 
@@ -214,7 +214,7 @@ Next unallocated ID: **LA-0024**.
 
 ##### LA-0022 — M5 checkpoint evidence, independent review and disposition
 
-- Status: IN_PROGRESS
+- Status: CANCELLED
 - Depends on: LA-0021
 - Owner: Brain
 - Executor: ChatGPT (temporary reversible engineering authority)
@@ -231,6 +231,192 @@ Next unallocated ID: **LA-0024**.
 - Executor: ChatGPT / Brain audit
 - Verification: Drive `LA-0023 — PROJECT WORK MATURITY & DEPTH AUDIT — TASK SPEC + QUALITY GATE` records PASS WITH CHANGES REQUIRED, keeps LA-0022 as the active cursor, and projects only current-risk/hygiene remediation rather than reopening feature breadth.
 - Exec plan: [docs/exec-plans/LA-0023.md](docs/exec-plans/LA-0023.md)
+
+#### Section M2.S4.C — Post-M5 full-product admission
+
+##### LA-0024 — Full-product shell + material continuity
+
+- Status: DONE
+- Depends on: LA-0022
+- Owner: Brain
+- Executor: ChatGPT (bounded reversible engineering)
+- Verification: D-077 development closure plus the post-M5 Tier-A premise audit admit the shortest user-visible path from real PDF/text intake through Home/Library, Material Workspace, grounded orientation, truthful progress/next-action, Recall and product-local Listen without adding a flat feature grid or unsupported mastery claims.
+- Exec plan: [docs/exec-plans/LA-0024.md](docs/exec-plans/LA-0024.md)
+
+##### LA-0025 — Grounded Teach / Explain
+
+- Status: DONE
+- Depends on: LA-0024
+- Owner: Brain
+- Executor: ChatGPT (bounded reversible engineering)
+- Verification: bounded checkpoint workflow `37377094721` passed strict format, Flutter analyze/test and PostgreSQL server migration/test coverage on `089038967b57748d784192f7869c2d51b35cabf9`.
+- Exec plan: [docs/exec-plans/LA-0025.md](docs/exec-plans/LA-0025.md)
+
+##### LA-0026 — Active Explain-Back
+
+- Status: DONE
+- Depends on: LA-0025
+- Owner: Brain
+- Executor: ChatGPT (bounded reversible engineering)
+- Verification: canonical D-054 EXPLAIN requirement is completed as a bounded source-bound learner explain-back → uncertainty-aware feedback → targeted repair/re-attempt → durable evidence loop; passive Explain remains evidence-neutral and no live/paid provider is authorized by this tranche.
+- Exec plan: [docs/exec-plans/LA-0026.md](docs/exec-plans/LA-0026.md)
+
+##### LA-0027 — Multi-material Library + selected-material continuity
+
+- Status: DONE
+- Depends on: LA-0026
+- Owner: Brain
+- Executor: ChatGPT (bounded reversible engineering)
+- Verification: multiple learner-owned materials coexist; Library opens the selected material; Recall/Listen/Explain remain explicitly bound to that material and cannot leak evidence/state across materials.
+- Exec plan: [docs/exec-plans/LA-0027.md](docs/exec-plans/LA-0027.md)
+
+##### LA-0028 — Bounded Focus Session
+
+- Status: DONE
+- Depends on: LA-0027
+- Owner: Brain
+- Executor: ChatGPT (bounded reversible engineering)
+- Verification: exact selected-source Focus session; bounded interaction; hint/direct-help escape hatch; fail-closed semantic feedback; no passive mastery evidence.
+- Exec plan: [docs/exec-plans/LA-0028.md](docs/exec-plans/LA-0028.md)
+
+##### LA-0029 — Truthful Progress Surface
+
+- Status: DONE
+- Depends on: LA-0028
+- Owner: Brain
+- Executor: ChatGPT (bounded reversible engineering)
+- Verification: learner-scoped canonical state only; no invented percentage/mastery; passive activity evidence-neutral; selected material can continue from Progress.
+- Exec plan: [docs/exec-plans/LA-0029.md](docs/exec-plans/LA-0029.md)
+
+##### LA-0030 — Durable Resume Continuity
+
+- Status: DONE
+- Depends on: LA-0029
+- Owner: Brain
+- Executor: ChatGPT (bounded reversible engineering)
+- Verification: Home selects the most recently updated active material; SQLite close/reopen preserves material plus canonical Recall state/next action; bounded workflow `37585838940` passed canonical format, Flutter analyze and expanded Flutter tests at head `377c9ce238883fced4e3a7fa99a29ecead91780f`.
+- Exec plan: [docs/exec-plans/LA-0030.md](docs/exec-plans/LA-0030.md)
+
+##### LA-0031 — Material deletion + safe continuity
+
+- Status: DONE
+- Depends on: LA-0030
+- Owner: Brain
+- Executor: ChatGPT (bounded reversible engineering)
+- Verification: Library exposes confirmed material deletion through the existing learner-scoped store semantics; deleting the most recent material removes accessible source/learning truth and Home safely falls back to the remaining material; bounded workflow `37585838940` passed canonical format, Flutter analyze and expanded Flutter tests at head `377c9ce238883fced4e3a7fa99a29ecead91780f`.
+- Exec plan: [docs/exec-plans/LA-0031.md](docs/exec-plans/LA-0031.md)
+
+##### LA-0032 — Durable Listen resume continuity
+
+- Status: DONE
+- Depends on: LA-0031
+- Owner: Brain
+- Executor: ChatGPT (bounded reversible engineering)
+- Verification: exact current SourceVersion owns the persisted Listen checkpoint; resume/restart controls remain evidence-neutral; v6→v7 additive migration and widget regression must pass strict format, Flutter analyze and bounded tests before DONE.
+- Exec plan: [docs/exec-plans/LA-0032.md](docs/exec-plans/LA-0032.md)
+
+##### LA-0033 — Profile + server-authoritative plan/usage surface
+
+- Status: DONE
+- Depends on: LA-0032
+- Owner: Brain
+- Executor: ChatGPT (bounded reversible engineering)
+- Verification: Profile reads only authenticated learner account/entitlement/quota truth; unavailable server truth fails closed; language/device-TTS/accessibility/privacy state is truthful; bootstrap run `37597120112` PASS and product-bounded-validation run `37597120046` PASS (format, analyze, expanded tests) on `a785783e54441ef5231e7b53c751d36fd408838f`.
+- Exec plan: [docs/exec-plans/LA-0033.md](docs/exec-plans/LA-0033.md)
+
+##### LA-0034 — Secure account + data deletion
+
+- Status: DONE
+- Depends on: LA-0033
+- Owner: Brain
+- Executor: ChatGPT (bounded reversible engineering)
+- Verification: authenticated deletion intent + server-only Storage/session/Auth cleanup; learner-scoped local purge; fail-closed destructive UI. Bootstrap run `37599984324` PASS, account-deletion bounded run `37599984408` PASS (PostgreSQL deletion slice + Deno lint/type-check), and product-bounded-validation run `37599984330` PASS (format, analyze, expanded Flutter tests) on `9010eed82eae067076629a1a1daca9d66486272b`. Hosted Supabase deployment remains intentionally deferred because the connected project has no canonical app schema/function deployment yet.
+- Exec plan: [docs/exec-plans/LA-0034.md](docs/exec-plans/LA-0034.md)
+
+##### LA-0035 — First-run product onboarding
+
+- Status: DONE
+- Depends on: LA-0034
+- Owner: Brain
+- Executor: ChatGPT (bounded reversible engineering)
+- Verification: first successful authenticated runtime shows a one-time onboarding before Product Shell; it explains material continuity, the passive-Listen vs active-learning evidence distinction, and implemented deletion control. Completion is learner-scoped in SQLite, survives reopen, is covered by additive v7→v8 migration, and is purged with learner data. Bootstrap run `37612556528` PASS, account-deletion run `37612556551` PASS, and product-bounded-validation run `37612556549` PASS (format, analyze, expanded tests) on `f1390330b6f0a1d522d18d60bbcaf32ef21df96f`.
+- Exec plan: [docs/exec-plans/LA-0035.md](docs/exec-plans/LA-0035.md)
+
+
+##### LA-0036 — Passwordless account entry + session restore
+
+- Status: DONE
+- Depends on: LA-0035
+- Owner: Brain
+- Executor: ChatGPT (bounded reversible engineering)
+- Verification: existing authenticated sessions restore without changing learner identity; no-session startup shows explicit passwordless email account entry instead of silently creating an anonymous user; successful OTP verification opens the verified learner runtime; missing Supabase client configuration fails closed. Bootstrap run `37614578993` PASS, account-deletion run `37614579001` PASS, and product-bounded-validation run `37614578893` PASS (format, analyze, expanded tests) on `00933dc76ab5190299adf563ca716c8b7310382b`. Live email delivery/template configuration remains deferred external release evidence.
+- Exec plan: [docs/exec-plans/LA-0036.md](docs/exec-plans/LA-0036.md)
+
+##### LA-0037 — Safe local sign-out + account switching boundary
+
+- Status: DONE
+- Depends on: LA-0036
+- Owner: Brain
+- Executor: ChatGPT (bounded reversible engineering)
+- Verification: confirmed local-session sign-out returns the root app to account entry only after Supabase sign-out succeeds; local learner data is preserved and remains learner-scoped; sign-out failure keeps the authenticated runtime open. Bootstrap run `37615873346` PASS, account-deletion run `37615873382` PASS, and product-bounded-validation run `37615873688` PASS (format, analyze, expanded tests) on `5496dc346451c49dd7b789cc67a0ebe40976665f`.
+- Exec plan: [docs/exec-plans/LA-0037.md](docs/exec-plans/LA-0037.md)
+
+##### LA-0038 — Truthful support contact surface
+
+- Status: DONE
+- Depends on: LA-0037
+- Owner: Brain
+- Executor: ChatGPT (bounded reversible engineering)
+- Verification: Profile exposes a release-configured client-safe support email when valid, allows copying it, and fails closed without inventing an address when configuration is absent/invalid. At head 5ee9f4fa8ab30504c7761ca5f5c6e7ae4fddc075: bootstrap-validation 37617623288 PASS, account-deletion-bounded-validation 37617623323 PASS, product-bounded-validation 37617623345 PASS. Actual production support address remains release configuration.
+- Exec plan: [docs/exec-plans/LA-0038.md](docs/exec-plans/LA-0038.md)
+
+##### LA-0039 — World-Class Experience / Golden Product Slice
+
+- Status: IN_PROGRESS
+- Tier: A — Founder-triggered product experience correction
+- Depends on: LA-0038
+- Owner: Brain
+- Executor: ChatGPT (bounded reversible engineering)
+- Verification: LA-0039 and LA-0040 are one integrated product outcome on PR #13. Engineering truth is SHA-specific; current implementation must preserve source/version/provenance, evidence semantics, error/recovery, persistence/reopen and navigation continuity while the visual direction is reworked. Founder visual disposition is required only to lock/close final visual direction, not to continue implementation.
+- Intent: preserve the validated Golden Product Slice as an engineering baseline while LA-0040 reevaluates the visual system, student desirability and companion treatment. Learning truth, provenance/evidence semantics and current feature scope remain authoritative.
+- Prior treatment: T2 Premium Active Learning Studio is now a baseline/control, not a locked final treatment.
+- Quality authority: [docs/qa/LA-0039_WORLD_CLASS_EXPERIENCE_GATE.md](docs/qa/LA-0039_WORLD_CLASS_EXPERIENCE_GATE.md) + LA-0040 VQG-01.
+- Current cursor: ACTIVE / COUPLED WITH LA-0040. Continue the coherent source → Reader/Listen → source-hidden Recall → truthful evidence/result → reasoned next action → reopen/resume outcome; do not wait on visual lock for independent product work.
+- Exec plan: [docs/exec-plans/LA-0039.md](docs/exec-plans/LA-0039.md)
+
+##### LA-0040 — Million-Dollar Visual Audit & Student Experience Elevation
+
+- Status: IN_PROGRESS
+- **LATEST FOUNDER OVERRIDE (second visual FAIL, 2026-10-08):** actual 12-screen Editorial/Studio/Knowledge treatment comparison is rejected as a whole; **NO Studio lead, NO accepted visual direction**. Stop incremental restyling of these controls. The active same-task scope is a product-local, source-centered interaction-first learning journey with real Flutter evidence, genuine Recall feedback, 320/390px and accessibility checks and explicit Founder visual acceptance. Consult [second-FAIL rework spec](docs/exec-plans/LA-0040_FOUNDER_FAIL_REWORK_SPEC.md), [QA gate](docs/qa/LA-0040_VISUAL_QUALITY_GATE.md), and [current handoff](docs/agent/CURRENT_HANDOFF.md). Existing CI PASS demonstrates technical functioning only, not UX quality.
+- Gate: **FOUNDER VISUAL FAIL / CHANGES_REQUIRED (2026-10-08)** — prior VQG-01 PASS was internal pre-Founder evidence only; no Founder acceptance.
+- Tier: A — Founder-triggered visual/product decision
+- Depends on: LA-0039 engineering baseline
+- Owner: Brain + Founder protected visual disposition
+- Executor: Founder-authorized active product/engineering executor (ChatGPT/Claude/Codex when assigned); reversible implementation is executable now
+- Verification: full-product visual packet and engineering gates are green at validated runtime head `93cd80be370e7a08f29358f175831a53bc474403`: bootstrap `37737380112` PASS, account-deletion `37737380121` PASS, product-bounded `37737380119` PASS (canonical format + Flutter analyze + bounded expanded tests). Final full visual capture `37737373695` PASS; artifact `11532626337` (`sha256:990e9494cef15d67b17fc5183ab50558cffe7818ab4cd7e13d138eb108eef748`) contains Home, Workspace, Recall prompt/payoff, Listen, Explain, Explain-Back, Focus, Library, Progress, Profile and narrow/text-scale stress evidence.
+- Intent: validate a distinctive, premium, show-don't-tell Learning App experience without inventing learner state or discarding prior Learning App research.
+- Audience: Sesli Öğren remains a broad learner-owned-material product; Turkish high-school students are the **priority-weighted initial commercial segment**, not the exclusive target.
+- Previous candidate direction: **Living Visual Learning Studio / Student Momentum**. Historical internal VQG-01 = PASS, but **Founder rejected its actual runtime visual expression**. Current visual acceptance = FAIL / CHANGES_REQUIRED; design hierarchy, signature payoff, visual identity and Companion integration must be retested.
+- Companion: **KEEP canonical D/Knot**. The generated non-canonical plush mascot is rejected; current evidence supports stateful/sparse integration, not identity redesign/removal.
+- Palette/system: Cloud / Deep Focus / Pulse Blue / Signal Aqua / bounded Volt Lime is now **REOPENED AS A VISUAL TREATMENT HYPOTHESIS**, not a final accepted palette. Preserve semantic accessibility while comparing genuinely different runtime design treatments.
+- Stress result: narrow Home + long Turkish title + 1.3× Workspace + 1.5× Recall captured without observed overflow/clip blocker; Reduced Motion remains separately covered.
+- Founder disposition: **FAIL** on representative runtime visuals; do not label this merely "not PASS+". Internal capture/engineering PASS does not prove premium appeal. Real-user preference, memorability and future device QA remain separately unproven.
+- Final VQG authority: [docs/qa/LA-0040_VQG_FINAL_PRE_FOUNDER_2026-10-08.md](docs/qa/LA-0040_VQG_FINAL_PRE_FOUNDER_2026-10-08.md).
+- Quality gate: [docs/qa/LA-0040_VISUAL_QUALITY_GATE.md](docs/qa/LA-0040_VISUAL_QUALITY_GATE.md).
+- Stress/red-team: [docs/qa/LA-0040_VISUAL_STRESS_REDTEAM.md](docs/qa/LA-0040_VISUAL_STRESS_REDTEAM.md).
+- Round-1 retest: [docs/qa/LA-0040_VQG_ROUND1_RETEST_2026-10-08.md](docs/qa/LA-0040_VQG_ROUND1_RETEST_2026-10-08.md).
+- Prior research/roadmap reconciliation: [docs/design/LA-0040_PRIOR_RESEARCH_ROADMAP_RECONCILIATION.md](docs/design/LA-0040_PRIOR_RESEARCH_ROADMAP_RECONCILIATION.md).
+- Current cursor: **LA-0039_LA-0040_INTEGRATED_OUTCOME**. The three-treatment tournament is a failed historical experiment, not an active requirement. Build and refine ONE coherent source-centered real-Flutter learning journey, integrate truth/error/recovery/continuity/accessibility as needed, and keep moving to the next dependency-ready roadmap outcome. Founder approval is required only for final visual lock/closure.
+- Exec plan: [docs/exec-plans/LA-0040.md](docs/exec-plans/LA-0040.md)
+
+
+**Historical projection note:** The M3/M4/M5 skeletons below predate the
+admitted/completed Golden Learning Slice and the current post-M5 LA-0039 +
+LA-0040 outcome. Their `PLANNED / NOT_EXECUTABLE` labels are retained only to
+preserve the validator-compatible whole-V0 map; they do not re-close work
+already admitted by later canonical decisions and are not a competing live
+cursor. Use Drive `CURRENT_EXECUTION_STATE` + `MASTER_ROADMAP` and the
+LA-0039/LA-0040 entries above for live sequencing.
 
 ## Milestone M3 — V0 Implementation Tranches
 

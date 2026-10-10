@@ -1,0 +1,131 @@
+name: la0039-visual-capture
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: la0039-visual-capture
+  cancel-in-progress: true
+
+jobs:
+  capture:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - name: Check out visual-review source
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+
+      - name: Read Flutter pin
+        id: pin
+        run: |
+          set -euo pipefail
+          version="$(tr -d '[:space:]' < .flutter-version)"
+          test -n "$version"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+      - name: Install pinned Flutter
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
+        with:
+          channel: stable
+          flutter-version: ${{ steps.pin.outputs.version }}
+          cache: false
+          pub-cache: false
+
+      - name: Resolve dependencies
+        working-directory: app
+        run: flutter pub get
+
+      - name: Capture representative Golden Product Slice
+        working-directory: app
+        run: |
+          set -euo pipefail
+          flutter test --update-goldens \
+            --dart-define=LA0039_VISUAL_CAPTURE=true \
+            test/la0039_visual_capture_test.dart
+          test -s test/goldens/la0039_home.png
+          test -s test/goldens/la0039_workspace.png
+          test -s test/goldens/la0039_recall_payoff.png
+          test -s test/goldens/la0040_library.png
+          test -s test/goldens/la0040_progress.png
+          test -s test/goldens/la0040_listen.png
+          test -s test/goldens/la0040_focus.png
+          test -s test/goldens/la0040_explain.png
+          test -s test/goldens/la0040_explain_back.png
+          test -s test/goldens/la0040_recall_prompt.png
+          test -s test/goldens/la0040_profile.png
+          test -s test/goldens/la0040_stress_narrow_home.png
+          test -s test/goldens/la0040_stress_text130_workspace.png
+          test -s test/goldens/la0040_stress_text150_recall.png
+          for state in empty populated narrow scale150; do
+            test -s "test/goldens/la0040_living_home_${state}.png"
+          done
+          test -s test/goldens/la0040_atelier_home_320_text150.png
+          test -s test/goldens/la0040_atelier_result_320_text150.png
+          for state in workspace recall result unknown hinted; do
+            test -s "test/goldens/la0040_atelier_${state}.png"
+          done
+
+      - name: Stage review evidence
+        run: |
+          set -euo pipefail
+          mkdir -p docs/qa/evidence/la0039
+          cp app/test/goldens/la0039_home.png docs/qa/evidence/la0039/home.png
+          cp app/test/goldens/la0039_workspace.png docs/qa/evidence/la0039/workspace.png
+          cp app/test/goldens/la0039_recall_payoff.png docs/qa/evidence/la0039/recall-payoff.png
+          cp app/test/goldens/la0040_library.png docs/qa/evidence/la0039/library.png
+          cp app/test/goldens/la0040_progress.png docs/qa/evidence/la0039/progress.png
+          cp app/test/goldens/la0040_listen.png docs/qa/evidence/la0039/listen.png
+          cp app/test/goldens/la0040_focus.png docs/qa/evidence/la0039/focus.png
+          cp app/test/goldens/la0040_explain.png docs/qa/evidence/la0039/explain.png
+          cp app/test/goldens/la0040_explain_back.png docs/qa/evidence/la0039/explain-back.png
+          cp app/test/goldens/la0040_recall_prompt.png docs/qa/evidence/la0039/recall-prompt.png
+          cp app/test/goldens/la0040_profile.png docs/qa/evidence/la0039/profile.png
+          cp app/test/goldens/la0040_stress_narrow_home.png docs/qa/evidence/la0039/stress-narrow-home.png
+          cp app/test/goldens/la0040_stress_text130_workspace.png docs/qa/evidence/la0039/stress-text130-workspace.png
+          cp app/test/goldens/la0040_stress_text150_recall.png docs/qa/evidence/la0039/stress-text150-recall.png
+          sha256sum docs/qa/evidence/la0039/*.png | tee docs/qa/evidence/la0039/SHA256SUMS.txt
+          mkdir -p docs/qa/evidence/la0040-treatments
+          for lane in editorial studio knowledge; do
+            for stage in home workspace prompt result; do
+              file="app/test/goldens/la0040_treatment_${lane}_${stage}.png"
+              test -s "$file"
+              cp "$file" "docs/qa/evidence/la0040-treatments/${lane}-${stage}.png"
+            done
+          done
+          sha256sum docs/qa/evidence/la0040-treatments/*.png | tee docs/qa/evidence/la0040-treatments/SHA256SUMS.txt
+          mkdir -p docs/qa/evidence/la0040-living-home
+          for state in empty populated narrow scale150; do
+            cp "app/test/goldens/la0040_living_home_${state}.png" "docs/qa/evidence/la0040-living-home/${state}.png"
+          done
+          sha256sum docs/qa/evidence/la0040-living-home/*.png | tee docs/qa/evidence/la0040-living-home/SHA256SUMS.txt
+          mkdir -p docs/qa/evidence/la0040-atelier
+          for state in workspace recall result unknown hinted; do
+            cp "app/test/goldens/la0040_atelier_${state}.png" "docs/qa/evidence/la0040-atelier/${state}.png"
+          done
+          sha256sum docs/qa/evidence/la0040-atelier/*.png | tee docs/qa/evidence/la0040-atelier/SHA256SUMS.txt
+          cp app/test/goldens/la0040_atelier_home_320_text150.png docs/qa/evidence/la0040-atelier/home-320-text150.png
+          cp app/test/goldens/la0040_atelier_result_320_text150.png docs/qa/evidence/la0040-atelier/result-320-text150.png
+          sha256sum docs/qa/evidence/la0040-atelier/*.png > docs/qa/evidence/la0040-atelier/SHA256SUMS.txt
+          # Carry the EXISTING canonical D/Knot reference into the visual-review
+          # packet so art-direction work never invents/replaces the character.
+          mkdir -p docs/qa/evidence/la0040-companion
+          cp app/assets/companions/D_KNOT_128.webp docs/qa/evidence/la0040-companion/D_KNOT_128_reference.webp
+          sha256sum docs/qa/evidence/la0040-companion/*.webp | tee docs/qa/evidence/la0040-companion/SHA256SUMS.txt
+
+      - name: Upload review evidence
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: la0039-visual-review
+          path: |
+            docs/qa/evidence/la0039
+            docs/qa/evidence/la0040-treatments
+            docs/qa/evidence/la0040-living-home
+            docs/qa/evidence/la0040-atelier
+            docs/qa/evidence/la0040-companion
+          if-no-files-found: error
+          retention-days: 7

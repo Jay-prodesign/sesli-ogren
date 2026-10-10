@@ -13,6 +13,8 @@ below is applied after them in the milestone validation batch:
 
 3. `server/db/migrations/0003_recall_learning_truth.sql`
 4. `server/db/migrations/0004_server_authoritative_recall_assistance.sql`
+5. `server/db/migrations/0005_grounded_explain_boundary.sql` (LA-0025; source-version/hash-bound client request/read boundary over the existing generation authority)
+6. `server/db/migrations/0006_explain_back_attempts.sql` (LA-0026; source-bound, idempotent Explain-back attempt authority; semantic evaluation remains server-side and unconfigured until separately authorized)
 
 This is deliberate D-066/D-072 behavior: reuse accepted substrate, avoid a
 second data authority, and batch the real PostgreSQL verification at the M5

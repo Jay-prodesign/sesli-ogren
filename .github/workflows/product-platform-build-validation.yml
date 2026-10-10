@@ -1,0 +1,109 @@
+name: product-platform-build-validation
+
+on:
+  pull_request:
+    paths:
+      - "app/lib/**"
+      - "app/assets/**"
+      - "app/android/**"
+      - "app/ios/**"
+      - "app/pubspec.yaml"
+      - "app/pubspec.lock"
+      - ".flutter-version"
+      - ".github/workflows/product-platform-build-validation.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: product-platform-build-validation-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  milestone-gate:
+    name: Milestone CI gate
+    runs-on: ubuntu-latest
+    outputs:
+      run_full: ${{ steps.check.outputs.run_full }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+          fetch-depth: 1
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - id: check
+        shell: bash
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ] || git log -1 --pretty=%B | grep -Fq "[platform-ci]"; then
+            echo "run_full=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "run_full=false" >> "$GITHUB_OUTPUT"
+            echo "Skipping Android/iOS build matrix unless this is a platform milestone."
+          fi
+
+  android-release-compile:
+    needs: milestone-gate
+    if: needs.milestone-gate.outputs.run_full == 'true'
+    name: Android release compile
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: app
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - id: flutter_pin
+        working-directory: .
+        shell: bash
+        run: |
+          version="$(tr -d '[:space:]' < .flutter-version)"
+          test -n "$version"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
+        with:
+          channel: stable
+          flutter-version: ${{ steps.flutter_pin.outputs.version }}
+          cache: true
+          pub-cache: true
+      - run: flutter pub get
+      - name: Compile Android release APK
+        run: |
+          flutter build apk --release --no-pub
+          test -s build/app/outputs/flutter-apk/app-release.apk
+
+  ios-release-compile:
+    needs: milestone-gate
+    if: needs.milestone-gate.outputs.run_full == 'true'
+    name: iOS simulator compile (no signing)
+    runs-on: macos-15
+    timeout-minutes: 40
+    defaults:
+      run:
+        working-directory: app
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - id: flutter_pin
+        working-directory: .
+        shell: bash
+        run: |
+          version="$(tr -d '[:space:]' < .flutter-version)"
+          test -n "$version"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
+        with:
+          channel: stable
+          flutter-version: ${{ steps.flutter_pin.outputs.version }}
+          cache: true
+          pub-cache: true
+      - run: flutter pub get
+      - name: Compile iOS simulator app without provisioning
+        run: |
+          flutter build ios --simulator --no-codesign --no-pub
+          test -d build/ios/iphonesimulator/Runner.app

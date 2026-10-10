@@ -8,15 +8,22 @@ this contract and never relaxes it.
 
 ## 1. Roles
 
+The current Drive `CURRENT_EXECUTION_STATE` and `ENGINEERING_EXECUTION_PROTOCOL`
+define the active executor. **Default = continuous outcome execution**: an
+authorized executor carries a dependency-ready user outcome through
+implementation, integration, proportional verification, repair, and the next
+safe roadmap outcome without an automatic handoff/review stop.
+
 | Role | Actor | Owns | Does not |
 | --- | --- | --- | --- |
-| **Brain** | ChatGPT (directed by the product owner) | Product intent, scope, priorities, decisions (`D-###`), lifecycle gates, handoff authoring, command records (`CMD-####`, §13), PASS / CHANGES_REQUIRED verdicts on engineer returns | Write or push code; mutate repository files other than its own command records and the handoff mirror |
-| **Primary Engineer** | Claude | Executing Brain-issued handoffs: investigation, implementation, tests, commits, branches, draft PRs, evidence, state reconciliation | Decide product scope; approve its own work; merge; release; change repo identity/visibility |
-| **Bounded Operator / Reviewer** | Codex | Narrowly scoped tasks explicitly assigned in a handoff or task entry; independent review of PRs and evidence | Act outside the assigned bound; approve product decisions; merge unless a handoff explicitly grants it |
-| **Product Owner** | Human (repository owner) | Final authority; all protected actions; credentials; merges and releases | — |
+| **Product Owner** | Human repository owner | Major product/scope decisions and all protected actions | — |
+| **Active Product & Engineering Executor** | ChatGPT, Claude, or Codex when named/admitted by the live cursor | Reversible in-scope implementation, integration, tests, branch commits/pushes, repair, current-state reconciliation, and continuous selection of the next admitted roadmap outcome | Self-authorize protected actions; silently change product scope/architecture; approve its own independent-review requirement |
+| **Independent Reviewer / Specialist** | A different admitted reviewer when a material risk/milestone requires independence | Risk-focused review or a bounded specialist surface | Become a mandatory routine waiting dependency or concurrently mutate the same surface |
 
-No agent is a product authority. An agent that believes a product decision is
-needed files a **Decision Request** (§8) and stops the affected work.
+Claude remains an available implementation engineer, not a mandatory waiting
+dependency. Codex is not required for routine reversible work. One writer owns
+each mutation surface. A real product/architecture/protected decision blocks
+only the affected work; independent admitted work continues.
 
 ## 2. Authority hierarchy
 
@@ -63,24 +70,28 @@ Before any material change an agent must:
    base SHA; confirm the remote is `Jay-prodesign/sesli-ogren`.
 2. Complete the read order in `CLAUDE.md` (or the equivalent for its tool).
 3. Read the files it will change and the files that depend on them.
-4. Confirm the change is inside the active task's scope. If not → stop and file a
-   Decision Request.
+4. Confirm the change is inside the active integrated outcome / admitted roadmap
+   corridor. If a discovered need would materially expand scope, isolate that
+   dependency and file a Decision Request; do not stop unrelated admitted work.
 
 ## 6. Git, PR, and test discipline
 
 - **Branches:** never commit to `main`. One dedicated branch per mission, named in
   the handoff (e.g. `chore/…`, `feat/LA-####-…`, `fix/LA-####-…`).
-- **Commits:** small and coherent; imperative subject; reference `LA-####`
-  where applicable. Never rewrite published history (no force-push on shared
-  branches) without explicit instruction.
+- **Commits:** coherent and reviewable; commit count is not a work-unit or stop
+  condition. Reference `LA-####` where useful. Never rewrite published history
+  (no force-push on shared branches) without explicit instruction.
 - **Pull requests:** open as **draft** against `main`. Agents do not merge,
   close, or mark ready unless the handoff explicitly grants it.
-- **Tests / checks:** run all local validations before pushing
-  (`python3 scripts/validate_bootstrap.py` plus any toolchain tests that exist).
-  Never claim tests that do not exist; never skip or disable a failing check to
-  get green — report it.
-- **CI:** a PR is not PASS-ready while required CI is failing or pending without
-  explanation.
+- **Tests / checks:** use risk-proportional validation. Batch related product
+  changes and run the smallest sufficient checks during implementation; run
+  milestone-level format/analyze/product/truth/build checks when the coherent
+  outcome is ready. Security, privacy, source/evidence integrity, data-loss and
+  compile failures are repaired immediately. Never disable a failing check to
+  get green or claim a check that did not run.
+- **CI:** a localized CI failure blocks the claim/surface it covers, not unrelated
+  admitted implementation. Fix it and rerun the affected checks; do not create a
+  gratuitous full-suite loop after every cosmetic edit.
 
 ## 7. Security and provenance
 
@@ -117,23 +128,22 @@ If a protected action appears necessary: stop, record a Decision Request in
 
 ## 9. Handoff / return protocol
 
-1. **Brain issues** a handoff `CLAUDE_HANDOFF_###` (Drive), mirrored in
-   non-private summary form into `docs/agent/CURRENT_HANDOFF.md`, which is the
-   mission-level contract.
-2. **Brain issues incremental instructions** inside a mission (review
-   corrections, clarifications) as command records `docs/agent/commands/CMD-####.md`
-   (§13), not by rewriting the handoff.
-3. **Engineer checks for unread commands** before material work, then executes
-   only tasks whose status is executable (`READY` or `IN_PROGRESS`, or
-   `CHANGES_REQUIRED` under an acknowledged command) and whose execution plan exists.
-4. **Engineer returns** a per-command record `docs/agent/returns/RET-####.md`,
-   updates the consolidated `docs/agent/ENGINEER_RETURN.md`, and sets
-   `docs/agent/EXECUTION_STATE.json` → `AWAITING_BRAIN_REVIEW`.
-5. **Brain reviews** and issues a verdict: `PASS` or `CHANGES_REQUIRED`.
-6. Only after `PASS` may the next staged handoff become executable.
+The live path is **current state → roadmap outcome → implement → integrate →
+verify → fix → next outcome**. `CURRENT_EXECUTION_STATE` is the single mutable
+mission cursor and `CURRENT_HANDOFF.md` is its concise repo projection.
 
-A staged handoff marked `NOT_EXECUTABLE` must not be started, even partially.
-No command, comment, or automated trigger can make it executable (§13.5).
+The historical `CLAUDE_HANDOFF_###` / `CMD-####` / `RET-####` bus remains
+available for an explicitly delegated bridge/session and stays auditable, but it
+is **not** a mandatory round trip for every file, commit, test, or routine
+outcome. Routine reversible progress remains `IN_PROGRESS`; do not
+automatically set `AWAITING_BRAIN_REVIEW` or wait for PASS merely because a
+subtask finished.
+
+Required independent/product review remains risk-based at material architecture,
+auth/security, persistence/migration, critical AI/data, major milestone, and
+release-candidate boundaries. Historical staged handoffs marked
+`NOT_EXECUTABLE` remain historical/non-executable unless current authority
+explicitly admits them; they do not supersede the live integrated mission.
 
 ## 10. Task map rules (`TASKS.md`)
 
@@ -391,15 +401,14 @@ authorize new asset breadth or reopen character discovery.
 
 ## 16. Agent credit efficiency
 
-Codex/Claude usage must be cost-efficient.
+Agent/tool use must be efficient **without shrinking the product outcome**.
 
-1. Brain handles planning, research, reconciliation, review, documentation, task decomposition and command drafting unless a local runtime/repository capability is required.
-2. Codex/Claude are delegated only bounded implementation, terminal/runtime execution, or repo-local verification that materially needs their environment.
-3. Do not repeat broad fresh-reads, historical audits, summaries, explanations, or evidence generation when current task authority can be supplied directly.
-4. Prefer one narrow command with exact scope, files, allowed mutations, validation, and stop condition.
-5. Batch adjacent checks when safe; avoid multiple sessions for work that can be completed in one bounded run.
-6. Stop on the first controlling failure. Do not continue downstream validation whose result cannot change the current disposition.
-7. Engineer returns should be concise and decision-relevant: commands/results, changed files, blocker/deviation, and exact next action.
-8. Do not spend agent credits merely to restate context Brain already knows.
+1. Fresh-read current authority once, then work from the single live cursor; do not repeatedly audit broad history without a concrete gap.
+2. Batch adjacent implementation, integration and verification work when they serve the same user-visible outcome.
+3. Do not create one-command/one-file/one-commit work packages or artificial stop conditions to save credits.
+4. Use the cheapest sufficient verification for the risk; milestone checks replace repeated cosmetic full-suite loops.
+5. If one check or dependency fails, fix or isolate it and continue independent admitted work. Stop the whole run only for a genuine protected decision, unavoidable blocker, explicit owner stop, substantive completion, or real execution-capacity limit.
+6. Returns/status updates are decision-relevant and batched; documentation is updated at meaningful checkpoints rather than after each micro-step.
 
-This efficiency rule does not weaken security, correctness, protected-action, evidence, or project-isolation requirements.
+This efficiency rule does not weaken security, correctness, protected-action,
+evidence, provenance, or project-isolation requirements.

@@ -6,6 +6,8 @@ import '../domain/learning_contracts.dart';
 abstract interface class SourceStore {
   Future<MaterialRecord?> material({required AuthenticatedLearner learner, required MaterialId materialId});
 
+  Future<List<MaterialRecord>> activeMaterials({required AuthenticatedLearner learner});
+
   Future<SourceVersionRecord?> currentSourceVersion({
     required AuthenticatedLearner learner,
     required MaterialId materialId,
@@ -34,11 +36,53 @@ abstract interface class SourceStore {
     Uint8List? rawSourceBytes,
   });
 
+  Future<int> listenResumeChunk({
+    required AuthenticatedLearner learner,
+    required MaterialId materialId,
+    required SourceVersionId sourceVersionId,
+  });
+
+  Future<DateTime?> listenResumeUpdatedAt({
+    required AuthenticatedLearner learner,
+    required MaterialId materialId,
+    required SourceVersionId sourceVersionId,
+  });
+
+  Future<void> saveListenResumeChunk({
+    required AuthenticatedLearner learner,
+    required MaterialId materialId,
+    required SourceVersionId sourceVersionId,
+    required int chunkIndex,
+    required DateTime updatedAt,
+  });
+
+  Future<double> readerResumeProgress({
+    required AuthenticatedLearner learner,
+    required MaterialId materialId,
+    required SourceVersionId sourceVersionId,
+  });
+
+  Future<DateTime?> readerResumeUpdatedAt({
+    required AuthenticatedLearner learner,
+    required MaterialId materialId,
+    required SourceVersionId sourceVersionId,
+  });
+
+  Future<void> saveReaderResumeProgress({
+    required AuthenticatedLearner learner,
+    required MaterialId materialId,
+    required SourceVersionId sourceVersionId,
+    required double progress,
+    required DateTime updatedAt,
+  });
+
   Future<void> deleteMaterial({
     required AuthenticatedLearner learner,
     required MaterialId materialId,
     required DateTime deletedAt,
   });
+
+  Future<void> purgeLearnerData({required AuthenticatedLearner learner});
 
   Future<void> close();
 }
