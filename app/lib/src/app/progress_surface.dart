@@ -36,12 +36,7 @@ class ProgressItem {
 }
 
 class ProgressSurface extends StatelessWidget {
-  const ProgressSurface({
-    required this.items,
-    required this.onOpenMaterial,
-    this.onAddSource,
-    super.key,
-  });
+  const ProgressSurface({required this.items, required this.onOpenMaterial, this.onAddSource, super.key});
 
   final List<ProgressItem> items;
   final ValueChanged<MaterialId> onOpenMaterial;
@@ -143,10 +138,7 @@ class ProgressSurface extends StatelessWidget {
                         children: [
                           Text(
                             'İlk hatırlama izini oluştur.',
-                            style: theme.textTheme.titleMedium?.copyWith(
-                              color: ink,
-                              fontWeight: FontWeight.w900,
-                            ),
+                            style: theme.textTheme.titleMedium?.copyWith(color: ink, fontWeight: FontWeight.w900),
                           ),
                           const SizedBox(height: 4),
                           Text(
@@ -165,10 +157,7 @@ class ProgressSurface extends StatelessWidget {
                     icon: const Icon(Icons.add_rounded),
                     label: const Text('İlk kaynağımı ekle'),
                     style: living
-                        ? FilledButton.styleFrom(
-                            backgroundColor: AtelierStyle.ink,
-                            foregroundColor: Colors.white,
-                          )
+                        ? FilledButton.styleFrom(backgroundColor: AtelierStyle.ink, foregroundColor: Colors.white)
                         : null,
                   ),
                 ],

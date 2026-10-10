@@ -139,8 +139,7 @@ class LivingStudyDeskHome extends StatelessWidget {
       RecallStateKind.retrievedOnce => 'İlk bağımsız hatırlaman kaydedildi. Kalıcılığı sonraki deneme gösterecek.',
       RecallStateKind.developing =>
         'Bu denemede yardım kullandın. Sıradaki hedef, aynı bilgiyi ipucusuz geri çağırmak.',
-      RecallStateKind.needsReview =>
-        'Bu bölüm henüz oturmadı. Kaynağa dönüp kısa bir onarım yap, sonra yeniden dene.',
+      RecallStateKind.needsReview => 'Bu bölüm henüz oturmadı. Kaynağa dönüp kısa bir onarım yap, sonra yeniden dene.',
       RecallStateKind.notAssessed => 'Henüz bağımsız bir hatırlama denemen yok.',
       null => null,
     };
@@ -497,19 +496,16 @@ class LivingStudyDeskHome extends StatelessWidget {
           borderRadius: BorderRadius.circular(compact ? 18 : 24),
           border: Border.all(color: const Color(0xFF3A5A60)),
         ),
-        child: Center(child: CompanionView(state: CompanionVisualState.idle, size: compact ? 52 : 74)),
+        child: Center(
+          child: CompanionView(state: CompanionVisualState.idle, size: compact ? 52 : 74),
+        ),
       );
       final promise = Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text(
             'İLK OTURUM',
-            style: TextStyle(
-              color: _mark,
-              fontSize: 10,
-              fontWeight: FontWeight.w900,
-              letterSpacing: 1,
-            ),
+            style: TextStyle(color: _mark, fontSize: 10, fontWeight: FontWeight.w900, letterSpacing: 1),
           ),
           const SizedBox(height: 8),
           Text(
@@ -620,11 +616,7 @@ class LivingStudyDeskHome extends StatelessWidget {
                         ),
                         SizedBox(width: 8),
                         Expanded(
-                          child: _FirstRunStep(
-                            number: '02',
-                            title: 'Oku veya dinle',
-                            icon: Icons.headphones_rounded,
-                          ),
+                          child: _FirstRunStep(number: '02', title: 'Oku veya dinle', icon: Icons.headphones_rounded),
                         ),
                         SizedBox(width: 8),
                         Expanded(
@@ -668,12 +660,7 @@ class LivingStudyDeskHome extends StatelessWidget {
 }
 
 class _FirstRunStep extends StatelessWidget {
-  const _FirstRunStep({
-    required this.number,
-    required this.title,
-    required this.icon,
-    this.compact = false,
-  });
+  const _FirstRunStep({required this.number, required this.title, required this.icon, this.compact = false});
 
   final String number;
   final String title;

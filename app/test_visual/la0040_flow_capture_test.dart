@@ -554,10 +554,7 @@ void main() {
       text: source,
       sourceName: 'Fotosentez: ışık ve enerji',
     );
-    final prompt = await recall.createCurrentPrompt(
-      learner: runtime.learner,
-      materialId: ingested.material.id,
-    );
+    final prompt = await recall.createCurrentPrompt(learner: runtime.learner, materialId: ingested.material.id);
     final attempt = await recall.openAttempt(learner: runtime.learner, actionId: prompt.id);
     await recall.submit(
       learner: runtime.learner,
