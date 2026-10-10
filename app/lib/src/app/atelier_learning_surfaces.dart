@@ -147,6 +147,7 @@ class AtelierWorkspace extends StatelessWidget {
                 children: [
                   Expanded(
                     child: OutlinedButton.icon(
+                      key: const ValueKey('la0040-atelier-workspace-listen'),
                       onPressed: onListen,
                       icon: const Icon(Icons.headphones_rounded),
                       label: const Text('Dinle'),

@@ -153,10 +153,12 @@ void main() {
 
     Navigator.of(tester.element(find.byType(QuickRecapScreen))).pop();
     await tester.pump();
-    await tester.pump(const Duration(milliseconds: 450));
+    await tester.pump(const Duration(milliseconds: 700));
     expect(find.byType(MaterialWorkspaceScreen), findsOneWidget);
 
-    await tapVisible(tester, find.text('Dinle').last);
+    final listenButton = find.byKey(const ValueKey('la0040-atelier-workspace-listen'));
+    expect(listenButton, findsOneWidget);
+    await tester.tap(listenButton);
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 450));
     expect(find.byType(ListenScreen), findsOneWidget);
