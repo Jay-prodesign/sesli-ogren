@@ -70,6 +70,7 @@ void main() {
     );
 
     final first = await recall.createCurrentPrompt(learner: learner, materialId: materialId);
+    expect((await actionFor(first)).expectedAnswer, 'Fotosentez');
     await recall.submit(
       learner: learner,
       actionId: first.id,
@@ -82,6 +83,7 @@ void main() {
 
     await answerCorrectly(retry, 'attempt-progression-correct');
     final next = await recall.createCurrentPrompt(learner: learner, materialId: materialId);
+    expect((await actionFor(next)).expectedAnswer, 'Mitokondri');
 
     expect(next.id, isNot(first.id));
     expect(next.anchor.startOffset, greaterThan(first.anchor.startOffset));
@@ -106,6 +108,7 @@ void main() {
     final second = await recall.createCurrentPrompt(learner: learner, materialId: materialId);
     await answerCorrectly(second, 'attempt-long-source-02');
     final third = await recall.createCurrentPrompt(learner: learner, materialId: materialId);
+    expect((await actionFor(third)).expectedAnswer, 'Ribozomlar');
 
     expect(third.anchor.startOffset, greaterThan(2400));
     expect(third.promptText, contains('_____'));

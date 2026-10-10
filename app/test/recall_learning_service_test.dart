@@ -67,8 +67,11 @@ void main() {
   test('creating Recall prompt exposes no answer and creates no learning truth', () async {
     final prompt = await recall.createCurrentPrompt(learner: learnerA, materialId: materialId);
 
-    expect(prompt.promptText, contains('_____'));
+    expect(prompt.promptText, startsWith('_____ sırasında'));
     expect(prompt.anchor.startOffset, greaterThanOrEqualTo(0));
+    expect(prompt.ruleVersion, RecallLearningService.promptRuleVersion);
+    final action = await storedAction(prompt);
+    expect(action.expectedAnswer, 'Fotosentez');
 
     final learningStore = sourceStore.learningTruthStore();
     final source = await sourceStore.currentSourceVersion(learner: learnerA, materialId: materialId);

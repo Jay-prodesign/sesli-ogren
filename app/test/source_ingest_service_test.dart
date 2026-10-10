@@ -191,13 +191,15 @@ void main() {
 
     final recall = RecallLearningService(sourceStore: store, learningStore: store.learningTruthStore());
     final prompt = await recall.createCurrentPrompt(learner: learnerA, materialId: material);
+    final action = await store.learningTruthStore().recallAction(learner: learnerA, actionId: prompt.id);
+    expect(action, isNotNull);
     final attempt = await recall.openAttempt(learner: learnerA, actionId: prompt.id);
     await recall.submit(
       learner: learnerA,
       actionId: prompt.id,
       attemptId: attempt.attempt.attemptId,
       disposition: RecallResponseDisposition.answer,
-      answer: attempt.action.expectedAnswer,
+      answer: action!.expectedAnswer,
     );
     expect(
       await store.learningTruthStore().evidenceForMaterial(

@@ -225,13 +225,15 @@ void main() {
     );
 
     final prompt = await runtime.recall.createCurrentPrompt(learner: runtime.learner, materialId: materialId);
+    final action = await store.learningTruthStore().recallAction(learner: runtime.learner, actionId: prompt.id);
+    expect(action, isNotNull);
     final attempt = await runtime.recall.openAttempt(learner: runtime.learner, actionId: prompt.id);
     await runtime.recall.submit(
       learner: runtime.learner,
       actionId: prompt.id,
       attemptId: attempt.attempt.attemptId,
       disposition: RecallResponseDisposition.answer,
-      answer: attempt.action.expectedAnswer,
+      answer: action!.expectedAnswer,
     );
 
     await ingest.ingestPastedText(

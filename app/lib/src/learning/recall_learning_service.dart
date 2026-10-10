@@ -12,7 +12,7 @@ class RecallLearningService {
   const RecallLearningService({required this._sourceStore, required this._learningStore, DateTime Function()? now})
     : _now = now ?? DateTime.now;
 
-  static const promptRuleVersion = 'recall-cloze-v2';
+  static const promptRuleVersion = 'recall-cloze-v3-topic-cue';
   static const evidenceRuleVersion = RecallTruthPolicy.evidenceRuleVersion;
   static const stateRuleVersion = RecallTruthPolicy.stateRuleVersion;
   static const nextActionPolicyVersion = RecallTruthPolicy.nextActionPolicyVersion;
@@ -395,8 +395,11 @@ class RecallLearningService {
       if (matches.isEmpty) continue;
 
       matches.sort((a, b) {
-        final lengthOrder = b.group(0)!.length.compareTo(a.group(0)!.length);
-        return lengthOrder != 0 ? lengthOrder : a.start.compareTo(b.start);
+        final scoreOrder = _topicCueScore(b).compareTo(_topicCueScore(a));
+        if (scoreOrder != 0) return scoreOrder;
+        final positionOrder = a.start.compareTo(b.start);
+        if (positionOrder != 0) return positionOrder;
+        return b.group(0)!.length.compareTo(a.group(0)!.length);
       });
       final selected = matches.first;
       candidates.add(
@@ -418,6 +421,19 @@ class RecallLearningService {
     }, growable: false);
   }
 
+  static int _topicCueScore(RegExpMatch match) {
+    final wordLength = match.group(0)!.length;
+    var score = wordLength > 12 ? 12 : wordLength;
+    if (match.start == 0) {
+      score += 24;
+    } else if (match.start <= 20) {
+      score += 10;
+    } else if (match.start <= 45) {
+      score += 4;
+    }
+    return score;
+  }
+
   static void _validateAttemptId(RecallAttemptId attemptId) {
     if (!RegExp(r'^[A-Za-z0-9_.:-]{8,128}$').hasMatch(attemptId.value)) {
       throw const RecallLearningException('Attempt ID must be a stable 8-128 character identifier.');
@@ -426,18 +442,34 @@ class RecallLearningService {
 
   static const _stopWords = <String>{
     'ancak',
+    'ardından',
+    'ayrıca',
+    'böylece',
     'bunun',
+    'bunlar',
+    'burada',
     'daha',
     'fakat',
+    'genellikle',
     'gibi',
     'için',
     'ile',
     'olan',
     'olarak',
+    'öncelikle',
+    'örneğin',
+    'özellikle',
+    'sırasında',
     'sonra',
     'şekilde',
+    'şunlar',
     'veya',
     'çünkü',
+    'during',
+    'especially',
+    'however',
+    'therefore',
+    'usually',
     'the',
     'that',
     'this',
