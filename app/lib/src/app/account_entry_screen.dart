@@ -196,24 +196,40 @@ class _AccountEntryScreenState extends State<AccountEntryScreen> {
                           ),
                         ),
                         const SizedBox(height: 9),
-                        const Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Expanded(
-                              child: Text(
-                                'Kaynağını getir.\nGerçekten hatırla.',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 29,
-                                  height: 1.06,
-                                  fontWeight: FontWeight.w900,
-                                  letterSpacing: -0.9,
-                                ),
+                        LayoutBuilder(
+                          builder: (context, constraints) {
+                            final compactHero =
+                                constraints.maxWidth < 300 || MediaQuery.textScalerOf(context).scale(1) > 1.25;
+                            const headline = Text(
+                              'Kaynağını getir.\nGerçekten hatırla.',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 29,
+                                height: 1.06,
+                                fontWeight: FontWeight.w900,
+                                letterSpacing: -0.9,
                               ),
-                            ),
-                            SizedBox(width: 8),
-                            CompanionView(state: CompanionVisualState.idle, size: 96),
-                          ],
+                            );
+                            if (compactHero) {
+                              return const Column(
+                                key: ValueKey('account-entry-hero-stacked'),
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  CompanionView(state: CompanionVisualState.idle, size: 82),
+                                  SizedBox(height: 12),
+                                  headline,
+                                ],
+                              );
+                            }
+                            return const Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Expanded(child: headline),
+                                SizedBox(width: 8),
+                                CompanionView(state: CompanionVisualState.idle, size: 96),
+                              ],
+                            );
+                          },
                         ),
                         const SizedBox(height: 10),
                         const Text(
