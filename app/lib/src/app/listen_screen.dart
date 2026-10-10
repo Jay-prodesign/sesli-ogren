@@ -273,11 +273,26 @@ class _ListenScreenState extends State<ListenScreen> {
     widget.onRecall?.call();
   }
 
-  void _retryLoad() {
+  Future<void> _retryLoad() async {
+    final token = ++_playToken;
+    try {
+      await _speech.stop();
+    } catch (_) {
+      if (!mounted || token != _playToken) return;
+      setState(() {
+        _error = 'Ses durdurulamadı. Yeniden yüklemeden önce tekrar deneyebilirsin.';
+      });
+      return;
+    }
+    if (!mounted || token != _playToken) return;
     setState(() {
       _error = null;
+      _speaking = false;
+      _startingPlayback = false;
       _resumeChunkOverride = null;
+      _currentChunkIndex = 0;
       _finishedListening = false;
+      _playbackRate = null;
       _source = _load();
     });
   }
