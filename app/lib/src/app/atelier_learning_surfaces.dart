@@ -327,10 +327,21 @@ class AtelierRecall extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 17),
-            Text(
-              prompt.promptText,
-              softWrap: true,
-              style: const TextStyle(color: Colors.white, fontSize: 23, height: 1.34, fontWeight: FontWeight.w800),
+            Semantics(
+              label: 'Hatırlama sorusu',
+              value: prompt.promptText,
+              child: ExcludeSemantics(
+                child: Text(
+                  prompt.promptText,
+                  softWrap: true,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 23,
+                    height: 1.34,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ),
             ),
           ],
         ),
@@ -364,6 +375,7 @@ class AtelierRecall extends StatelessWidget {
         maxLines: 6,
         textCapitalization: TextCapitalization.sentences,
         decoration: InputDecoration(
+          labelText: 'Yanıtın',
           hintText: 'Kaynağa bakmadan hatırladığını kendi cümlelerinle yaz…',
           filled: true,
           fillColor: AtelierStyle.paper,
@@ -372,16 +384,22 @@ class AtelierRecall extends StatelessWidget {
       ),
       if (support != null) ...[
         const SizedBox(height: 12),
-        Text(
-          support!,
-          style: const TextStyle(color: AtelierStyle.teal, fontWeight: FontWeight.w700),
+        Semantics(
+          liveRegion: true,
+          child: Text(
+            support!,
+            style: const TextStyle(color: AtelierStyle.teal, fontWeight: FontWeight.w700),
+          ),
         ),
       ],
       if (error != null) ...[
         const SizedBox(height: 12),
-        Text(
-          error!,
-          style: const TextStyle(color: Color(0xFF9A3530), fontWeight: FontWeight.w700),
+        Semantics(
+          liveRegion: true,
+          child: Text(
+            error!,
+            style: const TextStyle(color: Color(0xFF9A3530), fontWeight: FontWeight.w700),
+          ),
         ),
       ],
       const SizedBox(height: 17),
@@ -481,14 +499,18 @@ class AtelierResult extends StatelessWidget {
           style: TextStyle(color: AtelierStyle.teal, fontSize: 11, letterSpacing: 1, fontWeight: FontWeight.w900),
         ),
         const SizedBox(height: 10),
-        Text(
-          _heading,
-          style: const TextStyle(
-            color: AtelierStyle.ink,
-            fontWeight: FontWeight.w900,
-            fontSize: 29,
-            height: 1.12,
-            letterSpacing: -0.6,
+        Semantics(
+          header: true,
+          liveRegion: true,
+          child: Text(
+            _heading,
+            style: const TextStyle(
+              color: AtelierStyle.ink,
+              fontWeight: FontWeight.w900,
+              fontSize: 29,
+              height: 1.12,
+              letterSpacing: -0.6,
+            ),
           ),
         ),
         const SizedBox(height: 8),
@@ -560,9 +582,12 @@ class AtelierResult extends StatelessWidget {
             opacity: progress,
             child: Transform.translate(offset: Offset(0, 12 * (1 - progress)), child: child),
           ),
-          child: Container(
-            width: double.infinity,
-            padding: const EdgeInsets.fromLTRB(20, 21, 20, 23),
+          child: Semantics(
+            container: true,
+            label: 'Kaynak kanıtı',
+            child: Container(
+              width: double.infinity,
+              padding: const EdgeInsets.fromLTRB(20, 21, 20, 23),
             decoration: BoxDecoration(color: AtelierStyle.ink, borderRadius: BorderRadius.circular(21)),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -605,6 +630,7 @@ class AtelierResult extends StatelessWidget {
                 ],
               ],
             ),
+          ),
           ),
         ),
         const SizedBox(height: 14),

@@ -213,10 +213,13 @@ class _SourceReaderScreenState extends State<SourceReaderScreen> {
                 padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 4),
                 child: Align(
                   alignment: Alignment.centerLeft,
-                  child: Text(
-                    matches.isEmpty
-                        ? 'Eşleşme bulunamadı'
-                        : '${matches.length}${matches.length == 2000 ? '+' : ''} eşleşme',
+                  child: Semantics(
+                    liveRegion: true,
+                    child: Text(
+                      matches.isEmpty
+                          ? 'Eşleşme bulunamadı'
+                          : '${matches.length}${matches.length == 2000 ? '+' : ''} eşleşme',
+                    ),
                   ),
                 ),
               ),
@@ -251,6 +254,8 @@ class _SourceReaderScreenState extends State<SourceReaderScreen> {
                 minHeight: living ? 4 : 3,
                 color: accent,
                 backgroundColor: living ? line : null,
+                semanticsLabel: 'Okuma ilerlemesi',
+                semanticsValue: '%${(_readingProgress * 100).round()}',
               ),
             ],
             Expanded(

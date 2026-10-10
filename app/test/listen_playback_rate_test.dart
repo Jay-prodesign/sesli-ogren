@@ -165,6 +165,7 @@ void main() {
       ),
     );
     await _pumpUntilFound(tester, find.text('Dinleme hızı'));
+    expect(find.bySemanticsLabel('Dinleme ilerlemesi'), findsOneWidget);
     await _tapVisible(tester, find.text('1.25×'));
     await tester.pump(const Duration(milliseconds: 50));
 

@@ -25,6 +25,7 @@ void main() {
 
     expect(find.descendant(of: find.byType(AppBar), matching: find.text('Biyoloji notu')), findsOneWidget);
     expect(find.byType(RichText), findsWidgets);
+    expect(find.bySemanticsLabel('Okuma ilerlemesi'), findsOneWidget);
 
     await tester.tap(find.byTooltip('Metinde ara'));
     await tester.pumpAndSettle();

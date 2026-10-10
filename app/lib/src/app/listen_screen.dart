@@ -377,16 +377,21 @@ class _ListenScreenState extends State<ListenScreen> {
                             value: progress,
                             backgroundColor: Colors.white.withValues(alpha: 0.12),
                             color: progressAccent,
+                            semanticsLabel: 'Dinleme ilerlemesi',
+                            semanticsValue: '%${(progress * 100).round()}',
                           ),
                         ),
                         const SizedBox(height: 8),
-                        Text(
-                          _finishedListening
-                              ? 'Tüm bölümler dinlendi · Hatırlamayı deneyebilirsin'
-                              : progress == 0
-                              ? 'Dinleme henüz başlamadı · ${source.chunks.length} bölüm'
-                              : 'Dinleme konumu: bölüm ${visibleChunk + 1} / ${source.chunks.length}',
-                          style: theme.textTheme.bodySmall?.copyWith(color: Colors.white.withValues(alpha: 0.72)),
+                        Semantics(
+                          liveRegion: true,
+                          child: Text(
+                            _finishedListening
+                                ? 'Tüm bölümler dinlendi · Hatırlamayı deneyebilirsin'
+                                : progress == 0
+                                ? 'Dinleme henüz başlamadı · ${source.chunks.length} bölüm'
+                                : 'Dinleme konumu: bölüm ${visibleChunk + 1} / ${source.chunks.length}',
+                            style: theme.textTheme.bodySmall?.copyWith(color: Colors.white.withValues(alpha: 0.72)),
+                          ),
                         ),
                       ],
                     ),
@@ -469,7 +474,10 @@ class _ListenScreenState extends State<ListenScreen> {
                 Text('Hız tercihin bu cihazda hatırlanır.', style: theme.textTheme.bodySmall?.copyWith(color: muted)),
                 if (_error != null) ...[
                   const SizedBox(height: 12),
-                  Text(_error!, style: TextStyle(color: theme.colorScheme.error)),
+                  Semantics(
+                    liveRegion: true,
+                    child: Text(_error!, style: TextStyle(color: theme.colorScheme.error)),
+                  ),
                 ],
                 const SizedBox(height: 18),
                 if (_speaking || _startingPlayback)
