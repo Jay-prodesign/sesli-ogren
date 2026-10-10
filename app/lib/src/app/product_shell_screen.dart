@@ -1160,7 +1160,7 @@ class _LibrarySurfaceState extends State<_LibrarySurface> {
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 Expanded(child: title),
-                if (count != null) count,
+                ?count,
               ],
             );
           },

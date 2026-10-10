@@ -261,14 +261,35 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
       return;
     }
     if (file == null || !mounted) return;
+    final selectedFile = file;
+
+    int? fileByteSize;
+    try {
+      fileByteSize = selectedFile.lengthSync() ?? await selectedFile.length();
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        _inlineError =
+            'PDF boyutu güvenli biçimde doğrulanamadı. Başka bir PDF seçebilir veya metni doğrudan yapıştırabilirsin.';
+      });
+      return;
+    }
+    if (!mounted) return;
+    if (fileByteSize == null) {
+      setState(() {
+        _inlineError =
+            'PDF boyutu güvenli biçimde doğrulanamadı. Başka bir PDF seçebilir veya metni doğrudan yapıştırabilirsin.';
+      });
+      return;
+    }
 
     try {
-      widget.runtime.ingest.validatePdfByteSize(file.size);
+      widget.runtime.ingest.validatePdfByteSize(fileByteSize);
     } on SourceIngestException {
       if (!mounted) return;
       final maxMegabytes = (widget.runtime.ingest.maxPdfBytes / (1024 * 1024)).floor();
       setState(() {
-        _inlineError = file!.size <= 0
+        _inlineError = fileByteSize! <= 0
             ? 'Seçtiğin PDF boş görünüyor. Başka bir dosya seç veya metni doğrudan yapıştır.'
             : 'Bu PDF güvenli dosya sınırını aşıyor. En fazla $maxMegabytes MB olan bir PDF seç.';
       });
@@ -290,12 +311,12 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
     });
     try {
       final previousBinding = await _currentRemoteSourceBinding();
-      final bytes = await file.readAsBytes();
+      final bytes = await selectedFile.readAsBytes();
       final ingestResult = await widget.runtime.ingest.ingestPdf(
         learner: widget.runtime.learner,
         materialId: widget.materialId,
         bytes: bytes,
-        originalName: file.name,
+        originalName: selectedFile.name,
       );
       stopwatch.stop();
       await _recordEvent(
