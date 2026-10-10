@@ -152,8 +152,24 @@ class _ProgressCard extends StatelessWidget {
         (item.prefersReaderResume
             ? 'Okuma konumun kayıtlı. Okumak öğrenme kanıtı değil; kaldığın yerden devam edip sonra hatırlayabilirsin.'
             : item.hasListenResume
-            ? 'Dinleme konumun kayıtlı. Bu bir öğrenme kanıtı değil; kaldığın yerden dinlemeye devam edebilirsin.'
+            ? 'Dinleme konumun kayıtlı. Dinlemek öğrenme kanıtı oluşturmaz; kaldığın yerden devam edebilirsin.'
             : 'Aktif hatırlama henüz öğrenme kanıtı üretmedi.');
+    final actionLabel = switch (item.continuation?.nextAction.kind) {
+      NextLearningActionKind.reviewSourceThenRecall => 'Kaynağı gözden geçir',
+      NextLearningActionKind.retryRecallWithoutHint => 'İpucusuz tekrar dene',
+      NextLearningActionKind.repeatRecallLater => 'Kaynağa dön',
+      null when item.prefersReaderResume => 'Okumaya devam et',
+      null when item.hasListenResume => 'Dinlemeye devam et',
+      null => 'İlk hatırlamayı dene',
+    };
+    final actionIcon = switch (item.continuation?.nextAction.kind) {
+      NextLearningActionKind.reviewSourceThenRecall || NextLearningActionKind.repeatRecallLater =>
+        Icons.auto_stories_outlined,
+      NextLearningActionKind.retryRecallWithoutHint => Icons.refresh_rounded,
+      null when item.prefersReaderResume => Icons.menu_book_outlined,
+      null when item.hasListenResume => Icons.headphones_rounded,
+      null => Icons.psychology_alt_outlined,
+    };
     final (legacyAccent, legacySoft, icon) = switch (state) {
       RecallStateKind.notAssessed => (
         AppPalette.inkMuted,
@@ -261,7 +277,7 @@ class _ProgressCard extends StatelessWidget {
                       child: Padding(
                         padding: const EdgeInsets.all(6),
                         child: Icon(
-                          Icons.arrow_forward_rounded,
+                          actionIcon,
                           color: living ? AtelierStyle.ink : AppPalette.momentumInk,
                           size: 16,
                         ),
@@ -273,10 +289,10 @@ class _ProgressCard extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Sıradaki adıma devam et',
-                            style: theme.textTheme.labelSmall?.copyWith(
-                              color: Colors.white.withValues(alpha: 0.68),
-                              fontWeight: FontWeight.w800,
+                            actionLabel,
+                            style: theme.textTheme.labelMedium?.copyWith(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w900,
                             ),
                           ),
                           const SizedBox(height: 3),

@@ -135,6 +135,31 @@ void main() {
     expect(find.text('Kaynağı kapat ve yeniden dene'), findsOneWidget);
   });
 
+  testWidgets('Progress exposes and opens the same canonical repair action as Home and Library', (tester) async {
+    usePhoneViewport(tester);
+    final runtime = await _runtimeWithEvidence(
+      disposition: RecallResponseDisposition.unknown,
+      submitCorrectAnswer: false,
+    );
+    addTearDown(runtime.close);
+
+    await tester.pumpWidget(_testApp(LivingDeskReviewScope(child: ProductShellScreen(runtime: runtime))));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 150));
+
+    await tapVisible(tester, find.text('İlerleme'));
+    await tester.pump(const Duration(milliseconds: 150));
+
+    expect(find.text('Kaynağı gözden geçir'), findsOneWidget);
+    final continueAction = find.byKey(ValueKey('progress-continue-${AppRuntime.primaryMaterialId.value}'));
+    expect(continueAction, findsOneWidget);
+    await tapVisible(tester, continueAction);
+    await pumpUntilFound(tester, find.text('Bu bölümü yeniden kur'));
+
+    expect(find.text('Bu bölümü yeniden kur'), findsOneWidget);
+    expect(find.text('Kaynağı kapat ve yeniden dene'), findsOneWidget);
+  });
+
   testWidgets('Home completed action returns directly to the current source instead of replaying Recall', (
     tester,
   ) async {
