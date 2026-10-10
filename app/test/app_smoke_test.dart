@@ -495,18 +495,20 @@ void main() {
     await pumpUntilFound(tester, find.byType(ListenScreen));
     expect(find.text('Dinlenen eski materyal'), findsWidgets);
     await tester.pageBack();
-    await pumpUntilFound(tester, find.text('Kütüphane'));
+    await tester.pump(const Duration(milliseconds: 450));
+    await pumpUntilFound(tester, find.text('Kütüphane').hitTestable());
 
-    await tapVisible(tester, find.text('Kütüphane').last);
+    await tapVisible(tester, find.text('Kütüphane').hitTestable().last);
     final libraryContinue = find.byKey(ValueKey('library-continue-${listenedId.value}'));
     await pumpUntilFound(tester, libraryContinue);
     expect(find.text('Dinlemeye devam et'), findsOneWidget);
     await tapVisible(tester, libraryContinue);
     await pumpUntilFound(tester, find.byType(ListenScreen));
     await tester.pageBack();
-    await pumpUntilFound(tester, find.text('İlerleme'));
+    await tester.pump(const Duration(milliseconds: 450));
+    await pumpUntilFound(tester, find.text('İlerleme').hitTestable());
 
-    await tapVisible(tester, find.text('İlerleme').last);
+    await tapVisible(tester, find.text('İlerleme').hitTestable().last);
     final progressContinue = find.byKey(ValueKey('progress-continue-${listenedId.value}'));
     await pumpUntilFound(tester, progressContinue);
     expect(find.text('Henüz ölçülmedi'), findsWidgets);
