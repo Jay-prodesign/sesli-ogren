@@ -239,8 +239,7 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
       );
       if (!mounted) return;
       setState(() {
-        _inlineError =
-            'PDF işlenemedi. Tekrar deneyebilir; dosyada seçilebilir metin yoksa aynı bölümü metin olarak yapıştırabilirsin.';
+        _inlineError = 'PDF işlenemedi. Tekrar deneyebilir; dosyada seçilebilir metin yoksa aynı bölümü metin olarak yapıştırabilirsin.';
       });
     } finally {
       _setBusy(false);
@@ -829,11 +828,7 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
                   child: const Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      SizedBox(
-                        width: 18,
-                        height: 18,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      ),
+                      SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2)),
                       SizedBox(width: 10),
                       Expanded(
                         child: Text(
@@ -942,11 +937,7 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
               liveRegion: true,
               child: Row(
                 children: [
-                  const SizedBox(
-                    width: 18,
-                    height: 18,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  ),
+                  const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2)),
                   const SizedBox(width: 10),
                   Expanded(
                     child: Text(
@@ -1443,10 +1434,9 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
                                 padding: const EdgeInsets.all(16),
                                 child: SelectableText.rich(
                                   TextSpan(
-                                    style: Theme.of(sheetContext).textTheme.bodyLarge?.copyWith(
-                                      color: AtelierStyle.ink,
-                                      height: 1.55,
-                                    ),
+                                    style: Theme.of(
+                                      sheetContext,
+                                    ).textTheme.bodyLarge?.copyWith(color: AtelierStyle.ink, height: 1.55),
                                     children: [
                                       if (excerpt.leadingEllipsis) const TextSpan(text: '…'),
                                       TextSpan(text: excerpt.prefix),

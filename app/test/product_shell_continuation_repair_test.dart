@@ -60,7 +60,9 @@ Future<void> _pumpUntilFound(WidgetTester tester, Finder finder, {int maxPumps =
 void main() {
   sqfliteFfiInit();
 
-  testWidgets('first material outcome goes from empty Home through source entry into the real Workspace', (tester) async {
+  testWidgets('first material outcome goes from empty Home through source entry into the real Workspace', (
+    tester,
+  ) async {
     final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
     addTearDown(store.close);
     final ingest = SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor());
@@ -74,7 +76,9 @@ void main() {
     );
 
     await tester.pumpWidget(
-      MaterialApp(home: LivingDeskReviewScope(child: ProductShellScreen(runtime: runtime))),
+      MaterialApp(
+        home: LivingDeskReviewScope(child: ProductShellScreen(runtime: runtime)),
+      ),
     );
     await _pumpUntilFound(tester, find.text('İlk kaynağını ekle'));
     await tester.tap(find.text('İlk kaynağını ekle'));

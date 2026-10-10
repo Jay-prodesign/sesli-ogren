@@ -133,14 +133,12 @@ class LivingStudyDeskHome extends StatelessWidget {
   String? get _evidenceDetail {
     final state = continuation?.state.kind;
     return switch (state) {
-      RecallStateKind.retrievedOnce =>
-        'Bu tek başına ustalık kanıtı değil. Sonraki bağımsız deneme aynı bilgiyi yeniden kurup kuramadığını gösterecek.',
+      RecallStateKind.retrievedOnce => 'Bu tek başına ustalık kanıtı değil. Sonraki bağımsız deneme aynı bilgiyi yeniden kurup kuramadığını gösterecek.',
       RecallStateKind.developing =>
         'İpucu veya kısmi geri çağırma yardımcı oldu; sistem bunu ustalık saymadan ipucusuz tekrarı öne çıkarıyor.',
       RecallStateKind.needsReview =>
         'Yanlış eşleşme bir etiket değil. İlgili kaynak bölümüne dönüp ardından yeniden hatırlayabilirsin.',
-      RecallStateKind.notAssessed =>
-        'Bilmiyorum demek veya yanıtı görmek bağımsız geri çağırma sayılmaz; kaynak ve kanıt kaydı birbirinden ayrı tutulur.',
+      RecallStateKind.notAssessed => 'Bilmiyorum demek veya yanıtı görmek bağımsız geri çağırma sayılmaz; kaynak ve kanıt kaydı birbirinden ayrı tutulur.',
       null => null,
     };
   }

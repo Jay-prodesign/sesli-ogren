@@ -194,6 +194,20 @@ void main() {
     expect(find.text('Uygulama bağlantısı henüz yapılandırılmadı.'), findsNothing);
   });
 
+  testWidgets('runtime opening failure is not mislabeled as an OTP failure', (tester) async {
+    await tester.pumpWidget(
+      SesliOgrenApp(
+        restoreSession: () async => const AuthenticatedLearner(id: LearnerId('runtime-error-user')),
+        openRuntime: (_) async => throw StateError('local runtime failed'),
+      ),
+    );
+    await pumpUntilFound(tester, find.text('Güvenli öğrenme oturumu açılamadı.'));
+
+    expect(find.text('Güvenli öğrenme oturumu açılamadı.'), findsOneWidget);
+    expect(find.text('Yeniden dene'), findsOneWidget);
+    expect(find.text('Kod doğrulanamadı. Yeni bir kod isteyebilirsin.'), findsNothing);
+  });
+
   testWidgets('production learning slice boots at truthful source entry', (tester) async {
     final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
     addTearDown(store.close);

@@ -216,21 +216,10 @@ void main() {
     final secondSourceId = second.sourceVersion.identity.sourceVersionId;
 
     expect(
-      await store.readerResumeProgress(
-        learner: learnerA,
-        materialId: material,
-        sourceVersionId: secondSourceId,
-      ),
+      await store.readerResumeProgress(learner: learnerA, materialId: material, sourceVersionId: secondSourceId),
       0,
     );
-    expect(
-      await store.listenResumeChunk(
-        learner: learnerA,
-        materialId: material,
-        sourceVersionId: secondSourceId,
-      ),
-      0,
-    );
+    expect(await store.listenResumeChunk(learner: learnerA, materialId: material, sourceVersionId: secondSourceId), 0);
     expect(await recall.reopen(learner: learnerA, materialId: material), isNull);
     expect(
       await store.learningTruthStore().evidenceForMaterial(

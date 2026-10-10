@@ -271,5 +271,4 @@ void main() {
     expect(recallOpens, 1);
     expect(tester.takeException(), isNull);
   });
-
 }

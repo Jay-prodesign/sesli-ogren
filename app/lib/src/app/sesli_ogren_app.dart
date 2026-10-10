@@ -13,10 +13,11 @@ import 'product_shell_screen.dart';
 import 'living_study_desk_home.dart';
 
 class SesliOgrenApp extends StatefulWidget {
-  const SesliOgrenApp({this.restoreSession, super.key});
+  const SesliOgrenApp({this.restoreSession, this.openRuntime, super.key});
 
-  /// Test/review seam only. Production uses the real Supabase restore path.
+  /// Test/review seams only. Production uses real Supabase restore and AppRuntime.open.
   final Future<AuthenticatedLearner?> Function()? restoreSession;
+  final Future<AppRuntime> Function(AuthenticatedLearner learner)? openRuntime;
 
   @override
   State<SesliOgrenApp> createState() => _SesliOgrenAppState();
@@ -42,18 +43,18 @@ class _SesliOgrenAppState extends State<SesliOgrenApp> {
   }
 
   Future<AppRuntime> _openRuntimeForLearner(AuthenticatedLearner learner) async {
-    final runtime = await AppRuntime.open(learner: learner);
+    final runtime = await (widget.openRuntime?.call(learner) ?? AppRuntime.open(learner: learner));
     _runtime = runtime;
     return runtime;
   }
 
   Future<void> _handleAuthenticated(AuthenticatedLearner learner) async {
-    final runtime = await _openRuntimeForLearner(learner);
-    if (!mounted) {
-      await runtime.close();
-      return;
-    }
-    setState(() => _runtimeFuture = Future.value(runtime));
+    if (!mounted) return;
+    setState(() {
+      // Authentication has succeeded. Runtime opening is a separate product phase:
+      // its loading/error state belongs to the app shell, not to OTP validation.
+      _runtimeFuture = _openRuntimeForLearner(learner);
+    });
   }
 
   @override
@@ -151,6 +152,7 @@ class _AccountDeletedScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AtelierStyle.canvas,
       body: SafeArea(
         child: Center(
           child: ConstrainedBox(
@@ -223,10 +225,18 @@ class _RuntimeErrorScreen extends StatelessWidget {
             constraints: const BoxConstraints(maxWidth: 440),
             child: Padding(
               padding: const EdgeInsets.all(24),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const CompanionView(state: CompanionVisualState.correct, size: 112),
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  color: AtelierStyle.paper,
+                  borderRadius: BorderRadius.circular(22),
+                  border: Border.all(color: AtelierStyle.line),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(22),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const CompanionView(state: CompanionVisualState.correct, size: 96),
                   const SizedBox(height: 20),
                   Text(
                     error is LearnerAuthConfigurationException
@@ -243,8 +253,17 @@ class _RuntimeErrorScreen extends StatelessWidget {
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 20),
-                  FilledButton(onPressed: onRetry, child: const Text('Yeniden dene')),
-                ],
+                      FilledButton(
+                        style: FilledButton.styleFrom(
+                          backgroundColor: AtelierStyle.teal,
+                          foregroundColor: Colors.white,
+                        ),
+                        onPressed: onRetry,
+                        child: const Text('Yeniden dene'),
+                      ),
+                    ],
+                  ),
+                ),
               ),
             ),
           ),
