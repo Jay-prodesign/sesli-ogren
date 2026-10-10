@@ -3,12 +3,16 @@ import 'dart:io';
 import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:sesli_ogren/src/account/account_overview_gateway.dart';
 import 'package:sesli_ogren/src/app/account_entry_screen.dart';
 import 'package:sesli_ogren/src/app/app_runtime.dart';
 import 'package:sesli_ogren/src/app/app_theme.dart';
 import 'package:sesli_ogren/src/app/atelier_learning_surfaces.dart';
 import 'package:sesli_ogren/src/app/listen_screen.dart';
 import 'package:sesli_ogren/src/app/learning_slice_screen.dart';
+import 'package:sesli_ogren/src/app/product_shell_screen.dart';
+import 'package:sesli_ogren/src/app/profile_surface.dart';
+import 'package:sesli_ogren/src/app/progress_surface.dart';
 import 'package:sesli_ogren/src/app/living_study_desk_home.dart';
 import 'package:sesli_ogren/src/app/source_reader_screen.dart';
 import 'package:sesli_ogren/src/data/pdf_text_extractor.dart';
@@ -28,6 +32,22 @@ class _UnusedPdfExtractor implements PdfTextExtractor {
   Future<ExtractedPdf> extract(Uint8List bytes, {required String sourceName}) {
     throw UnimplementedError();
   }
+}
+
+class _VisualAccountOverviewGateway implements AccountOverviewGateway {
+  const _VisualAccountOverviewGateway();
+
+  @override
+  Future<AccountOverview?> load({required AuthenticatedLearner learner}) async => AccountOverview(
+    locale: 'tr-TR',
+    accountStatus: 'active',
+    plan: 'free',
+    entitlementStatus: 'active',
+    usage: [
+      AccountUsageEntry(periodStart: DateTime.utc(2026, 10, 1), capability: 'grounded_explain', consumed: 3),
+      AccountUsageEntry(periodStart: DateTime.utc(2026, 10, 1), capability: 'summary', consumed: 2),
+    ],
+  );
 }
 
 class _NoopSpeechOutput implements SpeechOutput {
@@ -502,6 +522,72 @@ void main() {
         ),
       ),
     );
+  });
+
+  testWidgets('LA-0040 integrated shell Home Progress Profile', (tester) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
+    addTearDown(store.close);
+    final ingest = SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor());
+    final recall = RecallLearningService(sourceStore: store, learningStore: store.learningTruthStore());
+    final runtime = AppRuntime(
+      learner: AppRuntime.localM5LearnerFixture,
+      store: store,
+      ingest: ingest,
+      recall: recall,
+      telemetry: store.operationalTelemetry(),
+      accountOverview: const _VisualAccountOverviewGateway(),
+    );
+    final ingested = await ingest.ingestPastedText(
+      learner: runtime.learner,
+      materialId: const MaterialId('visual-shell-material'),
+      text: source,
+      sourceName: 'Fotosentez: ışık ve enerji',
+    );
+    final prompt = await recall.createCurrentPrompt(
+      learner: runtime.learner,
+      materialId: ingested.material.id,
+    );
+    final attempt = await recall.openAttempt(learner: runtime.learner, actionId: prompt.id);
+    await recall.submit(
+      learner: runtime.learner,
+      actionId: prompt.id,
+      attemptId: attempt.attempt.attemptId,
+      disposition: RecallResponseDisposition.answered,
+      answer: 'Fotosentez',
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        debugShowCheckedModeBanner: false,
+        theme: SesliOgrenTheme.light(),
+        home: const SizedBox.shrink(),
+        builder: (context, _) => LivingDeskReviewScope(child: ProductShellScreen(runtime: runtime)),
+      ),
+    );
+    for (var i = 0; i < 40 && find.text('Kendi kaynağın.\nGerçek hatırlama.').evaluate().isEmpty; i++) {
+      await tester.pump(const Duration(milliseconds: 30));
+    }
+    expect(tester.takeException(), isNull);
+    await expectLater(find.byType(Scaffold), matchesGoldenFile('goldens/la0040_shell_home_390x844.png'));
+
+    await tester.tap(find.text('İlerleme'));
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(find.text('İlerleme'), findsWidgets);
+    expect(tester.takeException(), isNull);
+    await expectLater(find.byType(Scaffold), matchesGoldenFile('goldens/la0040_shell_progress_390x844.png'));
+
+    await tester.tap(find.text('Profil'));
+    for (var i = 0; i < 30 && find.text('Profil ve Ayarlar').evaluate().isEmpty; i++) {
+      await tester.pump(const Duration(milliseconds: 30));
+    }
+    expect(find.text('Profil ve Ayarlar'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+    await expectLater(find.byType(Scaffold), matchesGoldenFile('goldens/la0040_shell_profile_390x844.png'));
   });
 
   testWidgets('LA-0040 source-evidence Result', (tester) async {
