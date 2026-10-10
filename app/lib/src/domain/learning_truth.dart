@@ -324,32 +324,32 @@ class RecallTruthPolicy {
       RecallOutcome.correct => (
         NextLearningActionKind.repeatRecallLater,
         'ONE_UNASSISTED_RETRIEVAL_OBSERVED',
-        'Bu kavramı bir kez ipucusuz geri çağırdın. Bu ustalık kanıtı değil; daha sonra yeniden hatırlayacağız.',
+        'Bu kavramı bir kez kendi başına hatırladın. Kalıcılığını sonraki bağımsız denemede göreceğiz.',
       ),
       RecallOutcome.helpedCorrect => (
         NextLearningActionKind.retryRecallWithoutHint,
         'HINTED_SUCCESS_NEEDS_UNASSISTED_RETRIEVAL',
-        'Doğru yanıta ipucuyla ulaştın. Bunu bağımsız hatırlama saymadan daha sonra ipucusuz yeniden dene.',
+        'İpucu doğru kavrama götürdü. Sıradaki denemede aynı bilgiyi ipucusuz hatırlamaya çalış.',
       ),
       RecallOutcome.answerExposed => (
         NextLearningActionKind.retryRecallWithoutHint,
         'ANSWER_EXPOSED_NO_RETRIEVAL_CLAIM',
-        'Yanıt gösterildiği için geri çağırma kanıtı oluşmadı. Daha sonra kaynağı kapatıp ipucusuz yeniden dene.',
+        'Yanıtı gördün. Bu denemeyi bağımsız hatırlama saymıyoruz; daha sonra kaynağı kapatıp kendi başına dene.',
       ),
       RecallOutcome.partial => (
         NextLearningActionKind.retryRecallWithoutHint,
         'PARTIAL_RETRIEVAL_NEEDS_RETRY',
-        'Yanıt kısmen yaklaştı. Kaynak geri bildirimini gördükten sonra ipucusuz yeniden dene.',
+        'Kavramın bir kısmını yakaladın. Kaynağı gözden geçirip sonra ipucusuz yeniden dene.',
       ),
       RecallOutcome.incorrect => (
         NextLearningActionKind.reviewSourceThenRecall,
         'INCORRECT_RETRIEVAL_NEEDS_REPAIR',
-        'Bu denemede eşleşme oluşmadı. Kaynak bölümünü gözden geçirip yeniden dene.',
+        'Bu kez yanıt kaynakla eşleşmedi. İlgili bölümü gözden geçirip yeniden dene.',
       ),
       RecallOutcome.unknown => (
         NextLearningActionKind.reviewSourceThenRecall,
         'NO_EVALUABLE_RETRIEVAL',
-        'Bu denemede değerlendirilebilir bir geri çağırma yanıtı yok. Kaynağı gözden geçirip hazır olduğunda yeniden dene.',
+        'Bu kez yanıt vermedin. Kaynağı gözden geçirip hazır olduğunda yeniden dene.',
       ),
     };
     return NextLearningAction(

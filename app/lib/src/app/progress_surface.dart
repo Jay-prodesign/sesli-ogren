@@ -186,17 +186,17 @@ class _ProgressCard extends StatelessWidget {
     final state = item.continuation?.state.kind ?? RecallStateKind.notAssessed;
     final label = switch (state) {
       RecallStateKind.notAssessed => item.continuation == null ? 'Henüz ölçülmedi' : 'Bağımsız kanıt yok',
-      RecallStateKind.developing => 'Gelişiyor',
-      RecallStateKind.retrievedOnce => 'Bir kez bağımsız hatırlandı',
-      RecallStateKind.needsReview => 'Tekrar gerekiyor',
+      RecallStateKind.developing => 'İpucuyla ilerledi',
+      RecallStateKind.retrievedOnce => 'Kendi başına hatırlandı',
+      RecallStateKind.needsReview => 'Bir tur daha gerekiyor',
     };
     final reason =
         item.continuation?.nextAction.reasonText ??
         (item.prefersReaderResume
-            ? 'Okuma konumun kayıtlı. Okumak öğrenme kanıtı değil; kaldığın yerden devam edip sonra hatırlayabilirsin.'
+            ? 'Okuma konumun kayıtlı. Devam et; hazır olduğunda kaynağı kapatıp hatırlamayı dene.'
             : item.hasListenResume
-            ? 'Dinleme konumun kayıtlı. Dinlemek öğrenme kanıtı oluşturmaz; kaldığın yerden devam edebilirsin.'
-            : 'Aktif hatırlama henüz öğrenme kanıtı üretmedi.');
+            ? 'Dinleme konumun kayıtlı. Devam et; hazır olduğunda kaynağı kapatıp hatırlamayı dene.'
+            : 'Henüz bağımsız bir hatırlama denemen yok.');
     final actionLabel = switch (item.continuation?.nextAction.kind) {
       NextLearningActionKind.reviewSourceThenRecall => 'Kaynağı gözden geçir',
       NextLearningActionKind.retryRecallWithoutHint => 'İpucusuz tekrar dene',

@@ -567,12 +567,18 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
       bottomNavigationBar: living
           ? NavigationBarTheme(
               data: NavigationBarThemeData(
-                backgroundColor: const Color(0xFFF5F4F0),
-                indicatorColor: const Color(0xFFDCEAE1),
-                labelTextStyle: const WidgetStatePropertyAll(TextStyle(color: Color(0xFF1C292B), fontSize: 12)),
+                backgroundColor: AtelierStyle.paper,
+                indicatorColor: AtelierStyle.pulseSoft,
+                labelTextStyle: WidgetStateProperty.resolveWith(
+                  (states) => TextStyle(
+                    color: states.contains(WidgetState.selected) ? AtelierStyle.pulse : AtelierStyle.muted,
+                    fontSize: 12,
+                    fontWeight: states.contains(WidgetState.selected) ? FontWeight.w800 : FontWeight.w600,
+                  ),
+                ),
                 iconTheme: WidgetStateProperty.resolveWith(
                   (states) => IconThemeData(
-                    color: states.contains(WidgetState.selected) ? const Color(0xFF236B63) : const Color(0xFF58696A),
+                    color: states.contains(WidgetState.selected) ? AtelierStyle.pulse : AtelierStyle.muted,
                   ),
                 ),
               ),
@@ -719,7 +725,7 @@ class _HomeSurface extends StatelessWidget {
 
   static String _nextReason(LearningContinuation? continuation) =>
       continuation?.nextAction.reasonText ??
-      'Kaynağından kısa bir hatırlama denemesiyle ilk gerçek öğrenme kanıtını oluştur.';
+      'Kaynağa bakmadan kısa bir hatırlama denemesi yap.';
 
   static bool _nextActionOpensLearning(LearningContinuation? continuation) {
     final kind = continuation?.nextAction.kind;
@@ -741,7 +747,7 @@ class _HomeSurface extends StatelessWidget {
     return switch (state) {
       RecallStateKind.notAssessed => 'İlk aktif adımın hazır.',
       RecallStateKind.developing => 'Kaldığın yer hazır. Bir sonraki denemeye geç.',
-      RecallStateKind.retrievedOnce => 'Bir kez bağımsız hatırladın. Sıradaki adım hazır.',
+      RecallStateKind.retrievedOnce => 'Kendi başına hatırladın. Sıradaki adım hazır.',
       RecallStateKind.needsReview => 'Kısa bir tekrar noktası hazır.',
     };
   }
@@ -1007,9 +1013,9 @@ class _ContinueHero extends StatelessWidget {
     if (continuation == null) return 'Henüz ölçülmedi';
     return switch (continuation.state.kind) {
       RecallStateKind.notAssessed => 'Henüz ölçülmedi',
-      RecallStateKind.developing => 'Gelişiyor',
-      RecallStateKind.retrievedOnce => 'Bir kez bağımsız hatırlandı',
-      RecallStateKind.needsReview => 'Tekrar gerekiyor',
+      RecallStateKind.developing => 'İpucuyla ilerledi',
+      RecallStateKind.retrievedOnce => 'Kendi başına hatırlandı',
+      RecallStateKind.needsReview => 'Bir tur daha gerekiyor',
     };
   }
 
@@ -1295,9 +1301,9 @@ class _LibraryMaterialCard extends StatelessWidget {
     final nextReason =
         continuation?.nextAction.reasonText ??
         (_hasReaderResume
-            ? 'Okuma konumun kayıtlı. Okumak öğrenme kanıtı oluşturmaz; kaldığın yerden devam edebilirsin.'
+            ? 'Okuma konumun kayıtlı. Devam et; hazır olduğunda kaynağı kapatıp hatırlamayı dene.'
             : listenResumeChunk > 0
-            ? 'Dinleme konumun kayıtlı. Dinlemek öğrenme kanıtı oluşturmaz; kaldığın yerden devam edebilirsin.'
+            ? 'Dinleme konumun kayıtlı. Devam et; hazır olduğunda kaynağı kapatıp hatırlamayı dene.'
             : 'İlk aktif hatırlama denemesi öğrenme durumunu görünür kılar.');
     final resolvedStateSoft = living
         ? switch (state) {

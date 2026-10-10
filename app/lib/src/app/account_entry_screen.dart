@@ -370,7 +370,6 @@ class _AccountEntryScreenState extends State<AccountEntryScreen> {
                             backgroundColor: AtelierStyle.teal,
                             foregroundColor: Colors.white,
                             minimumSize: const Size.fromHeight(54),
-                            textStyle: const TextStyle(fontSize: 15, fontWeight: FontWeight.w900, letterSpacing: 0.05),
                           ),
                           onPressed: _busy ? null : (_codeRequested ? _verifyCode : _requestCode),
                           child: Text(
@@ -379,7 +378,6 @@ class _AccountEntryScreenState extends State<AccountEntryScreen> {
                                 : _codeRequested
                                 ? 'Giriş yap'
                                 : 'Kod gönder',
-                            style: const TextStyle(color: Colors.white),
                           ),
                         ),
                         if (_codeRequested) ...[
