@@ -1056,6 +1056,51 @@ void main() {
     expect(find.text('Destek e-postasını kopyala'), findsNothing);
   });
 
+  testWidgets('app sign out returns to account entry without deleting learner data', (tester) async {
+    final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
+    final ingest = SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor());
+    final runtime = AppRuntime(
+      learner: AppRuntime.localM5LearnerFixture,
+      store: store,
+      ingest: ingest,
+      recall: RecallLearningService(sourceStore: store, learningStore: store.learningTruthStore()),
+      telemetry: store.operationalTelemetry(),
+      accountOverview: const _ReadyAccountOverviewGateway(),
+    );
+    await ingest.ingestPastedText(
+      learner: runtime.learner,
+      materialId: AppRuntime.primaryMaterialId,
+      text: 'Oturum kapansa da bu yerel materyal hesap silme olmadan silinmemelidir.',
+      sourceName: 'Oturum koruma notu',
+    );
+    var signOutCalls = 0;
+
+    await tester.pumpWidget(
+      SesliOgrenApp(
+        restoreSession: () async => runtime.learner,
+        openRuntime: (_) async => runtime,
+        signOutSession: () async {
+          signOutCalls += 1;
+        },
+      ),
+    );
+    await pumpUntilFound(tester, find.text('Profil'));
+    await tester.tap(find.text('Profil').last);
+    await pumpUntilFound(tester, find.text('Profil ve Ayarlar'));
+    await tester.scrollUntilVisible(
+      find.text('Bu cihazda çıkış yap'),
+      260,
+      scrollable: find.byType(Scrollable).last,
+    );
+    await tester.tap(find.text('Bu cihazda çıkış yap'));
+    await pumpUntilFound(tester, find.text('Bu cihazda çıkış yap?'));
+    await tester.tap(find.text('Çıkış yap'));
+    await pumpUntilFound(tester, find.text('Öğrenme alanına gir'));
+
+    expect(signOutCalls, 1);
+    expect(find.text('Kod gönder'), findsOneWidget);
+  });
+
   testWidgets('Profile sign out requires confirmation and preserves learner local data', (tester) async {
     final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
     addTearDown(store.close);

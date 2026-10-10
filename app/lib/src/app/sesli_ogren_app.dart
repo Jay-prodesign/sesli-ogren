@@ -91,26 +91,41 @@ class _SesliOgrenAppState extends State<SesliOgrenApp> {
 
   Future<void> _handleSignOut() async {
     await _signOutSession();
+
+    // Session sign-out is the authority boundary. Once it succeeds, never keep
+    // rendering an authenticated product merely because local runtime cleanup
+    // failed afterward.
     final runtime = _runtime;
-    if (runtime != null) {
-      await runtime.close();
-    }
-    if (!mounted) return;
     _runtime = null;
     _accountDeleted = false;
-    setState(() => _runtimeFuture = Future.value(null));
+    if (mounted) {
+      setState(() => _runtimeFuture = Future.value(null));
+    }
+    if (runtime != null) {
+      try {
+        await runtime.close();
+      } catch (_) {
+        // Local handle cleanup is best-effort after the session is already gone.
+      }
+    }
   }
 
   Future<void> _returnToAccountEntryAfterRuntimeFailure() async {
     await _signOutSession();
+
     final runtime = _runtime;
-    if (runtime != null) {
-      await runtime.close();
-    }
-    if (!mounted) return;
     _runtime = null;
     _accountDeleted = false;
-    setState(() => _runtimeFuture = Future.value(null));
+    if (mounted) {
+      setState(() => _runtimeFuture = Future.value(null));
+    }
+    if (runtime != null) {
+      try {
+        await runtime.close();
+      } catch (_) {
+        // Do not resurrect a signed-out session because cleanup failed.
+      }
+    }
   }
 
   void _startFresh() {
