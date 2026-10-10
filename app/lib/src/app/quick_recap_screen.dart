@@ -42,6 +42,7 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> with WidgetsBinding
 
   String? _jobId;
   SourceVersionId? _submittedSourceVersion;
+  SourceVersionRecord? _boundSource;
   ServerSummaryStatus? _status;
   String? _error;
   bool _busy = false;
@@ -117,6 +118,8 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> with WidgetsBinding
         materialId: widget.materialId,
       );
       if (source == null) return;
+      if (!mounted) return;
+      setState(() => _boundSource = source);
       final id = await widget.runtime.store.summaryJobId(
         learner: widget.runtime.learner,
         materialId: widget.materialId,
@@ -200,6 +203,7 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> with WidgetsBinding
         materialId: widget.materialId,
       );
       if (source == null) throw StateError('Source unavailable');
+      if (mounted) setState(() => _boundSource = source);
       final extracted = await widget.runtime.store.extractedContentForSource(
         learner: widget.runtime.learner,
         sourceVersionId: source.identity.sourceVersionId,
@@ -314,6 +318,7 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> with WidgetsBinding
           setState(() {
             _jobId = null;
             _submittedSourceVersion = null;
+            _boundSource = currentSource;
             _status = null;
             _error = 'Kaynak değişti. Yeni sürüm için özet oluşturabilirsin.';
           });
@@ -379,9 +384,11 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> with WidgetsBinding
       materialId: widget.materialId,
     );
     final title = material?.title.trim().isNotEmpty == true ? material!.title : 'Öğrenme materyali';
+    final sourceName = _boundSource?.sourceName.trim();
     return [
       'Hızlı özet — $title',
       'AI tarafından oluşturulan özet · Sesli Öğren',
+      if (sourceName != null && sourceName.isNotEmpty) 'Kaynak: $sourceName',
       status.summary!,
       if (status.keyPoints.isNotEmpty) 'Önemli noktalar:\n${status.keyPoints.map((point) => '• $point').join('\n')}',
     ].join('\n\n');
@@ -481,6 +488,7 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> with WidgetsBinding
     setState(() {
       _jobId = null;
       _submittedSourceVersion = null;
+      _boundSource = null;
       _status = null;
       _error = null;
       _restoring = true;
@@ -547,6 +555,13 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> with WidgetsBinding
             'Özet, yüklediğin kaynağın güncel metnine dayanır. Kaynak değiştiğinde eski özet gösterilmez.',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: muted),
           ),
+          if (_boundSource != null) ...[
+            const SizedBox(height: 14),
+            KeyedSubtree(
+              key: const ValueKey('quick-recap-source-trust'),
+              child: AtelierSourceTrustStrip(sourceVersion: _boundSource!),
+            ),
+          ],
           const SizedBox(height: 20),
           if (_jobId == null)
             FilledButton.icon(

@@ -107,6 +107,8 @@ void main() {
 
     expect(gateway.submitCalls, 1);
     expect(gateway.deletedMaterialIds, isEmpty);
+    expect(find.byKey(const ValueKey('quick-recap-source-trust')), findsOneWidget);
+    expect(find.text('Biyoloji notu'), findsWidgets);
     expect(find.text('Kaynağa bağlı kısa özet.'), findsOneWidget);
     // A generated, persisted recap must be usable outside the app.
     String? copiedText;
@@ -123,6 +125,7 @@ void main() {
     expect(copiedText, contains('Hızlı özet —'));
     expect(copiedText, contains('Sesli Öğren'));
     expect(copiedText, contains('AI tarafından oluşturulan özet'));
+    expect(copiedText, contains('Kaynak: Biyoloji notu'));
     expect(copiedText, contains('Aynı server material yeniden kullanıldı.'));
     expect(find.text('Özet panoya kopyalandı'), findsOneWidget);
     expect(find.text('Paylaş'), findsOneWidget);
