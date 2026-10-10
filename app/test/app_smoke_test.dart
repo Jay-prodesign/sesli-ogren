@@ -1616,6 +1616,55 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  testWidgets('Workspace exposes source replacement without creating a second material', (tester) async {
+    usePhoneViewport(tester);
+    final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
+    addTearDown(store.close);
+    final ingest = SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor());
+    final runtime = AppRuntime(
+      learner: AppRuntime.localM5LearnerFixture,
+      store: store,
+      ingest: ingest,
+      recall: RecallLearningService(sourceStore: store, learningStore: store.learningTruthStore()),
+      telemetry: store.operationalTelemetry(),
+    );
+    const materialId = MaterialId('workspace-source-update');
+    final original = await ingest.ingestPastedText(
+      learner: runtime.learner,
+      materialId: materialId,
+      text: 'İlk kaynak sürümü hücre ve enerji hakkında yeterince uzun bir açıklama içerir.',
+      sourceName: 'İlk çalışma kaynağı',
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: LivingDeskReviewScope(
+          child: MaterialWorkspaceScreen(runtime: runtime, materialId: materialId),
+        ),
+      ),
+    );
+    await pumpUntilFound(tester, find.byKey(const ValueKey('la0040-atelier-workspace-update-source')));
+    await tapVisible(tester, find.byKey(const ValueKey('la0040-atelier-workspace-update-source')));
+    await pumpUntilFound(tester, find.text('KAYNAĞI GÜNCELLE'));
+
+    await tapVisible(tester, find.text('Metin yapıştır'));
+    await pumpUntilFound(tester, find.byKey(const ValueKey('pasted-material-text')));
+    await tester.enterText(
+      find.byKey(const ValueKey('pasted-material-text')),
+      'Yeni kaynak sürümü mitokondri ve hücresel solunum hakkında güncel bilgi içerir.',
+    );
+    await tapVisible(tester, find.byKey(const ValueKey('source-text-submit')));
+    await pumpUntilFound(tester, find.byKey(const ValueKey('la0040-atelier-workspace-update-source')));
+
+    final current = await store.currentSourceVersion(learner: runtime.learner, materialId: materialId);
+    final materials = await store.activeMaterials(learner: runtime.learner);
+    expect(current, isNotNull);
+    expect(current!.identity.sourceVersionId, isNot(original.sourceVersion.identity.sourceVersionId));
+    expect(materials, hasLength(1));
+    expect(materials.single.id, materialId);
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('source replacement proactively removes the superseded server mirror', (tester) async {
     usePhoneViewport(tester);
     final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
