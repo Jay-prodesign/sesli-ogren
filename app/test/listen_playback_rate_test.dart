@@ -61,6 +61,35 @@ Future<void> _tapVisible(WidgetTester tester, Finder finder) async {
 void main() {
   sqfliteFfiInit();
 
+  testWidgets('Listen exposes an in-place retry when the current source cannot be loaded', (tester) async {
+    final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
+    addTearDown(store.close);
+    final ingest = SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor());
+    final runtime = AppRuntime(
+      learner: AppRuntime.localM5LearnerFixture,
+      store: store,
+      ingest: ingest,
+      recall: RecallLearningService(sourceStore: store, learningStore: store.learningTruthStore()),
+      telemetry: store.operationalTelemetry(),
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: ListenScreen(
+          runtime: runtime,
+          materialId: const MaterialId('missing-listen-source'),
+          speechOutput: _RecordingSpeechOutput(),
+        ),
+      ),
+    );
+    await _pumpUntilFound(tester, find.text('Dinlenecek güncel kaynak bulunamadı.'));
+
+    expect(find.text('Tekrar dene'), findsOneWidget);
+    await tester.tap(find.text('Tekrar dene'));
+    await _pumpUntilFound(tester, find.text('Dinlenecek güncel kaynak bulunamadı.'));
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('Listen persists playback speed and passes it to device speech', (tester) async {
     final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
     addTearDown(store.close);

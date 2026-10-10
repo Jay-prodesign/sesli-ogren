@@ -216,6 +216,15 @@ class _ListenScreenState extends State<ListenScreen> {
     }
   }
 
+  void _retryLoad() {
+    setState(() {
+      _error = null;
+      _resumeChunkOverride = null;
+      _finishedListening = false;
+      _source = _load();
+    });
+  }
+
   @override
   void dispose() {
     _playToken++;
@@ -258,10 +267,32 @@ class _ListenScreenState extends State<ListenScreen> {
           future: _source,
           builder: (context, snapshot) {
             if (snapshot.hasError) {
-              return const Center(
+              return Center(
                 child: Padding(
-                  padding: EdgeInsets.all(24),
-                  child: Text('Dinlenecek güncel kaynak bulunamadı. Materyale dönüp kaynağı yeniden aç.'),
+                  padding: const EdgeInsets.all(24),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.sync_problem_rounded, size: 38),
+                      const SizedBox(height: 12),
+                      const Text(
+                        'Dinlenecek güncel kaynak bulunamadı.',
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Kaynağın silinmedi. Materyal verisini yeniden okumayı deneyebilirsin.',
+                        textAlign: TextAlign.center,
+                        style: theme.textTheme.bodyMedium?.copyWith(color: muted),
+                      ),
+                      const SizedBox(height: 16),
+                      OutlinedButton.icon(
+                        onPressed: _retryLoad,
+                        icon: const Icon(Icons.refresh_rounded),
+                        label: const Text('Tekrar dene'),
+                      ),
+                    ],
+                  ),
                 ),
               );
             }
