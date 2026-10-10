@@ -1227,6 +1227,10 @@ void main() {
   });
 
   testWidgets('source acquisition asks for one source path before showing the text form', (tester) async {
+    tester.view.physicalSize = const Size(320, 700);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
     final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
     addTearDown(store.close);
     final runtime = AppRuntime(
@@ -1240,7 +1244,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: MediaQuery(
-          data: const MediaQueryData(disableAnimations: true),
+          data: const MediaQueryData(textScaler: TextScaler.linear(1.5), disableAnimations: true),
           child: LivingDeskReviewScope(child: LearningSliceScreen(runtime: runtime)),
         ),
       ),

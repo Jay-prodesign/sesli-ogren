@@ -853,39 +853,49 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
               Semantics(
                 container: true,
                 label: 'Kaynak türünü seç',
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: FilledButton.icon(
-                        key: const ValueKey('source-choice-pdf'),
-                        onPressed: _busy ? null : _pickPdf,
-                        style: FilledButton.styleFrom(
-                          backgroundColor: AtelierStyle.ink,
-                          foregroundColor: Colors.white,
-                          minimumSize: const Size.fromHeight(54),
-                        ),
-                        icon: const Icon(Icons.picture_as_pdf_outlined),
-                        label: Text(_busy ? 'Hazırlanıyor…' : 'PDF seç'),
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    final compactChoices =
+                        constraints.maxWidth < 330 || MediaQuery.textScalerOf(context).scale(1) > 1.25;
+                    final pdfChoice = FilledButton.icon(
+                      key: const ValueKey('source-choice-pdf'),
+                      onPressed: _busy ? null : _pickPdf,
+                      style: FilledButton.styleFrom(
+                        backgroundColor: AtelierStyle.ink,
+                        foregroundColor: Colors.white,
+                        minimumSize: const Size.fromHeight(54),
                       ),
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: OutlinedButton.icon(
-                        key: const ValueKey('source-choice-text'),
-                        onPressed: _busy
-                            ? null
-                            : () {
-                                setState(() {
-                                  _sourceEntryMode = _SourceEntryMode.text;
-                                  _inlineError = null;
-                                });
-                              },
-                        style: OutlinedButton.styleFrom(minimumSize: const Size.fromHeight(54)),
-                        icon: const Icon(Icons.notes_rounded),
-                        label: const Text('Metin yapıştır'),
-                      ),
-                    ),
-                  ],
+                      icon: const Icon(Icons.picture_as_pdf_outlined),
+                      label: Text(_busy ? 'Hazırlanıyor…' : 'PDF seç'),
+                    );
+                    final textChoice = OutlinedButton.icon(
+                      key: const ValueKey('source-choice-text'),
+                      onPressed: _busy
+                          ? null
+                          : () {
+                              setState(() {
+                                _sourceEntryMode = _SourceEntryMode.text;
+                                _inlineError = null;
+                              });
+                            },
+                      style: OutlinedButton.styleFrom(minimumSize: const Size.fromHeight(54)),
+                      icon: const Icon(Icons.notes_rounded),
+                      label: const Text('Metin yapıştır'),
+                    );
+                    if (compactChoices) {
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [pdfChoice, const SizedBox(height: 8), textChoice],
+                      );
+                    }
+                    return Row(
+                      children: [
+                        Expanded(child: pdfChoice),
+                        const SizedBox(width: 10),
+                        Expanded(child: textChoice),
+                      ],
+                    );
+                  },
                 ),
               ),
               const SizedBox(height: 10),

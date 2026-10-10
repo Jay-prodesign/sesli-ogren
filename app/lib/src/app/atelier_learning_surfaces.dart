@@ -474,6 +474,7 @@ class AtelierWorkspace extends StatelessWidget {
       ),
     );
   }
+}
 
 enum AtelierLearningPhase { source, recall, evidence }
 
