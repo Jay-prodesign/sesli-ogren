@@ -455,6 +455,12 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> with WidgetsBinding
                           Navigator.of(listenContext).pop();
                           _openRecall();
                         },
+                        onReadSource: () {
+                          Navigator.of(listenContext).pop();
+                          WidgetsBinding.instance.addPostFrameCallback((_) {
+                            if (mounted) _openSourceReader();
+                          });
+                        },
                       ),
                     ),
                   ),
@@ -721,6 +727,12 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> with WidgetsBinding
                             onRecall: () {
                               Navigator.of(routeContext).pop();
                               _openRecall();
+                            },
+                            onReadSource: () {
+                              Navigator.of(routeContext).pop();
+                              WidgetsBinding.instance.addPostFrameCallback((_) {
+                                if (mounted) _openSourceReader();
+                              });
                             },
                           ),
                         ),

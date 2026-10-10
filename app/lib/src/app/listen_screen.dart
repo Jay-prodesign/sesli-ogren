@@ -339,6 +339,7 @@ class _ListenScreenState extends State<ListenScreen> {
               );
             }
             final source = snapshot.data!;
+            final listeningToDerivative = widget.textOverride?.trim().isNotEmpty == true;
             final resumeChunk = _resumeChunkOverride ?? source.resumeChunk;
             final hasResume = resumeChunk > 0;
             final playbackRate = _playbackRate ?? source.playbackRate;
@@ -567,7 +568,13 @@ class _ListenScreenState extends State<ListenScreen> {
                             const SizedBox(width: 7),
                             Expanded(
                               child: Text(
-                                _speaking || _startingPlayback ? 'ŞU AN DİNLENEN KAYNAK BÖLÜMÜ' : 'SIRADAKİ KAYNAK BÖLÜMÜ',
+                                listeningToDerivative
+                                    ? (_speaking || _startingPlayback
+                                          ? 'ŞU AN DİNLENEN ÖZET BÖLÜMÜ'
+                                          : 'SIRADAKİ ÖZET BÖLÜMÜ')
+                                    : (_speaking || _startingPlayback
+                                          ? 'ŞU AN DİNLENEN KAYNAK BÖLÜMÜ'
+                                          : 'SIRADAKİ KAYNAK BÖLÜMÜ'),
                                 style: theme.textTheme.labelMedium?.copyWith(
                                   color: accent,
                                   fontWeight: FontWeight.w800,
@@ -581,14 +588,14 @@ class _ListenScreenState extends State<ListenScreen> {
                           source.chunks[visibleChunkIndex],
                           style: theme.textTheme.bodyLarge?.copyWith(height: 1.55, color: ink),
                         ),
-                        if (widget.onReadSource != null && widget.textOverride?.trim().isNotEmpty != true) ...[
+                        if (widget.onReadSource != null) ...[
                           const SizedBox(height: 10),
                           Align(
                             alignment: Alignment.centerLeft,
                             child: TextButton.icon(
                               onPressed: widget.onReadSource,
                               icon: const Icon(Icons.menu_book_outlined),
-                              label: const Text('Tam kaynağı oku'),
+                              label: Text(listeningToDerivative ? 'Orijinal kaynağı oku' : 'Tam kaynağı oku'),
                             ),
                           ),
                         ],
@@ -622,7 +629,7 @@ class _ListenScreenState extends State<ListenScreen> {
                 ),
                 const SizedBox(height: 6),
                 Text('Hız tercihin bu cihazda hatırlanır.', style: theme.textTheme.bodySmall?.copyWith(color: muted)),
-                if (widget.textOverride?.trim().isNotEmpty == true || widget.onReadSource == null) ...[
+                if (widget.onReadSource == null) ...[
                   const SizedBox(height: 20),
                   DecoratedBox(
                     key: const ValueKey('listen-source-transcript'),
