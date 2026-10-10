@@ -155,6 +155,12 @@ class _MaterialWorkspaceScreenState extends State<MaterialWorkspaceScreen> {
               Navigator.of(listenContext).pop();
               _openRecall();
             },
+            onReadSource: () {
+              Navigator.of(listenContext).pop();
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                if (mounted) _readCurrentSource();
+              });
+            },
           ),
         ),
       ),

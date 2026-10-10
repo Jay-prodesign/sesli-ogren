@@ -268,6 +268,12 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
                     runtime: widget.runtime,
                     materialId: selected,
                     onRecall: () => _openRecallFromCurrentRoute(listenContext, selected),
+                    onReadSource: () {
+                      Navigator.of(listenContext).pop();
+                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                        if (mounted) _openSourceReader(selected);
+                      });
+                    },
                   ),
                 ),
               ),
@@ -333,6 +339,12 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
             runtime: widget.runtime,
             materialId: materialId,
             onRecall: () => _openRecallFromCurrentRoute(listenContext, materialId),
+            onReadSource: () {
+              Navigator.of(listenContext).pop();
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                if (mounted) _openSourceReader(materialId);
+              });
+            },
           );
           if (treatment != null) return LearningVisualTreatmentScope(treatment: treatment, child: screen);
           return livingReview ? LivingDeskReviewScope(child: screen) : screen;

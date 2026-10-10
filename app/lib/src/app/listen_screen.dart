@@ -16,6 +16,7 @@ class ListenScreen extends StatefulWidget {
     required this.materialId,
     this.speechOutput,
     this.onRecall,
+    this.onReadSource,
     this.textOverride,
     this.titleOverride,
     this.persistProgress = true,
@@ -26,6 +27,7 @@ class ListenScreen extends StatefulWidget {
   final MaterialId materialId;
   final SpeechOutput? speechOutput;
   final VoidCallback? onRecall;
+  final VoidCallback? onReadSource;
   final String? textOverride;
   final String? titleOverride;
   final bool persistProgress;
@@ -341,6 +343,8 @@ class _ListenScreenState extends State<ListenScreen> {
             final hasResume = resumeChunk > 0;
             final playbackRate = _playbackRate ?? source.playbackRate;
             final visibleChunk = _speaking || _startingPlayback ? _currentChunkIndex : resumeChunk;
+            final visibleChunkIndex =
+                visibleChunk >= 0 && visibleChunk < source.chunks.length ? visibleChunk : 0;
             final completedChunks = _finishedListening
                 ? source.chunks.length
                 : _speaking || _startingPlayback
@@ -452,34 +456,8 @@ class _ListenScreenState extends State<ListenScreen> {
                     ),
                   ),
                 ),
-                const SizedBox(height: 18),
-                Text(
-                  'Dinleme hızı',
-                  style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w800, color: ink),
-                ),
-                const SizedBox(height: 8),
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: [
-                    for (final rate in const <double>[0.75, 1.0, 1.25, 1.5])
-                      ChoiceChip(
-                        label: Text(_rateLabel(rate)),
-                        selected: playbackRate == rate,
-                        selectedColor: living ? AtelierStyle.mark : null,
-                        checkmarkColor: living ? AtelierStyle.ink : null,
-                        side: living ? const BorderSide(color: AtelierStyle.line) : null,
-                        labelStyle: living
-                            ? const TextStyle(color: AtelierStyle.ink, fontWeight: FontWeight.w700)
-                            : null,
-                        onSelected: _speaking || _startingPlayback ? null : (_) => _setPlaybackRate(rate),
-                      ),
-                  ],
-                ),
-                const SizedBox(height: 6),
-                Text('Hız tercihin bu cihazda hatırlanır.', style: theme.textTheme.bodySmall?.copyWith(color: muted)),
+                const SizedBox(height: 16),
                 if (_error != null) ...[
-                  const SizedBox(height: 12),
                   Semantics(
                     liveRegion: true,
                     child: DecoratedBox(
@@ -505,8 +483,8 @@ class _ListenScreenState extends State<ListenScreen> {
                       ),
                     ),
                   ),
+                  const SizedBox(height: 12),
                 ],
-                const SizedBox(height: 18),
                 if (_speaking || _startingPlayback)
                   FilledButton.icon(
                     onPressed: _stop,
@@ -531,7 +509,7 @@ class _ListenScreenState extends State<ListenScreen> {
                   ],
                 ],
                 if (widget.onRecall != null) ...[
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 10),
                   if (living && _finishedListening)
                     FilledButton.icon(
                       onPressed: _handoffToRecall,
@@ -570,35 +548,111 @@ class _ListenScreenState extends State<ListenScreen> {
                     ),
                   ),
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 16),
                 DecoratedBox(
-                  key: const ValueKey('listen-source-transcript'),
+                  key: const ValueKey('listen-current-source-segment'),
                   decoration: BoxDecoration(
                     color: surface,
                     borderRadius: BorderRadius.circular(18),
                     border: Border.all(color: line),
                   ),
                   child: Padding(
-                    padding: const EdgeInsets.fromLTRB(18, 17, 18, 18),
+                    padding: const EdgeInsets.fromLTRB(18, 16, 18, 16),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Row(
                           children: [
-                            Icon(Icons.article_outlined, color: accent, size: 18),
+                            Icon(Icons.graphic_eq_rounded, color: accent, size: 18),
                             const SizedBox(width: 7),
-                            Text(
-                              widget.textOverride?.trim().isNotEmpty == true ? 'Quick Recap özeti' : 'Kaynak metni',
-                              style: theme.textTheme.labelMedium?.copyWith(color: accent, fontWeight: FontWeight.w800),
+                            Expanded(
+                              child: Text(
+                                _speaking || _startingPlayback ? 'ŞU AN DİNLENEN KAYNAK BÖLÜMÜ' : 'SIRADAKİ KAYNAK BÖLÜMÜ',
+                                style: theme.textTheme.labelMedium?.copyWith(
+                                  color: accent,
+                                  fontWeight: FontWeight.w800,
+                                ),
+                              ),
                             ),
                           ],
                         ),
-                        const SizedBox(height: 12),
-                        Text(source.text, style: theme.textTheme.bodyLarge?.copyWith(height: 1.58, color: ink)),
+                        const SizedBox(height: 11),
+                        Text(
+                          source.chunks[visibleChunkIndex],
+                          style: theme.textTheme.bodyLarge?.copyWith(height: 1.55, color: ink),
+                        ),
+                        if (widget.onReadSource != null && widget.textOverride?.trim().isNotEmpty != true) ...[
+                          const SizedBox(height: 10),
+                          Align(
+                            alignment: Alignment.centerLeft,
+                            child: TextButton.icon(
+                              onPressed: widget.onReadSource,
+                              icon: const Icon(Icons.menu_book_outlined),
+                              label: const Text('Tam kaynağı oku'),
+                            ),
+                          ),
+                        ],
                       ],
                     ),
                   ),
                 ),
+                const SizedBox(height: 18),
+                Text(
+                  'Dinleme hızı',
+                  style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w800, color: ink),
+                ),
+                const SizedBox(height: 8),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    for (final rate in const <double>[0.75, 1.0, 1.25, 1.5])
+                      ChoiceChip(
+                        label: Text(_rateLabel(rate)),
+                        selected: playbackRate == rate,
+                        selectedColor: living ? AtelierStyle.mark : null,
+                        checkmarkColor: living ? AtelierStyle.ink : null,
+                        side: living ? const BorderSide(color: AtelierStyle.line) : null,
+                        labelStyle: living
+                            ? const TextStyle(color: AtelierStyle.ink, fontWeight: FontWeight.w700)
+                            : null,
+                        onSelected: _speaking || _startingPlayback ? null : (_) => _setPlaybackRate(rate),
+                      ),
+                  ],
+                ),
+                const SizedBox(height: 6),
+                Text('Hız tercihin bu cihazda hatırlanır.', style: theme.textTheme.bodySmall?.copyWith(color: muted)),
+                if (widget.textOverride?.trim().isNotEmpty == true || widget.onReadSource == null) ...[
+                  const SizedBox(height: 20),
+                  DecoratedBox(
+                    key: const ValueKey('listen-source-transcript'),
+                    decoration: BoxDecoration(
+                      color: surface,
+                      borderRadius: BorderRadius.circular(18),
+                      border: Border.all(color: line),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(18, 17, 18, 18),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Icon(Icons.article_outlined, color: accent, size: 18),
+                              const SizedBox(width: 7),
+                              Text(
+                                widget.textOverride?.trim().isNotEmpty == true ? 'Quick Recap özeti' : 'Kaynak metni',
+                                style: theme.textTheme.labelMedium?.copyWith(color: accent, fontWeight: FontWeight.w800),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 12),
+                          Text(source.text, style: theme.textTheme.bodyLarge?.copyWith(height: 1.58, color: ink)),
+                        ],
+                      ),
+                    ),
+                  ),
+                ]
               ],
             );
           },

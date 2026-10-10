@@ -474,32 +474,18 @@ class _SourceReaderScreenState extends State<SourceReaderScreen> {
                     child: Row(
                       children: [
                         if (widget.onListen != null)
-                          IconButton.filledTonal(
-                            tooltip: 'Kaynağı dinle',
+                          OutlinedButton.icon(
                             onPressed: () => unawaited(_runLearningAction(widget.onListen)),
                             style: living
-                                ? IconButton.styleFrom(
+                                ? OutlinedButton.styleFrom(
                                     foregroundColor: AtelierStyle.teal,
-                                    backgroundColor: AtelierStyle.mint,
+                                    side: const BorderSide(color: AtelierStyle.line),
                                   )
                                 : null,
-                            icon: const Icon(Icons.headphones_rounded),
+                            icon: const Icon(Icons.headphones_rounded, size: 19),
+                            label: const Text('Dinle'),
                           ),
-                        if (widget.onListen != null && (widget.onRecap != null || widget.onRecall != null))
-                          const SizedBox(width: 8),
-                        if (widget.onRecap != null)
-                          IconButton.filledTonal(
-                            tooltip: 'Hızlı özet',
-                            onPressed: () => unawaited(_runLearningAction(widget.onRecap)),
-                            style: living
-                                ? IconButton.styleFrom(
-                                    foregroundColor: AtelierStyle.teal,
-                                    backgroundColor: AtelierStyle.mint,
-                                  )
-                                : null,
-                            icon: const Icon(Icons.auto_awesome),
-                          ),
-                        if (widget.onRecap != null && widget.onRecall != null) const SizedBox(width: 10),
+                        if (widget.onListen != null && widget.onRecall != null) const SizedBox(width: 10),
                         if (widget.onRecall != null)
                           Expanded(
                             child: FilledButton.icon(
@@ -513,6 +499,14 @@ class _SourceReaderScreenState extends State<SourceReaderScreen> {
                               onPressed: () => unawaited(_runLearningAction(widget.onRecall)),
                               icon: const Icon(Icons.psychology_alt_outlined),
                               label: const Text('Kaynağı kapat ve hatırla'),
+                            ),
+                          )
+                        else if (widget.onRecap != null)
+                          Expanded(
+                            child: TextButton.icon(
+                              onPressed: () => unawaited(_runLearningAction(widget.onRecap)),
+                              icon: const Icon(Icons.auto_awesome),
+                              label: const Text('Hızlı özet'),
                             ),
                           ),
                       ],
