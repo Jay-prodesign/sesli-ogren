@@ -232,17 +232,11 @@ class _AccountEntryScreenState extends State<AccountEntryScreen> {
                                   Row(
                                     children: [
                                       Expanded(
-                                        child: _EntryJourneyStep(
-                                          icon: Icons.auto_stories_outlined,
-                                          label: 'KAYNAK',
-                                        ),
+                                        child: _EntryJourneyStep(icon: Icons.auto_stories_outlined, label: 'KAYNAK'),
                                       ),
                                       _EntryJourneyArrow(),
                                       Expanded(
-                                        child: _EntryJourneyStep(
-                                          icon: Icons.visibility_off_outlined,
-                                          label: 'KAPAT',
-                                        ),
+                                        child: _EntryJourneyStep(icon: Icons.visibility_off_outlined, label: 'KAPAT'),
                                       ),
                                     ],
                                   ),
@@ -250,17 +244,11 @@ class _AccountEntryScreenState extends State<AccountEntryScreen> {
                                   Row(
                                     children: [
                                       Expanded(
-                                        child: _EntryJourneyStep(
-                                          icon: Icons.psychology_alt_outlined,
-                                          label: 'HATIRLA',
-                                        ),
+                                        child: _EntryJourneyStep(icon: Icons.psychology_alt_outlined, label: 'HATIRLA'),
                                       ),
                                       _EntryJourneyArrow(),
                                       Expanded(
-                                        child: _EntryJourneyStep(
-                                          icon: Icons.find_in_page_outlined,
-                                          label: 'KANIT',
-                                        ),
+                                        child: _EntryJourneyStep(icon: Icons.find_in_page_outlined, label: 'KANIT'),
                                       ),
                                     ],
                                   ),
@@ -270,31 +258,19 @@ class _AccountEntryScreenState extends State<AccountEntryScreen> {
                             return const Row(
                               children: [
                                 Expanded(
-                                  child: _EntryJourneyStep(
-                                    icon: Icons.auto_stories_outlined,
-                                    label: 'KAYNAK',
-                                  ),
+                                  child: _EntryJourneyStep(icon: Icons.auto_stories_outlined, label: 'KAYNAK'),
                                 ),
                                 _EntryJourneyArrow(),
                                 Expanded(
-                                  child: _EntryJourneyStep(
-                                    icon: Icons.visibility_off_outlined,
-                                    label: 'KAPAT',
-                                  ),
+                                  child: _EntryJourneyStep(icon: Icons.visibility_off_outlined, label: 'KAPAT'),
                                 ),
                                 _EntryJourneyArrow(),
                                 Expanded(
-                                  child: _EntryJourneyStep(
-                                    icon: Icons.psychology_alt_outlined,
-                                    label: 'HATIRLA',
-                                  ),
+                                  child: _EntryJourneyStep(icon: Icons.psychology_alt_outlined, label: 'HATIRLA'),
                                 ),
                                 _EntryJourneyArrow(),
                                 Expanded(
-                                  child: _EntryJourneyStep(
-                                    icon: Icons.find_in_page_outlined,
-                                    label: 'KANIT',
-                                  ),
+                                  child: _EntryJourneyStep(icon: Icons.find_in_page_outlined, label: 'KANIT'),
                                 ),
                               ],
                             );
