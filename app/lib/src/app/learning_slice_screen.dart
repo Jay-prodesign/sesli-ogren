@@ -14,6 +14,8 @@ import 'atelier_learning_surfaces.dart';
 
 enum _SlicePhase { loading, source, recall, result, continuation, error }
 
+enum _SourceEntryMode { chooser, text }
+
 class LearningSliceScreen extends StatefulWidget {
   const LearningSliceScreen({
     required this.runtime,
@@ -47,6 +49,7 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
   bool _editingExistingSource = false;
   bool _answerWasRevealed = false;
   bool _submittedUnknown = false;
+  _SourceEntryMode _sourceEntryMode = _SourceEntryMode.chooser;
 
   @override
   void initState() {
@@ -104,6 +107,7 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
         if (!mounted) return;
         setState(() {
           _editingExistingSource = false;
+          _sourceEntryMode = _SourceEntryMode.chooser;
           _phase = _SlicePhase.source;
           _inlineError = null;
         });
@@ -842,76 +846,134 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
               ),
               const SizedBox(height: 12),
             ],
-            const SizedBox(height: 16),
-            OutlinedButton.icon(
-              onPressed: _busy ? null : _pickPdf,
-              icon: const Icon(Icons.picture_as_pdf_outlined),
-              label: Text(_busy ? 'PDF hazırlanıyor…' : 'PDF’den kaynak ekle'),
-            ),
-            const Padding(
-              padding: EdgeInsets.symmetric(vertical: 12),
-              child: Row(
+            const SizedBox(height: 18),
+            if (_sourceEntryMode == _SourceEntryMode.chooser) ...[
+              Semantics(
+                container: true,
+                label: 'Kaynak türünü seç',
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: FilledButton.icon(
+                        key: const ValueKey('source-choice-pdf'),
+                        onPressed: _busy ? null : _pickPdf,
+                        style: FilledButton.styleFrom(
+                          backgroundColor: AtelierStyle.ink,
+                          foregroundColor: Colors.white,
+                          minimumSize: const Size.fromHeight(54),
+                        ),
+                        icon: const Icon(Icons.picture_as_pdf_outlined),
+                        label: Text(_busy ? 'Hazırlanıyor…' : 'PDF seç'),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        key: const ValueKey('source-choice-text'),
+                        onPressed: _busy
+                            ? null
+                            : () {
+                                setState(() {
+                                  _sourceEntryMode = _SourceEntryMode.text;
+                                  _inlineError = null;
+                                });
+                              },
+                        style: OutlinedButton.styleFrom(minimumSize: const Size.fromHeight(54)),
+                        icon: const Icon(Icons.notes_rounded),
+                        label: const Text('Metin yapıştır'),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 10),
+              const Text(
+                'PDF tek adımda açılır. Metin yolunda yalnız çalışmak istediğin bölümü yapıştırırsın.',
+                textAlign: TextAlign.center,
+                style: TextStyle(color: AtelierStyle.muted, fontSize: 12.5, height: 1.35),
+              ),
+              if (_inlineError != null) ...[const SizedBox(height: 12), _InlineNotice(text: _inlineError!)],
+            ] else ...[
+              Row(
                 children: [
-                  Expanded(child: Divider(color: AtelierStyle.line)),
-                  Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 10),
-                    child: Text('veya kendi metnin', style: TextStyle(color: AtelierStyle.muted, fontSize: 12)),
+                  const Expanded(
+                    child: Text(
+                      'METİN KAYNAĞI',
+                      style: TextStyle(
+                        color: AtelierStyle.teal,
+                        fontSize: 10,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: 0.9,
+                      ),
+                    ),
                   ),
-                  Expanded(child: Divider(color: AtelierStyle.line)),
+                  TextButton(
+                    onPressed: _busy
+                        ? null
+                        : () {
+                            setState(() {
+                              _sourceEntryMode = _SourceEntryMode.chooser;
+                              _inlineError = null;
+                            });
+                          },
+                    child: const Text('Kaynak türünü değiştir'),
+                  ),
                 ],
               ),
-            ),
-            TextField(
-              key: const ValueKey('pasted-material-title'),
-              controller: _titleController,
-              enabled: !_busy,
-              onChanged: (_) {
-                if (_inlineError != null) setState(() => _inlineError = null);
-              },
-              maxLength: 120,
-              textCapitalization: TextCapitalization.sentences,
-              decoration: const InputDecoration(
-                labelText: 'Başlık (isteğe bağlı)',
-                hintText: 'Örn. Biyoloji · Fotosentez',
-                border: OutlineInputBorder(),
+              const SizedBox(height: 8),
+              TextField(
+                key: const ValueKey('pasted-material-title'),
+                controller: _titleController,
+                enabled: !_busy,
+                onChanged: (_) {
+                  if (_inlineError != null) setState(() => _inlineError = null);
+                },
+                maxLength: 120,
+                textCapitalization: TextCapitalization.sentences,
+                decoration: const InputDecoration(
+                  labelText: 'Başlık (isteğe bağlı)',
+                  hintText: 'Örn. Biyoloji · Fotosentez',
+                  border: OutlineInputBorder(),
+                ),
               ),
-            ),
-            const SizedBox(height: 8),
-            TextField(
-              key: const ValueKey('pasted-material-text'),
-              controller: _sourceController,
-              enabled: !_busy,
-              onChanged: (_) {
-                if (_inlineError != null) setState(() => _inlineError = null);
-              },
-              minLines: 6,
-              maxLines: 12,
-              textCapitalization: TextCapitalization.sentences,
-              decoration: const InputDecoration(
-                labelText: 'Kaynak metni',
-                hintText: 'Notunu veya çalışmak istediğin bölümü buraya yapıştır.',
-                border: OutlineInputBorder(),
-                alignLabelWithHint: true,
+              const SizedBox(height: 8),
+              TextField(
+                key: const ValueKey('pasted-material-text'),
+                controller: _sourceController,
+                enabled: !_busy,
+                onChanged: (_) {
+                  if (_inlineError != null) setState(() => _inlineError = null);
+                },
+                minLines: 6,
+                maxLines: 12,
+                textCapitalization: TextCapitalization.sentences,
+                decoration: const InputDecoration(
+                  labelText: 'Kaynak metni',
+                  hintText: 'Notunu veya çalışmak istediğin bölümü buraya yapıştır.',
+                  border: OutlineInputBorder(),
+                  alignLabelWithHint: true,
+                ),
               ),
-            ),
-            if (_inlineError != null) ...[const SizedBox(height: 12), _InlineNotice(text: _inlineError!)],
-            const SizedBox(height: 16),
-            FilledButton.icon(
-              onPressed: _busy ? null : _saveSource,
-              style: FilledButton.styleFrom(
-                backgroundColor: AtelierStyle.ink,
-                foregroundColor: Colors.white,
-                minimumSize: const Size.fromHeight(52),
+              if (_inlineError != null) ...[const SizedBox(height: 12), _InlineNotice(text: _inlineError!)],
+              const SizedBox(height: 16),
+              FilledButton.icon(
+                key: const ValueKey('source-text-submit'),
+                onPressed: _busy ? null : _saveSource,
+                style: FilledButton.styleFrom(
+                  backgroundColor: AtelierStyle.ink,
+                  foregroundColor: Colors.white,
+                  minimumSize: const Size.fromHeight(52),
+                ),
+                icon: const Icon(Icons.auto_stories_outlined),
+                label: Text(
+                  _busy
+                      ? 'Kaynak hazırlanıyor…'
+                      : _editingExistingSource
+                      ? 'Yeni sürümü ekle · çalışma alanını aç'
+                      : 'Metni ekle · çalışma alanını aç',
+                ),
               ),
-              icon: const Icon(Icons.auto_stories_outlined),
-              label: Text(
-                _busy
-                    ? 'Kaynak hazırlanıyor…'
-                    : _editingExistingSource
-                    ? 'Yeni sürümü ekle · çalışma alanını aç'
-                    : 'Kaynağı ekle · çalışma alanını aç',
-              ),
-            ),
+            ],
           ],
         ),
       );
@@ -1533,6 +1595,7 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
                 : () {
                     setState(() {
                       _editingExistingSource = true;
+                      _sourceEntryMode = _SourceEntryMode.chooser;
                       _sourceController.clear();
                       _inlineError = null;
                       _phase = _SlicePhase.source;
@@ -1562,6 +1625,7 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
                 ? null
                 : () {
                     setState(() {
+                      _sourceEntryMode = _SourceEntryMode.text;
                       _phase = _SlicePhase.source;
                       _inlineError = null;
                     });

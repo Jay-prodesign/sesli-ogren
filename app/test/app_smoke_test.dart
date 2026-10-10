@@ -1226,6 +1226,39 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  testWidgets('source acquisition asks for one source path before showing the text form', (tester) async {
+    final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
+    addTearDown(store.close);
+    final runtime = AppRuntime(
+      learner: AppRuntime.localM5LearnerFixture,
+      store: store,
+      ingest: SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor()),
+      recall: RecallLearningService(sourceStore: store, learningStore: store.learningTruthStore()),
+      telemetry: store.operationalTelemetry(),
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: MediaQuery(
+          data: const MediaQueryData(disableAnimations: true),
+          child: LivingDeskReviewScope(child: LearningSliceScreen(runtime: runtime)),
+        ),
+      ),
+    );
+    await pumpUntilFound(tester, find.text('PDF seç'));
+
+    expect(find.text('PDF seç'), findsOneWidget);
+    expect(find.text('Metin yapıştır'), findsOneWidget);
+    expect(find.byKey(const ValueKey('pasted-material-text')), findsNothing);
+
+    await tapVisible(tester, find.text('Metin yapıştır'));
+    await tester.pump();
+
+    expect(find.byKey(const ValueKey('pasted-material-title')), findsOneWidget);
+    expect(find.byKey(const ValueKey('pasted-material-text')), findsOneWidget);
+    expect(find.text('Metni ekle · çalışma alanını aç'), findsOneWidget);
+  });
+
   testWidgets('Reduced Motion keeps the learning slice usable', (tester) async {
     final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
     addTearDown(store.close);
