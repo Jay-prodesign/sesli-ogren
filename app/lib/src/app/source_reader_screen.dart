@@ -36,6 +36,16 @@ class _SourceReaderScreenState extends State<SourceReaderScreen> {
   void initState() {
     super.initState();
     _readingScroll.addListener(_updateReadingProgress);
+    _scheduleReadingProgressUpdate();
+  }
+
+  @override
+  void didUpdateWidget(covariant SourceReaderScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.sourceText != widget.sourceText) {
+      _readingProgress = 0;
+      _scheduleReadingProgressUpdate();
+    }
   }
 
   @override
@@ -45,13 +55,38 @@ class _SourceReaderScreenState extends State<SourceReaderScreen> {
     super.dispose();
   }
 
+  void _scheduleReadingProgressUpdate() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      _updateReadingProgress();
+    });
+  }
+
   void _updateReadingProgress() {
     if (!_readingScroll.hasClients) return;
-    final max = _readingScroll.position.maxScrollExtent;
-    final progress = max <= 0 ? 1.0 : _readingScroll.offset / max;
-    if ((progress - _readingProgress).abs() >= 0.01 || progress == 1.0) {
+    final position = _readingScroll.position;
+    final max = position.maxScrollExtent;
+    final progress = max <= 0 ? 1.0 : (position.pixels / max).clamp(0.0, 1.0);
+    if ((progress - _readingProgress).abs() >= 0.01 || progress == 0 || progress == 1.0) {
       setState(() => _readingProgress = progress);
     }
+  }
+
+  void _setReadingFontSize(double value) {
+    final next = value.clamp(14.0, 26.0).toDouble();
+    if (next == _fontSize) return;
+    setState(() => _fontSize = next);
+    _scheduleReadingProgressUpdate();
+  }
+
+  void _toggleSearch() {
+    setState(() => _showSearch = !_showSearch);
+    _scheduleReadingProgressUpdate();
+  }
+
+  void _searchChanged() {
+    setState(() {});
+    _scheduleReadingProgressUpdate();
   }
 
   @override
@@ -123,7 +158,7 @@ class _SourceReaderScreenState extends State<SourceReaderScreen> {
         actions: [
           IconButton(
             tooltip: 'Metinde ara',
-            onPressed: () => setState(() => _showSearch = !_showSearch),
+            onPressed: _toggleSearch,
             icon: Icon(_showSearch ? Icons.search_off : Icons.search),
           ),
           PopupMenuButton<String>(
@@ -140,10 +175,10 @@ class _SourceReaderScreenState extends State<SourceReaderScreen> {
                   widget.onRecall?.call();
                   break;
                 case 'smaller':
-                  setState(() => _fontSize = (_fontSize - 1).clamp(14.0, 26.0).toDouble());
+                  _setReadingFontSize(_fontSize - 1);
                   break;
                 case 'larger':
-                  setState(() => _fontSize = (_fontSize + 1).clamp(14.0, 26.0).toDouble());
+                  _setReadingFontSize(_fontSize + 1);
                   break;
               }
             },
@@ -184,7 +219,7 @@ class _SourceReaderScreenState extends State<SourceReaderScreen> {
                 child: TextField(
                   controller: _search,
                   autofocus: true,
-                  onChanged: (_) => setState(() {}),
+                  onChanged: (_) => _searchChanged(),
                   decoration: InputDecoration(
                     prefixIcon: const Icon(Icons.search),
                     hintText: 'Metinde ara',
@@ -196,7 +231,7 @@ class _SourceReaderScreenState extends State<SourceReaderScreen> {
                             icon: const Icon(Icons.close),
                             onPressed: () {
                               _search.clear();
-                              setState(() {});
+                              _searchChanged();
                             },
                           ),
                   ),
@@ -204,7 +239,9 @@ class _SourceReaderScreenState extends State<SourceReaderScreen> {
               ),
             if (!_showSearch && query.isNotEmpty)
               TextButton.icon(
-                onPressed: () => setState(() => _showSearch = true),
+                onPressed: () {
+                  if (!_showSearch) _toggleSearch();
+                },
                 icon: const Icon(Icons.search),
                 label: Text('Arama: $query'),
               ),
@@ -238,12 +275,12 @@ class _SourceReaderScreenState extends State<SourceReaderScreen> {
                     ),
                     IconButton(
                       tooltip: 'Yazıyı küçült',
-                      onPressed: _fontSize <= 14 ? null : () => setState(() => _fontSize -= 1),
+                      onPressed: _fontSize <= 14 ? null : () => _setReadingFontSize(_fontSize - 1),
                       icon: const Icon(Icons.text_decrease),
                     ),
                     IconButton(
                       tooltip: 'Yazıyı büyüt',
-                      onPressed: _fontSize >= 26 ? null : () => setState(() => _fontSize += 1),
+                      onPressed: _fontSize >= 26 ? null : () => _setReadingFontSize(_fontSize + 1),
                       icon: const Icon(Icons.text_increase),
                     ),
                   ],
