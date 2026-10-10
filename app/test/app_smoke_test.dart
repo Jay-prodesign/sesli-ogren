@@ -1659,7 +1659,8 @@ void main() {
     final current = await store.currentSourceVersion(learner: runtime.learner, materialId: materialId);
     final materials = await store.activeMaterials(learner: runtime.learner);
     expect(current, isNotNull);
-    expect(current!.identity.sourceVersionId, isNot(original.sourceVersion.identity.sourceVersionId));
+    expect(current!.identity.materialId, materialId);
+    expect(current.identity.sourceVersionId, isNot(original.sourceVersion.identity.sourceVersionId));
     expect(materials, hasLength(1));
     expect(materials.single.id, materialId);
     expect(tester.takeException(), isNull);
