@@ -207,6 +207,30 @@ void main() {
     );
   });
 
+  testWidgets('LA-0040 empty Home survives 320px + large type', (tester) async {
+    await capture(
+      tester,
+      'la0040_home_empty_320_text150',
+      SingleChildScrollView(
+        child: SizedBox(
+          height: 980,
+          child: LivingStudyDeskHome(
+            material: null,
+            continuation: null,
+            sourceText: null,
+            otherMaterials: const [],
+            onOpenWorkspace: () {},
+            onOpenLearning: () {},
+            onOpenListen: () {},
+            onOpenMaterial: (_) {},
+          ),
+        ),
+      ),
+      size: const Size(320, 700),
+      textScaler: const TextScaler.linear(1.5),
+    );
+  });
+
   testWidgets('LA-0040 source Reader', (tester) async {
     await capture(
       tester,
@@ -223,6 +247,27 @@ void main() {
         onExplain: () {},
         onFocus: () {},
       ),
+    );
+  });
+
+  testWidgets('LA-0040 Workspace survives 320px + large type', (tester) async {
+    await capture(
+      tester,
+      'la0040_workspace_320_text150',
+      AtelierWorkspace(
+        material: material,
+        sourceText: source,
+        sourceVersion: sourceVersion,
+        continuation: continuation,
+        onReadSource: () {},
+        onQuickRecap: () {},
+        onRecall: () {},
+        onListen: () {},
+        onExplain: () {},
+        onFocus: () {},
+      ),
+      size: const Size(320, 700),
+      textScaler: const TextScaler.linear(1.5),
     );
   });
 
