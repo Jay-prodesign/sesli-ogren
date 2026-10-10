@@ -338,11 +338,7 @@ void main() {
   test('source replacement can cross text and PDF while preserving material identity', () async {
     final extractor = _RecordingPdfExtractor();
     var now = DateTime.utc(2026, 10, 4, 10);
-    final crossMedia = SourceIngestService(
-      store: store,
-      pdfTextExtractor: extractor,
-      now: () => now,
-    );
+    final crossMedia = SourceIngestService(store: store, pdfTextExtractor: extractor, now: () => now);
 
     final first = await crossMedia.ingestPastedText(
       learner: learnerA,
