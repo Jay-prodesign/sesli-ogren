@@ -22,6 +22,7 @@ class LearningSliceScreen extends StatefulWidget {
     required this.runtime,
     this.materialId = AppRuntime.primaryMaterialId,
     this.autoAdvanceContinuation = false,
+    this.startInSourceEditor = false,
     this.sourceGateway = const SupabaseSourceSummaryGateway(),
     super.key,
   });
@@ -29,6 +30,7 @@ class LearningSliceScreen extends StatefulWidget {
   final AppRuntime runtime;
   final MaterialId materialId;
   final bool autoAdvanceContinuation;
+  final bool startInSourceEditor;
   final SupabaseSourceSummaryGateway sourceGateway;
 
   @override
@@ -120,6 +122,26 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
       }
 
       _editingExistingSource = true;
+      if (widget.startInSourceEditor) {
+        stopwatch.stop();
+        await _recordEvent(
+          OperationalEvent(
+            type: OperationalEventType.runtimeRestore,
+            phase: OperationalEventPhase.completed,
+            materialId: widget.materialId,
+            durationMs: stopwatch.elapsedMilliseconds,
+            createdAt: DateTime.now().toUtc(),
+          ),
+        );
+        if (!mounted) return;
+        setState(() {
+          _sourceEntryMode = _SourceEntryMode.chooser;
+          _showOptionalSourceTitle = false;
+          _phase = _SlicePhase.source;
+          _inlineError = null;
+        });
+        return;
+      }
       final continuation = await widget.runtime.recall.reopen(
         learner: widget.runtime.learner,
         materialId: widget.materialId,
