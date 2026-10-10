@@ -647,7 +647,9 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
                       ],
                     ),
                     const SizedBox(height: 8),
-                    _SourceLearningRail(showEvidence: compactResultHeader),
+                    AtelierLearningRail(
+                      phase: compactResultHeader ? AtelierLearningPhase.evidence : AtelierLearningPhase.recall,
+                    ),
                   ] else
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.center,
@@ -709,123 +711,6 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
       ),
     );
   }
-
-class _SourceLearningRail extends StatelessWidget {
-  const _SourceLearningRail({required this.showEvidence});
-
-  final bool showEvidence;
-
-  @override
-  Widget build(BuildContext context) {
-    final semantic = showEvidence
-        ? 'Kaynak okundu ve kapatıldı. Hatırlama tamamlandı. Şimdi kaynak kanıtı gösteriliyor.'
-        : 'Kaynak okundu ve kapatıldı. Şimdi hatırlama adımındasın; kaynak kanıtı yanıttan sonra açılacak.';
-    return Semantics(
-      label: semantic,
-      child: ExcludeSemantics(
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 10),
-          decoration: BoxDecoration(
-            color: AtelierStyle.paper,
-            borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: AtelierStyle.line),
-          ),
-          child: Row(
-            children: [
-              const _SourceLearningRailStep(
-                icon: Icons.auto_stories_outlined,
-                label: 'KAYNAK',
-                state: _SourceLearningRailState.done,
-              ),
-              const _SourceLearningRailLine(done: true),
-              const _SourceLearningRailStep(
-                icon: Icons.visibility_off_outlined,
-                label: 'KAPAT',
-                state: _SourceLearningRailState.done,
-              ),
-              const _SourceLearningRailLine(done: true),
-              _SourceLearningRailStep(
-                icon: Icons.psychology_alt_outlined,
-                label: 'HATIRLA',
-                state: showEvidence ? _SourceLearningRailState.done : _SourceLearningRailState.active,
-              ),
-              _SourceLearningRailLine(done: showEvidence),
-              _SourceLearningRailStep(
-                icon: Icons.find_in_page_outlined,
-                label: 'KANIT',
-                state: showEvidence ? _SourceLearningRailState.active : _SourceLearningRailState.upcoming,
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-enum _SourceLearningRailState { done, active, upcoming }
-
-class _SourceLearningRailStep extends StatelessWidget {
-  const _SourceLearningRailStep({required this.icon, required this.label, required this.state});
-
-  final IconData icon;
-  final String label;
-  final _SourceLearningRailState state;
-
-  @override
-  Widget build(BuildContext context) {
-    final active = state == _SourceLearningRailState.active;
-    final done = state == _SourceLearningRailState.done;
-    final foreground = active || done ? AtelierStyle.teal : AtelierStyle.muted;
-    final background = active
-        ? AtelierStyle.mark
-        : done
-        ? AtelierStyle.mint
-        : AtelierStyle.canvas;
-    return Flexible(
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 6),
-        decoration: BoxDecoration(color: background, borderRadius: BorderRadius.circular(999)),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(done ? Icons.check_rounded : icon, color: foreground, size: 13),
-            const SizedBox(width: 4),
-            Flexible(
-              child: Text(
-                label,
-                maxLines: 1,
-                overflow: TextOverflow.fade,
-                softWrap: false,
-                style: TextStyle(
-                  color: foreground,
-                  fontSize: 8.5,
-                  fontWeight: FontWeight.w900,
-                  letterSpacing: 0.35,
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _SourceLearningRailLine extends StatelessWidget {
-  const _SourceLearningRailLine({required this.done});
-
-  final bool done;
-
-  @override
-  Widget build(BuildContext context) => Expanded(
-    child: Container(
-      height: 2,
-      margin: const EdgeInsets.symmetric(horizontal: 4),
-      color: done ? AtelierStyle.teal : AtelierStyle.line,
-    ),
-  );
-}
 
   String _subtitle() => switch (_phase) {
     _SlicePhase.loading => 'Öğrenme durumunu hazırlıyorum.',

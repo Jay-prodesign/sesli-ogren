@@ -73,7 +73,7 @@ class AtelierWorkspace extends StatelessWidget {
               ),
               const SizedBox(height: 17),
               if (sourceText.trim().isNotEmpty) ...[
-                const _ReaderCue(),
+                const AtelierLearningRail(phase: AtelierLearningPhase.source),
                 const SizedBox(height: 12),
                 Wrap(
                   spacing: 8,
@@ -214,52 +214,130 @@ class AtelierWorkspace extends StatelessWidget {
   );
 }
 
-class _ReaderCue extends StatelessWidget {
-  const _ReaderCue();
+enum AtelierLearningPhase { source, recall, evidence }
+
+class AtelierLearningRail extends StatelessWidget {
+  const AtelierLearningRail({required this.phase, super.key});
+
+  final AtelierLearningPhase phase;
+
+  int get _activeIndex => switch (phase) {
+    AtelierLearningPhase.source => 0,
+    AtelierLearningPhase.recall => 2,
+    AtelierLearningPhase.evidence => 3,
+  };
+
+  String get _semanticLabel => switch (phase) {
+    AtelierLearningPhase.source =>
+      'Kaynak açık. Sonra kaynağı kapat, hatırla ve sonucu kaynak kanıtıyla karşılaştır.',
+    AtelierLearningPhase.recall =>
+      'Kaynak okundu ve kapatıldı. Şimdi hatırlama adımındasın; kaynak kanıtı yanıttan sonra açılacak.',
+    AtelierLearningPhase.evidence =>
+      'Kaynak okundu ve kapatıldı. Hatırlama tamamlandı. Şimdi kaynak kanıtı gösteriliyor.',
+  };
 
   @override
-  Widget build(BuildContext context) => Semantics(
-    label: 'Önce kaynağı oku, sonra kapat, hatırla ve sonucu kaynak kanıtıyla karşılaştır.',
-    child: Row(
-      children: [
-        _step(Icons.auto_stories_outlined, 'KAYNAK'),
-        _arrow(),
-        _step(Icons.visibility_off_outlined, 'KAPAT'),
-        _arrow(),
-        _step(Icons.psychology_alt_outlined, 'HATIRLA'),
-        _arrow(),
-        _step(Icons.find_in_page_outlined, 'KANIT'),
-      ],
-    ),
-  );
-
-  Widget _arrow() => const Expanded(
-    child: Padding(
-      padding: EdgeInsets.symmetric(horizontal: 7),
-      child: Divider(color: AtelierStyle.line, thickness: 1),
-    ),
-  );
-
-  Widget _step(IconData icon, String label) => Row(
-    mainAxisSize: MainAxisSize.min,
-    children: [
-      Icon(icon, color: AtelierStyle.teal, size: 18),
-      const SizedBox(width: 5),
-      Flexible(
-        child: Text(
-          label,
-          maxLines: 1,
-          overflow: TextOverflow.fade,
-          softWrap: false,
-          style: const TextStyle(
-            color: AtelierStyle.ink,
-            fontSize: 9,
-            fontWeight: FontWeight.w900,
-            letterSpacing: 0.55,
+  Widget build(BuildContext context) {
+    const steps = <(IconData, String)>[
+      (Icons.auto_stories_outlined, 'KAYNAK'),
+      (Icons.visibility_off_outlined, 'KAPAT'),
+      (Icons.psychology_alt_outlined, 'HATIRLA'),
+      (Icons.find_in_page_outlined, 'KANIT'),
+    ];
+    return Semantics(
+      label: _semanticLabel,
+      child: ExcludeSemantics(
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 9),
+          decoration: BoxDecoration(
+            color: AtelierStyle.paper,
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: AtelierStyle.line),
+          ),
+          child: Row(
+            children: [
+              for (var index = 0; index < steps.length; index++) ...[
+                _AtelierLearningRailStep(
+                  icon: steps[index].$1,
+                  label: steps[index].$2,
+                  state: index < _activeIndex
+                      ? _AtelierLearningRailState.done
+                      : index == _activeIndex
+                      ? _AtelierLearningRailState.active
+                      : _AtelierLearningRailState.upcoming,
+                ),
+                if (index != steps.length - 1)
+                  _AtelierLearningRailLine(done: index < _activeIndex),
+              ],
+            ],
           ),
         ),
       ),
-    ],
+    );
+  }
+}
+
+enum _AtelierLearningRailState { done, active, upcoming }
+
+class _AtelierLearningRailStep extends StatelessWidget {
+  const _AtelierLearningRailStep({required this.icon, required this.label, required this.state});
+
+  final IconData icon;
+  final String label;
+  final _AtelierLearningRailState state;
+
+  @override
+  Widget build(BuildContext context) {
+    final active = state == _AtelierLearningRailState.active;
+    final done = state == _AtelierLearningRailState.done;
+    final foreground = active || done ? AtelierStyle.teal : AtelierStyle.muted;
+    final background = active
+        ? AtelierStyle.mark
+        : done
+        ? AtelierStyle.mint
+        : AtelierStyle.canvas;
+    return Flexible(
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 6),
+        decoration: BoxDecoration(color: background, borderRadius: BorderRadius.circular(999)),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(done ? Icons.check_rounded : icon, color: foreground, size: 13),
+            const SizedBox(width: 4),
+            Flexible(
+              child: Text(
+                label,
+                maxLines: 1,
+                overflow: TextOverflow.fade,
+                softWrap: false,
+                style: TextStyle(
+                  color: foreground,
+                  fontSize: 8.5,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: 0.3,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _AtelierLearningRailLine extends StatelessWidget {
+  const _AtelierLearningRailLine({required this.done});
+
+  final bool done;
+
+  @override
+  Widget build(BuildContext context) => Expanded(
+    child: Container(
+      height: 2,
+      margin: const EdgeInsets.symmetric(horizontal: 3),
+      color: done ? AtelierStyle.teal : AtelierStyle.line,
+    ),
   );
 }
 
