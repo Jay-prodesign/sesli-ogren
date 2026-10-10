@@ -841,7 +841,7 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
             Text(
               _editingExistingSource
                   ? 'Yeni sürümü ekle.\nGeçmişin kaynakla karışmasın.'
-                  : 'Bir sayfa getir.\nOnu birlikte çalışalım.',
+                  : 'Bir sayfa getir.\nGerisini birlikte çalışalım.',
               style: const TextStyle(
                 color: AtelierStyle.ink,
                 fontSize: 28,
@@ -854,7 +854,7 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
             Text(
               _editingExistingSource
                   ? 'Yeni kaynak sürümü eski öğrenme kanıtını devralmaz.'
-                  : 'PDF seç veya yalnız çalışmak istediğin bölümü yapıştır.',
+                  : 'PDF ya da metin. Önce kaynağın görünür kalır; sonra kapatıp Hatırla ile denersin.',
               style: const TextStyle(color: AtelierStyle.muted, fontSize: 14, height: 1.45),
             ),
 

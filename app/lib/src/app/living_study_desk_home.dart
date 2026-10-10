@@ -56,6 +56,7 @@ class LivingStudyDeskHome extends StatelessWidget {
   static const _sub = Color(0xFF52696B);
   static const _accent = Color(0xFF0A716A);
   static const _line = Color(0xFFD5E3DC);
+  static const _mark = Color(0xFFE0F0AF);
 
   bool get _hasReaderResume =>
       continuation == null && readerResumePreferred && readerResumeProgress > 0.02 && readerResumeProgress < 0.95;
@@ -485,87 +486,190 @@ class LivingStudyDeskHome extends StatelessWidget {
     );
   }
 
-  Widget _empty(BuildContext context) => Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      Semantics(
-        header: true,
-        child: const Text(
-          'Kendi kaynağınla başla.',
-          style: TextStyle(color: _ink, fontSize: 32, height: 1.12, fontWeight: FontWeight.w800, letterSpacing: -1.1),
-        ),
-      ),
-      const SizedBox(height: 11),
-      const Text(
-        'PDF veya metnini getir. Önce kaynağın açılır; öğrenme kanıtını sen hatırlamayı denediğinde oluşturursun.',
-        style: TextStyle(fontSize: 16, color: _sub, height: 1.46),
-      ),
-      const SizedBox(height: 18),
-      SizedBox(
-        width: double.infinity,
-        child: FilledButton.icon(
-          key: const ValueKey('la0040-living-add'),
-          onPressed: onOpenLearning,
-          icon: const Icon(Icons.add_rounded),
-          label: const Text('Kaynak ekle'),
-          style: FilledButton.styleFrom(
-            backgroundColor: _ink,
-            foregroundColor: Colors.white,
-            minimumSize: const Size.fromHeight(54),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-          ),
-        ),
-      ),
-      const SizedBox(height: 18),
-      Semantics(
-        label: 'Öğrenme yolu: kaynağını ekle, oku veya dinle, ardından kaynağa bakmadan hatırla',
-        child: Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          children: [
-            for (final step in ['01  Kaynak ekle', '02  Oku / dinle', '03  Hatırla'])
-              Chip(
-                label: Text(step),
-                backgroundColor: _paper,
-                side: const BorderSide(color: _line),
-                labelStyle: const TextStyle(color: _ink, fontSize: 12, fontWeight: FontWeight.w700),
-              ),
-          ],
-        ),
-      ),
-      const SizedBox(height: 18),
-      Container(
-        width: double.infinity,
-        padding: const EdgeInsets.fromLTRB(15, 13, 15, 14),
+  Widget _empty(BuildContext context) => LayoutBuilder(
+    builder: (context, constraints) {
+      final compact = constraints.maxWidth < 340 || MediaQuery.textScalerOf(context).scale(1) > 1.25;
+      final companion = Container(
+        width: compact ? 72 : 84,
+        height: compact ? 72 : 84,
         decoration: BoxDecoration(
-          color: _paper,
-          borderRadius: BorderRadius.circular(15),
-          border: Border.all(color: _line),
+          color: const Color(0xFF24434A),
+          borderRadius: BorderRadius.circular(24),
+          border: Border.all(color: const Color(0xFF3A5A60)),
         ),
-        child: const Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            CompanionView(state: CompanionVisualState.idle, size: 58),
-            SizedBox(width: 11),
-            Expanded(
-              child: Column(
+        child: Center(child: CompanionView(state: CompanionVisualState.idle, size: compact ? 64 : 74)),
+      );
+      final promise = Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'İLK OTURUM',
+            style: TextStyle(
+              color: _mark,
+              fontSize: 10,
+              fontWeight: FontWeight.w900,
+              letterSpacing: 1,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Bir sayfa getir.\nGerisini birlikte çalışalım.',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: compact ? 28 : 32,
+              height: 1.05,
+              fontWeight: FontWeight.w900,
+              letterSpacing: -1.1,
+            ),
+          ),
+          const SizedBox(height: 10),
+          const Text(
+            'PDF ya da metin. Önce kaynağın görünür kalır; sonra kapatıp gerçekten neyi hatırladığını görürsün.',
+            style: TextStyle(color: Color(0xFFD1DFDC), fontSize: 14, height: 1.45),
+          ),
+        ],
+      );
+
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: double.infinity,
+            padding: EdgeInsets.fromLTRB(20, compact ? 18 : 20, 20, 20),
+            decoration: BoxDecoration(
+              color: _ink,
+              borderRadius: BorderRadius.circular(24),
+              boxShadow: const [BoxShadow(color: Color(0x1415313A), blurRadius: 28, offset: Offset(0, 14))],
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                if (compact) ...[
+                  Align(alignment: Alignment.centerLeft, child: companion),
+                  const SizedBox(height: 16),
+                  promise,
+                ] else
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(child: promise),
+                      const SizedBox(width: 14),
+                      companion,
+                    ],
+                  ),
+                const SizedBox(height: 18),
+                FilledButton.icon(
+                  key: const ValueKey('la0040-living-add'),
+                  onPressed: onOpenLearning,
+                  icon: const Icon(Icons.add_rounded),
+                  label: const Text('İlk kaynağımı ekle'),
+                  style: FilledButton.styleFrom(
+                    backgroundColor: _mark,
+                    foregroundColor: _ink,
+                    minimumSize: const Size.fromHeight(54),
+                    textStyle: const TextStyle(fontSize: 15, fontWeight: FontWeight.w900),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(13)),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 20),
+          const Text(
+            'NASIL ÇALIŞIR',
+            style: TextStyle(color: _accent, fontSize: 10, fontWeight: FontWeight.w900, letterSpacing: 0.9),
+          ),
+          const SizedBox(height: 10),
+          Semantics(
+            label: 'Öğrenme yolu: kaynağını ekle, oku veya dinle, ardından kaynağa bakmadan hatırla',
+            child: ExcludeSemantics(
+              child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    'D/Knot kaynağı görünür tutar.',
-                    style: TextStyle(color: _ink, fontSize: 14, fontWeight: FontWeight.w900),
-                  ),
-                  SizedBox(height: 4),
-                  Text(
-                    'Kaynak → oku veya dinle → kapat → hatırla → kanıtla karşılaştır.',
-                    style: TextStyle(color: _sub, fontSize: 13, height: 1.4),
-                  ),
+                  Expanded(child: _FirstRunStep(number: '01', title: 'Kaynağını getir', icon: Icons.auto_stories_outlined)),
+                  SizedBox(width: 8),
+                  Expanded(child: _FirstRunStep(number: '02', title: 'Oku veya dinle', icon: Icons.headphones_rounded)),
+                  SizedBox(width: 8),
+                  Expanded(child: _FirstRunStep(number: '03', title: 'Kapat ve hatırla', icon: Icons.psychology_alt_outlined)),
                 ],
               ),
             ),
-          ],
-        ),
-      ),
-    ],
+          ),
+          const SizedBox(height: 18),
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.fromLTRB(13, 11, 13, 11),
+            decoration: BoxDecoration(
+              color: _paper,
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(color: _line),
+            ),
+            child: const Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Icon(Icons.verified_outlined, color: _accent, size: 19),
+                SizedBox(width: 9),
+                Expanded(
+                  child: Text(
+                    'Öğrenme durumun yalnız Hatırla denemesinde değişir. Okumak ve dinlemek hazırlıktır.',
+                    style: TextStyle(color: _sub, fontSize: 12.5, height: 1.4),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      );
+    },
   );
+
+class _FirstRunStep extends StatelessWidget {
+  const _FirstRunStep({required this.number, required this.title, required this.icon});
+
+  final String number;
+  final String title;
+  final IconData icon;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      constraints: const BoxConstraints(minHeight: 116),
+      padding: const EdgeInsets.fromLTRB(12, 12, 12, 13),
+      decoration: BoxDecoration(
+        color: LivingStudyDeskHome._paper,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: LivingStudyDeskHome._line),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(icon, color: LivingStudyDeskHome._accent, size: 19),
+              const Spacer(),
+              Text(
+                number,
+                style: const TextStyle(
+                  color: LivingStudyDeskHome._accent,
+                  fontSize: 10,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: 0.8,
+                ),
+              ),
+            ],
+          ),
+          const Spacer(),
+          Text(
+            title,
+            style: const TextStyle(
+              color: LivingStudyDeskHome._ink,
+              fontSize: 13,
+              height: 1.25,
+              fontWeight: FontWeight.w900,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }

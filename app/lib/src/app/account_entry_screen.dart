@@ -187,7 +187,7 @@ class _AccountEntryScreenState extends State<AccountEntryScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         const Text(
-                          'KENDİ KAYNAĞIN · GERÇEK HATIRLAMA',
+                          'KAYNAĞINLA ÇALIŞ · GERÇEKTEN HATIRLA',
                           style: TextStyle(
                             color: AtelierStyle.mark,
                             fontSize: 10,
@@ -201,23 +201,23 @@ class _AccountEntryScreenState extends State<AccountEntryScreen> {
                           children: [
                             Expanded(
                               child: Text(
-                                'Çalışma alanın burada başlar.',
+                                'Kaynağını getir.\nGerçekten hatırla.',
                                 style: TextStyle(
                                   color: Colors.white,
                                   fontSize: 29,
-                                  height: 1.08,
+                                  height: 1.06,
                                   fontWeight: FontWeight.w900,
-                                  letterSpacing: -0.8,
+                                  letterSpacing: -0.9,
                                 ),
                               ),
                             ),
-                            SizedBox(width: 6),
-                            CompanionView(state: CompanionVisualState.idle, size: 92),
+                            SizedBox(width: 8),
+                            CompanionView(state: CompanionVisualState.idle, size: 96),
                           ],
                         ),
                         const SizedBox(height: 10),
                         const Text(
-                          'PDF veya metnini ekle. Kaynağı aç, kapatıp hatırla; sonra yanıtını kaynak kanıtıyla karşılaştır.',
+                          'Sesli Öğren kaynağını açık tutar, sonra onu kapatıp neyi kendi başına hatırladığını görmeni sağlar.',
                           style: TextStyle(color: Color(0xFFDCE8E5), fontSize: 14, height: 1.45),
                         ),
                         const SizedBox(height: 18),
