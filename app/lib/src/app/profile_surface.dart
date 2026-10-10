@@ -506,6 +506,25 @@ class _AccountOverviewCard extends StatelessWidget {
             _ => 'DOĞRULANAMADI',
           };
 
+    final usageByCapability = <String, AccountUsageEntry>{};
+    final unknownUsage = <AccountUsageEntry>[];
+    for (final entry in overview.usage) {
+      final capability = _canonicalCapability(entry.capability);
+      if (capability == null) {
+        unknownUsage.add(entry);
+      } else {
+        usageByCapability[capability] = entry;
+      }
+    }
+    final quotaCapabilities = <String>['summary', 'explain', 'focus', 'explain_back']
+        .where(
+          (capability) =>
+              overview.dailyLimitForCapability(capability) != null || usageByCapability.containsKey(capability),
+        )
+        .toList(growable: false);
+    final hasVerifiedLimits = overview.dailyLimits.isNotEmpty;
+    final hasUsageOrLimits = quotaCapabilities.isNotEmpty || unknownUsage.isNotEmpty;
+
     return DecoratedBox(
       decoration: BoxDecoration(
         color: hero,
@@ -597,13 +616,34 @@ class _AccountOverviewCard extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 10),
-            if (overview.usage.isEmpty)
+            if (!hasUsageOrLimits)
               Text(
-                'Bu hesap için sunucu kullanım kaydı henüz oluşmadı.',
+                'Bu hesap için doğrulanmış günlük limit veya kullanım kaydı henüz oluşmadı.',
                 style: theme.textTheme.bodyMedium?.copyWith(color: Colors.white.withValues(alpha: 0.78)),
               )
             else ...[
-              for (final entry in overview.usage.take(4))
+              for (final capability in quotaCapabilities)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 8),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          _capabilityLabel(capability),
+                          style: theme.textTheme.bodyMedium?.copyWith(color: Colors.white),
+                        ),
+                      ),
+                      Text(
+                        _usageAndLimitLabel(
+                          usageByCapability[capability]?.consumed ?? 0,
+                          overview.dailyLimitForCapability(capability),
+                        ),
+                        style: theme.textTheme.labelLarge?.copyWith(color: Colors.white),
+                      ),
+                    ],
+                  ),
+                ),
+              for (final entry in unknownUsage.take(2))
                 Padding(
                   padding: const EdgeInsets.only(bottom: 8),
                   child: Row(
@@ -623,7 +663,9 @@ class _AccountOverviewCard extends StatelessWidget {
                 ),
               const SizedBox(height: 2),
               Text(
-                'Bu sayılar sunucunun kaydettiği kullanımdır; kalan hak veya limit tahmini değildir.',
+                hasVerifiedLimits
+                    ? 'Günlük sınırlar sunucu planından gelir; burada tamamlanan kullanım gösterilir. Bekleyen işler kullanılabilir hakkı geçici olarak azaltabilir ve son kararı sunucu verir.'
+                    : 'Bu sayılar sunucunun kaydettiği kullanımdır; kalan hak veya limit tahmini değildir.',
                 style: theme.textTheme.bodySmall?.copyWith(color: Colors.white.withValues(alpha: 0.66), height: 1.35),
               ),
             ],
@@ -636,6 +678,19 @@ class _AccountOverviewCard extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  static String? _canonicalCapability(String capability) => switch (capability) {
+    'summary' => 'summary',
+    'explain' || 'grounded_explain' => 'explain',
+    'focus' => 'focus',
+    'explain_back' => 'explain_back',
+    _ => null,
+  };
+
+  static String _usageAndLimitLabel(int consumed, int? limit) {
+    if (consumed < 0) return limit == null ? 'Doğrulanamadı' : 'Doğrulanamadı / $limit';
+    return limit == null ? '$consumed işlem' : '$consumed / $limit bugün';
   }
 
   static String _capabilityLabel(String capability) => switch (capability) {

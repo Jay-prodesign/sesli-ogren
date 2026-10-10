@@ -14,17 +14,20 @@ class SupabaseAccountOverviewGateway implements AccountOverviewGateway {
       final account = await client.from('accounts').select('locale,status').eq('id', learner.id.value).maybeSingle();
       final entitlement = await client
           .from('entitlements')
-          .select('plan,status')
+          .select('plan,status,limits')
           .eq('account_id', learner.id.value)
           .maybeSingle();
       if (account == null || entitlement == null) return null;
 
+      final now = DateTime.now().toUtc();
+      final periodStart =
+          '${now.year.toString().padLeft(4, '0')}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';
       final rawUsage = await client
           .from('quota_ledger')
           .select('period_start,capability,consumed')
           .eq('account_id', learner.id.value)
-          .order('period_start', ascending: false)
-          .limit(12);
+          .eq('period_start', periodStart)
+          .order('capability');
 
       final usage = rawUsage
           .map((row) {
@@ -37,12 +40,25 @@ class SupabaseAccountOverviewGateway implements AccountOverviewGateway {
           })
           .toList(growable: false);
 
+      final dailyLimits = <String, int>{};
+      final rawLimits = entitlement['limits'];
+      if (rawLimits is Map) {
+        for (final entry in rawLimits.entries) {
+          final key = entry.key;
+          final value = entry.value;
+          if (key is String && value is int && value >= 0) {
+            dailyLimits[key] = value;
+          }
+        }
+      }
+
       return AccountOverview(
         locale: account['locale'] as String? ?? 'tr-TR',
         accountStatus: account['status'] as String? ?? 'unknown',
         plan: entitlement['plan'] as String? ?? 'unknown',
         entitlementStatus: entitlement['status'] as String? ?? 'unknown',
         usage: usage,
+        dailyLimits: Map.unmodifiable(dailyLimits),
       );
     } on PostgrestException {
       return null;

@@ -11,6 +11,7 @@ class AccountOverview {
     required this.plan,
     required this.entitlementStatus,
     required this.usage,
+    this.dailyLimits = const {},
   });
 
   final String locale;
@@ -18,6 +19,18 @@ class AccountOverview {
   final String plan;
   final String entitlementStatus;
   final List<AccountUsageEntry> usage;
+  final Map<String, int> dailyLimits;
+
+  int? dailyLimitForCapability(String capability) {
+    final key = switch (capability) {
+      'summary' => 'summary_daily',
+      'explain' || 'grounded_explain' => 'explain_daily',
+      'focus' => 'focus_daily',
+      'explain_back' => 'explain_back_daily',
+      _ => null,
+    };
+    return key == null ? null : dailyLimits[key];
+  }
 }
 
 class AccountUsageEntry {

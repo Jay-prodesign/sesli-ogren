@@ -62,9 +62,15 @@ class _ReadyAccountOverviewGateway implements AccountOverviewGateway {
     plan: 'free',
     entitlementStatus: 'active',
     usage: [
-      AccountUsageEntry(periodStart: DateTime.utc(2026, 10, 1), capability: 'grounded_explain', consumed: 3),
-      AccountUsageEntry(periodStart: DateTime.utc(2026, 10, 1), capability: 'focus', consumed: 2),
+      AccountUsageEntry(periodStart: DateTime.utc(2026, 10, 11), capability: 'explain', consumed: 3),
+      AccountUsageEntry(periodStart: DateTime.utc(2026, 10, 11), capability: 'focus', consumed: 2),
     ],
+    dailyLimits: const {
+      'summary_daily': 20,
+      'explain_daily': 20,
+      'focus_daily': 20,
+      'explain_back_daily': 20,
+    },
   );
 }
 
@@ -1049,9 +1055,13 @@ void main() {
     expect(find.text('Ücretsiz plan'), findsOneWidget);
     expect(find.text('Plan etkin'), findsOneWidget);
     expect(find.text('Kaynağa dayalı açıklama'), findsOneWidget);
-    expect(find.text('3 işlem'), findsOneWidget);
+    expect(find.text('3 / 20 bugün'), findsOneWidget);
     expect(find.text('Odak AI yardımı'), findsOneWidget);
-    expect(find.text('2 işlem'), findsOneWidget);
+    expect(find.text('2 / 20 bugün'), findsOneWidget);
+    expect(find.text('Quick Recap'), findsOneWidget);
+    expect(find.text('0 / 20 bugün'), findsNWidgets(2));
+    expect(find.text('Anlatım değerlendirme'), findsOneWidget);
+    expect(find.textContaining('Günlük sınırlar sunucu planından gelir'), findsOneWidget);
     expect(find.text('Dil: Türkçe'), findsOneWidget);
     await tester.scrollUntilVisible(find.text('Cihazın Türkçe sesi'), 260, scrollable: find.byType(Scrollable).last);
     await tester.pump(const Duration(milliseconds: 300));

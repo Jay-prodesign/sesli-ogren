@@ -45,9 +45,15 @@ class _VisualAccountOverviewGateway implements AccountOverviewGateway {
     plan: 'free',
     entitlementStatus: 'active',
     usage: [
-      AccountUsageEntry(periodStart: DateTime.utc(2026, 10, 1), capability: 'grounded_explain', consumed: 3),
-      AccountUsageEntry(periodStart: DateTime.utc(2026, 10, 1), capability: 'summary', consumed: 2),
+      AccountUsageEntry(periodStart: DateTime.utc(2026, 10, 11), capability: 'explain', consumed: 3),
+      AccountUsageEntry(periodStart: DateTime.utc(2026, 10, 11), capability: 'summary', consumed: 2),
     ],
+    dailyLimits: const {
+      'summary_daily': 20,
+      'explain_daily': 20,
+      'focus_daily': 20,
+      'explain_back_daily': 20,
+    },
   );
 }
 
