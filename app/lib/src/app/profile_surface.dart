@@ -31,20 +31,38 @@ class ProfileSurface extends StatefulWidget {
 
 class _ProfileSurfaceState extends State<ProfileSurface> {
   late Future<AccountOverview?> _overview;
+  AccountOverview? _resolvedOverview;
   bool _deleting = false;
   bool _signingOut = false;
 
   @override
   void initState() {
     super.initState();
-    _overview = widget.runtime.accountOverview.load(learner: widget.runtime.learner);
+    _overview = _loadOverview();
+  }
+
+  Future<AccountOverview?> _loadOverview() async {
+    final overview = await widget.runtime.accountOverview.load(learner: widget.runtime.learner);
+    if (mounted) setState(() => _resolvedOverview = overview);
+    return overview;
   }
 
   void _retry() {
     setState(() {
-      _overview = widget.runtime.accountOverview.load(learner: widget.runtime.learner);
+      _resolvedOverview = null;
+      _overview = _loadOverview();
     });
   }
+
+  bool get _deletionAlreadyRequested =>
+      _resolvedOverview?.accountStatus == 'deletion_requested' || _resolvedOverview?.accountStatus == 'deleted';
+
+  String get _deletionActionLabel => switch (_resolvedOverview?.accountStatus) {
+    'deletion_requested' => 'Silme isteği zaten bekliyor',
+    'deleted' => 'Hesap silinmiş görünüyor',
+    _ when _deleting => 'Siliniyor…',
+    _ => 'Hesabımı ve verilerimi sil',
+  };
 
   Future<void> _signOut() async {
     final callback = widget.onSignOut;
@@ -101,6 +119,7 @@ class _ProfileSurfaceState extends State<ProfileSurface> {
   }
 
   Future<void> _deleteAccount() async {
+    if (_deleting || _deletionAlreadyRequested) return;
     final firstConfirmed = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
@@ -286,11 +305,18 @@ class _ProfileSurfaceState extends State<ProfileSurface> {
         const SizedBox(height: 10),
         _ProfilePanel(
           children: [
-            const _ProfileTile(
+            _ProfileTile(
               icon: Icons.privacy_tip_outlined,
               title: 'Gizlilik ve veriler',
-              subtitle: 'Tek tek materyalleri Kütüphane’den silebilirsin. Hesap silme tüm hesap ve öğrenme verilerini kapsar.',
-              iconBackground: Color(0xFFFDE7E5),
+              subtitle: switch (_resolvedOverview?.accountStatus) {
+                'deletion_requested' =>
+                  'Hesap silme isteği sunucuda bekliyor. Aynı destructive isteği tekrar göndermiyoruz; süreç tamamlanana kadar bu durum korunur.',
+                'deleted' =>
+                  'Sunucu hesabı silinmiş olarak bildiriyor. Bu ekrandan yeni bir silme isteği gönderilmiyor.',
+                _ =>
+                  'Tek tek materyalleri Kütüphane’den silebilirsin. Hesap silme tüm hesap ve öğrenme verilerini kapsar.',
+              },
+              iconBackground: const Color(0xFFFDE7E5),
               iconForeground: AppPalette.destructive,
             ),
             Padding(
@@ -300,11 +326,11 @@ class _ProfileSurfaceState extends State<ProfileSurface> {
                   foregroundColor: AppPalette.destructive,
                   side: const BorderSide(color: Color(0xFFE7B8B4)),
                 ),
-                onPressed: _deleting ? null : _deleteAccount,
+                onPressed: _deleting || _deletionAlreadyRequested ? null : _deleteAccount,
                 icon: _deleting
                     ? const SizedBox.square(dimension: 18, child: CircularProgressIndicator(strokeWidth: 2))
-                    : const Icon(Icons.delete_forever_outlined),
-                label: Text(_deleting ? 'Siliniyor…' : 'Hesabımı ve verilerimi sil'),
+                    : Icon(_deletionAlreadyRequested ? Icons.hourglass_top_rounded : Icons.delete_forever_outlined),
+                label: Text(_deletionActionLabel),
               ),
             ),
           ],
@@ -432,7 +458,7 @@ class _AccountOverviewCard extends StatelessWidget {
                 'Bu hesap için sunucu kullanım kaydı henüz oluşmadı.',
                 style: theme.textTheme.bodyMedium?.copyWith(color: Colors.white.withValues(alpha: 0.78)),
               )
-            else
+            else ...[
               for (final entry in overview.usage.take(4))
                 Padding(
                   padding: const EdgeInsets.only(bottom: 8),
@@ -444,13 +470,22 @@ class _AccountOverviewCard extends StatelessWidget {
                           style: theme.textTheme.bodyMedium?.copyWith(color: Colors.white),
                         ),
                       ),
-                      Text('${entry.consumed} işlem', style: theme.textTheme.labelLarge?.copyWith(color: Colors.white)),
+                      Text(
+                        entry.consumed < 0 ? 'Doğrulanamadı' : '${entry.consumed} işlem',
+                        style: theme.textTheme.labelLarge?.copyWith(color: Colors.white),
+                      ),
                     ],
                   ),
                 ),
+              const SizedBox(height: 2),
+              Text(
+                'Bu sayılar sunucunun kaydettiği kullanımdır; kalan hak veya limit tahmini değildir.',
+                style: theme.textTheme.bodySmall?.copyWith(color: Colors.white.withValues(alpha: 0.66), height: 1.35),
+              ),
+            ],
             const SizedBox(height: 8),
             Text(
-              'Dil: ${overview.locale}',
+              'Dil: ${_localeLabel(overview.locale)}',
               style: theme.textTheme.bodySmall?.copyWith(color: Colors.white.withValues(alpha: 0.60)),
             ),
           ],
@@ -466,7 +501,13 @@ class _AccountOverviewCard extends StatelessWidget {
     'grounded_explain' => 'Kaynağa dayalı açıklama',
     'explain_back' => 'Anlatım değerlendirme',
     'focus' => 'Odak AI yardımı',
-    _ => capability.replaceAll('_', ' '),
+    _ => 'Diğer kullanım',
+  };
+
+  static String _localeLabel(String locale) => switch (locale) {
+    'tr' || 'tr-TR' => 'Türkçe',
+    'en' || 'en-US' || 'en-GB' => 'English',
+    _ => 'Doğrulanamadı',
   };
 }
 

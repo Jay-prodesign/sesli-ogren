@@ -78,6 +78,38 @@ class _UnverifiedPlanOverviewGateway implements AccountOverviewGateway {
   );
 }
 
+class _PendingDeletionOverviewGateway implements AccountOverviewGateway {
+  const _PendingDeletionOverviewGateway();
+
+  @override
+  Future<AccountOverview?> load({required AuthenticatedLearner learner}) async => const AccountOverview(
+    locale: 'tr-TR',
+    accountStatus: 'deletion_requested',
+    plan: 'free',
+    entitlementStatus: 'active',
+    usage: [],
+  );
+}
+
+class _UnknownUsageOverviewGateway implements AccountOverviewGateway {
+  const _UnknownUsageOverviewGateway();
+
+  @override
+  Future<AccountOverview?> load({required AuthenticatedLearner learner}) async => AccountOverview(
+    locale: 'unexpected-locale',
+    accountStatus: 'active',
+    plan: 'free',
+    entitlementStatus: 'active',
+    usage: [
+      AccountUsageEntry(
+        periodStart: DateTime.utc(2026, 10, 1),
+        capability: 'internal_future_capability',
+        consumed: 7,
+      ),
+    ],
+  );
+}
+
 class _FakeSpeechOutput implements SpeechOutput {
   String? lastText;
   double? lastRateMultiplier;
@@ -669,6 +701,62 @@ void main() {
     expect(find.text('Plan veya erişim durumu doğrulanamadı'), findsOneWidget);
     expect(find.text('AKTİF'), findsNothing);
     expect(find.text('DOĞRULANAMADI'), findsOneWidget);
+  });
+
+  testWidgets('Profile blocks duplicate account deletion while server deletion is pending', (tester) async {
+    usePhoneViewport(tester);
+    final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
+    addTearDown(store.close);
+    final deletion = _RecordingAccountDeletionGateway();
+    final runtime = AppRuntime(
+      learner: AppRuntime.localM5LearnerFixture,
+      store: store,
+      ingest: SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor()),
+      recall: RecallLearningService(sourceStore: store, learningStore: store.learningTruthStore()),
+      telemetry: store.operationalTelemetry(),
+      accountOverview: const _PendingDeletionOverviewGateway(),
+      accountDeletion: deletion,
+    );
+
+    await tester.pumpWidget(MaterialApp(home: ProfileSurface(runtime: runtime)));
+    await pumpUntilFound(tester, find.text('Hesap silme isteği bekliyor'));
+    await tester.scrollUntilVisible(
+      find.text('Silme isteği zaten bekliyor'),
+      260,
+      scrollable: find.byType(Scrollable).last,
+    );
+    await tester.pump(const Duration(milliseconds: 200));
+
+    final destructiveButton = tester.widget<OutlinedButton>(
+      find.widgetWithText(OutlinedButton, 'Silme isteği zaten bekliyor'),
+    );
+    expect(destructiveButton.onPressed, isNull);
+    expect(deletion.calls, 0);
+    expect(find.textContaining('Aynı destructive isteği tekrar göndermiyoruz'), findsOneWidget);
+  });
+
+  testWidgets('Profile hides unknown backend capability and locale keys', (tester) async {
+    usePhoneViewport(tester);
+    final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
+    addTearDown(store.close);
+    final runtime = AppRuntime(
+      learner: AppRuntime.localM5LearnerFixture,
+      store: store,
+      ingest: SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor()),
+      recall: RecallLearningService(sourceStore: store, learningStore: store.learningTruthStore()),
+      telemetry: store.operationalTelemetry(),
+      accountOverview: const _UnknownUsageOverviewGateway(),
+    );
+
+    await tester.pumpWidget(MaterialApp(home: ProfileSurface(runtime: runtime)));
+    await pumpUntilFound(tester, find.text('Diğer kullanım'));
+
+    expect(find.text('internal_future_capability'), findsNothing);
+    expect(find.text('unexpected-locale'), findsNothing);
+    expect(find.text('Diğer kullanım'), findsOneWidget);
+    expect(find.text('7 işlem'), findsOneWidget);
+    expect(find.textContaining('kalan hak veya limit tahmini değildir'), findsOneWidget);
+    expect(find.text('Dil: Doğrulanamadı'), findsOneWidget);
   });
 
   testWidgets('Profile exposes configured support contact without inventing one', (tester) async {
