@@ -455,9 +455,15 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
     return Scaffold(
       backgroundColor: living ? AtelierStyle.canvas : null,
       body: SafeArea(
-        child: FutureBuilder<_HomeSnapshot>(
-          future: _snapshot,
-          builder: (context, snapshot) {
+        child: _index == 3
+            ? ProfileSurface(
+                runtime: widget.runtime,
+                onAccountDeleted: widget.onAccountDeleted,
+                onSignOut: widget.onSignOut,
+              )
+            : FutureBuilder<_HomeSnapshot>(
+                future: _snapshot,
+                builder: (context, snapshot) {
             if (snapshot.hasError) {
               return Center(
                 child: Padding(
@@ -526,21 +532,13 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
                         enabled: _index == 2,
                         child: ProgressSurface(items: data.progress, onOpenMaterial: _openMaterialNextAction),
                       ),
-                      TickerMode(
-                        enabled: _index == 3,
-                        child: ProfileSurface(
-                          runtime: widget.runtime,
-                          onAccountDeleted: widget.onAccountDeleted,
-                          onSignOut: widget.onSignOut,
-                        ),
-                      ),
                     ],
                   ),
                 ),
               ],
-            );
-          },
-        ),
+                    );
+                  },
+                ),
       ),
       bottomNavigationBar: living
           ? NavigationBarTheme(

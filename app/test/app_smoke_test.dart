@@ -208,6 +208,39 @@ void main() {
     expect(find.text('Kod doğrulanamadı. Yeni bir kod isteyebilirsin.'), findsNothing);
   });
 
+  testWidgets('Profile stays available when the learning-library snapshot cannot load', (tester) async {
+    final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
+    final runtime = AppRuntime(
+      learner: AppRuntime.localM5LearnerFixture,
+      store: store,
+      ingest: SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor()),
+      recall: RecallLearningService(sourceStore: store, learningStore: store.learningTruthStore()),
+      telemetry: store.operationalTelemetry(),
+      accountOverview: const _ReadyAccountOverviewGateway(),
+    );
+    await store.close();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: MediaQuery(
+          data: const MediaQueryData(disableAnimations: true),
+          child: ProductShellScreen(runtime: runtime),
+        ),
+      ),
+    );
+    await pumpUntilFound(tester, find.text('Kütüphane şu anda yüklenemedi.'));
+
+    expect(find.text('Kütüphane şu anda yüklenemedi.'), findsOneWidget);
+    await tester.tap(find.text('Profil'));
+    await tester.pump();
+    await pumpUntilFound(tester, find.text('Profil ve Ayarlar'));
+
+    expect(find.text('Profil ve Ayarlar'), findsOneWidget);
+    expect(find.text('Ücretsiz plan'), findsOneWidget);
+    expect(find.text('Kütüphane şu anda yüklenemedi.'), findsNothing);
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('production learning slice boots at truthful source entry', (tester) async {
     final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
     addTearDown(store.close);
