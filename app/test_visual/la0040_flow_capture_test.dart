@@ -557,7 +557,7 @@ void main() {
       learner: runtime.learner,
       actionId: prompt.id,
       attemptId: attempt.attempt.attemptId,
-      disposition: RecallResponseDisposition.answered,
+      disposition: RecallResponseDisposition.answer,
       answer: 'Fotosentez',
     );
 
