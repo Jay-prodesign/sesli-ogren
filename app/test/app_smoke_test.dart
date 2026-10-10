@@ -224,6 +224,35 @@ void main() {
     expect(find.text('Kod doğrulanamadı. Yeni bir kod isteyebilirsin.'), findsNothing);
   });
 
+  testWidgets('learning continuation failure uses unresolved companion state', (tester) async {
+    final store = await SqliteSourceStore.open(
+      factory: databaseFactoryFfiNoIsolate,
+      path: inMemoryDatabasePath,
+    );
+    final runtime = AppRuntime(
+      learner: AppRuntime.localM5LearnerFixture,
+      store: store,
+      ingest: SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor()),
+      recall: RecallLearningService(sourceStore: store, learningStore: store.learningTruthStore()),
+      telemetry: store.operationalTelemetry(),
+    );
+    await store.close();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: MediaQuery(
+          data: const MediaQueryData(disableAnimations: true),
+          child: LearningSliceScreen(runtime: runtime),
+        ),
+      ),
+    );
+    await pumpUntilFound(tester, find.textContaining('Devam kaydı kullanılamadı'));
+
+    expect(find.bySemanticsLabel('Düğüm düşünüyor'), findsOneWidget);
+    expect(find.bySemanticsLabel('Düğüm destek oluyor'), findsNothing);
+    expect(find.bySemanticsLabel('Düğüm başarıyı kutluyor'), findsNothing);
+  });
+
   testWidgets('bottom navigation stays usable on narrow large-text layouts', (tester) async {
     tester.view.physicalSize = const Size(320, 700);
     tester.view.devicePixelRatio = 1;
@@ -1453,6 +1482,8 @@ void main() {
     await pumpUntilFound(tester, find.text('Henüz güvenilir değerlendirme yok'));
 
     expect(find.textContaining('öğrenme kanıtı olarak kaydetmiyoruz'), findsOneWidget);
+    expect(find.bySemanticsLabel('Düğüm düşünüyor'), findsOneWidget);
+    expect(find.bySemanticsLabel('Düğüm destek oluyor'), findsNothing);
     expect(find.text('Anlatımında temel fikirler görünüyor'), findsNothing);
   });
 

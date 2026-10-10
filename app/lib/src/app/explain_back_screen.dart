@@ -337,7 +337,7 @@ class _UnavailableResult extends StatelessWidget {
             children: [
               Icon(Icons.shield_outlined, color: AppPalette.attention, size: 20),
               SizedBox(width: 9),
-              CompanionView(state: CompanionVisualState.correct, size: 42),
+              CompanionView(state: CompanionVisualState.think, size: 42),
             ],
           ),
           const SizedBox(height: 10),

@@ -688,7 +688,7 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
     _SlicePhase.result =>
       _result?.evidence.outcome == RecallOutcome.correct ? CompanionVisualState.success : CompanionVisualState.correct,
     _SlicePhase.continuation => CompanionVisualState.idle,
-    _SlicePhase.error => CompanionVisualState.correct,
+    _SlicePhase.error => CompanionVisualState.think,
   };
 
   @override
