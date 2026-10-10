@@ -7,9 +7,10 @@ import 'atelier_learning_surfaces.dart';
 import 'living_study_desk_home.dart';
 
 class ProgressItem {
-  const ProgressItem({required this.material, required this.continuation});
+  const ProgressItem({required this.material, required this.continuation, this.listenActivityAt});
   final MaterialRecord material;
   final LearningContinuation? continuation;
+  final DateTime? listenActivityAt;
 }
 
 class ProgressSurface extends StatelessWidget {

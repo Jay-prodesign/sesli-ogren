@@ -983,6 +983,24 @@ LIMIT 1
   }
 
   @override
+  Future<DateTime?> listenResumeUpdatedAt({
+    required AuthenticatedLearner learner,
+    required MaterialId materialId,
+    required SourceVersionId sourceVersionId,
+  }) async {
+    final rows = await _database.query(
+      'listen_progress',
+      columns: ['updated_at_utc'],
+      where: 'learner_id = ? AND material_id = ? AND source_version_id = ?',
+      whereArgs: [learner.id.value, materialId.value, sourceVersionId.value],
+      limit: 1,
+    );
+    if (rows.isEmpty) return null;
+    final raw = rows.single['updated_at_utc'];
+    return raw is String ? DateTime.parse(raw).toUtc() : null;
+  }
+
+  @override
   Future<void> saveListenResumeChunk({
     required AuthenticatedLearner learner,
     required MaterialId materialId,

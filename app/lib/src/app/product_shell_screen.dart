@@ -60,7 +60,25 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
     final materials = await widget.runtime.store.activeMaterials(learner: widget.runtime.learner);
     if (materials.isEmpty) return const _HomeSnapshot();
     final progress = await Future.wait(
-      materials.map((item) async => ProgressItem(material: item, continuation: await _continuationFor(item.id))),
+      materials.map((item) async {
+        final continuation = await _continuationFor(item.id);
+        final source = await widget.runtime.store.currentSourceVersion(
+          learner: widget.runtime.learner,
+          materialId: item.id,
+        );
+        final listenActivityAt = source == null
+            ? null
+            : await widget.runtime.store.listenResumeUpdatedAt(
+                learner: widget.runtime.learner,
+                materialId: item.id,
+                sourceVersionId: source.identity.sourceVersionId,
+              );
+        return ProgressItem(
+          material: item,
+          continuation: continuation,
+          listenActivityAt: listenActivityAt,
+        );
+      }),
     );
     final sortedProgress = [...progress]..sort((a, b) => _activityAt(b).compareTo(_activityAt(a)));
     final active = sortedProgress.first;
@@ -87,8 +105,12 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
   }
 
   DateTime _activityAt(ProgressItem item) {
+    var latest = item.material.updatedAt;
     final learningAt = item.continuation?.state.updatedAt;
-    return learningAt != null && learningAt.isAfter(item.material.updatedAt) ? learningAt : item.material.updatedAt;
+    if (learningAt != null && learningAt.isAfter(latest)) latest = learningAt;
+    final listenAt = item.listenActivityAt;
+    if (listenAt != null && listenAt.isAfter(latest)) latest = listenAt;
+    return latest;
   }
 
   Future<void> _openLearning() async {

@@ -439,6 +439,56 @@ void main() {
     expect(find.text('Yeni materyal'), findsNothing);
   });
 
+  testWidgets('Home treats durable Listen activity as real recent study activity', (tester) async {
+    final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
+    addTearDown(store.close);
+    var now = DateTime.utc(2026, 10, 6, 9);
+    final ingest = SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor(), now: () => now);
+    final runtime = AppRuntime(
+      learner: AppRuntime.localM5LearnerFixture,
+      store: store,
+      ingest: ingest,
+      recall: RecallLearningService(sourceStore: store, learningStore: store.learningTruthStore()),
+      telemetry: store.operationalTelemetry(),
+    );
+
+    const listenedId = MaterialId('listened-older-material');
+    await ingest.ingestPastedText(
+      learner: runtime.learner,
+      materialId: listenedId,
+      text: List.filled(90, 'Dinlenen eski materyalin kaynak içeriği.').join(' '),
+      sourceName: 'Dinlenen eski materyal',
+    );
+    now = DateTime.utc(2026, 10, 6, 10);
+    await ingest.ingestPastedText(
+      learner: runtime.learner,
+      materialId: const MaterialId('newer-upload-material'),
+      text: 'Daha yeni yüklenen fakat henüz çalışılmayan materyal.',
+      sourceName: 'Yeni yüklenen materyal',
+    );
+
+    final listenedSource = await store.currentSourceVersion(
+      learner: runtime.learner,
+      materialId: listenedId,
+    );
+    expect(listenedSource, isNotNull);
+    await store.saveListenResumeChunk(
+      learner: runtime.learner,
+      materialId: listenedId,
+      sourceVersionId: listenedSource!.identity.sourceVersionId,
+      chunkIndex: 1,
+      updatedAt: DateTime.utc(2026, 10, 6, 11),
+    );
+
+    await tester.pumpWidget(MaterialApp(home: ProductShellScreen(runtime: runtime)));
+    await pumpUntilFound(tester, find.text('KALDIĞIN MATERYAL'));
+    await tapVisible(tester, find.text('Çalışmaya devam et'));
+    await pumpUntilFound(tester, find.text('Dinlenen eski materyal'));
+
+    expect(find.text('Dinlenen eski materyal'), findsWidgets);
+    expect(find.text('Yeni yüklenen materyal'), findsNothing);
+  });
+
   testWidgets('Library deletion removes the selected material and Home falls back safely', (tester) async {
     final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
     addTearDown(store.close);

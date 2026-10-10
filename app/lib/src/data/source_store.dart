@@ -42,6 +42,12 @@ abstract interface class SourceStore {
     required SourceVersionId sourceVersionId,
   });
 
+  Future<DateTime?> listenResumeUpdatedAt({
+    required AuthenticatedLearner learner,
+    required MaterialId materialId,
+    required SourceVersionId sourceVersionId,
+  });
+
   Future<void> saveListenResumeChunk({
     required AuthenticatedLearner learner,
     required MaterialId materialId,
