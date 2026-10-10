@@ -1219,7 +1219,7 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
   String _resultActionLabel(NextLearningActionKind kind) => switch (kind) {
     NextLearningActionKind.reviewSourceThenRecall => 'Kaynağı gözden geçir',
     NextLearningActionKind.retryRecallWithoutHint => 'İpucusuz tekrar dene',
-    NextLearningActionKind.repeatRecallLater => 'Bugünlük tamamla',
+    NextLearningActionKind.repeatRecallLater => 'Bu denemeyi tamamla',
   };
 
   Future<void> _continueFromResult(RecallAttemptResult result) async {
@@ -1370,7 +1370,7 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
                 ? 'Önce kaynağı gözden geçir'
                 : canRetry
                 ? 'Bir kez daha hatırla'
-                : 'Bugünlük iyi bir adım',
+                : 'Bu deneme kaydedildi',
             style: Theme.of(context).textTheme.titleLarge,
           ),
           const SizedBox(height: 10),

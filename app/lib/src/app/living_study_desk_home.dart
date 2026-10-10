@@ -54,7 +54,7 @@ class LivingStudyDeskHome extends StatelessWidget {
     return switch (action) {
       NextLearningActionKind.reviewSourceThenRecall => 'Kaynağa dön, sonra yeniden dene',
       NextLearningActionKind.retryRecallWithoutHint => 'İpucusuz bir kez daha dene',
-      NextLearningActionKind.repeatRecallLater => 'Bugünlük tamam. Kaynağın burada.',
+      NextLearningActionKind.repeatRecallLater => 'Bu deneme tamam. Kaynağın burada.',
       null => 'İlk hatırlama denemeni yap',
     };
   }
@@ -64,7 +64,7 @@ class LivingStudyDeskHome extends StatelessWidget {
   String get _continuationLabel {
     if (continuation == null) return 'KAYNAĞINDAN ÖĞREN';
     return continuation!.nextAction.kind == NextLearningActionKind.repeatRecallLater
-        ? 'DENEMEN KAYITLI · BUGÜNLÜK TAMAM'
+        ? 'DENEMEN KAYITLI · SONRA YENİDEN HATIRLA'
         : 'DENEMEN KAYITLI · SIRADAKİ ADIM';
   }
 

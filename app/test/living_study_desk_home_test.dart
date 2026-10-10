@@ -95,7 +95,7 @@ void main() {
       onOpenLearning: () => learningOpens++,
     );
 
-    expect(find.text('Bugünlük tamam. Kaynağın burada.'), findsOneWidget);
+    expect(find.text('Bu deneme tamam. Kaynağın burada.'), findsOneWidget);
     expect(find.text('Kaynağa dön'), findsOneWidget);
     final cta = find.byKey(const ValueKey('la0040-living-continue'));
     await tapHomeCta(tester, cta);
