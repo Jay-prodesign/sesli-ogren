@@ -249,6 +249,7 @@ class _ListenScreenState extends State<ListenScreen> {
       setState(() {
         _speaking = false;
         _startingPlayback = false;
+        _error = null;
       });
     }
   }
