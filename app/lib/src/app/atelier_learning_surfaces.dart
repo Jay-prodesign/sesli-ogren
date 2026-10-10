@@ -8,14 +8,22 @@ import 'source_text_matching.dart';
 /// One source-led art direction across Reader, Recall and Result.
 /// Source/learning models and outcome classification stay canonical.
 abstract final class AtelierStyle {
-  static const canvas = Color(0xFFF5F7F4);
-  static const paper = Color(0xFFFFFDF9);
-  static const ink = Color(0xFF15313A);
-  static const teal = Color(0xFF0A716A);
-  static const muted = Color(0xFF52696B);
-  static const line = Color(0xFFD5E3DC);
-  static const mint = Color(0xFFE8F3EC);
-  static const mark = Color(0xFFE0F0AF);
+  static const canvas = Color(0xFFF7F8FC);
+  static const paper = Color(0xFFFFFFFF);
+  static const ink = Color(0xFF111827);
+  static const muted = Color(0xFF667085);
+  static const line = Color(0xFFE4E7EC);
+
+  static const pulse = Color(0xFF3657FF);
+  static const pulseSoft = Color(0xFFEEF1FF);
+  static const focus = Color(0xFF14224A);
+  static const aqua = Color(0xFF20BFA9);
+  static const aquaSoft = Color(0xFFE6F8F4);
+  static const mark = Color(0xFFC9F45D);
+
+  // Compatibility alias while the current integrated slice is migrated.
+  static const teal = pulse;
+  static const mint = pulseSoft;
 }
 
 class AtelierSourceTrustStrip extends StatelessWidget {
@@ -390,7 +398,7 @@ class AtelierWorkspace extends StatelessWidget {
           Container(
             padding: const EdgeInsets.fromLTRB(17, 12, 17, 14),
             decoration: const BoxDecoration(
-              color: AtelierStyle.ink,
+              color: AtelierStyle.focus,
               borderRadius: BorderRadius.vertical(top: Radius.circular(21)),
             ),
             child: compactSurface
@@ -398,8 +406,8 @@ class AtelierWorkspace extends StatelessWidget {
                     key: const ValueKey('la0040-atelier-workspace-recall'),
                     onPressed: primaryAction,
                     style: FilledButton.styleFrom(
-                      backgroundColor: AtelierStyle.mark,
-                      foregroundColor: AtelierStyle.ink,
+                      backgroundColor: AtelierStyle.pulse,
+                      foregroundColor: Colors.white,
                       minimumSize: const Size.fromHeight(50),
                     ),
                     icon: Icon(_activeStepIcon),
@@ -432,15 +440,15 @@ class AtelierWorkspace extends StatelessWidget {
                       const SizedBox(height: 3),
                       Text(
                         _activeStepReason,
-                        style: const TextStyle(color: Color(0xFFC7D5D2), fontSize: 12, height: 1.3),
+                        style: const TextStyle(color: Color(0xFFD6DDF0), fontSize: 12, height: 1.3),
                       ),
                       const SizedBox(height: 10),
                       FilledButton.icon(
                         key: const ValueKey('la0040-atelier-workspace-recall'),
                         onPressed: primaryAction,
                         style: FilledButton.styleFrom(
-                          backgroundColor: AtelierStyle.mark,
-                          foregroundColor: AtelierStyle.ink,
+                          backgroundColor: AtelierStyle.pulse,
+                          foregroundColor: Colors.white,
                           minimumSize: const Size.fromHeight(48),
                         ),
                         icon: Icon(_activeStepIcon),
@@ -457,8 +465,8 @@ class AtelierWorkspace extends StatelessWidget {
                             icon: const Icon(Icons.headphones_rounded),
                             label: const Text('Dinle'),
                             style: OutlinedButton.styleFrom(
-                              foregroundColor: Colors.white,
-                              side: const BorderSide(color: Color(0xFF8EA9A3)),
+                              foregroundColor: AtelierStyle.aqua,
+                              side: const BorderSide(color: AtelierStyle.aqua),
                             ),
                           );
                           final more = TextButton.icon(
@@ -748,7 +756,7 @@ class AtelierRecall extends StatelessWidget {
       Container(
         width: double.infinity,
         padding: const EdgeInsets.fromLTRB(19, 19, 19, 23),
-        decoration: BoxDecoration(color: AtelierStyle.ink, borderRadius: BorderRadius.circular(21)),
+        decoration: BoxDecoration(color: AtelierStyle.focus, borderRadius: BorderRadius.circular(21)),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -1043,7 +1051,7 @@ class AtelierResult extends StatelessWidget {
             child: Container(
               width: double.infinity,
               padding: const EdgeInsets.fromLTRB(20, 21, 20, 23),
-              decoration: BoxDecoration(color: AtelierStyle.ink, borderRadius: BorderRadius.circular(21)),
+              decoration: BoxDecoration(color: AtelierStyle.focus, borderRadius: BorderRadius.circular(21)),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -1070,17 +1078,17 @@ class AtelierResult extends StatelessWidget {
                     style: const TextStyle(color: Colors.white, fontSize: 25, height: 1.2, fontWeight: FontWeight.w900),
                   ),
                   const SizedBox(height: 15),
-                  const Divider(color: Color(0xFF486068), height: 1),
+                  const Divider(color: Color(0xFF33436E), height: 1),
                   const SizedBox(height: 14),
                   SelectableText.rich(
                     TextSpan(children: spans),
-                    style: const TextStyle(color: Color(0xFFE4EDEC), fontSize: 16, height: 1.54),
+                    style: const TextStyle(color: Color(0xFFF1F3FA), fontSize: 16, height: 1.54),
                   ),
                   if (match == null) ...[
                     const SizedBox(height: 10),
                     const Text(
                       'Bu alıntıda doğru ifadeye birebir vurgu bulunamadı.',
-                      style: TextStyle(color: Color(0xFFC7D6D4), fontSize: 12, height: 1.4),
+                      style: TextStyle(color: Color(0xFFD6DDF0), fontSize: 12, height: 1.4),
                     ),
                   ],
                 ],
