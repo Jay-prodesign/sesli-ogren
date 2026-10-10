@@ -184,10 +184,7 @@ void main() {
           'ATP hücrenin doğrudan kullanabildiği enerji taşıyıcılarından biridir.',
       sourceName: 'Enerji onarım notu',
     );
-    final repairPrompt = await recall.createCurrentPrompt(
-      learner: runtime.learner,
-      materialId: repairMaterial,
-    );
+    final repairPrompt = await recall.createCurrentPrompt(learner: runtime.learner, materialId: repairMaterial);
     final repairSession = await recall.openAttempt(learner: runtime.learner, actionId: repairPrompt.id);
     await recall.submit(
       learner: runtime.learner,

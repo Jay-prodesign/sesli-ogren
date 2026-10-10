@@ -128,12 +128,14 @@ class _ListenScreenState extends State<ListenScreen> {
             _currentChunkIndex = index;
             _resumeChunkOverride = index;
           });
-          unawaited(_saveResume(source, index).catchError((Object _) {
-            if (!mounted || token != _playToken) return;
-            setState(() {
-              _error = 'Dinleme konumu kaydedilemedi. Bu oturumda dinlemeye devam edebilirsin.';
-            });
-          }));
+          unawaited(
+            _saveResume(source, index).catchError((Object _) {
+              if (!mounted || token != _playToken) return;
+              setState(() {
+                _error = 'Dinleme konumu kaydedilemedi. Bu oturumda dinlemeye devam edebilirsin.';
+              });
+            }),
+          );
         },
         onDone: () {
           if (token != _playToken) return;
@@ -168,7 +170,8 @@ class _ListenScreenState extends State<ListenScreen> {
       } catch (_) {
         if (mounted && token == _playToken) {
           setState(() {
-            _error = 'Dinleme tamamlandı ancak konum sıfırlanamadı. Yeniden açtığında kaldığın yerden devam edebilirsin.';
+            _error =
+                'Dinleme tamamlandı ancak konum sıfırlanamadı. Yeniden açtığında kaldığın yerden devam edebilirsin.';
           });
         }
       }

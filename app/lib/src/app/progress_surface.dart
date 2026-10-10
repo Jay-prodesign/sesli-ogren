@@ -163,8 +163,8 @@ class _ProgressCard extends StatelessWidget {
       null => 'İlk hatırlamayı dene',
     };
     final actionIcon = switch (item.continuation?.nextAction.kind) {
-      NextLearningActionKind.reviewSourceThenRecall || NextLearningActionKind.repeatRecallLater =>
-        Icons.auto_stories_outlined,
+      NextLearningActionKind.reviewSourceThenRecall ||
+      NextLearningActionKind.repeatRecallLater => Icons.auto_stories_outlined,
       NextLearningActionKind.retryRecallWithoutHint => Icons.refresh_rounded,
       null when item.prefersReaderResume => Icons.menu_book_outlined,
       null when item.hasListenResume => Icons.headphones_rounded,
@@ -276,11 +276,7 @@ class _ProgressCard extends StatelessWidget {
                       ),
                       child: Padding(
                         padding: const EdgeInsets.all(6),
-                        child: Icon(
-                          actionIcon,
-                          color: living ? AtelierStyle.ink : AppPalette.momentumInk,
-                          size: 16,
-                        ),
+                        child: Icon(actionIcon, color: living ? AtelierStyle.ink : AppPalette.momentumInk, size: 16),
                       ),
                     ),
                     const SizedBox(width: 9),

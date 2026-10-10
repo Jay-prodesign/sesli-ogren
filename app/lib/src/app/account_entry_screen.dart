@@ -82,7 +82,9 @@ class _AccountEntryScreenState extends State<AccountEntryScreen> {
         _codeRequested = true;
         _lastCodeRequestedAt = DateTime.now();
         _tokenController.clear();
-        _status = resending ? 'Yeni kod gönderildi. En son gelen kodu kullan.' : 'Kod gönderildi. E-postanı kontrol et.';
+        _status = resending
+            ? 'Yeni kod gönderildi. En son gelen kodu kullan.'
+            : 'Kod gönderildi. E-postanı kontrol et.';
       });
     } on LearnerAuthenticationException catch (error) {
       if (!mounted) return;

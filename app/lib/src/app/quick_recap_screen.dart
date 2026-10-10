@@ -802,11 +802,7 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> with WidgetsBinding
                       padding: EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(Icons.more_horiz_rounded),
-                          SizedBox(width: 7),
-                          Text('Diğer araçlar'),
-                        ],
+                        children: [Icon(Icons.more_horiz_rounded), SizedBox(width: 7), Text('Diğer araçlar')],
                       ),
                     ),
                   ),
