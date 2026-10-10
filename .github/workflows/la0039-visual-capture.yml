@@ -1,15 +1,7 @@
 name: la0039-visual-capture
 
 on:
-  push:
-    branches:
-      - feat/full-product-shell-continuity
-    paths:
-      - app/lib/src/app/**
-      - app/assets/companions/**
-      - app/test/la0039_visual_capture_test.dart
-      - app/pubspec.yaml
-      - .github/workflows/la0039-visual-capture.yml
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -26,7 +18,7 @@ jobs:
       - name: Check out visual-review source
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
-          persist-credentials: true
+          persist-credentials: false
 
       - name: Read Flutter pin
         id: pin
