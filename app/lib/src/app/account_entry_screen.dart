@@ -26,9 +26,13 @@ class _AccountEntryScreenState extends State<AccountEntryScreen> {
   final _emailController = TextEditingController();
   final _tokenController = TextEditingController();
 
+  static const _resendCooldown = Duration(seconds: 30);
+
   bool _codeRequested = false;
   bool _busy = false;
   String? _error;
+  String? _status;
+  DateTime? _lastCodeRequestedAt;
 
   @override
   void dispose() {
@@ -49,28 +53,49 @@ class _AccountEntryScreenState extends State<AccountEntryScreen> {
   Future<void> _requestCode() async {
     if (_busy) return;
     final email = _emailController.text.trim();
+    if (_codeRequested && _lastCodeRequestedAt != null) {
+      final elapsed = DateTime.now().difference(_lastCodeRequestedAt!);
+      if (elapsed < _resendCooldown) {
+        final remaining = (_resendCooldown - elapsed).inSeconds + 1;
+        setState(() {
+          _error = null;
+          _status = 'Yeni kod istemek için $remaining saniye bekle.';
+        });
+        return;
+      }
+    }
     if (!_validEmail(email)) {
       setState(() => _error = 'Geçerli bir e-posta adresi gir.');
       return;
     }
 
+    final resending = _codeRequested;
     setState(() {
       _busy = true;
       _error = null;
+      _status = null;
     });
     try {
       await widget.requestOtp(email);
       if (!mounted) return;
       setState(() {
         _codeRequested = true;
+        _lastCodeRequestedAt = DateTime.now();
         _tokenController.clear();
+        _status = resending ? 'Yeni kod gönderildi. En son gelen kodu kullan.' : 'Kod gönderildi. E-postanı kontrol et.';
       });
     } on LearnerAuthenticationException catch (error) {
       if (!mounted) return;
-      setState(() => _error = error.message);
+      setState(() {
+        _error = error.message;
+        _status = null;
+      });
     } catch (_) {
       if (!mounted) return;
-      setState(() => _error = 'Giriş kodu gönderilemedi. Tekrar deneyebilirsin.');
+      setState(() {
+        _error = 'Giriş kodu gönderilemedi. Tekrar deneyebilirsin.';
+        _status = null;
+      });
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -107,8 +132,10 @@ class _AccountEntryScreenState extends State<AccountEntryScreen> {
     if (_busy) return;
     setState(() {
       _codeRequested = false;
+      _lastCodeRequestedAt = null;
       _tokenController.clear();
       _error = null;
+      _status = null;
     });
   }
 
@@ -271,6 +298,15 @@ class _AccountEntryScreenState extends State<AccountEntryScreen> {
                             child: Text(
                               _error!,
                               style: TextStyle(color: theme.colorScheme.error, fontWeight: FontWeight.w700),
+                            ),
+                          ),
+                        ] else if (_status != null) ...[
+                          const SizedBox(height: 12),
+                          Semantics(
+                            liveRegion: true,
+                            child: Text(
+                              _status!,
+                              style: const TextStyle(color: AtelierStyle.teal, fontWeight: FontWeight.w700),
                             ),
                           ),
                         ],

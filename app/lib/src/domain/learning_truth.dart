@@ -263,8 +263,7 @@ class RecallTruthPolicy {
     if (response == expected) return true;
     final responseStem = _withoutTurkishPlural(response);
     final expectedStem = _withoutTurkishPlural(expected);
-    return responseStem != null && responseStem == expected ||
-        expectedStem != null && expectedStem == response;
+    return responseStem != null && responseStem == expected || expectedStem != null && expectedStem == response;
   }
 
   static String? _withoutTurkishPlural(String value) {

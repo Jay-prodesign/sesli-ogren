@@ -135,7 +135,9 @@ void main() {
     expect(find.text('Kaynağı kapat ve yeniden dene'), findsOneWidget);
   });
 
-  testWidgets('Home completed action returns directly to the current source instead of replaying Recall', (tester) async {
+  testWidgets('Home completed action returns directly to the current source instead of replaying Recall', (
+    tester,
+  ) async {
     usePhoneViewport(tester);
     final runtime = await _runtimeWithEvidence(
       disposition: RecallResponseDisposition.answer,

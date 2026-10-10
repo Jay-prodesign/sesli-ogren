@@ -444,7 +444,10 @@ class LivingStudyDeskHome extends StatelessWidget {
           const SizedBox(height: 22),
           const Divider(color: _line),
           const SizedBox(height: 13),
-          const Text('Diğer materyallerin', style: TextStyle(color: _ink, fontSize: 17, fontWeight: FontWeight.w900)),
+          const Text(
+            'Diğer materyallerin',
+            style: TextStyle(color: _ink, fontSize: 17, fontWeight: FontWeight.w900),
+          ),
           const SizedBox(height: 5),
           for (final item in otherMaterials.take(3))
             Material(

@@ -87,6 +87,37 @@ void main() {
     expect(find.text('Öğrenme alanına gir'), findsOneWidget);
   });
 
+  testWidgets('account entry rate-limits immediate OTP resend without calling the provider again', (tester) async {
+    usePhoneViewport(tester);
+    var requestCalls = 0;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: AccountEntryScreen(
+          requestOtp: (_) async {
+            requestCalls += 1;
+          },
+          verifyOtp: ({required email, required token}) async =>
+              const AuthenticatedLearner(id: LearnerId('resend-user')),
+          onAuthenticated: (_) async {},
+        ),
+      ),
+    );
+
+    await tester.enterText(find.byType(TextField), 'person@example.com');
+    await tapVisible(tester, find.text('Kod gönder'));
+    await tester.pump();
+
+    expect(requestCalls, 1);
+    expect(find.text('Kod gönderildi. E-postanı kontrol et.'), findsOneWidget);
+
+    await tapVisible(tester, find.text('Yeni kod gönder'));
+    await tester.pump();
+
+    expect(requestCalls, 1);
+    expect(find.textContaining('Yeni kod istemek için'), findsOneWidget);
+  });
+
   testWidgets('account entry refuses incomplete OTP before verification', (tester) async {
     usePhoneViewport(tester);
     var verifyCalls = 0;
