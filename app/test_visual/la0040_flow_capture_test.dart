@@ -590,10 +590,12 @@ void main() {
     await expectLater(find.byType(Scaffold), matchesGoldenFile('goldens/la0040_shell_progress_390x844.png'));
 
     await tester.tap(find.text('Profil'));
-    for (var i = 0; i < 30 && find.text('Profil ve Ayarlar').evaluate().isEmpty; i++) {
+    for (var i = 0; i < 40 && find.text('Ücretsiz plan').evaluate().isEmpty; i++) {
       await tester.pump(const Duration(milliseconds: 30));
     }
+    await tester.pump(const Duration(milliseconds: 400));
     expect(find.text('Profil ve Ayarlar'), findsOneWidget);
+    expect(find.text('Ücretsiz plan'), findsOneWidget);
     expect(tester.takeException(), isNull);
     await expectLater(find.byType(Scaffold), matchesGoldenFile('goldens/la0040_shell_profile_390x844.png'));
   });
