@@ -194,10 +194,7 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
       sourceVersionId: source.identity.sourceVersionId,
     );
     if (serverMaterialId == null) return null;
-    return _RemoteSourceBinding(
-      sourceVersionId: source.identity.sourceVersionId,
-      serverMaterialId: serverMaterialId,
-    );
+    return _RemoteSourceBinding(sourceVersionId: source.identity.sourceVersionId, serverMaterialId: serverMaterialId);
   }
 
   Future<void> _cleanupSupersededRemoteBinding(
@@ -275,10 +272,7 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
           createdAt: DateTime.now().toUtc(),
         ),
       );
-      await _cleanupSupersededRemoteBinding(
-        previousBinding,
-        ingestResult.sourceVersion.identity.sourceVersionId,
-      );
+      await _cleanupSupersededRemoteBinding(previousBinding, ingestResult.sourceVersion.identity.sourceVersionId);
       if (!mounted) return;
       await _completeSourceIngest();
     } catch (error) {
@@ -358,10 +352,7 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
           createdAt: DateTime.now().toUtc(),
         ),
       );
-      await _cleanupSupersededRemoteBinding(
-        previousBinding,
-        ingestResult.sourceVersion.identity.sourceVersionId,
-      );
+      await _cleanupSupersededRemoteBinding(previousBinding, ingestResult.sourceVersion.identity.sourceVersionId);
       if (!mounted) return;
       await _completeSourceIngest();
     } catch (error) {
