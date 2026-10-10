@@ -379,7 +379,7 @@ class _ListenScreenState extends State<ListenScreen> {
               child: Padding(
                 padding: const EdgeInsets.all(5),
                 child: CompanionView(
-                  state: _speaking ? CompanionVisualState.speak : CompanionVisualState.listen,
+                  state: _speaking ? CompanionVisualState.speak : CompanionVisualState.idle,
                   size: 52,
                 ),
               ),
