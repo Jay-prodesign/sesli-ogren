@@ -61,6 +61,32 @@ void main() {
     expect(openedLearner?.id.value, 'account-entry-user');
   });
 
+  testWidgets('account entry rejects malformed email before requesting an OTP', (tester) async {
+    usePhoneViewport(tester);
+    var requestCalls = 0;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: AccountEntryScreen(
+          requestOtp: (_) async {
+            requestCalls += 1;
+          },
+          verifyOtp: ({required email, required token}) async =>
+              const AuthenticatedLearner(id: LearnerId('never-opened')),
+          onAuthenticated: (_) async {},
+        ),
+      ),
+    );
+
+    await tester.enterText(find.byType(TextField), 'not-an-email');
+    await tapVisible(tester, find.text('Kod gönder'));
+    await tester.pump();
+
+    expect(find.text('Geçerli bir e-posta adresi gir.'), findsOneWidget);
+    expect(requestCalls, 0);
+    expect(find.text('Öğrenme alanına gir'), findsOneWidget);
+  });
+
   testWidgets('account entry refuses incomplete OTP before verification', (tester) async {
     usePhoneViewport(tester);
     var verifyCalls = 0;

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../auth/supabase_learner_auth.dart';
 import '../domain/authenticated_learner.dart';
@@ -36,11 +37,20 @@ class _AccountEntryScreenState extends State<AccountEntryScreen> {
     super.dispose();
   }
 
+  bool _validEmail(String value) {
+    if (value.isEmpty || value.length > 254 || RegExp(r'\s').hasMatch(value)) return false;
+    final at = value.indexOf('@');
+    if (at <= 0 || at != value.lastIndexOf('@')) return false;
+    final domain = value.substring(at + 1);
+    final dot = domain.lastIndexOf('.');
+    return dot > 0 && dot < domain.length - 1;
+  }
+
   Future<void> _requestCode() async {
     if (_busy) return;
     final email = _emailController.text.trim();
-    if (email.isEmpty) {
-      setState(() => _error = 'E-posta adresini gir.');
+    if (!_validEmail(email)) {
+      setState(() => _error = 'Geçerli bir e-posta adresi gir.');
       return;
     }
 
@@ -232,6 +242,8 @@ class _AccountEntryScreenState extends State<AccountEntryScreen> {
                             enabled: !_busy,
                             keyboardType: TextInputType.emailAddress,
                             autofillHints: const [AutofillHints.email],
+                            autocorrect: false,
+                            enableSuggestions: false,
                             textInputAction: TextInputAction.done,
                             onSubmitted: (_) => _requestCode(),
                             decoration: const InputDecoration(labelText: 'E-posta', hintText: 'ornek@eposta.com'),
@@ -242,6 +254,7 @@ class _AccountEntryScreenState extends State<AccountEntryScreen> {
                             enabled: !_busy,
                             keyboardType: TextInputType.number,
                             autofillHints: const [AutofillHints.oneTimeCode],
+                            inputFormatters: const [FilteringTextInputFormatter.digitsOnly],
                             textInputAction: TextInputAction.done,
                             maxLength: 6,
                             onSubmitted: (_) => _verifyCode(),
