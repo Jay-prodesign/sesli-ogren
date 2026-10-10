@@ -432,12 +432,18 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> with WidgetsBinding
         learner: widget.runtime.learner,
         materialId: widget.materialId,
       );
-      if (material == null || source == null || !mounted) return;
+      if (!mounted) return;
+      if (material == null || source == null) {
+        throw StateError('quick_recap_source_missing');
+      }
       final extracted = await widget.runtime.store.extractedContentForSource(
         learner: widget.runtime.learner,
         sourceVersionId: source.identity.sourceVersionId,
       );
       if (!mounted) return;
+      if (extracted == null || !extracted.isValid || extracted.normalizedText.trim().isEmpty) {
+        throw StateError('quick_recap_source_text_missing');
+      }
       await Navigator.of(context).push<void>(
         MaterialPageRoute(
           builder: (readerContext) => _preserveProductExperience(
@@ -503,16 +509,24 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> with WidgetsBinding
   }
 
   Future<void> _openExplain() async {
-    final source = await widget.runtime.store.currentSourceVersion(
-      learner: widget.runtime.learner,
-      materialId: widget.materialId,
-    );
-    if (!mounted || source == null) return;
-    await Navigator.of(context).push<void>(
-      MaterialPageRoute(
-        builder: (_) => _preserveProductExperience(ExplainBackScreen(runtime: widget.runtime, source: source)),
-      ),
-    );
+    try {
+      final source = await widget.runtime.store.currentSourceVersion(
+        learner: widget.runtime.learner,
+        materialId: widget.materialId,
+      );
+      if (!mounted) return;
+      if (source == null) throw StateError('quick_recap_explain_source_missing');
+      await Navigator.of(context).push<void>(
+        MaterialPageRoute(
+          builder: (_) => _preserveProductExperience(ExplainBackScreen(runtime: widget.runtime, source: source)),
+        ),
+      );
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Açıklama çalışması açılamadı. Orijinal kaynağa dönüp tekrar deneyebilirsin.')),
+      );
+    }
   }
 
   @override
@@ -686,73 +700,110 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> with WidgetsBinding
                 label: const Text('Orijinal kaynağı aç'),
               ),
             ),
-            const SizedBox(height: 10),
+            const SizedBox(height: 14),
             Text(
-              'Buradan devam et',
-              style: Theme.of(context).textTheme.labelMedium?.copyWith(color: muted, fontWeight: FontWeight.w700),
+              'Özet öğrenme kanıtı değildir. Hazır olduğunda kaynağı kapatıp kendi başına hatırla.',
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(color: muted, height: 1.4),
+            ),
+            const SizedBox(height: 12),
+            SizedBox(
+              width: double.infinity,
+              child: FilledButton.icon(
+                style: primaryStyle,
+                onPressed: _openRecall,
+                icon: const Icon(Icons.psychology_alt_outlined),
+                label: const Text('Şimdi hatırla'),
+              ),
             ),
             const SizedBox(height: 8),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
+            Row(
               children: [
-                OutlinedButton.icon(
-                  style: outlineStyle,
-                  onPressed: () => _shareSummary(status),
-                  icon: const Icon(Icons.share_outlined),
-                  label: const Text('Paylaş'),
-                ),
-                OutlinedButton.icon(
-                  style: outlineStyle,
-                  onPressed: () => _copySummary(status),
-                  icon: const Icon(Icons.copy_outlined),
-                  label: const Text('Özeti kopyala'),
-                ),
-                OutlinedButton.icon(
-                  style: outlineStyle,
-                  onPressed: () {
-                    final recapText = <String>[
-                      status.summary!,
-                      if (status.keyPoints.isNotEmpty) 'Önemli noktalar:\n${status.keyPoints.join('\n')}',
-                    ].join('\n\n');
-                    Navigator.of(context).push<void>(
-                      MaterialPageRoute(
-                        builder: (routeContext) => _preserveProductExperience(
-                          ListenScreen(
-                            runtime: widget.runtime,
-                            materialId: widget.materialId,
-                            textOverride: recapText,
-                            titleOverride: 'Hızlı özet',
-                            persistProgress: false,
-                            onRecall: () {
-                              Navigator.of(routeContext).pop();
-                              _openRecall();
-                            },
-                            onReadSource: () {
-                              Navigator.of(routeContext).pop();
-                              WidgetsBinding.instance.addPostFrameCallback((_) {
-                                if (mounted) _openSourceReader();
-                              });
-                            },
+                Expanded(
+                  child: OutlinedButton.icon(
+                    style: outlineStyle,
+                    onPressed: () {
+                      final recapText = <String>[
+                        status.summary!,
+                        if (status.keyPoints.isNotEmpty) 'Önemli noktalar:\n${status.keyPoints.join('\n')}',
+                      ].join('\n\n');
+                      Navigator.of(context).push<void>(
+                        MaterialPageRoute(
+                          builder: (routeContext) => _preserveProductExperience(
+                            ListenScreen(
+                              runtime: widget.runtime,
+                              materialId: widget.materialId,
+                              textOverride: recapText,
+                              titleOverride: 'Hızlı özet',
+                              persistProgress: false,
+                              onRecall: () {
+                                Navigator.of(routeContext).pop();
+                                _openRecall();
+                              },
+                              onReadSource: () {
+                                Navigator.of(routeContext).pop();
+                                WidgetsBinding.instance.addPostFrameCallback((_) {
+                                  if (mounted) _openSourceReader();
+                                });
+                              },
+                            ),
                           ),
                         ),
-                      ),
-                    );
+                      );
+                    },
+                    icon: const Icon(Icons.headphones_rounded),
+                    label: const Text('Özeti dinle'),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                PopupMenuButton<String>(
+                  tooltip: 'Diğer özet araçları',
+                  onSelected: (action) {
+                    switch (action) {
+                      case 'share':
+                        unawaited(_shareSummary(status));
+                        break;
+                      case 'copy':
+                        unawaited(_copySummary(status));
+                        break;
+                      case 'explain':
+                        unawaited(_openExplain());
+                        break;
+                    }
                   },
-                  icon: const Icon(Icons.headphones),
-                  label: const Text('Dinle'),
-                ),
-                OutlinedButton.icon(
-                  style: outlineStyle,
-                  onPressed: _openRecall,
-                  icon: const Icon(Icons.psychology_alt_outlined),
-                  label: const Text('Hatırla'),
-                ),
-                OutlinedButton.icon(
-                  style: outlineStyle,
-                  onPressed: _openExplain,
-                  icon: const Icon(Icons.record_voice_over_outlined),
-                  label: const Text('Kendi cümlelerinle açıkla'),
+                  itemBuilder: (_) => const [
+                    PopupMenuItem(
+                      value: 'share',
+                      child: ListTile(leading: Icon(Icons.share_outlined), title: Text('Paylaş')),
+                    ),
+                    PopupMenuItem(
+                      value: 'copy',
+                      child: ListTile(leading: Icon(Icons.copy_outlined), title: Text('Özeti kopyala')),
+                    ),
+                    PopupMenuItem(
+                      value: 'explain',
+                      child: ListTile(
+                        leading: Icon(Icons.record_voice_over_outlined),
+                        title: Text('Kendi cümlelerinle açıkla'),
+                      ),
+                    ),
+                  ],
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      border: Border.all(color: living ? AtelierStyle.line : Theme.of(context).colorScheme.outline),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.more_horiz_rounded),
+                          SizedBox(width: 7),
+                          Text('Diğer araçlar'),
+                        ],
+                      ),
+                    ),
+                  ),
                 ),
               ],
             ),

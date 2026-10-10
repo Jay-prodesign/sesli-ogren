@@ -119,6 +119,11 @@ void main() {
       return null;
     });
     addTearDown(() => tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, null));
+    expect(find.text('Şimdi hatırla'), findsOneWidget);
+    expect(find.text('Orijinal kaynağı aç'), findsOneWidget);
+    expect(find.text('Özeti dinle'), findsOneWidget);
+    await tester.tap(find.text('Diğer araçlar'));
+    await tester.pumpAndSettle();
     await tester.tap(find.text('Özeti kopyala'));
     await tester.pumpAndSettle();
     expect(copiedText, contains('Kaynağa bağlı kısa özet.'));
@@ -128,7 +133,6 @@ void main() {
     expect(copiedText, contains('Kaynak: Biyoloji notu'));
     expect(copiedText, contains('Aynı server material yeniden kullanıldı.'));
     expect(find.text('Özet panoya kopyalandı'), findsOneWidget);
-    expect(find.text('Paylaş'), findsOneWidget);
 
     expect(
       await store.summaryServerMaterialId(
