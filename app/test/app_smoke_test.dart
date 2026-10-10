@@ -941,10 +941,10 @@ void main() {
     expect(find.textContaining(action!.expectedAnswer), findsWidgets);
     expect(find.bySemanticsLabel('Kaynak bölümü'), findsOneWidget);
 
-    final retryFromSource = find.text('Kaynağı kapat ve yeniden dene');
+    final retryFromSource = find.byKey(const ValueKey('focused-source-retry'));
     await tester.pump(const Duration(milliseconds: 450));
     expect(retryFromSource, findsOneWidget);
-    await tester.tap(retryFromSource);
+    await tapVisible(tester, retryFromSource);
     await pumpUntilGone(tester, find.text('Bu bölümü yeniden kur'));
     await pumpUntilFound(tester, find.text('Hatırla'));
     expect(find.text('Yanıtla'), findsOneWidget);

@@ -119,12 +119,16 @@ class _MaterialWorkspaceScreenState extends State<MaterialWorkspaceScreen> {
     });
   }
 
-  Future<void> _openRecall() async {
+  Future<void> _openRecall({bool autoAdvanceContinuation = false}) async {
     final treatment = LearningVisualTreatmentScope.maybeOf(context);
     await Navigator.of(context).push<void>(
       MaterialPageRoute(
         builder: (_) {
-          final screen = LearningSliceScreen(runtime: widget.runtime, materialId: widget.materialId);
+          final screen = LearningSliceScreen(
+            runtime: widget.runtime,
+            materialId: widget.materialId,
+            autoAdvanceContinuation: autoAdvanceContinuation,
+          );
           if (treatment != null) return LearningVisualTreatmentScope(treatment: treatment, child: screen);
           return LivingDeskReviewScope.active(context) ? LivingDeskReviewScope(child: screen) : screen;
         },
@@ -188,11 +192,7 @@ class _MaterialWorkspaceScreenState extends State<MaterialWorkspaceScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Materyal'),
-        actions: [
-          IconButton(tooltip: 'Kaynağı oku', onPressed: _readCurrentSource, icon: const Icon(Icons.menu_book_outlined)),
-          IconButton(tooltip: 'Quick Recap', onPressed: _openQuickRecap, icon: const Icon(Icons.auto_awesome)),
-        ],
+        title: const Text('Çalışma alanı'),
         backgroundColor: LivingDeskReviewScope.active(context) ? AtelierStyle.canvas : null,
       ),
       body: SafeArea(
@@ -230,9 +230,13 @@ class _MaterialWorkspaceScreenState extends State<MaterialWorkspaceScreen> {
             if (!snapshot.hasData) {
               return const Center(child: CircularProgressIndicator());
             }
+            final data = snapshot.data!;
+            final shouldContinueCurrent =
+                data.continuation?.nextAction.kind == NextLearningActionKind.reviewSourceThenRecall ||
+                data.continuation?.nextAction.kind == NextLearningActionKind.retryRecallWithoutHint;
             return _WorkspaceBody(
-              data: snapshot.data!,
-              onRecall: _openRecall,
+              data: data,
+              onRecall: () => _openRecall(autoAdvanceContinuation: shouldContinueCurrent),
               onQuickRecap: _openQuickRecap,
               onReadSource: () => _openSourceReader(snapshot.data!),
               onListen: _openListen,
@@ -273,6 +277,9 @@ class _WorkspaceBody extends StatelessWidget {
       return AtelierWorkspace(
         material: data.material,
         sourceText: data.extracted?.normalizedText ?? '',
+        continuation: data.continuation,
+        onReadSource: onReadSource,
+        onQuickRecap: onQuickRecap,
         onRecall: onRecall,
         onListen: onListen,
         onExplain: onExplain,

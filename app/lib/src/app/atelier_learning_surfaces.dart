@@ -22,6 +22,9 @@ class AtelierWorkspace extends StatelessWidget {
   const AtelierWorkspace({
     required this.material,
     required this.sourceText,
+    required this.continuation,
+    required this.onReadSource,
+    required this.onQuickRecap,
     required this.onRecall,
     required this.onListen,
     required this.onExplain,
@@ -31,6 +34,9 @@ class AtelierWorkspace extends StatelessWidget {
 
   final MaterialRecord material;
   final String sourceText;
+  final LearningContinuation? continuation;
+  final VoidCallback onReadSource;
+  final VoidCallback onQuickRecap;
   final VoidCallback onRecall;
   final VoidCallback onListen;
   final VoidCallback onExplain;
@@ -66,7 +72,29 @@ class AtelierWorkspace extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 17),
-              if (sourceText.trim().isNotEmpty) ...[const _ReaderCue(), const SizedBox(height: 12)],
+              if (sourceText.trim().isNotEmpty) ...[
+                const _ReaderCue(),
+                const SizedBox(height: 12),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    OutlinedButton.icon(
+                      key: const ValueKey('la0040-atelier-workspace-reader'),
+                      onPressed: onReadSource,
+                      icon: const Icon(Icons.menu_book_outlined),
+                      label: const Text('Tam metni oku'),
+                    ),
+                    TextButton.icon(
+                      key: const ValueKey('la0040-atelier-workspace-recap'),
+                      onPressed: onQuickRecap,
+                      icon: const Icon(Icons.auto_awesome_outlined),
+                      label: const Text('Hızlı özet'),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 4),
+              ],
               const Divider(color: AtelierStyle.line),
               const SizedBox(height: 14),
               if (sourceText.trim().isEmpty)

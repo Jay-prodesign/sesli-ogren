@@ -1143,8 +1143,8 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
             isScrollControlled: true,
             showDragHandle: true,
             builder: (sheetContext) => SafeArea(
-              child: SizedBox(
-                height: MediaQuery.sizeOf(sheetContext).height * 0.72,
+              child: FractionallySizedBox(
+                heightFactor: 0.72,
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
                   child: Column(
@@ -1166,6 +1166,7 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
                       ),
                       const SizedBox(height: 12),
                       FilledButton.icon(
+                        key: const ValueKey('focused-source-retry'),
                         onPressed: () => Navigator.of(sheetContext).pop(true),
                         icon: const Icon(Icons.psychology_alt_outlined),
                         label: const Text('Kaynağı kapat ve yeniden dene'),
