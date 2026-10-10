@@ -254,7 +254,7 @@ class _AccountEntryScreenState extends State<AccountEntryScreen> {
                             enabled: !_busy,
                             keyboardType: TextInputType.number,
                             autofillHints: const [AutofillHints.oneTimeCode],
-                            inputFormatters: const [FilteringTextInputFormatter.digitsOnly],
+                            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                             textInputAction: TextInputAction.done,
                             maxLength: 6,
                             onSubmitted: (_) => _verifyCode(),
