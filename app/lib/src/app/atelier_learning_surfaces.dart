@@ -167,8 +167,11 @@ class AtelierWorkspace extends StatelessWidget {
   bool get _sourcePreviewIsTrimmed => sourceText.trim().replaceAll(RegExp(r'\s+'), ' ').length > 640;
 
   @override
-  Widget build(BuildContext context) => ColoredBox(
-    key: const ValueKey('la0040-atelier-workspace'),
+  Widget build(BuildContext context) {
+    final compactSurface =
+        MediaQuery.sizeOf(context).width < 340 || MediaQuery.textScalerOf(context).scale(1) > 1.25;
+    return ColoredBox(
+      key: const ValueKey('la0040-atelier-workspace'),
     color: AtelierStyle.canvas,
     child: Column(
       children: [
@@ -228,6 +231,79 @@ class AtelierWorkspace extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: 4),
+              ],
+              if (compactSurface) ...[
+                const SizedBox(height: 10),
+                Container(
+                  key: const ValueKey('la0040-atelier-compact-action-context'),
+                  width: double.infinity,
+                  padding: const EdgeInsets.fromLTRB(14, 13, 14, 14),
+                  decoration: BoxDecoration(
+                    color: AtelierStyle.mint,
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(color: AtelierStyle.line),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(_activeStepIcon, color: AtelierStyle.teal, size: 18),
+                          const SizedBox(width: 7),
+                          const Expanded(
+                            child: Text(
+                              'SIRADAKİ GERÇEK ADIM',
+                              style: TextStyle(
+                                color: AtelierStyle.teal,
+                                fontSize: 10,
+                                fontWeight: FontWeight.w900,
+                                letterSpacing: 0.8,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        _activeStepTitle,
+                        style: const TextStyle(
+                          color: AtelierStyle.ink,
+                          fontWeight: FontWeight.w900,
+                          fontSize: 16,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        _activeStepReason,
+                        style: const TextStyle(color: AtelierStyle.muted, fontSize: 12.5, height: 1.4),
+                      ),
+                      const SizedBox(height: 9),
+                      Wrap(
+                        spacing: 6,
+                        runSpacing: 4,
+                        children: [
+                          OutlinedButton.icon(
+                            key: const ValueKey('la0040-atelier-workspace-listen'),
+                            onPressed: onListen,
+                            icon: const Icon(Icons.headphones_rounded),
+                            label: const Text('Dinle'),
+                          ),
+                          TextButton.icon(
+                            onPressed: onExplain,
+                            icon: const Icon(Icons.record_voice_over_outlined),
+                            label: const Text('Açıkla'),
+                          ),
+                          TextButton.icon(
+                            onPressed: onFocus,
+                            icon: const Icon(Icons.center_focus_strong),
+                            label: const Text('Odaklan'),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 14),
               ],
               const Divider(color: AtelierStyle.line),
               const SizedBox(height: 14),
@@ -289,10 +365,22 @@ class AtelierWorkspace extends StatelessWidget {
             color: AtelierStyle.ink,
             borderRadius: BorderRadius.vertical(top: Radius.circular(21)),
           ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
+          child: compactSurface
+              ? FilledButton.icon(
+                  key: const ValueKey('la0040-atelier-workspace-recall'),
+                  onPressed: onRecall,
+                  style: FilledButton.styleFrom(
+                    backgroundColor: AtelierStyle.mark,
+                    foregroundColor: AtelierStyle.ink,
+                    minimumSize: const Size.fromHeight(50),
+                  ),
+                  icon: Icon(_activeStepIcon),
+                  label: Text(_activeStepLabel),
+                )
+              : Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
               Row(
                 children: [
                   Icon(_activeStepIcon, color: AtelierStyle.mark, size: 18),
@@ -382,10 +470,10 @@ class AtelierWorkspace extends StatelessWidget {
             ],
           ),
         ),
-      ],
-    ),
-  );
-}
+        ],
+      ),
+    );
+  }
 
 enum AtelierLearningPhase { source, recall, evidence }
 

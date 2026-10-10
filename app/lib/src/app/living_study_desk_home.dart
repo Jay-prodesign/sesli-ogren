@@ -513,8 +513,8 @@ class LivingStudyDeskHome extends StatelessWidget {
       Semantics(
         header: true,
         child: const Text(
-          'Kendi kaynağını\ncanlandıralım.',
-          style: TextStyle(color: _ink, fontSize: 35, height: 1.12, fontWeight: FontWeight.w800, letterSpacing: -1.3),
+          'Kendi kaynağınla başla.',
+          style: TextStyle(color: _ink, fontSize: 32, height: 1.12, fontWeight: FontWeight.w800, letterSpacing: -1.1),
         ),
       ),
       const SizedBox(height: 13),
