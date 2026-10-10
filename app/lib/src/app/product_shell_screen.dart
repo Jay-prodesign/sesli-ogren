@@ -423,35 +423,34 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
   );
 
   Widget _buildNavigationBar(BuildContext context) {
-    final compactLabels =
-        MediaQuery.sizeOf(context).width < 360 || MediaQuery.textScalerOf(context).scale(1) > 1.25;
+    final compactLabels = MediaQuery.sizeOf(context).width < 360 || MediaQuery.textScalerOf(context).scale(1) > 1.25;
     return NavigationBar(
       selectedIndex: _index,
       labelBehavior: compactLabels
           ? NavigationDestinationLabelBehavior.onlyShowSelected
           : NavigationDestinationLabelBehavior.alwaysShow,
       onDestinationSelected: (value) => setState(() => _index = value),
-    destinations: const [
-      NavigationDestination(
-        icon: Icon(Icons.home_outlined),
-        selectedIcon: Icon(Icons.home_rounded),
-        label: 'Ana Sayfa',
-      ),
-      NavigationDestination(
-        icon: Icon(Icons.library_books_outlined),
-        selectedIcon: Icon(Icons.library_books_rounded),
-        label: 'Kütüphane',
-      ),
-      NavigationDestination(
-        icon: Icon(Icons.insights_outlined),
-        selectedIcon: Icon(Icons.insights_rounded),
-        label: 'İlerleme',
-      ),
-      NavigationDestination(
-        icon: Icon(Icons.person_outline_rounded),
-        selectedIcon: Icon(Icons.person_rounded),
-        label: 'Profil',
-      ),
+      destinations: const [
+        NavigationDestination(
+          icon: Icon(Icons.home_outlined),
+          selectedIcon: Icon(Icons.home_rounded),
+          label: 'Ana Sayfa',
+        ),
+        NavigationDestination(
+          icon: Icon(Icons.library_books_outlined),
+          selectedIcon: Icon(Icons.library_books_rounded),
+          label: 'Kütüphane',
+        ),
+        NavigationDestination(
+          icon: Icon(Icons.insights_outlined),
+          selectedIcon: Icon(Icons.insights_rounded),
+          label: 'İlerleme',
+        ),
+        NavigationDestination(
+          icon: Icon(Icons.person_outline_rounded),
+          selectedIcon: Icon(Icons.person_rounded),
+          label: 'Profil',
+        ),
       ],
     );
   }

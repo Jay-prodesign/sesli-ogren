@@ -87,8 +87,7 @@ class _SesliOgrenAppState extends State<SesliOgrenApp> {
     setState(() => _accountDeleted = true);
   }
 
-  Future<void> _signOutSession() =>
-      (widget.signOutSession ?? SupabaseLearnerAuth.signOutCurrentSession)();
+  Future<void> _signOutSession() => (widget.signOutSession ?? SupabaseLearnerAuth.signOutCurrentSession)();
 
   Future<void> _handleSignOut() async {
     await _signOutSession();
@@ -234,11 +233,7 @@ class _RuntimeLoadingScreen extends StatelessWidget {
 }
 
 class _RuntimeErrorScreen extends StatefulWidget {
-  const _RuntimeErrorScreen({
-    required this.error,
-    required this.onRetry,
-    required this.onUseAnotherAccount,
-  });
+  const _RuntimeErrorScreen({required this.error, required this.onRetry, required this.onUseAnotherAccount});
 
   final Object error;
   final VoidCallback onRetry;
@@ -333,10 +328,7 @@ class _RuntimeErrorScreenState extends State<_RuntimeErrorScreen> {
                         TextButton.icon(
                           onPressed: _switchingAccount ? null : _useAnotherAccount,
                           icon: _switchingAccount
-                              ? const SizedBox.square(
-                                  dimension: 18,
-                                  child: CircularProgressIndicator(strokeWidth: 2),
-                                )
+                              ? const SizedBox.square(dimension: 18, child: CircularProgressIndicator(strokeWidth: 2))
                               : const Icon(Icons.switch_account_outlined),
                           label: Text(_switchingAccount ? 'Oturum kapatılıyor…' : 'Başka hesapla giriş yap'),
                         ),
