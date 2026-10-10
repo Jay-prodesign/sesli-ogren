@@ -161,19 +161,12 @@ class _ProfileSurfaceState extends State<ProfileSurface> {
       children: [
         Text(
           'HESAP VE AYARLAR',
-          style: theme.textTheme.labelSmall?.copyWith(
-            color: accent,
-            fontWeight: FontWeight.w800,
-            letterSpacing: 0.8,
-          ),
+          style: theme.textTheme.labelSmall?.copyWith(color: accent, fontWeight: FontWeight.w800, letterSpacing: 0.8),
         ),
         const SizedBox(height: 7),
         Text(
           'Profil ve Ayarlar',
-          style: theme.textTheme.headlineMedium?.copyWith(
-            color: ink,
-            fontWeight: living ? FontWeight.w900 : null,
-          ),
+          style: theme.textTheme.headlineMedium?.copyWith(color: ink, fontWeight: living ? FontWeight.w900 : null),
         ),
         const SizedBox(height: 6),
         Text(
@@ -343,9 +336,7 @@ class _AccountOverviewCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: hero,
         borderRadius: BorderRadius.circular(26),
-        boxShadow: [
-          BoxShadow(color: hero.withValues(alpha: 0.14), blurRadius: 24, offset: const Offset(0, 12)),
-        ],
+        boxShadow: [BoxShadow(color: hero.withValues(alpha: 0.14), blurRadius: 24, offset: const Offset(0, 12))],
       ),
       child: Padding(
         padding: const EdgeInsets.fromLTRB(20, 20, 20, 18),
@@ -465,10 +456,8 @@ class _ProfileSectionLabel extends StatelessWidget {
     final living = LivingDeskReviewScope.active(context);
     return Text(
       text,
-      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-        color: living ? AtelierStyle.ink : null,
-        fontWeight: living ? FontWeight.w800 : null,
-      ),
+      style: Theme.of(context).textTheme.titleMedium
+          ?.copyWith(color: living ? AtelierStyle.ink : null, fontWeight: living ? FontWeight.w800 : null),
     );
   }
 }
