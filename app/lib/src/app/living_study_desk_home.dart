@@ -665,6 +665,7 @@ class LivingStudyDeskHome extends StatelessWidget {
       );
     },
   );
+}
 
 class _FirstRunStep extends StatelessWidget {
   const _FirstRunStep({
