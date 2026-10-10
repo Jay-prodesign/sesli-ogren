@@ -231,8 +231,7 @@ class _ListenScreenState extends State<ListenScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final living = LivingDeskReviewScope.active(context);
-    final compactHero =
-        MediaQuery.sizeOf(context).width < 340 || MediaQuery.textScalerOf(context).scale(1) > 1.25;
+    final compactHero = MediaQuery.sizeOf(context).width < 340 || MediaQuery.textScalerOf(context).scale(1) > 1.25;
     final hero = living ? AtelierStyle.ink : AppPalette.primaryDark;
     final accent = living ? AtelierStyle.teal : AppPalette.signal;
     final accentSoft = living ? AtelierStyle.mint : AppPalette.signalSoft;
