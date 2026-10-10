@@ -204,8 +204,9 @@ class AtelierWorkspace extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final compactSurface = MediaQuery.sizeOf(context).width < 340 || MediaQuery.textScalerOf(context).scale(1) > 1.25;
-    final primaryAction =
-        continuation?.nextAction.kind == NextLearningActionKind.repeatRecallLater ? onReadSource : onRecall;
+    final primaryAction = continuation?.nextAction.kind == NextLearningActionKind.repeatRecallLater
+        ? onReadSource
+        : onRecall;
     return ColoredBox(
       key: const ValueKey('la0040-atelier-workspace'),
       color: AtelierStyle.canvas,

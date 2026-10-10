@@ -807,24 +807,11 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
             const SizedBox(height: 10),
             Text(
               _editingExistingSource
-                  ? 'Yeni PDF veya metin bu materyalin yeni kaynak sürümü olur. Eski öğrenme kanıtı yeni metne otomatik taşınmaz.'
-                  : 'PDF seç veya notunu yapıştır. Kaynak önce çalışma alanında açılır; sonra kaynağı kapatıp hatırlarsın.',
+                  ? 'Yeni kaynak sürümü eski öğrenme kanıtını devralmaz.'
+                  : 'PDF seç veya yalnız çalışmak istediğin bölümü yapıştır.',
               style: const TextStyle(color: AtelierStyle.muted, fontSize: 14, height: 1.45),
             ),
-            const SizedBox(height: 14),
-            const Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                CompanionView(state: CompanionVisualState.idle, size: 54),
-                SizedBox(width: 10),
-                Expanded(
-                  child: Text(
-                    'D/Knot: Önce ne çalıştığını görelim. Öğrenme kanıtı ancak sen hatırlamayı denediğinde oluşur.',
-                    style: TextStyle(color: AtelierStyle.muted, fontSize: 13, height: 1.4),
-                  ),
-                ),
-              ],
-            ),
+
             if (_busy) ...[
               Semantics(
                 liveRegion: true,
@@ -902,11 +889,27 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
                   },
                 ),
               ),
-              const SizedBox(height: 10),
-              const Text(
-                'PDF tek adımda açılır. Metin yolunda yalnız çalışmak istediğin bölümü yapıştırırsın.',
-                textAlign: TextAlign.center,
-                style: TextStyle(color: AtelierStyle.muted, fontSize: 12.5, height: 1.35),
+              const SizedBox(height: 12),
+              Container(
+                padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
+                decoration: BoxDecoration(
+                  color: AtelierStyle.mint,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: AtelierStyle.line),
+                ),
+                child: const Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    CompanionView(state: CompanionVisualState.idle, size: 40),
+                    SizedBox(width: 9),
+                    Expanded(
+                      child: Text(
+                        'Kaynağın önce açılır. Öğrenme durumun yalnız kendi Hatırla denemenle değişir.',
+                        style: TextStyle(color: AtelierStyle.ink, fontSize: 12.5, height: 1.38),
+                      ),
+                    ),
+                  ],
+                ),
               ),
               if (_inlineError != null) ...[const SizedBox(height: 12), _InlineNotice(text: _inlineError!)],
             ] else ...[

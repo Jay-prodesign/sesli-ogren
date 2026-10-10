@@ -344,8 +344,7 @@ class _ListenScreenState extends State<ListenScreen> {
             final hasResume = resumeChunk > 0;
             final playbackRate = _playbackRate ?? source.playbackRate;
             final visibleChunk = _speaking || _startingPlayback ? _currentChunkIndex : resumeChunk;
-            final visibleChunkIndex =
-                visibleChunk >= 0 && visibleChunk < source.chunks.length ? visibleChunk : 0;
+            final visibleChunkIndex = visibleChunk >= 0 && visibleChunk < source.chunks.length ? visibleChunk : 0;
             final completedChunks = _finishedListening
                 ? source.chunks.length
                 : _speaking || _startingPlayback
@@ -649,7 +648,10 @@ class _ListenScreenState extends State<ListenScreen> {
                               const SizedBox(width: 7),
                               Text(
                                 widget.textOverride?.trim().isNotEmpty == true ? 'Quick Recap özeti' : 'Kaynak metni',
-                                style: theme.textTheme.labelMedium?.copyWith(color: accent, fontWeight: FontWeight.w800),
+                                style: theme.textTheme.labelMedium?.copyWith(
+                                  color: accent,
+                                  fontWeight: FontWeight.w800,
+                                ),
                               ),
                             ],
                           ),
@@ -659,7 +661,7 @@ class _ListenScreenState extends State<ListenScreen> {
                       ),
                     ),
                   ),
-                ]
+                ],
               ],
             );
           },

@@ -519,10 +519,10 @@ class LivingStudyDeskHome extends StatelessWidget {
           style: TextStyle(color: _ink, fontSize: 32, height: 1.12, fontWeight: FontWeight.w800, letterSpacing: -1.1),
         ),
       ),
-      const SizedBox(height: 13),
+      const SizedBox(height: 11),
       const Text(
-        'Bir PDF ya da metin ekle. Önce kaynağın açılır; sonra dinler, kapatır ve gerçekten hatırlarsın.',
-        style: TextStyle(fontSize: 16, color: _sub, height: 1.48),
+        'PDF veya metnini getir. Önce kaynağın açılır; öğrenme kanıtını sen hatırlamayı denediğinde oluşturursun.',
+        style: TextStyle(fontSize: 16, color: _sub, height: 1.46),
       ),
       const SizedBox(height: 18),
       SizedBox(
@@ -531,7 +531,7 @@ class LivingStudyDeskHome extends StatelessWidget {
           key: const ValueKey('la0040-living-add'),
           onPressed: onOpenLearning,
           icon: const Icon(Icons.add_rounded),
-          label: const Text('İlk kaynağını ekle'),
+          label: const Text('Kaynak ekle'),
           style: FilledButton.styleFrom(
             backgroundColor: _ink,
             foregroundColor: Colors.white,
@@ -540,72 +540,35 @@ class LivingStudyDeskHome extends StatelessWidget {
           ),
         ),
       ),
-      const SizedBox(height: 9),
-      const Text('PDF veya kendi metnin · kendi kaynağınla başla', style: TextStyle(color: _sub, fontSize: 13)),
-      const SizedBox(height: 17),
-      LayoutBuilder(
-        builder: (context, constraints) {
-          final compactCompanion = constraints.maxWidth < 330 || MediaQuery.textScalerOf(context).scale(1) > 1.25;
-          const copy = Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Merhaba, ben D/Knot.',
-                style: TextStyle(color: _ink, fontSize: 18, fontWeight: FontWeight.w900),
-              ),
-              SizedBox(height: 6),
-              Text(
-                'Kaynağını görünür tutacağım. Öğrenme durumun yalnız kendi hatırlama denemelerinle değişecek.',
-                style: TextStyle(color: _sub, fontSize: 14, height: 1.4),
-              ),
-            ],
-          );
-          if (compactCompanion) {
-            return const Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                CompanionView(state: CompanionVisualState.idle, size: 88),
-                SizedBox(height: 8),
-                copy,
-              ],
-            );
-          }
-          return const Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              CompanionView(state: CompanionVisualState.idle, size: 104),
-              SizedBox(width: 10),
-              Expanded(child: copy),
-            ],
-          );
-        },
-      ),
-      const SizedBox(height: 17),
+      const SizedBox(height: 18),
       Container(
         width: double.infinity,
-        padding: const EdgeInsets.fromLTRB(21, 18, 21, 21),
+        padding: const EdgeInsets.fromLTRB(15, 13, 15, 14),
         decoration: BoxDecoration(
           color: _paper,
-          borderRadius: BorderRadius.circular(18),
+          borderRadius: BorderRadius.circular(15),
           border: Border.all(color: _line),
         ),
-        child: const Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        child: const Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Row(
-              children: [
-                Icon(Icons.auto_stories_outlined, color: _accent, size: 20),
-                SizedBox(width: 8),
-                Text(
-                  'İLK ÖĞRENME DÖNGÜN',
-                  style: TextStyle(color: _accent, fontSize: 10, fontWeight: FontWeight.w900, letterSpacing: 0.9),
-                ),
-              ],
-            ),
-            SizedBox(height: 12),
-            Text(
-              'Kaynağı aç → oku veya dinle → kapat → hatırla → kaynak kanıtıyla karşılaştır.',
-              style: TextStyle(fontSize: 18, color: _ink, fontWeight: FontWeight.w800, height: 1.3),
+            CompanionView(state: CompanionVisualState.idle, size: 58),
+            SizedBox(width: 11),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'D/Knot kaynağı görünür tutar.',
+                    style: TextStyle(color: _ink, fontSize: 14, fontWeight: FontWeight.w900),
+                  ),
+                  SizedBox(height: 4),
+                  Text(
+                    'Kaynak → oku veya dinle → kapat → hatırla → kanıtla karşılaştır.',
+                    style: TextStyle(color: _sub, fontSize: 13, height: 1.4),
+                  ),
+                ],
+              ),
             ),
           ],
         ),
