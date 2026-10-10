@@ -121,6 +121,24 @@ class _MaterialWorkspaceScreenState extends State<MaterialWorkspaceScreen> {
     await _openSourceReader(data);
   }
 
+  Future<void> _openSourceEditor() async {
+    final updated = await Navigator.of(context).push<bool>(
+      MaterialPageRoute<bool>(
+        builder: (_) => _preserveProductExperience(
+          LearningSliceScreen(
+            runtime: widget.runtime,
+            materialId: widget.materialId,
+            startInSourceEditor: true,
+          ),
+        ),
+      ),
+    );
+    if (!mounted || updated != true) return;
+    setState(() {
+      _snapshot = _load();
+    });
+  }
+
   Future<void> _openQuickRecap() async {
     await Navigator.of(context).push<void>(
       MaterialPageRoute(
@@ -267,6 +285,7 @@ class _MaterialWorkspaceScreenState extends State<MaterialWorkspaceScreen> {
               data: data,
               onRecall: () => _openRecall(autoAdvanceContinuation: shouldContinueCurrent),
               onQuickRecap: _openQuickRecap,
+              onUpdateSource: _openSourceEditor,
               onReadSource: () => _openSourceReader(snapshot.data!),
               onListen: _openListen,
               onExplain: () => _openExplain(snapshot.data!.source),
@@ -284,6 +303,7 @@ class _WorkspaceBody extends StatelessWidget {
     required this.data,
     required this.onRecall,
     required this.onQuickRecap,
+    required this.onUpdateSource,
     required this.onReadSource,
     required this.onListen,
     required this.onExplain,
@@ -293,6 +313,7 @@ class _WorkspaceBody extends StatelessWidget {
   final _WorkspaceSnapshot data;
   final VoidCallback onRecall;
   final VoidCallback onQuickRecap;
+  final VoidCallback onUpdateSource;
   final VoidCallback onReadSource;
   final VoidCallback onListen;
   final VoidCallback onExplain;
@@ -310,6 +331,7 @@ class _WorkspaceBody extends StatelessWidget {
         continuation: data.continuation,
         onReadSource: onReadSource,
         onQuickRecap: onQuickRecap,
+        onUpdateSource: onUpdateSource,
         onRecall: onRecall,
         onListen: onListen,
         onExplain: onExplain,
@@ -511,6 +533,13 @@ class _WorkspaceBody extends StatelessWidget {
                     label: const Text('Kaynak metnini gör'),
                   ),
                 ],
+                const SizedBox(height: 8),
+                OutlinedButton.icon(
+                  key: const ValueKey('workspace-update-source'),
+                  onPressed: onUpdateSource,
+                  icon: const Icon(Icons.sync_rounded),
+                  label: const Text('Kaynağı güncelle'),
+                ),
               ],
             ),
           ),
