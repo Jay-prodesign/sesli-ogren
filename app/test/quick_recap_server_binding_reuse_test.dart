@@ -144,6 +144,43 @@ void main() {
       serverMaterialId,
     );
   });
+  testWidgets('Quick Recap blocks a new summary when previous-job restore is uncertain', (tester) async {
+    final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
+    final ingest = SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor());
+    const materialId = MaterialId('quick-recap-restore-uncertain');
+    await ingest.ingestPastedText(
+      learner: AppRuntime.localM5LearnerFixture,
+      materialId: materialId,
+      text: 'Önceki özet işi doğrulanamıyorsa yeni üretim başlatılmamalıdır.',
+      sourceName: 'Güvenli özet notu',
+    );
+    final runtime = AppRuntime(
+      learner: AppRuntime.localM5LearnerFixture,
+      store: store,
+      ingest: ingest,
+      recall: RecallLearningService(sourceStore: store, learningStore: store.learningTruthStore()),
+      telemetry: store.operationalTelemetry(),
+    );
+    final gateway = _RecordingSummaryGateway(serverMaterialId: '11111111-1111-4111-8111-111111111111');
+
+    await store.close();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: QuickRecapScreen(runtime: runtime, materialId: materialId, summaryGateway: gateway),
+      ),
+    );
+    for (var i = 0; i < 20 && find.text('Önceki özet işi doğrulanamadı.').evaluate().isEmpty; i++) {
+      await tester.pump(const Duration(milliseconds: 20));
+    }
+
+    expect(find.text('Önceki özet işi doğrulanamadı.'), findsOneWidget);
+    expect(find.textContaining('Çifte üretim veya ücret riski'), findsOneWidget);
+    expect(find.text('Önceki işi yeniden kontrol et'), findsOneWidget);
+    expect(find.text('Özet oluştur'), findsNothing);
+    expect(gateway.submitCalls, 0);
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('Quick Recap shows recoverable error when dispatch throws', (tester) async {
     final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
     addTearDown(store.close);

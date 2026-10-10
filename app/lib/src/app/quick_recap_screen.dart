@@ -47,6 +47,7 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> with WidgetsBinding
   String? _error;
   bool _busy = false;
   bool _restoring = true;
+  bool _restoreUncertain = false;
   bool _checking = false;
   bool _dispatching = false;
   Timer? _pollTimer;
@@ -148,11 +149,24 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> with WidgetsBinding
       }
     } catch (_) {
       if (mounted) {
-        setState(() => _error = 'Önceki özet işi yüklenemedi.');
+        setState(() {
+          _restoreUncertain = true;
+          _error = null;
+        });
       }
     } finally {
       if (mounted) setState(() => _restoring = false);
     }
+  }
+
+  Future<void> _retryRestore() async {
+    if (_restoring || !mounted) return;
+    setState(() {
+      _restoring = true;
+      _restoreUncertain = false;
+      _error = null;
+    });
+    await _restore();
   }
 
   @override
@@ -187,7 +201,7 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> with WidgetsBinding
   }
 
   Future<void> _submit() async {
-    if (_busy || _restoring || _jobId != null) return;
+    if (_busy || _restoring || _restoreUncertain || _jobId != null) return;
     setState(() {
       _busy = true;
       _error = null;
@@ -589,14 +603,47 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> with WidgetsBinding
             ),
           ],
           const SizedBox(height: 20),
-          if (_jobId == null)
+          if (_restoreUncertain) ...[
+            DecoratedBox(
+              decoration: BoxDecoration(
+                color: living ? AtelierStyle.paper : Theme.of(context).colorScheme.surfaceContainerLow,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: line),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Text(
+                      'Önceki özet işi doğrulanamadı.',
+                      style: Theme.of(context).textTheme.titleSmall?.copyWith(color: ink, fontWeight: FontWeight.w800),
+                    ),
+                    const SizedBox(height: 7),
+                    Text(
+                      'Çifte üretim veya ücret riski yaratmamak için yeni özet başlatmıyoruz. Önce mevcut işi yeniden kontrol et.',
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: muted, height: 1.4),
+                    ),
+                    const SizedBox(height: 12),
+                    OutlinedButton.icon(
+                      style: outlineStyle,
+                      onPressed: _restoring ? null : _retryRestore,
+                      icon: const Icon(Icons.sync_rounded),
+                      label: const Text('Önceki işi yeniden kontrol et'),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+          ] else if (_jobId == null)
             FilledButton.icon(
               style: primaryStyle,
               onPressed: (_busy || _restoring) ? null : _submit,
               icon: const Icon(Icons.auto_awesome),
               label: const Text('Özet oluştur'),
             ),
-          if (_busy) const LinearProgressIndicator(),
+          if (_busy || _restoring) const LinearProgressIndicator(),
           if (_jobId != null && status?.summary == null) ...[
             Text(_statusLabel(status), style: Theme.of(context).textTheme.titleMedium),
             if (_statusDetail(status) != null) ...[const SizedBox(height: 6), Text(_statusDetail(status)!)],
