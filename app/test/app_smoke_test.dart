@@ -439,7 +439,7 @@ void main() {
     expect(find.text('Yeni materyal'), findsNothing);
   });
 
-  testWidgets('Home treats durable Listen activity as real recent study activity', (tester) async {
+  testWidgets('durable Listen checkpoint resumes across Home, Library and Progress without creating mastery', (tester) async {
     final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
     addTearDown(store.close);
     var now = DateTime.utc(2026, 10, 6, 9);
@@ -477,13 +477,35 @@ void main() {
       updatedAt: DateTime.utc(2026, 10, 6, 11),
     );
 
-    await tester.pumpWidget(MaterialApp(home: ProductShellScreen(runtime: runtime)));
-    await pumpUntilFound(tester, find.text('KALDIĞIN MATERYAL'));
-    await tapVisible(tester, find.text('Çalışmaya devam et'));
-    await pumpUntilFound(tester, find.text('Dinlenen eski materyal'));
-
+    await tester.pumpWidget(
+      MaterialApp(home: LivingDeskReviewScope(child: ProductShellScreen(runtime: runtime))),
+    );
+    await pumpUntilFound(tester, find.text('Dinlemeye devam et'));
     expect(find.text('Dinlenen eski materyal'), findsWidgets);
     expect(find.text('Yeni yüklenen materyal'), findsNothing);
+
+    await tapVisible(tester, find.text('Dinlemeye devam et'));
+    await pumpUntilFound(tester, find.byType(ListenScreen));
+    expect(find.text('Dinlenen eski materyal'), findsWidgets);
+    await tester.pageBack();
+    await pumpUntilFound(tester, find.text('Kütüphane'));
+
+    await tapVisible(tester, find.text('Kütüphane').last);
+    final libraryContinue = find.byKey(ValueKey('library-continue-${listenedId.value}'));
+    await pumpUntilFound(tester, libraryContinue);
+    expect(find.text('Dinlemeye devam et'), findsOneWidget);
+    await tapVisible(tester, libraryContinue);
+    await pumpUntilFound(tester, find.byType(ListenScreen));
+    await tester.pageBack();
+    await pumpUntilFound(tester, find.text('İlerleme'));
+
+    await tapVisible(tester, find.text('İlerleme').last);
+    final progressContinue = find.byKey(ValueKey('progress-continue-${listenedId.value}'));
+    await pumpUntilFound(tester, progressContinue);
+    expect(find.text('Henüz ölçülmedi'), findsWidgets);
+    expect(find.textContaining('Dinleme konumun kayıtlı'), findsOneWidget);
+    await tapVisible(tester, progressContinue);
+    await pumpUntilFound(tester, find.byType(ListenScreen));
   });
 
   testWidgets('Library deletion removes the selected material and Home falls back safely', (tester) async {
@@ -577,7 +599,12 @@ void main() {
     );
     await pumpUntilFound(tester, find.text('Dinleme devam notu'));
     expect(find.textContaining('bölüm 2 / 2'), findsOneWidget);
-    await pumpUntilFound(tester, find.text('Kaldığın yerden dinle'));
+    await tester.scrollUntilVisible(
+      find.text('Kaldığın yerden dinle'),
+      240,
+      scrollable: find.byType(Scrollable).last,
+    );
+    await tester.pump();
     expect(find.text('Kaldığın yerden dinle').hitTestable(), findsOneWidget);
     expect(find.byKey(const ValueKey('listen-source-transcript')), findsOneWidget);
 

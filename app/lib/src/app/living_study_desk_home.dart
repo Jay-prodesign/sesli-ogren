@@ -24,6 +24,7 @@ class LivingStudyDeskHome extends StatelessWidget {
   const LivingStudyDeskHome({
     required this.material,
     required this.continuation,
+    this.listenResumeChunk = 0,
     required this.sourceText,
     required this.otherMaterials,
     required this.onOpenWorkspace,
@@ -35,6 +36,7 @@ class LivingStudyDeskHome extends StatelessWidget {
 
   final MaterialRecord? material;
   final LearningContinuation? continuation;
+  final int listenResumeChunk;
   final String? sourceText;
   final List<MaterialRecord> otherMaterials;
   final VoidCallback onOpenWorkspace;
@@ -49,7 +51,10 @@ class LivingStudyDeskHome extends StatelessWidget {
   static const _accent = Color(0xFF0A716A);
   static const _line = Color(0xFFD5E3DC);
 
+  bool get _hasListenResume => continuation == null && listenResumeChunk > 0;
+
   String get _nextStep {
+    if (_hasListenResume) return 'Dinlemeye kaldığın yerden devam et';
     final action = continuation?.nextAction.kind;
     return switch (action) {
       NextLearningActionKind.reviewSourceThenRecall => 'Kaynağa dön, sonra yeniden dene',
@@ -59,9 +64,15 @@ class LivingStudyDeskHome extends StatelessWidget {
     };
   }
 
-  String get _why => continuation?.nextAction.reasonText ?? 'Kaynağından bir hatırlama denemesiyle ne bildiğini gör.';
+  String get _why {
+    if (_hasListenResume) {
+      return 'Dinleme konumun bu kaynakta kayıtlı. Dinlemek öğrenme kanıtı oluşturmaz; ardından hatırlamayı deneyebilirsin.';
+    }
+    return continuation?.nextAction.reasonText ?? 'Kaynağından bir hatırlama denemesiyle ne bildiğini gör.';
+  }
 
   String get _continuationLabel {
+    if (_hasListenResume) return 'DİNLEME KONUMUN KAYITLI';
     if (continuation == null) return 'KAYNAĞINDAN ÖĞREN';
     return continuation!.nextAction.kind == NextLearningActionKind.repeatRecallLater
         ? 'DENEMEN KAYITLI · SONRA YENİDEN HATIRLA'
@@ -69,6 +80,7 @@ class LivingStudyDeskHome extends StatelessWidget {
   }
 
   String get _nextActionCta {
+    if (_hasListenResume) return 'Dinlemeye devam et';
     final action = continuation?.nextAction.kind;
     return switch (action) {
       NextLearningActionKind.reviewSourceThenRecall => 'Kaynağı gözden geçir',
@@ -78,12 +90,17 @@ class LivingStudyDeskHome extends StatelessWidget {
     };
   }
 
-  VoidCallback get _nextActionHandler =>
-      continuation?.nextAction.kind == NextLearningActionKind.repeatRecallLater ? onOpenWorkspace : onOpenLearning;
+  VoidCallback get _nextActionHandler {
+    if (_hasListenResume) return onOpenListen;
+    return continuation?.nextAction.kind == NextLearningActionKind.repeatRecallLater ? onOpenWorkspace : onOpenLearning;
+  }
 
-  IconData get _nextActionIcon => continuation?.nextAction.kind == NextLearningActionKind.repeatRecallLater
-      ? Icons.auto_stories_outlined
-      : Icons.psychology_alt_outlined;
+  IconData get _nextActionIcon {
+    if (_hasListenResume) return Icons.headphones_rounded;
+    return continuation?.nextAction.kind == NextLearningActionKind.repeatRecallLater
+        ? Icons.auto_stories_outlined
+        : Icons.psychology_alt_outlined;
+  }
 
   String get _preview {
     final source = sourceText?.trim() ?? '';
@@ -153,6 +170,7 @@ class LivingStudyDeskHome extends StatelessWidget {
   Widget _populated(BuildContext context) {
     final current = material!;
     final hasRecallEvidence = continuation != null && continuation!.state.kind != RecallStateKind.notAssessed;
+    final hasActiveContinuation = hasRecallEvidence || _hasListenResume;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -274,7 +292,11 @@ class LivingStudyDeskHome extends StatelessWidget {
                     const Icon(Icons.arrow_downward_rounded, color: _accent, size: 19),
                     const SizedBox(height: 1),
                     CompanionView(
-                      state: hasRecallEvidence ? CompanionVisualState.idle : CompanionVisualState.think,
+                      state: _hasListenResume
+                          ? CompanionVisualState.listen
+                          : hasRecallEvidence
+                          ? CompanionVisualState.idle
+                          : CompanionVisualState.think,
                       size: 76,
                     ),
                   ],
@@ -288,7 +310,7 @@ class LivingStudyDeskHome extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        hasRecallEvidence ? _continuationLabel : 'KAYNAĞINDAN ÖĞREN',
+                        hasActiveContinuation ? _continuationLabel : 'KAYNAĞINDAN ÖĞREN',
                         style: const TextStyle(
                           color: _accent,
                           fontSize: 10,
@@ -347,9 +369,9 @@ class LivingStudyDeskHome extends StatelessWidget {
           alignment: Alignment.center,
           child: TextButton.icon(
             key: const ValueKey('la0040-living-listen'),
-            onPressed: onOpenListen,
-            icon: const Icon(Icons.headphones_rounded, size: 18),
-            label: const Text('Önce dinlemek istiyorum'),
+            onPressed: _hasListenResume ? onOpenLearning : onOpenListen,
+            icon: Icon(_hasListenResume ? Icons.psychology_alt_outlined : Icons.headphones_rounded, size: 18),
+            label: Text(_hasListenResume ? 'Şimdi hatırlamayı dene' : 'Önce dinlemek istiyorum'),
             style: TextButton.styleFrom(foregroundColor: _accent),
           ),
         ),

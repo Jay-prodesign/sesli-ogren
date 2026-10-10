@@ -148,12 +148,15 @@ void main() {
     await _pumpUntilFound(tester, find.byType(ListenScreen));
     expect(find.byType(ListenScreen), findsOneWidget);
 
+    final recallAction = find.widgetWithText(OutlinedButton, 'Şimdi hatırlamayı dene');
     await tester.scrollUntilVisible(
-      find.text('Şimdi hatırlamayı dene'),
+      recallAction,
       180,
       scrollable: find.descendant(of: find.byType(ListenScreen), matching: find.byType(Scrollable)),
     );
-    await tester.tap(find.text('Şimdi hatırlamayı dene'));
+    await tester.ensureVisible(recallAction);
+    await tester.pump();
+    await tester.tap(recallAction);
     await _pumpUntilFound(tester, find.byType(LearningSliceScreen));
     expect(find.byType(LearningSliceScreen), findsOneWidget);
     Navigator.of(tester.element(find.byType(LearningSliceScreen))).pop();

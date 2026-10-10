@@ -73,7 +73,19 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
                 materialId: item.id,
                 sourceVersionId: source.identity.sourceVersionId,
               );
-        return ProgressItem(material: item, continuation: continuation, listenActivityAt: listenActivityAt);
+        final listenResumeChunk = source == null
+            ? 0
+            : await widget.runtime.store.listenResumeChunk(
+                learner: widget.runtime.learner,
+                materialId: item.id,
+                sourceVersionId: source.identity.sourceVersionId,
+              );
+        return ProgressItem(
+          material: item,
+          continuation: continuation,
+          listenActivityAt: listenActivityAt,
+          listenResumeChunk: listenResumeChunk,
+        );
       }),
     );
     final sortedProgress = [...progress]..sort((a, b) => _activityAt(b).compareTo(_activityAt(a)));
@@ -95,6 +107,7 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
       source: source,
       extracted: extracted,
       continuation: continuation,
+      listenResumeChunk: active.listenResumeChunk,
       materials: sortedProgress.map((item) => item.material).toList(growable: false),
       progress: sortedProgress,
     );
@@ -147,15 +160,20 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
   Future<void> _openMaterialNextAction(MaterialId materialId) async {
     final snapshot = await _snapshot;
     if (!mounted) return;
-    LearningContinuation? continuation;
+    ProgressItem? progressItem;
     for (final item in snapshot.progress) {
       if (item.material.id == materialId) {
-        continuation = item.continuation;
+        progressItem = item;
         break;
       }
     }
+    final continuation = progressItem?.continuation;
     if (continuation?.nextAction.kind == NextLearningActionKind.repeatRecallLater) {
       await _openWorkspace(materialId);
+      return;
+    }
+    if (continuation == null && (progressItem?.listenResumeChunk ?? 0) > 0) {
+      await _openListenFor(materialId);
       return;
     }
     await _openLearningFor(materialId, autoAdvanceContinuation: continuation != null);
@@ -263,6 +281,11 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
   Future<void> _openListen() async {
     final material = (await _snapshot).material;
     if (material == null || !mounted) return;
+    await _openListenFor(material.id);
+  }
+
+  Future<void> _openListenFor(MaterialId materialId) async {
+    if (!mounted) return;
     final treatment = LearningVisualTreatmentScope.maybeOf(context);
     final livingReview = LivingDeskReviewScope.active(context);
     await Navigator.of(context).push<void>(
@@ -270,8 +293,8 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
         builder: (listenContext) {
           final screen = ListenScreen(
             runtime: widget.runtime,
-            materialId: material.id,
-            onRecall: () => _openRecallFromCurrentRoute(listenContext, material.id),
+            materialId: materialId,
+            onRecall: () => _openRecallFromCurrentRoute(listenContext, materialId),
           );
           if (treatment != null) return LearningVisualTreatmentScope(treatment: treatment, child: screen);
           return livingReview ? LivingDeskReviewScope(child: screen) : screen;
@@ -505,6 +528,7 @@ class _HomeSurface extends StatelessWidget {
       return LivingStudyDeskHome(
         material: data.material,
         continuation: data.continuation,
+        listenResumeChunk: data.listenResumeChunk,
         sourceText: data.extracted?.normalizedText,
         otherMaterials: data.materials.where((item) => item.id != data.material?.id).toList(),
         onOpenWorkspace: onOpenWorkspace,
@@ -515,6 +539,7 @@ class _HomeSurface extends StatelessWidget {
     }
     final theme = Theme.of(context);
     final hasMaterial = data.material != null;
+    final hasListenResume = data.continuation == null && data.listenResumeChunk > 0;
     final candidate = LearningVisualTreatmentScope.maybeOf(context);
     if (hasMaterial && candidate != null) {
       return LearningTreatmentHome(
@@ -555,7 +580,11 @@ class _HomeSurface extends StatelessWidget {
                   Text('Sesli Öğren', style: theme.textTheme.headlineSmall),
                   const SizedBox(height: 2),
                   Text(
-                    hasMaterial ? _headerLine(data.continuation) : 'Kendi materyalini aktif öğrenmeye dönüştür.',
+                    hasMaterial
+                        ? hasListenResume
+                              ? 'Dinleme konumun kayıtlı.'
+                              : _headerLine(data.continuation)
+                        : 'Kendi materyalini aktif öğrenmeye dönüştür.',
                     style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
                   ),
                 ],
@@ -569,10 +598,16 @@ class _HomeSurface extends StatelessWidget {
         else ...[
           _ContinueHero(
             data: data,
-            title: _nextTitle(data.continuation),
-            reason: _nextReason(data.continuation),
-            actionLabel: _nextActionLabel(data.continuation),
-            onPressed: _nextActionOpensLearning(data.continuation) ? onOpenLearning : onOpenWorkspace,
+            title: hasListenResume ? 'Dinlemeye kaldığın yerden devam et' : _nextTitle(data.continuation),
+            reason: hasListenResume
+                ? 'Dinleme konumun bu kaynakta kayıtlı. Dinlemek öğrenme kanıtı oluşturmaz; ardından hatırlamayı deneyebilirsin.'
+                : _nextReason(data.continuation),
+            actionLabel: hasListenResume ? 'Dinlemeye devam et' : _nextActionLabel(data.continuation),
+            onPressed: hasListenResume
+                ? onOpenListen
+                : _nextActionOpensLearning(data.continuation)
+                ? onOpenLearning
+                : onOpenWorkspace,
           ),
           const SizedBox(height: 22),
           Row(
@@ -1084,6 +1119,7 @@ class _LibrarySurfaceState extends State<_LibrarySurface> {
             _LibraryMaterialCard(
               material: material,
               continuation: _continuationFor(material.id),
+              listenResumeChunk: _progressFor(material.id)?.listenResumeChunk ?? 0,
               onPressed: () => widget.onOpenWorkspace(material.id),
               onContinue: () => widget.onContinueMaterial(material.id),
               onDelete: () => widget.onDeleteMaterial(material),
@@ -1095,18 +1131,21 @@ class _LibrarySurfaceState extends State<_LibrarySurface> {
     );
   }
 
-  LearningContinuation? _continuationFor(MaterialId materialId) {
+  ProgressItem? _progressFor(MaterialId materialId) {
     for (final item in widget.data.progress) {
-      if (item.material.id == materialId) return item.continuation;
+      if (item.material.id == materialId) return item;
     }
     return null;
   }
+
+  LearningContinuation? _continuationFor(MaterialId materialId) => _progressFor(materialId)?.continuation;
 }
 
 class _LibraryMaterialCard extends StatelessWidget {
   const _LibraryMaterialCard({
     required this.material,
     required this.continuation,
+    required this.listenResumeChunk,
     required this.onPressed,
     required this.onContinue,
     required this.onDelete,
@@ -1115,17 +1154,21 @@ class _LibraryMaterialCard extends StatelessWidget {
 
   final MaterialRecord material;
   final LearningContinuation? continuation;
+  final int listenResumeChunk;
   final VoidCallback onPressed;
   final VoidCallback onContinue;
   final VoidCallback onDelete;
   final bool isDeleting;
 
-  String get _continueLabel => switch (continuation?.nextAction.kind) {
-    NextLearningActionKind.reviewSourceThenRecall => 'Kaynağı gözden geçir ve yeniden dene',
-    NextLearningActionKind.retryRecallWithoutHint => 'İpucusuz tekrar dene',
-    NextLearningActionKind.repeatRecallLater => 'Kaynağa dön',
-    null => 'İlk hatırlamayı dene',
-  };
+  String get _continueLabel {
+    if (continuation == null && listenResumeChunk > 0) return 'Dinlemeye devam et';
+    return switch (continuation?.nextAction.kind) {
+      NextLearningActionKind.reviewSourceThenRecall => 'Kaynağı gözden geçir ve yeniden dene',
+      NextLearningActionKind.retryRecallWithoutHint => 'İpucusuz tekrar dene',
+      NextLearningActionKind.repeatRecallLater => 'Kaynağa dön',
+      null => 'İlk hatırlamayı dene',
+    };
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -1141,7 +1184,10 @@ class _LibraryMaterialCard extends StatelessWidget {
       RecallStateKind.needsReview => ('Tekrar gerekiyor', AppPalette.attentionSoft, AppPalette.attention),
     };
     final nextReason =
-        continuation?.nextAction.reasonText ?? 'İlk aktif hatırlama denemesi öğrenme durumunu görünür kılar.';
+        continuation?.nextAction.reasonText ??
+        (listenResumeChunk > 0
+            ? 'Dinleme konumun kayıtlı. Dinlemek öğrenme kanıtı oluşturmaz; kaldığın yerden devam edebilirsin.'
+            : 'İlk aktif hatırlama denemesi öğrenme durumunu görünür kılar.');
     final resolvedStateSoft = living
         ? switch (state) {
             RecallStateKind.notAssessed => AtelierStyle.canvas,
@@ -1445,6 +1491,7 @@ class _HomeSnapshot {
     this.source,
     this.extracted,
     this.continuation,
+    this.listenResumeChunk = 0,
     this.materials = const [],
     this.progress = const [],
   });
@@ -1453,6 +1500,7 @@ class _HomeSnapshot {
   final SourceVersionRecord? source;
   final ExtractedContentRecord? extracted;
   final LearningContinuation? continuation;
+  final int listenResumeChunk;
   final List<MaterialRecord> materials;
   final List<ProgressItem> progress;
 }

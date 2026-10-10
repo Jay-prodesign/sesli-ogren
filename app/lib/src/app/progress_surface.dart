@@ -7,10 +7,16 @@ import 'atelier_learning_surfaces.dart';
 import 'living_study_desk_home.dart';
 
 class ProgressItem {
-  const ProgressItem({required this.material, required this.continuation, this.listenActivityAt});
+  const ProgressItem({
+    required this.material,
+    required this.continuation,
+    this.listenActivityAt,
+    this.listenResumeChunk = 0,
+  });
   final MaterialRecord material;
   final LearningContinuation? continuation;
   final DateTime? listenActivityAt;
+  final int listenResumeChunk;
 }
 
 class ProgressSurface extends StatelessWidget {
@@ -126,7 +132,11 @@ class _ProgressCard extends StatelessWidget {
       RecallStateKind.retrievedOnce => 'Bir kez bağımsız hatırlandı',
       RecallStateKind.needsReview => 'Tekrar gerekiyor',
     };
-    final reason = item.continuation?.nextAction.reasonText ?? 'Aktif hatırlama henüz öğrenme kanıtı üretmedi.';
+    final reason =
+        item.continuation?.nextAction.reasonText ??
+        (item.listenResumeChunk > 0
+            ? 'Dinleme konumun kayıtlı. Bu bir öğrenme kanıtı değil; kaldığın yerden dinlemeye devam edebilirsin.'
+            : 'Aktif hatırlama henüz öğrenme kanıtı üretmedi.');
     final (legacyAccent, legacySoft, icon) = switch (state) {
       RecallStateKind.notAssessed => (
         AppPalette.inkMuted,
