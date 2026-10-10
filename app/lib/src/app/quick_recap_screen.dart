@@ -455,7 +455,7 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> with WidgetsBinding
           builder: (readerContext) => _preserveProductExperience(
             SourceReaderScreen(
               title: material.title,
-              sourceText: extracted?.normalizedText ?? '',
+              sourceText: extracted.normalizedText,
               onListen: () {
                 Navigator.of(readerContext).pushReplacement<void, void>(
                   MaterialPageRoute(
