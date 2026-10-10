@@ -127,7 +127,12 @@ class _ListenScreenState extends State<ListenScreen> {
             _currentChunkIndex = index;
             _resumeChunkOverride = index;
           });
-          unawaited(_saveResume(source, index));
+          unawaited(_saveResume(source, index).catchError((Object _) {
+            if (!mounted || token != _playToken) return;
+            setState(() {
+              _error = 'Dinleme konumu kaydedilemedi. Bu oturumda dinlemeye devam edebilirsin.';
+            });
+          }));
         },
         onDone: () {
           if (token != _playToken) return;
@@ -157,7 +162,15 @@ class _ListenScreenState extends State<ListenScreen> {
     if (token != _playToken) return;
     final next = index + 1;
     if (next >= source.chunks.length) {
-      await _saveResume(source, 0);
+      try {
+        await _saveResume(source, 0);
+      } catch (_) {
+        if (mounted && token == _playToken) {
+          setState(() {
+            _error = 'Dinleme tamamlandı ancak konum sıfırlanamadı. Yeniden açtığında kaldığın yerden devam edebilirsin.';
+          });
+        }
+      }
       if (!mounted || token != _playToken) return;
       setState(() {
         _speaking = false;
@@ -169,7 +182,15 @@ class _ListenScreenState extends State<ListenScreen> {
       return;
     }
 
-    await _saveResume(source, next);
+    try {
+      await _saveResume(source, next);
+    } catch (_) {
+      if (mounted && token == _playToken) {
+        setState(() {
+          _error = 'Dinleme konumu kaydedilemedi. Dinlemeye devam edebilirsin.';
+        });
+      }
+    }
     if (!mounted || token != _playToken) return;
     setState(() {
       _resumeChunkOverride = next;
