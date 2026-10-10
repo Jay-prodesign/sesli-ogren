@@ -270,10 +270,7 @@ class _SourceReaderScreenState extends State<SourceReaderScreen> {
                             const SizedBox(height: 14),
                             Text(
                               'Bu kaynak için okunabilir metin bulunamadı.',
-                              style: theme.textTheme.titleMedium?.copyWith(
-                                color: ink,
-                                fontWeight: FontWeight.w800,
-                              ),
+                              style: theme.textTheme.titleMedium?.copyWith(color: ink, fontWeight: FontWeight.w800),
                               textAlign: TextAlign.center,
                             ),
                             const SizedBox(height: 8),

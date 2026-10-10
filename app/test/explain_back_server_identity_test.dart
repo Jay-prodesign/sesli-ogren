@@ -101,10 +101,7 @@ void main() {
       text: 'Fotosentez sırasında klorofil ışığın soğurulmasına yardım eder.',
       sourceName: 'Kurtarma notu',
     );
-    final source = await store.currentSourceVersion(
-      learner: AppRuntime.localM5LearnerFixture,
-      materialId: materialId,
-    );
+    final source = await store.currentSourceVersion(learner: AppRuntime.localM5LearnerFixture, materialId: materialId);
     expect(source, isNotNull);
 
     final runtime = AppRuntime(
@@ -115,7 +112,11 @@ void main() {
       telemetry: store.operationalTelemetry(),
     );
 
-    await tester.pumpWidget(MaterialApp(home: ExplainBackScreen(runtime: runtime, source: source!)));
+    await tester.pumpWidget(
+      MaterialApp(
+        home: ExplainBackScreen(runtime: runtime, source: source!),
+      ),
+    );
     const response = 'Klorofil ışığı soğurur ve fotosentezin enerji dönüşümüne yardım eder.';
     await tester.enterText(find.byType(TextField), response);
     await _tapVisible(tester, find.text('Anlatımımı değerlendir'));

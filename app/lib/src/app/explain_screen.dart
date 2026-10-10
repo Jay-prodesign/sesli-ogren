@@ -389,12 +389,7 @@ class _Ready extends StatelessWidget {
 }
 
 class _Unavailable extends StatelessWidget {
-  const _Unavailable({
-    required this.reason,
-    required this.onRetry,
-    required this.onBack,
-    required this.onRecall,
-  });
+  const _Unavailable({required this.reason, required this.onRetry, required this.onBack, required this.onRecall});
 
   final GroundedExplainUnavailableReason reason;
   final VoidCallback onRetry;

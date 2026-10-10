@@ -297,14 +297,21 @@ class LivingStudyDeskHome extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 7),
-                      Text(
-                        _nextStep,
-                        style: const TextStyle(
-                          color: _ink,
-                          fontSize: 22,
-                          height: 1.16,
-                          fontWeight: FontWeight.w900,
-                          letterSpacing: -0.35,
+                      Semantics(
+                        header: true,
+                        label: 'Sıradaki öğrenme adımı',
+                        value: _nextStep,
+                        child: ExcludeSemantics(
+                          child: Text(
+                            _nextStep,
+                            style: const TextStyle(
+                              color: _ink,
+                              fontSize: 22,
+                              height: 1.16,
+                              fontWeight: FontWeight.w900,
+                              letterSpacing: -0.35,
+                            ),
+                          ),
                         ),
                       ),
                       const SizedBox(height: 6),
@@ -374,9 +381,18 @@ class LivingStudyDeskHome extends StatelessWidget {
   Widget _empty(BuildContext context) => Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
-      const Text(
-        'Kendi kaynağını\ncanlandıralım.',
-        style: TextStyle(color: _ink, fontSize: 35, height: 1.12, fontWeight: FontWeight.w800, letterSpacing: -1.3),
+      const Semantics(
+        header: true,
+        child: Text(
+          'Kendi kaynağını\ncanlandıralım.',
+          style: TextStyle(
+            color: _ink,
+            fontSize: 35,
+            height: 1.12,
+            fontWeight: FontWeight.w800,
+            letterSpacing: -1.3,
+          ),
+        ),
       ),
       const SizedBox(height: 13),
       const Text(

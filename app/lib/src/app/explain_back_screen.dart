@@ -314,12 +314,7 @@ class _ExplainBackScreenState extends State<ExplainBackScreen> {
 }
 
 class _UnavailableResult extends StatelessWidget {
-  const _UnavailableResult({
-    required this.reason,
-    required this.onRetry,
-    required this.onRecall,
-    required this.onBack,
-  });
+  const _UnavailableResult({required this.reason, required this.onRetry, required this.onRecall, required this.onBack});
   final String reason;
   final VoidCallback onRetry;
   final VoidCallback onRecall;

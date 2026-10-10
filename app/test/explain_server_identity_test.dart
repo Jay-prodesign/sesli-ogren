@@ -70,7 +70,9 @@ Future<void> _pumpUntilFound(WidgetTester tester, Finder finder, {int maxPumps =
 void main() {
   sqfliteFfiInit();
 
-  testWidgets('Explain provider failure keeps the learner moving through Recall or back to the material', (tester) async {
+  testWidgets('Explain provider failure keeps the learner moving through Recall or back to the material', (
+    tester,
+  ) async {
     final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
     addTearDown(store.close);
 
@@ -82,10 +84,7 @@ void main() {
       text: 'Fotosentez sırasında klorofil ışığın soğurulmasına yardım eder.',
       sourceName: 'Kurtarma notu',
     );
-    final source = await store.currentSourceVersion(
-      learner: AppRuntime.localM5LearnerFixture,
-      materialId: materialId,
-    );
+    final source = await store.currentSourceVersion(learner: AppRuntime.localM5LearnerFixture, materialId: materialId);
     expect(source, isNotNull);
 
     final runtime = AppRuntime(
@@ -96,7 +95,11 @@ void main() {
       telemetry: store.operationalTelemetry(),
     );
 
-    await tester.pumpWidget(MaterialApp(home: ExplainScreen(runtime: runtime, source: source!)));
+    await tester.pumpWidget(
+      MaterialApp(
+        home: ExplainScreen(runtime: runtime, source: source!),
+      ),
+    );
     await _pumpUntilFound(tester, find.text('Açıklama henüz hazır değil'));
 
     expect(find.text('Hatırla ile devam et'), findsOneWidget);

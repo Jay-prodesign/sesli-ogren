@@ -101,11 +101,7 @@ class _UnknownUsageOverviewGateway implements AccountOverviewGateway {
     plan: 'free',
     entitlementStatus: 'active',
     usage: [
-      AccountUsageEntry(
-        periodStart: DateTime.utc(2026, 10, 1),
-        capability: 'internal_future_capability',
-        consumed: 7,
-      ),
+      AccountUsageEntry(periodStart: DateTime.utc(2026, 10, 1), capability: 'internal_future_capability', consumed: 7),
     ],
   );
 }
