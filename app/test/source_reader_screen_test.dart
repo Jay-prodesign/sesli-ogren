@@ -43,7 +43,7 @@ void main() {
     expect(find.text('1 eşleşme'), findsOneWidget);
     expect(tester.takeException(), isNull);
 
-    await tester.tap(find.text('Hatırla'));
+    await tester.tap(find.text('Kaynağı kapat ve hatırla'));
     await tester.pump();
     expect(recalled, 1);
 
@@ -95,6 +95,31 @@ void main() {
     await tester.pump();
     expect(reported, isNotEmpty);
     expect(reported.last, greaterThan(0.5));
+
+    reported.clear();
+    var recalled = 0;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: SourceReaderScreen(
+          title: 'Uzun biyoloji notu',
+          sourceText: longSource,
+          initialProgress: restored,
+          onProgressChanged: (progress) async {
+            reported.add(progress);
+          },
+          onRecall: () => recalled++,
+        ),
+      ),
+    );
+    await tester.pump();
+    await tester.drag(find.byType(Scrollable).last, const Offset(0, -180));
+    await tester.pump();
+    reported.clear();
+    await tester.tap(find.text('Kaynağı kapat ve hatırla'));
+    await tester.pump();
+
+    expect(recalled, 1);
+    expect(reported, isNotEmpty);
     expect(tester.takeException(), isNull);
   });
 

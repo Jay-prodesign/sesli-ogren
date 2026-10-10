@@ -21,6 +21,26 @@ class _UnusedPdfExtractor implements PdfTextExtractor {
   }
 }
 
+class _ThrowingSpeechOutput implements SpeechOutput {
+  @override
+  Future<void> speak(
+    String text, {
+    required String locale,
+    required VoidCallback onStart,
+    required VoidCallback onDone,
+    required ValueChanged<Object> onError,
+    double rateMultiplier = 1.0,
+  }) {
+    throw StateError('speech provider unavailable');
+  }
+
+  @override
+  Future<void> stop() async {}
+
+  @override
+  Future<void> dispose() async {}
+}
+
 class _RecordingSpeechOutput implements SpeechOutput {
   double? lastRateMultiplier;
   VoidCallback? _onDone;
@@ -206,4 +226,50 @@ void main() {
 
     expect(secondSpeech.lastRateMultiplier, 1.25);
   });
+
+  testWidgets('Listen keeps the source usable when the speech provider throws', (tester) async {
+    final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
+    addTearDown(store.close);
+    final ingest = SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor());
+    const materialId = MaterialId('listen-provider-failure');
+    await ingest.ingestPastedText(
+      learner: AppRuntime.localM5LearnerFixture,
+      materialId: materialId,
+      text: 'Klorofil ışık enerjisinin soğurulmasına yardım eder.',
+      sourceName: 'Biyoloji kaynağı',
+    );
+    final runtime = AppRuntime(
+      learner: AppRuntime.localM5LearnerFixture,
+      store: store,
+      ingest: ingest,
+      recall: RecallLearningService(sourceStore: store, learningStore: store.learningTruthStore()),
+      telemetry: store.operationalTelemetry(),
+    );
+    var recallOpens = 0;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: ListenScreen(
+          runtime: runtime,
+          materialId: materialId,
+          speechOutput: _ThrowingSpeechOutput(),
+          onRecall: () => recallOpens++,
+        ),
+      ),
+    );
+    await _pumpUntilFound(tester, find.text('Dinlemeye başla'));
+
+    await _tapVisible(tester, find.text('Dinlemeye başla'));
+    await tester.pump();
+
+    expect(find.textContaining('Kaynağın ve dinleme konumun korunuyor'), findsOneWidget);
+    expect(find.text('Klorofil ışık enerjisinin soğurulmasına yardım eder.'), findsOneWidget);
+    expect(find.text('Şimdi hatırlamayı dene'), findsOneWidget);
+    await _tapVisible(tester, find.text('Şimdi hatırlamayı dene'));
+    await tester.pump();
+
+    expect(recallOpens, 1);
+    expect(tester.takeException(), isNull);
+  });
+
 }

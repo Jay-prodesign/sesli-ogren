@@ -113,33 +113,44 @@ class _ListenScreenState extends State<ListenScreen> {
   Future<void> _playChunk(_ListenSource source, int index, int token, double rate) async {
     if (!mounted || token != _playToken) return;
     _currentChunkIndex = index;
-    await _speech.speak(
-      source.chunks[index],
-      locale: 'tr-TR',
-      onStart: () {
-        if (!mounted || token != _playToken) return;
-        setState(() {
-          _speaking = true;
-          _startingPlayback = false;
-          _currentChunkIndex = index;
-          _resumeChunkOverride = index;
-        });
-        unawaited(_saveResume(source, index));
-      },
-      onDone: () {
-        if (token != _playToken) return;
-        unawaited(_completeChunk(source, index, token, rate));
-      },
-      rateMultiplier: rate,
-      onError: (_) {
-        if (!mounted || token != _playToken) return;
-        setState(() {
-          _speaking = false;
-          _startingPlayback = false;
-          _error = 'Bu cihazda Türkçe ses başlatılamadı. Metin yine kullanılabilir.';
-        });
-      },
-    );
+    try {
+      await _speech.speak(
+        source.chunks[index],
+        locale: 'tr-TR',
+        onStart: () {
+          if (!mounted || token != _playToken) return;
+          setState(() {
+            _speaking = true;
+            _startingPlayback = false;
+            _currentChunkIndex = index;
+            _resumeChunkOverride = index;
+          });
+          unawaited(_saveResume(source, index));
+        },
+        onDone: () {
+          if (token != _playToken) return;
+          unawaited(_completeChunk(source, index, token, rate));
+        },
+        rateMultiplier: rate,
+        onError: (_) {
+          if (!mounted || token != _playToken) return;
+          setState(() {
+            _speaking = false;
+            _startingPlayback = false;
+            _error =
+                'Bu cihazda Türkçe ses başlatılamadı. Kaynağın ve dinleme konumun korunuyor; tekrar deneyebilir veya Hatırla’ya geçebilirsin.';
+          });
+        },
+      );
+    } catch (_) {
+      if (!mounted || token != _playToken) return;
+      setState(() {
+        _speaking = false;
+        _startingPlayback = false;
+        _error =
+            'Bu cihazda Türkçe ses başlatılamadı. Kaynağın ve dinleme konumun korunuyor; tekrar deneyebilir veya Hatırla’ya geçebilirsin.';
+      });
+    }
   }
 
   Future<void> _completeChunk(_ListenSource source, int index, int token, double rate) async {
@@ -202,13 +213,40 @@ class _ListenScreenState extends State<ListenScreen> {
 
   Future<void> _stop() async {
     _playToken++;
-    await _speech.stop();
+    try {
+      await _speech.stop();
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        _error = 'Ses durdurulamadı. Kaynağın ve dinleme konumun korunuyor; tekrar deneyebilirsin.';
+      });
+      return;
+    }
     if (mounted) {
       setState(() {
         _speaking = false;
         _startingPlayback = false;
       });
     }
+  }
+
+  Future<void> _handoffToRecall() async {
+    _playToken++;
+    try {
+      await _speech.stop();
+    } catch (_) {
+      try {
+        await _speech.dispose();
+      } catch (_) {
+        // The screen is leaving immediately; do not let a device speech failure trap the learner.
+      }
+    }
+    if (!mounted) return;
+    setState(() {
+      _speaking = false;
+      _startingPlayback = false;
+    });
+    widget.onRecall?.call();
   }
 
   void _retryLoad() {
@@ -223,7 +261,7 @@ class _ListenScreenState extends State<ListenScreen> {
   @override
   void dispose() {
     _playToken++;
-    unawaited(_speech.dispose());
+    unawaited(_speech.dispose().catchError((Object _) {}));
     super.dispose();
   }
 
@@ -443,7 +481,28 @@ class _ListenScreenState extends State<ListenScreen> {
                   const SizedBox(height: 12),
                   Semantics(
                     liveRegion: true,
-                    child: Text(_error!, style: TextStyle(color: theme.colorScheme.error)),
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.errorContainer,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Icon(Icons.error_outline_rounded, color: theme.colorScheme.onErrorContainer, size: 18),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                _error!,
+                                style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onErrorContainer),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
                   ),
                 ],
                 const SizedBox(height: 18),
@@ -474,11 +533,7 @@ class _ListenScreenState extends State<ListenScreen> {
                   const SizedBox(height: 12),
                   if (living && _finishedListening)
                     FilledButton.icon(
-                      onPressed: () {
-                        unawaited(_stop().catchError((Object _) {}));
-                        if (!mounted) return;
-                        widget.onRecall?.call();
-                      },
+                      onPressed: _handoffToRecall,
                       style: FilledButton.styleFrom(
                         backgroundColor: AtelierStyle.mark,
                         foregroundColor: AtelierStyle.ink,
@@ -488,13 +543,7 @@ class _ListenScreenState extends State<ListenScreen> {
                     )
                   else
                     OutlinedButton.icon(
-                      onPressed: () {
-                        // Stop playback without blocking the navigation gesture on a
-                        // platform TTS response. Disposal also stops any active speech.
-                        unawaited(_stop().catchError((Object _) {}));
-                        if (!mounted) return;
-                        widget.onRecall?.call();
-                      },
+                      onPressed: _handoffToRecall,
                       style: outlineButtonStyle,
                       icon: const Icon(Icons.psychology_alt_outlined),
                       label: Text(_finishedListening ? 'Dinlemeyi bitirdin · Şimdi hatırla' : 'Şimdi hatırlamayı dene'),

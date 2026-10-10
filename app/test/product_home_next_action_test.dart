@@ -241,5 +241,4 @@ void main() {
     expect(find.text('Uzun biyoloji notu'), findsWidgets);
     expect(tester.takeException(), isNull);
   });
-
 }

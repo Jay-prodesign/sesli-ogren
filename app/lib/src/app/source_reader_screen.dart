@@ -143,6 +143,24 @@ class _SourceReaderScreenState extends State<SourceReaderScreen> {
     _scheduleReadingProgressUpdate();
   }
 
+  Future<void> _runLearningAction(VoidCallback? action) async {
+    final callback = widget.onProgressChanged;
+    if (callback != null && !_sourceFitsViewport) {
+      try {
+        await callback(_readingProgress);
+        _lastReportedProgress = _readingProgress;
+      } catch (_) {
+        if (mounted && !_progressSaveWarningShown) {
+          _progressSaveWarningShown = true;
+          ScaffoldMessenger.maybeOf(context)
+              ?.showSnackBar(const SnackBar(content: Text('Okuma konumu kaydedilemedi. Kaynağın kendisi korunuyor.')));
+        }
+      }
+    }
+    if (!mounted) return;
+    action?.call();
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -226,13 +244,13 @@ class _SourceReaderScreenState extends State<SourceReaderScreen> {
             onSelected: (action) {
               switch (action) {
                 case 'listen':
-                  widget.onListen?.call();
+                  unawaited(_runLearningAction(widget.onListen));
                   break;
                 case 'recap':
-                  widget.onRecap?.call();
+                  unawaited(_runLearningAction(widget.onRecap));
                   break;
                 case 'recall':
-                  widget.onRecall?.call();
+                  unawaited(_runLearningAction(widget.onRecall));
                   break;
                 case 'smaller':
                   _setReadingFontSize(_fontSize - 1);
@@ -256,7 +274,10 @@ class _SourceReaderScreenState extends State<SourceReaderScreen> {
               if (widget.onRecall != null)
                 const PopupMenuItem(
                   value: 'recall',
-                  child: ListTile(leading: Icon(Icons.psychology_alt_outlined), title: Text('Hatırlama çalışması')),
+                  child: ListTile(
+                    leading: Icon(Icons.psychology_alt_outlined),
+                    title: Text('Kaynağı kapat ve hatırla'),
+                  ),
                 ),
               const PopupMenuItem(
                 value: 'smaller',
@@ -457,7 +478,7 @@ class _SourceReaderScreenState extends State<SourceReaderScreen> {
                         if (widget.onListen != null)
                           IconButton.filledTonal(
                             tooltip: 'Kaynağı dinle',
-                            onPressed: widget.onListen,
+                            onPressed: () => unawaited(_runLearningAction(widget.onListen)),
                             style: living
                                 ? IconButton.styleFrom(
                                     foregroundColor: AtelierStyle.teal,
@@ -471,7 +492,7 @@ class _SourceReaderScreenState extends State<SourceReaderScreen> {
                         if (widget.onRecap != null)
                           IconButton.filledTonal(
                             tooltip: 'Hızlı özet',
-                            onPressed: widget.onRecap,
+                            onPressed: () => unawaited(_runLearningAction(widget.onRecap)),
                             style: living
                                 ? IconButton.styleFrom(
                                     foregroundColor: AtelierStyle.teal,
@@ -491,9 +512,9 @@ class _SourceReaderScreenState extends State<SourceReaderScreen> {
                                       minimumSize: const Size.fromHeight(48),
                                     )
                                   : FilledButton.styleFrom(minimumSize: const Size.fromHeight(48)),
-                              onPressed: widget.onRecall,
+                              onPressed: () => unawaited(_runLearningAction(widget.onRecall)),
                               icon: const Icon(Icons.psychology_alt_outlined),
-                              label: const Text('Hatırla'),
+                              label: const Text('Kaynağı kapat ve hatırla'),
                             ),
                           ),
                       ],
