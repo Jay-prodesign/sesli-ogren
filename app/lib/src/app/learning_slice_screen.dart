@@ -175,11 +175,20 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
 
   Future<void> _pickPdf() async {
     if (_busy) return;
-    final file = await FilePicker.pickFile(
-      type: FileType.custom,
-      allowedExtensions: const ['pdf'],
-      dialogTitle: 'Çalışmak istediğin PDF’i seç',
-    );
+    PickedFile? file;
+    try {
+      file = await FilePicker.pickFile(
+        type: FileType.custom,
+        allowedExtensions: const ['pdf'],
+        dialogTitle: 'Çalışmak istediğin PDF’i seç',
+      );
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        _inlineError = 'PDF seçici açılamadı. Tekrar deneyebilir veya notunu metin olarak yapıştırabilirsin.';
+      });
+      return;
+    }
     if (file == null || !mounted) return;
 
     final stopwatch = Stopwatch()..start();
@@ -191,7 +200,10 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
         createdAt: DateTime.now().toUtc(),
       ),
     );
-    _setBusy(true);
+    setState(() {
+      _busy = true;
+      _inlineError = null;
+    });
     try {
       final bytes = await file.readAsBytes();
       final ingestResult = await widget.runtime.ingest.ingestPdf(
@@ -227,7 +239,8 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
       );
       if (!mounted) return;
       setState(() {
-        _inlineError = 'PDF güvenli biçimde işlenemedi. Metin içeren başka bir PDF deneyebilirsin.';
+        _inlineError =
+            'PDF işlenemedi. Tekrar deneyebilir; dosyada seçilebilir metin yoksa aynı bölümü metin olarak yapıştırabilirsin.';
       });
     } finally {
       _setBusy(false);
@@ -261,7 +274,10 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
         createdAt: DateTime.now().toUtc(),
       ),
     );
-    _setBusy(true);
+    setState(() {
+      _busy = true;
+      _inlineError = null;
+    });
     try {
       final ingestResult = await widget.runtime.ingest.ingestPastedText(
         learner: widget.runtime.learner,
@@ -298,7 +314,7 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
       );
       if (!mounted) return;
       setState(() {
-        _inlineError = 'Metin güvenli biçimde işlenemedi. Daha kısa veya farklı bir metin deneyebilirsin.';
+        _inlineError = 'Metin eklenemedi. Yazdığın metin korunuyor; tekrar deneyebilir veya içeriği düzenleyebilirsin.';
       });
     } finally {
       _setBusy(false);
@@ -800,11 +816,42 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
                 ),
               ],
             ),
+            if (_busy) ...[
+              Semantics(
+                liveRegion: true,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                  decoration: BoxDecoration(
+                    color: AtelierStyle.mint,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: AtelierStyle.line),
+                  ),
+                  child: const Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      SizedBox(
+                        width: 18,
+                        height: 18,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      ),
+                      SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          'Kaynak hazırlanıyor. Başarıyla eklenene kadar mevcut girişin korunur.',
+                          style: TextStyle(color: AtelierStyle.ink, fontSize: 13, height: 1.35),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+            ],
             const SizedBox(height: 16),
             OutlinedButton.icon(
               onPressed: _busy ? null : _pickPdf,
               icon: const Icon(Icons.picture_as_pdf_outlined),
-              label: const Text('PDF’den kaynak ekle'),
+              label: Text(_busy ? 'PDF hazırlanıyor…' : 'PDF’den kaynak ekle'),
             ),
             const Padding(
               padding: EdgeInsets.symmetric(vertical: 12),
@@ -836,6 +883,9 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
               key: const ValueKey('pasted-material-text'),
               controller: _sourceController,
               enabled: !_busy,
+              onChanged: (_) {
+                if (_inlineError != null) setState(() => _inlineError = null);
+              },
               minLines: 6,
               maxLines: 12,
               textCapitalization: TextCapitalization.sentences,
@@ -857,7 +907,11 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
               ),
               icon: const Icon(Icons.auto_stories_outlined),
               label: Text(
-                _editingExistingSource ? 'Yeni sürümü ekle · çalışma alanını aç' : 'Kaynağı ekle · çalışma alanını aç',
+                _busy
+                    ? 'Kaynak hazırlanıyor…'
+                    : _editingExistingSource
+                    ? 'Yeni sürümü ekle · çalışma alanını aç'
+                    : 'Kaynağı ekle · çalışma alanını aç',
               ),
             ),
           ],
@@ -880,11 +934,33 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
                 ? 'Yeni PDF veya metin ayrı bir kaynak sürümü olur; eski kanıt yeni sürüme taşınmaz.'
                 : 'PDF seçebilir veya metni doğrudan yapıştırabilirsin.',
           ),
+          if (_busy) ...[
+            Semantics(
+              liveRegion: true,
+              child: Row(
+                children: [
+                  const SizedBox(
+                    width: 18,
+                    height: 18,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      'Kaynak hazırlanıyor. Girişin başarıyla eklenene kadar korunur.',
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 12),
+          ],
           const SizedBox(height: 18),
           OutlinedButton.icon(
             onPressed: _busy ? null : _pickPdf,
             icon: const Icon(Icons.picture_as_pdf_outlined),
-            label: const Text('PDF seç'),
+            label: Text(_busy ? 'PDF hazırlanıyor…' : 'PDF seç'),
           ),
           const Padding(
             padding: EdgeInsets.symmetric(vertical: 14),
@@ -913,6 +989,9 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
             key: const ValueKey('pasted-material-text'),
             controller: _sourceController,
             enabled: !_busy,
+            onChanged: (_) {
+              if (_inlineError != null) setState(() => _inlineError = null);
+            },
             minLines: 7,
             maxLines: 14,
             textCapitalization: TextCapitalization.sentences,
@@ -928,7 +1007,13 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
           FilledButton.icon(
             onPressed: _busy ? null : _saveSource,
             icon: const Icon(Icons.arrow_forward_rounded),
-            label: Text(_editingExistingSource ? 'Yeni sürümü ekle ve aç' : 'Kaynağı ekle ve aç'),
+            label: Text(
+              _busy
+                  ? 'Kaynak hazırlanıyor…'
+                  : _editingExistingSource
+                  ? 'Yeni sürümü ekle ve aç'
+                  : 'Kaynağı ekle ve aç',
+            ),
           ),
         ],
       ),

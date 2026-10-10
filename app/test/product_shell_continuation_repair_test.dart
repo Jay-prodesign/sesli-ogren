@@ -6,6 +6,8 @@ import 'package:sesli_ogren/src/app/app_runtime.dart';
 import 'package:sesli_ogren/src/app/product_shell_screen.dart';
 import 'package:sesli_ogren/src/app/learning_slice_screen.dart';
 import 'package:sesli_ogren/src/app/listen_screen.dart';
+import 'package:sesli_ogren/src/app/living_study_desk_home.dart';
+import 'package:sesli_ogren/src/app/material_workspace_screen.dart';
 import 'package:sesli_ogren/src/app/source_reader_screen.dart';
 import 'package:sesli_ogren/src/data/pdf_text_extractor.dart';
 import 'package:sesli_ogren/src/data/source_ingest_service.dart';
@@ -58,7 +60,7 @@ Future<void> _pumpUntilFound(WidgetTester tester, Finder finder, {int maxPumps =
 void main() {
   sqfliteFfiInit();
 
-  testWidgets('first material action opens the real source-entry flow', (tester) async {
+  testWidgets('first material outcome goes from empty Home through source entry into the real Workspace', (tester) async {
     final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
     addTearDown(store.close);
     final ingest = SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor());
@@ -71,12 +73,23 @@ void main() {
       telemetry: store.operationalTelemetry(),
     );
 
-    await tester.pumpWidget(MaterialApp(home: ProductShellScreen(runtime: runtime)));
-    await _pumpUntilFound(tester, find.text('Materyal ekle'));
-    await tester.tap(find.text('Materyal ekle'));
+    await tester.pumpWidget(
+      MaterialApp(home: LivingDeskReviewScope(child: ProductShellScreen(runtime: runtime))),
+    );
+    await _pumpUntilFound(tester, find.text('İlk kaynağını ekle'));
+    await tester.tap(find.text('İlk kaynağını ekle'));
     await _pumpUntilFound(tester, find.byType(LearningSliceScreen));
-    await _pumpUntilFound(tester, find.text('Çalışma materyalini ekle'));
-    expect(find.byType(LearningSliceScreen), findsOneWidget);
+    await _pumpUntilFound(tester, find.text('İLK KAYNAĞIN'));
+
+    await tester.enterText(find.byKey(const ValueKey('pasted-material-title')), 'Biyoloji · Fotosentez');
+    await tester.enterText(
+      find.byKey(const ValueKey('pasted-material-text')),
+      'Fotosentez sırasında klorofil ışık enerjisinin soğurulmasına yardım eder.',
+    );
+    await tester.tap(find.text('Kaynağı ekle · çalışma alanını aç'));
+    await _pumpUntilFound(tester, find.byType(MaterialWorkspaceScreen));
+
+    expect(find.text('Biyoloji · Fotosentez'), findsWidgets);
     expect(find.text('Kütüphane şu anda yüklenemedi.'), findsNothing);
     expect(tester.takeException(), isNull);
   });
