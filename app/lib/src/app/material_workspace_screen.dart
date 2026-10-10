@@ -125,11 +125,7 @@ class _MaterialWorkspaceScreenState extends State<MaterialWorkspaceScreen> {
     final updated = await Navigator.of(context).push<bool>(
       MaterialPageRoute<bool>(
         builder: (_) => _preserveProductExperience(
-          LearningSliceScreen(
-            runtime: widget.runtime,
-            materialId: widget.materialId,
-            startInSourceEditor: true,
-          ),
+          LearningSliceScreen(runtime: widget.runtime, materialId: widget.materialId, startInSourceEditor: true),
         ),
       ),
     );
