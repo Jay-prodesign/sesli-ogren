@@ -376,6 +376,7 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
     if (confirmed != true || !mounted || _deletingMaterialId != null) return;
 
     setState(() => _deletingMaterialId = material.id);
+    var remoteCopyRemoved = false;
     try {
       final serverMaterialId = await widget.runtime.store.summaryServerMaterialId(
         learner: widget.runtime.learner,
@@ -392,6 +393,19 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
           );
           return;
         }
+        remoteCopyRemoved = true;
+
+        // Persist the successful remote-cleanup checkpoint before local material
+        // deletion. If the later local delete fails, retry must not blindly
+        // resubmit the already-completed remote destructive action.
+        await widget.runtime.store.clearSummaryJob(
+          learner: widget.runtime.learner,
+          materialId: material.id,
+        );
+        await widget.runtime.store.clearServerMaterialBinding(
+          learner: widget.runtime.learner,
+          materialId: material.id,
+        );
       }
 
       await widget.runtime.store.deleteMaterial(
@@ -406,8 +420,12 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
     } catch (_) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Silme işlemi tamamlanamadı. Materyalin durumunu kontrol edip tekrar deneyebilirsin.'),
+        SnackBar(
+          content: Text(
+            remoteCopyRemoved
+                ? 'Sunucu kopyası silindi ancak cihazdaki materyal henüz kaldırılamadı. Tekrar denemek güvenlidir.'
+                : 'Silme işlemi tamamlanamadı. Materyalin durumunu kontrol edip tekrar deneyebilirsin.',
+          ),
         ),
       );
       setState(_refresh);
