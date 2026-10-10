@@ -1232,6 +1232,22 @@ LIMIT 1
         );
       }
 
+      if (previousSourceId != null) {
+        // Passive resume positions describe the superseded source, not the material
+        // abstractly. Remove them when the authoritative source changes so a new
+        // source can never inherit an old Reader/Listen position.
+        await transaction.delete(
+          'listen_progress',
+          where: 'learner_id = ? AND material_id = ?',
+          whereArgs: [learner.id.value, material.id.value],
+        );
+        await transaction.delete(
+          'reader_progress',
+          where: 'learner_id = ? AND material_id = ?',
+          whereArgs: [learner.id.value, material.id.value],
+        );
+      }
+
       await transaction.delete(
         'active_recall_attempts',
         where: 'learner_id = ? AND material_id = ?',

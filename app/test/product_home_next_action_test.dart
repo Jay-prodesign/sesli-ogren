@@ -197,6 +197,61 @@ void main() {
     expect(LivingDeskReviewScope.active(tester.element(find.byType(ListenScreen))), isTrue);
   });
 
+  testWidgets('source replacement returns Home to a fresh active-learning start', (tester) async {
+    usePhoneViewport(tester);
+    final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
+    addTearDown(store.close);
+    final ingest = SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor());
+    final runtime = AppRuntime(
+      learner: AppRuntime.localM5LearnerFixture,
+      store: store,
+      ingest: ingest,
+      recall: RecallLearningService(sourceStore: store, learningStore: store.learningTruthStore()),
+      telemetry: store.operationalTelemetry(),
+    );
+    const materialId = AppRuntime.primaryMaterialId;
+    final first = await ingest.ingestPastedText(
+      learner: runtime.learner,
+      materialId: materialId,
+      text: 'Klorofil ışık enerjisinin soğurulmasına yardım eder. Bitkiler enerji üretir.',
+      sourceName: 'Biyoloji sürüm 1',
+    );
+    await store.saveReaderResumeProgress(
+      learner: runtime.learner,
+      materialId: materialId,
+      sourceVersionId: first.sourceVersion.identity.sourceVersionId,
+      progress: 0.51,
+      updatedAt: DateTime.utc(2026, 10, 10, 8),
+    );
+
+    final prompt = await runtime.recall.createCurrentPrompt(learner: runtime.learner, materialId: materialId);
+    final attempt = await runtime.recall.openAttempt(learner: runtime.learner, actionId: prompt.id);
+    await runtime.recall.submit(
+      learner: runtime.learner,
+      actionId: prompt.id,
+      attemptId: attempt.attempt.attemptId,
+      disposition: RecallResponseDisposition.answer,
+      answer: attempt.action.expectedAnswer,
+    );
+
+    await ingest.ingestPastedText(
+      learner: runtime.learner,
+      materialId: materialId,
+      text: 'Mitokondri hücresel solunumla enerji üretimine katkı sağlar. Yeni ve ayrı kaynak sürümü.',
+      sourceName: 'Biyoloji sürüm 2',
+    );
+
+    await tester.pumpWidget(_testApp(LivingDeskReviewScope(child: ProductShellScreen(runtime: runtime))));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 150));
+
+    expect(find.text('İlk hatırlama denemeni yap'), findsOneWidget);
+    expect(find.text('Okumaya devam et'), findsNothing);
+    expect(find.text('Dinlemeye devam et'), findsNothing);
+    expect(find.text('Biyoloji sürüm 2'), findsWidgets);
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('Home resumes the exact Reader source position before passive alternatives', (tester) async {
     usePhoneViewport(tester);
     final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);

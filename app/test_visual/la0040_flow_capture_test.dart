@@ -391,7 +391,7 @@ void main() {
       ),
     );
     await tester.pump(const Duration(milliseconds: 300));
-    expect(find.text('Hatırla'), findsOneWidget);
+    expect(find.text('Kaynağı kapat ve hatırla'), findsOneWidget);
     expect(tester.takeException(), isNull);
     await expectLater(find.byType(Scaffold), matchesGoldenFile('goldens/la0040_source_reader_320_text150.png'));
   });

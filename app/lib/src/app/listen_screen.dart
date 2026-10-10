@@ -137,8 +137,7 @@ class _ListenScreenState extends State<ListenScreen> {
           setState(() {
             _speaking = false;
             _startingPlayback = false;
-            _error =
-                'Bu cihazda Türkçe ses başlatılamadı. Kaynağın ve dinleme konumun korunuyor; tekrar deneyebilir veya Hatırla’ya geçebilirsin.';
+            _error = 'Bu cihazda Türkçe ses başlatılamadı. Kaynağın ve dinleme konumun korunuyor; tekrar deneyebilir veya Hatırla’ya geçebilirsin.';
           });
         },
       );
@@ -147,8 +146,7 @@ class _ListenScreenState extends State<ListenScreen> {
       setState(() {
         _speaking = false;
         _startingPlayback = false;
-        _error =
-            'Bu cihazda Türkçe ses başlatılamadı. Kaynağın ve dinleme konumun korunuyor; tekrar deneyebilir veya Hatırla’ya geçebilirsin.';
+        _error = 'Bu cihazda Türkçe ses başlatılamadı. Kaynağın ve dinleme konumun korunuyor; tekrar deneyebilir veya Hatırla’ya geçebilirsin.';
       });
     }
   }

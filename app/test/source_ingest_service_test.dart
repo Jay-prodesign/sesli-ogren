@@ -6,6 +6,8 @@ import 'package:sesli_ogren/src/data/source_ingest_service.dart';
 import 'package:sesli_ogren/src/data/sqlite_source_store.dart';
 import 'package:sesli_ogren/src/domain/authenticated_learner.dart';
 import 'package:sesli_ogren/src/domain/learning_contracts.dart';
+import 'package:sesli_ogren/src/domain/learning_truth.dart';
+import 'package:sesli_ogren/src/learning/recall_learning_service.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 class _UnusedPdfExtractor implements PdfTextExtractor {
@@ -162,6 +164,89 @@ void main() {
     expect(
       (await store.currentSourceVersion(learner: learnerA, materialId: material))!.identity.sourceVersionId,
       second.sourceVersion.identity.sourceVersionId,
+    );
+  });
+
+  test('new source clears passive resume but preserves old evidence as historical truth', () async {
+    final first = await service.ingestPastedText(
+      learner: learnerA,
+      materialId: material,
+      text: 'Klorofil ışık enerjisinin soğurulmasına yardım eder. Bitkiler enerji üretir.',
+    );
+    final firstSourceId = first.sourceVersion.identity.sourceVersionId;
+    await store.saveReaderResumeProgress(
+      learner: learnerA,
+      materialId: material,
+      sourceVersionId: firstSourceId,
+      progress: 0.58,
+      updatedAt: DateTime.utc(2026, 10, 10, 8),
+    );
+    await store.saveListenResumeChunk(
+      learner: learnerA,
+      materialId: material,
+      sourceVersionId: firstSourceId,
+      chunkIndex: 2,
+      updatedAt: DateTime.utc(2026, 10, 10, 8, 5),
+    );
+
+    final recall = RecallLearningService(sourceStore: store, learningStore: store.learningTruthStore());
+    final prompt = await recall.createCurrentPrompt(learner: learnerA, materialId: material);
+    final attempt = await recall.openAttempt(learner: learnerA, actionId: prompt.id);
+    await recall.submit(
+      learner: learnerA,
+      actionId: prompt.id,
+      attemptId: attempt.attempt.attemptId,
+      disposition: RecallResponseDisposition.answer,
+      answer: attempt.action.expectedAnswer,
+    );
+    expect(
+      await store.learningTruthStore().evidenceForMaterial(
+        learner: learnerA,
+        materialId: material,
+        sourceVersionId: firstSourceId,
+      ),
+      isNotEmpty,
+    );
+
+    final second = await service.ingestPastedText(
+      learner: learnerA,
+      materialId: material,
+      text: 'Mitokondri hücresel solunumla kullanılabilir enerji üretimine katkı sağlar. Yeni kaynak sürümü.',
+    );
+    final secondSourceId = second.sourceVersion.identity.sourceVersionId;
+
+    expect(
+      await store.readerResumeProgress(
+        learner: learnerA,
+        materialId: material,
+        sourceVersionId: secondSourceId,
+      ),
+      0,
+    );
+    expect(
+      await store.listenResumeChunk(
+        learner: learnerA,
+        materialId: material,
+        sourceVersionId: secondSourceId,
+      ),
+      0,
+    );
+    expect(await recall.reopen(learner: learnerA, materialId: material), isNull);
+    expect(
+      await store.learningTruthStore().evidenceForMaterial(
+        learner: learnerA,
+        materialId: material,
+        sourceVersionId: secondSourceId,
+      ),
+      isEmpty,
+    );
+    expect(
+      await store.learningTruthStore().evidenceForMaterial(
+        learner: learnerA,
+        materialId: material,
+        sourceVersionId: firstSourceId,
+      ),
+      isNotEmpty,
     );
   });
 
