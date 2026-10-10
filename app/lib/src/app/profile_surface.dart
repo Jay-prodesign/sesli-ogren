@@ -249,9 +249,7 @@ class _ProfileSurfaceState extends State<ProfileSurface> {
           future: _overview,
           builder: (context, snapshot) {
             if (snapshot.connectionState != ConnectionState.done) {
-              return const Center(
-                child: Padding(padding: EdgeInsets.all(24), child: CircularProgressIndicator()),
-              );
+              return const _AccountOverviewLoadingCard();
             }
             final overview = snapshot.data;
             if (overview == null) {
@@ -396,6 +394,74 @@ class _ProfileSurfaceState extends State<ProfileSurface> {
           ],
         ),
       ],
+    );
+  }
+}
+
+class _AccountOverviewLoadingCard extends StatelessWidget {
+  const _AccountOverviewLoadingCard();
+
+  @override
+  Widget build(BuildContext context) {
+    final living = LivingDeskReviewScope.active(context);
+    final hero = living ? AtelierStyle.ink : AppPalette.primaryDark;
+    final muted = Colors.white.withValues(alpha: 0.72);
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: hero,
+        borderRadius: BorderRadius.circular(26),
+        boxShadow: [BoxShadow(color: hero.withValues(alpha: 0.12), blurRadius: 22, offset: const Offset(0, 10))],
+      ),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(20, 19, 20, 20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(13),
+                  ),
+                  child: const Padding(
+                    padding: EdgeInsets.all(10),
+                    child: Icon(Icons.person_search_outlined, color: Colors.white),
+                  ),
+                ),
+                const SizedBox(width: 13),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Hesap alanın hazırlanıyor',
+                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                      const SizedBox(height: 5),
+                      Text(
+                        'Plan ve doğrulanmış kullanım bilgilerin getiriliyor.',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(color: muted, height: 1.4),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 18),
+            LinearProgressIndicator(
+              minHeight: 3,
+              color: living ? AtelierStyle.mark : Colors.white,
+              backgroundColor: Colors.white.withValues(alpha: 0.14),
+              borderRadius: BorderRadius.circular(999),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
