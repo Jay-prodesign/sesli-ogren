@@ -198,7 +198,7 @@ class _MaterialWorkspaceScreenState extends State<MaterialWorkspaceScreen> {
                       const Text('Materyal açılamadı.', textAlign: TextAlign.center),
                       const SizedBox(height: 8),
                       const Text(
-                        'Kaynağın silinmedi. Bağlantıyı veya yerel veriyi yeniden okumayı deneyebilirsin.',
+                        'Bu hata tek başına kaynağın silindiği anlamına gelmez. Bağlantıyı veya yerel veriyi yeniden okumayı deneyebilirsin.',
                         textAlign: TextAlign.center,
                       ),
                       const SizedBox(height: 16),
@@ -209,6 +209,14 @@ class _MaterialWorkspaceScreenState extends State<MaterialWorkspaceScreen> {
                         icon: const Icon(Icons.refresh_rounded),
                         label: const Text('Tekrar dene'),
                       ),
+                      if (Navigator.of(context).canPop()) ...[
+                        const SizedBox(height: 6),
+                        TextButton.icon(
+                          onPressed: () => Navigator.of(context).maybePop(),
+                          icon: const Icon(Icons.arrow_back_rounded),
+                          label: const Text('Geri dön'),
+                        ),
+                      ],
                     ],
                   ),
                 ),

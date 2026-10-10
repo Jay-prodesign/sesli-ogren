@@ -380,7 +380,7 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
                       ),
                       const SizedBox(height: 8),
                       const Text(
-                        'Kaynakların silinmedi. Yerel öğrenme durumunu yeniden yüklemeyi deneyebilirsin.',
+                        'Bu yükleme hatası kaynaklarının silindiği anlamına gelmez. Yerel öğrenme durumunu yeniden okumayı deneyebilirsin.',
                         textAlign: TextAlign.center,
                       ),
                       const SizedBox(height: 16),

@@ -63,6 +63,50 @@ void main() {
     expect(find.text('Tekrar dene'), findsOneWidget);
   });
 
+  testWidgets('Missing material can return to the previous product surface', (tester) async {
+    final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
+    addTearDown(store.close);
+
+    final ingest = SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor());
+    final runtime = AppRuntime(
+      learner: AppRuntime.localM5LearnerFixture,
+      store: store,
+      ingest: ingest,
+      recall: RecallLearningService(sourceStore: store, learningStore: store.learningTruthStore()),
+      telemetry: store.operationalTelemetry(),
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Builder(
+          builder: (context) => Scaffold(
+            body: Center(
+              child: FilledButton(
+                onPressed: () => Navigator.of(context).push<void>(
+                  MaterialPageRoute<void>(
+                    builder: (_) => MaterialWorkspaceScreen(
+                      runtime: runtime,
+                      materialId: const MaterialId('missing-workspace-material'),
+                    ),
+                  ),
+                ),
+                child: const Text('Çalışma alanını aç'),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Çalışma alanını aç'));
+    await _pumpUntilFound(tester, find.text('Materyal açılamadı.'));
+    expect(find.text('Geri dön'), findsOneWidget);
+
+    await tester.tap(find.text('Geri dön'));
+    await tester.pumpAndSettle();
+    expect(find.text('Çalışma alanını aç'), findsOneWidget);
+  });
+
   testWidgets('Material Workspace Açıkla opens active Explain-back, not generated teaching', (tester) async {
     final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
     addTearDown(store.close);

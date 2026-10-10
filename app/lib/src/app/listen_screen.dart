@@ -281,7 +281,7 @@ class _ListenScreenState extends State<ListenScreen> {
                       const Text('Dinlenecek güncel kaynak bulunamadı.', textAlign: TextAlign.center),
                       const SizedBox(height: 8),
                       Text(
-                        'Kaynağın silinmedi. Materyal verisini yeniden okumayı deneyebilirsin.',
+                        'Bu hata tek başına kaynağın silindiği anlamına gelmez. Materyal verisini yeniden okumayı deneyebilir veya materyale dönebilirsin.',
                         textAlign: TextAlign.center,
                         style: theme.textTheme.bodyMedium?.copyWith(color: muted),
                       ),
