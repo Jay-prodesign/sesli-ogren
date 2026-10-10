@@ -1434,9 +1434,8 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
                                 padding: const EdgeInsets.all(16),
                                 child: SelectableText.rich(
                                   TextSpan(
-                                    style: Theme.of(
-                                      sheetContext,
-                                    ).textTheme.bodyLarge?.copyWith(color: AtelierStyle.ink, height: 1.55),
+                                    style: Theme.of(sheetContext).textTheme.bodyLarge
+                                        ?.copyWith(color: AtelierStyle.ink, height: 1.55),
                                     children: [
                                       if (excerpt.leadingEllipsis) const TextSpan(text: '…'),
                                       TextSpan(text: excerpt.prefix),

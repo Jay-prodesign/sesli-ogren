@@ -240,17 +240,17 @@ class _RuntimeErrorScreen extends StatelessWidget {
                       const CompanionView(state: CompanionVisualState.correct, size: 96),
                       const SizedBox(height: 20),
                       Text(
-                    error is LearnerAuthConfigurationException
-                        ? 'Uygulama bağlantısı henüz yapılandırılmadı.'
-                        : 'Güvenli öğrenme oturumu açılamadı.',
-                    style: Theme.of(context).textTheme.titleLarge,
+                        error is LearnerAuthConfigurationException
+                            ? 'Uygulama bağlantısı henüz yapılandırılmadı.'
+                            : 'Güvenli öğrenme oturumu açılamadı.',
+                        style: Theme.of(context).textTheme.titleLarge,
                         textAlign: TextAlign.center,
                       ),
                       const SizedBox(height: 10),
                       Text(
-                    error is LearnerAuthConfigurationException
-                        ? 'Öğrenme verisi açılmadı. Güvenli bağlantı yapılandırması gerekiyor.'
-                        : 'Öğrenme verisi açılmadan yeniden deneyebilirsin.',
+                        error is LearnerAuthConfigurationException
+                            ? 'Öğrenme verisi açılmadı. Güvenli bağlantı yapılandırması gerekiyor.'
+                            : 'Öğrenme verisi açılmadan yeniden deneyebilirsin.',
                         textAlign: TextAlign.center,
                       ),
                       const SizedBox(height: 20),

@@ -543,8 +543,7 @@ class LivingStudyDeskHome extends StatelessWidget {
       const SizedBox(height: 17),
       LayoutBuilder(
         builder: (context, constraints) {
-          final compactCompanion =
-              constraints.maxWidth < 330 || MediaQuery.textScalerOf(context).scale(1) > 1.25;
+          final compactCompanion = constraints.maxWidth < 330 || MediaQuery.textScalerOf(context).scale(1) > 1.25;
           const copy = Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [

@@ -314,10 +314,7 @@ class AtelierWorkspace extends StatelessWidget {
                 style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w900, fontSize: 17),
               ),
               const SizedBox(height: 3),
-              Text(
-                _activeStepReason,
-                style: const TextStyle(color: Color(0xFFC7D5D2), fontSize: 12, height: 1.3),
-              ),
+              Text(_activeStepReason, style: const TextStyle(color: Color(0xFFC7D5D2), fontSize: 12, height: 1.3)),
               const SizedBox(height: 10),
               FilledButton.icon(
                 key: const ValueKey('la0040-atelier-workspace-recall'),
@@ -333,8 +330,7 @@ class AtelierWorkspace extends StatelessWidget {
               const SizedBox(height: 7),
               LayoutBuilder(
                 builder: (context, constraints) {
-                  final compactActions =
-                      constraints.maxWidth < 340 || MediaQuery.textScalerOf(context).scale(1) > 1.2;
+                  final compactActions = constraints.maxWidth < 340 || MediaQuery.textScalerOf(context).scale(1) > 1.2;
                   final listen = OutlinedButton.icon(
                     key: const ValueKey('la0040-atelier-workspace-listen'),
                     onPressed: onListen,
@@ -363,12 +359,7 @@ class AtelierWorkspace extends StatelessWidget {
                       children: [
                         listen,
                         const SizedBox(height: 4),
-                        Wrap(
-                          alignment: WrapAlignment.center,
-                          spacing: 4,
-                          runSpacing: 2,
-                          children: [explain, focus],
-                        ),
+                        Wrap(alignment: WrapAlignment.center, spacing: 4, runSpacing: 2, children: [explain, focus]),
                       ],
                     );
                   }
