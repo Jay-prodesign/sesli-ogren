@@ -4,6 +4,13 @@ import 'package:sesli_ogren/src/app/living_study_desk_home.dart';
 import 'package:sesli_ogren/src/domain/learning_contracts.dart';
 import 'package:sesli_ogren/src/domain/learning_truth.dart';
 
+void usePhoneViewport(WidgetTester tester) {
+  tester.view.physicalSize = const Size(390, 844);
+  tester.view.devicePixelRatio = 1;
+  addTearDown(tester.view.resetPhysicalSize);
+  addTearDown(tester.view.resetDevicePixelRatio);
+}
+
 void main() {
   final now = DateTime.utc(2026, 10, 10);
   const materialId = MaterialId('home-routing-material');
@@ -73,6 +80,7 @@ void main() {
   testWidgets('completed Recall returns Home CTA to the source instead of reopening the completed step', (
     tester,
   ) async {
+    usePhoneViewport(tester);
     var workspaceOpens = 0;
     var learningOpens = 0;
     await pumpHome(
@@ -94,6 +102,7 @@ void main() {
   });
 
   testWidgets('review-required Home CTA keeps the learner in the repair and Recall journey', (tester) async {
+    usePhoneViewport(tester);
     var workspaceOpens = 0;
     var learningOpens = 0;
     await pumpHome(

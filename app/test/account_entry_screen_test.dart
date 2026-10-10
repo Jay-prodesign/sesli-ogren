@@ -3,8 +3,22 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:sesli_ogren/src/app/account_entry_screen.dart';
 import 'package:sesli_ogren/src/domain/authenticated_learner.dart';
 
+void usePhoneViewport(WidgetTester tester) {
+  tester.view.physicalSize = const Size(390, 844);
+  tester.view.devicePixelRatio = 1;
+  addTearDown(tester.view.resetPhysicalSize);
+  addTearDown(tester.view.resetDevicePixelRatio);
+}
+
+Future<void> tapVisible(WidgetTester tester, Finder finder) async {
+  await tester.ensureVisible(finder);
+  await tester.pump();
+  await tester.tap(finder);
+}
+
 void main() {
   testWidgets('email OTP entry requests code and opens the verified learner', (tester) async {
+    usePhoneViewport(tester);
     String? requestedEmail;
     String? verifiedEmail;
     String? verifiedToken;
@@ -32,14 +46,14 @@ void main() {
     expect(find.textContaining('Şifre gerekmiyor'), findsOneWidget);
 
     await tester.enterText(find.byType(TextField), 'Test@Example.com');
-    await tester.tap(find.text('Kod gönder'));
+    await tapVisible(tester, find.text('Kod gönder'));
     await tester.pump();
 
     expect(requestedEmail, 'Test@Example.com');
     expect(find.text('Kodunu gir'), findsOneWidget);
 
     await tester.enterText(find.byType(TextField), '123456');
-    await tester.tap(find.text('Giriş yap'));
+    await tapVisible(tester, find.text('Giriş yap'));
     await tester.pump();
 
     expect(verifiedEmail, 'Test@Example.com');
@@ -48,6 +62,7 @@ void main() {
   });
 
   testWidgets('account entry refuses incomplete OTP before verification', (tester) async {
+    usePhoneViewport(tester);
     var verifyCalls = 0;
 
     await tester.pumpWidget(

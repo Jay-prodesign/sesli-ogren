@@ -98,6 +98,13 @@ class _FakeSpeechOutput implements SpeechOutput {
   Future<void> dispose() async {}
 }
 
+void usePhoneViewport(WidgetTester tester) {
+  tester.view.physicalSize = const Size(390, 844);
+  tester.view.devicePixelRatio = 1;
+  addTearDown(tester.view.resetPhysicalSize);
+  addTearDown(tester.view.resetDevicePixelRatio);
+}
+
 Widget testShell(AppRuntime runtime) {
   return MaterialApp(
     home: MediaQuery(
@@ -900,6 +907,7 @@ void main() {
   });
 
   testWidgets('unknown Recall repairs from the focused source and retries directly', (tester) async {
+    usePhoneViewport(tester);
     final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
     addTearDown(store.close);
     final ingest = SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor());
@@ -946,6 +954,7 @@ void main() {
   });
 
   testWidgets('auto-advances the persisted Home next action into focused source repair', (tester) async {
+    usePhoneViewport(tester);
     final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
     addTearDown(store.close);
     final ingest = SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor());

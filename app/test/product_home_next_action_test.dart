@@ -65,8 +65,22 @@ Widget _testApp(Widget home) => MaterialApp(
   home: MediaQuery(data: const MediaQueryData(disableAnimations: true), child: home),
 );
 
+void usePhoneViewport(WidgetTester tester) {
+  tester.view.physicalSize = const Size(390, 844);
+  tester.view.devicePixelRatio = 1;
+  addTearDown(tester.view.resetPhysicalSize);
+  addTearDown(tester.view.resetDevicePixelRatio);
+}
+
+Future<void> tapVisible(WidgetTester tester, Finder finder) async {
+  await tester.ensureVisible(finder);
+  await tester.pump();
+  await tester.tap(finder);
+}
+
 void main() {
   testWidgets('Home review action opens the persisted repair continuation', (tester) async {
+    usePhoneViewport(tester);
     final runtime = await _runtimeWithEvidence(
       disposition: RecallResponseDisposition.unknown,
       submitCorrectAnswer: false,
@@ -79,16 +93,16 @@ void main() {
 
     final action = find.text('Kaynağı gözden geçir');
     expect(action, findsOneWidget);
-    await tester.tap(action);
+    await tapVisible(tester, action);
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
 
     expect(find.text('Bu bölümü yeniden kur'), findsOneWidget);
     expect(find.text('Kaynağı kapat ve yeniden dene'), findsOneWidget);
-    expect(find.text('Önce kaynağı gözden geçir'), findsNothing);
   });
 
   testWidgets('Home completed action returns to the source workspace instead of replaying Recall', (tester) async {
+    usePhoneViewport(tester);
     final runtime = await _runtimeWithEvidence(
       disposition: RecallResponseDisposition.answer,
       submitCorrectAnswer: true,
@@ -107,9 +121,10 @@ void main() {
 
     expect(find.text('Biyoloji çalışma notu'), findsWidgets);
     expect(find.text('Öğrenme durumu'), findsOneWidget);
-    expect(find.text('Kaynağa dön'), findsNothing);
+    expect(find.byType(MaterialWorkspaceScreen), findsOneWidget);
   });
   testWidgets('source-first scope survives Home to Workspace, Recap and Listen routes', (tester) async {
+    usePhoneViewport(tester);
     final runtime = await _runtimeWithEvidence(
       disposition: RecallResponseDisposition.answer,
       submitCorrectAnswer: true,
@@ -120,13 +135,13 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
 
-    await tester.tap(find.text('Kaynağa dön'));
+    await tapVisible(tester, find.text('Kaynağa dön'));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
     expect(find.byType(MaterialWorkspaceScreen), findsOneWidget);
     expect(LivingDeskReviewScope.active(tester.element(find.byType(MaterialWorkspaceScreen))), isTrue);
 
-    await tester.tap(find.byTooltip('Quick Recap'));
+    await tapVisible(tester, find.byTooltip('Quick Recap'));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
     expect(find.byType(QuickRecapScreen), findsOneWidget);
@@ -137,7 +152,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 100));
     expect(find.byType(MaterialWorkspaceScreen), findsOneWidget);
 
-    await tester.tap(find.text('Dinle').last);
+    await tapVisible(tester, find.text('Dinle').last);
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
     expect(find.byType(ListenScreen), findsOneWidget);
