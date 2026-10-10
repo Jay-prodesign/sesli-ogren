@@ -408,7 +408,6 @@ class _ListenScreenState extends State<ListenScreen> {
                   ),
                 ),
                 const SizedBox(height: 18),
-                const SizedBox(height: 18),
                 Text(
                   'Dinleme hızı',
                   style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w800, color: ink),
