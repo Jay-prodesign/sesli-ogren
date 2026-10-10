@@ -575,6 +575,12 @@ void main() {
     expect(tester.takeException(), isNull);
     await expectLater(find.byType(Scaffold), matchesGoldenFile('goldens/la0040_shell_home_390x844.png'));
 
+    await tester.tap(find.text('Kütüphane'));
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(find.byKey(const ValueKey('library-material-list')), findsOneWidget);
+    expect(tester.takeException(), isNull);
+    await expectLater(find.byType(Scaffold), matchesGoldenFile('goldens/la0040_shell_library_390x844.png'));
+
     await tester.tap(find.text('İlerleme'));
     await tester.pump(const Duration(milliseconds: 300));
     expect(find.text('İlerleme'), findsWidgets);
