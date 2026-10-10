@@ -148,6 +148,8 @@ void main() {
     );
     await _pumpUntilFound(tester, find.text('Sunucu materyaline bağlı açıklama'));
 
+    expect(find.byKey(const ValueKey('explain-source-trust')), findsOneWidget);
+    expect(find.text('Biyoloji notu'), findsWidgets);
     expect(serverMaterialGateway.ensureCalls, 1);
     expect(
       await store.summaryJobId(

@@ -369,6 +369,8 @@ void main() {
     expect(find.text('Odaklan'), findsOneWidget);
     await tapVisible(tester, find.text('Odaklan').last);
     await pumpUntilFound(tester, find.text('KISA ODAK · 3 ADIM'));
+    expect(find.byKey(const ValueKey('focus-source-trust')), findsOneWidget);
+    expect(find.text('Fotosentez çalışma notu'), findsWidgets);
     await tester.scrollUntilVisible(find.text('İpucu ver'), 220, scrollable: find.byType(Scrollable).last);
     await tester.pump(const Duration(milliseconds: 300));
     expect(find.text('İpucu ver'), findsOneWidget);

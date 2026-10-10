@@ -388,6 +388,11 @@ class _FocusScreenState extends State<FocusScreen> {
             ],
           ),
           const SizedBox(height: 14),
+          KeyedSubtree(
+            key: const ValueKey('focus-source-trust'),
+            child: AtelierSourceTrustStrip(sourceVersion: widget.source),
+          ),
+          const SizedBox(height: 12),
           DecoratedBox(
             decoration: BoxDecoration(color: accentSoft, borderRadius: BorderRadius.circular(14)),
             child: const Padding(

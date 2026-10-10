@@ -179,6 +179,8 @@ void main() {
         home: ExplainBackScreen(runtime: runtime, source: source),
       ),
     );
+    expect(find.byKey(const ValueKey('explain-back-source-trust')), findsOneWidget);
+    expect(find.text('Biyoloji notu'), findsWidgets);
     await tester.enterText(find.byType(TextField), 'Fotosentezde ışık enerjisi kimyasal enerjiye dönüşür.');
     await _tapVisible(tester, find.text('Anlatımımı değerlendir'));
     await _pumpUntilFound(tester, find.text('Temel fikir doğru, bir bağlantı eksik.'));

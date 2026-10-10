@@ -269,6 +269,11 @@ class _ExplainBackScreenState extends State<ExplainBackScreen> {
               ],
             ),
             const SizedBox(height: 14),
+            KeyedSubtree(
+              key: const ValueKey('explain-back-source-trust'),
+              child: AtelierSourceTrustStrip(sourceVersion: widget.source),
+            ),
+            const SizedBox(height: 12),
             DecoratedBox(
               decoration: BoxDecoration(color: truthSoft, borderRadius: BorderRadius.circular(14)),
               child: const Padding(

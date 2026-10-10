@@ -249,15 +249,10 @@ class _Ready extends StatelessWidget {
         ),
         const SizedBox(height: 14),
         Text('Kaynağına dayalı açıklama', style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w800)),
-        const SizedBox(height: 6),
-        Text(
-          source.sourceName,
-          maxLines: 2,
-          overflow: TextOverflow.ellipsis,
-          style: theme.textTheme.bodyMedium?.copyWith(
-            color: theme.colorScheme.onSurfaceVariant,
-            fontWeight: FontWeight.w600,
-          ),
+        const SizedBox(height: 10),
+        KeyedSubtree(
+          key: const ValueKey('explain-source-trust'),
+          child: AtelierSourceTrustStrip(sourceVersion: source),
         ),
         const SizedBox(height: 18),
         DecoratedBox(
