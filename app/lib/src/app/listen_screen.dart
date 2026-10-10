@@ -376,7 +376,7 @@ class _ListenScreenState extends State<ListenScreen> {
                             backgroundColor: Colors.white.withValues(alpha: 0.12),
                             color: progressAccent,
                             semanticsLabel: 'Dinleme ilerlemesi',
-                            semanticsValue: '%${(progress * 100).round()}',
+                            semanticsValue: '${(progress * 100).round()}',
                           ),
                         ),
                         const SizedBox(height: 8),

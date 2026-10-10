@@ -80,6 +80,14 @@ Future<void> tapVisible(WidgetTester tester, Finder finder) async {
   await tester.tap(finder);
 }
 
+Future<void> pumpUntilFound(WidgetTester tester, Finder finder, {int maxPumps = 100}) async {
+  for (var i = 0; i < maxPumps; i++) {
+    await tester.pump(const Duration(milliseconds: 20));
+    if (finder.evaluate().isNotEmpty) return;
+  }
+  fail('Expected source-first route state was not reached within bounded pumps.');
+}
+
 void main() {
   testWidgets('Home review action opens the persisted repair continuation', (tester) async {
     usePhoneViewport(tester);
@@ -120,7 +128,7 @@ void main() {
     final continueAction = find.byKey(ValueKey('library-continue-${AppRuntime.primaryMaterialId.value}'));
     expect(continueAction, findsOneWidget);
     await tapVisible(tester, continueAction);
-    await tester.pump(const Duration(milliseconds: 450));
+    await pumpUntilFound(tester, find.text('Bu bölümü yeniden kur'));
 
     expect(find.text('Bu bölümü yeniden kur'), findsOneWidget);
     expect(find.text('Kaynağı kapat ve yeniden dene'), findsOneWidget);

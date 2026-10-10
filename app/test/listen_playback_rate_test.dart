@@ -182,11 +182,11 @@ void main() {
     await _tapVisible(tester, find.text('Dinlemeye başla'));
     await tester.pump();
     expect(firstSpeech.lastRateMultiplier, 1.25);
-    expect(tester.getSemantics(find.bySemanticsLabel('Dinleme ilerlemesi')).value, '%0');
+    expect(tester.getSemantics(find.bySemanticsLabel('Dinleme ilerlemesi')).value, '0');
 
     firstSpeech.finishCurrentChunk();
     await _pumpUntilFound(tester, find.text('Tüm bölümler dinlendi · Hatırlamayı deneyebilirsin'));
-    expect(tester.getSemantics(find.bySemanticsLabel('Dinleme ilerlemesi')).value, '%100');
+    expect(tester.getSemantics(find.bySemanticsLabel('Dinleme ilerlemesi')).value, '100');
 
     await tester.pumpWidget(const SizedBox.shrink());
     await tester.pump();

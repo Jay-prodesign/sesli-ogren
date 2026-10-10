@@ -432,7 +432,7 @@ void main() {
 
     await tester.pumpWidget(MaterialApp(home: ProductShellScreen(runtime: runtime)));
     await pumpUntilFound(tester, find.text('KALDIĞIN MATERYAL'));
-    await tapVisible(tester, find.text('Çalışmaya devam et'));
+    await tapVisible(tester, find.text('Kaynağa dön'));
     await pumpUntilFound(tester, find.text('Eski materyal'));
 
     expect(find.text('Eski materyal'), findsWidgets);
@@ -713,7 +713,7 @@ void main() {
     expect(find.text('3 işlem'), findsOneWidget);
     expect(find.text('Odak AI yardımı'), findsOneWidget);
     expect(find.text('2 işlem'), findsOneWidget);
-    expect(find.textContaining('tr-TR'), findsOneWidget);
+    expect(find.text('Dil: Türkçe'), findsOneWidget);
     await tester.scrollUntilVisible(find.text('Cihazın Türkçe sesi'), 260, scrollable: find.byType(Scrollable).last);
     await tester.pump(const Duration(milliseconds: 300));
     expect(find.text('Cihazın Türkçe sesi'), findsOneWidget);
@@ -775,7 +775,7 @@ void main() {
     );
     expect(destructiveButton.onPressed, isNull);
     expect(deletion.calls, 0);
-    expect(find.textContaining('Aynı destructive isteği tekrar göndermiyoruz'), findsOneWidget);
+    expect(find.textContaining('Aynı silme isteğini tekrar göndermiyoruz'), findsOneWidget);
   });
 
   testWidgets('Profile hides unknown backend capability and locale keys', (tester) async {

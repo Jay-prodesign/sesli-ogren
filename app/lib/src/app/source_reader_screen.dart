@@ -292,7 +292,7 @@ class _SourceReaderScreenState extends State<SourceReaderScreen> {
                 color: accent,
                 backgroundColor: living ? line : null,
                 semanticsLabel: 'Okuma ilerlemesi',
-                semanticsValue: '%${(_readingProgress * 100).round()}',
+                semanticsValue: '${(_readingProgress * 100).round()}',
               ),
             ],
             Expanded(

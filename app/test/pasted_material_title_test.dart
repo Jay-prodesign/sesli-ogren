@@ -86,7 +86,7 @@ void main() {
       find.byKey(const ValueKey('pasted-material-text')),
       'Fotosentez ışık enerjisini kimyasal enerjiye dönüştürmeye yardımcı olur.',
     );
-    await _tapVisible(tester, find.text('Hatırlama başlat'));
+    await _tapVisible(tester, find.text('Kaynağı ekle ve aç'));
     await _pumpUntilFound(tester, find.text('Yeni materyal'));
 
     final material = await store.material(learner: runtime.learner, materialId: materialId);
@@ -107,7 +107,7 @@ void main() {
       find.byKey(const ValueKey('pasted-material-text')),
       'Fotosentez ışık enerjisini kimyasal enerjiye dönüştürür ve bitkinin enerji depolamasına yardım eder.',
     );
-    await _tapVisible(tester, find.text('Hatırlama başlat'));
+    await _tapVisible(tester, find.text('Kaynağı ekle ve aç'));
     await _pumpUntilFound(tester, find.text('Yeni materyal'));
 
     final material = await store.material(learner: runtime.learner, materialId: materialId);
