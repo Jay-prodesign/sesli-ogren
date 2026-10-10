@@ -440,27 +440,38 @@ class _FocusScreenState extends State<FocusScreen> {
             maxLines: 4,
             decoration: const InputDecoration(hintText: 'Neyi netleştirmek istiyorsun?'),
           ),
-          Row(
-            children: [
-              Expanded(
-                child: OutlinedButton.icon(
-                  onPressed: busy ? null : () => request(FocusHelpKind.hint),
-                  icon: const Icon(Icons.lightbulb_outline_rounded),
-                  label: const Text('İpucu ver'),
-                ),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: FilledButton.icon(
-                  style: living
-                      ? FilledButton.styleFrom(backgroundColor: AtelierStyle.teal, foregroundColor: Colors.white)
-                      : null,
-                  onPressed: busy ? null : () => request(FocusHelpKind.directExplanation),
-                  icon: const Icon(Icons.auto_awesome_outlined),
-                  label: const Text('Sorumu açıkla'),
-                ),
-              ),
-            ],
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final stackActions =
+                  constraints.maxWidth < 340 || MediaQuery.textScalerOf(context).scale(1) > 1.25;
+              final hintButton = OutlinedButton.icon(
+                onPressed: busy ? null : () => request(FocusHelpKind.hint),
+                icon: const Icon(Icons.lightbulb_outline_rounded),
+                label: const Text('İpucu ver'),
+              );
+              final explainButton = FilledButton.icon(
+                style: living
+                    ? FilledButton.styleFrom(backgroundColor: AtelierStyle.teal, foregroundColor: Colors.white)
+                    : null,
+                onPressed: busy ? null : () => request(FocusHelpKind.directExplanation),
+                icon: const Icon(Icons.auto_awesome_outlined),
+                label: const Text('Sorumu açıkla'),
+              );
+              if (stackActions) {
+                return Column(
+                  key: const ValueKey('focus-help-actions-stacked'),
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [hintButton, const SizedBox(height: 8), explainButton],
+                );
+              }
+              return Row(
+                children: [
+                  Expanded(child: hintButton),
+                  const SizedBox(width: 8),
+                  Expanded(child: explainButton),
+                ],
+              );
+            },
           ),
           if (busy) ...[const SizedBox(height: 12), const LinearProgressIndicator()],
           if (readyHelp != null) ...[
@@ -537,32 +548,43 @@ class _FocusScreenState extends State<FocusScreen> {
                     ],
                   ),
                   const SizedBox(height: 14),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: OutlinedButton.icon(
-                          style: OutlinedButton.styleFrom(
-                            foregroundColor: Colors.white,
-                            side: BorderSide(color: Colors.white.withValues(alpha: 0.30)),
-                          ),
-                          onPressed: _openRecall,
-                          icon: const Icon(Icons.psychology_alt_outlined),
-                          label: const Text('Hatırla'),
+                  LayoutBuilder(
+                    builder: (context, constraints) {
+                      final stackActions =
+                          constraints.maxWidth < 340 || MediaQuery.textScalerOf(context).scale(1) > 1.25;
+                      final recallButton = OutlinedButton.icon(
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: Colors.white,
+                          side: BorderSide(color: Colors.white.withValues(alpha: 0.30)),
                         ),
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: FilledButton.icon(
-                          style: FilledButton.styleFrom(
-                            backgroundColor: Colors.white,
-                            foregroundColor: AppPalette.primaryDark,
-                          ),
-                          onPressed: _openExplainBack,
-                          icon: const Icon(Icons.record_voice_over_outlined),
-                          label: const Text('Kendi cümlelerinle anlat'),
+                        onPressed: _openRecall,
+                        icon: const Icon(Icons.psychology_alt_outlined),
+                        label: const Text('Hatırla'),
+                      );
+                      final explainBackButton = FilledButton.icon(
+                        style: FilledButton.styleFrom(
+                          backgroundColor: Colors.white,
+                          foregroundColor: AppPalette.primaryDark,
                         ),
-                      ),
-                    ],
+                        onPressed: _openExplainBack,
+                        icon: const Icon(Icons.record_voice_over_outlined),
+                        label: const Text('Kendi cümlelerinle anlat'),
+                      );
+                      if (stackActions) {
+                        return Column(
+                          key: const ValueKey('focus-next-actions-stacked'),
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [recallButton, const SizedBox(height: 8), explainBackButton],
+                        );
+                      }
+                      return Row(
+                        children: [
+                          Expanded(child: recallButton),
+                          const SizedBox(width: 8),
+                          Expanded(child: explainBackButton),
+                        ],
+                      );
+                    },
                   ),
                 ],
               ),

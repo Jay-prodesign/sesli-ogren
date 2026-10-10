@@ -8,9 +8,12 @@ import 'package:sesli_ogren/src/app/account_entry_screen.dart';
 import 'package:sesli_ogren/src/app/app_runtime.dart';
 import 'package:sesli_ogren/src/app/app_theme.dart';
 import 'package:sesli_ogren/src/app/atelier_learning_surfaces.dart';
+import 'package:sesli_ogren/src/app/explain_back_screen.dart';
+import 'package:sesli_ogren/src/app/focus_screen.dart';
 import 'package:sesli_ogren/src/app/listen_screen.dart';
 import 'package:sesli_ogren/src/app/learning_slice_screen.dart';
 import 'package:sesli_ogren/src/app/product_shell_screen.dart';
+import 'package:sesli_ogren/src/app/quick_recap_screen.dart';
 import 'package:sesli_ogren/src/app/living_study_desk_home.dart';
 import 'package:sesli_ogren/src/app/source_reader_screen.dart';
 import 'package:sesli_ogren/src/data/pdf_text_extractor.dart';
@@ -505,6 +508,65 @@ void main() {
     expect(find.text('Kaynağı kapat ve hatırla'), findsOneWidget);
     expect(tester.takeException(), isNull);
     await expectLater(find.byType(Scaffold), matchesGoldenFile('goldens/la0040_source_reader_320_text150.png'));
+  });
+
+  testWidgets('LA-0040 secondary learning tools', (tester) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
+    addTearDown(store.close);
+    final ingest = SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor());
+    final runtime = AppRuntime(
+      learner: AppRuntime.localM5LearnerFixture,
+      store: store,
+      ingest: ingest,
+      recall: RecallLearningService(sourceStore: store, learningStore: store.learningTruthStore()),
+      telemetry: store.operationalTelemetry(),
+    );
+    const toolMaterialId = MaterialId('visual-secondary-tools');
+    await ingest.ingestPastedText(
+      learner: runtime.learner,
+      materialId: toolMaterialId,
+      text: source,
+      sourceName: material.title,
+    );
+    final currentSource = await store.currentSourceVersion(
+      learner: runtime.learner,
+      materialId: toolMaterialId,
+    );
+    expect(currentSource, isNotNull);
+
+    Future<void> captureScreen(String name, Widget child) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          debugShowCheckedModeBanner: false,
+          theme: SesliOgrenTheme.light(),
+          home: MediaQuery(
+            data: const MediaQueryData(disableAnimations: true),
+            child: LivingDeskReviewScope(child: child),
+          ),
+        ),
+      );
+      await tester.pump(const Duration(milliseconds: 500));
+      expect(tester.takeException(), isNull);
+      await expectLater(find.byType(Scaffold), matchesGoldenFile('goldens/$name.png'));
+    }
+
+    await captureScreen(
+      'la0040_quick_recap_390x844',
+      QuickRecapScreen(runtime: runtime, materialId: toolMaterialId),
+    );
+    await captureScreen(
+      'la0040_focus_390x844',
+      FocusScreen(runtime: runtime, source: currentSource!, sourceText: source),
+    );
+    await captureScreen(
+      'la0040_explain_back_390x844',
+      ExplainBackScreen(runtime: runtime, source: currentSource),
+    );
   });
 
   testWidgets('LA-0040 source-hidden Recall', (tester) async {

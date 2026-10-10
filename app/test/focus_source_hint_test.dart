@@ -146,6 +146,51 @@ void main() {
     expect(find.textContaining('simulated server outage'), findsNothing);
   });
 
+  testWidgets('Focus stacks learning actions on narrow large-text layouts', (tester) async {
+    tester.view.physicalSize = const Size(320, 700);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
+    addTearDown(store.close);
+    final runtime = await _runtime(store);
+    const materialId = MaterialId('focus-large-text');
+    const sourceText =
+        'Fotosentez ışık enerjisini kimyasal enerjiye dönüştürür. '
+        'Bitki bu süreçte karbondioksit ve su kullanır.';
+    await runtime.ingest.ingestPastedText(
+      learner: runtime.learner,
+      materialId: materialId,
+      text: sourceText,
+      sourceName: 'Biyoloji notu',
+    );
+    final source = await store.currentSourceVersion(learner: runtime.learner, materialId: materialId);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: MediaQuery(
+          data: const MediaQueryData(textScaler: TextScaler.linear(1.6)),
+          child: FocusScreen(runtime: runtime, source: source!, sourceText: sourceText),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    for (var i = 0; i < 8 && find.byKey(const ValueKey('focus-help-actions-stacked')).evaluate().isEmpty; i++) {
+      await tester.drag(find.byType(Scrollable).last, const Offset(0, -180));
+      await tester.pump();
+    }
+    expect(find.byKey(const ValueKey('focus-help-actions-stacked')), findsOneWidget);
+
+    for (var i = 0; i < 10 && find.byKey(const ValueKey('focus-next-actions-stacked')).evaluate().isEmpty; i++) {
+      await tester.drag(find.byType(Scrollable).last, const Offset(0, -180));
+      await tester.pump();
+    }
+    expect(find.byKey(const ValueKey('focus-next-actions-stacked')), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('Focus hint refuses to invent a passage when terms do not match', (tester) async {
     final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
     addTearDown(store.close);
