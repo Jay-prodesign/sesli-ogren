@@ -107,6 +107,7 @@ class _ListenScreenState extends State<ListenScreen> {
       _error = null;
       _currentChunkIndex = safeStart;
       _startingPlayback = true;
+      _speaking = false;
       _finishedListening = false;
     });
     await _playChunk(source, safeStart, token, rate);
