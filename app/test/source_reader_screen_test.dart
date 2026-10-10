@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sesli_ogren/src/app/source_reader_screen.dart';
+import 'package:sesli_ogren/src/app/living_study_desk_home.dart';
+import 'package:sesli_ogren/src/domain/learning_contracts.dart';
 
 void main() {
   testWidgets('source reader keeps local search and learning exits usable', (tester) async {
@@ -93,6 +95,41 @@ void main() {
     await tester.pump();
     expect(reported, isNotEmpty);
     expect(reported.last, greaterThan(0.5));
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('source trust UI never labels platform reference as learner-owned', (tester) async {
+    final sourceVersion = SourceVersionRecord(
+      identity: const SourceVersionIdentity(
+        materialId: MaterialId('reference-material'),
+        sourceVersionId: SourceVersionId('reference-version'),
+        contentDigest: 'reference-digest',
+        trustClass: SourceTrustClass.authoritativeReference,
+        knowledgeClass: SourceKnowledgeClass.trustedPlatform,
+      ),
+      mediaType: SourceMediaType.pdf,
+      sourceName: 'Biyoloji referansı.pdf',
+      mimeType: 'application/pdf',
+      byteSize: 1024,
+      createdAt: DateTime.utc(2026, 10, 10),
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: LivingDeskReviewScope(
+          child: SourceReaderScreen(
+            title: 'Biyoloji referansı',
+            sourceText: 'Klorofil ışık enerjisinin soğurulmasında görev alır.',
+            sourceVersion: sourceVersion,
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    expect(find.text('GÜVENİLİR KAYNAK · PDF · GÜNCEL SÜRÜM'), findsOneWidget);
+    expect(find.textContaining('KENDİ KAYNAĞIN'), findsNothing);
+    expect(find.text('Biyoloji referansı.pdf'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 

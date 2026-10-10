@@ -89,7 +89,7 @@ class _ListenScreenState extends State<ListenScreen> {
     return _ListenSource(
       name: widget.titleOverride?.trim().isNotEmpty == true ? widget.titleOverride!.trim() : version.sourceName,
       text: text,
-      sourceVersionId: version.identity.sourceVersionId,
+      sourceVersion: version,
       chunks: chunks,
       resumeChunk: resumeChunk,
       playbackRate: playbackRate,
@@ -194,7 +194,7 @@ class _ListenScreenState extends State<ListenScreen> {
     return widget.runtime.store.saveListenResumeChunk(
       learner: widget.runtime.learner,
       materialId: widget.materialId,
-      sourceVersionId: source.sourceVersionId,
+      sourceVersionId: source.sourceVersion.identity.sourceVersionId,
       chunkIndex: chunkIndex,
       updatedAt: DateTime.now().toUtc(),
     );
@@ -349,6 +349,8 @@ class _ListenScreenState extends State<ListenScreen> {
               children: [
                 if (living) ...[
                   const AtelierLearningRail(phase: AtelierLearningPhase.source),
+                  const SizedBox(height: 10),
+                  AtelierSourceTrustStrip(sourceVersion: source.sourceVersion),
                   const SizedBox(height: 12),
                 ],
                 DecoratedBox(
@@ -587,7 +589,7 @@ class _ListenSource {
   const _ListenSource({
     required this.name,
     required this.text,
-    required this.sourceVersionId,
+    required this.sourceVersion,
     required this.chunks,
     required this.resumeChunk,
     required this.playbackRate,
@@ -595,7 +597,7 @@ class _ListenSource {
 
   final String name;
   final String text;
-  final SourceVersionId sourceVersionId;
+  final SourceVersionRecord sourceVersion;
   final List<String> chunks;
   final int resumeChunk;
   final double playbackRate;

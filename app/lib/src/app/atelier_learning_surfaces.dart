@@ -18,10 +18,88 @@ abstract final class AtelierStyle {
   static const mark = Color(0xFFE0F0AF);
 }
 
+class AtelierSourceTrustStrip extends StatelessWidget {
+  const AtelierSourceTrustStrip({required this.sourceVersion, super.key});
+
+  final SourceVersionRecord sourceVersion;
+
+  String get _ownershipLabel {
+    final identity = sourceVersion.identity;
+    if (identity.trustClass == SourceTrustClass.userProvided &&
+        identity.knowledgeClass == SourceKnowledgeClass.learnerOwned) {
+      return 'KENDİ KAYNAĞIN';
+    }
+    if (identity.trustClass == SourceTrustClass.authoritativeReference) {
+      return 'GÜVENİLİR KAYNAK';
+    }
+    return 'KAYNAK';
+  }
+
+  String get _mediaLabel => sourceVersion.mediaType == SourceMediaType.pdf ? 'PDF' : 'METİN';
+
+  @override
+  Widget build(BuildContext context) {
+    final versionLabel = sourceVersion.isCurrent ? 'GÜNCEL SÜRÜM' : 'ÖNCEKİ SÜRÜM';
+    return Semantics(
+      container: true,
+      label:
+          '${sourceVersion.sourceName}. $_ownershipLabel. $versionLabel. Öğrenme kanıtı bu kaynak sürümüne bağlıdır.',
+      child: ExcludeSemantics(
+        child: Container(
+          key: const ValueKey('atelier-source-trust'),
+          width: double.infinity,
+          padding: const EdgeInsets.fromLTRB(13, 11, 13, 12),
+          decoration: BoxDecoration(
+            color: AtelierStyle.mint,
+            borderRadius: BorderRadius.circular(13),
+            border: Border.all(color: AtelierStyle.line),
+          ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Icon(Icons.verified_user_outlined, color: AtelierStyle.teal, size: 19),
+              const SizedBox(width: 9),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      '$_ownershipLabel · $_mediaLabel · $versionLabel',
+                      style: const TextStyle(
+                        color: AtelierStyle.teal,
+                        fontSize: 10,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: 0.8,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      sourceVersion.sourceName,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(color: AtelierStyle.ink, fontSize: 13, fontWeight: FontWeight.w800),
+                    ),
+                    const SizedBox(height: 3),
+                    const Text(
+                      'Hatırlama ve kaynak kanıtı bu sürümle ilişkilendirilir.',
+                      style: TextStyle(color: AtelierStyle.muted, fontSize: 12, height: 1.35),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class AtelierWorkspace extends StatelessWidget {
   const AtelierWorkspace({
     required this.material,
     required this.sourceText,
+    this.sourceVersion,
     required this.continuation,
     required this.onReadSource,
     required this.onQuickRecap,
@@ -34,6 +112,7 @@ class AtelierWorkspace extends StatelessWidget {
 
   final MaterialRecord material;
   final String sourceText;
+  final SourceVersionRecord? sourceVersion;
   final LearningContinuation? continuation;
   final VoidCallback onReadSource;
   final VoidCallback onQuickRecap;
@@ -71,6 +150,10 @@ class AtelierWorkspace extends StatelessWidget {
                   height: 1.14,
                 ),
               ),
+              if (sourceVersion != null) ...[
+                const SizedBox(height: 14),
+                AtelierSourceTrustStrip(sourceVersion: sourceVersion!),
+              ],
               const SizedBox(height: 17),
               if (sourceText.trim().isNotEmpty) ...[
                 const AtelierLearningRail(phase: AtelierLearningPhase.source),
@@ -535,10 +618,17 @@ class AtelierRecall extends StatelessWidget {
 }
 
 class AtelierResult extends StatelessWidget {
-  const AtelierResult({required this.result, required this.answerInMemory, required this.onContinue, super.key});
+  const AtelierResult({
+    required this.result,
+    required this.answerInMemory,
+    required this.onContinue,
+    this.sourceVersion,
+    super.key,
+  });
   final RecallAttemptResult result;
   final String answerInMemory;
   final VoidCallback onContinue;
+  final SourceVersionRecord? sourceVersion;
 
   String get _heading => switch (result.evidence.outcome) {
     RecallOutcome.correct when result.evidence.assistance == RecallAssistance.none => 'Bir kez bağımsız hatırladın',
@@ -654,6 +744,10 @@ class AtelierResult extends StatelessWidget {
             style: const TextStyle(color: AtelierStyle.ink, fontSize: 16, height: 1.45, fontWeight: FontWeight.w700),
           ),
         ),
+        if (sourceVersion != null) ...[
+          const SizedBox(height: 14),
+          AtelierSourceTrustStrip(sourceVersion: sourceVersion!),
+        ],
         const SizedBox(height: 13),
         Center(
           child: Padding(

@@ -2,6 +2,8 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
+import '../domain/learning_contracts.dart';
+
 import 'atelier_learning_surfaces.dart';
 import 'living_study_desk_home.dart';
 import 'source_text_matching.dart';
@@ -11,6 +13,7 @@ class SourceReaderScreen extends StatefulWidget {
   const SourceReaderScreen({
     required this.title,
     required this.sourceText,
+    this.sourceVersion,
     this.initialProgress = 0,
     this.onProgressChanged,
     this.onListen,
@@ -21,6 +24,7 @@ class SourceReaderScreen extends StatefulWidget {
 
   final String title;
   final String sourceText;
+  final SourceVersionRecord? sourceVersion;
   final double initialProgress;
   final Future<void> Function(double progress)? onProgressChanged;
   final VoidCallback? onListen;
@@ -98,9 +102,8 @@ class _SourceReaderScreenState extends State<SourceReaderScreen> {
       callback(progress).catchError((Object _) {
         if (!mounted || _progressSaveWarningShown) return;
         _progressSaveWarningShown = true;
-        ScaffoldMessenger.maybeOf(context)?.showSnackBar(
-          const SnackBar(content: Text('Okuma konumu kaydedilemedi. Kaynağın kendisi korunuyor.')),
-        );
+        ScaffoldMessenger.maybeOf(context)
+            ?.showSnackBar(const SnackBar(content: Text('Okuma konumu kaydedilemedi. Kaynağın kendisi korunuyor.')));
       }),
     );
   }
@@ -190,6 +193,10 @@ class _SourceReaderScreenState extends State<SourceReaderScreen> {
           widget.title,
           style: theme.textTheme.titleLarge?.copyWith(color: ink, fontWeight: living ? FontWeight.w900 : null),
         ),
+        if (living && widget.sourceVersion != null) ...[
+          const SizedBox(height: 12),
+          AtelierSourceTrustStrip(sourceVersion: widget.sourceVersion!),
+        ],
         if (living) ...[const SizedBox(height: 14), const AtelierLearningRail(phase: AtelierLearningPhase.source)],
         const SizedBox(height: 16),
         RichText(
@@ -333,10 +340,7 @@ class _SourceReaderScreenState extends State<SourceReaderScreen> {
                           Expanded(
                             child: Text(
                               'Kaldığın yer geri açıldı · %${(widget.initialProgress * 100).round()}',
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                color: ink,
-                                fontWeight: FontWeight.w700,
-                              ),
+                              style: theme.textTheme.bodySmall?.copyWith(color: ink, fontWeight: FontWeight.w700),
                             ),
                           ),
                         ],

@@ -287,6 +287,7 @@ class _WorkspaceBody extends StatelessWidget {
       return AtelierWorkspace(
         material: data.material,
         sourceText: data.extracted?.normalizedText ?? '',
+        sourceVersion: data.source,
         continuation: data.continuation,
         onReadSource: onReadSource,
         onQuickRecap: onQuickRecap,
