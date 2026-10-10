@@ -109,7 +109,7 @@ void main() {
     outcome: RecallOutcome.correct,
     assistance: RecallAssistance.none,
     responseDigest: 'visual-only',
-    responseLength: 8,
+    responseLength: 9,
     ruleVersion: RecallTruthPolicy.evidenceRuleVersion,
     createdAt: now,
   );
@@ -134,8 +134,8 @@ void main() {
     evidence: evidence,
     state: state,
     nextAction: next,
-    correctAnswer: 'Klorofil',
-    sourceExcerpt: 'Klorofil ışığın soğurulmasında görev alır.',
+    correctAnswer: 'Fotosentez',
+    sourceExcerpt: 'Fotosentez sırasında bitkiler ışık enerjisini kimyasal enerjiye dönüştürür.',
   );
 
   Future<void> capture(
@@ -489,9 +489,9 @@ void main() {
             id: RecallActionId('visual-action'),
             materialId: materialId,
             sourceVersionId: versionId,
-            promptText: 'Işığın soğurulmasında hangi pigment görev alır?',
+            promptText: '_____ sırasında bitkiler ışık enerjisini kimyasal enerjiye dönüştürür.',
             anchor: SourceAnchor(startOffset: 75, endOffset: 84),
-            ruleVersion: 'visual-fixture',
+            ruleVersion: RecallLearningService.promptRuleVersion,
           ),
           controller: controller,
           busy: false,
@@ -512,7 +512,7 @@ void main() {
         padding: const EdgeInsets.all(20),
         child: AtelierResult(
           result: result,
-          answerInMemory: 'Klorofil',
+          answerInMemory: 'Fotosentez',
           onContinue: () {},
           sourceVersion: sourceVersion,
         ),
@@ -533,9 +533,9 @@ void main() {
             id: RecallActionId('visual-action'),
             materialId: materialId,
             sourceVersionId: versionId,
-            promptText: 'Işığın soğurulmasında hangi pigment görev alır?',
+            promptText: '_____ sırasında bitkiler ışık enerjisini kimyasal enerjiye dönüştürür.',
             anchor: SourceAnchor(startOffset: 75, endOffset: 84),
-            ruleVersion: 'visual-fixture',
+            ruleVersion: RecallLearningService.promptRuleVersion,
           ),
           controller: controller,
           busy: false,
@@ -556,7 +556,7 @@ void main() {
         padding: const EdgeInsets.all(16),
         child: AtelierResult(
           result: result,
-          answerInMemory: 'Klorofil',
+          answerInMemory: 'Fotosentez',
           onContinue: () {},
           sourceVersion: sourceVersion,
         ),

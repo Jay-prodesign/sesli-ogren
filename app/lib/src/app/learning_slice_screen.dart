@@ -462,7 +462,7 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
     final attemptId = _activeAttemptId;
     if (prompt == null || attemptId == null || _busy) return;
     if (!unknown && _answerController.text.trim().isEmpty) {
-      setState(() => _inlineError = 'Yanıtını yaz veya “Bilmiyorum”u seç.');
+      setState(() => _inlineError = 'Kısa yanıtını yaz veya “Bilmiyorum”u seç.');
       return;
     }
 
@@ -1183,9 +1183,18 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
           TextField(
             controller: _answerController,
             enabled: !_busy,
+            autocorrect: false,
+            enableSuggestions: false,
             textInputAction: TextInputAction.done,
+            maxLines: 1,
+            textCapitalization: TextCapitalization.none,
             onSubmitted: (_) => _submit(),
-            decoration: const InputDecoration(labelText: 'Yanıtın', border: OutlineInputBorder()),
+            decoration: const InputDecoration(
+              labelText: 'Kısa yanıtın',
+              hintText: 'Sorunun beklediği kavramı veya terimi yaz',
+              helperText: 'Tek, kısa bir kaynak kavramı bekleniyor.',
+              border: OutlineInputBorder(),
+            ),
           ),
           if (_supportText != null) ...[const SizedBox(height: 12), _InlineNotice(text: _supportText!)],
           if (_inlineError != null) ...[const SizedBox(height: 12), _InlineNotice(text: _inlineError!)],
