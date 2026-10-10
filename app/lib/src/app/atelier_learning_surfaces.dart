@@ -114,6 +114,7 @@ class AtelierWorkspace extends StatelessWidget {
     required this.continuation,
     required this.onReadSource,
     required this.onQuickRecap,
+    required this.onUpdateSource,
     required this.onRecall,
     required this.onListen,
     required this.onExplain,
@@ -127,6 +128,7 @@ class AtelierWorkspace extends StatelessWidget {
   final LearningContinuation? continuation;
   final VoidCallback onReadSource;
   final VoidCallback onQuickRecap;
+  final VoidCallback onUpdateSource;
   final VoidCallback onRecall;
   final VoidCallback onListen;
   final VoidCallback onExplain;
@@ -272,6 +274,13 @@ class AtelierWorkspace extends StatelessWidget {
                         style: TextButton.styleFrom(foregroundColor: AtelierStyle.teal),
                         icon: const Icon(Icons.auto_awesome_outlined),
                         label: const Text('Hızlı özet'),
+                      ),
+                      TextButton.icon(
+                        key: const ValueKey('la0040-atelier-workspace-update-source'),
+                        onPressed: onUpdateSource,
+                        style: TextButton.styleFrom(foregroundColor: AtelierStyle.teal),
+                        icon: const Icon(Icons.sync_rounded),
+                        label: const Text('Kaynağı güncelle'),
                       ),
                     ],
                   ),
