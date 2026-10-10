@@ -62,10 +62,8 @@ Future<AppRuntime> _runtimeWithEvidence({
 }
 
 Widget _testApp(Widget home) => MaterialApp(
-  builder: (context, child) => MediaQuery(
-    data: MediaQuery.of(context).copyWith(disableAnimations: true),
-    child: child!,
-  ),
+  builder: (context, child) =>
+      MediaQuery(data: MediaQuery.of(context).copyWith(disableAnimations: true), child: child!),
   home: home,
 );
 
