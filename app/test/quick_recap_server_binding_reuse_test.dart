@@ -131,6 +131,7 @@ void main() {
     expect(copiedText, contains('Sesli Öğren'));
     expect(copiedText, contains('AI tarafından oluşturulan özet'));
     expect(copiedText, contains('Kaynak: Biyoloji notu'));
+    expect(copiedText, contains('Dışa aktarma tarihi:'));
     expect(copiedText, contains('Aynı server material yeniden kullanıldı.'));
     expect(find.text('Özet panoya kopyalandı'), findsOneWidget);
 

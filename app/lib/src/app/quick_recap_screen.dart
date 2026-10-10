@@ -385,10 +385,16 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> with WidgetsBinding
     );
     final title = material?.title.trim().isNotEmpty == true ? material!.title : 'Öğrenme materyali';
     final sourceName = _boundSource?.sourceName.trim();
+    final exportedAt = DateTime.now().toLocal();
+    final exportDate =
+        '${exportedAt.year.toString().padLeft(4, '0')}-'
+        '${exportedAt.month.toString().padLeft(2, '0')}-'
+        '${exportedAt.day.toString().padLeft(2, '0')}';
     return [
       'Hızlı özet — $title',
       'AI tarafından oluşturulan özet · Sesli Öğren',
       if (sourceName != null && sourceName.isNotEmpty) 'Kaynak: $sourceName',
+      'Dışa aktarma tarihi: $exportDate',
       status.summary!,
       if (status.keyPoints.isNotEmpty) 'Önemli noktalar:\n${status.keyPoints.map((point) => '• $point').join('\n')}',
     ].join('\n\n');
