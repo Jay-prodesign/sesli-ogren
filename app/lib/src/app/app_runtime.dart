@@ -16,6 +16,15 @@ import '../learning/supabase_focus_help_gateway.dart';
 import '../generation/grounded_explain_gateway.dart';
 import '../generation/supabase_grounded_explain_gateway.dart';
 
+class AccountDeletionLocalCleanupException implements Exception {
+  const AccountDeletionLocalCleanupException(this.cause);
+
+  final Object cause;
+
+  @override
+  String toString() => 'AccountDeletionLocalCleanupException: $cause';
+}
+
 class AppRuntime {
   AppRuntime({
     required this.learner,
@@ -69,8 +78,16 @@ class AppRuntime {
 
   Future<void> deleteAccount() async {
     await accountDeletion.deleteAccount(learner: learner);
-    await store.purgeLearnerData(learner: learner);
+    try {
+      await store.purgeLearnerData(learner: learner);
+    } catch (error) {
+      // Remote deletion has already been confirmed at this point. Surface a
+      // distinct state so callers never resubmit the destructive remote action.
+      throw AccountDeletionLocalCleanupException(error);
+    }
   }
+
+  Future<void> retryDeletedAccountLocalCleanup() => store.purgeLearnerData(learner: learner);
 
   Future<void> close() => store.close();
 }

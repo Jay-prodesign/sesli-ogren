@@ -34,6 +34,7 @@ class _ProfileSurfaceState extends State<ProfileSurface> {
   AccountOverview? _resolvedOverview;
   bool _deleting = false;
   bool _signingOut = false;
+  bool _remoteDeletionConfirmed = false;
 
   @override
   void initState() {
@@ -57,12 +58,17 @@ class _ProfileSurfaceState extends State<ProfileSurface> {
   bool get _deletionAlreadyRequested =>
       _resolvedOverview?.accountStatus == 'deletion_requested' || _resolvedOverview?.accountStatus == 'deleted';
 
-  String get _deletionActionLabel => switch (_resolvedOverview?.accountStatus) {
-    'deletion_requested' => 'Silme isteği zaten bekliyor',
-    'deleted' => 'Hesap silinmiş görünüyor',
-    _ when _deleting => 'Siliniyor…',
-    _ => 'Hesabımı ve verilerimi sil',
-  };
+  String get _deletionActionLabel {
+    if (_remoteDeletionConfirmed) {
+      return _deleting ? 'Yerel veriler temizleniyor…' : 'Yerel veriyi temizlemeyi tekrar dene';
+    }
+    return switch (_resolvedOverview?.accountStatus) {
+      'deletion_requested' => 'Silme isteği zaten bekliyor',
+      'deleted' => 'Hesap silinmiş görünüyor',
+      _ when _deleting => 'Siliniyor…',
+      _ => 'Hesabımı ve verilerimi sil',
+    };
+  }
 
   Future<void> _signOut() async {
     final callback = widget.onSignOut;
@@ -165,10 +171,48 @@ class _ProfileSurfaceState extends State<ProfileSurface> {
       } else {
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Hesap ve veriler silindi.')));
       }
+    } on AccountDeletionLocalCleanupException {
+      if (!mounted) return;
+      setState(() => _remoteDeletionConfirmed = true);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Hesap sunucuda silindi ancak bu cihazdaki yerel veriler henüz temizlenemedi. '
+            'Sunucuya yeni silme isteği göndermeden yerel temizliği tekrar deneyebilirsin.',
+          ),
+        ),
+      );
     } catch (_) {
       if (!mounted) return;
       ScaffoldMessenger.of(context)
           .showSnackBar(const SnackBar(content: Text('Hesap silinemedi. Verilerin korunuyor; tekrar deneyebilirsin.')));
+    } finally {
+      if (mounted) setState(() => _deleting = false);
+    }
+  }
+
+  Future<void> _retryLocalCleanup() async {
+    if (_deleting || !_remoteDeletionConfirmed) return;
+    setState(() => _deleting = true);
+    try {
+      await widget.runtime.retryDeletedAccountLocalCleanup();
+      if (!mounted) return;
+      final callback = widget.onAccountDeleted;
+      if (callback != null) {
+        callback();
+      } else {
+        setState(() => _remoteDeletionConfirmed = false);
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Bu cihazdaki yerel veriler temizlendi.')));
+      }
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Yerel veriler henüz temizlenemedi. Sunucuya yeni silme isteği gönderilmedi; yalnız cihaz temizliği tekrar denenebilir.',
+          ),
+        ),
+      );
     } finally {
       if (mounted) setState(() => _deleting = false);
     }
@@ -315,12 +359,14 @@ class _ProfileSurfaceState extends State<ProfileSurface> {
             _ProfileTile(
               icon: Icons.privacy_tip_outlined,
               title: 'Gizlilik ve veriler',
-              subtitle: switch (_resolvedOverview?.accountStatus) {
-                'deletion_requested' => 'Hesap silme isteği sunucuda bekliyor. Aynı silme isteğini tekrar göndermiyoruz; süreç tamamlanana kadar bu durum korunur.',
-                'deleted' =>
-                  'Sunucu hesabı silinmiş olarak bildiriyor. Bu ekrandan yeni bir silme isteği gönderilmiyor.',
-                _ => 'Tek tek materyalleri Kütüphane’den silebilirsin. Hesap silme tüm hesap ve öğrenme verilerini kapsar.',
-              },
+              subtitle: _remoteDeletionConfirmed
+                  ? 'Sunucu hesabı silindi. Bu cihazdaki yerel öğrenme verilerinin temizliği tamamlanmayı bekliyor.'
+                  : switch (_resolvedOverview?.accountStatus) {
+                      'deletion_requested' => 'Hesap silme isteği sunucuda bekliyor. Aynı silme isteğini tekrar göndermiyoruz; süreç tamamlanana kadar bu durum korunur.',
+                      'deleted' =>
+                        'Sunucu hesabı silinmiş olarak bildiriyor. Bu ekrandan yeni bir silme isteği gönderilmiyor.',
+                      _ => 'Tek tek materyalleri Kütüphane’den silebilirsin. Hesap silme tüm hesap ve öğrenme verilerini kapsar.',
+                    },
               iconBackground: const Color(0xFFFDE7E5),
               iconForeground: AppPalette.destructive,
             ),
@@ -331,10 +377,18 @@ class _ProfileSurfaceState extends State<ProfileSurface> {
                   foregroundColor: AppPalette.destructive,
                   side: const BorderSide(color: Color(0xFFE7B8B4)),
                 ),
-                onPressed: _deleting || _deletionAlreadyRequested ? null : _deleteAccount,
+                onPressed: _deleting || (_deletionAlreadyRequested && !_remoteDeletionConfirmed)
+                    ? null
+                    : (_remoteDeletionConfirmed ? _retryLocalCleanup : _deleteAccount),
                 icon: _deleting
                     ? const SizedBox.square(dimension: 18, child: CircularProgressIndicator(strokeWidth: 2))
-                    : Icon(_deletionAlreadyRequested ? Icons.hourglass_top_rounded : Icons.delete_forever_outlined),
+                    : Icon(
+                        _remoteDeletionConfirmed
+                            ? Icons.delete_sweep_outlined
+                            : _deletionAlreadyRequested
+                            ? Icons.hourglass_top_rounded
+                            : Icons.delete_forever_outlined,
+                      ),
                 label: Text(_deletionActionLabel),
               ),
             ),

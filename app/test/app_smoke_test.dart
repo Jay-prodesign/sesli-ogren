@@ -1151,6 +1151,56 @@ void main() {
     expect(await store.activeMaterials(learner: runtime.learner), isEmpty);
   });
 
+  testWidgets('remote deletion is never resubmitted when only local cleanup failed', (tester) async {
+    final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
+    addTearDown(() async {
+      try {
+        await store.close();
+      } catch (_) {}
+    });
+    final deletion = _RecordingAccountDeletionGateway();
+    final runtime = AppRuntime(
+      learner: AppRuntime.localM5LearnerFixture,
+      store: store,
+      ingest: SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor()),
+      recall: RecallLearningService(sourceStore: store, learningStore: store.learningTruthStore()),
+      telemetry: store.operationalTelemetry(),
+      accountOverview: const _ReadyAccountOverviewGateway(),
+      accountDeletion: deletion,
+    );
+    var deletedCallback = false;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: ProfileSurface(runtime: runtime, onAccountDeleted: () => deletedCallback = true),
+      ),
+    );
+    await pumpUntilFound(tester, find.text('Ücretsiz plan'));
+    await store.close();
+
+    await tester.scrollUntilVisible(
+      find.text('Hesabımı ve verilerimi sil'),
+      260,
+      scrollable: find.byType(Scrollable).last,
+    );
+    await tester.tap(find.text('Hesabımı ve verilerimi sil'));
+    await pumpUntilFound(tester, find.text('Hesabı ve verileri sil?'));
+    await tester.tap(find.text('Devam et'));
+    await pumpUntilFound(tester, find.text('Son onay'));
+    await tester.tap(find.text('Kalıcı olarak sil'));
+    await pumpUntilFound(tester, find.textContaining('Hesap sunucuda silindi ancak'));
+
+    expect(deletion.calls, 1);
+    expect(deletedCallback, isFalse);
+    expect(find.text('Yerel veriyi temizlemeyi tekrar dene'), findsOneWidget);
+
+    await tester.tap(find.text('Yerel veriyi temizlemeyi tekrar dene'));
+    await pumpUntilFound(tester, find.textContaining('Sunucuya yeni silme isteği gönderilmedi'));
+
+    expect(deletion.calls, 1);
+    expect(deletedCallback, isFalse);
+  });
+
   test('failed remote account deletion preserves local learner data', () async {
     final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
     addTearDown(store.close);
