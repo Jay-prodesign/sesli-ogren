@@ -1174,13 +1174,7 @@ class _LibrarySurfaceState extends State<_LibrarySurface> {
         ],
         const SizedBox(height: 24),
         if (widget.data.materials.isEmpty)
-          _PrimaryCard(
-            title: 'Henüz materyal yok',
-            body: 'İlk kaynağını eklediğinde burada kaldığın yerden devam edebilirsin.',
-            buttonLabel: 'Materyal ekle',
-            icon: Icons.add_rounded,
-            onPressed: widget.onOpenLearning,
-          )
+          _LibraryFirstSourceCard(onPressed: widget.onOpenLearning)
         else if (visibleMaterials.isEmpty)
           _PrimaryCard(
             title: 'Eşleşen materyal bulunamadı',
@@ -1526,6 +1520,76 @@ class _ContextCard extends StatelessWidget {
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _LibraryFirstSourceCard extends StatelessWidget {
+  const _LibraryFirstSourceCard({required this.onPressed});
+
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final living = LivingDeskReviewScope.active(context);
+    final theme = Theme.of(context);
+    final ink = living ? AtelierStyle.ink : theme.colorScheme.onSurface;
+    final muted = living ? AtelierStyle.muted : theme.colorScheme.onSurfaceVariant;
+    final accent = living ? AtelierStyle.teal : theme.colorScheme.primary;
+    final paper = living ? AtelierStyle.paper : theme.colorScheme.surface;
+    return Container(
+      padding: const EdgeInsets.fromLTRB(17, 17, 17, 18),
+      decoration: BoxDecoration(
+        color: paper,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: living ? AtelierStyle.line : theme.colorScheme.outlineVariant),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              const CompanionView(state: CompanionVisualState.idle, size: 64),
+              const SizedBox(width: 13),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'İLK KAYNAĞIN',
+                      style: theme.textTheme.labelSmall?.copyWith(
+                        color: accent,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: 0.8,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'Kütüphanen bir kaynakla başlar.',
+                      style: theme.textTheme.titleMedium?.copyWith(color: ink, fontWeight: FontWeight.w900),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'Henüz materyal yok. PDF veya metnini eklediğinde burada kaldığın yerden devam edebilirsin.',
+                      style: theme.textTheme.bodySmall?.copyWith(color: muted, height: 1.4),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          FilledButton.icon(
+            onPressed: onPressed,
+            icon: const Icon(Icons.add_rounded),
+            label: const Text('İlk kaynağımı ekle'),
+            style: living
+                ? FilledButton.styleFrom(backgroundColor: AtelierStyle.ink, foregroundColor: Colors.white)
+                : null,
+          ),
+        ],
       ),
     );
   }
