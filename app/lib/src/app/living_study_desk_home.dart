@@ -119,6 +119,43 @@ class LivingStudyDeskHome extends StatelessWidget {
         : Icons.psychology_alt_outlined;
   }
 
+  String? get _evidenceHeadline {
+    final state = continuation?.state.kind;
+    return switch (state) {
+      RecallStateKind.retrievedOnce => 'Bir bağımsız geri çağırma gözlemi var',
+      RecallStateKind.developing => 'Bu deneme henüz bağımsız başarı değil',
+      RecallStateKind.needsReview => 'Son deneme kaynak onarımı istiyor',
+      RecallStateKind.notAssessed => 'Henüz bağımsız geri çağırma kanıtı yok',
+      null => null,
+    };
+  }
+
+  String? get _evidenceDetail {
+    final state = continuation?.state.kind;
+    return switch (state) {
+      RecallStateKind.retrievedOnce =>
+        'Bu tek başına ustalık kanıtı değil. Sonraki bağımsız deneme aynı bilgiyi yeniden kurup kuramadığını gösterecek.',
+      RecallStateKind.developing =>
+        'İpucu veya kısmi geri çağırma yardımcı oldu; sistem bunu ustalık saymadan ipucusuz tekrarı öne çıkarıyor.',
+      RecallStateKind.needsReview =>
+        'Yanlış eşleşme bir etiket değil. İlgili kaynak bölümüne dönüp ardından yeniden hatırlayabilirsin.',
+      RecallStateKind.notAssessed =>
+        'Bilmiyorum demek veya yanıtı görmek bağımsız geri çağırma sayılmaz; kaynak ve kanıt kaydı birbirinden ayrı tutulur.',
+      null => null,
+    };
+  }
+
+  IconData? get _evidenceIcon {
+    final state = continuation?.state.kind;
+    return switch (state) {
+      RecallStateKind.retrievedOnce => Icons.check_circle_outline_rounded,
+      RecallStateKind.developing => Icons.trending_up_rounded,
+      RecallStateKind.needsReview => Icons.auto_stories_outlined,
+      RecallStateKind.notAssessed => Icons.radio_button_unchecked_rounded,
+      null => null,
+    };
+  }
+
   String get _preview {
     final source = sourceText?.trim() ?? '';
     if (source.isEmpty) return 'Bu materyalin metin önizlemesi henüz hazır değil.';
@@ -293,6 +330,55 @@ class LivingStudyDeskHome extends StatelessWidget {
             ),
           ],
         ),
+        if (_evidenceHeadline != null) ...[
+          const SizedBox(height: 17),
+          Semantics(
+            container: true,
+            label: 'Öğrenme kanıtı. $_evidenceHeadline. $_evidenceDetail',
+            child: ExcludeSemantics(
+              child: Container(
+                key: const ValueKey('la0040-home-evidence-payoff'),
+                width: double.infinity,
+                padding: const EdgeInsets.fromLTRB(14, 12, 14, 13),
+                decoration: BoxDecoration(
+                  color: _paper,
+                  borderRadius: BorderRadius.circular(13),
+                  border: Border.all(color: _line),
+                ),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Icon(_evidenceIcon, color: _accent, size: 20),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'SON DENEMENDEN',
+                            style: TextStyle(
+                              color: _accent,
+                              fontSize: 9.5,
+                              fontWeight: FontWeight.w900,
+                              letterSpacing: 0.9,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            _evidenceHeadline!,
+                            style: const TextStyle(color: _ink, fontSize: 15, fontWeight: FontWeight.w900),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(_evidenceDetail!, style: const TextStyle(color: _sub, fontSize: 12.5, height: 1.38)),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
         const SizedBox(height: 18),
         Container(
           key: const ValueKey('la0040-source-to-recall-thread'),
