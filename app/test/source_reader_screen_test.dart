@@ -60,6 +60,44 @@ void main() {
     expect(recap, 1);
   });
 
+  testWidgets('source reader stacks learning actions on narrow large-text layouts', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(320, 650));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    var listened = 0;
+    var recalled = 0;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: MediaQuery(
+          data: const MediaQueryData(textScaler: TextScaler.linear(1.6)),
+          child: SourceReaderScreen(
+            title: 'Dar ekran biyoloji notu',
+            sourceText:
+                'Fotosentez ışık enerjisini kimyasal enerjiye dönüştürmeye yardım eder. '
+                'Kaynak açıkken kanıt görülebilir.',
+            onListen: () => listened++,
+            onRecall: () => recalled++,
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const ValueKey('reader-learning-actions-stacked')), findsOneWidget);
+    expect(find.text('Kaynağı kapat ve hatırla'), findsOneWidget);
+    expect(find.text('Dinle'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+
+    await tester.tap(find.text('Kaynağı kapat ve hatırla'));
+    await tester.pump();
+    expect(recalled, 1);
+
+    await tester.tap(find.text('Dinle'));
+    await tester.pump();
+    expect(listened, 1);
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('source reader restores and reports a durable reading position', (tester) async {
     await tester.binding.setSurfaceSize(const Size(390, 500));
     addTearDown(() => tester.binding.setSurfaceSize(null));

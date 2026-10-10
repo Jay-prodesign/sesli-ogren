@@ -471,45 +471,65 @@ class _SourceReaderScreenState extends State<SourceReaderScreen> {
                   ),
                   child: Padding(
                     padding: const EdgeInsets.fromLTRB(16, 8, 16, 10),
-                    child: Row(
-                      children: [
-                        if (widget.onListen != null)
-                          OutlinedButton.icon(
-                            onPressed: () => unawaited(_runLearningAction(widget.onListen)),
-                            style: living
-                                ? OutlinedButton.styleFrom(
-                                    foregroundColor: AtelierStyle.teal,
-                                    side: const BorderSide(color: AtelierStyle.line),
-                                  )
-                                : null,
-                            icon: const Icon(Icons.headphones_rounded, size: 19),
-                            label: const Text('Dinle'),
-                          ),
-                        if (widget.onListen != null && widget.onRecall != null) const SizedBox(width: 10),
-                        if (widget.onRecall != null)
-                          Expanded(
-                            child: FilledButton.icon(
-                              style: living
-                                  ? FilledButton.styleFrom(
-                                      backgroundColor: AtelierStyle.ink,
-                                      foregroundColor: Colors.white,
-                                      minimumSize: const Size.fromHeight(48),
-                                    )
-                                  : FilledButton.styleFrom(minimumSize: const Size.fromHeight(48)),
-                              onPressed: () => unawaited(_runLearningAction(widget.onRecall)),
-                              icon: const Icon(Icons.psychology_alt_outlined),
-                              label: const Text('Kaynağı kapat ve hatırla'),
-                            ),
-                          )
-                        else if (widget.onRecap != null)
-                          Expanded(
-                            child: TextButton.icon(
-                              onPressed: () => unawaited(_runLearningAction(widget.onRecap)),
-                              icon: const Icon(Icons.auto_awesome),
-                              label: const Text('Hızlı özet'),
-                            ),
-                          ),
-                      ],
+                    child: LayoutBuilder(
+                      builder: (context, constraints) {
+                        final stackActions =
+                            constraints.maxWidth < 360 || MediaQuery.textScalerOf(context).scale(16) >= 22;
+                        final listenAction = widget.onListen == null
+                            ? null
+                            : OutlinedButton.icon(
+                                onPressed: () => unawaited(_runLearningAction(widget.onListen)),
+                                style: living
+                                    ? OutlinedButton.styleFrom(
+                                        foregroundColor: AtelierStyle.teal,
+                                        side: const BorderSide(color: AtelierStyle.line),
+                                        minimumSize: const Size.fromHeight(48),
+                                      )
+                                    : OutlinedButton.styleFrom(minimumSize: const Size.fromHeight(48)),
+                                icon: const Icon(Icons.headphones_rounded, size: 19),
+                                label: const Text('Dinle'),
+                              );
+                        final primaryAction = widget.onRecall != null
+                            ? FilledButton.icon(
+                                style: living
+                                    ? FilledButton.styleFrom(
+                                        backgroundColor: AtelierStyle.ink,
+                                        foregroundColor: Colors.white,
+                                        minimumSize: const Size.fromHeight(48),
+                                      )
+                                    : FilledButton.styleFrom(minimumSize: const Size.fromHeight(48)),
+                                onPressed: () => unawaited(_runLearningAction(widget.onRecall)),
+                                icon: const Icon(Icons.psychology_alt_outlined),
+                                label: const Text('Kaynağı kapat ve hatırla'),
+                              )
+                            : widget.onRecap != null
+                            ? TextButton.icon(
+                                onPressed: () => unawaited(_runLearningAction(widget.onRecap)),
+                                icon: const Icon(Icons.auto_awesome),
+                                label: const Text('Hızlı özet'),
+                              )
+                            : null;
+
+                        if (stackActions) {
+                          return Column(
+                            key: const ValueKey('reader-learning-actions-stacked'),
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              if (primaryAction != null) primaryAction,
+                              if (primaryAction != null && listenAction != null) const SizedBox(height: 8),
+                              if (listenAction != null) listenAction,
+                            ],
+                          );
+                        }
+
+                        return Row(
+                          children: [
+                            if (listenAction != null) listenAction,
+                            if (listenAction != null && primaryAction != null) const SizedBox(width: 10),
+                            if (primaryAction != null) Expanded(child: primaryAction),
+                          ],
+                        );
+                      },
                     ),
                   ),
                 ),
