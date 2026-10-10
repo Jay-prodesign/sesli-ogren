@@ -11,10 +11,6 @@ on:
 permissions:
   contents: read
 
-concurrency:
-  group: product-bounded-validation-${{ github.ref }}
-  cancel-in-progress: true
-
 jobs:
   milestone-gate:
     name: Milestone CI gate
@@ -30,11 +26,16 @@ jobs:
       - id: check
         shell: bash
         run: |
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ] || git log -1 --pretty=%B | grep -Fq "[milestone-ci]"; then
+          message="$(git log -1 --pretty=%B)"
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "run_full=true" >> "$GITHUB_OUTPUT"
+          elif printf '%s' "$message" | grep -Fq "[product-ci]"; then
+            echo "run_full=true" >> "$GITHUB_OUTPUT"
+          elif printf '%s' "$message" | grep -Fq "[milestone-ci]" && ! printf '%s' "$message" | grep -Fq "[visual-ci]"; then
             echo "run_full=true" >> "$GITHUB_OUTPUT"
           else
             echo "run_full=false" >> "$GITHUB_OUTPUT"
-            echo "Skipping full product milestone validation for routine commit."
+            echo "Skipping full product validation for routine or visual-only commit."
           fi
 
   validate:
@@ -42,6 +43,9 @@ jobs:
     if: needs.milestone-gate.outputs.run_full == 'true'
     runs-on: ubuntu-24.04
     timeout-minutes: 20
+    concurrency:
+      group: product-bounded-validation-${{ github.ref }}
+      cancel-in-progress: true
     defaults:
       run:
         working-directory: app
