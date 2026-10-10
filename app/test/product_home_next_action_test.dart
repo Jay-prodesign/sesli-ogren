@@ -62,7 +62,11 @@ Future<AppRuntime> _runtimeWithEvidence({
 }
 
 Widget _testApp(Widget home) => MaterialApp(
-  home: MediaQuery(data: const MediaQueryData(disableAnimations: true), child: home),
+  builder: (context, child) => MediaQuery(
+    data: MediaQuery.of(context).copyWith(disableAnimations: true),
+    child: child!,
+  ),
+  home: home,
 );
 
 void usePhoneViewport(WidgetTester tester) {
@@ -115,7 +119,7 @@ void main() {
 
     final action = find.text('Kaynağa dön');
     expect(action, findsOneWidget);
-    await tester.tap(action);
+    await tapVisible(tester, action);
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
 

@@ -107,10 +107,11 @@ void usePhoneViewport(WidgetTester tester) {
 
 Widget testShell(AppRuntime runtime) {
   return MaterialApp(
-    home: MediaQuery(
-      data: const MediaQueryData(disableAnimations: true),
-      child: LearningSliceScreen(runtime: runtime),
+    builder: (context, child) => MediaQuery(
+      data: MediaQuery.of(context).copyWith(disableAnimations: true),
+      child: child!,
     ),
+    home: LearningSliceScreen(runtime: runtime),
   );
 }
 

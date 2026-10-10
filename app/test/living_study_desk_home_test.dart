@@ -11,6 +11,12 @@ void usePhoneViewport(WidgetTester tester) {
   addTearDown(tester.view.resetDevicePixelRatio);
 }
 
+Future<void> tapHomeCta(WidgetTester tester, Finder finder) async {
+  await tester.scrollUntilVisible(finder, 260, scrollable: find.byType(Scrollable).first);
+  await tester.pump();
+  await tester.tap(finder);
+}
+
 void main() {
   final now = DateTime.utc(2026, 10, 10);
   const materialId = MaterialId('home-routing-material');
@@ -57,19 +63,20 @@ void main() {
   }) async {
     await tester.pumpWidget(
       MaterialApp(
-        home: MediaQuery(
-          data: const MediaQueryData(disableAnimations: true),
-          child: Scaffold(
-            body: LivingStudyDeskHome(
-              material: material,
-              continuation: continuation,
-              sourceText: 'Fotosentez sırasında klorofil ışık enerjisinin yakalanmasına yardım eder.',
-              otherMaterials: const [],
-              onOpenWorkspace: onOpenWorkspace,
-              onOpenLearning: onOpenLearning,
-              onOpenListen: () {},
-              onOpenMaterial: (_) {},
-            ),
+        builder: (context, child) => MediaQuery(
+          data: MediaQuery.of(context).copyWith(disableAnimations: true),
+          child: child!,
+        ),
+        home: Scaffold(
+          body: LivingStudyDeskHome(
+            material: material,
+            continuation: continuation,
+            sourceText: 'Fotosentez sırasında klorofil ışık enerjisinin yakalanmasına yardım eder.',
+            otherMaterials: const [],
+            onOpenWorkspace: onOpenWorkspace,
+            onOpenLearning: onOpenLearning,
+            onOpenListen: () {},
+            onOpenMaterial: (_) {},
           ),
         ),
       ),
@@ -93,8 +100,7 @@ void main() {
     expect(find.text('Bugünlük tamam. Kaynağın burada.'), findsOneWidget);
     expect(find.text('Kaynağa dön'), findsOneWidget);
     final cta = find.byKey(const ValueKey('la0040-living-continue'));
-    await tester.ensureVisible(cta);
-    await tester.tap(cta);
+    await tapHomeCta(tester, cta);
     await tester.pump();
 
     expect(workspaceOpens, 1);
@@ -115,8 +121,7 @@ void main() {
     expect(find.text('Kaynağa dön, sonra yeniden dene'), findsOneWidget);
     expect(find.text('Kaynağı gözden geçir'), findsOneWidget);
     final cta = find.byKey(const ValueKey('la0040-living-continue'));
-    await tester.ensureVisible(cta);
-    await tester.tap(cta);
+    await tapHomeCta(tester, cta);
     await tester.pump();
 
     expect(workspaceOpens, 0);

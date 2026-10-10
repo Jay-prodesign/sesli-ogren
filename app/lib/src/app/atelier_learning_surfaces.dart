@@ -89,13 +89,16 @@ class AtelierWorkspace extends StatelessWidget {
                         children: [
                           Icon(Icons.auto_stories_outlined, color: AtelierStyle.teal, size: 17),
                           SizedBox(width: 8),
-                          Text(
-                            'KAYNAĞINDAN ÇIKARILAN METİN',
-                            style: TextStyle(
-                              color: AtelierStyle.teal,
-                              fontSize: 10,
-                              fontWeight: FontWeight.w900,
-                              letterSpacing: 1,
+                          Expanded(
+                            child: Text(
+                              'KAYNAĞINDAN ÇIKARILAN METİN',
+                              softWrap: true,
+                              style: TextStyle(
+                                color: AtelierStyle.teal,
+                                fontSize: 10,
+                                fontWeight: FontWeight.w900,
+                                letterSpacing: 1,
+                              ),
                             ),
                           ),
                         ],
