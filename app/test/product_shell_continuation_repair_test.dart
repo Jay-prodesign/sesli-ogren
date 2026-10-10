@@ -90,6 +90,8 @@ void main() {
     await _pumpUntilFound(tester, find.byType(MaterialWorkspaceScreen));
 
     expect(find.text('Biyoloji · Fotosentez'), findsWidgets);
+    expect(find.text('KAYNAK ÖNİZLEMESİ'), findsOneWidget);
+    expect(find.byKey(const ValueKey('la0040-atelier-workspace-recall')), findsOneWidget);
     expect(find.text('Kütüphane şu anda yüklenemedi.'), findsNothing);
     expect(tester.takeException(), isNull);
   });

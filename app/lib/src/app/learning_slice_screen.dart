@@ -175,7 +175,7 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
 
   Future<void> _pickPdf() async {
     if (_busy) return;
-    PickedFile? file;
+    PlatformFile? file;
     try {
       file = await FilePicker.pickFile(
         type: FileType.custom,
@@ -870,6 +870,9 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
               key: const ValueKey('pasted-material-title'),
               controller: _titleController,
               enabled: !_busy,
+              onChanged: (_) {
+                if (_inlineError != null) setState(() => _inlineError = null);
+              },
               maxLength: 120,
               textCapitalization: TextCapitalization.sentences,
               decoration: const InputDecoration(
@@ -976,6 +979,9 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
             key: const ValueKey('pasted-material-title'),
             controller: _titleController,
             enabled: !_busy,
+            onChanged: (_) {
+              if (_inlineError != null) setState(() => _inlineError = null);
+            },
             maxLength: 120,
             textCapitalization: TextCapitalization.sentences,
             decoration: const InputDecoration(
