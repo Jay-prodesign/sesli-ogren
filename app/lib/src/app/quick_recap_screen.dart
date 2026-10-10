@@ -433,23 +433,29 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> with WidgetsBinding
       if (!mounted) return;
       await Navigator.of(context).push<void>(
         MaterialPageRoute(
-          builder: (_) => _preserveProductExperience(
+          builder: (readerContext) => _preserveProductExperience(
             SourceReaderScreen(
               title: material.title,
               sourceText: extracted?.normalizedText ?? '',
               onListen: () {
-                Navigator.of(context).pop();
-                Navigator.of(context).push<void>(
+                Navigator.of(readerContext).pushReplacement<void, void>(
                   MaterialPageRoute(
-                    builder: (_) => _preserveProductExperience(
-                      ListenScreen(runtime: widget.runtime, materialId: widget.materialId),
+                    builder: (listenContext) => _preserveProductExperience(
+                      ListenScreen(
+                        runtime: widget.runtime,
+                        materialId: widget.materialId,
+                        onRecall: () {
+                          Navigator.of(listenContext).pop();
+                          _openRecall();
+                        },
+                      ),
                     ),
                   ),
                 );
               },
-              onRecap: () => Navigator.of(context).pop(),
+              onRecap: () => Navigator.of(readerContext).pop(),
               onRecall: () {
-                Navigator.of(context).pop();
+                Navigator.of(readerContext).pop();
                 _openRecall();
               },
             ),
@@ -498,6 +504,9 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> with WidgetsBinding
     final primaryStyle = living
         ? FilledButton.styleFrom(backgroundColor: AtelierStyle.ink, foregroundColor: Colors.white)
         : null;
+    final paper = living ? AtelierStyle.paper : Theme.of(context).colorScheme.surfaceContainerLow;
+    final line = living ? AtelierStyle.line : Theme.of(context).colorScheme.outlineVariant;
+    final ink = living ? AtelierStyle.ink : Theme.of(context).colorScheme.onSurface;
     return Scaffold(
       backgroundColor: living ? AtelierStyle.canvas : null,
       appBar: AppBar(
@@ -570,22 +579,95 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> with WidgetsBinding
             if (_dispatching) ...[const SizedBox(height: 8), const LinearProgressIndicator()],
           ],
           if (status?.summary != null) ...[
-            Text(status!.summary!, style: Theme.of(context).textTheme.bodyLarge),
-            const SizedBox(height: 16),
-            for (final point in status.keyPoints)
-              Padding(padding: const EdgeInsets.only(bottom: 8), child: Text('• $point')),
-            const Text('AI özeti · Yüklediğin kaynağa dayalı'),
-            const SizedBox(height: 20),
+            DecoratedBox(
+              decoration: BoxDecoration(
+                color: paper,
+                borderRadius: BorderRadius.circular(18),
+                border: Border.all(color: line),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(18, 16, 18, 18),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Icon(Icons.auto_awesome_outlined, color: accent, size: 19),
+                        const SizedBox(width: 9),
+                        Expanded(
+                          child: Text(
+                            'AI TARAFINDAN ÜRETİLDİ · ORİJİNAL KAYNAK DEĞİL',
+                            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                              color: accent,
+                              fontWeight: FontWeight.w900,
+                              letterSpacing: 0.65,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 13),
+                    Text(
+                      status!.summary!,
+                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: ink, height: 1.55),
+                    ),
+                    if (status.keyPoints.isNotEmpty) ...[
+                      const SizedBox(height: 16),
+                      Text(
+                        'Önemli noktalar',
+                        style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                          color: ink,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      for (final point in status.keyPoints)
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 7),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text('• ', style: TextStyle(color: accent, fontWeight: FontWeight.w900)),
+                              Expanded(child: Text(point)),
+                            ],
+                          ),
+                        ),
+                    ],
+                    const SizedBox(height: 10),
+                    Divider(color: line),
+                    const SizedBox(height: 8),
+                    Text(
+                      'AI özeti · Yüklediğin kaynağa dayalı. Öğrenme kanıtı değildir.',
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(color: muted),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton.icon(
+                style: outlineStyle,
+                onPressed: _openOriginalSource,
+                icon: const Icon(Icons.menu_book_outlined),
+                label: const Text('Orijinal kaynağı aç'),
+              ),
+            ),
+            const SizedBox(height: 10),
+            Text(
+              'Buradan devam et',
+              style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                color: muted,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            const SizedBox(height: 8),
             Wrap(
               spacing: 8,
               runSpacing: 8,
               children: [
-                OutlinedButton.icon(
-                  style: outlineStyle,
-                  onPressed: _openOriginalSource,
-                  icon: const Icon(Icons.menu_book_outlined),
-                  label: const Text('Kaynağı oku'),
-                ),
                 OutlinedButton.icon(
                   style: outlineStyle,
                   onPressed: () => _shareSummary(status),
