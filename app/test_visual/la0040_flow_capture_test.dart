@@ -538,6 +538,7 @@ void main() {
       materialId: toolMaterialId,
     );
     expect(currentSource, isNotNull);
+    final sourceForTools = currentSource!;
 
     Future<void> captureScreen(String name, Widget child) async {
       await tester.pumpWidget(
@@ -561,11 +562,11 @@ void main() {
     );
     await captureScreen(
       'la0040_focus_390x844',
-      FocusScreen(runtime: runtime, source: currentSource!, sourceText: source),
+      FocusScreen(runtime: runtime, source: sourceForTools, sourceText: source),
     );
     await captureScreen(
       'la0040_explain_back_390x844',
-      ExplainBackScreen(runtime: runtime, source: currentSource),
+      ExplainBackScreen(runtime: runtime, source: sourceForTools),
     );
   });
 
