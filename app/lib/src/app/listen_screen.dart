@@ -339,8 +339,8 @@ class _ListenScreenState extends State<ListenScreen> {
             );
             final sourceTitle = Text(
               source.name,
-              maxLines: compactHero ? 4 : 2,
-              overflow: TextOverflow.ellipsis,
+              maxLines: compactHero ? null : 2,
+              overflow: compactHero ? TextOverflow.visible : TextOverflow.ellipsis,
               style: theme.textTheme.titleLarge?.copyWith(color: Colors.white),
             );
 
