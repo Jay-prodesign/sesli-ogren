@@ -338,14 +338,19 @@ class _Ready extends StatelessWidget {
                     foregroundColor: Colors.white,
                     side: BorderSide(color: Colors.white.withValues(alpha: 0.28)),
                   ),
-                  onPressed: () => Navigator.of(context).push<void>(
-                    MaterialPageRoute(
-                      builder: (_) => _preserveExplainExperience(
-                        context,
-                        LearningSliceScreen(runtime: runtime, materialId: source.identity.materialId),
+                  onPressed: () async {
+                    final sourceUpdated = await Navigator.of(context).push<bool>(
+                      MaterialPageRoute<bool>(
+                        builder: (_) => _preserveExplainExperience(
+                          context,
+                          LearningSliceScreen(runtime: runtime, materialId: source.identity.materialId),
+                        ),
                       ),
-                    ),
-                  ),
+                    );
+                    if (sourceUpdated == true && context.mounted) {
+                      Navigator.of(context).pop();
+                    }
+                  },
                   icon: const Icon(Icons.psychology_alt_outlined),
                   label: const Text('Hatırla ile dene'),
                 ),

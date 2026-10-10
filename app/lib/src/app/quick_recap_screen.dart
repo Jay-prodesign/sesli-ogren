@@ -469,12 +469,24 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> with WidgetsBinding
     }
   }
 
-  Future<void> _openRecall() => Navigator.of(context).push<void>(
-    MaterialPageRoute(
-      builder: (_) =>
-          _preserveProductExperience(LearningSliceScreen(runtime: widget.runtime, materialId: widget.materialId)),
-    ),
-  );
+  Future<void> _openRecall() async {
+    final sourceUpdated = await Navigator.of(context).push<bool>(
+      MaterialPageRoute<bool>(
+        builder: (_) =>
+            _preserveProductExperience(LearningSliceScreen(runtime: widget.runtime, materialId: widget.materialId)),
+      ),
+    );
+    if (!mounted || sourceUpdated != true) return;
+    _pollTimer?.cancel();
+    setState(() {
+      _jobId = null;
+      _submittedSourceVersion = null;
+      _status = null;
+      _error = null;
+      _restoring = true;
+    });
+    await _restore();
+  }
 
   Future<void> _openExplain() async {
     final source = await widget.runtime.store.currentSourceVersion(

@@ -43,6 +43,7 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
   String? _supportText;
   String? _inlineError;
   bool _busy = false;
+  bool _editingExistingSource = false;
   bool _answerWasRevealed = false;
   bool _submittedUnknown = false;
 
@@ -101,12 +102,14 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
         );
         if (!mounted) return;
         setState(() {
+          _editingExistingSource = false;
           _phase = _SlicePhase.source;
           _inlineError = null;
         });
         return;
       }
 
+      _editingExistingSource = true;
       final continuation = await widget.runtime.recall.reopen(
         learner: widget.runtime.learner,
         materialId: widget.materialId,
@@ -159,6 +162,16 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
     }
   }
 
+  Future<void> _completeSourceIngest() async {
+    if (!mounted) return;
+    final navigator = Navigator.of(context);
+    if (navigator.canPop()) {
+      navigator.pop(true);
+      return;
+    }
+    await _openRecall();
+  }
+
   Future<void> _pickPdf() async {
     if (_busy) return;
     final file = await FilePicker.pickFile(
@@ -198,7 +211,7 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
         ),
       );
       if (!mounted) return;
-      Navigator.of(context).pop(true);
+      await _completeSourceIngest();
     } catch (error) {
       stopwatch.stop();
       await _recordEvent(
@@ -269,7 +282,7 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
         ),
       );
       if (!mounted) return;
-      Navigator.of(context).pop(true);
+      await _completeSourceIngest();
     } catch (error) {
       stopwatch.stop();
       await _recordEvent(
@@ -585,6 +598,7 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
     final candidate = LearningVisualTreatmentScope.maybeOf(context);
     final living = LivingDeskReviewScope.active(context);
     final reviewFocus = (candidate != null || living) && (_phase == _SlicePhase.recall || _phase == _SlicePhase.result);
+    final canExit = Navigator.of(context).canPop();
     return Scaffold(
       backgroundColor: living ? AtelierStyle.canvas : null,
       body: SafeArea(
@@ -632,6 +646,14 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
+                        if (canExit) ...[
+                          IconButton(
+                            tooltip: 'Geri dön',
+                            onPressed: () => Navigator.of(context).maybePop(),
+                            icon: const Icon(Icons.arrow_back_rounded),
+                          ),
+                          const SizedBox(width: 4),
+                        ],
                         DecoratedBox(
                           decoration: BoxDecoration(
                             color: compactResultHeader ? AppPalette.successSoft : AppPalette.primarySoft,
@@ -684,7 +706,8 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
 
   String _subtitle() => switch (_phase) {
     _SlicePhase.loading => 'Öğrenme durumunu hazırlıyorum.',
-    _SlicePhase.source => 'Kendi materyalinle başlayalım.',
+    _SlicePhase.source =>
+      _editingExistingSource ? 'Kaynağının yeni sürümünü güvenle ekle.' : 'Kendi materyalinle başlayalım.',
     _SlicePhase.recall => 'Kaynaktan hatırlamayı dene.',
     _SlicePhase.result => 'Yanıtını kaynakla karşılaştırdım.',
     _SlicePhase.continuation => 'Bir sonraki adımın hazır.',
@@ -718,14 +741,21 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const Text(
-              'İLK KAYNAĞIN',
-              style: TextStyle(color: AtelierStyle.teal, fontSize: 11, fontWeight: FontWeight.w900, letterSpacing: 1),
+            Text(
+              _editingExistingSource ? 'KAYNAĞI GÜNCELLE' : 'İLK KAYNAĞIN',
+              style: const TextStyle(
+                color: AtelierStyle.teal,
+                fontSize: 11,
+                fontWeight: FontWeight.w900,
+                letterSpacing: 1,
+              ),
             ),
             const SizedBox(height: 9),
-            const Text(
-              'Bir sayfa getir.\nOnu birlikte çalışalım.',
-              style: TextStyle(
+            Text(
+              _editingExistingSource
+                  ? 'Yeni sürümü ekle.\nGeçmişin kaynakla karışmasın.'
+                  : 'Bir sayfa getir.\nOnu birlikte çalışalım.',
+              style: const TextStyle(
                 color: AtelierStyle.ink,
                 fontSize: 28,
                 height: 1.08,
@@ -734,9 +764,11 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
               ),
             ),
             const SizedBox(height: 10),
-            const Text(
-              'PDF seç veya notunu yapıştır. Kaynak önce çalışma alanında açılır; sonra kaynağı kapatıp hatırlarsın.',
-              style: TextStyle(color: AtelierStyle.muted, fontSize: 14, height: 1.45),
+            Text(
+              _editingExistingSource
+                  ? 'Yeni PDF veya metin bu materyalin yeni kaynak sürümü olur. Eski öğrenme kanıtı yeni metne otomatik taşınmaz.'
+                  : 'PDF seç veya notunu yapıştır. Kaynak önce çalışma alanında açılır; sonra kaynağı kapatıp hatırlarsın.',
+              style: const TextStyle(color: AtelierStyle.muted, fontSize: 14, height: 1.45),
             ),
             const SizedBox(height: 14),
             const Row(
@@ -808,7 +840,7 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
                 minimumSize: const Size.fromHeight(52),
               ),
               icon: const Icon(Icons.auto_stories_outlined),
-              label: const Text('Kaynağı ekle ve aç'),
+              label: Text(_editingExistingSource ? 'Yeni sürümü ekle ve aç' : 'Kaynağı ekle ve aç'),
             ),
           ],
         ),
@@ -820,9 +852,16 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text('Çalışma materyalini ekle', style: Theme.of(context).textTheme.titleLarge),
+          Text(
+            _editingExistingSource ? 'Kaynağı güncelle' : 'Çalışma materyalini ekle',
+            style: Theme.of(context).textTheme.titleLarge,
+          ),
           const SizedBox(height: 8),
-          const Text('PDF seçebilir veya metni doğrudan yapıştırabilirsin.'),
+          Text(
+            _editingExistingSource
+                ? 'Yeni PDF veya metin ayrı bir kaynak sürümü olur; eski kanıt yeni sürüme taşınmaz.'
+                : 'PDF seçebilir veya metni doğrudan yapıştırabilirsin.',
+          ),
           const SizedBox(height: 18),
           OutlinedButton.icon(
             onPressed: _busy ? null : _pickPdf,
@@ -871,7 +910,7 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
           FilledButton.icon(
             onPressed: _busy ? null : _saveSource,
             icon: const Icon(Icons.arrow_forward_rounded),
-            label: const Text('Kaynağı ekle ve aç'),
+            label: Text(_editingExistingSource ? 'Yeni sürümü ekle ve aç' : 'Kaynağı ekle ve aç'),
           ),
         ],
       ),
@@ -1355,6 +1394,7 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
                 ? null
                 : () {
                     setState(() {
+                      _editingExistingSource = true;
                       _sourceController.clear();
                       _inlineError = null;
                       _phase = _SlicePhase.source;

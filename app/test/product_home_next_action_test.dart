@@ -117,9 +117,7 @@ void main() {
 
     await tapVisible(tester, find.text('Kütüphane'));
     await tester.pump(const Duration(milliseconds: 150));
-    final continueAction = find.byKey(
-      ValueKey('library-continue-${AppRuntime.primaryMaterialId.value}'),
-    );
+    final continueAction = find.byKey(ValueKey('library-continue-${AppRuntime.primaryMaterialId.value}'));
     expect(continueAction, findsOneWidget);
     await tapVisible(tester, continueAction);
     await tester.pump(const Duration(milliseconds: 450));

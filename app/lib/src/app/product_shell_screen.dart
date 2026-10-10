@@ -199,8 +199,7 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
               ),
               onRecap: () =>
                   _replaceReaderWith(readerContext, QuickRecapScreen(runtime: widget.runtime, materialId: selected)),
-              onRecall: () =>
-                  _replaceReaderWith(readerContext, LearningSliceScreen(runtime: widget.runtime, materialId: selected)),
+              onRecall: () => _openRecallFromCurrentRoute(readerContext, selected),
             );
             if (treatment != null) return LearningVisualTreatmentScope(treatment: treatment, child: screen);
             return livingReview ? LivingDeskReviewScope(child: screen) : screen;
@@ -226,13 +225,13 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
     Navigator.of(readerContext).pushReplacement<void, void>(MaterialPageRoute(builder: (_) => wrapped));
   }
 
-  void _openRecallFromCurrentRoute(BuildContext routeContext, MaterialId materialId) {
+  Future<void> _openRecallFromCurrentRoute(BuildContext routeContext, MaterialId materialId) async {
     if (!mounted) return;
     final treatment = LearningVisualTreatmentScope.maybeOf(context);
     final livingReview = LivingDeskReviewScope.active(context);
     final screen = LearningSliceScreen(runtime: widget.runtime, materialId: materialId);
-    Navigator.of(routeContext).pushReplacement<void, void>(
-      MaterialPageRoute(
+    await Navigator.of(routeContext).pushReplacement<bool, void>(
+      MaterialPageRoute<bool>(
         builder: (_) => treatment != null
             ? LearningVisualTreatmentScope(treatment: treatment, child: screen)
             : livingReview
@@ -240,6 +239,7 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
             : screen,
       ),
     );
+    if (mounted) setState(_refresh);
   }
 
   Future<void> _openListen() async {
