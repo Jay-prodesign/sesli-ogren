@@ -586,7 +586,7 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
 class _HomeSurface extends StatelessWidget {
   const _HomeSurface({
     required this.data,
-    required this.onAddMaterial,
+    required this.onOpenLearning,
     required this.onOpenListen,
     required this.onOpenWorkspace,
     required this.onOpenReader,
@@ -594,7 +594,7 @@ class _HomeSurface extends StatelessWidget {
   });
 
   final _HomeSnapshot data;
-  final VoidCallback onAddMaterial;
+  final VoidCallback onOpenLearning;
   final VoidCallback onOpenListen;
   final VoidCallback onOpenWorkspace;
   final VoidCallback onOpenReader;
@@ -1062,7 +1062,7 @@ class _HeroLabel extends StatelessWidget {
 class _LibrarySurface extends StatefulWidget {
   const _LibrarySurface({
     required this.data,
-    required this.onOpenLearning,
+    required this.onAddMaterial,
     required this.onOpenWorkspace,
     required this.onContinueMaterial,
     required this.onDeleteMaterial,
@@ -1070,7 +1070,7 @@ class _LibrarySurface extends StatefulWidget {
   });
 
   final _HomeSnapshot data;
-  final VoidCallback onOpenLearning;
+  final VoidCallback onAddMaterial;
   final ValueChanged<MaterialId> onOpenWorkspace;
   final ValueChanged<MaterialId> onContinueMaterial;
   final ValueChanged<MaterialRecord> onDeleteMaterial;
@@ -1148,10 +1148,7 @@ class _LibrarySurfaceState extends State<_LibrarySurface> {
               return Column(
                 key: const ValueKey('library-header-stacked'),
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  title,
-                  if (count != null) ...[const SizedBox(height: 6), count],
-                ],
+                children: count == null ? [title] : [title, const SizedBox(height: 6), count],
               );
             }
             return Row(

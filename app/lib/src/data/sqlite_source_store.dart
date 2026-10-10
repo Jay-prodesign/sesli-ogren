@@ -1153,9 +1153,6 @@ LIMIT 1
         if (!existingMaterial.isActive) {
           throw const SourceStoreConflict('A deleted material cannot be silently resurrected.');
         }
-        if (existingMaterial.mediaType != material.mediaType) {
-          throw const SourceStoreConflict('A material cannot silently change its source media type.');
-        }
       } else {
         await transaction.insert(
           'materials',
@@ -1282,6 +1279,8 @@ LIMIT 1
       await transaction.update(
         'materials',
         {
+          'title': material.title,
+          'media_type': material.mediaType.name,
           'processing_state': MaterialProcessingState.ready.name,
           'current_source_version_id': sourceVersion.identity.sourceVersionId.value,
           'updated_at_utc': supersededAt,

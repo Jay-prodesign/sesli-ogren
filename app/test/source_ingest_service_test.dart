@@ -335,6 +335,61 @@ void main() {
     expect(await store.material(learner: learnerA, materialId: material), isNull);
   });
 
+  test('source replacement can cross text and PDF while preserving material identity', () async {
+    final extractor = _RecordingPdfExtractor();
+    var now = DateTime.utc(2026, 10, 4, 10);
+    final crossMedia = SourceIngestService(
+      store: store,
+      pdfTextExtractor: extractor,
+      now: () => now,
+    );
+
+    final first = await crossMedia.ingestPastedText(
+      learner: learnerA,
+      materialId: material,
+      text: 'İlk metin kaynağı öğrenme için kullanılıyor.',
+      sourceName: 'İlk not',
+    );
+    final createdAt = first.material.createdAt;
+    expect(first.material.mediaType, SourceMediaType.pastedText);
+    expect(first.material.title, 'İlk not');
+
+    now = DateTime.utc(2026, 10, 4, 11);
+    final pdf = await crossMedia.ingestPdf(
+      learner: learnerA,
+      materialId: material,
+      bytes: Uint8List.fromList([0x25, 0x50, 0x44, 0x46, 0x2D, 0x31, 0x2E, 0x34]),
+      originalName: 'guncel-kaynak.pdf',
+    );
+
+    expect(extractor.calls, 1);
+    expect(pdf.material.id, material);
+    expect(pdf.material.createdAt, createdAt);
+    expect(pdf.material.mediaType, SourceMediaType.pdf);
+    expect(pdf.material.title, 'guncel-kaynak.pdf');
+    expect(
+      (await store.currentSourceVersion(learner: learnerA, materialId: material))?.identity.sourceVersionId,
+      pdf.sourceVersion.identity.sourceVersionId,
+    );
+
+    now = DateTime.utc(2026, 10, 4, 12);
+    final textAgain = await crossMedia.ingestPastedText(
+      learner: learnerA,
+      materialId: material,
+      text: 'PDF yerine artık bu yeni metin sürümü authoritative kaynaktır.',
+      sourceName: 'Yeni metin sürümü',
+    );
+
+    expect(textAgain.material.id, material);
+    expect(textAgain.material.createdAt, createdAt);
+    expect(textAgain.material.mediaType, SourceMediaType.pastedText);
+    expect(textAgain.material.title, 'Yeni metin sürümü');
+    expect(
+      (await store.currentSourceVersion(learner: learnerA, materialId: material))?.identity.sourceVersionId,
+      textAgain.sourceVersion.identity.sourceVersionId,
+    );
+  });
+
   test('malformed PDF fails before parser execution', () async {
     final extractor = _RecordingPdfExtractor();
     final bounded = SourceIngestService(store: store, pdfTextExtractor: extractor);
