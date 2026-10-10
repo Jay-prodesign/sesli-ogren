@@ -757,6 +757,95 @@ void main() {
     expect(find.text('Korunacak materyal'), findsWidgets);
   });
 
+  testWidgets('Library adds a second material without replacing the current source', (tester) async {
+    final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
+    addTearDown(store.close);
+    final ingest = SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor());
+    final runtime = AppRuntime(
+      learner: AppRuntime.localM5LearnerFixture,
+      store: store,
+      ingest: ingest,
+      recall: RecallLearningService(sourceStore: store, learningStore: store.learningTruthStore()),
+      telemetry: store.operationalTelemetry(),
+    );
+    const firstId = MaterialId('library-first-material');
+    await ingest.ingestPastedText(
+      learner: runtime.learner,
+      materialId: firstId,
+      text: 'İlk kaynak korunurken ikinci kaynak ayrı bir materyal olarak eklenmelidir.',
+      sourceName: 'İlk kaynak',
+    );
+
+    await tester.pumpWidget(MaterialApp(home: LivingDeskReviewScope(child: ProductShellScreen(runtime: runtime))));
+    await pumpUntilFound(tester, find.text('Kütüphane'));
+    await tapVisible(tester, find.text('Kütüphane').last);
+    await pumpUntilFound(tester, find.byKey(const ValueKey('library-add-material')));
+    await tapVisible(tester, find.byKey(const ValueKey('library-add-material')));
+    await pumpUntilFound(tester, find.text('İLK KAYNAĞIN'));
+    expect(find.text('KAYNAĞI GÜNCELLE'), findsNothing);
+
+    await tapVisible(tester, find.text('Metin yapıştır'));
+    await pumpUntilFound(tester, find.byKey(const ValueKey('pasted-material-text')));
+    await tester.enterText(
+      find.byKey(const ValueKey('pasted-material-text')),
+      'İkinci kaynak birinci kaynağın sürümü olmadan kendi materyali olarak saklanır.',
+    );
+    await tapVisible(tester, find.byKey(const ValueKey('source-add-title')));
+    await tester.enterText(find.byKey(const ValueKey('pasted-material-title')), 'İkinci kaynak');
+    await tapVisible(tester, find.byKey(const ValueKey('source-text-submit')));
+    await pumpUntilFound(tester, find.byType(MaterialWorkspaceScreen));
+
+    final materials = await store.activeMaterials(learner: runtime.learner);
+    expect(materials, hasLength(2));
+    expect(materials.map((item) => item.id), contains(firstId));
+    expect(materials.where((item) => item.title == 'İkinci kaynak'), hasLength(1));
+
+    await tester.pageBack();
+    await tester.pump(const Duration(milliseconds: 350));
+    await pumpUntilFound(tester, find.text('İlk kaynak'));
+    expect(find.text('İkinci kaynak'), findsOneWidget);
+    expect(find.text('İlk kaynak'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('Library header and add action stay usable on narrow large-text layouts', (tester) async {
+    tester.view.physicalSize = const Size(320, 700);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
+    addTearDown(store.close);
+    final ingest = SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor());
+    final runtime = AppRuntime(
+      learner: AppRuntime.localM5LearnerFixture,
+      store: store,
+      ingest: ingest,
+      recall: RecallLearningService(sourceStore: store, learningStore: store.learningTruthStore()),
+      telemetry: store.operationalTelemetry(),
+    );
+    await ingest.ingestPastedText(
+      learner: runtime.learner,
+      materialId: const MaterialId('library-large-text-material'),
+      text: 'Dar ekranda kütüphane başlığı ve yeni kaynak eylemi okunabilir kalmalıdır.',
+      sourceName: 'Dar ekran kaynağı',
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: MediaQuery(
+          data: const MediaQueryData(textScaler: TextScaler.linear(1.6)),
+          child: ProductShellScreen(runtime: runtime),
+        ),
+      ),
+    );
+    await pumpUntilFound(tester, find.text('Kütüphane'));
+    await tapVisible(tester, find.text('Kütüphane').last);
+    await pumpUntilFound(tester, find.byKey(const ValueKey('library-header-stacked')));
+    expect(find.byKey(const ValueKey('library-add-material')), findsOneWidget);
+    expect(find.text('Yeni kaynak ekle'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('Listen resumes the exact current source from a durable chunk checkpoint', (tester) async {
     final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
     addTearDown(store.close);
