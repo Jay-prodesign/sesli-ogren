@@ -275,10 +275,7 @@ class _ListenScreenState extends State<ListenScreen> {
                     children: [
                       const Icon(Icons.sync_problem_rounded, size: 38),
                       const SizedBox(height: 12),
-                      const Text(
-                        'Dinlenecek güncel kaynak bulunamadı.',
-                        textAlign: TextAlign.center,
-                      ),
+                      const Text('Dinlenecek güncel kaynak bulunamadı.', textAlign: TextAlign.center),
                       const SizedBox(height: 8),
                       Text(
                         'Kaynağın silinmedi. Materyal verisini yeniden okumayı deneyebilirsin.',
@@ -526,7 +523,6 @@ class _ListenScreenState extends State<ListenScreen> {
                     ),
                   ),
                 ),
-
               ],
             );
           },
