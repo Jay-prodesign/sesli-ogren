@@ -143,7 +143,9 @@ void main() {
     expect(find.byType(MaterialWorkspaceScreen), findsOneWidget);
     expect(LivingDeskReviewScope.active(tester.element(find.byType(MaterialWorkspaceScreen))), isTrue);
 
-    await tapVisible(tester, find.byTooltip('Quick Recap'));
+    final quickRecapButton = find.widgetWithIcon(IconButton, Icons.auto_awesome);
+    expect(quickRecapButton, findsOneWidget);
+    await tester.tap(quickRecapButton);
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
     expect(find.byType(QuickRecapScreen), findsOneWidget);
