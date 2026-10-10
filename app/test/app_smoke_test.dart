@@ -776,7 +776,11 @@ void main() {
       sourceName: 'İlk kaynak',
     );
 
-    await tester.pumpWidget(MaterialApp(home: LivingDeskReviewScope(child: ProductShellScreen(runtime: runtime))));
+    await tester.pumpWidget(
+      MaterialApp(
+        home: LivingDeskReviewScope(child: ProductShellScreen(runtime: runtime)),
+      ),
+    );
     await pumpUntilFound(tester, find.text('Kütüphane'));
     await tapVisible(tester, find.text('Kütüphane').last);
     await pumpUntilFound(tester, find.byKey(const ValueKey('library-add-material')));
