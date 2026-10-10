@@ -168,97 +168,225 @@ class AtelierWorkspace extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final compactSurface =
-        MediaQuery.sizeOf(context).width < 340 || MediaQuery.textScalerOf(context).scale(1) > 1.25;
+    final compactSurface = MediaQuery.sizeOf(context).width < 340 || MediaQuery.textScalerOf(context).scale(1) > 1.25;
     return ColoredBox(
       key: const ValueKey('la0040-atelier-workspace'),
-    color: AtelierStyle.canvas,
-    child: Column(
-      children: [
-        Expanded(
-          child: ListView(
-            padding: const EdgeInsets.fromLTRB(21, 13, 21, 25),
-            children: [
-              Text(
-                material.mediaType == SourceMediaType.pdf ? 'PDF KAYNAĞI' : 'KENDİ METNİN',
-                style: const TextStyle(
-                  color: AtelierStyle.teal,
-                  fontSize: 11,
-                  fontWeight: FontWeight.w900,
-                  letterSpacing: 1,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                material.title,
-                style: const TextStyle(
-                  color: AtelierStyle.ink,
-                  fontSize: 27,
-                  fontWeight: FontWeight.w900,
-                  height: 1.14,
-                ),
-              ),
-              if (sourceVersion != null) ...[
-                const SizedBox(height: 14),
-                AtelierSourceTrustStrip(sourceVersion: sourceVersion!),
-              ],
-              const SizedBox(height: 17),
-              if (sourceText.trim().isNotEmpty) ...[
-                const AtelierLearningRail(phase: AtelierLearningPhase.source),
-                const SizedBox(height: 12),
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: [
-                    OutlinedButton.icon(
-                      key: const ValueKey('la0040-atelier-workspace-reader'),
-                      onPressed: onReadSource,
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: AtelierStyle.teal,
-                        backgroundColor: AtelierStyle.paper,
-                        side: const BorderSide(color: AtelierStyle.line),
-                      ),
-                      icon: const Icon(Icons.menu_book_outlined),
-                      label: const Text('Tam metni oku'),
-                    ),
-                    TextButton.icon(
-                      key: const ValueKey('la0040-atelier-workspace-recap'),
-                      onPressed: onQuickRecap,
-                      style: TextButton.styleFrom(foregroundColor: AtelierStyle.teal),
-                      icon: const Icon(Icons.auto_awesome_outlined),
-                      label: const Text('Hızlı özet'),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 4),
-              ],
-              if (compactSurface) ...[
-                const SizedBox(height: 10),
-                Container(
-                  key: const ValueKey('la0040-atelier-compact-action-context'),
-                  width: double.infinity,
-                  padding: const EdgeInsets.fromLTRB(14, 13, 14, 14),
-                  decoration: BoxDecoration(
-                    color: AtelierStyle.mint,
-                    borderRadius: BorderRadius.circular(14),
-                    border: Border.all(color: AtelierStyle.line),
+      color: AtelierStyle.canvas,
+      child: Column(
+        children: [
+          Expanded(
+            child: ListView(
+              padding: const EdgeInsets.fromLTRB(21, 13, 21, 25),
+              children: [
+                Text(
+                  material.mediaType == SourceMediaType.pdf ? 'PDF KAYNAĞI' : 'KENDİ METNİN',
+                  style: const TextStyle(
+                    color: AtelierStyle.teal,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 1,
                   ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  material.title,
+                  style: const TextStyle(
+                    color: AtelierStyle.ink,
+                    fontSize: 27,
+                    fontWeight: FontWeight.w900,
+                    height: 1.14,
+                  ),
+                ),
+                if (sourceVersion != null) ...[
+                  const SizedBox(height: 14),
+                  AtelierSourceTrustStrip(sourceVersion: sourceVersion!),
+                ],
+                const SizedBox(height: 17),
+                if (sourceText.trim().isNotEmpty) ...[
+                  const AtelierLearningRail(phase: AtelierLearningPhase.source),
+                  const SizedBox(height: 12),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      OutlinedButton.icon(
+                        key: const ValueKey('la0040-atelier-workspace-reader'),
+                        onPressed: onReadSource,
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: AtelierStyle.teal,
+                          backgroundColor: AtelierStyle.paper,
+                          side: const BorderSide(color: AtelierStyle.line),
+                        ),
+                        icon: const Icon(Icons.menu_book_outlined),
+                        label: const Text('Tam metni oku'),
+                      ),
+                      TextButton.icon(
+                        key: const ValueKey('la0040-atelier-workspace-recap'),
+                        onPressed: onQuickRecap,
+                        style: TextButton.styleFrom(foregroundColor: AtelierStyle.teal),
+                        icon: const Icon(Icons.auto_awesome_outlined),
+                        label: const Text('Hızlı özet'),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                ],
+                if (compactSurface) ...[
+                  const SizedBox(height: 10),
+                  Container(
+                    key: const ValueKey('la0040-atelier-compact-action-context'),
+                    width: double.infinity,
+                    padding: const EdgeInsets.fromLTRB(14, 13, 14, 14),
+                    decoration: BoxDecoration(
+                      color: AtelierStyle.mint,
+                      borderRadius: BorderRadius.circular(14),
+                      border: Border.all(color: AtelierStyle.line),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Icon(_activeStepIcon, color: AtelierStyle.teal, size: 18),
+                            const SizedBox(width: 7),
+                            const Expanded(
+                              child: Text(
+                                'SIRADAKİ GERÇEK ADIM',
+                                style: TextStyle(
+                                  color: AtelierStyle.teal,
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w900,
+                                  letterSpacing: 0.8,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          _activeStepTitle,
+                          style: const TextStyle(color: AtelierStyle.ink, fontWeight: FontWeight.w900, fontSize: 16),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          _activeStepReason,
+                          style: const TextStyle(color: AtelierStyle.muted, fontSize: 12.5, height: 1.4),
+                        ),
+                        const SizedBox(height: 9),
+                        Wrap(
+                          spacing: 6,
+                          runSpacing: 4,
+                          children: [
+                            OutlinedButton.icon(
+                              key: const ValueKey('la0040-atelier-workspace-listen'),
+                              onPressed: onListen,
+                              icon: const Icon(Icons.headphones_rounded),
+                              label: const Text('Dinle'),
+                            ),
+                            TextButton.icon(
+                              onPressed: onExplain,
+                              icon: const Icon(Icons.record_voice_over_outlined),
+                              label: const Text('Açıkla'),
+                            ),
+                            TextButton.icon(
+                              onPressed: onFocus,
+                              icon: const Icon(Icons.center_focus_strong),
+                              label: const Text('Odaklan'),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 14),
+                ],
+                const Divider(color: AtelierStyle.line),
+                const SizedBox(height: 14),
+                if (sourceText.trim().isEmpty)
+                  const Text(
+                    'Bu kaynağın metni henüz okunamıyor.',
+                    style: TextStyle(color: AtelierStyle.muted, fontSize: 16),
+                  )
+                else
+                  Container(
+                    padding: const EdgeInsets.fromLTRB(22, 22, 22, 30),
+                    decoration: const BoxDecoration(
+                      color: AtelierStyle.paper,
+                      border: Border(left: BorderSide(color: AtelierStyle.teal, width: 3)),
+                      boxShadow: [BoxShadow(color: Color(0x0B15313A), blurRadius: 18, offset: Offset(0, 8))],
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Row(
+                          children: [
+                            Icon(Icons.auto_stories_outlined, color: AtelierStyle.teal, size: 17),
+                            SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                'KAYNAK ÖNİZLEMESİ',
+                                softWrap: true,
+                                style: TextStyle(
+                                  color: AtelierStyle.teal,
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w900,
+                                  letterSpacing: 1,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 17),
+                        SelectableText(
+                          _sourcePreview,
+                          style: const TextStyle(color: AtelierStyle.ink, fontSize: 18, height: 1.65),
+                        ),
+                        if (_sourcePreviewIsTrimmed) ...[
+                          const SizedBox(height: 14),
+                          const Text(
+                            'Bu yalnızca önizleme. Kaynağın tamamı “Tam metni oku” ile Reader’da açılır.',
+                            style: TextStyle(color: AtelierStyle.muted, fontSize: 12, height: 1.35),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+              ],
+            ),
+          ),
+          Container(
+            padding: const EdgeInsets.fromLTRB(17, 12, 17, 14),
+            decoration: const BoxDecoration(
+              color: AtelierStyle.ink,
+              borderRadius: BorderRadius.vertical(top: Radius.circular(21)),
+            ),
+            child: compactSurface
+                ? FilledButton.icon(
+                    key: const ValueKey('la0040-atelier-workspace-recall'),
+                    onPressed: onRecall,
+                    style: FilledButton.styleFrom(
+                      backgroundColor: AtelierStyle.mark,
+                      foregroundColor: AtelierStyle.ink,
+                      minimumSize: const Size.fromHeight(50),
+                    ),
+                    icon: Icon(_activeStepIcon),
+                    label: Text(_activeStepLabel),
+                  )
+                : Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       Row(
                         children: [
-                          Icon(_activeStepIcon, color: AtelierStyle.teal, size: 18),
+                          Icon(_activeStepIcon, color: AtelierStyle.mark, size: 18),
                           const SizedBox(width: 7),
-                          const Expanded(
-                            child: Text(
-                              'SIRADAKİ GERÇEK ADIM',
-                              style: TextStyle(
-                                color: AtelierStyle.teal,
-                                fontSize: 10,
-                                fontWeight: FontWeight.w900,
-                                letterSpacing: 0.8,
-                              ),
+                          const Text(
+                            'SIRADAKİ GERÇEK ADIM',
+                            style: TextStyle(
+                              color: AtelierStyle.mark,
+                              fontSize: 10,
+                              fontWeight: FontWeight.w900,
+                              letterSpacing: 0.8,
                             ),
                           ),
                         ],
@@ -266,210 +394,86 @@ class AtelierWorkspace extends StatelessWidget {
                       const SizedBox(height: 6),
                       Text(
                         _activeStepTitle,
-                        style: const TextStyle(
-                          color: AtelierStyle.ink,
-                          fontWeight: FontWeight.w900,
-                          fontSize: 16,
-                        ),
+                        style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w900, fontSize: 17),
                       ),
-                      const SizedBox(height: 4),
+                      const SizedBox(height: 3),
                       Text(
                         _activeStepReason,
-                        style: const TextStyle(color: AtelierStyle.muted, fontSize: 12.5, height: 1.4),
+                        style: const TextStyle(color: Color(0xFFC7D5D2), fontSize: 12, height: 1.3),
                       ),
-                      const SizedBox(height: 9),
-                      Wrap(
-                        spacing: 6,
-                        runSpacing: 4,
-                        children: [
-                          OutlinedButton.icon(
+                      const SizedBox(height: 10),
+                      FilledButton.icon(
+                        key: const ValueKey('la0040-atelier-workspace-recall'),
+                        onPressed: onRecall,
+                        style: FilledButton.styleFrom(
+                          backgroundColor: AtelierStyle.mark,
+                          foregroundColor: AtelierStyle.ink,
+                          minimumSize: const Size.fromHeight(48),
+                        ),
+                        icon: Icon(_activeStepIcon),
+                        label: Text(_activeStepLabel),
+                      ),
+                      const SizedBox(height: 7),
+                      LayoutBuilder(
+                        builder: (context, constraints) {
+                          final compactActions =
+                              constraints.maxWidth < 340 || MediaQuery.textScalerOf(context).scale(1) > 1.2;
+                          final listen = OutlinedButton.icon(
                             key: const ValueKey('la0040-atelier-workspace-listen'),
                             onPressed: onListen,
                             icon: const Icon(Icons.headphones_rounded),
                             label: const Text('Dinle'),
-                          ),
-                          TextButton.icon(
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: Colors.white,
+                              side: const BorderSide(color: Color(0xFF8EA9A3)),
+                            ),
+                          );
+                          final explain = TextButton.icon(
                             onPressed: onExplain,
+                            style: TextButton.styleFrom(foregroundColor: Colors.white),
                             icon: const Icon(Icons.record_voice_over_outlined),
                             label: const Text('Açıkla'),
-                          ),
-                          TextButton.icon(
+                          );
+                          final focus = TextButton.icon(
                             onPressed: onFocus,
+                            style: TextButton.styleFrom(foregroundColor: Colors.white),
                             icon: const Icon(Icons.center_focus_strong),
                             label: const Text('Odaklan'),
-                          ),
-                        ],
+                          );
+                          if (compactActions) {
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                listen,
+                                const SizedBox(height: 4),
+                                Wrap(
+                                  alignment: WrapAlignment.center,
+                                  spacing: 4,
+                                  runSpacing: 2,
+                                  children: [explain, focus],
+                                ),
+                              ],
+                            );
+                          }
+                          return Row(
+                            children: [
+                              Expanded(child: listen),
+                              const SizedBox(width: 7),
+                              explain,
+                              focus,
+                            ],
+                          );
+                        },
+                      ),
+                      const SizedBox(height: 4),
+                      const Text(
+                        'Okuma ve dinleme hazırlık; öğrenme durumunu aktif Hatırla denemesi günceller.',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(color: Color(0xFFB6C8C4), fontSize: 11, height: 1.35),
                       ),
                     ],
                   ),
-                ),
-                const SizedBox(height: 14),
-              ],
-              const Divider(color: AtelierStyle.line),
-              const SizedBox(height: 14),
-              if (sourceText.trim().isEmpty)
-                const Text(
-                  'Bu kaynağın metni henüz okunamıyor.',
-                  style: TextStyle(color: AtelierStyle.muted, fontSize: 16),
-                )
-              else
-                Container(
-                  padding: const EdgeInsets.fromLTRB(22, 22, 22, 30),
-                  decoration: const BoxDecoration(
-                    color: AtelierStyle.paper,
-                    border: Border(left: BorderSide(color: AtelierStyle.teal, width: 3)),
-                    boxShadow: [BoxShadow(color: Color(0x0B15313A), blurRadius: 18, offset: Offset(0, 8))],
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Row(
-                        children: [
-                          Icon(Icons.auto_stories_outlined, color: AtelierStyle.teal, size: 17),
-                          SizedBox(width: 8),
-                          Expanded(
-                            child: Text(
-                              'KAYNAK ÖNİZLEMESİ',
-                              softWrap: true,
-                              style: TextStyle(
-                                color: AtelierStyle.teal,
-                                fontSize: 10,
-                                fontWeight: FontWeight.w900,
-                                letterSpacing: 1,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 17),
-                      SelectableText(
-                        _sourcePreview,
-                        style: const TextStyle(color: AtelierStyle.ink, fontSize: 18, height: 1.65),
-                      ),
-                      if (_sourcePreviewIsTrimmed) ...[
-                        const SizedBox(height: 14),
-                        const Text(
-                          'Bu yalnızca önizleme. Kaynağın tamamı “Tam metni oku” ile Reader’da açılır.',
-                          style: TextStyle(color: AtelierStyle.muted, fontSize: 12, height: 1.35),
-                        ),
-                      ],
-                    ],
-                  ),
-                ),
-            ],
           ),
-        ),
-        Container(
-          padding: const EdgeInsets.fromLTRB(17, 12, 17, 14),
-          decoration: const BoxDecoration(
-            color: AtelierStyle.ink,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(21)),
-          ),
-          child: compactSurface
-              ? FilledButton.icon(
-                  key: const ValueKey('la0040-atelier-workspace-recall'),
-                  onPressed: onRecall,
-                  style: FilledButton.styleFrom(
-                    backgroundColor: AtelierStyle.mark,
-                    foregroundColor: AtelierStyle.ink,
-                    minimumSize: const Size.fromHeight(50),
-                  ),
-                  icon: Icon(_activeStepIcon),
-                  label: Text(_activeStepLabel),
-                )
-              : Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-              Row(
-                children: [
-                  Icon(_activeStepIcon, color: AtelierStyle.mark, size: 18),
-                  const SizedBox(width: 7),
-                  const Text(
-                    'SIRADAKİ GERÇEK ADIM',
-                    style: TextStyle(
-                      color: AtelierStyle.mark,
-                      fontSize: 10,
-                      fontWeight: FontWeight.w900,
-                      letterSpacing: 0.8,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 6),
-              Text(
-                _activeStepTitle,
-                style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w900, fontSize: 17),
-              ),
-              const SizedBox(height: 3),
-              Text(_activeStepReason, style: const TextStyle(color: Color(0xFFC7D5D2), fontSize: 12, height: 1.3)),
-              const SizedBox(height: 10),
-              FilledButton.icon(
-                key: const ValueKey('la0040-atelier-workspace-recall'),
-                onPressed: onRecall,
-                style: FilledButton.styleFrom(
-                  backgroundColor: AtelierStyle.mark,
-                  foregroundColor: AtelierStyle.ink,
-                  minimumSize: const Size.fromHeight(48),
-                ),
-                icon: Icon(_activeStepIcon),
-                label: Text(_activeStepLabel),
-              ),
-              const SizedBox(height: 7),
-              LayoutBuilder(
-                builder: (context, constraints) {
-                  final compactActions = constraints.maxWidth < 340 || MediaQuery.textScalerOf(context).scale(1) > 1.2;
-                  final listen = OutlinedButton.icon(
-                    key: const ValueKey('la0040-atelier-workspace-listen'),
-                    onPressed: onListen,
-                    icon: const Icon(Icons.headphones_rounded),
-                    label: const Text('Dinle'),
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: Colors.white,
-                      side: const BorderSide(color: Color(0xFF8EA9A3)),
-                    ),
-                  );
-                  final explain = TextButton.icon(
-                    onPressed: onExplain,
-                    style: TextButton.styleFrom(foregroundColor: Colors.white),
-                    icon: const Icon(Icons.record_voice_over_outlined),
-                    label: const Text('Açıkla'),
-                  );
-                  final focus = TextButton.icon(
-                    onPressed: onFocus,
-                    style: TextButton.styleFrom(foregroundColor: Colors.white),
-                    icon: const Icon(Icons.center_focus_strong),
-                    label: const Text('Odaklan'),
-                  );
-                  if (compactActions) {
-                    return Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        listen,
-                        const SizedBox(height: 4),
-                        Wrap(alignment: WrapAlignment.center, spacing: 4, runSpacing: 2, children: [explain, focus]),
-                      ],
-                    );
-                  }
-                  return Row(
-                    children: [
-                      Expanded(child: listen),
-                      const SizedBox(width: 7),
-                      explain,
-                      focus,
-                    ],
-                  );
-                },
-              ),
-              const SizedBox(height: 4),
-              const Text(
-                'Okuma ve dinleme hazırlık; öğrenme durumunu aktif Hatırla denemesi günceller.',
-                textAlign: TextAlign.center,
-                style: TextStyle(color: Color(0xFFB6C8C4), fontSize: 11, height: 1.35),
-              ),
-            ],
-          ),
-        ),
         ],
       ),
     );

@@ -1263,9 +1263,16 @@ void main() {
     expect(find.text('Başlık ekle · isteğe bağlı'), findsOneWidget);
     expect(find.text('Metni ekle · çalışma alanını aç'), findsOneWidget);
 
-    await tapVisible(tester, find.text('Başlık ekle · isteğe bağlı'));
-    await tester.pump();
-    expect(find.byKey(const ValueKey('pasted-material-title')), findsOneWidget);
+    await tester.enterText(
+      find.byKey(const ValueKey('pasted-material-text')),
+      'Fotosentez ve ışık. Klorofil, ışık enerjisinin yakalanmasına yardım eder.',
+    );
+    await tapVisible(tester, find.text('Metni ekle · çalışma alanını aç'));
+    await pumpUntilFound(tester, find.text('Hatırla'));
+
+    final material = await store.material(learner: runtime.learner, materialId: AppRuntime.primaryMaterialId);
+    expect(material, isNotNull);
+    expect(material!.title, 'Fotosentez ve ışık');
   });
 
   testWidgets('Reduced Motion keeps the learning slice usable', (tester) async {

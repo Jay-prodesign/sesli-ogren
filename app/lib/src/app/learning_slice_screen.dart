@@ -258,8 +258,12 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
 
     final normalized = text.trim().replaceAll(RegExp(r'\s+'), ' ');
     if (normalized.isEmpty) return 'Çalışma materyalim';
-    if (normalized.length <= 72) return normalized;
-    return '${normalized.substring(0, 69).trimRight()}…';
+
+    final sentenceEnd = RegExp(r'[.!?](?:\s|$)').firstMatch(normalized);
+    final firstThought = sentenceEnd == null ? normalized : normalized.substring(0, sentenceEnd.start).trim();
+    final candidate = firstThought.isEmpty ? normalized : firstThought;
+    if (candidate.length <= 72) return candidate;
+    return '${candidate.substring(0, 69).trimRight()}…';
   }
 
   Future<void> _saveSource() async {

@@ -263,10 +263,7 @@ void main() {
     expect(find.text('PDF seç'), findsOneWidget);
     expect(find.text('Metin yapıştır'), findsOneWidget);
     expect(tester.takeException(), isNull);
-    await expectLater(
-      find.byType(Scaffold),
-      matchesGoldenFile('goldens/la0040_source_acquisition_390x844.png'),
-    );
+    await expectLater(find.byType(Scaffold), matchesGoldenFile('goldens/la0040_source_acquisition_390x844.png'));
   });
 
   testWidgets('LA-0040 source Reader', (tester) async {
