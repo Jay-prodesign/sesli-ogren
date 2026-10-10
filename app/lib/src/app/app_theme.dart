@@ -7,30 +7,30 @@ import 'package:flutter/material.dart';
 /// state. They are not a generic design system and should grow only when
 /// Sesli Öğren has a concrete experience need.
 abstract final class AppPalette {
-  static const canvas = Color(0xFFF7F8FC);
-  static const surface = Color(0xFFFFFFFF);
-  static const surfaceMuted = Color(0xFFF1F3F9);
-  static const ink = Color(0xFF111827);
-  static const inkMuted = Color(0xFF667085);
+  static const canvas = Color(0xFFF5F7F4);
+  static const surface = Color(0xFFFFFDF9);
+  static const surfaceMuted = Color(0xFFE8F3EC);
+  static const ink = Color(0xFF15313A);
+  static const inkMuted = Color(0xFF52696B);
 
-  static const primary = Color(0xFF3657FF);
-  static const primaryDark = Color(0xFF14224A);
-  static const primarySoft = Color(0xFFE8EDFF);
+  static const primary = Color(0xFF0A716A);
+  static const primaryDark = Color(0xFF15313A);
+  static const primarySoft = Color(0xFFE8F3EC);
 
-  static const signal = Color(0xFF0D8F80);
-  static const signalSoft = Color(0xFFDFF7F3);
-  static const momentum = Color(0xFFC9F45D);
-  static const momentumInk = Color(0xFF29451E);
+  static const signal = Color(0xFF0A716A);
+  static const signalSoft = Color(0xFFE8F3EC);
+  static const momentum = Color(0xFFE0F0AF);
+  static const momentumInk = Color(0xFF15313A);
 
-  static const success = Color(0xFF138A72);
-  static const successSoft = Color(0xFFE2F7F2);
+  static const success = Color(0xFF0A716A);
+  static const successSoft = Color(0xFFE8F3EC);
 
   static const attention = Color(0xFFA9560A);
   static const attentionAccent = Color(0xFFE99024);
   static const attentionSoft = Color(0xFFFFEEDB);
 
   static const destructive = Color(0xFFD64550);
-  static const outline = Color(0xFFE4E7EC);
+  static const outline = Color(0xFFD5E3DC);
 }
 
 abstract final class SesliOgrenTheme {
