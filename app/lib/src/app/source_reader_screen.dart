@@ -138,10 +138,7 @@ class _SourceReaderScreenState extends State<SourceReaderScreen> {
           widget.title,
           style: theme.textTheme.titleLarge?.copyWith(color: ink, fontWeight: living ? FontWeight.w900 : null),
         ),
-        if (living) ...[
-          const SizedBox(height: 14),
-          const AtelierLearningRail(phase: AtelierLearningPhase.source),
-        ],
+        if (living) ...[const SizedBox(height: 14), const AtelierLearningRail(phase: AtelierLearningPhase.source)],
         const SizedBox(height: 16),
         RichText(
           text: TextSpan(
@@ -364,56 +361,56 @@ class _SourceReaderScreenState extends State<SourceReaderScreen> {
                     border: Border(top: BorderSide(color: line)),
                   ),
                   child: Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 10),
-                  child: Row(
-                    children: [
-                      if (widget.onListen != null)
-                        IconButton.filledTonal(
-                          tooltip: 'Kaynağı dinle',
-                          onPressed: widget.onListen,
-                          style: living
-                              ? IconButton.styleFrom(
-                                  foregroundColor: AtelierStyle.teal,
-                                  backgroundColor: AtelierStyle.mint,
-                                )
-                              : null,
-                          icon: const Icon(Icons.headphones_rounded),
-                        ),
-                      if (widget.onListen != null && (widget.onRecap != null || widget.onRecall != null))
-                        const SizedBox(width: 8),
-                      if (widget.onRecap != null)
-                        IconButton.filledTonal(
-                          tooltip: 'Hızlı özet',
-                          onPressed: widget.onRecap,
-                          style: living
-                              ? IconButton.styleFrom(
-                                  foregroundColor: AtelierStyle.teal,
-                                  backgroundColor: AtelierStyle.mint,
-                                )
-                              : null,
-                          icon: const Icon(Icons.auto_awesome),
-                        ),
-                      if (widget.onRecap != null && widget.onRecall != null) const SizedBox(width: 10),
-                      if (widget.onRecall != null)
-                        Expanded(
-                          child: FilledButton.icon(
+                    padding: const EdgeInsets.fromLTRB(16, 8, 16, 10),
+                    child: Row(
+                      children: [
+                        if (widget.onListen != null)
+                          IconButton.filledTonal(
+                            tooltip: 'Kaynağı dinle',
+                            onPressed: widget.onListen,
                             style: living
-                                ? FilledButton.styleFrom(
-                                    backgroundColor: AtelierStyle.ink,
-                                    foregroundColor: Colors.white,
-                                    minimumSize: const Size.fromHeight(48),
+                                ? IconButton.styleFrom(
+                                    foregroundColor: AtelierStyle.teal,
+                                    backgroundColor: AtelierStyle.mint,
                                   )
-                                : FilledButton.styleFrom(minimumSize: const Size.fromHeight(48)),
-                            onPressed: widget.onRecall,
-                            icon: const Icon(Icons.psychology_alt_outlined),
-                            label: const Text('Hatırla'),
+                                : null,
+                            icon: const Icon(Icons.headphones_rounded),
                           ),
-                        ),
-                    ],
+                        if (widget.onListen != null && (widget.onRecap != null || widget.onRecall != null))
+                          const SizedBox(width: 8),
+                        if (widget.onRecap != null)
+                          IconButton.filledTonal(
+                            tooltip: 'Hızlı özet',
+                            onPressed: widget.onRecap,
+                            style: living
+                                ? IconButton.styleFrom(
+                                    foregroundColor: AtelierStyle.teal,
+                                    backgroundColor: AtelierStyle.mint,
+                                  )
+                                : null,
+                            icon: const Icon(Icons.auto_awesome),
+                          ),
+                        if (widget.onRecap != null && widget.onRecall != null) const SizedBox(width: 10),
+                        if (widget.onRecall != null)
+                          Expanded(
+                            child: FilledButton.icon(
+                              style: living
+                                  ? FilledButton.styleFrom(
+                                      backgroundColor: AtelierStyle.ink,
+                                      foregroundColor: Colors.white,
+                                      minimumSize: const Size.fromHeight(48),
+                                    )
+                                  : FilledButton.styleFrom(minimumSize: const Size.fromHeight(48)),
+                              onPressed: widget.onRecall,
+                              icon: const Icon(Icons.psychology_alt_outlined),
+                              label: const Text('Hatırla'),
+                            ),
+                          ),
+                      ],
+                    ),
                   ),
                 ),
               ),
-            ),
           ],
         ),
       ),

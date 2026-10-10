@@ -237,8 +237,6 @@ class AtelierLearningRail extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final compact =
-        MediaQuery.sizeOf(context).width < 350 || MediaQuery.textScalerOf(context).scale(1) > 1.25;
     const steps = <(IconData, String)>[
       (Icons.auto_stories_outlined, 'KAYNAK'),
       (Icons.visibility_off_outlined, 'KAPAT'),
@@ -255,8 +253,11 @@ class AtelierLearningRail extends StatelessWidget {
             borderRadius: BorderRadius.circular(14),
             border: Border.all(color: AtelierStyle.line),
           ),
-          child: compact
-              ? Wrap(
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final compact = constraints.maxWidth < 320 || MediaQuery.textScalerOf(context).scale(1) > 1.25;
+              if (compact) {
+                return Wrap(
                   spacing: 6,
                   runSpacing: 6,
                   children: [
@@ -271,24 +272,27 @@ class AtelierLearningRail extends StatelessWidget {
                             : _AtelierLearningRailState.upcoming,
                       ),
                   ],
-                )
-              : Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    for (var index = 0; index < steps.length; index++) ...[
-                      _AtelierLearningRailStep(
-                        icon: steps[index].$1,
-                        label: steps[index].$2,
-                        state: index < _activeIndex
-                            ? _AtelierLearningRailState.done
-                            : index == _activeIndex
-                            ? _AtelierLearningRailState.active
-                            : _AtelierLearningRailState.upcoming,
-                      ),
-                      if (index != steps.length - 1) _AtelierLearningRailLine(done: index < _activeIndex),
-                    ],
+                );
+              }
+              return Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  for (var index = 0; index < steps.length; index++) ...[
+                    _AtelierLearningRailStep(
+                      icon: steps[index].$1,
+                      label: steps[index].$2,
+                      state: index < _activeIndex
+                          ? _AtelierLearningRailState.done
+                          : index == _activeIndex
+                          ? _AtelierLearningRailState.active
+                          : _AtelierLearningRailState.upcoming,
+                    ),
+                    if (index != steps.length - 1) _AtelierLearningRailLine(done: index < _activeIndex),
                   ],
-                ),
+                ],
+              );
+            },
+          ),
         ),
       ),
     );
