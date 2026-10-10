@@ -291,6 +291,14 @@ class _ListenScreenState extends State<ListenScreen> {
                         icon: const Icon(Icons.refresh_rounded),
                         label: const Text('Tekrar dene'),
                       ),
+                      if (Navigator.of(context).canPop()) ...[
+                        const SizedBox(height: 6),
+                        TextButton.icon(
+                          onPressed: () => Navigator.of(context).maybePop(),
+                          icon: const Icon(Icons.arrow_back_rounded),
+                          label: const Text('Materyale dön'),
+                        ),
+                      ],
                     ],
                   ),
                 ),

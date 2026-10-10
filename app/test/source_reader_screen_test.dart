@@ -57,6 +57,38 @@ void main() {
     expect(recap, 1);
   });
 
+  testWidgets('empty source returns to the material instead of trapping the learner', (tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Builder(
+          builder: (context) => Scaffold(
+            body: Center(
+              child: FilledButton(
+                onPressed: () => Navigator.of(context).push<void>(
+                  MaterialPageRoute<void>(
+                    builder: (_) => const SourceReaderScreen(title: 'Kaynak', sourceText: '   '),
+                  ),
+                ),
+                child: const Text('Reader aç'),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Reader aç'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Bu kaynak için okunabilir metin bulunamadı.'), findsOneWidget);
+    expect(find.text('Materyale dön'), findsOneWidget);
+    await tester.tap(find.text('Materyale dön'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Reader aç'), findsOneWidget);
+    expect(find.text('Bu kaynak için okunabilir metin bulunamadı.'), findsNothing);
+  });
+
   testWidgets('source reader gives a clear empty-source recovery state', (tester) async {
     await tester.pumpWidget(
       const MaterialApp(

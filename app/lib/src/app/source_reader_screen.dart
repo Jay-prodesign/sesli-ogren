@@ -255,7 +255,42 @@ class _SourceReaderScreenState extends State<SourceReaderScreen> {
             ],
             Expanded(
               child: source.isEmpty
-                  ? const Center(child: Text('Bu kaynak için okunabilir metin bulunamadı.'))
+                  ? Center(
+                      child: Padding(
+                        padding: const EdgeInsets.all(28),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.menu_book_outlined, size: 42, color: accent),
+                            const SizedBox(height: 14),
+                            Text(
+                              'Bu kaynak için okunabilir metin bulunamadı.',
+                              style: theme.textTheme.titleMedium?.copyWith(
+                                color: ink,
+                                fontWeight: FontWeight.w800,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              'Bu ekranda gösterilecek metin yok. Materyale dönüp kaynağın güncel durumunu yeniden açabilir veya güncelleyebilirsin.',
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                color: living ? AtelierStyle.muted : theme.colorScheme.onSurfaceVariant,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                            if (Navigator.of(context).canPop()) ...[
+                              const SizedBox(height: 18),
+                              OutlinedButton.icon(
+                                onPressed: () => Navigator.of(context).maybePop(),
+                                icon: const Icon(Icons.arrow_back_rounded),
+                                label: const Text('Materyale dön'),
+                              ),
+                            ],
+                          ],
+                        ),
+                      ),
+                    )
                   : SelectionArea(
                       child: ListView(
                         controller: _readingScroll,
