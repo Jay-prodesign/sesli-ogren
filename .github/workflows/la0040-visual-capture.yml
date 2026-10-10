@@ -48,6 +48,9 @@ jobs:
     if: needs.milestone-gate.outputs.run_full == 'true'
     runs-on: ubuntu-24.04
     timeout-minutes: 15
+    concurrency:
+      group: la0040-visual-capture-${{ github.ref }}
+      cancel-in-progress: true
     defaults:
       run:
         working-directory: app
