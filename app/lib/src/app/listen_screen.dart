@@ -407,26 +407,6 @@ class _ListenScreenState extends State<ListenScreen> {
                     ),
                   ),
                 ),
-                const SizedBox(height: 12),
-                DecoratedBox(
-                  decoration: BoxDecoration(color: truthSoft, borderRadius: BorderRadius.circular(14)),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 11),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Icon(Icons.info_outline_rounded, color: truthAccent, size: 19),
-                        const SizedBox(width: 9),
-                        Expanded(
-                          child: Text(
-                            'Dinlemek öğrenme kanıtı oluşturmaz. Hatırlamayı denediğinde öğrenme durumun güncellenebilir.',
-                            style: theme.textTheme.bodySmall?.copyWith(color: ink),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
                 const SizedBox(height: 18),
                 Text(
                   'Dinleme hızı',
@@ -514,11 +494,25 @@ class _ListenScreenState extends State<ListenScreen> {
                       label: Text(_finishedListening ? 'Dinlemeyi bitirdin · Şimdi hatırla' : 'Şimdi hatırlamayı dene'),
                     ),
                 ],
-                const SizedBox(height: 10),
-                Text(
-                  'Dinledikten sonra hatırlamayı denemek, öğrenme durumunu güncelleyebilen aktif adımdır.',
-                  textAlign: TextAlign.center,
-                  style: theme.textTheme.bodySmall?.copyWith(color: muted),
+                const SizedBox(height: 14),
+                DecoratedBox(
+                  decoration: BoxDecoration(color: truthSoft, borderRadius: BorderRadius.circular(14)),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 11),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Icon(Icons.info_outline_rounded, color: truthAccent, size: 19),
+                        const SizedBox(width: 9),
+                        Expanded(
+                          child: Text(
+                            'Dinlemek tek başına öğrenme kanıtı oluşturmaz; öğrenme durumun Hatırla denemesiyle güncellenir.',
+                            style: theme.textTheme.bodySmall?.copyWith(color: ink),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
                 const SizedBox(height: 20),
                 DecoratedBox(

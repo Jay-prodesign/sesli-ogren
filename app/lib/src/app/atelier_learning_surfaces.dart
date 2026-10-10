@@ -237,6 +237,8 @@ class AtelierLearningRail extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final compact =
+        MediaQuery.sizeOf(context).width < 350 || MediaQuery.textScalerOf(context).scale(1) > 1.25;
     const steps = <(IconData, String)>[
       (Icons.auto_stories_outlined, 'KAYNAK'),
       (Icons.visibility_off_outlined, 'KAPAT'),
@@ -253,22 +255,40 @@ class AtelierLearningRail extends StatelessWidget {
             borderRadius: BorderRadius.circular(14),
             border: Border.all(color: AtelierStyle.line),
           ),
-          child: Row(
-            children: [
-              for (var index = 0; index < steps.length; index++) ...[
-                _AtelierLearningRailStep(
-                  icon: steps[index].$1,
-                  label: steps[index].$2,
-                  state: index < _activeIndex
-                      ? _AtelierLearningRailState.done
-                      : index == _activeIndex
-                      ? _AtelierLearningRailState.active
-                      : _AtelierLearningRailState.upcoming,
+          child: compact
+              ? Wrap(
+                  spacing: 6,
+                  runSpacing: 6,
+                  children: [
+                    for (var index = 0; index < steps.length; index++)
+                      _AtelierLearningRailStep(
+                        icon: steps[index].$1,
+                        label: steps[index].$2,
+                        state: index < _activeIndex
+                            ? _AtelierLearningRailState.done
+                            : index == _activeIndex
+                            ? _AtelierLearningRailState.active
+                            : _AtelierLearningRailState.upcoming,
+                      ),
+                  ],
+                )
+              : Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    for (var index = 0; index < steps.length; index++) ...[
+                      _AtelierLearningRailStep(
+                        icon: steps[index].$1,
+                        label: steps[index].$2,
+                        state: index < _activeIndex
+                            ? _AtelierLearningRailState.done
+                            : index == _activeIndex
+                            ? _AtelierLearningRailState.active
+                            : _AtelierLearningRailState.upcoming,
+                      ),
+                      if (index != steps.length - 1) _AtelierLearningRailLine(done: index < _activeIndex),
+                    ],
+                  ],
                 ),
-                if (index != steps.length - 1) _AtelierLearningRailLine(done: index < _activeIndex),
-              ],
-            ],
-          ),
         ),
       ),
     );
@@ -294,26 +314,21 @@ class _AtelierLearningRailStep extends StatelessWidget {
         : done
         ? AtelierStyle.mint
         : AtelierStyle.canvas;
-    return Flexible(
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 6),
-        decoration: BoxDecoration(color: background, borderRadius: BorderRadius.circular(999)),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(done ? Icons.check_rounded : icon, color: foreground, size: 13),
-            const SizedBox(width: 4),
-            Flexible(
-              child: Text(
-                label,
-                maxLines: 1,
-                overflow: TextOverflow.fade,
-                softWrap: false,
-                style: TextStyle(color: foreground, fontSize: 8.5, fontWeight: FontWeight.w900, letterSpacing: 0.3),
-              ),
-            ),
-          ],
-        ),
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 6),
+      decoration: BoxDecoration(color: background, borderRadius: BorderRadius.circular(999)),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(done ? Icons.check_rounded : icon, color: foreground, size: 13),
+          const SizedBox(width: 4),
+          Text(
+            label,
+            maxLines: 1,
+            softWrap: false,
+            style: TextStyle(color: foreground, fontSize: 8.5, fontWeight: FontWeight.w900, letterSpacing: 0.3),
+          ),
+        ],
       ),
     );
   }
@@ -325,12 +340,11 @@ class _AtelierLearningRailLine extends StatelessWidget {
   final bool done;
 
   @override
-  Widget build(BuildContext context) => Expanded(
-    child: Container(
-      height: 2,
-      margin: const EdgeInsets.symmetric(horizontal: 3),
-      color: done ? AtelierStyle.teal : AtelierStyle.line,
-    ),
+  Widget build(BuildContext context) => Container(
+    width: 12,
+    height: 2,
+    margin: const EdgeInsets.symmetric(horizontal: 3),
+    color: done ? AtelierStyle.teal : AtelierStyle.line,
   );
 }
 
