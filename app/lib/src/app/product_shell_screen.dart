@@ -252,6 +252,7 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
             final screen = SourceReaderScreen(
               title: material.title,
               sourceText: extracted?.normalizedText ?? '',
+              sourceVersion: source,
               initialProgress: initialReaderProgress,
               onProgressChanged: (progress) => widget.runtime.store.saveReaderResumeProgress(
                 learner: widget.runtime.learner,
@@ -1210,10 +1211,7 @@ class _LibraryMaterialCard extends StatelessWidget {
   final bool isDeleting;
 
   bool get _hasReaderResume =>
-      continuation == null &&
-      readerResumePreferred &&
-      readerResumeProgress > 0.02 &&
-      readerResumeProgress < 0.95;
+      continuation == null && readerResumePreferred && readerResumeProgress > 0.02 && readerResumeProgress < 0.95;
 
   String get _continueLabel {
     if (_hasReaderResume) return 'Okumaya devam et';

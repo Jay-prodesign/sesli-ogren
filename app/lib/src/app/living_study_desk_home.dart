@@ -58,10 +58,7 @@ class LivingStudyDeskHome extends StatelessWidget {
   static const _line = Color(0xFFD5E3DC);
 
   bool get _hasReaderResume =>
-      continuation == null &&
-      readerResumePreferred &&
-      readerResumeProgress > 0.02 &&
-      readerResumeProgress < 0.95;
+      continuation == null && readerResumePreferred && readerResumeProgress > 0.02 && readerResumeProgress < 0.95;
 
   bool get _hasListenResume => continuation == null && !_hasReaderResume && listenResumeChunk > 0;
 
@@ -390,7 +387,10 @@ class LivingStudyDeskHome extends StatelessWidget {
           child: TextButton.icon(
             key: const ValueKey('la0040-living-listen'),
             onPressed: (_hasReaderResume || _hasListenResume) ? onOpenLearning : onOpenListen,
-            icon: Icon((_hasReaderResume || _hasListenResume) ? Icons.psychology_alt_outlined : Icons.headphones_rounded, size: 18),
+            icon: Icon(
+              (_hasReaderResume || _hasListenResume) ? Icons.psychology_alt_outlined : Icons.headphones_rounded,
+              size: 18,
+            ),
             label: Text((_hasReaderResume || _hasListenResume) ? 'Şimdi hatırlamayı dene' : 'Önce dinlemek istiyorum'),
             style: TextButton.styleFrom(foregroundColor: _accent),
           ),

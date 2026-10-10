@@ -83,6 +83,21 @@ void main() {
     createdAt: now,
     updatedAt: now,
   );
+  final sourceVersion = SourceVersionRecord(
+    identity: const SourceVersionIdentity(
+      materialId: materialId,
+      sourceVersionId: versionId,
+      contentDigest: 'visual-source-digest',
+      trustClass: SourceTrustClass.userProvided,
+      knowledgeClass: SourceKnowledgeClass.learnerOwned,
+    ),
+    mediaType: SourceMediaType.pastedText,
+    sourceName: 'Fotosentez: ışık ve enerji',
+    mimeType: 'text/plain',
+    byteSize: source.length,
+    inlineText: source,
+    createdAt: now,
+  );
   final evidence = LearnerEvidence(
     id: evidenceId,
     attemptId: const RecallAttemptId('visual-attempt'),
@@ -199,6 +214,7 @@ void main() {
       AtelierWorkspace(
         material: material,
         sourceText: source,
+        sourceVersion: sourceVersion,
         continuation: continuation,
         onReadSource: () {},
         onQuickRecap: () {},
@@ -338,6 +354,7 @@ void main() {
           child: SourceReaderScreen(
             title: material.title,
             sourceText: source,
+            sourceVersion: sourceVersion,
             onListen: () {},
             onRecap: () {},
             onRecall: () {},
@@ -413,7 +430,12 @@ void main() {
       'la0040_result_390x844',
       SingleChildScrollView(
         padding: const EdgeInsets.all(20),
-        child: AtelierResult(result: result, answerInMemory: 'Klorofil', onContinue: () {}),
+        child: AtelierResult(
+          result: result,
+          answerInMemory: 'Klorofil',
+          onContinue: () {},
+          sourceVersion: sourceVersion,
+        ),
       ),
     );
   });
@@ -452,7 +474,12 @@ void main() {
       'la0040_result_320_text150',
       SingleChildScrollView(
         padding: const EdgeInsets.all(16),
-        child: AtelierResult(result: result, answerInMemory: 'Klorofil', onContinue: () {}),
+        child: AtelierResult(
+          result: result,
+          answerInMemory: 'Klorofil',
+          onContinue: () {},
+          sourceVersion: sourceVersion,
+        ),
       ),
       size: const Size(320, 700),
       textScaler: const TextScaler.linear(1.5),

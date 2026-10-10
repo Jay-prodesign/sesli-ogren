@@ -38,6 +38,7 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
   _SlicePhase _phase = _SlicePhase.loading;
   RecallPrompt? _prompt;
   RecallAttemptResult? _result;
+  SourceVersionRecord? _activeSourceVersion;
   LearningContinuation? _continuation;
   RecallAttemptId? _activeAttemptId;
   String? _supportText;
@@ -331,6 +332,13 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
         learner: widget.runtime.learner,
         materialId: widget.materialId,
       );
+      final sourceVersion = await widget.runtime.store.sourceVersion(
+        learner: widget.runtime.learner,
+        sourceVersionId: prompt.sourceVersionId,
+      );
+      if (sourceVersion == null || !sourceVersion.isCurrent) {
+        throw StateError('recall_source_version_missing_or_stale');
+      }
       final session = await widget.runtime.recall.openAttempt(learner: widget.runtime.learner, actionId: prompt.id);
       stopwatch.stop();
       await _recordEvent(
@@ -353,6 +361,7 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
         _submittedUnknown = false;
         _prompt = prompt;
         _result = null;
+        _activeSourceVersion = sourceVersion;
         _continuation = null;
         _activeAttemptId = session.attempt.attemptId;
         _supportText = _restoredSupportNotice(session.assistance);
@@ -1053,6 +1062,7 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
             ? 'Yanıt gösterildi; bu metin öğrencinin bağımsız yanıtı değil.'
             : _answerController.text,
         onContinue: () => _continueFromResult(result),
+        sourceVersion: _activeSourceVersion,
       );
     }
     if (candidate != null) {
