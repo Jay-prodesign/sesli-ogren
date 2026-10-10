@@ -19,9 +19,10 @@ abstract final class AtelierStyle {
 }
 
 class AtelierSourceTrustStrip extends StatelessWidget {
-  const AtelierSourceTrustStrip({required this.sourceVersion, super.key});
+  const AtelierSourceTrustStrip({required this.sourceVersion, this.showSourceName = true, super.key});
 
   final SourceVersionRecord sourceVersion;
+  final bool showSourceName;
 
   String get _ownershipLabel {
     final identity = sourceVersion.identity;
@@ -72,13 +73,15 @@ class AtelierSourceTrustStrip extends StatelessWidget {
                         letterSpacing: 0.8,
                       ),
                     ),
-                    const SizedBox(height: 4),
-                    Text(
-                      sourceVersion.sourceName,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(color: AtelierStyle.ink, fontSize: 13, fontWeight: FontWeight.w800),
-                    ),
+                    if (showSourceName) ...[
+                      const SizedBox(height: 4),
+                      Text(
+                        sourceVersion.sourceName,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(color: AtelierStyle.ink, fontSize: 13, fontWeight: FontWeight.w800),
+                      ),
+                    ],
                     const SizedBox(height: 3),
                     const Text(
                       'Hatırlama ve kaynak kanıtı bu sürümle ilişkilendirilir.',

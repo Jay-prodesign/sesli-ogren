@@ -401,10 +401,8 @@ class _SourceReaderScreenState extends State<SourceReaderScreen> {
                 minHeight: living ? 4 : 3,
                 color: accent,
                 backgroundColor: living ? line : null,
-                semanticsLabel: _sourceFitsViewport ? 'Kaynak görünümü' : 'Okuma konumu',
-                semanticsValue: _sourceFitsViewport
-                    ? 'Kaynağın tamamı ekranda'
-                    : 'Yüzde ${(_readingProgress * 100).round()}',
+                semanticsLabel: _sourceFitsViewport ? 'Kaynak görünümü, tamamı ekranda' : 'Okuma konumu',
+                semanticsValue: '${(_readingProgress * 100).round()}',
               ),
             ],
             Expanded(

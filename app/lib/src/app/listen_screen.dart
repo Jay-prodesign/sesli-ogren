@@ -388,7 +388,10 @@ class _ListenScreenState extends State<ListenScreen> {
                 if (living) ...[
                   const AtelierLearningRail(phase: AtelierLearningPhase.source),
                   const SizedBox(height: 10),
-                  AtelierSourceTrustStrip(sourceVersion: source.sourceVersion),
+                  AtelierSourceTrustStrip(
+                    sourceVersion: source.sourceVersion,
+                    showSourceName: widget.textOverride?.trim().isNotEmpty == true,
+                  ),
                   const SizedBox(height: 12),
                 ],
                 DecoratedBox(
