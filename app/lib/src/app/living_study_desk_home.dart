@@ -385,15 +385,18 @@ class LivingStudyDeskHome extends StatelessWidget {
           ),
           const SizedBox(height: 7),
           for (final item in otherMaterials.take(3))
-            ListTile(
-              contentPadding: EdgeInsets.zero,
-              leading: Icon(
-                item.mediaType == SourceMediaType.pdf ? Icons.picture_as_pdf_outlined : Icons.notes_rounded,
-                color: _accent,
+            Material(
+              color: Colors.transparent,
+              child: ListTile(
+                contentPadding: EdgeInsets.zero,
+                leading: Icon(
+                  item.mediaType == SourceMediaType.pdf ? Icons.picture_as_pdf_outlined : Icons.notes_rounded,
+                  color: _accent,
+                ),
+                title: Text(item.title, maxLines: 2, overflow: TextOverflow.ellipsis),
+                trailing: const Icon(Icons.chevron_right_rounded, color: _sub),
+                onTap: () => onOpenMaterial(item.id),
               ),
-              title: Text(item.title, maxLines: 2, overflow: TextOverflow.ellipsis),
-              trailing: const Icon(Icons.chevron_right_rounded, color: _sub),
-              onTap: () => onOpenMaterial(item.id),
             ),
         ],
       ],
