@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 import '../domain/learning_contracts.dart';
 import '../domain/learning_truth.dart';
+import '../data/source_ingest_service.dart';
 import '../domain/operational_event.dart';
 import '../generation/supabase_source_summary_gateway.dart';
 import 'app_runtime.dart';
