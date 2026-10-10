@@ -239,6 +239,7 @@ class _ListenScreenState extends State<ListenScreen> {
     } catch (_) {
       if (!mounted) return;
       setState(() {
+        _startingPlayback = false;
         _error = 'Ses durdurulamadı. Kaynağın ve dinleme konumun korunuyor; tekrar deneyebilirsin.';
       });
       return;
