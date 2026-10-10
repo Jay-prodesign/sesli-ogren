@@ -450,8 +450,9 @@ def check_execution_coherence(r: Report, state: dict | None) -> None:
             "continue" in str(state.get("next_action", "")).lower(),
             "EXECUTION_STATE.json: IN_PROGRESS next_action must explicitly continue beyond the immediate check",
         )
+        normalized_return = " ".join(engineer_return.lower().split())
         r.check(
-            "blocked dependency does not stop independent admitted work" in engineer_return.lower(),
+            "blocked dependency does not stop independent admitted work" in normalized_return,
             "ENGINEER_RETURN.md: blocker isolation semantics are missing",
         )
 
