@@ -202,7 +202,8 @@ class _ProfileSurfaceState extends State<ProfileSurface> {
         callback();
       } else {
         setState(() => _remoteDeletionConfirmed = false);
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Bu cihazdaki yerel veriler temizlendi.')));
+        ScaffoldMessenger.of(context)
+            .showSnackBar(const SnackBar(content: Text('Bu cihazdaki yerel veriler temizlendi.')));
       }
     } catch (_) {
       if (!mounted) return;
@@ -454,8 +455,7 @@ class _AccountOverviewCard extends StatelessWidget {
           children: [
             LayoutBuilder(
               builder: (context, constraints) {
-                final stackHeader =
-                    constraints.maxWidth < 340 || MediaQuery.textScalerOf(context).scale(16) >= 22;
+                final stackHeader = constraints.maxWidth < 340 || MediaQuery.textScalerOf(context).scale(16) >= 22;
                 final identity = Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -513,7 +513,11 @@ class _AccountOverviewCard extends StatelessWidget {
                 }
                 return Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [Expanded(child: identity), const SizedBox(width: 10), badge],
+                  children: [
+                    Expanded(child: identity),
+                    const SizedBox(width: 10),
+                    badge,
+                  ],
                 );
               },
             ),

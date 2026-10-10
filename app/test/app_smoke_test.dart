@@ -257,7 +257,9 @@ void main() {
       const MaterialApp(
         home: MediaQuery(
           data: MediaQueryData(textScaler: TextScaler.linear(1.6)),
-          child: Scaffold(body: ProgressSurface(items: [], onOpenMaterial: _noopMaterialOpen)),
+          child: Scaffold(
+            body: ProgressSurface(items: [], onOpenMaterial: _noopMaterialOpen),
+          ),
         ),
       ),
     );
@@ -1135,11 +1137,7 @@ void main() {
     await pumpUntilFound(tester, find.text('Profil'));
     await tester.tap(find.text('Profil').last);
     await pumpUntilFound(tester, find.text('Profil ve Ayarlar'));
-    await tester.scrollUntilVisible(
-      find.text('Bu cihazda çıkış yap'),
-      260,
-      scrollable: find.byType(Scrollable).last,
-    );
+    await tester.scrollUntilVisible(find.text('Bu cihazda çıkış yap'), 260, scrollable: find.byType(Scrollable).last);
     await tester.tap(find.text('Bu cihazda çıkış yap'));
     await pumpUntilFound(tester, find.text('Bu cihazda çıkış yap?'));
     await tester.tap(find.text('Çıkış yap'));

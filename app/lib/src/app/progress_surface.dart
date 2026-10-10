@@ -59,14 +59,10 @@ class ProgressSurface extends StatelessWidget {
         ],
         LayoutBuilder(
           builder: (context, constraints) {
-            final stackHeader =
-                constraints.maxWidth < 340 || MediaQuery.textScalerOf(context).scale(16) >= 22;
+            final stackHeader = constraints.maxWidth < 340 || MediaQuery.textScalerOf(context).scale(16) >= 22;
             final title = Text(
               'İlerleme',
-              style: theme.textTheme.headlineMedium?.copyWith(
-                color: ink,
-                fontWeight: living ? FontWeight.w900 : null,
-              ),
+              style: theme.textTheme.headlineMedium?.copyWith(color: ink, fontWeight: living ? FontWeight.w900 : null),
             );
             final badge = DecoratedBox(
               decoration: BoxDecoration(color: soft, borderRadius: BorderRadius.circular(999)),
@@ -89,7 +85,12 @@ class ProgressSurface extends StatelessWidget {
                 children: [title, const SizedBox(height: 10), badge],
               );
             }
-            return Row(children: [Expanded(child: title), badge]);
+            return Row(
+              children: [
+                Expanded(child: title),
+                badge,
+              ],
+            );
           },
         ),
         const SizedBox(height: 8),

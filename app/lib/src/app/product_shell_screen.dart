@@ -398,14 +398,8 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
         // Persist the successful remote-cleanup checkpoint before local material
         // deletion. If the later local delete fails, retry must not blindly
         // resubmit the already-completed remote destructive action.
-        await widget.runtime.store.clearSummaryJob(
-          learner: widget.runtime.learner,
-          materialId: material.id,
-        );
-        await widget.runtime.store.clearServerMaterialBinding(
-          learner: widget.runtime.learner,
-          materialId: material.id,
-        );
+        await widget.runtime.store.clearSummaryJob(learner: widget.runtime.learner, materialId: material.id);
+        await widget.runtime.store.clearServerMaterialBinding(learner: widget.runtime.learner, materialId: material.id);
       }
 
       await widget.runtime.store.deleteMaterial(

@@ -61,11 +61,7 @@ void main() {
     );
     expect(await store.material(learner: learner, materialId: materialId), isNotNull);
 
-    await store.deleteMaterial(
-      learner: learner,
-      materialId: materialId,
-      deletedAt: DateTime.utc(2026, 10, 11),
-    );
+    await store.deleteMaterial(learner: learner, materialId: materialId, deletedAt: DateTime.utc(2026, 10, 11));
     expect(await store.material(learner: learner, materialId: materialId), isNull);
   });
 
