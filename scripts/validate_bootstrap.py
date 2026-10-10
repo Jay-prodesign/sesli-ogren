@@ -370,6 +370,70 @@ def check_state(r: Report, state: dict, task_status: dict[str, str]) -> None:
         r.check(task_id in (state.get("tasks") or {}), f"{rel}: task {task_id} missing from tasks")
 
 
+def check_execution_coherence(r: Report, state: dict | None) -> None:
+    """Fail when mandatory live-control reads contradict the single current cursor."""
+    if state is None:
+        return
+
+    mission_id = str((state.get("mission") or {}).get("id", "")).strip()
+    status = state.get("status")
+
+    live_texts: dict[str, str] = {}
+    for rel in [
+        "AGENTS.md",
+        "TASKS.md",
+        "docs/agent/CURRENT_HANDOFF.md",
+        "docs/agent/ENGINEER_RETURN.md",
+    ]:
+        if (ROOT / rel).is_file():
+            live_texts[rel] = read_text(rel)
+
+    for rel in ["docs/agent/CURRENT_HANDOFF.md", "docs/agent/ENGINEER_RETURN.md"]:
+        text = live_texts.get(rel, "")
+        r.check(
+            bool(mission_id) and mission_id in text,
+            f"{rel}: does not name active mission {mission_id}",
+        )
+
+    stale_assertions = {
+        "AGENTS.md": [
+            "During the current M5 checkpoint, LA-0022 remains the only active cursor",
+        ],
+        "TASKS.md": [
+            "Current branch implication: Architecture Proof is accepted, but M2/M5 feature implementation is still NOT_EXECUTABLE",
+            "keeps LA-0022 as the active cursor",
+        ],
+        "docs/agent/ENGINEER_RETURN.md": [
+            "LA-0022 CHECKPOINT ACTIVE",
+            "LA-0022 — IN_PROGRESS",
+        ],
+    }
+    for rel, phrases in stale_assertions.items():
+        text = live_texts.get(rel, "")
+        for phrase in phrases:
+            r.check(
+                phrase not in text,
+                f"{rel}: stale live cursor assertion detected: '{phrase}'",
+            )
+
+    if status == "IN_PROGRESS":
+        agents = live_texts.get("AGENTS.md", "").lower()
+        handoff = live_texts.get("docs/agent/CURRENT_HANDOFF.md", "").lower()
+        engineer_return = live_texts.get("docs/agent/ENGINEER_RETURN.md", "")
+        r.check(
+            "continuous outcome execution" in agents,
+            "AGENTS.md: active IN_PROGRESS state requires continuous outcome execution authority",
+        )
+        r.check(
+            "not a stop condition" in handoff,
+            "CURRENT_HANDOFF.md: active IN_PROGRESS state must state that routine checkpoints are not stop conditions",
+        )
+        r.check(
+            "IN_PROGRESS" in engineer_return and "not a stop condition" in engineer_return,
+            "ENGINEER_RETURN.md: latest consolidated evidence must preserve IN_PROGRESS continuation semantics",
+        )
+
+
 def check_contracts(r: Report, state: dict | None) -> None:
     if (ROOT / "CLAUDE.md").is_file():
         claude = read_text("CLAUDE.md")
@@ -796,6 +860,7 @@ def main() -> int:
     if state is not None:
         check_state(r, state, task_status)
     check_contracts(r, state)
+    check_execution_coherence(r, state)
     check_reuse(r)
     check_claude_dir(r, files)
     check_bus(r, files, state)

@@ -123,8 +123,10 @@ Before any material change an agent must:
 - Creating, rotating, or storing credentials or secrets.
 - Deleting data or history.
 
-If a protected action appears necessary: stop, record a Decision Request in
-`docs/agent/DECISION_REQUEST.md`, and set execution state to `BLOCKED`.
+If a protected action appears necessary, do not perform that action. Record a Decision Request in
+`docs/agent/DECISION_REQUEST.md` and mark only the affected dependency `BLOCKED`; continue other
+independent admitted work. Set the whole execution state to `BLOCKED` only when no safe,
+dependency-ready work remains.
 
 ## 9. Handoff / return protocol
 
@@ -156,12 +158,12 @@ explicitly admits them; they do not supersede the live integrated mission.
   makes it executable.
 - Allowed statuses: `PLANNED`, `NOT_EXECUTABLE`, `READY`, `IN_PROGRESS`,
   `BLOCKED`, `CHANGES_REQUIRED`, `AWAITING_BRAIN_REVIEW`, `DONE`, `CANCELLED`.
-- Only Brain moves a task to `DONE` (via PASS verdict).
+- Task status is bookkeeping, not execution authority. Where a current acceptance contract explicitly requires Brain or independent review, that authority closes `DONE`; routine Tier-B completion may be reconciled by the active executor under the live cursor. In all cases, moving a task to `DONE` is not an automatic run stop.
 - `scripts/validate_bootstrap.py` enforces the structural rules.
 
 ## 11. Verdict evidence
 
-Every engineer return states exactly one verdict with evidence:
+When a formal engineer return is explicitly required by a live delegation or milestone, it states exactly one verdict with evidence:
 
 | Verdict | Meaning | Required evidence |
 | --- | --- | --- |
@@ -169,7 +171,7 @@ Every engineer return states exactly one verdict with evidence:
 | `CHANGES_REQUIRED` | (Brain verdict) Work must be revised | Brain lists required changes; engineer addresses each and re-returns |
 | `BLOCKED` | Cannot proceed without auth, decision, or protected action | Exact blocker, what was attempted, what is needed and from whom, current safe state |
 
-"PASS" itself is only ever issued by Brain.
+"PASS" for a checkpoint that explicitly requires Brain acceptance is issued by Brain. Routine reversible outcomes do not require a formal PASS before continuation.
 
 ## 12. Open-source reuse (D-024)
 
@@ -333,10 +335,11 @@ downstream artifact stale blindly, and do not rewrite historical or unaffected
 records for ceremonial consistency.
 
 D-074 preserves D-063 project isolation and D-064/D-065/D-066 lean execution.
-It does not authorize feature breadth or protected actions. During the current
-M5 checkpoint, LA-0022 remains the only active cursor. The intended first
-post-M5 Tier-A subject is the Desire / Engagement / Core-Loop Premise Audit,
-which remains NOT_EXECUTABLE until M5 closes and Brain explicitly admits it.
+It does not authorize feature breadth or protected actions. **Historical M5 note:**
+the former LA-0022-only cursor and pre-admission post-M5 wording are superseded by
+the live Drive `CURRENT_EXECUTION_STATE` and repo `CURRENT_HANDOFF`. D-074 becomes
+a gate only when a genuinely new Tier-A premise is being admitted; it is not a
+routine continuation or review-stop gate for the current integrated outcome.
 
 
 ## 15. Asset necessity, experience role, and sustainable production (D-075)

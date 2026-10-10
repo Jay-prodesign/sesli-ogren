@@ -147,6 +147,34 @@ class ValidatorNegativeTests(unittest.TestCase):
         self.write(STATE, "{ not json\n")
         self.assertFailsWith(r"EXECUTION_STATE\.json does not parse")
 
+    # --- live execution coherence -------------------------------------------
+    def test_stale_agents_cursor_rejected(self) -> None:
+        path = self.root / "AGENTS.md"
+        path.write_text(
+            path.read_text(encoding="utf-8")
+            + "\nDuring the current M5 checkpoint, LA-0022 remains the only active cursor.\n",
+            encoding="utf-8",
+        )
+        self.assertFailsWith(r"AGENTS\.md: stale live cursor assertion detected")
+
+    def test_stale_engineer_return_rejected(self) -> None:
+        path = self.root / "docs/agent/ENGINEER_RETURN.md"
+        path.write_text(
+            path.read_text(encoding="utf-8")
+            + "\n# M5 ENGINEER RETURN — LA-0021 CLOSED / LA-0022 CHECKPOINT ACTIVE\n",
+            encoding="utf-8",
+        )
+        self.assertFailsWith(r"ENGINEER_RETURN\.md: stale live cursor assertion detected")
+
+    def test_latest_engineer_return_must_name_live_mission(self) -> None:
+        mission = self.state()["mission"]["id"]
+        self.edit(
+            "docs/agent/ENGINEER_RETURN.md",
+            mission,
+            "LA-0999_STALE_MISSION",
+        )
+        self.assertFailsWith(r"ENGINEER_RETURN\.md: does not name active mission")
+
     # --- D-024 reuse -------------------------------------------------------
     def test_register_missing(self) -> None:
         (self.root / "docs/provenance/OPEN_SOURCE_REUSE_REGISTER.md").unlink()

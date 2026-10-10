@@ -13,7 +13,7 @@ plans until Brain admits them.
 
 Status legend: `PLANNED` · `NOT_EXECUTABLE` · `READY` · `IN_PROGRESS` · `BLOCKED` ·
 `CHANGES_REQUIRED` · `AWAITING_BRAIN_REVIEW` · `DONE` · `CANCELLED`
-(only Brain sets `DONE`).
+(DONE authority follows the current acceptance/review contract; a task-status change is never an automatic execution stop).
 Milestone status: `ACTIVE` · `PLANNED / NOT_EXECUTABLE` · `DONE`.
 
 Milestone numbering follows the program sequence in
@@ -130,7 +130,7 @@ Next unallocated ID: **LA-0041**.
 - Exit gate: ARCHITECTURE_PROOF_PASS / GO_ADAPT — **met** at immutable reviewed head `0327d2e5b854df1c9923c65ed88f77151cfe9eed`.
 - Evidence branch: `spike/v0-architecture-proof`, draft PR #2, unmerged. Detailed LA-0009…LA-0017 task/evidence files remain on that sibling stacked branch and are not duplicated into this Round 7 branch.
 - Source: PRE_BOOTSTRAP_PRODUCT_READINESS_AND_MASTER_SEQUENCE_v1.0 — Learning App (Drive); D-015, D-024, D-025
-- Current branch implication: Architecture Proof is accepted, but M2/M5 feature implementation is still NOT_EXECUTABLE. Round 7 evidence work is a bounded pre-admission evidence program, not Golden Learning Slice implementation.
+- Historical pre-M5 implication: at Architecture Proof closure, later M2/M5 implementation had not yet been admitted. Subsequent D-071/post-M5 decisions superseded that pre-admission state. Do not use this historical line for current task selection; resolve the live cursor from Drive `CURRENT_EXECUTION_STATE` and the current LA-0039/LA-0040 entries below.
 
 ### Sprint M1.S1 — Donor fresh-audit & layered reuse matrix
 
@@ -229,7 +229,7 @@ Next unallocated ID: **LA-0041**.
 - Depends on: LA-0021
 - Owner: Brain
 - Executor: ChatGPT / Brain audit
-- Verification: Drive `LA-0023 — PROJECT WORK MATURITY & DEPTH AUDIT — TASK SPEC + QUALITY GATE` records PASS WITH CHANGES REQUIRED, keeps LA-0022 as the active cursor, and projects only current-risk/hygiene remediation rather than reopening feature breadth.
+- Verification: Historical audit result: Drive `LA-0023 — PROJECT WORK MATURITY & DEPTH AUDIT — TASK SPEC + QUALITY GATE` recorded PASS WITH CHANGES REQUIRED and, at that time, kept LA-0022 as the active cursor. That cursor is superseded and must not be used for current execution selection.
 - Exec plan: [docs/exec-plans/LA-0023.md](docs/exec-plans/LA-0023.md)
 
 #### Section M2.S4.C — Post-M5 full-product admission
