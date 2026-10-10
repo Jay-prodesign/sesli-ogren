@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../domain/learning_contracts.dart';
 import '../domain/learning_truth.dart';
+import 'app_theme.dart';
 import 'companion_view.dart';
 
 /// Current source-first product experience scope.
@@ -50,13 +51,13 @@ class LivingStudyDeskHome extends StatelessWidget {
   final VoidCallback onOpenListen;
   final ValueChanged<MaterialId> onOpenMaterial;
 
-  static const _canvas = Color(0xFFF5F7F4);
-  static const _paper = Color(0xFFFFFDF9);
-  static const _ink = Color(0xFF15313A);
-  static const _sub = Color(0xFF52696B);
-  static const _accent = Color(0xFF0A716A);
-  static const _line = Color(0xFFD5E3DC);
-  static const _mark = Color(0xFFE0F0AF);
+  static const _canvas = AppPalette.canvas;
+  static const _paper = AppPalette.surface;
+  static const _ink = AppPalette.primaryDark;
+  static const _sub = AppPalette.inkMuted;
+  static const _accent = AppPalette.primary;
+  static const _line = AppPalette.outline;
+  static const _mark = AppPalette.momentum;
 
   bool get _hasReaderResume =>
       continuation == null && readerResumePreferred && readerResumeProgress > 0.02 && readerResumeProgress < 0.95;
@@ -492,9 +493,9 @@ class LivingStudyDeskHome extends StatelessWidget {
         width: compact ? 58 : 84,
         height: compact ? 58 : 84,
         decoration: BoxDecoration(
-          color: const Color(0xFF24434A),
+          color: AppPalette.ink,
           borderRadius: BorderRadius.circular(compact ? 18 : 24),
-          border: Border.all(color: const Color(0xFF3A5A60)),
+          border: Border.all(color: AppPalette.primary),
         ),
         child: Center(
           child: CompanionView(state: CompanionVisualState.idle, size: compact ? 52 : 74),
