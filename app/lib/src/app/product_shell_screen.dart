@@ -428,12 +428,6 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
     }
   }
 
-  Widget _readerShortcut(_HomeSnapshot data) => IconButton(
-    tooltip: 'Son kaynağı oku',
-    icon: const Icon(Icons.menu_book_outlined),
-    onPressed: data.material == null ? null : () => _openSourceReader(data.material!.id),
-  );
-
   Widget _buildNavigationBar(BuildContext context) {
     final compactLabels = MediaQuery.sizeOf(context).width < 360 || MediaQuery.textScalerOf(context).scale(1) > 1.25;
     return NavigationBar(
@@ -515,8 +509,6 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
         final data = snapshot.data!;
         return Column(
           children: [
-            if (_index == 1 && data.material != null)
-              Align(alignment: Alignment.centerRight, child: _readerShortcut(data)),
             Expanded(
               child: IndexedStack(
                 index: _index,
