@@ -208,6 +208,41 @@ void main() {
     expect(find.text('Kod doğrulanamadı. Yeni bir kod isteyebilirsin.'), findsNothing);
   });
 
+  testWidgets('bottom navigation stays usable on narrow large-text layouts', (tester) async {
+    tester.view.physicalSize = const Size(320, 700);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
+    addTearDown(store.close);
+    final runtime = AppRuntime(
+      learner: AppRuntime.localM5LearnerFixture,
+      store: store,
+      ingest: SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor()),
+      recall: RecallLearningService(sourceStore: store, learningStore: store.learningTruthStore()),
+      telemetry: store.operationalTelemetry(),
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: MediaQuery(
+          data: const MediaQueryData(textScaler: TextScaler.linear(1.6)),
+          child: ProductShellScreen(runtime: runtime),
+        ),
+      ),
+    );
+    await pumpUntilFound(tester, find.byType(NavigationBar));
+
+    final navigation = tester.widget<NavigationBar>(find.byType(NavigationBar));
+    expect(navigation.labelBehavior, NavigationDestinationLabelBehavior.onlyShowSelected);
+    expect(find.byIcon(Icons.home_rounded), findsOneWidget);
+    expect(find.byIcon(Icons.library_books_outlined), findsOneWidget);
+    expect(find.byIcon(Icons.insights_outlined), findsOneWidget);
+    expect(find.byIcon(Icons.person_outline_rounded), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('Profile stays available when the learning-library snapshot cannot load', (tester) async {
     final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
     final runtime = AppRuntime(

@@ -422,9 +422,15 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
     onPressed: data.material == null ? null : () => _openSourceReader(data.material!.id),
   );
 
-  Widget _buildNavigationBar() => NavigationBar(
-    selectedIndex: _index,
-    onDestinationSelected: (value) => setState(() => _index = value),
+  Widget _buildNavigationBar(BuildContext context) {
+    final compactLabels =
+        MediaQuery.sizeOf(context).width < 360 || MediaQuery.textScalerOf(context).scale(1) > 1.25;
+    return NavigationBar(
+      selectedIndex: _index,
+      labelBehavior: compactLabels
+          ? NavigationDestinationLabelBehavior.onlyShowSelected
+          : NavigationDestinationLabelBehavior.alwaysShow,
+      onDestinationSelected: (value) => setState(() => _index = value),
     destinations: const [
       NavigationDestination(
         icon: Icon(Icons.home_outlined),
@@ -446,8 +452,9 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
         selectedIcon: Icon(Icons.person_rounded),
         label: 'Profil',
       ),
-    ],
-  );
+      ],
+    );
+  }
 
   Widget _buildBody() {
     if (_index == 3) {
@@ -556,9 +563,9 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
                   ),
                 ),
               ),
-              child: _buildNavigationBar(),
+              child: _buildNavigationBar(context),
             )
-          : _buildNavigationBar(),
+          : _buildNavigationBar(context),
     );
   }
 }
