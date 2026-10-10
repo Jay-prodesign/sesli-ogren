@@ -545,7 +545,11 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
                   ),
                   TickerMode(
                     enabled: _index == 2,
-                    child: ProgressSurface(items: data.progress, onOpenMaterial: _openMaterialNextAction),
+                    child: ProgressSurface(
+                      items: data.progress,
+                      onOpenMaterial: _openMaterialNextAction,
+                      onAddSource: _openLearning,
+                    ),
                   ),
                 ],
               ),
