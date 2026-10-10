@@ -381,17 +381,11 @@ class LivingStudyDeskHome extends StatelessWidget {
   Widget _empty(BuildContext context) => Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
-      const Semantics(
+      Semantics(
         header: true,
-        child: Text(
+        child: const Text(
           'Kendi kaynağını\ncanlandıralım.',
-          style: TextStyle(
-            color: _ink,
-            fontSize: 35,
-            height: 1.12,
-            fontWeight: FontWeight.w800,
-            letterSpacing: -1.3,
-          ),
+          style: TextStyle(color: _ink, fontSize: 35, height: 1.12, fontWeight: FontWeight.w800, letterSpacing: -1.3),
         ),
       ),
       const SizedBox(height: 13),
