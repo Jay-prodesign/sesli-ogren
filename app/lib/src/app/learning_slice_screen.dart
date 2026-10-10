@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import '../domain/learning_contracts.dart';
 import '../domain/learning_truth.dart';
 import '../domain/operational_event.dart';
+import '../generation/supabase_source_summary_gateway.dart';
 import 'app_runtime.dart';
 import 'app_theme.dart';
 import 'companion_view.dart';
@@ -21,12 +22,14 @@ class LearningSliceScreen extends StatefulWidget {
     required this.runtime,
     this.materialId = AppRuntime.primaryMaterialId,
     this.autoAdvanceContinuation = false,
+    this.sourceGateway = const SupabaseSourceSummaryGateway(),
     super.key,
   });
 
   final AppRuntime runtime;
   final MaterialId materialId;
   final bool autoAdvanceContinuation;
+  final SupabaseSourceSummaryGateway sourceGateway;
 
   @override
   State<LearningSliceScreen> createState() => _LearningSliceScreenState();
@@ -179,6 +182,48 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
     await _openRecall();
   }
 
+  Future<_RemoteSourceBinding?> _currentRemoteSourceBinding() async {
+    final source = await widget.runtime.store.currentSourceVersion(
+      learner: widget.runtime.learner,
+      materialId: widget.materialId,
+    );
+    if (source == null) return null;
+    final serverMaterialId = await widget.runtime.store.summaryServerMaterialId(
+      learner: widget.runtime.learner,
+      materialId: widget.materialId,
+      sourceVersionId: source.identity.sourceVersionId,
+    );
+    if (serverMaterialId == null) return null;
+    return _RemoteSourceBinding(
+      sourceVersionId: source.identity.sourceVersionId,
+      serverMaterialId: serverMaterialId,
+    );
+  }
+
+  Future<void> _cleanupSupersededRemoteBinding(
+    _RemoteSourceBinding? previousBinding,
+    SourceVersionId currentSourceVersionId,
+  ) async {
+    if (previousBinding == null || previousBinding.sourceVersionId == currentSourceVersionId) return;
+    try {
+      final removed = await widget.sourceGateway.deleteServerMaterial(previousBinding.serverMaterialId);
+      if (!removed) return;
+      await widget.runtime.store.clearSummaryJob(
+        learner: widget.runtime.learner,
+        materialId: widget.materialId,
+        sourceVersionId: previousBinding.sourceVersionId,
+      );
+      await widget.runtime.store.clearServerMaterialBinding(
+        learner: widget.runtime.learner,
+        materialId: widget.materialId,
+        sourceVersionId: previousBinding.sourceVersionId,
+      );
+    } catch (_) {
+      // The new local source is already authoritative. Keep any stale local
+      // binding as a cleanup marker so Explain/Focus/Recap can retry fail-closed.
+    }
+  }
+
   Future<void> _pickPdf() async {
     if (_busy) return;
     PlatformFile? file;
@@ -211,6 +256,7 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
       _inlineError = null;
     });
     try {
+      final previousBinding = await _currentRemoteSourceBinding();
       final bytes = await file.readAsBytes();
       final ingestResult = await widget.runtime.ingest.ingestPdf(
         learner: widget.runtime.learner,
@@ -228,6 +274,10 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
           durationMs: stopwatch.elapsedMilliseconds,
           createdAt: DateTime.now().toUtc(),
         ),
+      );
+      await _cleanupSupersededRemoteBinding(
+        previousBinding,
+        ingestResult.sourceVersion.identity.sourceVersionId,
       );
       if (!mounted) return;
       await _completeSourceIngest();
@@ -288,6 +338,7 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
       _inlineError = null;
     });
     try {
+      final previousBinding = await _currentRemoteSourceBinding();
       final ingestResult = await widget.runtime.ingest.ingestPastedText(
         learner: widget.runtime.learner,
         materialId: widget.materialId,
@@ -306,6 +357,10 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
           durationMs: stopwatch.elapsedMilliseconds,
           createdAt: DateTime.now().toUtc(),
         ),
+      );
+      await _cleanupSupersededRemoteBinding(
+        previousBinding,
+        ingestResult.sourceVersion.identity.sourceVersionId,
       );
       if (!mounted) return;
       await _completeSourceIngest();
@@ -1706,6 +1761,13 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
     RecallOutcome.incorrect => 'Bu kez eşleşmedi. Bu bir etiket değil; yalnızca bu denemenin sonucu.',
     RecallOutcome.unknown => 'Bu denemede değerlendirilebilir bir yanıt yok. Durumun bilinmiyor olarak kaldı.',
   };
+}
+
+class _RemoteSourceBinding {
+  const _RemoteSourceBinding({required this.sourceVersionId, required this.serverMaterialId});
+
+  final SourceVersionId sourceVersionId;
+  final String serverMaterialId;
 }
 
 class _FocusedSourceReview {

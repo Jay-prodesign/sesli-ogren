@@ -22,6 +22,7 @@ import 'package:sesli_ogren/src/domain/authenticated_learner.dart';
 import 'package:sesli_ogren/src/domain/learning_truth.dart';
 import 'package:sesli_ogren/src/domain/learning_contracts.dart';
 import 'package:sesli_ogren/src/domain/operational_event.dart';
+import 'package:sesli_ogren/src/generation/supabase_source_summary_gateway.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 class _UnusedPdfExtractor implements PdfTextExtractor {
@@ -106,6 +107,16 @@ class _UnknownUsageOverviewGateway implements AccountOverviewGateway {
       AccountUsageEntry(periodStart: DateTime.utc(2026, 10, 1), capability: 'internal_future_capability', consumed: 7),
     ],
   );
+}
+
+class _RecordingSourceCleanupGateway extends SupabaseSourceSummaryGateway {
+  final List<String> deletedMaterialIds = <String>[];
+
+  @override
+  Future<bool> deleteServerMaterial(String serverMaterialId) async {
+    deletedMaterialIds.add(serverMaterialId);
+    return true;
+  }
 }
 
 class _FakeSpeechOutput implements SpeechOutput {
@@ -1509,6 +1520,93 @@ void main() {
 
     await pumpUntilFound(tester, find.text('Bu bölümü yeniden kur'));
     expect(find.text('Kaynağı kapat ve yeniden dene'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('source replacement proactively removes the superseded server mirror', (tester) async {
+    usePhoneViewport(tester);
+    final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
+    addTearDown(store.close);
+    final ingest = SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor());
+    final recall = RecallLearningService(sourceStore: store, learningStore: store.learningTruthStore());
+    final runtime = AppRuntime(
+      learner: AppRuntime.localM5LearnerFixture,
+      store: store,
+      ingest: ingest,
+      recall: recall,
+      telemetry: store.operationalTelemetry(),
+    );
+    final gateway = _RecordingSourceCleanupGateway();
+
+    final original = await ingest.ingestPastedText(
+      learner: runtime.learner,
+      materialId: AppRuntime.primaryMaterialId,
+      text: 'Eski kaynak metni fotosentez hakkında bilgi verir ve artık değiştirilecektir.',
+      sourceName: 'Eski kaynak',
+    );
+    await store.saveSummaryJob(
+      learner: runtime.learner,
+      materialId: AppRuntime.primaryMaterialId,
+      sourceVersionId: original.sourceVersion.identity.sourceVersionId,
+      serverMaterialId: '55555555-5555-4555-8555-555555555555',
+      jobId: '66666666-6666-4666-8666-666666666666',
+    );
+    final prompt = await recall.createCurrentPrompt(
+      learner: runtime.learner,
+      materialId: AppRuntime.primaryMaterialId,
+    );
+    final session = await recall.openAttempt(learner: runtime.learner, actionId: prompt.id);
+    await recall.submit(
+      learner: runtime.learner,
+      actionId: prompt.id,
+      attemptId: session.attempt.attemptId,
+      disposition: RecallResponseDisposition.unknown,
+      answer: '',
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: MediaQuery(
+          data: const MediaQueryData(disableAnimations: true),
+          child: LearningSliceScreen(runtime: runtime, sourceGateway: gateway),
+        ),
+      ),
+    );
+    await pumpUntilFound(tester, find.text('Materyali güncelle'));
+    await tapVisible(tester, find.text('Materyali güncelle'));
+    await pumpUntilFound(tester, find.text('Metin yapıştır'));
+    await tapVisible(tester, find.text('Metin yapıştır'));
+    await tester.enterText(
+      find.byKey(const ValueKey('pasted-material-text')),
+      'Yeni kaynak sürümü mitokondri ve hücresel solunum hakkında ayrı bilgi verir.',
+    );
+    await tapVisible(tester, find.text('Yeni sürümü ekle ve aç'));
+    for (var i = 0; i < 80 && gateway.deletedMaterialIds.isEmpty; i++) {
+      await tester.pump(const Duration(milliseconds: 20));
+    }
+
+    final current = await store.currentSourceVersion(
+      learner: runtime.learner,
+      materialId: AppRuntime.primaryMaterialId,
+    );
+    expect(current, isNotNull);
+    expect(current!.identity.sourceVersionId, isNot(original.sourceVersion.identity.sourceVersionId));
+    expect(gateway.deletedMaterialIds, ['55555555-5555-4555-8555-555555555555']);
+    expect(
+      await store.summaryServerMaterialId(
+        learner: runtime.learner,
+        materialId: AppRuntime.primaryMaterialId,
+      ),
+      isNull,
+    );
+    expect(
+      await store.summaryJobId(
+        learner: runtime.learner,
+        materialId: AppRuntime.primaryMaterialId,
+        sourceVersionId: original.sourceVersion.identity.sourceVersionId,
+      ),
+      isNull,
+    );
     expect(tester.takeException(), isNull);
   });
 

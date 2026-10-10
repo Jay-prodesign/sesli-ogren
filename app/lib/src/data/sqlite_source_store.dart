@@ -543,22 +543,37 @@ FROM summary_jobs
     return changed == 1;
   }
 
-  Future<void> clearSummaryJob({required AuthenticatedLearner learner, required MaterialId materialId}) async {
+  Future<void> clearSummaryJob({
+    required AuthenticatedLearner learner,
+    required MaterialId materialId,
+    SourceVersionId? sourceVersionId,
+  }) async {
+    final scoped = sourceVersionId != null;
     await _database.delete(
       'summary_jobs',
-      where: 'learner_id = ? AND material_id = ?',
-      whereArgs: [learner.id.value, materialId.value],
+      where: scoped
+          ? 'learner_id = ? AND material_id = ? AND source_version_id = ?'
+          : 'learner_id = ? AND material_id = ?',
+      whereArgs: scoped
+          ? [learner.id.value, materialId.value, sourceVersionId.value]
+          : [learner.id.value, materialId.value],
     );
   }
 
   Future<void> clearServerMaterialBinding({
     required AuthenticatedLearner learner,
     required MaterialId materialId,
+    SourceVersionId? sourceVersionId,
   }) async {
+    final scoped = sourceVersionId != null;
     await _database.delete(
       'server_material_bindings',
-      where: 'learner_id = ? AND material_id = ?',
-      whereArgs: [learner.id.value, materialId.value],
+      where: scoped
+          ? 'learner_id = ? AND material_id = ? AND source_version_id = ?'
+          : 'learner_id = ? AND material_id = ?',
+      whereArgs: scoped
+          ? [learner.id.value, materialId.value, sourceVersionId.value]
+          : [learner.id.value, materialId.value],
     );
   }
 
