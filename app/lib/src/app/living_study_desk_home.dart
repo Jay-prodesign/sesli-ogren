@@ -444,14 +444,30 @@ class LivingStudyDeskHome extends StatelessWidget {
           const SizedBox(height: 22),
           const Divider(color: _line),
           const SizedBox(height: 13),
-          const Text(
-            'Diğer materyallerin',
-            style: TextStyle(color: _ink, fontSize: 17, fontWeight: FontWeight.w900),
+          Row(
+            children: [
+              const Expanded(
+                child: Text(
+                  'Diğer materyallerin',
+                  style: TextStyle(color: _ink, fontSize: 17, fontWeight: FontWeight.w900),
+                ),
+              ),
+              Text(
+                'KALDIĞIN YERDEN',
+                style: TextStyle(
+                  color: _accent.withValues(alpha: 0.82),
+                  fontSize: 9,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: 0.7,
+                ),
+              ),
+            ],
           ),
           const SizedBox(height: 5),
           for (final item in otherMaterials.take(3))
-            Material(
-              color: Colors.transparent,
+            Semantics(
+              button: true,
+              label: '${item.title} materyalinde kaldığın öğrenme adımına devam et',
               child: ListTile(
                 contentPadding: EdgeInsets.zero,
                 leading: Icon(
@@ -459,6 +475,7 @@ class LivingStudyDeskHome extends StatelessWidget {
                   color: _accent,
                 ),
                 title: Text(item.title, maxLines: 2, overflow: TextOverflow.ellipsis),
+                subtitle: const Text('Sıradaki öğrenme adımını aç'),
                 trailing: const Icon(Icons.chevron_right_rounded, color: _sub),
                 onTap: () => onOpenMaterial(item.id),
               ),
