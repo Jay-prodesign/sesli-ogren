@@ -158,6 +158,14 @@ class AtelierWorkspace extends StatelessWidget {
     };
   }
 
+  String get _sourcePreview {
+    final normalized = sourceText.trim().replaceAll(RegExp(r'\s+'), ' ');
+    if (normalized.length <= 640) return normalized;
+    return '${normalized.substring(0, 637).trimRight()}…';
+  }
+
+  bool get _sourcePreviewIsTrimmed => sourceText.trim().replaceAll(RegExp(r'\s+'), ' ').length > 640;
+
   @override
   Widget build(BuildContext context) => ColoredBox(
     key: const ValueKey('la0040-atelier-workspace'),
@@ -245,7 +253,7 @@ class AtelierWorkspace extends StatelessWidget {
                           SizedBox(width: 8),
                           Expanded(
                             child: Text(
-                              'KAYNAĞINDAN ÇIKARILAN METİN',
+                              'KAYNAK ÖNİZLEMESİ',
                               softWrap: true,
                               style: TextStyle(
                                 color: AtelierStyle.teal,
@@ -259,9 +267,16 @@ class AtelierWorkspace extends StatelessWidget {
                       ),
                       const SizedBox(height: 17),
                       SelectableText(
-                        sourceText,
+                        _sourcePreview,
                         style: const TextStyle(color: AtelierStyle.ink, fontSize: 18, height: 1.65),
                       ),
+                      if (_sourcePreviewIsTrimmed) ...[
+                        const SizedBox(height: 14),
+                        const Text(
+                          'Bu yalnızca önizleme. Kaynağın tamamı “Tam metni oku” ile Reader’da açılır.',
+                          style: TextStyle(color: AtelierStyle.muted, fontSize: 12, height: 1.35),
+                        ),
+                      ],
                     ],
                   ),
                 ),
@@ -269,48 +284,55 @@ class AtelierWorkspace extends StatelessWidget {
           ),
         ),
         Container(
-          padding: const EdgeInsets.fromLTRB(17, 10, 17, 14),
+          padding: const EdgeInsets.fromLTRB(17, 12, 17, 14),
           decoration: const BoxDecoration(
             color: AtelierStyle.ink,
             borderRadius: BorderRadius.vertical(top: Radius.circular(21)),
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          _activeStepTitle,
-                          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w900),
-                        ),
-                        const SizedBox(height: 3),
-                        Text(
-                          _activeStepReason,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(color: Color(0xFFC7D5D2), fontSize: 12, height: 1.3),
-                        ),
-                      ],
+                  Icon(_activeStepIcon, color: AtelierStyle.mark, size: 18),
+                  const SizedBox(width: 7),
+                  const Text(
+                    'SIRADAKİ GERÇEK ADIM',
+                    style: TextStyle(
+                      color: AtelierStyle.mark,
+                      fontSize: 10,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: 0.8,
                     ),
-                  ),
-                  const SizedBox(width: 8),
-                  TextButton(
-                    onPressed: onExplain,
-                    style: TextButton.styleFrom(foregroundColor: Colors.white),
-                    child: const Text('Açıkla'),
-                  ),
-                  IconButton(
-                    onPressed: onFocus,
-                    tooltip: 'Odaklan',
-                    icon: const Icon(Icons.center_focus_strong, color: Colors.white),
                   ),
                 ],
               ),
+              const SizedBox(height: 6),
+              Text(
+                _activeStepTitle,
+                style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w900, fontSize: 17),
+              ),
+              const SizedBox(height: 3),
+              Text(
+                _activeStepReason,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(color: Color(0xFFC7D5D2), fontSize: 12, height: 1.3),
+              ),
+              const SizedBox(height: 10),
+              FilledButton.icon(
+                key: const ValueKey('la0040-atelier-workspace-recall'),
+                onPressed: onRecall,
+                style: FilledButton.styleFrom(
+                  backgroundColor: AtelierStyle.mark,
+                  foregroundColor: AtelierStyle.ink,
+                  minimumSize: const Size.fromHeight(48),
+                ),
+                icon: Icon(_activeStepIcon),
+                label: Text(_activeStepLabel),
+              ),
+              const SizedBox(height: 7),
               Row(
                 children: [
                   Expanded(
@@ -325,24 +347,22 @@ class AtelierWorkspace extends StatelessWidget {
                       ),
                     ),
                   ),
-                  const SizedBox(width: 9),
-                  Expanded(
-                    child: FilledButton.icon(
-                      key: const ValueKey('la0040-atelier-workspace-recall'),
-                      onPressed: onRecall,
-                      style: FilledButton.styleFrom(
-                        backgroundColor: AtelierStyle.mark,
-                        foregroundColor: AtelierStyle.ink,
-                      ),
-                      icon: Icon(_activeStepIcon),
-                      label: Text(_activeStepLabel),
-                    ),
+                  const SizedBox(width: 7),
+                  TextButton(
+                    onPressed: onExplain,
+                    style: TextButton.styleFrom(foregroundColor: Colors.white),
+                    child: const Text('Açıkla'),
+                  ),
+                  IconButton(
+                    onPressed: onFocus,
+                    tooltip: 'Odaklan',
+                    icon: const Icon(Icons.center_focus_strong, color: Colors.white),
                   ),
                 ],
               ),
-              const SizedBox(height: 7),
+              const SizedBox(height: 4),
               const Text(
-                'Bu akışta öğrenme durumunu aktif Hatırla denemesi günceller; okuma ve dinleme hazırlık olarak kalır.',
+                'Okuma ve dinleme hazırlık; öğrenme durumunu aktif Hatırla denemesi günceller.',
                 textAlign: TextAlign.center,
                 style: TextStyle(color: Color(0xFFB6C8C4), fontSize: 11, height: 1.35),
               ),
@@ -395,22 +415,26 @@ class AtelierLearningRail extends StatelessWidget {
           ),
           child: LayoutBuilder(
             builder: (context, constraints) {
-              final compact = constraints.maxWidth < 320 || MediaQuery.textScalerOf(context).scale(1) > 1.25;
+              final compact = constraints.maxWidth < 360 || MediaQuery.textScalerOf(context).scale(1) > 1.2;
               if (compact) {
-                return Wrap(
-                  spacing: 6,
-                  runSpacing: 6,
+                return Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    for (var index = 0; index < steps.length; index++)
-                      _AtelierLearningRailStep(
-                        icon: steps[index].$1,
-                        label: steps[index].$2,
-                        state: index < _activeIndex
-                            ? _AtelierLearningRailState.done
-                            : index == _activeIndex
-                            ? _AtelierLearningRailState.active
-                            : _AtelierLearningRailState.upcoming,
+                    for (var index = 0; index < steps.length; index++) ...[
+                      Expanded(
+                        child: _AtelierLearningRailCompactStep(
+                          icon: steps[index].$1,
+                          label: steps[index].$2,
+                          state: index < _activeIndex
+                              ? _AtelierLearningRailState.done
+                              : index == _activeIndex
+                              ? _AtelierLearningRailState.active
+                              : _AtelierLearningRailState.upcoming,
+                        ),
                       ),
+                      if (index != steps.length - 1)
+                        _AtelierLearningRailLine(done: index < _activeIndex, width: 8, topMargin: 14),
+                    ],
                   ],
                 );
               }
@@ -478,16 +502,57 @@ class _AtelierLearningRailStep extends StatelessWidget {
   }
 }
 
+class _AtelierLearningRailCompactStep extends StatelessWidget {
+  const _AtelierLearningRailCompactStep({required this.icon, required this.label, required this.state});
+
+  final IconData icon;
+  final String label;
+  final _AtelierLearningRailState state;
+
+  @override
+  Widget build(BuildContext context) {
+    final active = state == _AtelierLearningRailState.active;
+    final done = state == _AtelierLearningRailState.done;
+    final foreground = active || done ? AtelierStyle.teal : AtelierStyle.muted;
+    final background = active
+        ? AtelierStyle.mark
+        : done
+        ? AtelierStyle.mint
+        : AtelierStyle.canvas;
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          width: 28,
+          height: 28,
+          decoration: BoxDecoration(color: background, shape: BoxShape.circle),
+          alignment: Alignment.center,
+          child: Icon(done ? Icons.check_rounded : icon, color: foreground, size: 14),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          label,
+          maxLines: 1,
+          textAlign: TextAlign.center,
+          style: TextStyle(color: foreground, fontSize: 8.5, fontWeight: FontWeight.w900, letterSpacing: 0.2),
+        ),
+      ],
+    );
+  }
+}
+
 class _AtelierLearningRailLine extends StatelessWidget {
-  const _AtelierLearningRailLine({required this.done});
+  const _AtelierLearningRailLine({required this.done, this.width = 12, this.topMargin = 0});
 
   final bool done;
+  final double width;
+  final double topMargin;
 
   @override
   Widget build(BuildContext context) => Container(
-    width: 12,
+    width: width,
     height: 2,
-    margin: const EdgeInsets.symmetric(horizontal: 3),
+    margin: EdgeInsets.fromLTRB(3, topMargin, 3, 0),
     color: done ? AtelierStyle.teal : AtelierStyle.line,
   );
 }
