@@ -887,6 +887,40 @@ void main() {
     expect(copiedSupportEmail, 'destek@example.com');
   });
 
+  testWidgets('Profile keeps support usable when clipboard write fails', (tester) async {
+    final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
+    addTearDown(store.close);
+    final runtime = AppRuntime(
+      learner: AppRuntime.localM5LearnerFixture,
+      store: store,
+      ingest: SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor()),
+      recall: RecallLearningService(sourceStore: store, learningStore: store.learningTruthStore()),
+      telemetry: store.operationalTelemetry(),
+      accountOverview: const _ReadyAccountOverviewGateway(),
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: ProfileSurface(
+            runtime: runtime,
+            supportEmail: 'destek@example.com',
+            clipboardWriter: (_) async => throw StateError('clipboard unavailable'),
+          ),
+        ),
+      ),
+    );
+    await pumpUntilFound(tester, find.text('Profil ve Ayarlar'));
+    await tester.drag(find.byType(Scrollable).last, const Offset(0, -900));
+    await tester.pump(const Duration(milliseconds: 300));
+
+    await tapVisible(tester, find.text('Destek e-postasını kopyala'));
+    await tester.pump(const Duration(milliseconds: 100));
+
+    expect(find.textContaining('Destek e-postası kopyalanamadı'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('Profile fails closed when support contact is not configured', (tester) async {
     final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
     addTearDown(store.close);

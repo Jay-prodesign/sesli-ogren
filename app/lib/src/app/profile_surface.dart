@@ -108,14 +108,21 @@ class _ProfileSurfaceState extends State<ProfileSurface> {
   Future<void> _copySupportEmail() async {
     final email = _supportEmail;
     if (email == null) return;
-    final writer = widget.clipboardWriter;
-    if (writer == null) {
-      await Clipboard.setData(ClipboardData(text: email));
-    } else {
-      await writer(email);
+    try {
+      final writer = widget.clipboardWriter;
+      if (writer == null) {
+        await Clipboard.setData(ClipboardData(text: email));
+      } else {
+        await writer(email);
+      }
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Destek e-postası kopyalandı.')));
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Destek e-postası kopyalanamadı. Adresi seçip tekrar deneyebilirsin.')),
+      );
     }
-    if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Destek e-postası kopyalandı.')));
   }
 
   Future<void> _deleteAccount() async {
