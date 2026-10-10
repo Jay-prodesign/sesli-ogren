@@ -250,13 +250,30 @@ class RecallTruthPolicy {
     }
 
     final normalizedExpected = normalizeAnswer(expectedAnswer);
-    if (normalizedAnswer == normalizedExpected) {
+    if (_sameBoundedConcept(normalizedAnswer, normalizedExpected)) {
       return assistance == RecallAssistance.hint ? RecallOutcome.helpedCorrect : RecallOutcome.correct;
     }
     if (normalizedExpected.length >= 5 && editDistance(normalizedAnswer, normalizedExpected) <= 1) {
       return RecallOutcome.partial;
     }
     return RecallOutcome.incorrect;
+  }
+
+  static bool _sameBoundedConcept(String response, String expected) {
+    if (response == expected) return true;
+    final responseStem = _withoutTurkishPlural(response);
+    final expectedStem = _withoutTurkishPlural(expected);
+    return responseStem != null && responseStem == expected ||
+        expectedStem != null && expectedStem == response;
+  }
+
+  static String? _withoutTurkishPlural(String value) {
+    if (value.length < 7) return null;
+    if (value.endsWith('lar') || value.endsWith('ler')) {
+      final stem = value.substring(0, value.length - 3);
+      return stem.length >= 4 ? stem : null;
+    }
+    return null;
   }
 
   static String normalizeAnswer(String value) {

@@ -117,7 +117,7 @@ class RecallLearningService {
     final firstCharacter = action.expectedAnswer.substring(0, 1);
     return RecallSupport(
       kind: RecallSupportKind.hint,
-      text: 'İlk harf: $firstCharacter · ${action.expectedAnswer.length} harf',
+      text: 'İlk harf: $firstCharacter · kaynaktaki biçim ${action.expectedAnswer.length} harf',
       assistance: assistance,
     );
   }

@@ -260,6 +260,36 @@ void main() {
     );
   });
 
+  test('Turkish singular concept is accepted for a plural source token', () {
+    expect(
+      RecallTruthPolicy.evaluate(
+        expectedAnswer: 'Ribozomlar',
+        response: 'Ribozom',
+        disposition: RecallResponseDisposition.answer,
+        assistance: RecallAssistance.none,
+      ),
+      RecallOutcome.correct,
+    );
+    expect(
+      RecallTruthPolicy.evaluate(
+        expectedAnswer: 'Bitkiler',
+        response: 'Bitki',
+        disposition: RecallResponseDisposition.answer,
+        assistance: RecallAssistance.hint,
+      ),
+      RecallOutcome.helpedCorrect,
+    );
+    expect(
+      RecallTruthPolicy.evaluate(
+        expectedAnswer: 'Klorofil',
+        response: 'Kloro',
+        disposition: RecallResponseDisposition.answer,
+        assistance: RecallAssistance.none,
+      ),
+      RecallOutcome.incorrect,
+    );
+  });
+
   test('near answer is partial rather than silently correct', () async {
     final prompt = await recall.createCurrentPrompt(learner: learnerA, materialId: materialId);
     final action = await storedAction(prompt);
