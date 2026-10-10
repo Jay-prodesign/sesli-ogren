@@ -114,13 +114,14 @@ void main() {
     var learningOpens = 0;
     await pumpHome(
       tester,
-      continuation: continuationFor(RecallOutcome.unknown, RecallStateKind.needsReview),
+      continuation: continuationFor(RecallOutcome.unknown, RecallStateKind.notAssessed),
       onOpenWorkspace: () => workspaceOpens++,
       onOpenLearning: () => learningOpens++,
     );
 
-    expect(find.text('Son deneme kaynak onarımı istiyor'), findsOneWidget);
-    expect(find.textContaining('Yanlış eşleşme bir etiket değil'), findsOneWidget);
+    expect(find.text('Henüz bağımsız geri çağırma kanıtı yok'), findsOneWidget);
+    expect(find.textContaining('Bilmiyorum demek veya yanıtı görmek'), findsOneWidget);
+    expect(find.text('DENEMEN KAYITLI · SIRADAKİ ADIM'), findsOneWidget);
     expect(find.text('Kaynağa dön, sonra yeniden dene'), findsOneWidget);
     expect(find.text('Kaynağı gözden geçir'), findsOneWidget);
     final cta = find.byKey(const ValueKey('la0040-living-continue'));

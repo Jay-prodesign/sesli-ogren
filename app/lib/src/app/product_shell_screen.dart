@@ -1232,7 +1232,11 @@ class _LibraryMaterialCard extends StatelessWidget {
     final mediaLabel = material.mediaType == SourceMediaType.pdf ? 'PDF' : 'Metin';
     final state = continuation?.state.kind ?? RecallStateKind.notAssessed;
     final (stateLabel, stateSoft, stateAccent) = switch (state) {
-      RecallStateKind.notAssessed => ('Henüz ölçülmedi', AppPalette.surfaceMuted, AppPalette.inkMuted),
+      RecallStateKind.notAssessed => (
+        continuation == null ? 'Henüz ölçülmedi' : 'Bağımsız kanıt yok',
+        AppPalette.surfaceMuted,
+        AppPalette.inkMuted,
+      ),
       RecallStateKind.developing => ('Gelişiyor', AppPalette.primarySoft, AppPalette.primary),
       RecallStateKind.retrievedOnce => ('Bir kez bağımsız hatırlandı', AppPalette.successSoft, AppPalette.success),
       RecallStateKind.needsReview => ('Tekrar gerekiyor', AppPalette.attentionSoft, AppPalette.attention),

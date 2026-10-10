@@ -142,7 +142,7 @@ class _ProgressCard extends StatelessWidget {
     final living = LivingDeskReviewScope.active(context);
     final state = item.continuation?.state.kind ?? RecallStateKind.notAssessed;
     final label = switch (state) {
-      RecallStateKind.notAssessed => 'Henüz ölçülmedi',
+      RecallStateKind.notAssessed => item.continuation == null ? 'Henüz ölçülmedi' : 'Bağımsız kanıt yok',
       RecallStateKind.developing => 'Gelişiyor',
       RecallStateKind.retrievedOnce => 'Bir kez bağımsız hatırlandı',
       RecallStateKind.needsReview => 'Tekrar gerekiyor',

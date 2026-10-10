@@ -222,7 +222,7 @@ class LivingStudyDeskHome extends StatelessWidget {
   Widget _populated(BuildContext context) {
     final current = material!;
     final hasRecallEvidence = continuation != null && continuation!.state.kind != RecallStateKind.notAssessed;
-    final hasActiveContinuation = hasRecallEvidence || _hasListenResume;
+    final hasActiveContinuation = continuation != null || _hasReaderResume || _hasListenResume;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
