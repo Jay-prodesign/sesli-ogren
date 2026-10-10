@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:sesli_ogren/src/app/app_theme.dart';
 import 'package:sesli_ogren/src/app/companion_view.dart';
 import 'package:sesli_ogren/src/app/living_study_desk_home.dart';
 
@@ -35,6 +36,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         debugShowCheckedModeBanner: false,
+        theme: SesliOgrenTheme.light(),
         home: Scaffold(
           body: LivingStudyDeskHome(
             material: null,
@@ -79,7 +81,8 @@ void main() {
 
   testWidgets('D/Knot honors reduced motion and exposes the correct state', (tester) async {
     await tester.pumpWidget(
-      const MaterialApp(
+      MaterialApp(
+        theme: SesliOgrenTheme.light(),
         home: MediaQuery(
           data: MediaQueryData(disableAnimations: true),
           child: Scaffold(body: CompanionView(state: CompanionVisualState.think)),
@@ -93,7 +96,8 @@ void main() {
 
   testWidgets('D/Knot stops its motion when the scene is inactive', (tester) async {
     await tester.pumpWidget(
-      const MaterialApp(
+      MaterialApp(
+        theme: SesliOgrenTheme.light(),
         home: TickerMode(
           enabled: false,
           child: Scaffold(body: CompanionView(state: CompanionVisualState.idle)),
