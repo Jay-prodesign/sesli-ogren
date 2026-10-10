@@ -7,6 +7,7 @@ import '../domain/authenticated_learner.dart';
 import 'account_entry_screen.dart';
 import 'app_runtime.dart';
 import 'app_theme.dart';
+import 'atelier_learning_surfaces.dart';
 import 'companion_view.dart';
 import 'first_run_onboarding.dart';
 import 'product_shell_screen.dart';
@@ -237,22 +238,22 @@ class _RuntimeErrorScreen extends StatelessWidget {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       const CompanionView(state: CompanionVisualState.correct, size: 96),
-                  const SizedBox(height: 20),
-                  Text(
+                      const SizedBox(height: 20),
+                      Text(
                     error is LearnerAuthConfigurationException
                         ? 'Uygulama bağlantısı henüz yapılandırılmadı.'
                         : 'Güvenli öğrenme oturumu açılamadı.',
                     style: Theme.of(context).textTheme.titleLarge,
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 10),
-                  Text(
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 10),
+                      Text(
                     error is LearnerAuthConfigurationException
                         ? 'Öğrenme verisi açılmadı. Güvenli bağlantı yapılandırması gerekiyor.'
                         : 'Öğrenme verisi açılmadan yeniden deneyebilirsin.',
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 20),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 20),
                       FilledButton(
                         style: FilledButton.styleFrom(
                           backgroundColor: AtelierStyle.teal,
