@@ -437,10 +437,8 @@ class _AccountOverviewLoadingCard extends StatelessWidget {
                     children: [
                       Text(
                         'Hesap alanın hazırlanıyor',
-                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w800,
-                        ),
+                        style: Theme.of(context).textTheme.titleLarge
+                            ?.copyWith(color: Colors.white, fontWeight: FontWeight.w800),
                       ),
                       const SizedBox(height: 5),
                       Text(
