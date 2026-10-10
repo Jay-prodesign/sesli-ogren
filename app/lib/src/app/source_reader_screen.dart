@@ -327,6 +327,12 @@ class _SourceReaderScreenState extends State<SourceReaderScreen> {
                         IconButton.filledTonal(
                           tooltip: 'Kaynağı dinle',
                           onPressed: widget.onListen,
+                          style: living
+                              ? IconButton.styleFrom(
+                                  foregroundColor: AtelierStyle.teal,
+                                  backgroundColor: AtelierStyle.mint,
+                                )
+                              : null,
                           icon: const Icon(Icons.headphones_rounded),
                         ),
                       if (widget.onListen != null && (widget.onRecap != null || widget.onRecall != null))
@@ -335,6 +341,12 @@ class _SourceReaderScreenState extends State<SourceReaderScreen> {
                         IconButton.filledTonal(
                           tooltip: 'Hızlı özet',
                           onPressed: widget.onRecap,
+                          style: living
+                              ? IconButton.styleFrom(
+                                  foregroundColor: AtelierStyle.teal,
+                                  backgroundColor: AtelierStyle.mint,
+                                )
+                              : null,
                           icon: const Icon(Icons.auto_awesome),
                         ),
                       if (widget.onRecap != null && widget.onRecall != null) const SizedBox(width: 10),

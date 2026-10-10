@@ -82,12 +82,18 @@ class AtelierWorkspace extends StatelessWidget {
                     OutlinedButton.icon(
                       key: const ValueKey('la0040-atelier-workspace-reader'),
                       onPressed: onReadSource,
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: AtelierStyle.teal,
+                        backgroundColor: AtelierStyle.paper,
+                        side: const BorderSide(color: AtelierStyle.line),
+                      ),
                       icon: const Icon(Icons.menu_book_outlined),
                       label: const Text('Tam metni oku'),
                     ),
                     TextButton.icon(
                       key: const ValueKey('la0040-atelier-workspace-recap'),
                       onPressed: onQuickRecap,
+                      style: TextButton.styleFrom(foregroundColor: AtelierStyle.teal),
                       icon: const Icon(Icons.auto_awesome_outlined),
                       label: const Text('Hızlı özet'),
                     ),
