@@ -564,7 +564,6 @@ class LivingStudyDeskHome extends StatelessWidget {
                     backgroundColor: _mark,
                     foregroundColor: _ink,
                     minimumSize: const Size.fromHeight(54),
-                    textStyle: const TextStyle(fontSize: 15, fontWeight: FontWeight.w900),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(13)),
                   ),
                 ),
