@@ -1131,14 +1131,10 @@ class _LibrarySurfaceState extends State<_LibrarySurface> {
         ],
         LayoutBuilder(
           builder: (context, constraints) {
-            final compactHeader =
-                constraints.maxWidth < 340 || MediaQuery.textScalerOf(context).scale(1) > 1.25;
+            final compactHeader = constraints.maxWidth < 340 || MediaQuery.textScalerOf(context).scale(1) > 1.25;
             final title = Text(
               'Kütüphane',
-              style: theme.textTheme.headlineMedium?.copyWith(
-                color: ink,
-                fontWeight: living ? FontWeight.w900 : null,
-              ),
+              style: theme.textTheme.headlineMedium?.copyWith(color: ink, fontWeight: living ? FontWeight.w900 : null),
             );
             final count = widget.data.materials.isEmpty
                 ? null
@@ -1152,12 +1148,18 @@ class _LibrarySurfaceState extends State<_LibrarySurface> {
               return Column(
                 key: const ValueKey('library-header-stacked'),
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children: [title, if (count != null) ...[const SizedBox(height: 6), count]],
+                children: [
+                  title,
+                  if (count != null) ...[const SizedBox(height: 6), count],
+                ],
               );
             }
             return Row(
               crossAxisAlignment: CrossAxisAlignment.end,
-              children: [Expanded(child: title), if (count != null) count],
+              children: [
+                Expanded(child: title),
+                if (count != null) count,
+              ],
             );
           },
         ),
