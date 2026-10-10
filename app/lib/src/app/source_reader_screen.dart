@@ -515,16 +515,16 @@ class _SourceReaderScreenState extends State<SourceReaderScreen> {
                             key: const ValueKey('reader-learning-actions-stacked'),
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
-                              if (primaryAction != null) primaryAction,
+                              ?primaryAction,
                               if (primaryAction != null && listenAction != null) const SizedBox(height: 8),
-                              if (listenAction != null) listenAction,
+                              ?listenAction,
                             ],
                           );
                         }
 
                         return Row(
                           children: [
-                            if (listenAction != null) listenAction,
+                            ?listenAction,
                             if (listenAction != null && primaryAction != null) const SizedBox(width: 10),
                             if (primaryAction != null) Expanded(child: primaryAction),
                           ],
