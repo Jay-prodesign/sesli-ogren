@@ -86,6 +86,8 @@ void main() {
     expect(scrollable.position.maxScrollExtent, greaterThan(0));
     final restored = scrollable.position.pixels / scrollable.position.maxScrollExtent;
     expect(restored, closeTo(0.5, 0.08));
+    expect(find.byKey(const ValueKey('reader-resume-restored')), findsOneWidget);
+    expect(find.text('Kaldığın yer geri açıldı · %50'), findsOneWidget);
 
     await tester.drag(find.byType(Scrollable).last, const Offset(0, -240));
     await tester.pump();

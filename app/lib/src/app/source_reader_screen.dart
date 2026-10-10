@@ -152,6 +152,7 @@ class _SourceReaderScreenState extends State<SourceReaderScreen> {
     final line = living ? AtelierStyle.line : theme.colorScheme.outlineVariant;
     final paper = living ? AtelierStyle.paper : theme.colorScheme.surface;
     final canvas = living ? AtelierStyle.canvas : theme.colorScheme.surface;
+    final restoredFromSavedPosition = widget.initialProgress > 0.02 && widget.initialProgress < 0.95;
 
     final spans = <TextSpan>[];
     if (matches.isEmpty) {
@@ -313,6 +314,36 @@ class _SourceReaderScreenState extends State<SourceReaderScreen> {
                 ),
               ),
             if (source.isNotEmpty) ...[
+              if (restoredFromSavedPosition)
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
+                  child: Semantics(
+                    liveRegion: true,
+                    child: Container(
+                      key: const ValueKey('reader-resume-restored'),
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
+                      decoration: BoxDecoration(
+                        color: living ? AtelierStyle.mint : theme.colorScheme.secondaryContainer,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(Icons.history_rounded, size: 18, color: accent),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              'Kaldığın yer geri açıldı · %${(widget.initialProgress * 100).round()}',
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: ink,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
               Padding(
                 padding: const EdgeInsets.fromLTRB(20, 8, 20, 4),
                 child: Row(
