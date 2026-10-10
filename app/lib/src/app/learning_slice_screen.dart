@@ -50,6 +50,7 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
   bool _answerWasRevealed = false;
   bool _submittedUnknown = false;
   _SourceEntryMode _sourceEntryMode = _SourceEntryMode.chooser;
+  bool _showOptionalSourceTitle = false;
 
   @override
   void initState() {
@@ -108,6 +109,7 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
         setState(() {
           _editingExistingSource = false;
           _sourceEntryMode = _SourceEntryMode.chooser;
+          _showOptionalSourceTitle = false;
           _phase = _SlicePhase.source;
           _inlineError = null;
         });
@@ -922,30 +924,15 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
               ),
               const SizedBox(height: 8),
               TextField(
-                key: const ValueKey('pasted-material-title'),
-                controller: _titleController,
-                enabled: !_busy,
-                onChanged: (_) {
-                  if (_inlineError != null) setState(() => _inlineError = null);
-                },
-                maxLength: 120,
-                textCapitalization: TextCapitalization.sentences,
-                decoration: const InputDecoration(
-                  labelText: 'Başlık (isteğe bağlı)',
-                  hintText: 'Örn. Biyoloji · Fotosentez',
-                  border: OutlineInputBorder(),
-                ),
-              ),
-              const SizedBox(height: 8),
-              TextField(
                 key: const ValueKey('pasted-material-text'),
                 controller: _sourceController,
                 enabled: !_busy,
                 onChanged: (_) {
                   if (_inlineError != null) setState(() => _inlineError = null);
                 },
-                minLines: 6,
-                maxLines: 12,
+                minLines: 7,
+                maxLines: 13,
+                autofocus: true,
                 textCapitalization: TextCapitalization.sentences,
                 decoration: const InputDecoration(
                   labelText: 'Kaynak metni',
@@ -954,6 +941,46 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
                   alignLabelWithHint: true,
                 ),
               ),
+              const SizedBox(height: 6),
+              if (!_showOptionalSourceTitle)
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: TextButton.icon(
+                    key: const ValueKey('source-add-title'),
+                    onPressed: _busy ? null : () => setState(() => _showOptionalSourceTitle = true),
+                    icon: const Icon(Icons.edit_note_rounded, size: 18),
+                    label: const Text('Başlık ekle · isteğe bağlı'),
+                  ),
+                )
+              else ...[
+                TextField(
+                  key: const ValueKey('pasted-material-title'),
+                  controller: _titleController,
+                  enabled: !_busy,
+                  onChanged: (_) {
+                    if (_inlineError != null) setState(() => _inlineError = null);
+                  },
+                  maxLength: 120,
+                  textCapitalization: TextCapitalization.sentences,
+                  decoration: const InputDecoration(
+                    labelText: 'Başlık',
+                    hintText: 'Örn. Biyoloji · Fotosentez',
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: TextButton(
+                    onPressed: _busy
+                        ? null
+                        : () {
+                            _titleController.clear();
+                            setState(() => _showOptionalSourceTitle = false);
+                          },
+                    child: const Text('Başlığı kaldır'),
+                  ),
+                ),
+              ],
               if (_inlineError != null) ...[const SizedBox(height: 12), _InlineNotice(text: _inlineError!)],
               const SizedBox(height: 16),
               FilledButton.icon(
@@ -1596,6 +1623,7 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
                     setState(() {
                       _editingExistingSource = true;
                       _sourceEntryMode = _SourceEntryMode.chooser;
+                      _showOptionalSourceTitle = false;
                       _sourceController.clear();
                       _inlineError = null;
                       _phase = _SlicePhase.source;
@@ -1626,6 +1654,7 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
                 : () {
                     setState(() {
                       _sourceEntryMode = _SourceEntryMode.text;
+                      _showOptionalSourceTitle = false;
                       _phase = _SlicePhase.source;
                       _inlineError = null;
                     });

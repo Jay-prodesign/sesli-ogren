@@ -1254,9 +1254,14 @@ void main() {
     await tapVisible(tester, find.text('Metin yapıştır'));
     await tester.pump();
 
-    expect(find.byKey(const ValueKey('pasted-material-title')), findsOneWidget);
     expect(find.byKey(const ValueKey('pasted-material-text')), findsOneWidget);
+    expect(find.byKey(const ValueKey('pasted-material-title')), findsNothing);
+    expect(find.text('Başlık ekle · isteğe bağlı'), findsOneWidget);
     expect(find.text('Metni ekle · çalışma alanını aç'), findsOneWidget);
+
+    await tapVisible(tester, find.text('Başlık ekle · isteğe bağlı'));
+    await tester.pump();
+    expect(find.byKey(const ValueKey('pasted-material-title')), findsOneWidget);
   });
 
   testWidgets('Reduced Motion keeps the learning slice usable', (tester) async {
