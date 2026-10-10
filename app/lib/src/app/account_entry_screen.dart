@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../auth/supabase_learner_auth.dart';
 import '../domain/authenticated_learner.dart';
+import 'atelier_learning_surfaces.dart';
 import 'companion_view.dart';
 
 class AccountEntryScreen extends StatefulWidget {
@@ -105,81 +106,191 @@ class _AccountEntryScreenState extends State<AccountEntryScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Scaffold(
+      backgroundColor: AtelierStyle.canvas,
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.all(24),
+            padding: const EdgeInsets.fromLTRB(20, 18, 20, 28),
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 440),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  const Center(child: CompanionView(state: CompanionVisualState.idle, size: 116)),
-                  const SizedBox(height: 24),
-                  Text(
-                    _codeRequested ? 'Kodunu gir' : 'Öğrenme alanına gir',
-                    style: theme.textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.w800),
-                    textAlign: TextAlign.center,
+                  const Row(
+                    children: [
+                      SizedBox(
+                        width: 8,
+                        height: 28,
+                        child: DecoratedBox(
+                          decoration: BoxDecoration(
+                            color: AtelierStyle.teal,
+                            borderRadius: BorderRadius.all(Radius.circular(3)),
+                          ),
+                        ),
+                      ),
+                      SizedBox(width: 10),
+                      Text(
+                        'sesli öğren',
+                        style: TextStyle(
+                          color: AtelierStyle.ink,
+                          fontSize: 20,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: -0.8,
+                        ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 10),
-                  Text(
-                    _codeRequested
-                        ? '${_emailController.text.trim()} adresine gönderilen 6 haneli kodu gir.'
-                        : 'E-posta adresinle giriş yap veya yeni hesabını oluştur. Şifre gerekmiyor.',
-                    style: theme.textTheme.bodyLarge?.copyWith(color: theme.colorScheme.onSurfaceVariant),
-                    textAlign: TextAlign.center,
+                  const SizedBox(height: 20),
+                  Container(
+                    padding: const EdgeInsets.fromLTRB(22, 22, 18, 22),
+                    decoration: BoxDecoration(
+                      color: AtelierStyle.ink,
+                      borderRadius: BorderRadius.circular(24),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'KENDİ KAYNAĞIN · GERÇEK HATIRLAMA',
+                          style: TextStyle(
+                            color: AtelierStyle.mark,
+                            fontSize: 10,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: 1,
+                          ),
+                        ),
+                        const SizedBox(height: 9),
+                        const Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Expanded(
+                              child: Text(
+                                'Çalışma alanın burada başlar.',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 29,
+                                  height: 1.08,
+                                  fontWeight: FontWeight.w900,
+                                  letterSpacing: -0.8,
+                                ),
+                              ),
+                            ),
+                            SizedBox(width: 6),
+                            CompanionView(state: CompanionVisualState.idle, size: 92),
+                          ],
+                        ),
+                        const SizedBox(height: 10),
+                        const Text(
+                          'PDF veya metnini ekle. Oku ya da dinle. Sonra kaynağı kapatıp kendi cümlelerinle hatırla.',
+                          style: TextStyle(color: Color(0xFFDCE8E5), fontSize: 14, height: 1.45),
+                        ),
+                        const SizedBox(height: 18),
+                        const Row(
+                          children: [
+                            Expanded(child: _EntryJourneyStep(icon: Icons.auto_stories_outlined, label: 'KAYNAĞIN')),
+                            _EntryJourneyArrow(),
+                            Expanded(child: _EntryJourneyStep(icon: Icons.visibility_off_outlined, label: 'KAPAT')),
+                            _EntryJourneyArrow(),
+                            Expanded(child: _EntryJourneyStep(icon: Icons.psychology_alt_outlined, label: 'HATIRLA')),
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
-                  const SizedBox(height: 28),
-                  if (!_codeRequested)
-                    TextField(
-                      controller: _emailController,
-                      enabled: !_busy,
-                      keyboardType: TextInputType.emailAddress,
-                      autofillHints: const [AutofillHints.email],
-                      textInputAction: TextInputAction.done,
-                      onSubmitted: (_) => _requestCode(),
-                      decoration: const InputDecoration(labelText: 'E-posta', hintText: 'ornek@eposta.com'),
-                    )
-                  else
-                    TextField(
-                      controller: _tokenController,
-                      enabled: !_busy,
-                      keyboardType: TextInputType.number,
-                      autofillHints: const [AutofillHints.oneTimeCode],
-                      textInputAction: TextInputAction.done,
-                      maxLength: 6,
-                      onSubmitted: (_) => _verifyCode(),
-                      decoration: const InputDecoration(labelText: '6 haneli kod', counterText: ''),
-                    ),
-                  if (_error != null) ...[
-                    const SizedBox(height: 12),
-                    Text(
-                      _error!,
-                      style: TextStyle(color: theme.colorScheme.error),
-                      textAlign: TextAlign.center,
-                    ),
-                  ],
                   const SizedBox(height: 18),
-                  FilledButton(
-                    onPressed: _busy ? null : (_codeRequested ? _verifyCode : _requestCode),
-                    child: Text(
-                      _busy
-                          ? 'Kontrol ediliyor…'
-                          : _codeRequested
-                          ? 'Giriş yap'
-                          : 'Kod gönder',
+                  Container(
+                    padding: const EdgeInsets.fromLTRB(20, 20, 20, 18),
+                    decoration: BoxDecoration(
+                      color: AtelierStyle.paper,
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: AtelierStyle.line),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Text(
+                          _codeRequested ? 'Kodunu gir' : 'Öğrenme alanına gir',
+                          style: theme.textTheme.headlineSmall?.copyWith(
+                            color: AtelierStyle.ink,
+                            fontWeight: FontWeight.w900,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          _codeRequested
+                              ? '${_emailController.text.trim()} adresine gönderilen 6 haneli kodu gir.'
+                              : 'E-posta adresinle giriş yap veya yeni hesabını oluştur. Şifre gerekmiyor.',
+                          style: theme.textTheme.bodyMedium?.copyWith(color: AtelierStyle.muted, height: 1.45),
+                        ),
+                        const SizedBox(height: 20),
+                        if (!_codeRequested)
+                          TextField(
+                            controller: _emailController,
+                            enabled: !_busy,
+                            keyboardType: TextInputType.emailAddress,
+                            autofillHints: const [AutofillHints.email],
+                            textInputAction: TextInputAction.done,
+                            onSubmitted: (_) => _requestCode(),
+                            decoration: const InputDecoration(labelText: 'E-posta', hintText: 'ornek@eposta.com'),
+                          )
+                        else
+                          TextField(
+                            controller: _tokenController,
+                            enabled: !_busy,
+                            keyboardType: TextInputType.number,
+                            autofillHints: const [AutofillHints.oneTimeCode],
+                            textInputAction: TextInputAction.done,
+                            maxLength: 6,
+                            onSubmitted: (_) => _verifyCode(),
+                            decoration: const InputDecoration(labelText: '6 haneli kod', counterText: ''),
+                          ),
+                        if (_error != null) ...[
+                          const SizedBox(height: 12),
+                          Semantics(
+                            liveRegion: true,
+                            child: Text(
+                              _error!,
+                              style: TextStyle(color: theme.colorScheme.error, fontWeight: FontWeight.w700),
+                            ),
+                          ),
+                        ],
+                        const SizedBox(height: 16),
+                        FilledButton(
+                          style: FilledButton.styleFrom(
+                            backgroundColor: AtelierStyle.teal,
+                            foregroundColor: Colors.white,
+                            minimumSize: const Size.fromHeight(54),
+                          ),
+                          onPressed: _busy ? null : (_codeRequested ? _verifyCode : _requestCode),
+                          child: Text(
+                            _busy
+                                ? 'Kontrol ediliyor…'
+                                : _codeRequested
+                                ? 'Giriş yap'
+                                : 'Kod gönder',
+                          ),
+                        ),
+                        if (_codeRequested) ...[
+                          const SizedBox(height: 8),
+                          TextButton(onPressed: _busy ? null : _requestCode, child: const Text('Yeni kod gönder')),
+                          TextButton(onPressed: _busy ? null : _changeEmail, child: const Text('E-postayı değiştir')),
+                        ],
+                      ],
                     ),
                   ),
-                  if (_codeRequested) ...[
-                    const SizedBox(height: 8),
-                    TextButton(onPressed: _busy ? null : _requestCode, child: const Text('Yeni kod gönder')),
-                    TextButton(onPressed: _busy ? null : _changeEmail, child: const Text('E-postayı değiştir')),
-                  ],
-                  const SizedBox(height: 18),
-                  Text(
-                    'Hesabın, bu cihazdaki materyal ve öğrenme geçmişini doğru kullanıcıyla ayrı tutmak için kullanılır.',
-                    style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant),
-                    textAlign: TextAlign.center,
+                  const SizedBox(height: 14),
+                  const Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Icon(Icons.lock_outline_rounded, size: 17, color: AtelierStyle.teal),
+                      SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          'Hesabın, bu cihazdaki materyal ve öğrenme geçmişini doğru kullanıcıyla ayrı tutmak için kullanılır.',
+                          style: TextStyle(color: AtelierStyle.muted, fontSize: 12, height: 1.4),
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
@@ -189,4 +300,39 @@ class _AccountEntryScreenState extends State<AccountEntryScreen> {
       ),
     );
   }
+}
+
+class _EntryJourneyStep extends StatelessWidget {
+  const _EntryJourneyStep({required this.icon, required this.label});
+
+  final IconData icon;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) => Column(
+    children: [
+      Icon(icon, color: AtelierStyle.mark, size: 19),
+      const SizedBox(height: 6),
+      Text(
+        label,
+        textAlign: TextAlign.center,
+        style: const TextStyle(
+          color: Colors.white,
+          fontSize: 9,
+          fontWeight: FontWeight.w900,
+          letterSpacing: 0.7,
+        ),
+      ),
+    ],
+  );
+}
+
+class _EntryJourneyArrow extends StatelessWidget {
+  const _EntryJourneyArrow();
+
+  @override
+  Widget build(BuildContext context) => const Padding(
+    padding: EdgeInsets.only(top: 4),
+    child: Icon(Icons.arrow_forward_rounded, color: Color(0xFF8DA7A1), size: 16),
+  );
 }
