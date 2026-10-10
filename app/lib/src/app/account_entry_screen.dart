@@ -143,10 +143,7 @@ class _AccountEntryScreenState extends State<AccountEntryScreen> {
                   const SizedBox(height: 20),
                   Container(
                     padding: const EdgeInsets.fromLTRB(22, 22, 18, 22),
-                    decoration: BoxDecoration(
-                      color: AtelierStyle.ink,
-                      borderRadius: BorderRadius.circular(24),
-                    ),
+                    decoration: BoxDecoration(color: AtelierStyle.ink, borderRadius: BorderRadius.circular(24)),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -187,11 +184,17 @@ class _AccountEntryScreenState extends State<AccountEntryScreen> {
                         const SizedBox(height: 18),
                         const Row(
                           children: [
-                            Expanded(child: _EntryJourneyStep(icon: Icons.auto_stories_outlined, label: 'KAYNAĞIN')),
+                            Expanded(
+                              child: _EntryJourneyStep(icon: Icons.auto_stories_outlined, label: 'KAYNAĞIN'),
+                            ),
                             _EntryJourneyArrow(),
-                            Expanded(child: _EntryJourneyStep(icon: Icons.visibility_off_outlined, label: 'KAPAT')),
+                            Expanded(
+                              child: _EntryJourneyStep(icon: Icons.visibility_off_outlined, label: 'KAPAT'),
+                            ),
                             _EntryJourneyArrow(),
-                            Expanded(child: _EntryJourneyStep(icon: Icons.psychology_alt_outlined, label: 'HATIRLA')),
+                            Expanded(
+                              child: _EntryJourneyStep(icon: Icons.psychology_alt_outlined, label: 'HATIRLA'),
+                            ),
                           ],
                         ),
                       ],
@@ -316,12 +319,7 @@ class _EntryJourneyStep extends StatelessWidget {
       Text(
         label,
         textAlign: TextAlign.center,
-        style: const TextStyle(
-          color: Colors.white,
-          fontSize: 9,
-          fontWeight: FontWeight.w900,
-          letterSpacing: 0.7,
-        ),
+        style: const TextStyle(color: Colors.white, fontSize: 9, fontWeight: FontWeight.w900, letterSpacing: 0.7),
       ),
     ],
   );
