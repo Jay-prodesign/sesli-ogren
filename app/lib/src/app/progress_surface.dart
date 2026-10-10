@@ -4,6 +4,7 @@ import '../domain/learning_contracts.dart';
 import '../domain/learning_truth.dart';
 import 'app_theme.dart';
 import 'atelier_learning_surfaces.dart';
+import 'companion_view.dart';
 import 'living_study_desk_home.dart';
 
 class ProgressItem {
@@ -35,9 +36,16 @@ class ProgressItem {
 }
 
 class ProgressSurface extends StatelessWidget {
-  const ProgressSurface({required this.items, required this.onOpenMaterial, super.key});
+  const ProgressSurface({
+    required this.items,
+    required this.onOpenMaterial,
+    this.onAddSource,
+    super.key,
+  });
+
   final List<ProgressItem> items;
   final ValueChanged<MaterialId> onOpenMaterial;
+  final VoidCallback? onAddSource;
 
   @override
   Widget build(BuildContext context) {
@@ -52,7 +60,7 @@ class ProgressSurface extends StatelessWidget {
       children: [
         if (living) ...[
           Text(
-            'ÖĞRENME KANITIN',
+            'HATIRLAMA GEÇMİŞİN',
             style: theme.textTheme.labelSmall?.copyWith(color: accent, fontWeight: FontWeight.w900, letterSpacing: 0.9),
           ),
           const SizedBox(height: 7),
@@ -95,39 +103,76 @@ class ProgressSurface extends StatelessWidget {
         ),
         const SizedBox(height: 8),
         Text(
-          'Burada yalnızca aktif öğrenme denemelerinden gelen gerçek durumları görürsün.',
+          'Buradaki durumlar yalnız kaynağa bakmadan yaptığın Hatırla denemelerinden gelir.',
           style: theme.textTheme.bodyMedium?.copyWith(color: muted),
         ),
-        const SizedBox(height: 12),
-        DecoratedBox(
-          decoration: BoxDecoration(
-            color: living ? AtelierStyle.mint : AppPalette.attentionSoft,
-            borderRadius: BorderRadius.circular(14),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 11),
-            child: Text(
-              'Dinlemek veya açıklama okumak ilerlemeyi yapay olarak artırmaz.',
-              style: TextStyle(color: ink),
+        const SizedBox(height: 13),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Icon(Icons.verified_outlined, color: accent, size: 18),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                'Okumak ve dinlemek hazırlanmandır; ilerlemeyi aktif hatırlama değiştirir.',
+                style: theme.textTheme.bodySmall?.copyWith(color: muted, height: 1.4),
+              ),
             ),
-          ),
+          ],
         ),
         const SizedBox(height: 24),
         if (items.isEmpty)
-          Card(
-            elevation: 0,
-            color: living ? AtelierStyle.paper : null,
-            shape: living
-                ? RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(18),
-                    side: const BorderSide(color: AtelierStyle.line),
-                  )
-                : null,
-            child: const Padding(
-              padding: EdgeInsets.all(18),
-              child: Text(
-                'Henüz ölçülmüş bir öğrenme durumu yok. Bir materyalde Hatırla ile aktif olarak denediğinde burada görünür.',
-              ),
+          Container(
+            padding: const EdgeInsets.fromLTRB(17, 17, 17, 18),
+            decoration: BoxDecoration(
+              color: living ? AtelierStyle.paper : theme.colorScheme.surface,
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: living ? AtelierStyle.line : theme.colorScheme.outlineVariant),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    const CompanionView(state: CompanionVisualState.idle, size: 64),
+                    const SizedBox(width: 13),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'İlk hatırlama izini oluştur.',
+                            style: theme.textTheme.titleMedium?.copyWith(
+                              color: ink,
+                              fontWeight: FontWeight.w900,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            'Bir kaynak ekle; sonra kaynağı kapatıp Hatırla ile ilk gerçek denemeni yap.',
+                            style: theme.textTheme.bodySmall?.copyWith(color: muted, height: 1.4),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                if (onAddSource != null) ...[
+                  const SizedBox(height: 14),
+                  FilledButton.icon(
+                    onPressed: onAddSource,
+                    icon: const Icon(Icons.add_rounded),
+                    label: const Text('İlk kaynağımı ekle'),
+                    style: living
+                        ? FilledButton.styleFrom(
+                            backgroundColor: AtelierStyle.ink,
+                            foregroundColor: Colors.white,
+                          )
+                        : null,
+                  ),
+                ],
+              ],
             ),
           )
         else
