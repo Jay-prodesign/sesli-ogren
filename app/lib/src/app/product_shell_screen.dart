@@ -724,8 +724,7 @@ class _HomeSurface extends StatelessWidget {
   }
 
   static String _nextReason(LearningContinuation? continuation) =>
-      continuation?.nextAction.reasonText ??
-      'Kaynağa bakmadan kısa bir hatırlama denemesi yap.';
+      continuation?.nextAction.reasonText ?? 'Kaynağa bakmadan kısa bir hatırlama denemesi yap.';
 
   static bool _nextActionOpensLearning(LearningContinuation? continuation) {
     final kind = continuation?.nextAction.kind;
