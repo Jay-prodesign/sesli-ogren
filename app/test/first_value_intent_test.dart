@@ -152,14 +152,14 @@ void main() {
     await _pumpUntilFound(tester, find.byType(SourceReaderScreen));
     expect(find.text('İlk değer notu'), findsWidgets);
     Navigator.of(tester.element(find.byType(SourceReaderScreen))).pop();
-    await tester.pumpAndSettle();
+    await _pumpUntilFound(tester, find.text('İlk aktif denemeni yap'));
 
     expect(find.byKey(const ValueKey('first-value-intent')), findsNothing);
     expect(find.text('İlk aktif denemeni yap'), findsOneWidget);
     expect(find.text('Diğer yollar'), findsOneWidget);
 
     await _tapVisible(tester, find.text('Diğer yollar'));
-    await tester.pumpAndSettle();
+    await _pumpUntilFound(tester, find.byKey(const ValueKey('workspace-other-study-paths-scroll')));
     expect(find.text('Hızlı özet'), findsOneWidget);
     expect(find.text('Odaklan'), findsOneWidget);
     await tester.tap(find.text('Odaklan'));
