@@ -249,9 +249,12 @@ void main() {
     await _pumpUntilFound(tester, find.byType(SourceReaderScreen));
     expect(find.byType(SourceReaderScreen), findsOneWidget);
 
-    await tester.tap(find.byTooltip('Okuma ve öğrenme seçenekleri'));
-    await _pumpUntilFound(tester, find.text('Kaynağı dinle'));
-    await tester.tap(find.text('Kaynağı dinle').last);
+    final readerMenu = find.byTooltip('Okuma ve öğrenme seçenekleri').hitTestable();
+    await _pumpUntilFound(tester, readerMenu);
+    await tester.tap(readerMenu);
+    final listenAction = find.text('Kaynağı dinle').hitTestable();
+    await _pumpUntilFound(tester, listenAction);
+    await tester.tap(listenAction);
     // Listen may show a continuously animated playback indicator; waiting for
     // every scheduled frame to settle would never complete.
     await _pumpUntilFound(tester, find.byType(ListenScreen));
