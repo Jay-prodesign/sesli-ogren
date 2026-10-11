@@ -16,6 +16,7 @@ import 'package:sesli_ogren/src/data/source_ingest_service.dart';
 import 'package:sesli_ogren/src/data/sqlite_source_store.dart';
 import 'package:sesli_ogren/src/domain/learning_contracts.dart';
 import 'package:sesli_ogren/src/domain/learning_truth.dart';
+import 'package:sesli_ogren/src/domain/operational_event.dart';
 import 'package:sesli_ogren/src/learning/recall_learning_service.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
@@ -173,12 +174,29 @@ void main() {
     await tapVisible(tester, find.text('Metni ekle · çalışma alanını aç'));
     await pumpUntilFound(tester, find.byKey(const ValueKey('first-value-intent')));
 
+    final material = (await store.activeMaterials(learner: runtime.learner)).single;
+    var activationEvents = (await runtime.telemetry.events(
+      learner: runtime.learner,
+    )).where((event) => event.materialId == material.id).toList(growable: false);
+    expect(activationEvents.any((event) => event.type == OperationalEventType.sourceAdded), isTrue);
+    expect(activationEvents.any((event) => event.type == OperationalEventType.sourceReady), isTrue);
+
     expect(find.text('Önce kaynağın tamamını bir kez gör.'), findsOneWidget);
     expect(find.text('Kaynağı aç'), findsOneWidget);
 
     await tapVisible(tester, find.text('Kaynağı aç'));
     await pumpUntilFound(tester, find.byType(SourceReaderScreen));
     expect(find.textContaining('Fotosentez'), findsWidgets);
+
+    activationEvents = (await runtime.telemetry.events(
+      learner: runtime.learner,
+    )).where((event) => event.materialId == material.id).toList(growable: false);
+    expect(
+      activationEvents.singleWhere((event) => event.type == OperationalEventType.firstActionSelected).reasonCode,
+      'read_source',
+    );
+    expect(activationEvents.any((event) => event.type == OperationalEventType.firstValueStarted), isTrue);
+    expect(activationEvents.any((event) => event.type == OperationalEventType.firstValueCompleted), isFalse);
 
     Navigator.of(tester.element(find.byType(SourceReaderScreen))).pop();
     await tester.pumpAndSettle();
@@ -189,6 +207,29 @@ void main() {
     await pumpUntilFound(tester, find.text('Kaldığın yer hazır.'));
     expect(find.text('İlk hatırlama denemeni yap'), findsOneWidget);
     expect(find.text('Hatırlamayı dene'), findsOneWidget);
+
+    await tapVisible(tester, find.byKey(const ValueKey('la0040-living-material-open')));
+    await pumpUntilFound(tester, find.byType(MaterialWorkspaceScreen));
+    await tester.pump(const Duration(milliseconds: 80));
+
+    await tapVisible(tester, find.text('Kaynağı kapat · Hatırla'));
+    await pumpUntilFound(tester, find.text('Bilmiyorum'));
+    await tapVisible(tester, find.text('Bilmiyorum'));
+    await pumpUntilFound(tester, find.text('Bu kez bilmiyorum dedin'));
+
+    activationEvents = (await runtime.telemetry.events(
+      learner: runtime.learner,
+    )).where((event) => event.materialId == material.id).toList(growable: false);
+    expect(activationEvents.any((event) => event.type == OperationalEventType.returnToSameMaterial), isTrue);
+    expect(
+      activationEvents.singleWhere((event) => event.type == OperationalEventType.secondModeUsed).reasonCode,
+      'recall',
+    );
+    expect(activationEvents.any((event) => event.type == OperationalEventType.firstActiveEvidence), isTrue);
+    expect(
+      activationEvents.singleWhere((event) => event.type == OperationalEventType.firstValueCompleted).reasonCode,
+      'recall',
+    );
     expect(tester.takeException(), isNull);
   });
 

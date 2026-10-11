@@ -6,6 +6,7 @@ import 'package:share_plus/share_plus.dart';
 
 import '../domain/learning_contracts.dart';
 import '../generation/supabase_source_summary_gateway.dart';
+import 'activation_observability.dart';
 import 'app_runtime.dart';
 import 'atelier_learning_surfaces.dart';
 import 'companion_view.dart';
@@ -110,6 +111,7 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> with WidgetsBinding
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    unawaited(widget.runtime.recordActivationActionStart(materialId: widget.materialId, action: 'quick_recap'));
     _restore();
   }
 
@@ -350,6 +352,11 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> with WidgetsBinding
           summary: status.summary!,
           keyPoints: status.keyPoints,
           cachedAt: DateTime.now().toUtc(),
+        );
+        await widget.runtime.recordActivationFirstValue(
+          materialId: widget.materialId,
+          sourceVersionId: submittedSourceVersion,
+          action: 'quick_recap',
         );
       }
       if (status.isTerminal) {

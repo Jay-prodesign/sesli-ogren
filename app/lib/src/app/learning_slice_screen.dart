@@ -6,6 +6,7 @@ import '../domain/learning_truth.dart';
 import '../data/source_ingest_service.dart';
 import '../domain/operational_event.dart';
 import '../generation/supabase_source_summary_gateway.dart';
+import 'activation_observability.dart';
 import 'app_runtime.dart';
 import 'app_theme.dart';
 import 'companion_view.dart';
@@ -312,6 +313,7 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
         createdAt: DateTime.now().toUtc(),
       ),
     );
+    await widget.runtime.recordActivationSourceAdded(materialId: widget.materialId, sourceKind: 'pdf');
     setState(() {
       _busy = true;
       _inlineError = null;
@@ -335,6 +337,11 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
           durationMs: stopwatch.elapsedMilliseconds,
           createdAt: DateTime.now().toUtc(),
         ),
+      );
+      await widget.runtime.recordActivationSourceReady(
+        materialId: widget.materialId,
+        sourceVersionId: ingestResult.sourceVersion.identity.sourceVersionId,
+        sourceKind: 'pdf',
       );
       await _cleanupSupersededRemoteBinding(previousBinding, ingestResult.sourceVersion.identity.sourceVersionId);
       if (!mounted) return;
@@ -420,6 +427,7 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
         createdAt: DateTime.now().toUtc(),
       ),
     );
+    await widget.runtime.recordActivationSourceAdded(materialId: widget.materialId, sourceKind: 'text');
     setState(() {
       _busy = true;
       _inlineError = null;
@@ -444,6 +452,11 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
           durationMs: stopwatch.elapsedMilliseconds,
           createdAt: DateTime.now().toUtc(),
         ),
+      );
+      await widget.runtime.recordActivationSourceReady(
+        materialId: widget.materialId,
+        sourceVersionId: ingestResult.sourceVersion.identity.sourceVersionId,
+        sourceKind: 'text',
       );
       await _cleanupSupersededRemoteBinding(previousBinding, ingestResult.sourceVersion.identity.sourceVersionId);
       if (!mounted) return;
@@ -482,6 +495,7 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
   }
 
   Future<void> _openRecall() async {
+    await widget.runtime.recordActivationActionStart(materialId: widget.materialId, action: 'recall');
     final stopwatch = Stopwatch()..start();
     await _recordEvent(
       OperationalEvent(
@@ -644,6 +658,18 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
           durationMs: stopwatch.elapsedMilliseconds,
           createdAt: DateTime.now().toUtc(),
         ),
+      );
+      await widget.runtime.recordActivationFirstEvidence(
+        materialId: result.evidence.materialId,
+        sourceVersionId: result.evidence.sourceVersionId,
+        evidenceId: result.evidence.id,
+        outcome: result.evidence.outcome,
+        stateKind: result.state.kind,
+      );
+      await widget.runtime.recordActivationFirstValue(
+        materialId: result.evidence.materialId,
+        sourceVersionId: result.evidence.sourceVersionId,
+        action: 'recall',
       );
       if (!mounted) return;
       setState(() {
