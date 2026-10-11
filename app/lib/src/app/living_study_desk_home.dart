@@ -71,7 +71,7 @@ class LivingStudyDeskHome extends StatelessWidget {
     return switch (action) {
       NextLearningActionKind.reviewSourceThenRecall => 'Kaynağa dön, sonra yeniden dene',
       NextLearningActionKind.retryRecallWithoutHint => 'İpucusuz bir kez daha dene',
-      NextLearningActionKind.repeatRecallLater => 'Bu deneme tamam. Kaynağın burada.',
+      NextLearningActionKind.repeatRecallLater => 'Bu tur tamam. Sonra yeniden hatırla.',
       null => 'İlk hatırlama denemeni yap',
     };
   }
@@ -102,7 +102,7 @@ class LivingStudyDeskHome extends StatelessWidget {
     return switch (action) {
       NextLearningActionKind.reviewSourceThenRecall => 'Kaynağı gözden geçir',
       NextLearningActionKind.retryRecallWithoutHint => 'İpucusuz tekrar dene',
-      NextLearningActionKind.repeatRecallLater => 'Kaynağa dön',
+      NextLearningActionKind.repeatRecallLater => 'Çalışma alanına dön',
       null => 'Hatırlamayı dene',
     };
   }
@@ -110,16 +110,14 @@ class LivingStudyDeskHome extends StatelessWidget {
   VoidCallback get _nextActionHandler {
     if (_hasReaderResume) return onOpenReader ?? onOpenWorkspace;
     if (_hasListenResume) return onOpenListen;
-    return continuation?.nextAction.kind == NextLearningActionKind.repeatRecallLater
-        ? onOpenReader ?? onOpenWorkspace
-        : onOpenLearning;
+    return continuation?.nextAction.kind == NextLearningActionKind.repeatRecallLater ? onOpenWorkspace : onOpenLearning;
   }
 
   IconData get _nextActionIcon {
     if (_hasReaderResume) return Icons.menu_book_outlined;
     if (_hasListenResume) return Icons.headphones_rounded;
     return continuation?.nextAction.kind == NextLearningActionKind.repeatRecallLater
-        ? Icons.auto_stories_outlined
+        ? Icons.space_dashboard_outlined
         : Icons.psychology_alt_outlined;
   }
 

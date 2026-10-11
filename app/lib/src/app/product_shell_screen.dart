@@ -105,7 +105,13 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
       }),
     );
     final sortedProgress = [...progress]..sort((a, b) => _activityAt(b).compareTo(_activityAt(a)));
-    final active = sortedProgress.first;
+    final recommendedProgress = [...sortedProgress]
+      ..sort((a, b) {
+        final priority = _homeRecommendationPriority(b).compareTo(_homeRecommendationPriority(a));
+        if (priority != 0) return priority;
+        return _activityAt(b).compareTo(_activityAt(a));
+      });
+    final active = recommendedProgress.first;
     final material = active.material;
     final continuation = active.continuation;
     final source = await widget.runtime.store.currentSourceVersion(
@@ -129,6 +135,16 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
       materials: sortedProgress.map((item) => item.material).toList(growable: false),
       progress: sortedProgress,
     );
+  }
+
+  int _homeRecommendationPriority(ProgressItem item) {
+    return switch (item.continuation?.nextAction.kind) {
+      NextLearningActionKind.reviewSourceThenRecall => 5,
+      NextLearningActionKind.retryRecallWithoutHint => 4,
+      null when item.prefersReaderResume || item.hasListenResume => 3,
+      null => 2,
+      NextLearningActionKind.repeatRecallLater => 1,
+    };
   }
 
   DateTime _activityAt(ProgressItem item) {
@@ -195,7 +211,7 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
     }
     final continuation = progressItem?.continuation;
     if (continuation?.nextAction.kind == NextLearningActionKind.repeatRecallLater) {
-      await _openSourceReader(materialId);
+      await _openWorkspace(materialId);
       return;
     }
     if (continuation == null && progressItem?.prefersReaderResume == true) {
@@ -742,7 +758,7 @@ class _HomeSurface extends StatelessWidget {
   static String _nextTitle(LearningContinuation? continuation) {
     if (continuation == null) return 'Aktif öğrenmeye başla';
     return switch (continuation.state.kind) {
-      RecallStateKind.retrievedOnce => 'Hatırlamanı güçlendir',
+      RecallStateKind.retrievedOnce => 'Bu tur tamamlandı',
       RecallStateKind.developing => 'Bir kez daha dene',
       RecallStateKind.needsReview => 'Kısa bir tekrar yap',
       RecallStateKind.notAssessed => 'Ne kadar hatırladığını gör',
@@ -763,7 +779,7 @@ class _HomeSurface extends StatelessWidget {
     return switch (continuation.nextAction.kind) {
       NextLearningActionKind.reviewSourceThenRecall => 'Kaynağı gözden geçir',
       NextLearningActionKind.retryRecallWithoutHint => 'İpucusuz tekrar dene',
-      NextLearningActionKind.repeatRecallLater => 'Kaynağa dön',
+      NextLearningActionKind.repeatRecallLater => 'Çalışma alanına dön',
     };
   }
 
@@ -772,7 +788,7 @@ class _HomeSurface extends StatelessWidget {
     return switch (state) {
       RecallStateKind.notAssessed => 'İlk aktif adımın hazır.',
       RecallStateKind.developing => 'Kaldığın yer hazır. Bir sonraki denemeye geç.',
-      RecallStateKind.retrievedOnce => 'Kendi başına hatırladın. Sıradaki adım hazır.',
+      RecallStateKind.retrievedOnce => 'Kendi başına hatırladın. Sonraki bağımsız deneme daha sonra.',
       RecallStateKind.needsReview => 'Kısa bir tekrar noktası hazır.',
     };
   }
@@ -1301,7 +1317,7 @@ class _LibraryMaterialCard extends StatelessWidget {
     return switch (continuation?.nextAction.kind) {
       NextLearningActionKind.reviewSourceThenRecall => 'Kaynağı gözden geçir ve yeniden dene',
       NextLearningActionKind.retryRecallWithoutHint => 'İpucusuz tekrar dene',
-      NextLearningActionKind.repeatRecallLater => 'Kaynağa dön',
+      NextLearningActionKind.repeatRecallLater => 'Çalışma alanına dön',
       null => 'İlk hatırlamayı dene',
     };
   }

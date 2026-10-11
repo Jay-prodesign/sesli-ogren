@@ -200,15 +200,15 @@ class _ProgressCard extends StatelessWidget {
     final actionLabel = switch (item.continuation?.nextAction.kind) {
       NextLearningActionKind.reviewSourceThenRecall => 'Kaynağı gözden geçir',
       NextLearningActionKind.retryRecallWithoutHint => 'İpucusuz tekrar dene',
-      NextLearningActionKind.repeatRecallLater => 'Kaynağa dön',
+      NextLearningActionKind.repeatRecallLater => 'Çalışma alanına dön',
       null when item.prefersReaderResume => 'Okumaya devam et',
       null when item.hasListenResume => 'Dinlemeye devam et',
       null => 'İlk hatırlamayı dene',
     };
     final actionIcon = switch (item.continuation?.nextAction.kind) {
-      NextLearningActionKind.reviewSourceThenRecall ||
-      NextLearningActionKind.repeatRecallLater => Icons.auto_stories_outlined,
+      NextLearningActionKind.reviewSourceThenRecall => Icons.auto_stories_outlined,
       NextLearningActionKind.retryRecallWithoutHint => Icons.refresh_rounded,
+      NextLearningActionKind.repeatRecallLater => Icons.space_dashboard_outlined,
       null when item.prefersReaderResume => Icons.menu_book_outlined,
       null when item.hasListenResume => Icons.headphones_rounded,
       null => Icons.psychology_alt_outlined,

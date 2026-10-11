@@ -266,7 +266,87 @@ void main() {
     expect(find.byType(MaterialWorkspaceScreen), findsNothing);
   });
 
-  testWidgets('Home completed action returns directly to the current source instead of replaying Recall', (
+  testWidgets('Home prioritizes a material that needs repair over a newer completed material', (tester) async {
+    usePhoneViewport(tester);
+    final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
+    final ingest = SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor());
+    final recall = RecallLearningService(sourceStore: store, learningStore: store.learningTruthStore());
+    final runtime = AppRuntime(
+      learner: AppRuntime.localM5LearnerFixture,
+      store: store,
+      ingest: ingest,
+      recall: recall,
+      telemetry: store.operationalTelemetry(),
+    );
+    addTearDown(runtime.close);
+
+    const repairMaterial = MaterialId('home-priority-repair');
+    await ingest.ingestPastedText(
+      learner: runtime.learner,
+      materialId: repairMaterial,
+      text:
+          'Mitokondri hücresel solunumla enerji dönüşümüne katkı sağlar. '
+          'ATP hücrenin doğrudan kullanabildiği enerji taşıyıcılarından biridir.',
+      sourceName: 'Enerji onarım notu',
+    );
+    final repairPrompt = await recall.createCurrentPrompt(learner: runtime.learner, materialId: repairMaterial);
+    final repairSession = await recall.openAttempt(learner: runtime.learner, actionId: repairPrompt.id);
+    await recall.submit(
+      learner: runtime.learner,
+      actionId: repairPrompt.id,
+      attemptId: repairSession.attempt.attemptId,
+      disposition: RecallResponseDisposition.unknown,
+      answer: '',
+    );
+
+    await Future<void>.delayed(const Duration(milliseconds: 2));
+
+    const completedMaterial = MaterialId('home-priority-completed');
+    await ingest.ingestPastedText(
+      learner: runtime.learner,
+      materialId: completedMaterial,
+      text:
+          'Fotosentez sırasında klorofil ışık enerjisini kimyasal enerjiye dönüştürmeye yardım eder. '
+          'Bitkiler karbondioksit kullanır ve oksijen açığa çıkarır.',
+      sourceName: 'Yeni tamamlanan biyoloji notu',
+    );
+    final completedPrompt = await recall.createCurrentPrompt(
+      learner: runtime.learner,
+      materialId: completedMaterial,
+    );
+    final completedSession = await recall.openAttempt(
+      learner: runtime.learner,
+      actionId: completedPrompt.id,
+    );
+    final completedAction = await store.learningTruthStore().recallAction(
+      learner: runtime.learner,
+      actionId: completedPrompt.id,
+    );
+    await recall.submit(
+      learner: runtime.learner,
+      actionId: completedPrompt.id,
+      attemptId: completedSession.attempt.attemptId,
+      disposition: RecallResponseDisposition.answer,
+      answer: completedAction!.expectedAnswer,
+    );
+
+    await tester.pumpWidget(_testApp(LivingDeskReviewScope(child: ProductShellScreen(runtime: runtime))));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 180));
+
+    expect(find.text('Enerji onarım notu'), findsWidgets);
+    expect(find.text('Kaynağa dön, sonra yeniden dene'), findsOneWidget);
+    final repairAction = find.text('Kaynağı gözden geçir');
+    expect(repairAction, findsOneWidget);
+
+    await tapVisible(tester, repairAction);
+    await pumpUntilFound(tester, find.text('Bu bölümü yeniden kur'));
+
+    expect(find.text('Kaynağı kapat ve yeniden dene'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('Home completed action returns to the material workspace instead of forcing passive review', (
     tester,
   ) async {
     usePhoneViewport(tester);
@@ -280,14 +360,15 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
 
-    final action = find.text('Kaynağa dön');
+    final action = find.text('Çalışma alanına dön');
     expect(action, findsOneWidget);
     await tapVisible(tester, action);
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
 
     expect(find.text('Biyoloji çalışma notu'), findsWidgets);
-    expect(find.byType(SourceReaderScreen), findsOneWidget);
+    expect(find.byType(MaterialWorkspaceScreen), findsOneWidget);
+    expect(find.byType(SourceReaderScreen), findsNothing);
     expect(find.byType(LearningSliceScreen), findsNothing);
   });
   testWidgets('source-first scope survives Home to Workspace, Recap and Listen routes', (tester) async {
