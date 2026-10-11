@@ -697,25 +697,59 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> with WidgetsBinding
                           ],
                         ),
                       const SizedBox(height: 14),
-                      FilledButton.icon(
-                        key: const ValueKey('quick-recap-create'),
-                        style: living
-                            ? FilledButton.styleFrom(
-                                backgroundColor: AtelierStyle.pulse,
-                                foregroundColor: Colors.white,
-                                minimumSize: const Size.fromHeight(52),
-                              )
-                            : primaryStyle,
-                        onPressed: (_busy || _restoring) ? null : _submit,
-                        icon: const Icon(Icons.auto_awesome_outlined),
-                        label: const Text('Kaynağa bağlı özet oluştur'),
-                      ),
+                      if (_restoring)
+                        Semantics(
+                          liveRegion: true,
+                          child: Container(
+                            key: const ValueKey('quick-recap-restore-loading'),
+                            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
+                            decoration: BoxDecoration(
+                              color: living ? Colors.white.withValues(alpha: 0.10) : accentSoft,
+                              borderRadius: BorderRadius.circular(14),
+                            ),
+                            child: Row(
+                              children: [
+                                SizedBox.square(
+                                  dimension: 18,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: living ? AtelierStyle.aqua : accent,
+                                  ),
+                                ),
+                                const SizedBox(width: 10),
+                                Expanded(
+                                  child: Text(
+                                    'Önceki özet işi kontrol ediliyor…',
+                                    style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                                      color: living ? Colors.white.withValues(alpha: 0.82) : ink,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        )
+                      else
+                        FilledButton.icon(
+                          key: const ValueKey('quick-recap-create'),
+                          style: living
+                              ? FilledButton.styleFrom(
+                                  backgroundColor: AtelierStyle.pulse,
+                                  foregroundColor: Colors.white,
+                                  minimumSize: const Size.fromHeight(52),
+                                )
+                              : primaryStyle,
+                          onPressed: _busy ? null : _submit,
+                          icon: const Icon(Icons.auto_awesome_outlined),
+                          label: const Text('Kaynağa bağlı özet oluştur'),
+                        ),
                     ],
                   );
                 },
               ),
             ),
-          if (_busy || _restoring) ...[const SizedBox(height: 10), const LinearProgressIndicator()],
+          if (_busy) ...[const SizedBox(height: 10), const LinearProgressIndicator()],
           if (_jobId != null && status?.summary == null) ...[
             Text(_statusLabel(status), style: Theme.of(context).textTheme.titleMedium),
             if (_statusDetail(status) != null) ...[const SizedBox(height: 6), Text(_statusDetail(status)!)],
