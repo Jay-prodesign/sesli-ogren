@@ -168,6 +168,25 @@ class _CompanionViewState extends State<CompanionView> with SingleTickerProvider
     );
   }
 
+  static Color _haloColor(CompanionVisualState state) => switch (state) {
+    CompanionVisualState.idle => const Color(0xFFBEDDD0),
+    CompanionVisualState.listen => const Color(0xFF89C9DA),
+    CompanionVisualState.think => const Color(0xFFB4A3DB),
+    CompanionVisualState.speak => const Color(0xFF94B8E8),
+    CompanionVisualState.correct => const Color(0xFFE8B980),
+    CompanionVisualState.success => const Color(0xFF9DCB74),
+  };
+
+  static String _semanticLabel(CompanionVisualState state) => switch (state) {
+    CompanionVisualState.idle => 'Düğüm hazır',
+    CompanionVisualState.listen => 'Düğüm dinleme modunda',
+    CompanionVisualState.think => 'Düğüm düşünüyor',
+    CompanionVisualState.speak => 'Düğüm konuşuyor',
+    CompanionVisualState.correct => 'Düğüm destek oluyor',
+    CompanionVisualState.success => 'Düğüm başarıyı kutluyor',
+  };
+}
+
 class _CompanionStateBadge extends StatelessWidget {
   const _CompanionStateBadge({required this.state, required this.companionSize});
 
@@ -210,23 +229,4 @@ class _CompanionStateBadge extends StatelessWidget {
       ),
     );
   }
-}
-
-  static Color _haloColor(CompanionVisualState state) => switch (state) {
-    CompanionVisualState.idle => const Color(0xFFBEDDD0),
-    CompanionVisualState.listen => const Color(0xFF89C9DA),
-    CompanionVisualState.think => const Color(0xFFB4A3DB),
-    CompanionVisualState.speak => const Color(0xFF94B8E8),
-    CompanionVisualState.correct => const Color(0xFFE8B980),
-    CompanionVisualState.success => const Color(0xFF9DCB74),
-  };
-
-  static String _semanticLabel(CompanionVisualState state) => switch (state) {
-    CompanionVisualState.idle => 'Düğüm hazır',
-    CompanionVisualState.listen => 'Düğüm dinleme modunda',
-    CompanionVisualState.think => 'Düğüm düşünüyor',
-    CompanionVisualState.speak => 'Düğüm konuşuyor',
-    CompanionVisualState.correct => 'Düğüm destek oluyor',
-    CompanionVisualState.success => 'Düğüm başarıyı kutluyor',
-  };
 }
