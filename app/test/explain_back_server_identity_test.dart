@@ -25,6 +25,9 @@ class _UnusedPdfExtractor implements PdfTextExtractor {
 }
 
 class _RecordingExplainBackGateway implements ExplainBackGateway {
+  _RecordingExplainBackGateway({this.kind = ExplainBackEvaluationKind.gapDetected});
+
+  final ExplainBackEvaluationKind kind;
   ExplainBackRequest? lastRequest;
   final List<ExplainBackRequest> requests = <ExplainBackRequest>[];
 
@@ -36,9 +39,13 @@ class _RecordingExplainBackGateway implements ExplainBackGateway {
       attemptId: request.attemptId,
       sourceVersionId: request.sourceVersionId,
       sourceContentDigest: request.sourceContentDigest,
-      kind: ExplainBackEvaluationKind.gapDetected,
-      feedback: 'Temel fikir doğru, bir bağlantı eksik.',
-      targetedRepair: 'Enerjinin kimyasal biçimde depolandığını da belirt.',
+      kind: kind,
+      feedback: kind == ExplainBackEvaluationKind.notEvaluable
+          ? 'Bu yanıttan güvenilir bir değerlendirme çıkarılamadı.'
+          : 'Temel fikir doğru, bir bağlantı eksik.',
+      targetedRepair: kind == ExplainBackEvaluationKind.gapDetected
+          ? 'Enerjinin kimyasal biçimde depolandığını da belirt.'
+          : '',
       executionRef: 'test:explain-back',
     );
   }
@@ -186,6 +193,11 @@ void main() {
     await _pumpUntilFound(tester, find.text('Temel fikir doğru, bir bağlantı eksik.'));
 
     expect(find.text('Temel fikir doğru, bir bağlantı eksik.'), findsOneWidget);
+    expect(find.text('Hatırla ile kontrol et'), findsOneWidget);
+    expect(find.text('Tekrar kendi cümlelerimle anlat'), findsOneWidget);
+    expect(find.text('Önceki çalışmaya dön'), findsOneWidget);
+    expect(find.textContaining('bağımsız Hatırla kanıtının yerini tutmaz'), findsOneWidget);
+    expect(find.bySemanticsLabel('Düğüm destek oluyor'), findsOneWidget);
     expect(explainBack.lastRequest, isNotNull);
     expect(explainBack.lastRequest!.materialId.value, serverMaterialId);
     expect(explainBack.lastRequest!.sourceVersionId, source.identity.sourceVersionId);
@@ -205,6 +217,54 @@ void main() {
 
     expect(explainBack.requests, hasLength(2));
     expect(explainBack.lastRequest!.attemptId, firstAttemptId);
+  });
+
+  testWidgets('not-evaluable Explain-back stays neutral and still returns to the learning loop', (tester) async {
+    final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
+    addTearDown(store.close);
+
+    final ingest = SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor());
+    const materialId = MaterialId('explain-back-neutral-material');
+    await ingest.ingestPastedText(
+      learner: AppRuntime.localM5LearnerFixture,
+      materialId: materialId,
+      text: 'Fotosentez ışık enerjisini kimyasal enerjiye dönüştürür.',
+      sourceName: 'Biyoloji notu',
+    );
+    final source = await store.currentSourceVersion(
+      learner: AppRuntime.localM5LearnerFixture,
+      materialId: materialId,
+    );
+    expect(source, isNotNull);
+
+    const serverMaterialId = '88888888-8888-4888-8888-888888888888';
+    await store.saveServerMaterialBinding(
+      learner: AppRuntime.localM5LearnerFixture,
+      materialId: materialId,
+      sourceVersionId: source!.identity.sourceVersionId,
+      serverMaterialId: serverMaterialId,
+    );
+
+    final runtime = AppRuntime(
+      learner: AppRuntime.localM5LearnerFixture,
+      store: store,
+      ingest: ingest,
+      recall: RecallLearningService(sourceStore: store, learningStore: store.learningTruthStore()),
+      telemetry: store.operationalTelemetry(),
+      explainBack: _RecordingExplainBackGateway(kind: ExplainBackEvaluationKind.notEvaluable),
+    );
+
+    await tester.pumpWidget(MaterialApp(home: ExplainBackScreen(runtime: runtime, source: source)));
+    await tester.enterText(find.byType(TextField), 'Bilmiyorum.');
+    await _tapVisible(tester, find.text('Anlatımımı değerlendir'));
+    await _pumpUntilFound(tester, find.text('Bu yanıttan güvenilir sonuç çıkaramıyoruz'));
+
+    expect(find.bySemanticsLabel('Düğüm düşünüyor'), findsOneWidget);
+    expect(find.bySemanticsLabel('Düğüm destek oluyor'), findsNothing);
+    expect(find.text('Hatırla ile devam et'), findsOneWidget);
+    expect(find.text('Önceki çalışmaya dön'), findsOneWidget);
+    expect(find.textContaining('bağımsız Hatırla kanıtının yerini tutmaz'), findsOneWidget);
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('Explain-back deletes stale server source before rebinding a newer local source', (tester) async {

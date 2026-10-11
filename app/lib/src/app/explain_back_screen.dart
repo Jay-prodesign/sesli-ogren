@@ -310,7 +310,13 @@ class _ExplainBackScreenState extends State<ExplainBackScreen> {
                 onRecall: _openRecall,
                 onBack: _backToMaterial,
               ),
-            if (result is ExplainBackEvaluated) _EvaluatedResult(result: result, onRetry: _startFreshAttempt),
+            if (result is ExplainBackEvaluated)
+              _EvaluatedResult(
+                result: result,
+                onRetry: _startFreshAttempt,
+                onRecall: _openRecall,
+                onBack: _backToMaterial,
+              ),
           ],
         ),
       ),
@@ -361,7 +367,7 @@ class _UnavailableResult extends StatelessWidget {
             icon: const Icon(Icons.psychology_alt_outlined),
             label: const Text('Hatırla ile devam et'),
           ),
-          TextButton(onPressed: onBack, child: const Text('Materyale dön')),
+          TextButton(onPressed: onBack, child: const Text('Önceki çalışmaya dön')),
         ],
       ),
     ),
@@ -369,9 +375,17 @@ class _UnavailableResult extends StatelessWidget {
 }
 
 class _EvaluatedResult extends StatelessWidget {
-  const _EvaluatedResult({required this.result, required this.onRetry});
+  const _EvaluatedResult({
+    required this.result,
+    required this.onRetry,
+    required this.onRecall,
+    required this.onBack,
+  });
+
   final ExplainBackEvaluated result;
   final VoidCallback onRetry;
+  final VoidCallback onRecall;
+  final VoidCallback onBack;
 
   @override
   Widget build(BuildContext context) {
@@ -383,7 +397,18 @@ class _EvaluatedResult extends StatelessWidget {
       ExplainBackEvaluationKind.notEvaluable => 'Bu yanıttan güvenilir sonuç çıkaramıyoruz',
       ExplainBackEvaluationKind.unavailable => 'Değerlendirme kullanılamıyor',
     };
+    final companionState = switch (result.kind) {
+      ExplainBackEvaluationKind.sufficient => CompanionVisualState.success,
+      ExplainBackEvaluationKind.gapDetected => CompanionVisualState.correct,
+      ExplainBackEvaluationKind.notEvaluable || ExplainBackEvaluationKind.unavailable => CompanionVisualState.think,
+    };
+    final recallLabel = switch (result.kind) {
+      ExplainBackEvaluationKind.sufficient => 'Hatırla ile pekiştir',
+      ExplainBackEvaluationKind.gapDetected => 'Hatırla ile kontrol et',
+      ExplainBackEvaluationKind.notEvaluable || ExplainBackEvaluationKind.unavailable => 'Hatırla ile devam et',
+    };
     final isStrong = result.kind == ExplainBackEvaluationKind.sufficient;
+
     return DecoratedBox(
       decoration: BoxDecoration(
         color: isStrong ? (living ? AtelierStyle.mint : AppPalette.successSoft) : AppPalette.attentionSoft,
@@ -392,12 +417,12 @@ class _EvaluatedResult extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                CompanionView(state: isStrong ? CompanionVisualState.success : CompanionVisualState.correct, size: 48),
+                CompanionView(state: companionState, size: 48),
                 const SizedBox(width: 11),
                 Expanded(
                   child: Text(title, style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800)),
@@ -427,7 +452,26 @@ class _EvaluatedResult extends StatelessWidget {
               ),
             ],
             const SizedBox(height: 14),
-            FilledButton.tonal(onPressed: onRetry, child: const Text('Tekrar kendi cümlelerimle anlat')),
+            Text(
+              'Bu geri bildirim açıklamana dayanır; bağımsız Hatırla kanıtının yerini tutmaz.',
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: living ? AtelierStyle.muted : theme.colorScheme.onSurfaceVariant,
+                height: 1.4,
+              ),
+            ),
+            const SizedBox(height: 14),
+            FilledButton.icon(
+              onPressed: onRecall,
+              icon: const Icon(Icons.psychology_alt_outlined),
+              label: Text(recallLabel),
+            ),
+            const SizedBox(height: 8),
+            OutlinedButton.icon(
+              onPressed: onRetry,
+              icon: const Icon(Icons.refresh_rounded),
+              label: const Text('Tekrar kendi cümlelerimle anlat'),
+            ),
+            TextButton(onPressed: onBack, child: const Text('Önceki çalışmaya dön')),
           ],
         ),
       ),
