@@ -201,7 +201,9 @@ class AtelierWorkspace extends StatelessWidget {
                 key: const ValueKey('workspace-other-quick-recap'),
                 leading: const Icon(Icons.auto_awesome_outlined),
                 title: const Text('Hızlı özet'),
-                subtitle: const Text('Kaynağa bağlı kısa bir genel bakış al. Bu hazırlıktır; öğrenme kanıtı oluşturmaz.'),
+                subtitle: const Text(
+                  'Kaynağa bağlı kısa bir genel bakış al. Bu hazırlıktır; öğrenme kanıtı oluşturmaz.',
+                ),
                 onTap: () {
                   Navigator.of(sheetContext).pop();
                   onQuickRecap();

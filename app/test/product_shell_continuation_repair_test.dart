@@ -111,7 +111,9 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('Home review source handoff reaches hidden Recall without asking for the same review twice', (tester) async {
+  testWidgets('Home review source handoff reaches hidden Recall without asking for the same review twice', (
+    tester,
+  ) async {
     final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
     addTearDown(store.close);
     final ingest = SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor());
@@ -142,7 +144,9 @@ void main() {
     expect(result.nextAction.kind, NextLearningActionKind.reviewSourceThenRecall);
 
     await tester.pumpWidget(
-      MaterialApp(home: LivingDeskReviewScope(child: ProductShellScreen(runtime: runtime))),
+      MaterialApp(
+        home: LivingDeskReviewScope(child: ProductShellScreen(runtime: runtime)),
+      ),
     );
     await _pumpUntilFound(tester, find.text('Kaynağı gözden geçir'));
     await tester.tap(find.text('Kaynağı gözden geçir'));

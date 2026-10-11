@@ -59,7 +59,9 @@ void main() {
     );
 
     await tester.pumpWidget(
-      MaterialApp(home: LivingDeskReviewScope(child: ProductShellScreen(runtime: runtime))),
+      MaterialApp(
+        home: LivingDeskReviewScope(child: ProductShellScreen(runtime: runtime)),
+      ),
     );
     await _pumpUntilFound(tester, find.text('İlk kaynağımı ekle'));
 

@@ -253,7 +253,9 @@ void main() {
     final speech = _RecordingSpeechOutput();
 
     await tester.pumpWidget(
-      MaterialApp(home: ListenScreen(runtime: runtime, materialId: materialId, speechOutput: speech)),
+      MaterialApp(
+        home: ListenScreen(runtime: runtime, materialId: materialId, speechOutput: speech),
+      ),
     );
     await _pumpUntilFound(tester, find.textContaining('Eski kaynak fotosentezin'));
 

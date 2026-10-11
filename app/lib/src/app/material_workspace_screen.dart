@@ -110,16 +110,17 @@ class _MaterialWorkspaceScreenState extends State<MaterialWorkspaceScreen> {
     if (!mounted) return;
     if (currentSource?.identity.sourceVersionId != sourceVersionId) {
       setState(() => _snapshot = _load());
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Kaynak güncellendi. Güncel sürümü açmak için tekrar dokun.')),
-      );
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text('Kaynak güncellendi. Güncel sürümü açmak için tekrar dokun.')));
       return;
     }
     final extracted = data.extracted;
     if (extracted == null || !extracted.isValid || extracted.normalizedText.trim().isEmpty) {
       setState(() => _snapshot = _load());
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Bu kaynak için okunabilir güncel metin bulunamadı. Kaynağı kontrol edip tekrar dene.')),
+        const SnackBar(
+          content: Text('Bu kaynak için okunabilir güncel metin bulunamadı. Kaynağı kontrol edip tekrar dene.'),
+        ),
       );
       return;
     }
@@ -190,11 +191,9 @@ class _MaterialWorkspaceScreenState extends State<MaterialWorkspaceScreen> {
     final wrapped = treatment != null
         ? LearningVisualTreatmentScope(treatment: treatment, child: destination)
         : livingReview
-            ? LivingDeskReviewScope(child: destination)
-            : destination;
-    Navigator.of(readerContext).pushReplacement<void, void>(
-      MaterialPageRoute<void>(builder: (_) => wrapped),
-    );
+        ? LivingDeskReviewScope(child: destination)
+        : destination;
+    Navigator.of(readerContext).pushReplacement<void, void>(MaterialPageRoute<void>(builder: (_) => wrapped));
   }
 
   Future<void> _readCurrentSource() async {
@@ -837,7 +836,13 @@ class _LearningStatusCard extends StatelessWidget {
               style: FilledButton.styleFrom(backgroundColor: Colors.white, foregroundColor: AppPalette.primaryDark),
               onPressed: reviewFirst || waitUntilLater ? onReadSource : onRecall,
               icon: Icon(reviewFirst || waitUntilLater ? Icons.menu_book_outlined : Icons.psychology_alt_rounded),
-              label: Text(reviewFirst ? 'Önce kaynağı gözden geçir' : waitUntilLater ? 'Kaynağa dön' : 'Hatırla ile devam'),
+              label: Text(
+                reviewFirst
+                    ? 'Önce kaynağı gözden geçir'
+                    : waitUntilLater
+                    ? 'Kaynağa dön'
+                    : 'Hatırla ile devam',
+              ),
             ),
           ],
         ),

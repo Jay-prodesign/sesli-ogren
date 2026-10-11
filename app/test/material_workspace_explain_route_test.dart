@@ -177,10 +177,7 @@ void main() {
       telemetry: store.operationalTelemetry(),
     );
 
-    final prompt = await runtime.recall.createCurrentPrompt(
-      learner: runtime.learner,
-      materialId: materialId,
-    );
+    final prompt = await runtime.recall.createCurrentPrompt(learner: runtime.learner, materialId: materialId);
     final attempt = await runtime.recall.openAttempt(learner: runtime.learner, actionId: prompt.id);
     final result = await runtime.recall.submit(
       learner: runtime.learner,

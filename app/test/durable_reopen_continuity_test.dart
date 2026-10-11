@@ -81,7 +81,9 @@ void main() {
     expect(result.nextAction.kind, NextLearningActionKind.reviewSourceThenRecall);
 
     await tester.pumpWidget(
-      MaterialApp(home: LearningSliceScreen(runtime: runtime, materialId: materialId)),
+      MaterialApp(
+        home: LearningSliceScreen(runtime: runtime, materialId: materialId),
+      ),
     );
     await _pumpUntilFound(tester, find.text('Önce kaynağı gözden geçir'));
 

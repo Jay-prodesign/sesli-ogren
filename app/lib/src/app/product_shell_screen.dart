@@ -288,9 +288,8 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
       if (!mounted) return;
       if (currentSource?.identity.sourceVersionId != source.identity.sourceVersionId) {
         setState(_refresh);
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Kaynak güncellendi. Güncel sürümü yeniden aç.')),
-        );
+        ScaffoldMessenger.of(context)
+            .showSnackBar(const SnackBar(content: Text('Kaynak güncellendi. Güncel sürümü yeniden aç.')));
         return;
       }
 
