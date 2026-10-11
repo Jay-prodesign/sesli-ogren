@@ -1709,10 +1709,7 @@ void main() {
     expect(deletedCallback, isFalse);
     expect(find.text('Yerel veriyi temizlemeyi tekrar dene'), findsOneWidget);
 
-    await tapVisible(
-      tester,
-      find.widgetWithText(OutlinedButton, 'Yerel veriyi temizlemeyi tekrar dene'),
-    );
+    await tapVisible(tester, find.widgetWithText(OutlinedButton, 'Yerel veriyi temizlemeyi tekrar dene'));
     await pumpUntilFound(tester, find.textContaining('Sunucuya yeni silme isteği gönderilmedi'));
 
     expect(deletion.calls, 1);
