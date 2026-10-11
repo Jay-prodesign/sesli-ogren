@@ -14,6 +14,7 @@ import 'package:sesli_ogren/src/app/product_shell_screen.dart';
 import 'package:sesli_ogren/src/app/profile_surface.dart';
 import 'package:sesli_ogren/src/app/progress_surface.dart';
 import 'package:sesli_ogren/src/app/sesli_ogren_app.dart';
+import 'package:sesli_ogren/src/app/source_reader_screen.dart';
 import 'package:sesli_ogren/src/data/pdf_text_extractor.dart';
 import 'package:sesli_ogren/src/data/source_ingest_service.dart';
 import 'package:sesli_ogren/src/data/sqlite_source_store.dart';
