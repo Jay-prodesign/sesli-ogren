@@ -92,6 +92,53 @@ Future<void> pumpUntilFound(WidgetTester tester, Finder finder, {int maxPumps = 
 }
 
 void main() {
+  testWidgets('first session flows from empty Home through source intent and back to a usable Home', (tester) async {
+    usePhoneViewport(tester);
+    final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
+    addTearDown(store.close);
+    final ingest = SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor());
+    final runtime = AppRuntime(
+      learner: AppRuntime.localM5LearnerFixture,
+      store: store,
+      ingest: ingest,
+      recall: RecallLearningService(sourceStore: store, learningStore: store.learningTruthStore()),
+      telemetry: store.operationalTelemetry(),
+    );
+
+    await tester.pumpWidget(_testApp(LivingDeskReviewScope(child: ProductShellScreen(runtime: runtime))));
+    await pumpUntilFound(tester, find.text('İlk kaynağımı ekle'));
+
+    await tapVisible(tester, find.text('İlk kaynağımı ekle'));
+    await pumpUntilFound(tester, find.text('Metin yapıştır'));
+    await tapVisible(tester, find.text('Metin yapıştır'));
+    await pumpUntilFound(tester, find.byKey(const ValueKey('pasted-material-text')));
+
+    await tester.enterText(
+      find.byKey(const ValueKey('pasted-material-text')),
+      'Fotosentez ışık enerjisini kimyasal enerjiye dönüştürür. Klorofil ışığın soğurulmasına yardım eder.',
+    );
+    await tapVisible(tester, find.text('Metni ekle · çalışma alanını aç'));
+    await pumpUntilFound(tester, find.byKey(const ValueKey('first-value-intent')));
+
+    expect(find.text('Şimdi bununla ne yapmak istiyorsun?'), findsOneWidget);
+    expect(find.text('Sen öner · Önce kaynağı oku'), findsOneWidget);
+
+    await tapVisible(tester, find.text('Sen öner · Önce kaynağı oku'));
+    await pumpUntilFound(tester, find.byType(SourceReaderScreen));
+    expect(find.textContaining('Fotosentez'), findsWidgets);
+
+    await tester.pageBack();
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('first-value-intent')), findsNothing);
+    expect(find.text('İlk aktif denemeni yap'), findsOneWidget);
+
+    await tester.pageBack();
+    await pumpUntilFound(tester, find.text('Kaldığın yer hazır.'));
+    expect(find.text('İlk hatırlama denemeni yap'), findsOneWidget);
+    expect(find.text('Hatırlamayı dene'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('Home review action opens the persisted repair continuation', (tester) async {
     usePhoneViewport(tester);
     final runtime = await _runtimeWithEvidence(
