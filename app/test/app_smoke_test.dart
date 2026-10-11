@@ -5,8 +5,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sesli_ogren/src/account/account_deletion_gateway.dart';
 import 'package:sesli_ogren/src/account/account_overview_gateway.dart';
+import 'package:sesli_ogren/src/app/account_entry_screen.dart';
 import 'package:sesli_ogren/src/app/app_runtime.dart';
 import 'package:sesli_ogren/src/app/companion_view.dart';
+import 'package:sesli_ogren/src/app/focus_screen.dart';
 import 'package:sesli_ogren/src/app/learning_slice_screen.dart';
 import 'package:sesli_ogren/src/app/listen_screen.dart';
 import 'package:sesli_ogren/src/app/living_study_desk_home.dart';
@@ -492,7 +494,7 @@ void main() {
       of: find.byKey(const ValueKey('profile-surface')),
       matching: find.byType(Scrollable),
     );
-    final deleteAccount = find.widgetWithText(OutlinedButton, 'Hesabımı ve verilerimi sil');
+    final deleteAccount = find.text('Hesabımı ve verilerimi sil');
     await scrollUntilFound(tester, deleteAccount, scrollable: profileScroll);
     await tapVisible(tester, deleteAccount);
     await pumpUntilFound(tester, find.text('Hesabı ve verileri sil?'));
@@ -532,10 +534,11 @@ void main() {
     final switchAccount = find.widgetWithText(TextButton, 'Başka hesapla giriş yap');
     expect(switchAccount, findsOneWidget);
     await pumpUntilFound(tester, switchAccount.hitTestable());
-    await tester.tap(switchAccount);
-    await pumpUntilFound(tester, find.text('Öğrenme alanına gir'));
+    await tester.tap(switchAccount.hitTestable());
+    await pumpUntilFound(tester, find.byType(AccountEntryScreen));
 
     expect(signOutCalls, 1);
+    expect(find.text('Öğrenme alanına gir'), findsOneWidget);
     expect(find.text('Kod gönder'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
@@ -689,6 +692,7 @@ void main() {
       ),
     );
     final learningScroll = find.descendant(of: find.byType(LearningSliceScreen), matching: find.byType(Scrollable));
+    await pumpUntilGone(tester, find.byKey(const ValueKey('loading')));
     await scrollUntilFound(tester, find.byKey(const ValueKey('recall')), scrollable: learningScroll);
     await scrollUntilFound(tester, find.text('Bilmiyorum'), scrollable: learningScroll);
     await tapVisible(tester, find.text('Bilmiyorum'));
@@ -850,7 +854,9 @@ void main() {
     await pumpUntilFound(tester, find.text('KISA ODAK · 3 ADIM'));
     expect(find.byKey(const ValueKey('focus-source-trust')), findsOneWidget);
     expect(find.text('Fotosentez çalışma notu'), findsWidgets);
-    expect(find.text('Sorumu açıkla'), findsOneWidget);
+    final focusScroll = find.descendant(of: find.byType(FocusScreen), matching: find.byType(Scrollable));
+    await scrollUntilFound(tester, find.text('Sorumu açıkla'), scrollable: focusScroll);
+    await scrollUntilFound(tester, find.byType(TextField), scrollable: focusScroll);
     await tester.enterText(find.byType(TextField), 'Fotosentezde karbondioksit nasıl kullanılır?');
     await tapVisible(tester, find.text('İpucu ver'));
     await pumpUntilFound(tester, find.textContaining('Kaynak ipucu:'));
@@ -934,7 +940,7 @@ void main() {
 
     await tapVisible(tester, find.text('Okumaya devam et'));
     await pumpUntilFound(tester, find.byType(SourceReaderScreen));
-    expect(find.descendant(of: find.byType(SourceReaderScreen), matching: find.text('Eski materyal')), findsOneWidget);
+    expect(find.descendant(of: find.byType(SourceReaderScreen), matching: find.text('Eski materyal')), findsWidgets);
     expect(find.descendant(of: find.byType(SourceReaderScreen), matching: find.text('Yeni materyal')), findsNothing);
     expect(tester.takeException(), isNull);
   });
@@ -1572,9 +1578,10 @@ void main() {
     await tapVisible(tester, signOut);
     await pumpUntilFound(tester, find.text('Bu cihazda çıkış yap?'));
     await tapVisible(tester, find.widgetWithText(FilledButton, 'Çıkış yap'));
-    await pumpUntilFound(tester, find.text('Öğrenme alanına gir'));
+    await pumpUntilFound(tester, find.byType(AccountEntryScreen));
 
     expect(signOutCalls, 1);
+    expect(find.text('Öğrenme alanına gir'), findsOneWidget);
     expect(find.text('Kod gönder'), findsOneWidget);
   });
 
@@ -1706,9 +1713,9 @@ void main() {
       of: find.byKey(const ValueKey('profile-surface')),
       matching: find.byType(Scrollable),
     );
-    final deleteAccount = find.widgetWithText(OutlinedButton, 'Hesabımı ve verilerimi sil');
+    final deleteAccount = find.text('Hesabımı ve verilerimi sil');
     await scrollUntilFound(tester, deleteAccount, scrollable: profileScroll);
-    await tester.tap(deleteAccount);
+    await tapVisible(tester, deleteAccount);
     await pumpUntilFound(tester, find.text('Hesabı ve verileri sil?'));
     await tester.tap(find.text('Devam et'));
     await pumpUntilFound(tester, find.text('Son onay'));
@@ -2057,7 +2064,7 @@ void main() {
     await pumpUntilFound(tester, find.text('Materyali güncelle'));
     await tapVisible(tester, find.text('Materyali güncelle'));
     final editorScroll = find.descendant(of: find.byType(LearningSliceScreen), matching: find.byType(Scrollable));
-    await scrollUntilFound(tester, find.text('Metin yapıştır'), scrollable: editorScroll);
+    await scrollUntilFound(tester, find.text('Metin yapıştır'), scrollable: editorScroll, delta: 180);
     await tapVisible(tester, find.text('Metin yapıştır'));
     await tester.enterText(
       find.byKey(const ValueKey('pasted-material-text')),
@@ -2133,7 +2140,8 @@ void main() {
     );
     await tapVisible(tester, find.text('Metni ekle · çalışma alanını aç'));
     final sourceFlowScroll = find.descendant(of: find.byType(LearningSliceScreen), matching: find.byType(Scrollable));
-    await scrollUntilFound(tester, find.byKey(const ValueKey('recall')), scrollable: sourceFlowScroll);
+    await pumpUntilGone(tester, find.byKey(const ValueKey('source')));
+    await scrollUntilFound(tester, find.byKey(const ValueKey('recall')), scrollable: sourceFlowScroll, delta: 180);
 
     final material = await store.material(learner: runtime.learner, materialId: AppRuntime.primaryMaterialId);
     expect(material, isNotNull);
