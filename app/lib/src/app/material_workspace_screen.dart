@@ -1,11 +1,8 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 
 import '../domain/learning_contracts.dart';
 import '../domain/learning_truth.dart';
 import '../learning/recall_learning_service.dart';
-import 'activation_observability.dart';
 import 'app_runtime.dart';
 import 'app_theme.dart';
 import 'companion_view.dart';
@@ -52,7 +49,6 @@ class _MaterialWorkspaceScreenState extends State<MaterialWorkspaceScreen> {
     super.initState();
     _showFirstValueIntent = widget.showFirstValueIntent;
     _snapshot = _load();
-    unawaited(widget.runtime.recordActivationReturnIfStarted(materialId: widget.materialId));
   }
 
   void _consumeFirstValueIntent() {
@@ -89,11 +85,6 @@ class _MaterialWorkspaceScreenState extends State<MaterialWorkspaceScreen> {
 
   Future<void> _openSourceReader(_WorkspaceSnapshot data) async {
     final sourceVersionId = data.source.identity.sourceVersionId;
-    await widget.runtime.recordActivationActionStart(
-      materialId: data.material.id,
-      sourceVersionId: sourceVersionId,
-      action: 'read_source',
-    );
     final initialProgress = await widget.runtime.store.readerResumeProgress(
       learner: widget.runtime.learner,
       materialId: data.material.id,

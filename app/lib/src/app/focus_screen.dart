@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'dart:convert';
 
 import 'package:crypto/crypto.dart';
@@ -7,7 +6,6 @@ import 'package:flutter/material.dart';
 import '../domain/learning_contracts.dart';
 import '../generation/supabase_source_summary_gateway.dart';
 import '../learning/focus_help_gateway.dart';
-import 'activation_observability.dart';
 import 'app_runtime.dart';
 import 'app_theme.dart';
 import 'atelier_learning_surfaces.dart';
@@ -43,18 +41,6 @@ class FocusScreen extends StatefulWidget {
 
 class _FocusScreenState extends State<FocusScreen> {
   final question = TextEditingController();
-
-  @override
-  void initState() {
-    super.initState();
-    unawaited(
-      widget.runtime.recordActivationActionStart(
-        materialId: widget.source.identity.materialId,
-        sourceVersionId: widget.source.identity.sourceVersionId,
-        action: 'focus',
-      ),
-    );
-  }
 
   Widget _preserveProductExperience(Widget screen) {
     final treatment = LearningVisualTreatmentScope.maybeOf(context);
@@ -344,13 +330,6 @@ class _FocusScreenState extends State<FocusScreen> {
               ? result
               : const FocusHelpUnavailable('Kaynak değişti. Eski sürüme bağlı yardımı göstermiyoruz.');
         });
-        if (stillCurrent && result is FocusHelpReady) {
-          await widget.runtime.recordActivationFirstValue(
-            materialId: widget.source.identity.materialId,
-            sourceVersionId: widget.source.identity.sourceVersionId,
-            action: 'focus',
-          );
-        }
         return;
       }
       if (mounted) setState(() => busy = false);
@@ -370,23 +349,15 @@ class _FocusScreenState extends State<FocusScreen> {
 
     final stillCurrent = await _sourceStillCurrent();
     if (!mounted) return;
-    final displayed = !stillCurrent
-        ? const FocusHelpUnavailable('Kaynak değişti. Eski sürüme bağlı yardımı göstermiyoruz.')
-        : result is FocusHelpReady && !result.matches(widget.source.identity)
-        ? const FocusHelpUnavailable('Kaynak değişti; eski yanıtı göstermiyoruz.')
-        : result;
     setState(() {
       busy = false;
       _sourceChanged = !stillCurrent;
-      help = displayed;
+      help = !stillCurrent
+          ? const FocusHelpUnavailable('Kaynak değişti. Eski sürüme bağlı yardımı göstermiyoruz.')
+          : result is FocusHelpReady && !result.matches(widget.source.identity)
+          ? const FocusHelpUnavailable('Kaynak değişti; eski yanıtı göstermiyoruz.')
+          : result;
     });
-    if (displayed is FocusHelpReady) {
-      await widget.runtime.recordActivationFirstValue(
-        materialId: widget.source.identity.materialId,
-        sourceVersionId: widget.source.identity.sourceVersionId,
-        action: 'focus',
-      );
-    }
   }
 
   @override

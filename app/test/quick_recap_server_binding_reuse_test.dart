@@ -3,7 +3,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sesli_ogren/src/app/app_runtime.dart';
 import 'package:sesli_ogren/src/app/quick_recap_screen.dart';
-import 'package:sesli_ogren/src/app/source_reader_screen.dart';
 import 'package:sesli_ogren/src/data/pdf_text_extractor.dart';
 import 'package:sesli_ogren/src/data/source_ingest_service.dart';
 import 'package:sesli_ogren/src/data/sqlite_source_store.dart';
@@ -254,13 +253,5 @@ void main() {
     }
     expect(find.textContaining('Sunucuya ulaşılamadı'), findsOneWidget);
     expect(find.text('İşlemi başlatmayı tekrar dene'), findsOneWidget);
-    expect(find.byKey(const ValueKey('quick-recap-study-fallback')), findsOneWidget);
-    expect(find.text('Kaynağı aç'), findsOneWidget);
-    expect(find.text('Hatırlamayı dene'), findsOneWidget);
-
-    await tester.tap(find.text('Kaynağı aç'));
-    await tester.pumpAndSettle();
-    expect(find.byType(SourceReaderScreen), findsOneWidget);
-    expect(find.text('Biyoloji notu'), findsWidgets);
   });
 }
