@@ -38,7 +38,9 @@ Future<void> _scrollUntilFound(
   int maxDrags = 12,
 }) async {
   for (var i = 0; i < maxDrags && target.evaluate().isEmpty; i++) {
-    await tester.drag(scrollable, const Offset(0, -180));
+    final activeScrollables = scrollable.hitTestable();
+    expect(activeScrollables, findsWidgets);
+    await tester.drag(activeScrollables.first, const Offset(0, -180));
     await tester.pump();
   }
   expect(target, findsOneWidget);
