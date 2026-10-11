@@ -2,6 +2,8 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
+import 'app_theme.dart';
+
 enum CompanionVisualState { idle, listen, think, speak, correct, success }
 
 class CompanionView extends StatefulWidget {
@@ -135,12 +137,12 @@ class _CompanionViewState extends State<CompanionView> with SingleTickerProvider
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         color: switch (widget.state) {
-                          CompanionVisualState.success => const Color(0xFFE1F2C9),
-                          CompanionVisualState.correct => const Color(0xFFFFE8CF),
-                          CompanionVisualState.listen => const Color(0xFFDCEFF2),
-                          CompanionVisualState.think => const Color(0xFFE8E4F5),
-                          CompanionVisualState.speak => const Color(0xFFE3EFFB),
-                          CompanionVisualState.idle => const Color(0xFFE7F0E9),
+                          CompanionVisualState.success => AppPalette.momentum.withValues(alpha: 0.28),
+                          CompanionVisualState.correct => AppPalette.attentionSoft,
+                          CompanionVisualState.listen => AppPalette.signalSoft,
+                          CompanionVisualState.think => AppPalette.primarySoft,
+                          CompanionVisualState.speak => AppPalette.surfaceMuted,
+                          CompanionVisualState.idle => AppPalette.surfaceMuted,
                         },
                       ),
                     ),
@@ -169,12 +171,12 @@ class _CompanionViewState extends State<CompanionView> with SingleTickerProvider
   }
 
   static Color _haloColor(CompanionVisualState state) => switch (state) {
-    CompanionVisualState.idle => const Color(0xFFBEDDD0),
-    CompanionVisualState.listen => const Color(0xFF89C9DA),
-    CompanionVisualState.think => const Color(0xFFB4A3DB),
-    CompanionVisualState.speak => const Color(0xFF94B8E8),
-    CompanionVisualState.correct => const Color(0xFFE8B980),
-    CompanionVisualState.success => const Color(0xFF9DCB74),
+    CompanionVisualState.idle => AppPalette.outline,
+    CompanionVisualState.listen => AppPalette.signal,
+    CompanionVisualState.think => AppPalette.primary,
+    CompanionVisualState.speak => AppPalette.primaryDark,
+    CompanionVisualState.correct => AppPalette.attention,
+    CompanionVisualState.success => AppPalette.momentumInk,
   };
 
   static String _semanticLabel(CompanionVisualState state) => switch (state) {
@@ -203,12 +205,21 @@ class _CompanionStateBadge extends StatelessWidget {
   };
 
   Color get _background => switch (state) {
-    CompanionVisualState.listen => const Color(0xFF0E6F86),
-    CompanionVisualState.think => const Color(0xFF6E58A6),
-    CompanionVisualState.speak => const Color(0xFF315F9D),
-    CompanionVisualState.correct => const Color(0xFFB0692C),
-    CompanionVisualState.success => const Color(0xFF4D7C2D),
-    CompanionVisualState.idle => const Color(0xFF557A67),
+    CompanionVisualState.listen => AppPalette.signal,
+    CompanionVisualState.think => AppPalette.primary,
+    CompanionVisualState.speak => AppPalette.primaryDark,
+    CompanionVisualState.correct => AppPalette.attention,
+    CompanionVisualState.success => AppPalette.momentum,
+    CompanionVisualState.idle => AppPalette.inkMuted,
+  };
+
+  Color get _foreground => switch (state) {
+    CompanionVisualState.listen => AppPalette.ink,
+    CompanionVisualState.think => Colors.white,
+    CompanionVisualState.speak => Colors.white,
+    CompanionVisualState.correct => AppPalette.ink,
+    CompanionVisualState.success => AppPalette.momentumInk,
+    CompanionVisualState.idle => Colors.white,
   };
 
   @override
@@ -225,7 +236,7 @@ class _CompanionStateBadge extends StatelessWidget {
           boxShadow: const [BoxShadow(color: Color(0x22000000), blurRadius: 6, offset: Offset(0, 2))],
         ),
         alignment: Alignment.center,
-        child: Icon(_icon, color: Colors.white, size: badgeSize * 0.56),
+        child: Icon(_icon, color: _foreground, size: badgeSize * 0.56),
       ),
     );
   }
