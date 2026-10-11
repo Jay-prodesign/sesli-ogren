@@ -276,9 +276,7 @@ void main() {
     expect(find.text('Önceki çalışmaya dön'), findsOneWidget);
     expect(find.textContaining('bağımsız Hatırla kanıtının yerini tutmaz'), findsOneWidget);
     expect(
-      find.byWidgetPredicate(
-        (widget) => widget is CompanionView && widget.state == CompanionVisualState.correct,
-      ),
+      find.byWidgetPredicate((widget) => widget is CompanionView && widget.state == CompanionVisualState.correct),
       findsOneWidget,
     );
     expect(explainBack.lastRequest, isNotNull);
@@ -344,9 +342,7 @@ void main() {
     await _pumpUntilFound(tester, find.text('Bu yanıttan güvenilir sonuç çıkaramıyoruz'));
 
     expect(
-      find.byWidgetPredicate(
-        (widget) => widget is CompanionView && widget.state == CompanionVisualState.think,
-      ),
+      find.byWidgetPredicate((widget) => widget is CompanionView && widget.state == CompanionVisualState.think),
       findsOneWidget,
     );
     expect(
