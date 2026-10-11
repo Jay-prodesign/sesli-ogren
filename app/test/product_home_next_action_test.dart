@@ -312,9 +312,9 @@ void main() {
     expect(find.text('Güncel çalışma notu'), findsWidgets);
     expect(find.text('Enerji onarım notu'), findsOneWidget);
     await tapVisible(tester, find.text('Enerji onarım notu'));
-    await pumpUntilFound(tester, find.text('Bu bölümü yeniden kur'));
+    await pumpUntilFound(tester, find.byType(SourceReaderScreen));
 
-    expect(find.text('Kaynağı kapat ve yeniden dene'), findsOneWidget);
+    expect(find.text('Kaynağı kapat ve hatırla'), findsOneWidget);
     expect(find.byType(MaterialWorkspaceScreen), findsNothing);
   });
 
@@ -463,9 +463,9 @@ void main() {
     expect(repairAction, findsOneWidget);
 
     await tapVisible(tester, repairAction);
-    await pumpUntilFound(tester, find.text('Bu bölümü yeniden kur'));
+    await pumpUntilFound(tester, find.byType(SourceReaderScreen));
 
-    expect(find.text('Kaynağı kapat ve yeniden dene'), findsOneWidget);
+    expect(find.text('Kaynağı kapat ve hatırla'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 
