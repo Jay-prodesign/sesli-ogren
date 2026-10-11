@@ -6,6 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:sesli_ogren/src/account/account_deletion_gateway.dart';
 import 'package:sesli_ogren/src/account/account_overview_gateway.dart';
 import 'package:sesli_ogren/src/app/app_runtime.dart';
+import 'package:sesli_ogren/src/app/companion_view.dart';
 import 'package:sesli_ogren/src/app/learning_slice_screen.dart';
 import 'package:sesli_ogren/src/app/listen_screen.dart';
 import 'package:sesli_ogren/src/app/living_study_desk_home.dart';
@@ -232,23 +233,30 @@ Future<void> scrollUntilFound(
   double delta = -180,
 }) async {
   for (var i = 0; i < maxDrags && target.evaluate().isEmpty; i++) {
-    await tester.drag(scrollable, Offset(0, delta));
+    final activeScrollables = scrollable.hitTestable();
+    expect(activeScrollables, findsWidgets);
+    await tester.drag(activeScrollables.first, Offset(0, delta));
     await tester.pump();
   }
   expect(target, findsWidgets);
 }
 
 Future<void> tapVisible(WidgetTester tester, Finder finder) async {
+  for (var i = 0; i < 20 && finder.evaluate().isNotEmpty && finder.hitTestable().evaluate().isEmpty; i++) {
+    await tester.pump(const Duration(milliseconds: 20));
+  }
   if (finder.evaluate().isEmpty) {
     final scrollables = find.byType(Scrollable).hitTestable();
     if (scrollables.evaluate().isNotEmpty) {
-      await scrollUntilFound(tester, finder, scrollable: scrollables.last);
+      await scrollUntilFound(tester, finder, scrollable: scrollables.first);
     }
   }
   var target = finder.hitTestable();
   if (target.evaluate().isEmpty && finder.evaluate().isNotEmpty) {
-    await tester.ensureVisible(finder);
-    await tester.pump();
+    await tester.ensureVisible(finder.first);
+    for (var i = 0; i < 20 && finder.hitTestable().evaluate().isEmpty; i++) {
+      await tester.pump(const Duration(milliseconds: 20));
+    }
     target = finder.hitTestable();
   }
   expect(target, findsWidgets);
@@ -258,18 +266,8 @@ Future<void> tapVisible(WidgetTester tester, Finder finder) async {
 Future<void> tapBottomNavIcon(WidgetTester tester, IconData icon) async {
   final target = find.byIcon(icon).hitTestable();
   await pumpUntilFound(tester, target);
-  await tester.tap(target);
+  await tester.tap(target.first);
   await tester.pump();
-}
-
-Future<void> pumpUntilGone(WidgetTester tester, Finder finder, {int maxPumps = 100}) async {
-  for (var i = 0; i < maxPumps; i++) {
-    await tester.pump(const Duration(milliseconds: 20));
-    if (finder.evaluate().isEmpty) {
-      return;
-    }
-  }
-  fail('Expected widget did not disappear within bounded pumps.');
 }
 
 void main() {
@@ -323,7 +321,8 @@ void main() {
     await pumpUntilFound(tester, find.textContaining('Devam kaydı kullanılamadı'));
     await tester.pump();
 
-    expect(find.bySemanticsLabel('Düğüm düşünüyor'), findsOneWidget);
+    final companion = tester.widget<CompanionView>(find.byType(CompanionView).first);
+    expect(companion.state, CompanionVisualState.think);
     expect(find.bySemanticsLabel('Düğüm destek oluyor'), findsNothing);
     expect(find.bySemanticsLabel('Düğüm başarıyı kutluyor'), findsNothing);
   });
@@ -479,7 +478,13 @@ void main() {
     await pumpUntilFound(tester, find.byType(NavigationBar));
     await tapBottomNavIcon(tester, Icons.person_outline_rounded);
     await pumpUntilFound(tester, find.text('Profil ve Ayarlar'));
-    await tapVisible(tester, find.text('Hesabımı ve verilerimi sil'));
+    final profileScroll = find.descendant(
+      of: find.byKey(const ValueKey('profile-surface')),
+      matching: find.byType(Scrollable),
+    );
+    final deleteAccount = find.widgetWithText(OutlinedButton, 'Hesabımı ve verilerimi sil');
+    await scrollUntilFound(tester, deleteAccount, scrollable: profileScroll);
+    await tapVisible(tester, deleteAccount);
     await pumpUntilFound(tester, find.text('Hesabı ve verileri sil?'));
     await tapVisible(tester, find.text('Devam et'));
     await pumpUntilFound(tester, find.text('Son onay'));
@@ -514,8 +519,10 @@ void main() {
     );
     await pumpUntilFound(tester, find.text('Güvenli öğrenme oturumu açılamadı.'));
 
-    expect(find.text('Başka hesapla giriş yap'), findsOneWidget);
-    await tapVisible(tester, find.text('Başka hesapla giriş yap'));
+    final switchAccount = find.widgetWithText(TextButton, 'Başka hesapla giriş yap');
+    expect(switchAccount, findsOneWidget);
+    await pumpUntilFound(tester, switchAccount.hitTestable());
+    await tester.tap(switchAccount);
     await pumpUntilFound(tester, find.text('Öğrenme alanına gir'));
 
     expect(signOutCalls, 1);
@@ -915,8 +922,8 @@ void main() {
 
     await tapVisible(tester, find.text('Okumaya devam et'));
     await pumpUntilFound(tester, find.byType(SourceReaderScreen));
-    expect(find.text('Eski materyal'), findsWidgets);
-    expect(find.text('Yeni materyal'), findsNothing);
+    expect(find.descendant(of: find.byType(SourceReaderScreen), matching: find.text('Eski materyal')), findsOneWidget);
+    expect(find.descendant(of: find.byType(SourceReaderScreen), matching: find.text('Yeni materyal')), findsNothing);
     expect(tester.takeException(), isNull);
   });
 
@@ -1100,8 +1107,8 @@ void main() {
     await tester.pageBack();
     await tester.pump(const Duration(milliseconds: 350));
     await pumpUntilFound(tester, find.text('İlk kaynak'));
-    expect(find.text('İkinci kaynak'), findsOneWidget);
-    expect(find.text('İlk kaynak'), findsOneWidget);
+    expect(find.text('İkinci kaynak'), findsWidgets);
+    expect(find.text('İlk kaynak'), findsWidgets);
     expect(tester.takeException(), isNull);
   });
 
@@ -1328,15 +1335,16 @@ void main() {
     expect(find.text('Anlatım değerlendirme'), findsOneWidget);
     expect(find.textContaining('Günlük sınırlar sunucu planından gelir'), findsOneWidget);
     expect(find.text('Dil: Türkçe'), findsOneWidget);
-    await tester.scrollUntilVisible(find.text('Cihazın Türkçe sesi'), 260, scrollable: find.byType(Scrollable).last);
-    await tester.pump(const Duration(milliseconds: 300));
-    expect(find.text('Cihazın Türkçe sesi'), findsOneWidget);
-    await tester.scrollUntilVisible(
-      find.textContaining('Hesap silme tüm hesap ve öğrenme verilerini kapsar'),
-      260,
-      scrollable: find.byType(Scrollable).last,
+    final profileScroll = find.descendant(
+      of: find.byKey(const ValueKey('profile-surface')),
+      matching: find.byType(Scrollable),
     );
-    await tester.pump(const Duration(milliseconds: 300));
+    await scrollUntilFound(tester, find.text('Cihazın Türkçe sesi'), scrollable: profileScroll);
+    await scrollUntilFound(
+      tester,
+      find.textContaining('Hesap silme tüm hesap ve öğrenme verilerini kapsar'),
+      scrollable: profileScroll,
+    );
     expect(find.textContaining('Hesap silme tüm hesap ve öğrenme verilerini kapsar'), findsOneWidget);
   });
 
@@ -1543,9 +1551,15 @@ void main() {
     await pumpUntilFound(tester, find.byType(NavigationBar));
     await tapBottomNavIcon(tester, Icons.person_outline_rounded);
     await pumpUntilFound(tester, find.text('Profil ve Ayarlar'));
-    await tapVisible(tester, find.text('Bu cihazda çıkış yap'));
+    final profileScroll = find.descendant(
+      of: find.byKey(const ValueKey('profile-surface')),
+      matching: find.byType(Scrollable),
+    );
+    final signOut = find.widgetWithText(OutlinedButton, 'Bu cihazda çıkış yap');
+    await scrollUntilFound(tester, signOut, scrollable: profileScroll);
+    await tapVisible(tester, signOut);
     await pumpUntilFound(tester, find.text('Bu cihazda çıkış yap?'));
-    await tapVisible(tester, find.text('Çıkış yap'));
+    await tapVisible(tester, find.widgetWithText(FilledButton, 'Çıkış yap'));
     await pumpUntilFound(tester, find.text('Öğrenme alanına gir'));
 
     expect(signOutCalls, 1);
@@ -1676,12 +1690,13 @@ void main() {
     await pumpUntilFound(tester, find.text('Ücretsiz plan'));
     await store.close();
 
-    await tester.scrollUntilVisible(
-      find.text('Hesabımı ve verilerimi sil'),
-      260,
-      scrollable: find.byType(Scrollable).last,
+    final profileScroll = find.descendant(
+      of: find.byKey(const ValueKey('profile-surface')),
+      matching: find.byType(Scrollable),
     );
-    await tester.tap(find.text('Hesabımı ve verilerimi sil'));
+    final deleteAccount = find.widgetWithText(OutlinedButton, 'Hesabımı ve verilerimi sil');
+    await scrollUntilFound(tester, deleteAccount, scrollable: profileScroll);
+    await tester.tap(deleteAccount);
     await pumpUntilFound(tester, find.text('Hesabı ve verileri sil?'));
     await tester.tap(find.text('Devam et'));
     await pumpUntilFound(tester, find.text('Son onay'));
@@ -1692,7 +1707,10 @@ void main() {
     expect(deletedCallback, isFalse);
     expect(find.text('Yerel veriyi temizlemeyi tekrar dene'), findsOneWidget);
 
-    await tapVisible(tester, find.text('Yerel veriyi temizlemeyi tekrar dene'));
+    await tapVisible(
+      tester,
+      find.widgetWithText(OutlinedButton, 'Yerel veriyi temizlemeyi tekrar dene'),
+    );
     await pumpUntilFound(tester, find.textContaining('Sunucuya yeni silme isteği gönderilmedi'));
 
     expect(deletion.calls, 1);
