@@ -239,11 +239,7 @@ void main() {
     final create = find.byKey(const ValueKey('quick-recap-create'));
     await _scrollUntilFound(tester, create, scrollable: recapScroll);
     await tester.tap(create);
-    await _scrollUntilFound(
-      tester,
-      find.byKey(const ValueKey('quick-recap-utility-actions')),
-      scrollable: recapScroll,
-    );
+    await _scrollUntilFound(tester, find.byKey(const ValueKey('quick-recap-utility-actions')), scrollable: recapScroll);
 
     expect(find.byKey(const ValueKey('quick-recap-utility-actions')), findsOneWidget);
     expect(find.text('Özeti dinle'), findsOneWidget);
