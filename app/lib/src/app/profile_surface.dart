@@ -738,9 +738,7 @@ class _ProfilePanel extends StatelessWidget {
       decoration: BoxDecoration(
         color: living ? AtelierStyle.paper : AppPalette.surface,
         borderRadius: BorderRadius.circular(20),
-        boxShadow: living
-            ? const [BoxShadow(color: Color(0x0D14224A), blurRadius: 18, offset: Offset(0, 8))]
-            : null,
+        boxShadow: living ? const [BoxShadow(color: Color(0x0D14224A), blurRadius: 18, offset: Offset(0, 8))] : null,
       ),
       child: Column(children: children),
     );

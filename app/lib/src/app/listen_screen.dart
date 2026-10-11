@@ -559,10 +559,7 @@ class _ListenScreenState extends State<ListenScreen> {
                   if (living && _finishedListening)
                     FilledButton.icon(
                       onPressed: _handoffToRecall,
-                      style: FilledButton.styleFrom(
-                        backgroundColor: AtelierStyle.pulse,
-                        foregroundColor: Colors.white,
-                      ),
+                      style: FilledButton.styleFrom(backgroundColor: AtelierStyle.pulse, foregroundColor: Colors.white),
                       icon: const Icon(Icons.psychology_alt_outlined),
                       label: const Text('Dinlemeyi bitirdin · Şimdi hatırla'),
                     )

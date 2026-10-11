@@ -1566,10 +1566,7 @@ class _ContextCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               DecoratedBox(
-                decoration: BoxDecoration(
-                  color: AppPalette.surface,
-                  borderRadius: BorderRadius.circular(12),
-                ),
+                decoration: BoxDecoration(color: AppPalette.surface, borderRadius: BorderRadius.circular(12)),
                 child: Padding(
                   padding: const EdgeInsets.all(9),
                   child: Icon(icon, size: 20, color: accent),

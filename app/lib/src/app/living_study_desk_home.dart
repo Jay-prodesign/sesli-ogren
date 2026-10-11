@@ -446,10 +446,7 @@ class LivingStudyDeskHome extends StatelessWidget {
                 key: const ValueKey('la0040-home-evidence-payoff'),
                 width: double.infinity,
                 padding: const EdgeInsets.fromLTRB(13, 11, 13, 12),
-                decoration: BoxDecoration(
-                  color: AppPalette.primarySoft,
-                  borderRadius: BorderRadius.circular(16),
-                ),
+                decoration: BoxDecoration(color: AppPalette.primarySoft, borderRadius: BorderRadius.circular(16)),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -703,10 +700,7 @@ class LivingStudyDeskHome extends StatelessWidget {
           Container(
             width: double.infinity,
             padding: const EdgeInsets.fromLTRB(13, 11, 13, 11),
-            decoration: BoxDecoration(
-              color: AppPalette.primarySoft,
-              borderRadius: BorderRadius.circular(16),
-            ),
+            decoration: BoxDecoration(color: AppPalette.primarySoft, borderRadius: BorderRadius.circular(16)),
             child: const Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [

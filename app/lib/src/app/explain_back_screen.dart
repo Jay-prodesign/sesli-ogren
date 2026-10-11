@@ -282,19 +282,14 @@ class _ExplainBackScreenState extends State<ExplainBackScreen> {
                         children: [
                           Text(
                             'KAYNAĞA BAKMADAN',
-                            style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                              color: AtelierStyle.mark,
-                              fontWeight: FontWeight.w900,
-                              letterSpacing: 0.6,
-                            ),
+                            style: Theme.of(context).textTheme.labelSmall
+                                ?.copyWith(color: AtelierStyle.mark, fontWeight: FontWeight.w900, letterSpacing: 0.6),
                           ),
                           const SizedBox(height: 8),
                           Text(
                             'Anladığını kendi cümlelerinle açıkla.',
-                            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                              color: Colors.white,
-                              fontWeight: FontWeight.w800,
-                            ),
+                            style: Theme.of(context).textTheme.titleLarge
+                                ?.copyWith(color: Colors.white, fontWeight: FontWeight.w800),
                           ),
                         ],
                       ),

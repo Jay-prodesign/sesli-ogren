@@ -576,10 +576,7 @@ class AtelierLearningRail extends StatelessWidget {
       child: ExcludeSemantics(
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 9),
-          decoration: BoxDecoration(
-            color: AppPalette.surfaceMuted,
-            borderRadius: BorderRadius.circular(16),
-          ),
+          decoration: BoxDecoration(color: AppPalette.surfaceMuted, borderRadius: BorderRadius.circular(16)),
           child: LayoutBuilder(
             builder: (context, constraints) {
               final compact = constraints.maxWidth < 360 || MediaQuery.textScalerOf(context).scale(1) > 1.2;
