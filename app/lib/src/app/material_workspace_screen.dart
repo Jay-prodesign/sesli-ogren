@@ -35,6 +35,7 @@ class MaterialWorkspaceScreen extends StatefulWidget {
 
 class _MaterialWorkspaceScreenState extends State<MaterialWorkspaceScreen> {
   late Future<_WorkspaceSnapshot?> _snapshot;
+  late bool _showFirstValueIntent;
 
   Widget _preserveProductExperience(Widget screen) {
     final treatment = LearningVisualTreatmentScope.maybeOf(context);
@@ -45,7 +46,13 @@ class _MaterialWorkspaceScreenState extends State<MaterialWorkspaceScreen> {
   @override
   void initState() {
     super.initState();
+    _showFirstValueIntent = widget.showFirstValueIntent;
     _snapshot = _load();
+  }
+
+  void _consumeFirstValueIntent() {
+    if (!_showFirstValueIntent || !mounted) return;
+    setState(() => _showFirstValueIntent = false);
   }
 
   Future<_WorkspaceSnapshot?> _load() async {
@@ -296,14 +303,29 @@ class _MaterialWorkspaceScreenState extends State<MaterialWorkspaceScreen> {
                 data.continuation?.nextAction.kind == NextLearningActionKind.retryRecallWithoutHint;
             return _WorkspaceBody(
               data: data,
-              showFirstValueIntent: widget.showFirstValueIntent,
-              onRecall: () => _openRecall(autoAdvanceContinuation: shouldContinueCurrent),
-              onQuickRecap: _openQuickRecap,
+              showFirstValueIntent: _showFirstValueIntent,
+              onRecall: () {
+                _consumeFirstValueIntent();
+                _openRecall(autoAdvanceContinuation: shouldContinueCurrent);
+              },
+              onQuickRecap: () {
+                _consumeFirstValueIntent();
+                _openQuickRecap();
+              },
               onUpdateSource: _openSourceEditor,
-              onReadSource: () => _openSourceReader(snapshot.data!),
-              onListen: _openListen,
+              onReadSource: () {
+                _consumeFirstValueIntent();
+                _openSourceReader(snapshot.data!);
+              },
+              onListen: () {
+                _consumeFirstValueIntent();
+                _openListen();
+              },
               onExplain: () => _openExplain(snapshot.data!.source),
-              onFocus: () => _openFocus(snapshot.data!),
+              onFocus: () {
+                _consumeFirstValueIntent();
+                _openFocus(snapshot.data!);
+              },
             );
           },
         ),

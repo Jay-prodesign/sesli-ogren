@@ -86,8 +86,14 @@ void main() {
     await tester.pageBack();
     await tester.pumpAndSettle();
 
-    await _pumpUntilFound(tester, find.text('Birlikte çalışalım'));
-    await _tapVisible(tester, find.text('Birlikte çalışalım'));
+    expect(find.byKey(const ValueKey('first-value-intent')), findsNothing);
+    expect(find.text('İlk aktif denemeni yap'), findsOneWidget);
+    expect(find.text('Diğer yollar'), findsOneWidget);
+
+    await _tapVisible(tester, find.text('Diğer yollar'));
+    await tester.pumpAndSettle();
+    expect(find.text('Odaklan'), findsOneWidget);
+    await tester.tap(find.text('Odaklan'));
     await _pumpUntilFound(tester, find.text('KISA ODAK · 3 ADIM'));
     expect(find.byType(FocusScreen), findsOneWidget);
     expect(tester.takeException(), isNull);
