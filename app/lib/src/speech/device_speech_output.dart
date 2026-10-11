@@ -92,11 +92,20 @@ final class DeviceSpeechOutput implements SpeechOutput {
     _generation++;
     try {
       await _tts.stop();
-    } catch (_) {
-      // Stopping speech is best-effort; the learning loop must remain usable.
+    } catch (error) {
+      // Callers that are about to hide the source must know whether native TTS
+      // actually stopped. Otherwise source audio could continue into Recall.
+      throw StateError('device_tts_stop_failed:$error');
     }
   }
 
   @override
-  Future<void> dispose() => stop();
+  Future<void> dispose() async {
+    try {
+      await stop();
+    } catch (_) {
+      // Disposal is cleanup-only. Interactive source-hiding transitions call
+      // stop() directly and fail closed before leaving the Listen screen.
+    }
+  }
 }

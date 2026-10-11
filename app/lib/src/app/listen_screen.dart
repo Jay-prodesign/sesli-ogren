@@ -258,20 +258,24 @@ class _ListenScreenState extends State<ListenScreen> {
   }
 
   Future<void> _handoffToRecall() async {
+    // Recall is source-hidden. If native speech cannot be stopped, do not open
+    // Recall while the source may still be audible.
     _playToken++;
     try {
       await _speech.stop();
     } catch (_) {
-      try {
-        await _speech.dispose();
-      } catch (_) {
-        // The screen is leaving immediately; do not let a device speech failure trap the learner.
-      }
+      if (!mounted) return;
+      setState(() {
+        _error =
+            'Kaynak sesi güvenle durdurulamadı. Hatırla açılmadı; sesi durdurup tekrar deneyebilirsin.';
+      });
+      return;
     }
     if (!mounted) return;
     setState(() {
       _speaking = false;
       _startingPlayback = false;
+      _error = null;
     });
     widget.onRecall?.call();
   }

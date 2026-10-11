@@ -41,6 +41,35 @@ class _ThrowingSpeechOutput implements SpeechOutput {
   Future<void> dispose() async {}
 }
 
+class _StopFailingSpeechOutput implements SpeechOutput {
+  VoidCallback? _onDone;
+  int stopCalls = 0;
+
+  @override
+  Future<void> speak(
+    String text, {
+    required String locale,
+    required VoidCallback onStart,
+    required VoidCallback onDone,
+    required ValueChanged<Object> onError,
+    double rateMultiplier = 1.0,
+  }) async {
+    _onDone = onDone;
+    onStart();
+  }
+
+  @override
+  Future<void> stop() async {
+    stopCalls += 1;
+    throw StateError('native stop failed');
+  }
+
+  @override
+  Future<void> dispose() async {}
+
+  void finishUnexpectedly() => _onDone?.call();
+}
+
 class _RecordingSpeechOutput implements SpeechOutput {
   double? lastRateMultiplier;
   VoidCallback? _onDone;
@@ -225,6 +254,52 @@ void main() {
     await tester.pump();
 
     expect(secondSpeech.lastRateMultiplier, 1.25);
+  });
+
+  testWidgets('Listen never opens source-hidden Recall while native speech may still be audible', (tester) async {
+    final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
+    addTearDown(store.close);
+    final ingest = SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor());
+    const materialId = MaterialId('listen-stop-failure');
+    await ingest.ingestPastedText(
+      learner: AppRuntime.localM5LearnerFixture,
+      materialId: materialId,
+      text: 'Fotosentez ışık enerjisini kimyasal enerjiye dönüştürmeye yardımcı olur.',
+      sourceName: 'Biyoloji kaynağı',
+    );
+    final runtime = AppRuntime(
+      learner: AppRuntime.localM5LearnerFixture,
+      store: store,
+      ingest: ingest,
+      recall: RecallLearningService(sourceStore: store, learningStore: store.learningTruthStore()),
+      telemetry: store.operationalTelemetry(),
+    );
+    final speech = _StopFailingSpeechOutput();
+    var recallOpens = 0;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: ListenScreen(
+          runtime: runtime,
+          materialId: materialId,
+          speechOutput: speech,
+          onRecall: () => recallOpens++,
+        ),
+      ),
+    );
+    await _pumpUntilFound(tester, find.text('Dinlemeye başla'));
+    await _tapVisible(tester, find.text('Dinlemeye başla'));
+    await tester.pump();
+
+    expect(find.text('Durdur'), findsOneWidget);
+    await _tapVisible(tester, find.text('Şimdi hatırlamayı dene'));
+    await tester.pump();
+
+    expect(recallOpens, 0);
+    expect(speech.stopCalls, 1);
+    expect(find.textContaining('Hatırla açılmadı'), findsOneWidget);
+    expect(find.text('Durdur'), findsOneWidget);
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('Listen keeps the source usable when the speech provider throws', (tester) async {
