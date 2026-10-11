@@ -485,9 +485,9 @@ class _SourceReaderScreenState extends State<SourceReaderScreen> {
                                     ? OutlinedButton.styleFrom(
                                         foregroundColor: AtelierStyle.teal,
                                         side: const BorderSide(color: AtelierStyle.line),
-                                        minimumSize: const Size.fromHeight(48),
+                                        minimumSize: const Size(0, 48),
                                       )
-                                    : OutlinedButton.styleFrom(minimumSize: const Size.fromHeight(48)),
+                                    : OutlinedButton.styleFrom(minimumSize: const Size(0, 48)),
                                 icon: const Icon(Icons.headphones_rounded, size: 19),
                                 label: const Text('Dinle'),
                               );
@@ -497,9 +497,9 @@ class _SourceReaderScreenState extends State<SourceReaderScreen> {
                                     ? FilledButton.styleFrom(
                                         backgroundColor: AtelierStyle.ink,
                                         foregroundColor: Colors.white,
-                                        minimumSize: const Size.fromHeight(48),
+                                        minimumSize: const Size(0, 48),
                                       )
-                                    : FilledButton.styleFrom(minimumSize: const Size.fromHeight(48)),
+                                    : FilledButton.styleFrom(minimumSize: const Size(0, 48)),
                                 onPressed: () => unawaited(_runLearningAction(widget.onRecall)),
                                 icon: const Icon(Icons.psychology_alt_outlined),
                                 label: const Text('Kaynağı kapat ve hatırla'),
@@ -515,6 +515,7 @@ class _SourceReaderScreenState extends State<SourceReaderScreen> {
                         if (stackActions) {
                           return Column(
                             key: const ValueKey('reader-learning-actions-stacked'),
+                            mainAxisSize: MainAxisSize.min,
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
                               ?primaryAction,

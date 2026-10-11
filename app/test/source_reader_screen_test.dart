@@ -99,6 +99,37 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  testWidgets('large text never gives Reader action buttons infinite width', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(800, 544));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: MediaQuery(
+          data: const MediaQueryData(textScaler: TextScaler.linear(1.6)),
+          child: SourceReaderScreen(
+            title: 'Geniş ekran büyük yazı notu',
+            sourceText:
+                'Fotosentez ışık enerjisini kimyasal enerjiye dönüştürmeye yardım eder. '
+                'Kaynak açıkken güvenli öğrenme eylemleri görünür kalır.',
+            onListen: () {},
+            onRecall: () {},
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    expect(find.byKey(const ValueKey('reader-learning-actions-stacked')), findsOneWidget);
+    final listenSize = tester.getSize(find.widgetWithText(OutlinedButton, 'Dinle'));
+    final recallSize = tester.getSize(find.widgetWithText(FilledButton, 'Kaynağı kapat ve hatırla'));
+    expect(listenSize.width.isFinite, isTrue);
+    expect(recallSize.width.isFinite, isTrue);
+    expect(listenSize.width, lessThanOrEqualTo(800));
+    expect(recallSize.width, lessThanOrEqualTo(800));
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('source reader restores and reports a durable reading position', (tester) async {
     await tester.binding.setSurfaceSize(const Size(390, 500));
     addTearDown(() => tester.binding.setSurfaceSize(null));
