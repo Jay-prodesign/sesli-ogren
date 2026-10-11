@@ -577,7 +577,8 @@ class LivingStudyDeskHome extends StatelessWidget {
           ),
           const SizedBox(height: 10),
           Semantics(
-            label: 'Öğrenme yolu: kaynağını ekle, oku veya dinle, ardından kaynağa bakmadan hatırla',
+            label:
+                'Öğrenme yolu: kaynağını getir, oku veya dinle, kaynağa bakmadan hatırla, sonra yanıtını kaynak kanıtıyla karşılaştır',
             child: ExcludeSemantics(
               child: compact
                   ? const Column(
@@ -602,31 +603,57 @@ class LivingStudyDeskHome extends StatelessWidget {
                           icon: Icons.psychology_alt_outlined,
                           compact: true,
                         ),
+                        SizedBox(height: 8),
+                        _FirstRunStep(
+                          number: '04',
+                          title: 'Kanıtla karşılaştır',
+                          icon: Icons.find_in_page_outlined,
+                          compact: true,
+                        ),
                       ],
                     )
-                  : const Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Expanded(
-                          child: _FirstRunStep(
-                            number: '01',
-                            title: 'Kaynağını getir',
-                            icon: Icons.auto_stories_outlined,
-                          ),
-                        ),
-                        SizedBox(width: 8),
-                        Expanded(
-                          child: _FirstRunStep(number: '02', title: 'Oku veya dinle', icon: Icons.headphones_rounded),
-                        ),
-                        SizedBox(width: 8),
-                        Expanded(
-                          child: _FirstRunStep(
-                            number: '03',
-                            title: 'Kapat ve hatırla',
-                            icon: Icons.psychology_alt_outlined,
-                          ),
-                        ),
-                      ],
+                  : LayoutBuilder(
+                      builder: (context, stepConstraints) {
+                        final stepWidth = (stepConstraints.maxWidth - 8) / 2;
+                        return Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          children: [
+                            SizedBox(
+                              width: stepWidth,
+                              child: const _FirstRunStep(
+                                number: '01',
+                                title: 'Kaynağını getir',
+                                icon: Icons.auto_stories_outlined,
+                              ),
+                            ),
+                            SizedBox(
+                              width: stepWidth,
+                              child: const _FirstRunStep(
+                                number: '02',
+                                title: 'Oku veya dinle',
+                                icon: Icons.headphones_rounded,
+                              ),
+                            ),
+                            SizedBox(
+                              width: stepWidth,
+                              child: const _FirstRunStep(
+                                number: '03',
+                                title: 'Kapat ve hatırla',
+                                icon: Icons.psychology_alt_outlined,
+                              ),
+                            ),
+                            SizedBox(
+                              width: stepWidth,
+                              child: const _FirstRunStep(
+                                number: '04',
+                                title: 'Kanıtla karşılaştır',
+                                icon: Icons.find_in_page_outlined,
+                              ),
+                            ),
+                          ],
+                        );
+                      },
                     ),
             ),
           ),

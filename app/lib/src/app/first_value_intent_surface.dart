@@ -246,7 +246,7 @@ class FirstValueIntentSurface extends StatelessWidget {
                       side: const BorderSide(color: AtelierStyle.line),
                     ),
                     icon: const Icon(Icons.auto_awesome_outlined),
-                    label: const Text('Hızlı özetle orientasyon al'),
+                    label: const Text('Hızlı özetle genel resmi gör'),
                   ),
                   const SizedBox(height: 5),
                   TextButton.icon(

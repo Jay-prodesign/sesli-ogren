@@ -1042,9 +1042,9 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
                   border: Border.all(color: AtelierStyle.line),
                 ),
                 child: const Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    CompanionView(state: CompanionVisualState.idle, size: 40),
+                    Icon(Icons.verified_user_outlined, color: AtelierStyle.teal, size: 19),
                     SizedBox(width: 9),
                     Expanded(
                       child: Text(
