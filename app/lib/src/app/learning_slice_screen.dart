@@ -23,6 +23,7 @@ class LearningSliceScreen extends StatefulWidget {
     required this.runtime,
     this.materialId = AppRuntime.primaryMaterialId,
     this.autoAdvanceContinuation = false,
+    this.reviewedSourceVersionId,
     this.startInSourceEditor = false,
     this.sourceGateway = const SupabaseSourceSummaryGateway(),
     this.pickPdfFile,
@@ -32,6 +33,11 @@ class LearningSliceScreen extends StatefulWidget {
   final AppRuntime runtime;
   final MaterialId materialId;
   final bool autoAdvanceContinuation;
+
+  /// Exact source version the learner just reviewed before entering Recall.
+  /// This is a handoff fact, not learning evidence or a mastery signal.
+  final SourceVersionId? reviewedSourceVersionId;
+
   final bool startInSourceEditor;
   final SupabaseSourceSummaryGateway sourceGateway;
 
@@ -153,7 +159,29 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
       );
       if (!mounted) return;
 
-      if (continuation != null) {
+      final reviewedSourceVersionId = widget.reviewedSourceVersionId;
+      if (reviewedSourceVersionId != null) {
+        final currentSource = await widget.runtime.store.currentSourceVersion(
+          learner: widget.runtime.learner,
+          materialId: widget.materialId,
+        );
+        if (!mounted) return;
+        if (currentSource?.identity.sourceVersionId != reviewedSourceVersionId) {
+          throw StateError('reviewed_source_version_is_no_longer_current');
+        }
+      }
+
+      final reviewedRequiredSource =
+          continuation != null &&
+          reviewedSourceVersionId != null &&
+          continuation.nextAction.kind == NextLearningActionKind.reviewSourceThenRecall &&
+          continuation.state.sourceVersionId == reviewedSourceVersionId;
+      if (reviewedRequiredSource) {
+        // The learner arrived from Reader after reviewing the exact source
+        // required by this continuation. Reopening the review step would form
+        // a loop; proceed to a fresh source-hidden attempt instead.
+        await _openRecall();
+      } else if (continuation != null) {
         setState(() {
           _continuation = continuation;
           _phase = _SlicePhase.continuation;

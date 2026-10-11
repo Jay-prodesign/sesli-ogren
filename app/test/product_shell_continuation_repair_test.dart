@@ -111,6 +111,51 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  testWidgets('Home review source handoff reaches hidden Recall without asking for the same review twice', (tester) async {
+    final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
+    addTearDown(store.close);
+    final ingest = SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor());
+    const learner = AppRuntime.localM5LearnerFixture;
+    const materialId = MaterialId('home-review-to-recall');
+    await ingest.ingestPastedText(
+      learner: learner,
+      materialId: materialId,
+      text: 'Fotosentez ışık enerjisini kimyasal enerjiye dönüştürür. Klorofil ışığın soğurulmasına yardım eder.',
+      sourceName: 'Home review notu',
+    );
+    final runtime = AppRuntime(
+      learner: learner,
+      store: store,
+      ingest: ingest,
+      recall: RecallLearningService(sourceStore: store, learningStore: store.learningTruthStore()),
+      telemetry: store.operationalTelemetry(),
+    );
+    final prompt = await runtime.recall.createCurrentPrompt(learner: learner, materialId: materialId);
+    final attempt = await runtime.recall.openAttempt(learner: learner, actionId: prompt.id);
+    final result = await runtime.recall.submit(
+      learner: learner,
+      actionId: prompt.id,
+      attemptId: attempt.attempt.attemptId,
+      disposition: RecallResponseDisposition.unknown,
+      answer: '',
+    );
+    expect(result.nextAction.kind, NextLearningActionKind.reviewSourceThenRecall);
+
+    await tester.pumpWidget(
+      MaterialApp(home: LivingDeskReviewScope(child: ProductShellScreen(runtime: runtime))),
+    );
+    await _pumpUntilFound(tester, find.text('Kaynağı gözden geçir'));
+    await tester.tap(find.text('Kaynağı gözden geçir'));
+    await _pumpUntilFound(tester, find.byType(SourceReaderScreen));
+
+    await tester.tap(find.text('Kaynağı kapat ve hatırla'));
+    await _pumpUntilFound(tester, find.byKey(const ValueKey('la0040-atelier-recall')));
+
+    expect(find.text('Önce kaynağı gözden geçir'), findsNothing);
+    expect(find.byKey(const ValueKey('la0040-atelier-recall')), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('reader navigation keeps Home available after returning', (tester) async {
     final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
     addTearDown(store.close);

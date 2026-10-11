@@ -148,7 +148,11 @@ class _MaterialWorkspaceScreenState extends State<MaterialWorkspaceScreen> {
                   materialId: widget.materialId,
                   onRecall: () => _replaceReaderWith(
                     listenContext,
-                    LearningSliceScreen(runtime: widget.runtime, materialId: widget.materialId),
+                    LearningSliceScreen(
+                      runtime: widget.runtime,
+                      materialId: widget.materialId,
+                      reviewedSourceVersionId: sourceVersionId,
+                    ),
                   ),
                   onReadSource: () {
                     Navigator.of(listenContext).pop();
@@ -165,7 +169,11 @@ class _MaterialWorkspaceScreenState extends State<MaterialWorkspaceScreen> {
             ),
             onRecall: () => _replaceReaderWith(
               readerContext,
-              LearningSliceScreen(runtime: widget.runtime, materialId: widget.materialId),
+              LearningSliceScreen(
+                runtime: widget.runtime,
+                materialId: widget.materialId,
+                reviewedSourceVersionId: sourceVersionId,
+              ),
             ),
           );
           if (treatment != null) return LearningVisualTreatmentScope(treatment: treatment, child: screen);

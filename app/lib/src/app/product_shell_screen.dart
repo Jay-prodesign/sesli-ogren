@@ -320,7 +320,11 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
                   builder: (listenContext) => ListenScreen(
                     runtime: widget.runtime,
                     materialId: selected,
-                    onRecall: () => _openRecallFromCurrentRoute(listenContext, selected),
+                    onRecall: () => _openRecallFromCurrentRoute(
+                      listenContext,
+                      selected,
+                      reviewedSourceVersionId: source.identity.sourceVersionId,
+                    ),
                     onReadSource: () {
                       Navigator.of(listenContext).pop();
                       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -332,7 +336,11 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
               ),
               onRecap: () =>
                   _replaceReaderWith(readerContext, QuickRecapScreen(runtime: widget.runtime, materialId: selected)),
-              onRecall: () => _openRecallFromCurrentRoute(readerContext, selected),
+              onRecall: () => _openRecallFromCurrentRoute(
+                readerContext,
+                selected,
+                reviewedSourceVersionId: source.identity.sourceVersionId,
+              ),
             );
             if (treatment != null) return LearningVisualTreatmentScope(treatment: treatment, child: screen);
             return livingReview ? LivingDeskReviewScope(child: screen) : screen;
@@ -358,11 +366,19 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
     Navigator.of(readerContext).pushReplacement<void, void>(MaterialPageRoute(builder: (_) => wrapped));
   }
 
-  Future<void> _openRecallFromCurrentRoute(BuildContext routeContext, MaterialId materialId) async {
+  Future<void> _openRecallFromCurrentRoute(
+    BuildContext routeContext,
+    MaterialId materialId, {
+    SourceVersionId? reviewedSourceVersionId,
+  }) async {
     if (!mounted) return;
     final treatment = LearningVisualTreatmentScope.maybeOf(context);
     final livingReview = LivingDeskReviewScope.active(context);
-    final screen = LearningSliceScreen(runtime: widget.runtime, materialId: materialId);
+    final screen = LearningSliceScreen(
+      runtime: widget.runtime,
+      materialId: materialId,
+      reviewedSourceVersionId: reviewedSourceVersionId,
+    );
     await Navigator.of(routeContext).pushReplacement<bool, void>(
       MaterialPageRoute<bool>(
         builder: (_) => treatment != null
