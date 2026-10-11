@@ -511,6 +511,63 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  testWidgets('Recall result keeps its canonical next-action reason complete at large text', (tester) async {
+    tester.view.physicalSize = const Size(320, 700);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
+    addTearDown(store.close);
+    final ingest = SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor());
+    final recall = RecallLearningService(sourceStore: store, learningStore: store.learningTruthStore());
+    final runtime = AppRuntime(
+      learner: AppRuntime.localM5LearnerFixture,
+      store: store,
+      ingest: ingest,
+      recall: recall,
+      telemetry: store.operationalTelemetry(),
+    );
+
+    await ingest.ingestPastedText(
+      learner: runtime.learner,
+      materialId: AppRuntime.primaryMaterialId,
+      text:
+          'Fotosentez sırasında klorofil ışık enerjisini kimyasal enerjiye dönüştürmeye yardımcı olur. '
+          'Bitkiler bu süreçte karbondioksit kullanır.',
+      sourceName: 'Büyük yazı sonuç notu',
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        builder: (context, child) => MediaQuery(
+          data: MediaQuery.of(context).copyWith(
+            disableAnimations: true,
+            textScaler: const TextScaler.linear(1.6),
+          ),
+          child: child!,
+        ),
+        home: LivingDeskReviewScope(child: LearningSliceScreen(runtime: runtime)),
+      ),
+    );
+    await pumpUntilFound(tester, find.text('Hatırla'));
+    await tapVisible(tester, find.text('Bilmiyorum'));
+    await pumpUntilFound(tester, find.byKey(const ValueKey('la0040-result-next-reason')));
+
+    final continuation = await recall.reopen(
+      learner: runtime.learner,
+      materialId: AppRuntime.primaryMaterialId,
+    );
+    expect(continuation, isNotNull);
+
+    final reason = tester.widget<Text>(find.byKey(const ValueKey('la0040-result-next-reason')));
+    expect(reason.data, continuation!.nextAction.reasonText);
+    expect(reason.maxLines, isNull);
+    expect(reason.overflow, isNull);
+    expect(find.byKey(const ValueKey('la0040-result-sticky-next')).hitTestable(), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('source to Recall result persists and reopens as one continuation', (tester) async {
     final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
     addTearDown(store.close);

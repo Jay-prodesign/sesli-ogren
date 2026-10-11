@@ -337,8 +337,7 @@ class _ProgressCard extends StatelessWidget {
                           const SizedBox(height: 3),
                           Text(
                             reason,
-                            maxLines: 3,
-                            overflow: TextOverflow.ellipsis,
+                            key: ValueKey('progress-next-reason-${item.material.id.value}'),
                             style: theme.textTheme.bodySmall?.copyWith(color: Colors.white, height: 1.4),
                           ),
                         ],

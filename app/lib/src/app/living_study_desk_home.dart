@@ -254,8 +254,7 @@ class LivingStudyDeskHome extends StatelessWidget {
         SizedBox(height: compactFirstViewport ? 3 : 5),
         Text(
           _why,
-          maxLines: compactFirstViewport ? 3 : null,
-          overflow: compactFirstViewport ? TextOverflow.ellipsis : TextOverflow.visible,
+          key: const ValueKey('la0040-home-next-reason'),
           style: TextStyle(color: _sub, fontSize: reasonSize, height: 1.4),
         ),
       ],

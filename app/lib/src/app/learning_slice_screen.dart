@@ -1935,8 +1935,7 @@ class _ResultNextActionBar extends StatelessWidget {
                     const SizedBox(height: 3),
                     Text(
                       reason,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
+                      key: const ValueKey('la0040-result-next-reason'),
                       style: const TextStyle(color: Color(0xFFD6DDF0), fontSize: 11.5, height: 1.32),
                     ),
                     const SizedBox(height: 8),
@@ -1972,8 +1971,7 @@ class _ResultNextActionBar extends StatelessWidget {
                           const SizedBox(height: 3),
                           Text(
                             reason,
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
+                            key: const ValueKey('la0040-result-next-reason'),
                             style: const TextStyle(color: Color(0xFFD6DDF0), fontSize: 11.5, height: 1.32),
                           ),
                         ],

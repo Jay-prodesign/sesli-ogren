@@ -319,6 +319,57 @@ void main() {
     expect(find.byType(MaterialWorkspaceScreen), findsNothing);
   });
 
+  testWidgets('Home and Progress keep the canonical next-action reason complete at large text', (tester) async {
+    tester.view.physicalSize = const Size(320, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    final runtime = await _runtimeWithEvidence(
+      disposition: RecallResponseDisposition.unknown,
+      submitCorrectAnswer: false,
+    );
+    addTearDown(runtime.close);
+    final continuation = await runtime.recall.reopen(
+      learner: runtime.learner,
+      materialId: AppRuntime.primaryMaterialId,
+    );
+    expect(continuation, isNotNull);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        builder: (context, child) => MediaQuery(
+          data: MediaQuery.of(context).copyWith(
+            disableAnimations: true,
+            textScaler: const TextScaler.linear(1.6),
+          ),
+          child: child!,
+        ),
+        home: LivingDeskReviewScope(child: ProductShellScreen(runtime: runtime)),
+      ),
+    );
+    await pumpUntilFound(tester, find.byKey(const ValueKey('la0040-home-next-reason')));
+
+    final homeReason = tester.widget<Text>(find.byKey(const ValueKey('la0040-home-next-reason')));
+    expect(homeReason.data, continuation!.nextAction.reasonText);
+    expect(homeReason.maxLines, isNull);
+    expect(homeReason.overflow, isNull);
+
+    await tapVisible(tester, find.text('İlerleme').last);
+    await pumpUntilFound(
+      tester,
+      find.byKey(ValueKey('progress-next-reason-${AppRuntime.primaryMaterialId.value}')),
+    );
+
+    final progressReason = tester.widget<Text>(
+      find.byKey(ValueKey('progress-next-reason-${AppRuntime.primaryMaterialId.value}')),
+    );
+    expect(progressReason.data, continuation.nextAction.reasonText);
+    expect(progressReason.maxLines, isNull);
+    expect(progressReason.overflow, isNull);
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('Home keeps the primary next-action CTA in the first viewport at 320px and 150% text', (tester) async {
     tester.view.physicalSize = const Size(320, 844);
     tester.view.devicePixelRatio = 1;

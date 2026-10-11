@@ -76,16 +76,12 @@ void main() {
     );
     await _pumpUntilFound(tester, find.byKey(const ValueKey('first-value-intent')));
 
-    final reason = tester.widget<Text>(
-      find.text('Önce bütünü gör; sonra kaynağı kapatıp ne kaldığını sınarsın.'),
-    );
+    final reason = tester.widget<Text>(find.text('Önce bütünü gör; sonra kaynağı kapatıp ne kaldığını sınarsın.'));
     expect(reason.maxLines, isNull);
     expect(reason.overflow, isNull);
 
     final evidenceTruth = tester.widget<Text>(
-      find.text(
-        'Bu adım hazırlık. Öğrenme durumun yalnız kaynağı kapatıp kendi Hatırla denemeni yaptığında değişir.',
-      ),
+      find.text('Bu adım hazırlık. Öğrenme durumun yalnız kaynağı kapatıp kendi Hatırla denemeni yaptığında değişir.'),
     );
     expect(evidenceTruth.maxLines, isNull);
     expect(evidenceTruth.overflow, isNull);
