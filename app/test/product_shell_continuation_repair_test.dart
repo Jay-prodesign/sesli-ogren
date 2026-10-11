@@ -110,6 +110,12 @@ void main() {
     Navigator.of(tester.element(find.byType(SourceReaderScreen))).pop();
     await _pumpUntilFound(tester, find.byKey(const ValueKey('la0040-atelier-workspace')));
 
+    await tester.scrollUntilVisible(
+      find.text('KAYNAK ÖNİZLEMESİ'),
+      220,
+      scrollable: find.byType(Scrollable).last,
+    );
+    await tester.pump();
     expect(find.text('KAYNAK ÖNİZLEMESİ'), findsOneWidget);
     expect(find.byKey(const ValueKey('la0040-atelier-workspace-recall')), findsOneWidget);
     expect(find.text('Kütüphane şu anda yüklenemedi.'), findsNothing);
@@ -199,6 +205,9 @@ void main() {
     expect(find.byType(SourceReaderScreen), findsOneWidget);
     Navigator.of(tester.element(find.byType(SourceReaderScreen))).pop();
     await tester.pumpAndSettle();
+    expect(find.byType(MaterialWorkspaceScreen), findsOneWidget);
+    Navigator.of(tester.element(find.byType(MaterialWorkspaceScreen))).pop();
+    await tester.pumpAndSettle();
     expect(find.byType(ProductShellScreen), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
@@ -252,6 +261,9 @@ void main() {
     await _pumpUntilFound(tester, find.byType(LearningSliceScreen));
     expect(find.byType(LearningSliceScreen), findsOneWidget);
     Navigator.of(tester.element(find.byType(LearningSliceScreen))).pop();
+    await tester.pumpAndSettle();
+    expect(find.byType(MaterialWorkspaceScreen), findsOneWidget);
+    Navigator.of(tester.element(find.byType(MaterialWorkspaceScreen))).pop();
     await tester.pumpAndSettle();
     expect(find.byType(ProductShellScreen), findsOneWidget);
     expect(tester.takeException(), isNull);

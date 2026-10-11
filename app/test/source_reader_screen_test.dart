@@ -164,7 +164,7 @@ void main() {
     expect(find.byKey(const ValueKey('reader-resume-restored')), findsOneWidget);
     expect(find.text('Kaldığın yer geri açıldı · %50'), findsOneWidget);
 
-    await tester.drag(sourceScroll, const Offset(0, -240));
+    await tester.drag(sourceScroll, const Offset(0, -900));
     await tester.pump(const Duration(milliseconds: 20));
     expect(reported, isNotEmpty);
     expect(reported.last, greaterThan(0.5));

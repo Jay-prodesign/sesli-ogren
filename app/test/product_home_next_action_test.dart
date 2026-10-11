@@ -207,11 +207,10 @@ void main() {
     final action = find.text('Kaynağı gözden geçir');
     expect(action, findsOneWidget);
     await tapVisible(tester, action);
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 100));
+    await pumpUntilFound(tester, find.byType(SourceReaderScreen));
 
-    expect(find.text('Bu bölümü yeniden kur'), findsOneWidget);
-    expect(find.text('Kaynağı kapat ve yeniden dene'), findsOneWidget);
+    expect(find.byType(SourceReaderScreen), findsOneWidget);
+    expect(find.text('Kaynağı kapat ve hatırla'), findsOneWidget);
   });
 
   testWidgets('Library continuation opens the canonical repair step', (tester) async {
@@ -231,10 +230,10 @@ void main() {
     final continueAction = find.byKey(ValueKey('library-continue-${AppRuntime.primaryMaterialId.value}'));
     expect(continueAction, findsOneWidget);
     await tapVisible(tester, continueAction);
-    await pumpUntilFound(tester, find.text('Bu bölümü yeniden kur'));
+    await pumpUntilFound(tester, find.byType(SourceReaderScreen));
 
-    expect(find.text('Bu bölümü yeniden kur'), findsOneWidget);
-    expect(find.text('Kaynağı kapat ve yeniden dene'), findsOneWidget);
+    expect(find.byType(SourceReaderScreen), findsOneWidget);
+    expect(find.text('Kaynağı kapat ve hatırla'), findsOneWidget);
   });
 
   testWidgets('Progress exposes and opens the same canonical repair action as Home and Library', (tester) async {
@@ -256,10 +255,10 @@ void main() {
     final continueAction = find.byKey(ValueKey('progress-continue-${AppRuntime.primaryMaterialId.value}'));
     expect(continueAction, findsOneWidget);
     await tapVisible(tester, continueAction);
-    await pumpUntilFound(tester, find.text('Bu bölümü yeniden kur'));
+    await pumpUntilFound(tester, find.byType(SourceReaderScreen));
 
-    expect(find.text('Bu bölümü yeniden kur'), findsOneWidget);
-    expect(find.text('Kaynağı kapat ve yeniden dene'), findsOneWidget);
+    expect(find.byType(SourceReaderScreen), findsOneWidget);
+    expect(find.text('Kaynağı kapat ve hatırla'), findsOneWidget);
   });
 
   testWidgets('Home other-material entry preserves that material canonical repair action', (tester) async {

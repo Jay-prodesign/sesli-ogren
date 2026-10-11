@@ -773,9 +773,11 @@ class _HomeSurface extends StatelessWidget {
             actionLabel: hasListenResume ? 'Dinlemeye devam et' : _nextActionLabel(data.continuation),
             onPressed: hasListenResume
                 ? onOpenListen
-                : _nextActionOpensLearning(data.continuation)
-                ? onOpenLearning
-                : onOpenWorkspace,
+                : switch (data.continuation?.nextAction.kind) {
+                    NextLearningActionKind.reviewSourceThenRecall => onOpenReader,
+                    NextLearningActionKind.retryRecallWithoutHint => onOpenLearning,
+                    NextLearningActionKind.repeatRecallLater || null => onOpenWorkspace,
+                  },
           ),
           const SizedBox(height: 22),
           Row(
@@ -806,12 +808,6 @@ class _HomeSurface extends StatelessWidget {
 
   static String _nextReason(LearningContinuation? continuation) =>
       continuation?.nextAction.reasonText ?? 'Kaynağa bakmadan kısa bir hatırlama denemesi yap.';
-
-  static bool _nextActionOpensLearning(LearningContinuation? continuation) {
-    final kind = continuation?.nextAction.kind;
-    return kind == NextLearningActionKind.reviewSourceThenRecall ||
-        kind == NextLearningActionKind.retryRecallWithoutHint;
-  }
 
   static String _nextActionLabel(LearningContinuation? continuation) {
     if (continuation == null) return 'Çalışmaya devam et';

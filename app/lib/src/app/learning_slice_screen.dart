@@ -1936,7 +1936,7 @@ class _ResultNextActionBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final compact = MediaQuery.sizeOf(context).width < 350 || MediaQuery.textScalerOf(context).scale(1) > 1.2;
+    final compact = MediaQuery.sizeOf(context).width < 430 || MediaQuery.textScalerOf(context).scale(1) > 1.2;
     return Material(
       color: AtelierStyle.focus,
       elevation: 12,
