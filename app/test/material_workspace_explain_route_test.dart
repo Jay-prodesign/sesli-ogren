@@ -5,6 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:sesli_ogren/src/app/app_runtime.dart';
 import 'package:sesli_ogren/src/app/living_study_desk_home.dart';
 import 'package:sesli_ogren/src/app/material_workspace_screen.dart';
+import 'package:sesli_ogren/src/app/source_reader_screen.dart';
 import 'package:sesli_ogren/src/data/pdf_text_extractor.dart';
 import 'package:sesli_ogren/src/data/source_ingest_service.dart';
 import 'package:sesli_ogren/src/data/sqlite_source_store.dart';
@@ -151,6 +152,59 @@ void main() {
     expect(find.text('Kaynağı bana açıkla'), findsOneWidget);
     expect(find.text('Kendi cümlelerimle anlat'), findsOneWidget);
     expect(find.text('Odaklan'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('review-source continuation opens the source before another hidden recall', (tester) async {
+    final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
+    addTearDown(store.close);
+
+    final ingest = SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor());
+    const materialId = MaterialId('workspace-review-source-first');
+    await ingest.ingestPastedText(
+      learner: AppRuntime.localM5LearnerFixture,
+      materialId: materialId,
+      text:
+          'Fotosentez ışık enerjisini kimyasal enerjiye dönüştürür. '
+          'Klorofil ışığın soğurulmasına yardım eder.',
+      sourceName: 'Kaynak onarım notu',
+    );
+    final runtime = AppRuntime(
+      learner: AppRuntime.localM5LearnerFixture,
+      store: store,
+      ingest: ingest,
+      recall: RecallLearningService(sourceStore: store, learningStore: store.learningTruthStore()),
+      telemetry: store.operationalTelemetry(),
+    );
+
+    final prompt = await runtime.recall.createCurrentPrompt(
+      learner: runtime.learner,
+      materialId: materialId,
+    );
+    final attempt = await runtime.recall.openAttempt(learner: runtime.learner, actionId: prompt.id);
+    final result = await runtime.recall.submit(
+      learner: runtime.learner,
+      actionId: prompt.id,
+      attemptId: attempt.attempt.attemptId,
+      disposition: RecallResponseDisposition.unknown,
+      answer: '',
+    );
+    expect(result.nextAction.kind, NextLearningActionKind.reviewSourceThenRecall);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: LivingDeskReviewScope(
+          child: MaterialWorkspaceScreen(runtime: runtime, materialId: materialId),
+        ),
+      ),
+    );
+    await _pumpUntilFound(tester, find.text('Kaynağı gözden geçir'));
+
+    await _tapVisible(tester, find.text('Kaynağı gözden geçir'));
+    await _pumpUntilFound(tester, find.byType(SourceReaderScreen));
+
+    expect(find.byType(SourceReaderScreen), findsOneWidget);
+    expect(find.text('Kaynak onarım notu'), findsWidgets);
     expect(tester.takeException(), isNull);
   });
 
