@@ -122,9 +122,9 @@ class FirstValueIntentSurface extends StatelessWidget {
         const SizedBox(height: 6),
         Text(
           _recommendationTitle,
-          style: const TextStyle(
+          style: TextStyle(
             color: Colors.white,
-            fontSize: 22,
+            fontSize: compact ? 18 : 22,
             height: 1.18,
             fontWeight: FontWeight.w900,
             letterSpacing: -0.35,
@@ -158,19 +158,19 @@ class FirstValueIntentSurface extends StatelessWidget {
             const SizedBox(height: 7),
             Text(
               material.title,
-              style: const TextStyle(
+              style: TextStyle(
                 color: AtelierStyle.ink,
-                fontSize: 28,
+                fontSize: compact ? 22 : 28,
                 height: 1.12,
                 fontWeight: FontWeight.w900,
                 letterSpacing: -0.45,
               ),
             ),
-            const SizedBox(height: 13),
-            AtelierSourceTrustStrip(sourceVersion: sourceVersion),
-            const SizedBox(height: 14),
+            SizedBox(height: compact ? 9 : 13),
+            AtelierSourceTrustStrip(sourceVersion: sourceVersion, showSourceName: !compact),
+            SizedBox(height: compact ? 10 : 14),
             const AtelierLearningRail(phase: AtelierLearningPhase.source),
-            const SizedBox(height: 16),
+            SizedBox(height: compact ? 12 : 16),
             Container(
               key: const ValueKey('first-value-recommendation-card'),
               padding: EdgeInsets.fromLTRB(18, compact ? 17 : 19, 18, 18),
@@ -187,9 +187,9 @@ class FirstValueIntentSurface extends StatelessWidget {
                   if (compact) ...[
                     const Align(
                       alignment: Alignment.centerLeft,
-                      child: CompanionView(state: CompanionVisualState.think, size: 58),
+                      child: CompanionView(state: CompanionVisualState.think, size: 48),
                     ),
-                    const SizedBox(height: 10),
+                    const SizedBox(height: 7),
                     guideCopy,
                   ] else
                     Row(
@@ -200,7 +200,7 @@ class FirstValueIntentSurface extends StatelessWidget {
                         Expanded(child: guideCopy),
                       ],
                     ),
-                  const SizedBox(height: 17),
+                  SizedBox(height: compact ? 12 : 17),
                   FilledButton.icon(
                     key: const ValueKey('first-intent-recommend'),
                     onPressed: _recommendedAction,
@@ -212,7 +212,7 @@ class FirstValueIntentSurface extends StatelessWidget {
                     icon: Icon(_recommendListenFirst ? Icons.headphones_rounded : Icons.menu_book_outlined),
                     label: Text(_recommendedActionLabel),
                   ),
-                  const SizedBox(height: 10),
+                  SizedBox(height: compact ? 7 : 10),
                   const Text(
                     'Bu adım hazırlık. Öğrenme durumun yalnız kaynağı kapatıp kendi Hatırla denemeni yaptığında değişir.',
                     textAlign: TextAlign.center,
