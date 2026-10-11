@@ -193,7 +193,7 @@ void main() {
     );
     await _pumpUntilFound(tester, find.text('Biyoloji · Fotosentez'));
     await tester.tap(find.text('Kütüphane'));
-    await tester.pumpAndSettle();
+    await tester.pump(const Duration(milliseconds: 120));
     final libraryMaterialCard = find.ancestor(
       of: find.text('Biyoloji · Fotosentez').last,
       matching: find.byType(InkWell),
@@ -204,10 +204,10 @@ void main() {
     await _pumpUntilFound(tester, find.byType(SourceReaderScreen));
     expect(find.byType(SourceReaderScreen), findsOneWidget);
     Navigator.of(tester.element(find.byType(SourceReaderScreen))).pop();
-    await tester.pumpAndSettle();
+    await _pumpUntilFound(tester, find.byType(MaterialWorkspaceScreen));
     expect(find.byType(MaterialWorkspaceScreen), findsOneWidget);
     Navigator.of(tester.element(find.byType(MaterialWorkspaceScreen))).pop();
-    await tester.pumpAndSettle();
+    await _pumpUntilFound(tester, find.byType(ProductShellScreen));
     expect(find.byType(ProductShellScreen), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
@@ -238,7 +238,7 @@ void main() {
     );
     await _pumpUntilFound(tester, find.text('Biyoloji · Fotosentez'));
     await tester.tap(find.text('Kütüphane').last);
-    await tester.pumpAndSettle();
+    await tester.pump(const Duration(milliseconds: 120));
     final libraryMaterialCard = find.ancestor(
       of: find.text('Biyoloji · Fotosentez').last,
       matching: find.byType(InkWell),
@@ -250,7 +250,7 @@ void main() {
     expect(find.byType(SourceReaderScreen), findsOneWidget);
 
     await tester.tap(find.byTooltip('Okuma ve öğrenme seçenekleri'));
-    await tester.pumpAndSettle();
+    await _pumpUntilFound(tester, find.text('Kaynağı dinle'));
     await tester.tap(find.text('Kaynağı dinle').last);
     // Listen may show a continuously animated playback indicator; waiting for
     // every scheduled frame to settle would never complete.
@@ -269,10 +269,10 @@ void main() {
     await _pumpUntilFound(tester, find.byType(LearningSliceScreen));
     expect(find.byType(LearningSliceScreen), findsOneWidget);
     Navigator.of(tester.element(find.byType(LearningSliceScreen))).pop();
-    await tester.pumpAndSettle();
+    await _pumpUntilFound(tester, find.byType(MaterialWorkspaceScreen));
     expect(find.byType(MaterialWorkspaceScreen), findsOneWidget);
     Navigator.of(tester.element(find.byType(MaterialWorkspaceScreen))).pop();
-    await tester.pumpAndSettle();
+    await _pumpUntilFound(tester, find.byType(ProductShellScreen));
     expect(find.byType(ProductShellScreen), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
