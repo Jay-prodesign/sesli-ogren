@@ -266,17 +266,19 @@ void main() {
     // Listen may show a continuously animated playback indicator; waiting for
     // every scheduled frame to settle would never complete.
     await _pumpUntilFound(tester, find.byType(ListenScreen));
+    await _pumpUntilGone(tester, find.byType(SourceReaderScreen));
     expect(find.byType(ListenScreen), findsOneWidget);
 
-    final recallAction = find.widgetWithText(OutlinedButton, 'Şimdi hatırlamayı dene');
+    final recallAction = find.widgetWithText(OutlinedButton, 'Şimdi hatırlamayı dene').hitTestable();
     await tester.scrollUntilVisible(
-      recallAction,
+      find.widgetWithText(OutlinedButton, 'Şimdi hatırlamayı dene'),
       180,
       scrollable: find.descendant(of: find.byType(ListenScreen), matching: find.byType(Scrollable)),
     );
-    await tester.ensureVisible(recallAction);
-    await tester.pump();
+    await tester.ensureVisible(find.widgetWithText(OutlinedButton, 'Şimdi hatırlamayı dene'));
+    await _pumpUntilFound(tester, recallAction);
     await tester.tap(recallAction);
+    await _pumpUntilGone(tester, find.byType(ListenScreen));
     await _pumpUntilFound(tester, find.byType(LearningSliceScreen));
     expect(find.byType(LearningSliceScreen), findsOneWidget);
     Navigator.of(tester.element(find.byType(LearningSliceScreen))).pop();
