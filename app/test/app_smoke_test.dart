@@ -377,6 +377,89 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  testWidgets('runtime failure recovery remains reachable on a short large-text screen', (tester) async {
+    tester.view.physicalSize = const Size(320, 460);
+    tester.view.devicePixelRatio = 1;
+    tester.platformDispatcher.textScaleFactorTestValue = 1.6;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+
+    await tester.pumpWidget(
+      SesliOgrenApp(
+        restoreSession: () async => const AuthenticatedLearner(id: LearnerId('runtime-large-text-user')),
+        openRuntime: (_) async => throw StateError('local runtime failed'),
+        signOutSession: () async {},
+      ),
+    );
+    await pumpUntilFound(tester, find.byKey(const ValueKey('runtime-error-scroll')));
+
+    expect(find.text('Güvenli öğrenme oturumu açılamadı.'), findsOneWidget);
+    await tester.scrollUntilVisible(
+      find.text('Başka hesapla giriş yap'),
+      160,
+      scrollable: find.byKey(const ValueKey('runtime-error-scroll')),
+    );
+    await tester.pump();
+    expect(find.text('Yeniden dene'), findsOneWidget);
+    expect(find.text('Başka hesapla giriş yap').hitTestable(), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('account-deleted recovery remains reachable on a short large-text screen', (tester) async {
+    tester.view.physicalSize = const Size(320, 460);
+    tester.view.devicePixelRatio = 1;
+    tester.platformDispatcher.textScaleFactorTestValue = 1.6;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+
+    final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
+    addTearDown(() async {
+      try {
+        await store.close();
+      } catch (_) {}
+    });
+    final deletion = _RecordingAccountDeletionGateway();
+    final runtime = AppRuntime(
+      learner: AppRuntime.localM5LearnerFixture,
+      store: store,
+      ingest: SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor()),
+      recall: RecallLearningService(sourceStore: store, learningStore: store.learningTruthStore()),
+      telemetry: store.operationalTelemetry(),
+      accountOverview: const _ReadyAccountOverviewGateway(),
+      accountDeletion: deletion,
+    );
+
+    await tester.pumpWidget(
+      SesliOgrenApp(
+        restoreSession: () async => runtime.learner,
+        openRuntime: (_) async => runtime,
+        signOutSession: () async {},
+      ),
+    );
+    await pumpUntilFound(tester, find.text('Profil'));
+    await tapVisible(tester, find.text('Profil').last);
+    await pumpUntilFound(tester, find.text('Profil ve Ayarlar'));
+    await tapVisible(tester, find.text('Hesabımı ve verilerimi sil'));
+    await pumpUntilFound(tester, find.text('Hesabı ve verileri sil?'));
+    await tapVisible(tester, find.text('Devam et'));
+    await pumpUntilFound(tester, find.text('Son onay'));
+    await tapVisible(tester, find.text('Kalıcı olarak sil'));
+    await pumpUntilFound(tester, find.byKey(const ValueKey('account-deleted-scroll')));
+
+    expect(deletion.calls, 1);
+    expect(find.text('Hesabın ve verilerin silindi.'), findsOneWidget);
+    await tester.scrollUntilVisible(
+      find.text('Yeni öğrenme alanı oluştur'),
+      160,
+      scrollable: find.byKey(const ValueKey('account-deleted-scroll')),
+    );
+    await tester.pump();
+    expect(find.text('Yeni öğrenme alanı oluştur').hitTestable(), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('runtime failure can safely return to account entry for another account', (tester) async {
     var signOutCalls = 0;
     await tester.pumpWidget(
@@ -541,10 +624,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         builder: (context, child) => MediaQuery(
-          data: MediaQuery.of(context).copyWith(
-            disableAnimations: true,
-            textScaler: const TextScaler.linear(1.6),
-          ),
+          data: MediaQuery.of(context).copyWith(disableAnimations: true, textScaler: const TextScaler.linear(1.6)),
           child: child!,
         ),
         home: LivingDeskReviewScope(child: LearningSliceScreen(runtime: runtime)),
@@ -554,10 +634,7 @@ void main() {
     await tapVisible(tester, find.text('Bilmiyorum'));
     await pumpUntilFound(tester, find.byKey(const ValueKey('la0040-result-next-reason')));
 
-    final continuation = await recall.reopen(
-      learner: runtime.learner,
-      materialId: AppRuntime.primaryMaterialId,
-    );
+    final continuation = await recall.reopen(learner: runtime.learner, materialId: AppRuntime.primaryMaterialId);
     expect(continuation, isNotNull);
 
     final reason = tester.widget<Text>(find.byKey(const ValueKey('la0040-result-next-reason')));

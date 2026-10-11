@@ -356,10 +356,7 @@ void main() {
     expect(homeReason.overflow, isNull);
 
     await tapVisible(tester, find.text('İlerleme').last);
-    await pumpUntilFound(
-      tester,
-      find.byKey(ValueKey('progress-next-reason-${AppRuntime.primaryMaterialId.value}')),
-    );
+    await pumpUntilFound(tester, find.byKey(ValueKey('progress-next-reason-${AppRuntime.primaryMaterialId.value}')));
 
     final progressReason = tester.widget<Text>(
       find.byKey(ValueKey('progress-next-reason-${AppRuntime.primaryMaterialId.value}')),

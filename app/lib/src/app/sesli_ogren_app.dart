@@ -191,29 +191,37 @@ class _AccountDeletedScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: AtelierStyle.canvas,
       body: SafeArea(
-        child: Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 440),
-            child: Padding(
-              padding: const EdgeInsets.all(24),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Icon(Icons.check_circle_outline_rounded, size: 72),
-                  const SizedBox(height: 18),
-                  Text(
-                    'Hesabın ve verilerin silindi.',
-                    style: Theme.of(context).textTheme.headlineSmall,
-                    textAlign: TextAlign.center,
+        child: LayoutBuilder(
+          builder: (context, constraints) => SingleChildScrollView(
+            key: const ValueKey('account-deleted-scroll'),
+            child: ConstrainedBox(
+              constraints: BoxConstraints(minHeight: constraints.maxHeight),
+              child: Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 440),
+                  child: Padding(
+                    padding: const EdgeInsets.all(24),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.check_circle_outline_rounded, size: 72),
+                        const SizedBox(height: 18),
+                        Text(
+                          'Hesabın ve verilerin silindi.',
+                          style: Theme.of(context).textTheme.headlineSmall,
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 10),
+                        const Text(
+                          'Yeni bir öğrenme alanı oluşturmak istersen sıfırdan başlayabilirsin.',
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 20),
+                        FilledButton(onPressed: onStartFresh, child: const Text('Yeni öğrenme alanı oluştur')),
+                      ],
+                    ),
                   ),
-                  const SizedBox(height: 10),
-                  const Text(
-                    'Yeni bir öğrenme alanı oluşturmak istersen sıfırdan başlayabilirsin.',
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 20),
-                  FilledButton(onPressed: onStartFresh, child: const Text('Yeni öğrenme alanı oluştur')),
-                ],
+                ),
               ),
             ),
           ),
@@ -286,69 +294,80 @@ class _RuntimeErrorScreenState extends State<_RuntimeErrorScreen> {
     final configurationError = widget.error is LearnerAuthConfigurationException;
     return Scaffold(
       body: SafeArea(
-        child: Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 440),
-            child: Padding(
-              padding: const EdgeInsets.all(24),
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  color: AtelierStyle.paper,
-                  borderRadius: BorderRadius.circular(22),
-                  border: Border.all(color: AtelierStyle.line),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(22),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const CompanionView(state: CompanionVisualState.think, size: 96),
-                      const SizedBox(height: 20),
-                      Text(
-                        configurationError
-                            ? 'Uygulama bağlantısı henüz yapılandırılmadı.'
-                            : 'Güvenli öğrenme oturumu açılamadı.',
-                        style: Theme.of(context).textTheme.titleLarge,
-                        textAlign: TextAlign.center,
+        child: LayoutBuilder(
+          builder: (context, constraints) => SingleChildScrollView(
+            key: const ValueKey('runtime-error-scroll'),
+            child: ConstrainedBox(
+              constraints: BoxConstraints(minHeight: constraints.maxHeight),
+              child: Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 440),
+                  child: Padding(
+                    padding: const EdgeInsets.all(24),
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        color: AtelierStyle.paper,
+                        borderRadius: BorderRadius.circular(22),
+                        border: Border.all(color: AtelierStyle.line),
                       ),
-                      const SizedBox(height: 10),
-                      Text(
-                        configurationError
-                            ? 'Öğrenme verisi açılmadı. Güvenli bağlantı yapılandırması gerekiyor.'
-                            : 'Öğrenme verisi açılmadan yeniden deneyebilir veya başka bir hesapla giriş yapabilirsin.',
-                        textAlign: TextAlign.center,
+                      child: Padding(
+                        padding: const EdgeInsets.all(22),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const CompanionView(state: CompanionVisualState.think, size: 96),
+                            const SizedBox(height: 20),
+                            Text(
+                              configurationError
+                                  ? 'Uygulama bağlantısı henüz yapılandırılmadı.'
+                                  : 'Güvenli öğrenme oturumu açılamadı.',
+                              style: Theme.of(context).textTheme.titleLarge,
+                              textAlign: TextAlign.center,
+                            ),
+                            const SizedBox(height: 10),
+                            Text(
+                              configurationError
+                                  ? 'Öğrenme verisi açılmadı. Güvenli bağlantı yapılandırması gerekiyor.'
+                                  : 'Öğrenme verisi açılmadan yeniden deneyebilir veya başka bir hesapla giriş yapabilirsin.',
+                              textAlign: TextAlign.center,
+                            ),
+                            if (_switchError != null) ...[
+                              const SizedBox(height: 12),
+                              Semantics(
+                                liveRegion: true,
+                                child: Text(
+                                  _switchError!,
+                                  style: TextStyle(color: Theme.of(context).colorScheme.error),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ),
+                            ],
+                            const SizedBox(height: 20),
+                            FilledButton(
+                              style: FilledButton.styleFrom(
+                                backgroundColor: AtelierStyle.teal,
+                                foregroundColor: Colors.white,
+                              ),
+                              onPressed: _switchingAccount ? null : widget.onRetry,
+                              child: const Text('Yeniden dene'),
+                            ),
+                            if (widget.onUseAnotherAccount != null) ...[
+                              const SizedBox(height: 8),
+                              TextButton.icon(
+                                onPressed: _switchingAccount ? null : _useAnotherAccount,
+                                icon: _switchingAccount
+                                    ? const SizedBox.square(
+                                        dimension: 18,
+                                        child: CircularProgressIndicator(strokeWidth: 2),
+                                      )
+                                    : const Icon(Icons.switch_account_outlined),
+                                label: Text(_switchingAccount ? 'Oturum kapatılıyor…' : 'Başka hesapla giriş yap'),
+                              ),
+                            ],
+                          ],
+                        ),
                       ),
-                      if (_switchError != null) ...[
-                        const SizedBox(height: 12),
-                        Semantics(
-                          liveRegion: true,
-                          child: Text(
-                            _switchError!,
-                            style: TextStyle(color: Theme.of(context).colorScheme.error),
-                            textAlign: TextAlign.center,
-                          ),
-                        ),
-                      ],
-                      const SizedBox(height: 20),
-                      FilledButton(
-                        style: FilledButton.styleFrom(
-                          backgroundColor: AtelierStyle.teal,
-                          foregroundColor: Colors.white,
-                        ),
-                        onPressed: _switchingAccount ? null : widget.onRetry,
-                        child: const Text('Yeniden dene'),
-                      ),
-                      if (widget.onUseAnotherAccount != null) ...[
-                        const SizedBox(height: 8),
-                        TextButton.icon(
-                          onPressed: _switchingAccount ? null : _useAnotherAccount,
-                          icon: _switchingAccount
-                              ? const SizedBox.square(dimension: 18, child: CircularProgressIndicator(strokeWidth: 2))
-                              : const Icon(Icons.switch_account_outlined),
-                          label: Text(_switchingAccount ? 'Oturum kapatılıyor…' : 'Başka hesapla giriş yap'),
-                        ),
-                      ],
-                    ],
+                    ),
                   ),
                 ),
               ),
