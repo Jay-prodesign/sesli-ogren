@@ -224,9 +224,18 @@ Future<void> pumpUntilFound(WidgetTester tester, Finder finder, {int maxPumps = 
 }
 
 Future<void> tapVisible(WidgetTester tester, Finder finder) async {
-  await tester.scrollUntilVisible(finder, 240, scrollable: find.byType(Scrollable).last);
-  await tester.pump();
-  await tester.tap(finder);
+  var target = finder.hitTestable();
+  if (target.evaluate().isEmpty) {
+    final scrollables = find.byType(Scrollable);
+    if (scrollables.evaluate().isNotEmpty) {
+      await tester.scrollUntilVisible(finder, 240, scrollable: scrollables.last);
+    } else {
+      await tester.ensureVisible(finder);
+    }
+    await tester.pump();
+    target = finder.hitTestable();
+  }
+  await tester.tap(target.evaluate().isNotEmpty ? target : finder);
 }
 
 Future<void> pumpUntilGone(WidgetTester tester, Finder finder, {int maxPumps = 100}) async {
@@ -872,7 +881,7 @@ void main() {
 
     await tester.pumpWidget(MaterialApp(home: ProductShellScreen(runtime: runtime)));
     await pumpUntilFound(tester, find.text('KALDIĞIN MATERYAL'));
-    await tapVisible(tester, find.text('Kaynağa dön'));
+    await tapVisible(tester, find.text('Çalışma alanına dön'));
     await pumpUntilFound(tester, find.text('Eski materyal'));
 
     expect(find.text('Eski materyal'), findsWidgets);
@@ -1093,8 +1102,9 @@ void main() {
         ),
       ),
     );
-    await pumpUntilFound(tester, find.text('Kütüphane'));
-    await tapVisible(tester, find.text('Kütüphane').last);
+    await pumpUntilFound(tester, find.byType(NavigationBar));
+    await tester.tap(find.byIcon(Icons.library_books_outlined));
+    await tester.pump();
     await pumpUntilFound(tester, find.byKey(const ValueKey('library-header-stacked')));
     expect(find.byKey(const ValueKey('library-add-material')), findsOneWidget);
     expect(find.text('Yeni kaynak ekle'), findsOneWidget);
@@ -1205,6 +1215,12 @@ void main() {
       ),
     );
     await pumpUntilFound(tester, find.text('Quick Recap'));
+    await tester.scrollUntilVisible(
+      find.text('Quick Recap özeti'),
+      240,
+      scrollable: find.byType(Scrollable).last,
+    );
+    await tester.pump();
     expect(find.text('Quick Recap özeti'), findsOneWidget);
     expect(find.text(recap), findsOneWidget);
     expect(find.textContaining('bölüm 2 / 2'), findsNothing);
@@ -1250,7 +1266,7 @@ void main() {
     await pumpUntilFound(tester, find.text('Henüz ölçülmedi'));
     expect(find.text('İlerleme notu'), findsOneWidget);
     expect(find.text('Henüz ölçülmedi'), findsOneWidget);
-    expect(find.textContaining('yapay olarak artırmaz'), findsOneWidget);
+    expect(find.text('Henüz bağımsız bir hatırlama denemen yok.'), findsOneWidget);
     expect(find.textContaining('%'), findsNothing);
   });
 
