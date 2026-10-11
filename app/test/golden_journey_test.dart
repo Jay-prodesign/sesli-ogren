@@ -87,9 +87,7 @@ void main() {
     await _pumpUntilFound(tester, find.byType(SourceReaderScreen));
     expect(find.textContaining('Fotosentez sırasında klorofil'), findsWidgets);
 
-    await tester.tap(find.byTooltip('Okuma ve öğrenme seçenekleri'));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Kaynağı kapat ve hatırla'));
+    await _tapVisible(tester, find.text('Kaynağı kapat ve hatırla'));
     await _pumpUntilFound(tester, find.byKey(const ValueKey('la0040-atelier-recall')));
 
     expect(find.byType(SourceReaderScreen), findsNothing);
