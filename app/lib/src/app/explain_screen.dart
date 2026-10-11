@@ -9,6 +9,7 @@ import '../generation/supabase_source_summary_gateway.dart';
 import 'app_runtime.dart';
 import 'app_theme.dart';
 import 'atelier_learning_surfaces.dart';
+import 'companion_view.dart';
 import 'explain_back_screen.dart';
 import 'learning_slice_screen.dart';
 import 'la0040_visual_treatments.dart';
@@ -179,7 +180,7 @@ class _ExplainScreenState extends State<ExplainScreen> {
     return Scaffold(
       backgroundColor: living ? AtelierStyle.canvas : null,
       appBar: AppBar(
-        title: const Text('Açıkla'),
+        title: const Text('Kaynağı açıkla'),
         backgroundColor: living ? AtelierStyle.canvas : null,
         foregroundColor: living ? AtelierStyle.ink : null,
       ),
@@ -227,29 +228,60 @@ class _Ready extends StatelessWidget {
     return ListView(
       padding: const EdgeInsets.fromLTRB(20, 16, 20, 36),
       children: [
-        Row(
-          children: [
-            DecoratedBox(
-              decoration: BoxDecoration(color: accentSoft, borderRadius: BorderRadius.circular(999)),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                child: Text(
-                  'ÜRETİLMİŞ AÇIKLAMA',
+        LayoutBuilder(
+          builder: (context, constraints) {
+            final compact =
+                constraints.maxWidth < 340 || MediaQuery.textScalerOf(context).scale(1) > 1.2;
+            final copy = Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'KAYNAĞA BAĞLI AÇIKLAMA',
                   style: theme.textTheme.labelSmall?.copyWith(
                     color: accent,
                     fontWeight: FontWeight.w900,
-                    letterSpacing: 0.4,
+                    letterSpacing: 0.8,
                   ),
                 ),
-              ),
-            ),
-            const Spacer(),
-            Icon(Icons.auto_awesome_outlined, color: accent, size: 20),
-          ],
+                const SizedBox(height: 5),
+                Text(
+                  'Kavramı birlikte netleştirelim.',
+                  style: theme.textTheme.headlineSmall?.copyWith(
+                    color: living ? AtelierStyle.ink : null,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+                const SizedBox(height: 5),
+                Text(
+                  'Bu açıklama yalnız güncel kaynağına dayanır. Okumak hazırlıktır; öğrenme kanıtı değildir.',
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: living ? AtelierStyle.muted : theme.colorScheme.onSurfaceVariant,
+                    height: 1.4,
+                  ),
+                ),
+              ],
+            );
+            if (compact) {
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const CompanionView(state: CompanionVisualState.think, size: 54),
+                  const SizedBox(height: 9),
+                  copy,
+                ],
+              );
+            }
+            return Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const CompanionView(state: CompanionVisualState.think, size: 62),
+                const SizedBox(width: 13),
+                Expanded(child: copy),
+              ],
+            );
+          },
         ),
         const SizedBox(height: 14),
-        Text('Kaynağına dayalı açıklama', style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w800)),
-        const SizedBox(height: 10),
         KeyedSubtree(
           key: const ValueKey('explain-source-trust'),
           child: AtelierSourceTrustStrip(sourceVersion: source),
@@ -257,21 +289,39 @@ class _Ready extends StatelessWidget {
         const SizedBox(height: 18),
         DecoratedBox(
           decoration: BoxDecoration(
-            color: paper,
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: line),
+            color: living ? AtelierStyle.focus : hero,
+            borderRadius: BorderRadius.circular(21),
           ),
           child: Padding(
-            padding: const EdgeInsets.all(18),
+            padding: const EdgeInsets.fromLTRB(18, 17, 18, 19),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  'Bu bölüm kaynak metnin kendisi değil; kaynağına bağlı üretilmiş bir açıklamadır.',
-                  style: theme.textTheme.bodySmall?.copyWith(color: AppPalette.inkMuted, fontWeight: FontWeight.w600),
+                Row(
+                  children: [
+                    Icon(Icons.auto_awesome_outlined, color: living ? AtelierStyle.mark : Colors.white, size: 18),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'ÜRETİLMİŞ AÇIKLAMA · ORİJİNAL KAYNAK DEĞİL',
+                        style: theme.textTheme.labelSmall?.copyWith(
+                          color: living ? AtelierStyle.mark : Colors.white,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: 0.55,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
                 const SizedBox(height: 14),
-                Text(result.explanation, style: theme.textTheme.bodyLarge?.copyWith(height: 1.55)),
+                Text(
+                  result.explanation,
+                  style: theme.textTheme.bodyLarge?.copyWith(
+                    color: Colors.white,
+                    height: 1.55,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
               ],
             ),
           ),
@@ -325,7 +375,11 @@ class _Ready extends StatelessWidget {
         ),
         const SizedBox(height: 18),
         DecoratedBox(
-          decoration: BoxDecoration(color: hero, borderRadius: BorderRadius.circular(20)),
+          decoration: BoxDecoration(
+            color: living ? AtelierStyle.paper : paper,
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: line),
+          ),
           child: Padding(
             padding: const EdgeInsets.all(16),
             child: Column(
@@ -333,16 +387,26 @@ class _Ready extends StatelessWidget {
               children: [
                 Text(
                   'Şimdi aktif olarak dene',
-                  style: theme.textTheme.titleMedium?.copyWith(color: Colors.white, fontWeight: FontWeight.w800),
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    color: living ? AtelierStyle.ink : null,
+                    fontWeight: FontWeight.w900,
+                  ),
                 ),
                 const SizedBox(height: 6),
                 Text(
                   'Okuduğunu kendi cümlelerinle kur veya kaynağa bakmadan hatırla.',
-                  style: theme.textTheme.bodySmall?.copyWith(color: Colors.white.withValues(alpha: 0.76)),
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: living ? AtelierStyle.muted : theme.colorScheme.onSurfaceVariant,
+                  ),
                 ),
                 const SizedBox(height: 14),
                 FilledButton.icon(
-                  style: FilledButton.styleFrom(backgroundColor: Colors.white, foregroundColor: hero),
+                  style: living
+                      ? FilledButton.styleFrom(
+                          backgroundColor: AtelierStyle.pulse,
+                          foregroundColor: Colors.white,
+                        )
+                      : null,
                   onPressed: () => Navigator.of(context).push<void>(
                     MaterialPageRoute(
                       builder: (_) =>
@@ -354,10 +418,12 @@ class _Ready extends StatelessWidget {
                 ),
                 const SizedBox(height: 8),
                 OutlinedButton.icon(
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: Colors.white,
-                    side: BorderSide(color: Colors.white.withValues(alpha: 0.28)),
-                  ),
+                  style: living
+                      ? OutlinedButton.styleFrom(
+                          foregroundColor: AtelierStyle.teal,
+                          side: const BorderSide(color: AtelierStyle.line),
+                        )
+                      : null,
                   onPressed: () async {
                     final sourceUpdated = await Navigator.of(context).push<bool>(
                       MaterialPageRoute<bool>(
