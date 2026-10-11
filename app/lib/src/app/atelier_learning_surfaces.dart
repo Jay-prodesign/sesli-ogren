@@ -892,12 +892,14 @@ class AtelierResult extends StatelessWidget {
     required this.answerInMemory,
     required this.onContinue,
     this.sourceVersion,
+    this.showInlineContinue = true,
     super.key,
   });
   final RecallAttemptResult result;
   final String answerInMemory;
   final VoidCallback onContinue;
   final SourceVersionRecord? sourceVersion;
+  final bool showInlineContinue;
 
   String get _heading => switch (result.evidence.outcome) {
     RecallOutcome.correct when result.evidence.assistance == RecallAssistance.none => 'Kendi başına hatırladın',
@@ -1143,21 +1145,23 @@ class AtelierResult extends StatelessWidget {
           result.nextAction.reasonText,
           style: const TextStyle(color: AtelierStyle.ink, fontSize: 16, height: 1.44, fontWeight: FontWeight.w700),
         ),
-        const SizedBox(height: 13),
-        SizedBox(
-          width: double.infinity,
-          child: FilledButton.icon(
-            key: const ValueKey('la0040-atelier-next'),
-            onPressed: onContinue,
-            style: FilledButton.styleFrom(
-              backgroundColor: AtelierStyle.teal,
-              foregroundColor: Colors.white,
-              minimumSize: const Size.fromHeight(52),
+        if (showInlineContinue) ...[
+          const SizedBox(height: 13),
+          SizedBox(
+            width: double.infinity,
+            child: FilledButton.icon(
+              key: const ValueKey('la0040-atelier-next'),
+              onPressed: onContinue,
+              style: FilledButton.styleFrom(
+                backgroundColor: AtelierStyle.teal,
+                foregroundColor: Colors.white,
+                minimumSize: const Size.fromHeight(52),
+              ),
+              icon: const Icon(Icons.arrow_forward_rounded),
+              label: Text(_nextActionLabel),
             ),
-            icon: const Icon(Icons.arrow_forward_rounded),
-            label: Text(_nextActionLabel),
           ),
-        ),
+        ],
       ],
     );
   }

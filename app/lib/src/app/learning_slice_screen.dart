@@ -772,8 +772,17 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
     final living = LivingDeskReviewScope.active(context);
     final reviewFocus = (candidate != null || living) && (_phase == _SlicePhase.recall || _phase == _SlicePhase.result);
     final canExit = Navigator.of(context).canPop();
+    final visibleResult = _phase == _SlicePhase.result ? _result : null;
+    final showStickyResultAction = living && visibleResult != null;
     return Scaffold(
       backgroundColor: living ? AtelierStyle.canvas : null,
+      bottomNavigationBar: showStickyResultAction
+          ? _ResultNextActionBar(
+              reason: visibleResult.nextAction.reasonText,
+              label: _resultActionLabel(visibleResult.nextAction.kind),
+              onPressed: _busy ? null : () => _continueFromResult(visibleResult),
+            )
+          : null,
       body: SafeArea(
         child: DecoratedBox(
           decoration: BoxDecoration(
@@ -789,7 +798,7 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 620),
               child: ListView(
-                padding: EdgeInsets.fromLTRB(24, reviewFocus ? 16 : 28, 24, 40),
+                padding: EdgeInsets.fromLTRB(24, reviewFocus ? 16 : 28, 24, showStickyResultAction ? 24 : 40),
                 children: [
                   if (reviewFocus) ...[
                     Row(
@@ -1415,6 +1424,7 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
             : _answerController.text,
         onContinue: () => _continueFromResult(result),
         sourceVersion: _activeSourceVersion,
+        showInlineContinue: false,
       );
     }
     if (candidate != null) {
@@ -1882,6 +1892,109 @@ class _FocusedSourceReview {
   final String suffix;
   final bool leadingEllipsis;
   final bool trailingEllipsis;
+}
+
+class _ResultNextActionBar extends StatelessWidget {
+  const _ResultNextActionBar({
+    required this.reason,
+    required this.label,
+    required this.onPressed,
+  });
+
+  final String reason;
+  final String label;
+  final VoidCallback? onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final compact =
+        MediaQuery.sizeOf(context).width < 350 || MediaQuery.textScalerOf(context).scale(1) > 1.2;
+    return Material(
+      color: AtelierStyle.focus,
+      elevation: 12,
+      child: SafeArea(
+        top: false,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(18, 11, 18, 12),
+          child: compact
+              ? Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    const Text(
+                      'SIRADAKİ ADIM',
+                      style: TextStyle(
+                        color: AtelierStyle.mark,
+                        fontSize: 10,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: 0.9,
+                      ),
+                    ),
+                    const SizedBox(height: 3),
+                    Text(
+                      reason,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(color: Color(0xFFD6DDF0), fontSize: 11.5, height: 1.32),
+                    ),
+                    const SizedBox(height: 8),
+                    FilledButton.icon(
+                      key: const ValueKey('la0040-result-sticky-next'),
+                      onPressed: onPressed,
+                      style: FilledButton.styleFrom(
+                        backgroundColor: AtelierStyle.mark,
+                        foregroundColor: AtelierStyle.focus,
+                        minimumSize: const Size.fromHeight(50),
+                      ),
+                      icon: const Icon(Icons.arrow_forward_rounded),
+                      label: Text(label),
+                    ),
+                  ],
+                )
+              : Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'SIRADAKİ ADIM',
+                            style: TextStyle(
+                              color: AtelierStyle.mark,
+                              fontSize: 10,
+                              fontWeight: FontWeight.w900,
+                              letterSpacing: 0.9,
+                            ),
+                          ),
+                          const SizedBox(height: 3),
+                          Text(
+                            reason,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(color: Color(0xFFD6DDF0), fontSize: 11.5, height: 1.32),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    FilledButton.icon(
+                      key: const ValueKey('la0040-result-sticky-next'),
+                      onPressed: onPressed,
+                      style: FilledButton.styleFrom(
+                        backgroundColor: AtelierStyle.mark,
+                        foregroundColor: AtelierStyle.focus,
+                        minimumSize: const Size(0, 48),
+                      ),
+                      icon: const Icon(Icons.arrow_forward_rounded),
+                      label: Text(label),
+                    ),
+                  ],
+                ),
+        ),
+      ),
+    );
+  }
 }
 
 class _SurfaceCard extends StatelessWidget {
