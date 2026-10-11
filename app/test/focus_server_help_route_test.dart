@@ -115,6 +115,63 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  testWidgets('Focus stops stale-source retries and routes back to the current source', (tester) async {
+    final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
+    addTearDown(store.close);
+
+    final ingest = SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor());
+    const materialId = MaterialId('focus-stale-source-recovery');
+    final first = await ingest.ingestPastedText(
+      learner: AppRuntime.localM5LearnerFixture,
+      materialId: materialId,
+      text: 'Eski kaynak fotosentez hakkında kısa bir açıklama içerir.',
+      sourceName: 'Biyoloji notu',
+    );
+
+    final focusGateway = _FocusGateway();
+    final runtime = AppRuntime(
+      learner: AppRuntime.localM5LearnerFixture,
+      store: store,
+      ingest: ingest,
+      recall: RecallLearningService(sourceStore: store, learningStore: store.learningTruthStore()),
+      telemetry: store.operationalTelemetry(),
+      focusHelp: focusGateway,
+    );
+    var currentSourceOpens = 0;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: FocusScreen(
+          runtime: runtime,
+          source: first.sourceVersion,
+          sourceText: first.extractedContent.normalizedText,
+          sourceGateway: const _SourceGateway(),
+          onReadSource: () => currentSourceOpens += 1,
+        ),
+      ),
+    );
+
+    await ingest.ingestPastedText(
+      learner: AppRuntime.localM5LearnerFixture,
+      materialId: materialId,
+      text: 'Yeni kaynak sürümü fotosentez ve enerji dönüşümünü günceller.',
+      sourceName: 'Biyoloji notu',
+    );
+
+    await tester.enterText(find.byType(TextField), 'Fotosentezde enerji nasıl dönüşür?');
+    await _tapVisible(tester, find.text('Sorumu açıkla'));
+    await _pumpUntilFound(tester, find.textContaining('Kaynak değişti. Eski sürüme bağlı yardımı'));
+
+    expect(focusGateway.lastRequest, isNull);
+    expect(find.text('Güncel kaynağı aç'), findsOneWidget);
+    expect(find.text('Güncel kaynakla Hatırla'), findsOneWidget);
+    expect(tester.widget<TextField>(find.byType(TextField)).enabled, isFalse);
+
+    await _tapVisible(tester, find.text('Güncel kaynağı aç'));
+    expect(currentSourceOpens, 1);
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('Focus sends the exact server source binding and renders grounded help', (tester) async {
     final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
     addTearDown(store.close);

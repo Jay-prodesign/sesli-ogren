@@ -42,6 +42,7 @@ class _ExplainBackScreenState extends State<ExplainBackScreen> {
   final _controller = TextEditingController();
   ExplainBackResult? _result;
   bool _submitting = false;
+  bool _sourceChanged = false;
 
   @override
   void dispose() {
@@ -64,6 +65,7 @@ class _ExplainBackScreenState extends State<ExplainBackScreen> {
     }
 
     ExplainBackResult result;
+    var sourceChanged = false;
     try {
       final currentSource = await widget.runtime.store.currentSourceVersion(
         learner: widget.runtime.learner,
@@ -72,7 +74,8 @@ class _ExplainBackScreenState extends State<ExplainBackScreen> {
       if (currentSource == null ||
           currentSource.identity.sourceVersionId != widget.source.identity.sourceVersionId ||
           currentSource.identity.contentDigest != widget.source.identity.contentDigest) {
-        result = const ExplainBackUnavailable('Kaynak değişti; güncel kaynakla yeniden dene.');
+        sourceChanged = true;
+        result = const ExplainBackUnavailable('Kaynak değişti; eski sürüme bağlı değerlendirmeyi yeniden göndermiyoruz.');
       } else {
         final material = await widget.runtime.store.material(
           learner: widget.runtime.learner,
@@ -172,6 +175,18 @@ class _ExplainBackScreenState extends State<ExplainBackScreen> {
               outputLocale: 'tr-TR',
             ),
           );
+
+          final sourceAfterEvaluation = await widget.runtime.store.currentSourceVersion(
+            learner: widget.runtime.learner,
+            materialId: widget.source.identity.materialId,
+          );
+          if (sourceAfterEvaluation?.identity.sourceVersionId != widget.source.identity.sourceVersionId ||
+              sourceAfterEvaluation?.identity.contentDigest != widget.source.identity.contentDigest) {
+            sourceChanged = true;
+            result = const ExplainBackUnavailable(
+              'Kaynak değerlendirme sırasında değişti. Eski sürüme ait sonucu göstermiyoruz.',
+            );
+          }
         }
       }
     } catch (_) {
@@ -181,17 +196,22 @@ class _ExplainBackScreenState extends State<ExplainBackScreen> {
     if (!mounted) return;
     setState(() {
       _submitting = false;
+      _sourceChanged = sourceChanged;
       _result = result is ExplainBackEvaluated && !result.matches(widget.source.identity)
           ? const ExplainBackUnavailable('Kaynak değiştiği için bu değerlendirmeyi öğrenme kanıtı saymıyoruz.')
           : result;
     });
   }
 
-  void _retryUnavailable() => setState(() {
-    _result = null;
-  });
+  void _retryUnavailable() {
+    if (_sourceChanged) return;
+    setState(() {
+      _result = null;
+    });
+  }
 
   void _startFreshAttempt() => setState(() {
+    _sourceChanged = false;
     _result = null;
     _controller.clear();
   });
@@ -306,6 +326,7 @@ class _ExplainBackScreenState extends State<ExplainBackScreen> {
             if (result is ExplainBackUnavailable)
               _UnavailableResult(
                 reason: result.reason,
+                sourceChanged: _sourceChanged,
                 onRetry: _retryUnavailable,
                 onRecall: _openRecall,
                 onBack: _backToMaterial,
@@ -325,8 +346,16 @@ class _ExplainBackScreenState extends State<ExplainBackScreen> {
 }
 
 class _UnavailableResult extends StatelessWidget {
-  const _UnavailableResult({required this.reason, required this.onRetry, required this.onRecall, required this.onBack});
+  const _UnavailableResult({
+    required this.reason,
+    required this.sourceChanged,
+    required this.onRetry,
+    required this.onRecall,
+    required this.onBack,
+  });
+
   final String reason;
+  final bool sourceChanged;
   final VoidCallback onRetry;
   final VoidCallback onRecall;
   final VoidCallback onBack;
@@ -341,33 +370,42 @@ class _UnavailableResult extends StatelessWidget {
         children: [
           const Row(
             children: [
-              Icon(Icons.shield_outlined, color: AppPalette.attention, size: 20),
-              SizedBox(width: 9),
+              Icon(Icons.fact_check_outlined),
+              SizedBox(width: 8),
               CompanionView(state: CompanionVisualState.think, size: 42),
             ],
           ),
           const SizedBox(height: 10),
           Text(
-            'Henüz güvenilir değerlendirme yok',
+            sourceChanged ? 'Kaynak değişti' : 'Henüz güvenilir değerlendirme yok',
             style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
           ),
           const SizedBox(height: 8),
           Text(reason),
           const SizedBox(height: 8),
-          const Text('Yanıtını doğru/yanlış diye tahmin etmiyoruz ve bunu öğrenme kanıtı olarak kaydetmiyoruz.'),
-          const SizedBox(height: 12),
-          FilledButton.icon(
-            onPressed: onRetry,
-            icon: const Icon(Icons.refresh_rounded),
-            label: const Text('Aynı yanıtla yeniden dene'),
+          Text(
+            sourceChanged
+                ? 'Eski kaynak sürümüne göre sonuç göstermiyoruz ve yanıtını öğrenme kanıtı olarak kaydetmiyoruz.'
+                : 'Yanıtını doğru/yanlış diye tahmin etmiyoruz ve bunu öğrenme kanıtı olarak kaydetmiyoruz.',
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 12),
+          if (!sourceChanged) ...[
+            FilledButton.icon(
+              onPressed: onRetry,
+              icon: const Icon(Icons.refresh_rounded),
+              label: const Text('Aynı yanıtla yeniden dene'),
+            ),
+            const SizedBox(height: 8),
+          ],
           OutlinedButton.icon(
             onPressed: onRecall,
             icon: const Icon(Icons.psychology_alt_outlined),
-            label: const Text('Hatırla ile devam et'),
+            label: Text(sourceChanged ? 'Güncel kaynakla Hatırla' : 'Hatırla ile devam et'),
           ),
-          TextButton(onPressed: onBack, child: const Text('Önceki çalışmaya dön')),
+          TextButton(
+            onPressed: onBack,
+            child: Text(sourceChanged ? 'Güncel çalışmaya dön' : 'Önceki çalışmaya dön'),
+          ),
         ],
       ),
     ),

@@ -51,6 +51,28 @@ class _RecordingExplainBackGateway implements ExplainBackGateway {
   }
 }
 
+class _MutatingExplainBackGateway implements ExplainBackGateway {
+  _MutatingExplainBackGateway(this.beforeReturn);
+
+  final Future<void> Function() beforeReturn;
+  int calls = 0;
+
+  @override
+  Future<ExplainBackResult> evaluate(ExplainBackRequest request) async {
+    calls += 1;
+    await beforeReturn();
+    return ExplainBackEvaluated(
+      attemptId: request.attemptId,
+      sourceVersionId: request.sourceVersionId,
+      sourceContentDigest: request.sourceContentDigest,
+      kind: ExplainBackEvaluationKind.sufficient,
+      feedback: 'Bu eski kaynak sürümüne ait değerlendirme ekranda görünmemeli.',
+      targetedRepair: '',
+      executionRef: 'test:mutating-explain-back',
+    );
+  }
+}
+
 class _RecordingSourceGateway extends SupabaseSourceSummaryGateway {
   _RecordingSourceGateway({required this.createdServerMaterialId});
 
@@ -142,6 +164,61 @@ void main() {
     await _tapVisible(tester, find.text('Hatırla ile devam et'));
     await _pumpUntilFound(tester, find.text('Hatırla'));
     expect(find.text('Hatırla'), findsOneWidget);
+  });
+
+  testWidgets('Explain-back suppresses an evaluation when the source changes in flight', (tester) async {
+    final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
+    addTearDown(store.close);
+
+    final ingest = SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor());
+    const materialId = MaterialId('explain-back-inflight-source-change');
+    final first = await ingest.ingestPastedText(
+      learner: AppRuntime.localM5LearnerFixture,
+      materialId: materialId,
+      text: 'İlk kaynak sürümü fotosentezde ışık enerjisini açıklar.',
+      sourceName: 'Biyoloji notu',
+    );
+    const serverMaterialId = '99999999-9999-4999-8999-999999999999';
+    await store.saveServerMaterialBinding(
+      learner: AppRuntime.localM5LearnerFixture,
+      materialId: materialId,
+      sourceVersionId: first.sourceVersion.identity.sourceVersionId,
+      serverMaterialId: serverMaterialId,
+    );
+
+    final explainBack = _MutatingExplainBackGateway(() async {
+      await ingest.ingestPastedText(
+        learner: AppRuntime.localM5LearnerFixture,
+        materialId: materialId,
+        text: 'İkinci kaynak sürümü fotosentezde kimyasal enerji depolanmasını günceller.',
+        sourceName: 'Biyoloji notu',
+      );
+    });
+    final runtime = AppRuntime(
+      learner: AppRuntime.localM5LearnerFixture,
+      store: store,
+      ingest: ingest,
+      recall: RecallLearningService(sourceStore: store, learningStore: store.learningTruthStore()),
+      telemetry: store.operationalTelemetry(),
+      explainBack: explainBack,
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: ExplainBackScreen(runtime: runtime, source: first.sourceVersion),
+      ),
+    );
+    await tester.enterText(find.byType(TextField), 'Fotosentez ışığı kimyasal enerjiye dönüştürür.');
+    await _tapVisible(tester, find.text('Anlatımımı değerlendir'));
+    await _pumpUntilFound(tester, find.text('Kaynak değişti'));
+
+    expect(explainBack.calls, 1);
+    expect(find.textContaining('değerlendirme sırasında değişti'), findsOneWidget);
+    expect(find.textContaining('eski kaynak sürümüne ait değerlendirme ekranda görünmemeli'), findsNothing);
+    expect(find.text('Aynı yanıtla yeniden dene'), findsNothing);
+    expect(find.text('Güncel kaynakla Hatırla'), findsOneWidget);
+    expect(find.text('Güncel çalışmaya dön'), findsOneWidget);
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('Explain-back uses server material UUID and normalized grounding hash', (tester) async {

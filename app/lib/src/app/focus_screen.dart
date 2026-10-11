@@ -50,6 +50,7 @@ class _FocusScreenState extends State<FocusScreen> {
 
   FocusHelpResult? help;
   bool busy = false;
+  bool _sourceChanged = false;
 
   @override
   void dispose() {
@@ -282,20 +283,52 @@ class _FocusScreenState extends State<FocusScreen> {
     return _localSourceHint();
   }
 
+  Future<bool> _sourceStillCurrent() async {
+    final currentSource = await widget.runtime.store.currentSourceVersion(
+      learner: widget.runtime.learner,
+      materialId: widget.source.identity.materialId,
+    );
+    return currentSource?.identity.sourceVersionId == widget.source.identity.sourceVersionId &&
+        currentSource?.identity.contentDigest == widget.source.identity.contentDigest;
+  }
+
+  void _recoverFromSourceChange() {
+    final onReadSource = widget.onReadSource;
+    if (onReadSource != null) {
+      onReadSource();
+      return;
+    }
+    Navigator.of(context).maybePop();
+  }
+
   Future<void> request(FocusHelpKind kind) async {
-    if (busy) return;
+    if (busy || _sourceChanged) return;
     setState(() {
       busy = true;
       help = null;
     });
 
+    if (!await _sourceStillCurrent()) {
+      if (!mounted) return;
+      setState(() {
+        busy = false;
+        _sourceChanged = true;
+        help = const FocusHelpUnavailable('Kaynak değişti. Eski sürüme bağlı yardımı yeniden göndermiyoruz.');
+      });
+      return;
+    }
+
     if (widget.runtime.focusHelp is UnavailableFocusHelpGateway) {
       if (kind == FocusHelpKind.hint) {
         final result = _localSourceHint();
+        final stillCurrent = await _sourceStillCurrent();
         if (!mounted) return;
         setState(() {
           busy = false;
-          help = result;
+          _sourceChanged = !stillCurrent;
+          help = stillCurrent
+              ? result
+              : const FocusHelpUnavailable('Kaynak değişti. Eski sürüme bağlı yardımı göstermiyoruz.');
         });
         return;
       }
@@ -313,10 +346,15 @@ class _FocusScreenState extends State<FocusScreen> {
     if (kind == FocusHelpKind.hint && result is FocusHelpUnavailable) {
       result = await _localHintForCurrentSource();
     }
+
+    final stillCurrent = await _sourceStillCurrent();
     if (!mounted) return;
     setState(() {
       busy = false;
-      help = result is FocusHelpReady && !result.matches(widget.source.identity)
+      _sourceChanged = !stillCurrent;
+      help = !stillCurrent
+          ? const FocusHelpUnavailable('Kaynak değişti. Eski sürüme bağlı yardımı göstermiyoruz.')
+          : result is FocusHelpReady && !result.matches(widget.source.identity)
           ? const FocusHelpUnavailable('Kaynak değişti; eski yanıtı göstermiyoruz.')
           : result;
     });
@@ -461,7 +499,7 @@ class _FocusScreenState extends State<FocusScreen> {
           const SizedBox(height: 9),
           TextField(
             controller: question,
-            enabled: !busy,
+            enabled: !busy && !_sourceChanged,
             maxLength: 600,
             maxLines: 4,
             decoration: const InputDecoration(hintText: 'Neyi netleştirmek istiyorsun?'),
@@ -470,7 +508,7 @@ class _FocusScreenState extends State<FocusScreen> {
             builder: (context, constraints) {
               final stackActions = constraints.maxWidth < 340 || MediaQuery.textScalerOf(context).scale(1) > 1.25;
               final hintButton = OutlinedButton.icon(
-                onPressed: busy ? null : () => request(FocusHelpKind.hint),
+                onPressed: busy || _sourceChanged ? null : () => request(FocusHelpKind.hint),
                 icon: const Icon(Icons.lightbulb_outline_rounded),
                 label: const Text('İpucu ver'),
               );
@@ -478,7 +516,7 @@ class _FocusScreenState extends State<FocusScreen> {
                 style: living
                     ? FilledButton.styleFrom(backgroundColor: AtelierStyle.teal, foregroundColor: Colors.white)
                     : null,
-                onPressed: busy ? null : () => request(FocusHelpKind.directExplanation),
+                onPressed: busy || _sourceChanged ? null : () => request(FocusHelpKind.directExplanation),
                 icon: const Icon(Icons.auto_awesome_outlined),
                 label: const Text('Sorumu açıkla'),
               );
@@ -534,12 +572,25 @@ class _FocusScreenState extends State<FocusScreen> {
               decoration: BoxDecoration(color: AppPalette.attentionSoft, borderRadius: BorderRadius.circular(18)),
               child: Padding(
                 padding: const EdgeInsets.all(15),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    const Icon(Icons.info_outline_rounded, color: AppPalette.attention, size: 20),
-                    const SizedBox(width: 9),
-                    Expanded(child: Text(unavailable.reason)),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Icon(Icons.info_outline_rounded, color: AppPalette.attention, size: 20),
+                        const SizedBox(width: 9),
+                        Expanded(child: Text(unavailable.reason)),
+                      ],
+                    ),
+                    if (_sourceChanged) ...[
+                      const SizedBox(height: 12),
+                      OutlinedButton.icon(
+                        onPressed: _recoverFromSourceChange,
+                        icon: const Icon(Icons.menu_book_outlined),
+                        label: Text(widget.onReadSource == null ? 'Güncel çalışmaya dön' : 'Güncel kaynağı aç'),
+                      ),
+                    ],
                   ],
                 ),
               ),
@@ -584,14 +635,14 @@ class _FocusScreenState extends State<FocusScreen> {
                         ),
                         onPressed: _openRecall,
                         icon: const Icon(Icons.psychology_alt_outlined),
-                        label: const Text('Hatırla'),
+                        label: Text(_sourceChanged ? 'Güncel kaynakla Hatırla' : 'Hatırla'),
                       );
                       final explainBackButton = FilledButton.icon(
                         style: FilledButton.styleFrom(
                           backgroundColor: Colors.white,
                           foregroundColor: AppPalette.primaryDark,
                         ),
-                        onPressed: _openExplainBack,
+                        onPressed: _sourceChanged ? null : _openExplainBack,
                         icon: const Icon(Icons.record_voice_over_outlined),
                         label: const Text('Kendi cümlelerinle anlat'),
                       );
