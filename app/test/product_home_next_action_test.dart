@@ -264,8 +264,17 @@ void main() {
   testWidgets('Home other-material entry preserves that material canonical repair action', (tester) async {
     usePhoneViewport(tester);
     final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
-    final ingest = SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor());
-    final recall = RecallLearningService(sourceStore: store, learningStore: store.learningTruthStore());
+    var now = DateTime.utc(2026, 10, 11, 12);
+    final ingest = SourceIngestService(
+      store: store,
+      pdfTextExtractor: const _UnusedPdfExtractor(),
+      now: () => now,
+    );
+    final recall = RecallLearningService(
+      sourceStore: store,
+      learningStore: store.learningTruthStore(),
+      now: () => now,
+    );
     final runtime = AppRuntime(
       learner: AppRuntime.localM5LearnerFixture,
       store: store,
@@ -294,7 +303,7 @@ void main() {
       answer: '',
     );
 
-    await Future<void>.delayed(const Duration(milliseconds: 2));
+    now = now.add(const Duration(minutes: 1));
     await ingest.ingestPastedText(
       learner: runtime.learner,
       materialId: AppRuntime.primaryMaterialId,
