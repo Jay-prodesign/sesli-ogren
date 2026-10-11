@@ -53,7 +53,8 @@ class LivingStudyDeskHome extends StatelessWidget {
 
   static const _canvas = AppPalette.canvas;
   static const _paper = AppPalette.surface;
-  static const _ink = AppPalette.primaryDark;
+  static const _ink = AppPalette.ink;
+  static const _focus = AppPalette.primaryDark;
   static const _sub = AppPalette.inkMuted;
   static const _accent = AppPalette.primary;
   static const _line = AppPalette.outline;
@@ -284,7 +285,9 @@ class LivingStudyDeskHome extends StatelessWidget {
         SizedBox(height: compactFirstViewport ? 10 : 17),
         Material(
           color: _paper,
-          borderRadius: BorderRadius.circular(14),
+          elevation: 1,
+          shadowColor: const Color(0x140F1F47),
+          borderRadius: BorderRadius.circular(18),
           clipBehavior: Clip.antiAlias,
           child: InkWell(
             key: const ValueKey('la0040-living-material-open'),
@@ -411,7 +414,7 @@ class LivingStudyDeskHome extends StatelessWidget {
               icon: Icon(_nextActionIcon, size: 20),
               label: Text(_nextActionCta),
               style: FilledButton.styleFrom(
-                backgroundColor: _ink,
+                backgroundColor: _accent,
                 foregroundColor: Colors.white,
                 minimumSize: Size.fromHeight(compactFirstViewport ? 48 : 54),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -444,9 +447,8 @@ class LivingStudyDeskHome extends StatelessWidget {
                 width: double.infinity,
                 padding: const EdgeInsets.fromLTRB(13, 11, 13, 12),
                 decoration: BoxDecoration(
-                  color: _paper,
-                  borderRadius: BorderRadius.circular(13),
-                  border: Border.all(color: _line),
+                  color: AppPalette.primarySoft,
+                  borderRadius: BorderRadius.circular(16),
                 ),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -534,7 +536,7 @@ class LivingStudyDeskHome extends StatelessWidget {
         width: compact ? 58 : 84,
         height: compact ? 58 : 84,
         decoration: BoxDecoration(
-          color: AppPalette.ink,
+          color: _focus,
           borderRadius: BorderRadius.circular(compact ? 18 : 24),
           border: Border.all(color: AppPalette.primary),
         ),
@@ -563,7 +565,7 @@ class LivingStudyDeskHome extends StatelessWidget {
           const SizedBox(height: 10),
           const Text(
             'PDF ya da metin. Sonra kaynağı kapatıp neyi gerçekten hatırladığını gör.',
-            style: TextStyle(color: Color(0xFFD1DFDC), fontSize: 14, height: 1.45),
+            style: TextStyle(color: Color(0xFFD6DDF0), fontSize: 14, height: 1.45),
           ),
         ],
       );
@@ -575,9 +577,9 @@ class LivingStudyDeskHome extends StatelessWidget {
             width: double.infinity,
             padding: EdgeInsets.fromLTRB(20, compact ? 18 : 20, 20, 20),
             decoration: BoxDecoration(
-              color: _ink,
-              borderRadius: BorderRadius.circular(24),
-              boxShadow: const [BoxShadow(color: Color(0x1415313A), blurRadius: 28, offset: Offset(0, 14))],
+              color: _focus,
+              borderRadius: BorderRadius.circular(26),
+              boxShadow: const [BoxShadow(color: Color(0x1A14224A), blurRadius: 30, offset: Offset(0, 16))],
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -602,8 +604,8 @@ class LivingStudyDeskHome extends StatelessWidget {
                   icon: const Icon(Icons.add_rounded),
                   label: const Text('İlk kaynağımı ekle'),
                   style: FilledButton.styleFrom(
-                    backgroundColor: _mark,
-                    foregroundColor: _ink,
+                    backgroundColor: _accent,
+                    foregroundColor: Colors.white,
                     minimumSize: const Size.fromHeight(54),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(13)),
                   ),
@@ -702,9 +704,8 @@ class LivingStudyDeskHome extends StatelessWidget {
             width: double.infinity,
             padding: const EdgeInsets.fromLTRB(13, 11, 13, 11),
             decoration: BoxDecoration(
-              color: _paper,
-              borderRadius: BorderRadius.circular(14),
-              border: Border.all(color: _line),
+              color: AppPalette.primarySoft,
+              borderRadius: BorderRadius.circular(16),
             ),
             child: const Row(
               crossAxisAlignment: CrossAxisAlignment.start,

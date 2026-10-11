@@ -62,15 +62,21 @@ class AtelierSourceTrustStrip extends StatelessWidget {
           width: double.infinity,
           padding: const EdgeInsets.fromLTRB(13, 11, 13, 12),
           decoration: BoxDecoration(
-            color: AtelierStyle.mint,
-            borderRadius: BorderRadius.circular(13),
-            border: Border.all(color: AtelierStyle.line),
+            color: AtelierStyle.pulseSoft,
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: const [BoxShadow(color: Color(0x0D14224A), blurRadius: 18, offset: Offset(0, 8))],
           ),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Icon(Icons.verified_user_outlined, color: AtelierStyle.teal, size: 19),
-              const SizedBox(width: 9),
+              Container(
+                width: 4,
+                height: 44,
+                decoration: BoxDecoration(color: AtelierStyle.pulse, borderRadius: BorderRadius.circular(99)),
+              ),
+              const SizedBox(width: 10),
+              const Icon(Icons.verified_user_outlined, color: AtelierStyle.pulse, size: 19),
+              const SizedBox(width: 8),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -571,9 +577,8 @@ class AtelierLearningRail extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 9),
           decoration: BoxDecoration(
-            color: AtelierStyle.paper,
-            borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: AtelierStyle.line),
+            color: AppPalette.surfaceMuted,
+            borderRadius: BorderRadius.circular(16),
           ),
           child: LayoutBuilder(
             builder: (context, constraints) {
@@ -638,12 +643,16 @@ class _AtelierLearningRailStep extends StatelessWidget {
   Widget build(BuildContext context) {
     final active = state == _AtelierLearningRailState.active;
     final done = state == _AtelierLearningRailState.done;
-    final foreground = active || done ? AtelierStyle.teal : AtelierStyle.muted;
-    final background = active
-        ? AtelierStyle.mark
+    final foreground = active
+        ? Colors.white
         : done
-        ? AtelierStyle.mint
-        : AtelierStyle.canvas;
+        ? AtelierStyle.aqua
+        : AtelierStyle.muted;
+    final background = active
+        ? AtelierStyle.pulse
+        : done
+        ? AtelierStyle.aquaSoft
+        : AtelierStyle.paper;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 6),
       decoration: BoxDecoration(color: background, borderRadius: BorderRadius.circular(999)),
@@ -675,12 +684,16 @@ class _AtelierLearningRailCompactStep extends StatelessWidget {
   Widget build(BuildContext context) {
     final active = state == _AtelierLearningRailState.active;
     final done = state == _AtelierLearningRailState.done;
-    final foreground = active || done ? AtelierStyle.teal : AtelierStyle.muted;
-    final background = active
-        ? AtelierStyle.mark
+    final foreground = active
+        ? Colors.white
         : done
-        ? AtelierStyle.mint
-        : AtelierStyle.canvas;
+        ? AtelierStyle.aqua
+        : AtelierStyle.muted;
+    final background = active
+        ? AtelierStyle.pulse
+        : done
+        ? AtelierStyle.aquaSoft
+        : AtelierStyle.paper;
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -715,7 +728,7 @@ class _AtelierLearningRailLine extends StatelessWidget {
     width: width,
     height: 2,
     margin: EdgeInsets.fromLTRB(3, topMargin, 3, 0),
-    color: done ? AtelierStyle.teal : AtelierStyle.line,
+    color: done ? AtelierStyle.aqua : AtelierStyle.line,
   );
 }
 

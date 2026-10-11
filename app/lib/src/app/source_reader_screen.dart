@@ -451,8 +451,10 @@ class _SourceReaderScreenState extends State<SourceReaderScreen> {
                             DecoratedBox(
                               decoration: BoxDecoration(
                                 color: paper,
-                                borderRadius: BorderRadius.circular(18),
-                                border: Border.all(color: line),
+                                borderRadius: BorderRadius.circular(22),
+                                boxShadow: const [
+                                  BoxShadow(color: Color(0x1014224A), blurRadius: 24, offset: Offset(0, 10)),
+                                ],
                               ),
                               child: Padding(padding: const EdgeInsets.fromLTRB(22, 22, 22, 28), child: article),
                             )
@@ -467,9 +469,9 @@ class _SourceReaderScreenState extends State<SourceReaderScreen> {
                 container: true,
                 label: 'Kaynak açık. Hatırla düğmesi kaynağı kapatıp aktif denemeyi başlatır.',
                 child: DecoratedBox(
-                  decoration: BoxDecoration(
-                    color: paper,
-                    border: Border(top: BorderSide(color: line)),
+                  decoration: const BoxDecoration(
+                    color: AtelierStyle.focus,
+                    borderRadius: BorderRadius.vertical(top: Radius.circular(22)),
                   ),
                   child: Padding(
                     padding: const EdgeInsets.fromLTRB(16, 8, 16, 10),
@@ -483,8 +485,8 @@ class _SourceReaderScreenState extends State<SourceReaderScreen> {
                                 onPressed: () => unawaited(_runLearningAction(widget.onListen)),
                                 style: living
                                     ? OutlinedButton.styleFrom(
-                                        foregroundColor: AtelierStyle.teal,
-                                        side: const BorderSide(color: AtelierStyle.line),
+                                        foregroundColor: AtelierStyle.aqua,
+                                        side: const BorderSide(color: AtelierStyle.aqua),
                                         minimumSize: const Size(0, 48),
                                       )
                                     : OutlinedButton.styleFrom(minimumSize: const Size(0, 48)),
@@ -495,7 +497,7 @@ class _SourceReaderScreenState extends State<SourceReaderScreen> {
                             ? FilledButton.icon(
                                 style: living
                                     ? FilledButton.styleFrom(
-                                        backgroundColor: AtelierStyle.ink,
+                                        backgroundColor: AtelierStyle.pulse,
                                         foregroundColor: Colors.white,
                                         minimumSize: const Size(0, 48),
                                       )
@@ -506,6 +508,7 @@ class _SourceReaderScreenState extends State<SourceReaderScreen> {
                               )
                             : widget.onRecap != null
                             ? TextButton.icon(
+                                style: TextButton.styleFrom(foregroundColor: Colors.white),
                                 onPressed: () => unawaited(_runLearningAction(widget.onRecap)),
                                 icon: const Icon(Icons.auto_awesome),
                                 label: const Text('Hızlı özet'),

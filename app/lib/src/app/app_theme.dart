@@ -112,12 +112,11 @@ abstract final class SesliOgrenTheme {
       textTheme: text,
       cardTheme: CardThemeData(
         color: AppPalette.surface,
-        elevation: 0,
+        surfaceTintColor: Colors.transparent,
+        shadowColor: const Color(0x140F1F47),
+        elevation: 1,
         margin: EdgeInsets.zero,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(18),
-          side: const BorderSide(color: AppPalette.outline),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       ),
       appBarTheme: const AppBarTheme(
         backgroundColor: AppPalette.canvas,
