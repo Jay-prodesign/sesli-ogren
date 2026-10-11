@@ -720,8 +720,13 @@ class _ProfileSectionLabel extends StatelessWidget {
     final living = LivingDeskReviewScope.active(context);
     return Text(
       text,
-      style: Theme.of(context).textTheme.titleMedium
-          ?.copyWith(color: living ? AtelierStyle.ink : null, fontWeight: living ? FontWeight.w800 : null),
+      style: living
+          ? Theme.of(context).textTheme.labelMedium?.copyWith(
+              color: AtelierStyle.pulse,
+              fontWeight: FontWeight.w900,
+              letterSpacing: 0.7,
+            )
+          : Theme.of(context).textTheme.titleMedium,
     );
   }
 }
@@ -736,9 +741,8 @@ class _ProfilePanel extends StatelessWidget {
     final living = LivingDeskReviewScope.active(context);
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: living ? AtelierStyle.paper : AppPalette.surface,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: living ? const [BoxShadow(color: Color(0x0D14224A), blurRadius: 18, offset: Offset(0, 8))] : null,
+        color: living ? AppPalette.surfaceMuted : AppPalette.surface,
+        borderRadius: BorderRadius.circular(18),
       ),
       child: Column(children: children),
     );
@@ -764,9 +768,8 @@ class _ProfileTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final living = LivingDeskReviewScope.active(context);
-    final destructive = iconForeground == AppPalette.destructive;
-    final resolvedBackground = living && !destructive ? AtelierStyle.mint : iconBackground;
-    final resolvedForeground = living && !destructive ? AtelierStyle.teal : iconForeground;
+    final resolvedBackground = iconBackground;
+    final resolvedForeground = iconForeground;
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 15, 16, 14),
       child: Row(

@@ -966,9 +966,8 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                   decoration: BoxDecoration(
-                    color: AtelierStyle.mint,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: AtelierStyle.line),
+                    color: AtelierStyle.pulseSoft,
+                    borderRadius: BorderRadius.circular(16),
                   ),
                   child: const Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -1035,16 +1034,26 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
               ),
               const SizedBox(height: 12),
               Container(
-                padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
+                padding: const EdgeInsets.fromLTRB(13, 11, 13, 11),
                 decoration: BoxDecoration(
-                  color: AtelierStyle.mint,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: AtelierStyle.line),
+                  color: AtelierStyle.pulseSoft,
+                  borderRadius: BorderRadius.circular(16),
                 ),
                 child: const Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Icon(Icons.verified_user_outlined, color: AtelierStyle.teal, size: 19),
+                    SizedBox(
+                      width: 4,
+                      height: 38,
+                      child: DecoratedBox(
+                        decoration: BoxDecoration(
+                          color: AtelierStyle.pulse,
+                          borderRadius: BorderRadius.all(Radius.circular(99)),
+                        ),
+                      ),
+                    ),
+                    SizedBox(width: 10),
+                    Icon(Icons.verified_user_outlined, color: AtelierStyle.pulse, size: 19),
                     SizedBox(width: 9),
                     Expanded(
                       child: Text(
@@ -2055,27 +2064,26 @@ class _SourceChoiceCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final background = primary ? AtelierStyle.focus : AtelierStyle.paper;
+    final background = primary ? AtelierStyle.focus : AppPalette.surfaceMuted;
     final foreground = primary ? Colors.white : AtelierStyle.ink;
     final muted = primary ? const Color(0xFFD6DDF0) : AtelierStyle.muted;
-    final accent = primary ? AtelierStyle.mark : AtelierStyle.teal;
+    final accent = primary ? AtelierStyle.mark : AtelierStyle.pulse;
     return Semantics(
       button: true,
       enabled: enabled,
       label: '$title. $body',
       child: Material(
         color: background,
-        borderRadius: BorderRadius.circular(18),
+        elevation: primary ? 2 : 0,
+        shadowColor: primary ? const Color(0x2914224A) : Colors.transparent,
+        borderRadius: BorderRadius.circular(primary ? 22 : 18),
         clipBehavior: Clip.antiAlias,
         child: InkWell(
           onTap: enabled ? onTap : null,
           child: Container(
-            constraints: const BoxConstraints(minHeight: 154),
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 15),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(18),
-              border: Border.all(color: primary ? AtelierStyle.focus : AtelierStyle.line),
-            ),
+            constraints: BoxConstraints(minHeight: primary ? 170 : 148),
+            padding: const EdgeInsets.fromLTRB(17, 17, 17, 15),
+            decoration: BoxDecoration(borderRadius: BorderRadius.circular(primary ? 22 : 18)),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [

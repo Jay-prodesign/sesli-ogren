@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../domain/learning_contracts.dart';
 import '../domain/learning_truth.dart';
 import 'app_theme.dart';
+import 'atelier_learning_surfaces.dart';
 import 'companion_view.dart';
 
 /// Current source-first product experience scope.
@@ -616,86 +617,7 @@ class LivingStudyDeskHome extends StatelessWidget {
             style: TextStyle(color: _accent, fontSize: 10, fontWeight: FontWeight.w900, letterSpacing: 0.9),
           ),
           const SizedBox(height: 10),
-          Semantics(
-            label: 'Öğrenme yolu: kaynağını getir, oku veya dinle, kaynağa bakmadan hatırla, sonra yanıtını kaynak kanıtıyla karşılaştır',
-            child: ExcludeSemantics(
-              child: compact
-                  ? const Column(
-                      children: [
-                        _FirstRunStep(
-                          number: '01',
-                          title: 'Kaynağını getir',
-                          icon: Icons.auto_stories_outlined,
-                          compact: true,
-                        ),
-                        SizedBox(height: 8),
-                        _FirstRunStep(
-                          number: '02',
-                          title: 'Oku veya dinle',
-                          icon: Icons.headphones_rounded,
-                          compact: true,
-                        ),
-                        SizedBox(height: 8),
-                        _FirstRunStep(
-                          number: '03',
-                          title: 'Kapat ve hatırla',
-                          icon: Icons.psychology_alt_outlined,
-                          compact: true,
-                        ),
-                        SizedBox(height: 8),
-                        _FirstRunStep(
-                          number: '04',
-                          title: 'Kanıtla karşılaştır',
-                          icon: Icons.find_in_page_outlined,
-                          compact: true,
-                        ),
-                      ],
-                    )
-                  : LayoutBuilder(
-                      builder: (context, stepConstraints) {
-                        final stepWidth = (stepConstraints.maxWidth - 8) / 2;
-                        return Wrap(
-                          spacing: 8,
-                          runSpacing: 8,
-                          children: [
-                            SizedBox(
-                              width: stepWidth,
-                              child: const _FirstRunStep(
-                                number: '01',
-                                title: 'Kaynağını getir',
-                                icon: Icons.auto_stories_outlined,
-                              ),
-                            ),
-                            SizedBox(
-                              width: stepWidth,
-                              child: const _FirstRunStep(
-                                number: '02',
-                                title: 'Oku veya dinle',
-                                icon: Icons.headphones_rounded,
-                              ),
-                            ),
-                            SizedBox(
-                              width: stepWidth,
-                              child: const _FirstRunStep(
-                                number: '03',
-                                title: 'Kapat ve hatırla',
-                                icon: Icons.psychology_alt_outlined,
-                              ),
-                            ),
-                            SizedBox(
-                              width: stepWidth,
-                              child: const _FirstRunStep(
-                                number: '04',
-                                title: 'Kanıtla karşılaştır',
-                                icon: Icons.find_in_page_outlined,
-                              ),
-                            ),
-                          ],
-                        );
-                      },
-                    ),
-            ),
-          ),
+          const AtelierLearningRail(phase: AtelierLearningPhase.source),
           const SizedBox(height: 18),
           Container(
             width: double.infinity,
@@ -719,85 +641,4 @@ class LivingStudyDeskHome extends StatelessWidget {
       );
     },
   );
-}
-
-class _FirstRunStep extends StatelessWidget {
-  const _FirstRunStep({required this.number, required this.title, required this.icon, this.compact = false});
-
-  final String number;
-  final String title;
-  final IconData icon;
-  final bool compact;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      height: compact ? 72 : 116,
-      padding: EdgeInsets.fromLTRB(12, compact ? 10 : 12, 12, compact ? 10 : 13),
-      decoration: BoxDecoration(
-        color: LivingStudyDeskHome._paper,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: LivingStudyDeskHome._line),
-      ),
-      child: compact
-          ? Row(
-              children: [
-                Icon(icon, color: LivingStudyDeskHome._accent, size: 20),
-                const SizedBox(width: 11),
-                Text(
-                  number,
-                  style: const TextStyle(
-                    color: LivingStudyDeskHome._accent,
-                    fontSize: 10,
-                    fontWeight: FontWeight.w900,
-                    letterSpacing: 0.8,
-                  ),
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Text(
-                    title,
-                    style: const TextStyle(
-                      color: LivingStudyDeskHome._ink,
-                      fontSize: 13.5,
-                      height: 1.25,
-                      fontWeight: FontWeight.w900,
-                    ),
-                  ),
-                ),
-              ],
-            )
-          : Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Icon(icon, color: LivingStudyDeskHome._accent, size: 19),
-                    const Spacer(),
-                    Text(
-                      number,
-                      style: const TextStyle(
-                        color: LivingStudyDeskHome._accent,
-                        fontSize: 10,
-                        fontWeight: FontWeight.w900,
-                        letterSpacing: 0.8,
-                      ),
-                    ),
-                  ],
-                ),
-                const Spacer(),
-                Text(
-                  title,
-                  style: const TextStyle(
-                    color: LivingStudyDeskHome._ink,
-                    fontSize: 13,
-                    height: 1.25,
-                    fontWeight: FontWeight.w900,
-                  ),
-                ),
-              ],
-            ),
-    );
-  }
 }

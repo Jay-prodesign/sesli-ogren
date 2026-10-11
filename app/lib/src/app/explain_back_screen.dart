@@ -240,9 +240,7 @@ class _ExplainBackScreenState extends State<ExplainBackScreen> {
   Widget build(BuildContext context) {
     final result = _result;
     final living = LivingDeskReviewScope.active(context);
-    final accent = living ? AtelierStyle.teal : AppPalette.primary;
-    final accentSoft = living ? AtelierStyle.mint : AppPalette.primarySoft;
-    final truthSoft = living ? AtelierStyle.mint : AppPalette.signalSoft;
+    final truthSoft = living ? AtelierStyle.pulseSoft : AppPalette.signalSoft;
     return Scaffold(
       backgroundColor: living ? AtelierStyle.canvas : null,
       appBar: AppBar(

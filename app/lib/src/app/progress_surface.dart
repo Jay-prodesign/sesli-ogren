@@ -46,61 +46,95 @@ class ProgressSurface extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final living = LivingDeskReviewScope.active(context);
-    final accent = living ? AtelierStyle.teal : AppPalette.signal;
-    final soft = living ? AtelierStyle.mint : AppPalette.signalSoft;
+    final accent = living ? AtelierStyle.pulse : AppPalette.signal;
     final ink = living ? AtelierStyle.ink : theme.colorScheme.onSurface;
     final muted = living ? AtelierStyle.muted : theme.colorScheme.onSurfaceVariant;
     return ListView(
       padding: const EdgeInsets.fromLTRB(20, 24, 20, 32),
       children: [
-        if (living) ...[
-          Text(
-            'HATIRLAMA GEÇMİŞİN',
-            style: theme.textTheme.labelSmall?.copyWith(color: accent, fontWeight: FontWeight.w900, letterSpacing: 0.9),
-          ),
-          const SizedBox(height: 7),
-        ],
-        LayoutBuilder(
-          builder: (context, constraints) {
-            final stackHeader = constraints.maxWidth < 340 || MediaQuery.textScalerOf(context).scale(16) >= 22;
-            final title = Text(
-              'İlerleme',
-              style: theme.textTheme.headlineMedium?.copyWith(color: ink, fontWeight: living ? FontWeight.w900 : null),
-            );
-            final badge = DecoratedBox(
-              decoration: BoxDecoration(color: soft, borderRadius: BorderRadius.circular(999)),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                child: Text(
-                  'KANITA DAYALI',
-                  style: theme.textTheme.labelSmall?.copyWith(
-                    color: accent,
-                    fontWeight: FontWeight.w900,
-                    letterSpacing: 0.45,
-                  ),
-                ),
+        if (living)
+          DecoratedBox(
+            decoration: BoxDecoration(
+              color: AtelierStyle.focus,
+              borderRadius: BorderRadius.circular(26),
+              boxShadow: const [BoxShadow(color: Color(0x1A14224A), blurRadius: 26, offset: Offset(0, 13))],
+            ),
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(18, 17, 18, 18),
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  final stackHeader =
+                      constraints.maxWidth < 340 || MediaQuery.textScalerOf(context).scale(16) >= 22;
+                  final copy = Column(
+                    key: stackHeader ? const ValueKey('progress-header-stacked') : null,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'HATIRLAMA GEÇMİŞİN',
+                        style: TextStyle(
+                          color: AtelierStyle.mark,
+                          fontSize: 10,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: 0.9,
+                        ),
+                      ),
+                      const SizedBox(height: 7),
+                      Text(
+                        'İlerleme',
+                        style: theme.textTheme.headlineMedium?.copyWith(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w900,
+                        ),
+                      ),
+                      const SizedBox(height: 7),
+                      Text(
+                        'Buradaki durumlar yalnız kaynağa bakmadan yaptığın Hatırla denemelerinden gelir.',
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: Colors.white.withValues(alpha: 0.78),
+                          height: 1.4,
+                        ),
+                      ),
+                    ],
+                  );
+                  final badge = DecoratedBox(
+                    decoration: BoxDecoration(
+                      color: AtelierStyle.mark,
+                      borderRadius: BorderRadius.circular(999),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                      child: Text(
+                        'KANITA DAYALI',
+                        style: theme.textTheme.labelSmall?.copyWith(
+                          color: AtelierStyle.focus,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: 0.45,
+                        ),
+                      ),
+                    ),
+                  );
+                  if (stackHeader) {
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [copy, const SizedBox(height: 12), badge],
+                    );
+                  }
+                  return Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [Expanded(child: copy), const SizedBox(width: 12), badge],
+                  );
+                },
               ),
-            );
-            if (stackHeader) {
-              return Column(
-                key: const ValueKey('progress-header-stacked'),
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [title, const SizedBox(height: 10), badge],
-              );
-            }
-            return Row(
-              children: [
-                Expanded(child: title),
-                badge,
-              ],
-            );
-          },
-        ),
-        const SizedBox(height: 8),
-        Text(
-          'Buradaki durumlar yalnız kaynağa bakmadan yaptığın Hatırla denemelerinden gelir.',
-          style: theme.textTheme.bodyMedium?.copyWith(color: muted),
-        ),
+            ),
+          )
+        else ...[
+          Text('İlerleme', style: theme.textTheme.headlineMedium),
+          const SizedBox(height: 8),
+          Text(
+            'Buradaki durumlar yalnız kaynağa bakmadan yaptığın Hatırla denemelerinden gelir.',
+            style: theme.textTheme.bodyMedium?.copyWith(color: muted),
+          ),
+        ],
         const SizedBox(height: 13),
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -159,7 +193,7 @@ class ProgressSurface extends StatelessWidget {
                     icon: const Icon(Icons.add_rounded),
                     label: const Text('İlk kaynağımı ekle'),
                     style: living
-                        ? FilledButton.styleFrom(backgroundColor: AtelierStyle.ink, foregroundColor: Colors.white)
+                        ? FilledButton.styleFrom(backgroundColor: AtelierStyle.pulse, foregroundColor: Colors.white)
                         : null,
                   ),
                 ],
@@ -225,22 +259,8 @@ class _ProgressCard extends StatelessWidget {
       RecallStateKind.retrievedOnce => (AppPalette.success, AppPalette.successSoft, Icons.check_circle_rounded),
       RecallStateKind.needsReview => (AppPalette.attention, AppPalette.attentionSoft, Icons.refresh_rounded),
     };
-    final accent = living
-        ? switch (state) {
-            RecallStateKind.notAssessed => AtelierStyle.muted,
-            RecallStateKind.developing => AtelierStyle.teal,
-            RecallStateKind.retrievedOnce => AtelierStyle.teal,
-            RecallStateKind.needsReview => AtelierStyle.attention,
-          }
-        : legacyAccent;
-    final soft = living
-        ? switch (state) {
-            RecallStateKind.notAssessed => AtelierStyle.canvas,
-            RecallStateKind.developing => AtelierStyle.mint,
-            RecallStateKind.retrievedOnce => AtelierStyle.mint,
-            RecallStateKind.needsReview => AtelierStyle.attentionSoft,
-          }
-        : legacySoft;
+    final accent = legacyAccent;
+    final soft = legacySoft;
     return Card(
       elevation: living ? 1 : null,
       shadowColor: living ? const Color(0x140F1F47) : null,

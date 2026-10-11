@@ -367,11 +367,10 @@ class _FocusScreenState extends State<FocusScreen> {
     final unavailable = help is FocusHelpUnavailable ? help as FocusHelpUnavailable : null;
     final living = LivingDeskReviewScope.active(context);
     final accent = living ? AtelierStyle.teal : AppPalette.signal;
-    final accentSoft = living ? AtelierStyle.mint : AppPalette.signalSoft;
+    final accentSoft = living ? AtelierStyle.aquaSoft : AppPalette.signalSoft;
     final paper = living ? AtelierStyle.paper : AppPalette.surface;
-    final line = living ? AtelierStyle.line : AppPalette.outline;
     final ink = living ? AtelierStyle.ink : theme.colorScheme.onSurface;
-    final hero = living ? AtelierStyle.ink : AppPalette.primaryDark;
+    final hero = living ? AtelierStyle.focus : AppPalette.primaryDark;
     final mark = living ? AtelierStyle.mark : AppPalette.momentum;
     final markInk = living ? AtelierStyle.ink : AppPalette.momentumInk;
     final sourceText = widget.sourceText.trim();
