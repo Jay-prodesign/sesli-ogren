@@ -94,7 +94,6 @@ void main() {
   });
 
   test('durable learner continuity survives a real SQLite close and reopen', () async {
-
     final directory = await Directory.systemTemp.createTemp('sesli-ogren-durable-reopen-');
     addTearDown(() async {
       if (await directory.exists()) {
