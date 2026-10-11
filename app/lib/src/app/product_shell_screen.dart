@@ -276,6 +276,20 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
         sourceVersionId: source.identity.sourceVersionId,
       );
       if (!mounted) return;
+      // The source may change while its extracted text or resume position is
+      // loading. Never render an old snapshot as the current Reader.
+      final currentSource = await widget.runtime.store.currentSourceVersion(
+        learner: widget.runtime.learner,
+        materialId: selected,
+      );
+      if (!mounted) return;
+      if (currentSource?.identity.sourceVersionId != source.identity.sourceVersionId) {
+        setState(_refresh);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Kaynak güncellendi. Güncel sürümü yeniden aç.')),
+        );
+        return;
+      }
 
       // Replace the reader route with its chosen learning activity. This avoids
       // racing a pop against a new push on the same Navigator. Capture the
