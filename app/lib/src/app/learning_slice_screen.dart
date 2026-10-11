@@ -1023,7 +1023,7 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
                       );
                     }
                     return Row(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Expanded(child: pdfChoice),
                         const SizedBox(width: 10),
@@ -2109,8 +2109,7 @@ class _SourceChoiceCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 6),
                 Text(body, style: TextStyle(color: muted, fontSize: 12, height: 1.38)),
-                const Spacer(),
-                const SizedBox(height: 10),
+                const SizedBox(height: 12),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
