@@ -511,6 +511,34 @@ class _AccountOverviewCard extends StatelessWidget {
     final hasVerifiedLimits = overview.dailyLimits.isNotEmpty;
     final hasUsageOrLimits = quotaCapabilities.isNotEmpty || unknownUsage.isNotEmpty;
 
+    Widget usageRow(String label, String value, {bool strongValue = false}) {
+      return LayoutBuilder(
+        builder: (context, constraints) {
+          final stack = constraints.maxWidth < 300 || MediaQuery.textScalerOf(context).scale(1) > 1.3;
+          final labelWidget = Text(
+            label,
+            style: theme.textTheme.bodyMedium?.copyWith(color: AppPalette.ink),
+          );
+          final valueWidget = Text(
+            value,
+            style: theme.textTheme.labelLarge?.copyWith(
+              color: AppPalette.primaryDark,
+              fontWeight: strongValue ? FontWeight.w800 : null,
+            ),
+          );
+          if (stack) {
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [labelWidget, const SizedBox(height: 3), valueWidget],
+            );
+          }
+          return Row(
+            children: [Expanded(child: labelWidget), const SizedBox(width: 10), valueWidget],
+          );
+        },
+      );
+    }
+
     return Container(
       padding: const EdgeInsets.fromLTRB(18, 18, 18, 17),
       decoration: BoxDecoration(
@@ -609,43 +637,21 @@ class _AccountOverviewCard extends StatelessWidget {
             for (final capability in quotaCapabilities)
               Padding(
                 padding: const EdgeInsets.only(bottom: 8),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        _capabilityLabel(capability),
-                        style: theme.textTheme.bodyMedium?.copyWith(color: AppPalette.ink),
-                      ),
-                    ),
-                    Text(
-                      _usageAndLimitLabel(
-                        usageByCapability[capability]?.consumed ?? 0,
-                        overview.dailyLimitForCapability(capability),
-                      ),
-                      style: theme.textTheme.labelLarge?.copyWith(
-                        color: AppPalette.primaryDark,
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
-                  ],
+                child: usageRow(
+                  _capabilityLabel(capability),
+                  _usageAndLimitLabel(
+                    usageByCapability[capability]?.consumed ?? 0,
+                    overview.dailyLimitForCapability(capability),
+                  ),
+                  strongValue: true,
                 ),
               ),
             for (final entry in unknownUsage.take(2))
               Padding(
                 padding: const EdgeInsets.only(bottom: 8),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        _capabilityLabel(entry.capability),
-                        style: theme.textTheme.bodyMedium?.copyWith(color: AppPalette.ink),
-                      ),
-                    ),
-                    Text(
-                      entry.consumed < 0 ? 'Doğrulanamadı' : '${entry.consumed} işlem',
-                      style: theme.textTheme.labelLarge?.copyWith(color: AppPalette.primaryDark),
-                    ),
-                  ],
+                child: usageRow(
+                  _capabilityLabel(entry.capability),
+                  entry.consumed < 0 ? 'Doğrulanamadı' : '${entry.consumed} işlem',
                 ),
               ),
             const SizedBox(height: 2),
