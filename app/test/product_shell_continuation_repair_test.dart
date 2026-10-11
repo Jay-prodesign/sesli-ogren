@@ -57,6 +57,14 @@ Future<void> _pumpUntilFound(WidgetTester tester, Finder finder, {int maxPumps =
   fail('Expected repaired product shell was not reached within bounded pumps.');
 }
 
+Future<void> _pumpUntilGone(WidgetTester tester, Finder finder, {int maxPumps = 200}) async {
+  for (var i = 0; i < maxPumps; i++) {
+    await tester.pump(const Duration(milliseconds: 20));
+    if (finder.evaluate().isEmpty) return;
+  }
+  fail('Expected route was not dismissed within bounded pumps.');
+}
+
 Future<void> _tapVisible(WidgetTester tester, Finder finder) async {
   await tester.scrollUntilVisible(finder, 220, scrollable: find.byType(Scrollable).last);
   await tester.pump();
@@ -272,11 +280,15 @@ void main() {
     await _pumpUntilFound(tester, find.byType(LearningSliceScreen));
     expect(find.byType(LearningSliceScreen), findsOneWidget);
     Navigator.of(tester.element(find.byType(LearningSliceScreen))).pop();
-    await _pumpUntilFound(tester, find.byType(MaterialWorkspaceScreen));
-    expect(find.byType(MaterialWorkspaceScreen), findsOneWidget);
-    Navigator.of(tester.element(find.byType(MaterialWorkspaceScreen))).pop();
-    await _pumpUntilFound(tester, find.byType(ProductShellScreen));
-    expect(find.byType(ProductShellScreen), findsOneWidget);
+    await _pumpUntilGone(tester, find.byType(LearningSliceScreen));
+    final activeWorkspace = find.byType(MaterialWorkspaceScreen).hitTestable();
+    await _pumpUntilFound(tester, activeWorkspace);
+    expect(activeWorkspace, findsOneWidget);
+    Navigator.of(tester.element(activeWorkspace)).pop();
+    await _pumpUntilGone(tester, find.byType(MaterialWorkspaceScreen));
+    final activeShell = find.byType(ProductShellScreen).hitTestable();
+    await _pumpUntilFound(tester, activeShell);
+    expect(activeShell, findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 
