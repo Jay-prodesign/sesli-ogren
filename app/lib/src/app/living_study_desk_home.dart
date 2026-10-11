@@ -185,18 +185,17 @@ class LivingStudyDeskHome extends StatelessWidget {
                       children: [
                         Container(
                           width: 9,
-                          height: 30,
+                          height: compactHeader ? 36 : 30,
                           decoration: BoxDecoration(color: _accent, borderRadius: BorderRadius.circular(3)),
                         ),
                         const SizedBox(width: 11),
                         const Expanded(
                           child: Text(
                             'sesli öğren',
-                            maxLines: 1,
-                            overflow: TextOverflow.fade,
                             softWrap: false,
                             style: TextStyle(
                               fontSize: 19,
+                              height: 1.2,
                               fontWeight: FontWeight.w800,
                               letterSpacing: -0.9,
                               color: _ink,
