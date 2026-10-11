@@ -208,7 +208,6 @@ class FirstValueIntentSurface extends StatelessWidget {
                       backgroundColor: AtelierStyle.mark,
                       foregroundColor: AtelierStyle.focus,
                       minimumSize: const Size.fromHeight(54),
-                      textStyle: const TextStyle(fontWeight: FontWeight.w900),
                     ),
                     icon: Icon(_recommendListenFirst ? Icons.headphones_rounded : Icons.menu_book_outlined),
                     label: Text(_recommendedActionLabel),
