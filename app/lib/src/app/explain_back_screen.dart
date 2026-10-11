@@ -75,7 +75,9 @@ class _ExplainBackScreenState extends State<ExplainBackScreen> {
           currentSource.identity.sourceVersionId != widget.source.identity.sourceVersionId ||
           currentSource.identity.contentDigest != widget.source.identity.contentDigest) {
         sourceChanged = true;
-        result = const ExplainBackUnavailable('Kaynak değişti; eski sürüme bağlı değerlendirmeyi yeniden göndermiyoruz.');
+        result = const ExplainBackUnavailable(
+          'Kaynak değişti; eski sürüme bağlı değerlendirmeyi yeniden göndermiyoruz.',
+        );
       } else {
         final material = await widget.runtime.store.material(
           learner: widget.runtime.learner,
@@ -408,10 +410,7 @@ class _UnavailableResult extends StatelessWidget {
             icon: const Icon(Icons.psychology_alt_outlined),
             label: Text(sourceChanged ? 'Güncel kaynakla Hatırla' : 'Hatırla ile devam et'),
           ),
-          TextButton(
-            onPressed: onBack,
-            child: Text(sourceChanged ? 'Güncel çalışmaya dön' : 'Önceki çalışmaya dön'),
-          ),
+          TextButton(onPressed: onBack, child: Text(sourceChanged ? 'Güncel çalışmaya dön' : 'Önceki çalışmaya dön')),
         ],
       ),
     ),

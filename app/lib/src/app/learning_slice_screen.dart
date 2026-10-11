@@ -1072,8 +1072,7 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
             ] else ...[
               LayoutBuilder(
                 builder: (context, constraints) {
-                  final compactHeader =
-                      constraints.maxWidth < 350 || MediaQuery.textScalerOf(context).scale(1) > 1.2;
+                  final compactHeader = constraints.maxWidth < 350 || MediaQuery.textScalerOf(context).scale(1) > 1.2;
                   final changeSource = TextButton.icon(
                     onPressed: _busy
                         ? null
@@ -1101,7 +1100,12 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
                       children: [label, const SizedBox(height: 2), changeSource],
                     );
                   }
-                  return Row(children: [const Expanded(child: label), changeSource]);
+                  return Row(
+                    children: [
+                      const Expanded(child: label),
+                      changeSource,
+                    ],
+                  );
                 },
               ),
               const SizedBox(height: 8),
@@ -1898,11 +1902,7 @@ class _FocusedSourceReview {
 }
 
 class _ResultNextActionBar extends StatelessWidget {
-  const _ResultNextActionBar({
-    required this.reason,
-    required this.label,
-    required this.onPressed,
-  });
+  const _ResultNextActionBar({required this.reason, required this.label, required this.onPressed});
 
   final String reason;
   final String label;
@@ -1910,8 +1910,7 @@ class _ResultNextActionBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final compact =
-        MediaQuery.sizeOf(context).width < 350 || MediaQuery.textScalerOf(context).scale(1) > 1.2;
+    final compact = MediaQuery.sizeOf(context).width < 350 || MediaQuery.textScalerOf(context).scale(1) > 1.2;
     return Material(
       color: AtelierStyle.focus,
       elevation: 12,
@@ -2095,12 +2094,7 @@ class _SourceChoiceCard extends StatelessWidget {
                 const SizedBox(height: 13),
                 Text(
                   eyebrow,
-                  style: TextStyle(
-                    color: accent,
-                    fontSize: 10,
-                    fontWeight: FontWeight.w900,
-                    letterSpacing: 0.9,
-                  ),
+                  style: TextStyle(color: accent, fontSize: 10, fontWeight: FontWeight.w900, letterSpacing: 0.9),
                 ),
                 const SizedBox(height: 4),
                 Text(

@@ -651,8 +651,7 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> with WidgetsBinding
               ),
               child: LayoutBuilder(
                 builder: (context, constraints) {
-                  final compact =
-                      constraints.maxWidth < 340 || MediaQuery.textScalerOf(context).scale(1) > 1.2;
+                  final compact = constraints.maxWidth < 340 || MediaQuery.textScalerOf(context).scale(1) > 1.2;
                   final guidance = Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -667,18 +666,14 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> with WidgetsBinding
                       const SizedBox(height: 5),
                       Text(
                         'Önce genel resmi çıkaralım.',
-                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          color: living ? Colors.white : ink,
-                          fontWeight: FontWeight.w900,
-                        ),
+                        style: Theme.of(context).textTheme.titleLarge
+                            ?.copyWith(color: living ? Colors.white : ink, fontWeight: FontWeight.w900),
                       ),
                       const SizedBox(height: 6),
                       Text(
                         'Özet yalnız bu kaynak sürümünden hazırlanır. Sana yön verir; öğrenme durumunu ancak kendi Hatırla denemen değiştirir.',
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: living ? const Color(0xFFD6DDF0) : muted,
-                          height: 1.42,
-                        ),
+                        style: Theme.of(context).textTheme.bodyMedium
+                            ?.copyWith(color: living ? const Color(0xFFD6DDF0) : muted, height: 1.42),
                       ),
                     ],
                   );
@@ -720,10 +715,7 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> with WidgetsBinding
                 },
               ),
             ),
-          if (_busy || _restoring) ...[
-            const SizedBox(height: 10),
-            const LinearProgressIndicator(),
-          ],
+          if (_busy || _restoring) ...[const SizedBox(height: 10), const LinearProgressIndicator()],
           if (_jobId != null && status?.summary == null) ...[
             Text(_statusLabel(status), style: Theme.of(context).textTheme.titleMedium),
             if (_statusDetail(status) != null) ...[const SizedBox(height: 6), Text(_statusDetail(status)!)],

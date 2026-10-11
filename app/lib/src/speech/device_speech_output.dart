@@ -41,7 +41,8 @@ final class DeviceSpeechOutput implements SpeechOutput {
       ], IosTextToSpeechAudioMode.spokenAudio);
     }
 
-    final canCheckLanguage = kIsWeb ||
+    final canCheckLanguage =
+        kIsWeb ||
         defaultTargetPlatform == TargetPlatform.android ||
         defaultTargetPlatform == TargetPlatform.iOS ||
         defaultTargetPlatform == TargetPlatform.macOS;

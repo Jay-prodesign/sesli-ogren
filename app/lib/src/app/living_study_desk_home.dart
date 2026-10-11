@@ -574,8 +574,7 @@ class LivingStudyDeskHome extends StatelessWidget {
           ),
           const SizedBox(height: 10),
           Semantics(
-            label:
-                'Öğrenme yolu: kaynağını getir, oku veya dinle, kaynağa bakmadan hatırla, sonra yanıtını kaynak kanıtıyla karşılaştır',
+            label: 'Öğrenme yolu: kaynağını getir, oku veya dinle, kaynağa bakmadan hatırla, sonra yanıtını kaynak kanıtıyla karşılaştır',
             child: ExcludeSemantics(
               child: compact
                   ? const Column(

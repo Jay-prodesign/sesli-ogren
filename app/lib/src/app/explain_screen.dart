@@ -262,8 +262,7 @@ class _Ready extends StatelessWidget {
       children: [
         LayoutBuilder(
           builder: (context, constraints) {
-            final compact =
-                constraints.maxWidth < 340 || MediaQuery.textScalerOf(context).scale(1) > 1.2;
+            final compact = constraints.maxWidth < 340 || MediaQuery.textScalerOf(context).scale(1) > 1.2;
             final copy = Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -320,10 +319,7 @@ class _Ready extends StatelessWidget {
         ),
         const SizedBox(height: 18),
         DecoratedBox(
-          decoration: BoxDecoration(
-            color: living ? AtelierStyle.focus : hero,
-            borderRadius: BorderRadius.circular(21),
-          ),
+          decoration: BoxDecoration(color: living ? AtelierStyle.focus : hero, borderRadius: BorderRadius.circular(21)),
           child: Padding(
             padding: const EdgeInsets.fromLTRB(18, 17, 18, 19),
             child: Column(
@@ -434,10 +430,7 @@ class _Ready extends StatelessWidget {
                 const SizedBox(height: 14),
                 FilledButton.icon(
                   style: living
-                      ? FilledButton.styleFrom(
-                          backgroundColor: AtelierStyle.pulse,
-                          foregroundColor: Colors.white,
-                        )
+                      ? FilledButton.styleFrom(backgroundColor: AtelierStyle.pulse, foregroundColor: Colors.white)
                       : null,
                   onPressed: () => Navigator.of(context).push<void>(
                     MaterialPageRoute(
@@ -546,9 +539,7 @@ class _Unavailable extends StatelessWidget {
             TextButton(
               onPressed: onBack,
               child: Text(
-                reason == GroundedExplainUnavailableReason.staleSource
-                    ? 'Güncel çalışmaya dön'
-                    : 'Materyale dön',
+                reason == GroundedExplainUnavailableReason.staleSource ? 'Güncel çalışmaya dön' : 'Materyale dön',
               ),
             ),
           ],

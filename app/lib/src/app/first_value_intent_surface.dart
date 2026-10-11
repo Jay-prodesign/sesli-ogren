@@ -104,20 +104,14 @@ class FirstValueIntentSurface extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final compact =
-        MediaQuery.sizeOf(context).width < 350 || MediaQuery.textScalerOf(context).scale(1) > 1.25;
+    final compact = MediaQuery.sizeOf(context).width < 350 || MediaQuery.textScalerOf(context).scale(1) > 1.25;
 
     final guideCopy = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text(
           'İLK 60 SANİYE',
-          style: TextStyle(
-            color: AtelierStyle.mark,
-            fontSize: 10,
-            fontWeight: FontWeight.w900,
-            letterSpacing: 1,
-          ),
+          style: TextStyle(color: AtelierStyle.mark, fontSize: 10, fontWeight: FontWeight.w900, letterSpacing: 1),
         ),
         const SizedBox(height: 6),
         Text(
@@ -131,10 +125,7 @@ class FirstValueIntentSurface extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 7),
-        Text(
-          _recommendationReason,
-          style: const TextStyle(color: Color(0xFFD6DDF0), fontSize: 12.5, height: 1.45),
-        ),
+        Text(_recommendationReason, style: const TextStyle(color: Color(0xFFD6DDF0), fontSize: 12.5, height: 1.45)),
       ],
     );
 
@@ -177,9 +168,7 @@ class FirstValueIntentSurface extends StatelessWidget {
               decoration: BoxDecoration(
                 color: AtelierStyle.focus,
                 borderRadius: BorderRadius.circular(22),
-                boxShadow: const [
-                  BoxShadow(color: Color(0x1A14224A), blurRadius: 24, offset: Offset(0, 12)),
-                ],
+                boxShadow: const [BoxShadow(color: Color(0x1A14224A), blurRadius: 24, offset: Offset(0, 12))],
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,

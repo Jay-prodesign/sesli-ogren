@@ -24,35 +24,19 @@ class _UnusedPdfExtractor implements PdfTextExtractor {
   }
 }
 
-Future<AppRuntime> _openRuntime({
-  required String path,
-  required AuthenticatedLearner learner,
-}) async {
-  final store = await SqliteSourceStore.open(
-    factory: databaseFactoryFfiNoIsolate,
-    path: path,
-  );
-  final ingest = SourceIngestService(
-    store: store,
-    pdfTextExtractor: const _UnusedPdfExtractor(),
-  );
+Future<AppRuntime> _openRuntime({required String path, required AuthenticatedLearner learner}) async {
+  final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: path);
+  final ingest = SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor());
   return AppRuntime(
     learner: learner,
     store: store,
     ingest: ingest,
-    recall: RecallLearningService(
-      sourceStore: store,
-      learningStore: store.learningTruthStore(),
-    ),
+    recall: RecallLearningService(sourceStore: store, learningStore: store.learningTruthStore()),
     telemetry: store.operationalTelemetry(),
   );
 }
 
-Future<void> _pumpUntilFound(
-  WidgetTester tester,
-  Finder finder, {
-  int maxPumps = 30,
-}) async {
+Future<void> _pumpUntilFound(WidgetTester tester, Finder finder, {int maxPumps = 30}) async {
   for (var i = 0; i < maxPumps; i++) {
     await tester.pump(const Duration(milliseconds: 40));
     if (finder.evaluate().isNotEmpty) return;
@@ -63,136 +47,99 @@ Future<void> _pumpUntilFound(
 void main() {
   sqfliteFfiInit();
 
-  testWidgets(
-    'durable learner continuity survives a real SQLite close and reopen',
-    (tester) async {
-      tester.view.physicalSize = const Size(390, 844);
-      tester.view.devicePixelRatio = 1;
-      addTearDown(tester.view.resetPhysicalSize);
-      addTearDown(tester.view.resetDevicePixelRatio);
+  testWidgets('durable learner continuity survives a real SQLite close and reopen', (tester) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
 
-      final directory = await Directory.systemTemp.createTemp(
-        'sesli-ogren-durable-reopen-',
-      );
-      addTearDown(() async {
-        if (await directory.exists()) {
-          await directory.delete(recursive: true);
-        }
-      });
-      final dbPath = '${directory.path}/learning.sqlite';
+    final directory = await Directory.systemTemp.createTemp('sesli-ogren-durable-reopen-');
+    addTearDown(() async {
+      if (await directory.exists()) {
+        await directory.delete(recursive: true);
+      }
+    });
+    final dbPath = '${directory.path}/learning.sqlite';
 
-      const learner = AuthenticatedLearner(
-        id: LearnerId('durable-reopen-learner'),
-      );
-      const otherLearner = AuthenticatedLearner(
-        id: LearnerId('durable-reopen-other'),
-      );
-      const materialId = MaterialId('durable-reopen-material');
+    const learner = AuthenticatedLearner(id: LearnerId('durable-reopen-learner'));
+    const otherLearner = AuthenticatedLearner(id: LearnerId('durable-reopen-other'));
+    const materialId = MaterialId('durable-reopen-material');
 
-      final firstRuntime = await _openRuntime(path: dbPath, learner: learner);
-      final ingestResult = await firstRuntime.ingest.ingestPastedText(
-        learner: learner,
-        materialId: materialId,
-        text:
-            'Fotosentez ışık enerjisini kimyasal enerjiye dönüştürür. '
-            'Klorofil ışığın soğurulmasına yardım eder. '
-            'Bitkiler süreçte karbondioksit ve su kullanır.',
-        sourceName: 'Kalıcı biyoloji notu',
-      );
-      final sourceId = ingestResult.sourceVersion.identity.sourceVersionId;
+    final firstRuntime = await _openRuntime(path: dbPath, learner: learner);
+    final ingestResult = await firstRuntime.ingest.ingestPastedText(
+      learner: learner,
+      materialId: materialId,
+      text:
+          'Fotosentez ışık enerjisini kimyasal enerjiye dönüştürür. '
+          'Klorofil ışığın soğurulmasına yardım eder. '
+          'Bitkiler süreçte karbondioksit ve su kullanır.',
+      sourceName: 'Kalıcı biyoloji notu',
+    );
+    final sourceId = ingestResult.sourceVersion.identity.sourceVersionId;
 
-      await firstRuntime.store.saveReaderResumeProgress(
-        learner: learner,
-        materialId: materialId,
-        sourceVersionId: sourceId,
-        progress: 0.42,
-        updatedAt: DateTime.utc(2026, 10, 11, 7),
-      );
-      await firstRuntime.store.saveListenResumeChunk(
-        learner: learner,
-        materialId: materialId,
-        sourceVersionId: sourceId,
-        chunkIndex: 1,
-        updatedAt: DateTime.utc(2026, 10, 11, 7, 1),
-      );
+    await firstRuntime.store.saveReaderResumeProgress(
+      learner: learner,
+      materialId: materialId,
+      sourceVersionId: sourceId,
+      progress: 0.42,
+      updatedAt: DateTime.utc(2026, 10, 11, 7),
+    );
+    await firstRuntime.store.saveListenResumeChunk(
+      learner: learner,
+      materialId: materialId,
+      sourceVersionId: sourceId,
+      chunkIndex: 1,
+      updatedAt: DateTime.utc(2026, 10, 11, 7, 1),
+    );
 
-      final prompt = await firstRuntime.recall.createCurrentPrompt(
-        learner: learner,
-        materialId: materialId,
-      );
-      final attempt = await firstRuntime.recall.openAttempt(
-        learner: learner,
-        actionId: prompt.id,
-      );
-      final submitted = await firstRuntime.recall.submit(
-        learner: learner,
-        actionId: prompt.id,
-        attemptId: attempt.attempt.attemptId,
-        disposition: RecallResponseDisposition.unknown,
-        answer: '',
-      );
-      expect(
-        submitted.nextAction.kind,
-        NextLearningActionKind.reviewSourceThenRecall,
-      );
+    final prompt = await firstRuntime.recall.createCurrentPrompt(learner: learner, materialId: materialId);
+    final attempt = await firstRuntime.recall.openAttempt(learner: learner, actionId: prompt.id);
+    final submitted = await firstRuntime.recall.submit(
+      learner: learner,
+      actionId: prompt.id,
+      attemptId: attempt.attempt.attemptId,
+      disposition: RecallResponseDisposition.unknown,
+      answer: '',
+    );
+    expect(submitted.nextAction.kind, NextLearningActionKind.reviewSourceThenRecall);
 
-      await firstRuntime.close();
+    await firstRuntime.close();
 
-      final reopened = await _openRuntime(path: dbPath, learner: learner);
-      addTearDown(reopened.close);
+    final reopened = await _openRuntime(path: dbPath, learner: learner);
+    addTearDown(reopened.close);
 
-      final materials = await reopened.store.activeMaterials(learner: learner);
-      expect(materials.map((item) => item.id), contains(materialId));
+    final materials = await reopened.store.activeMaterials(learner: learner);
+    expect(materials.map((item) => item.id), contains(materialId));
 
-      final continuation = await reopened.recall.reopen(
-        learner: learner,
-        materialId: materialId,
-      );
-      expect(continuation, isNotNull);
-      expect(
-        continuation!.nextAction.kind,
-        NextLearningActionKind.reviewSourceThenRecall,
-      );
-      expect(continuation.state.latestEvidenceId, submitted.evidence.id);
+    final continuation = await reopened.recall.reopen(learner: learner, materialId: materialId);
+    expect(continuation, isNotNull);
+    expect(continuation!.nextAction.kind, NextLearningActionKind.reviewSourceThenRecall);
+    expect(continuation.state.latestEvidenceId, submitted.evidence.id);
 
-      expect(
-        await reopened.store.readerResumeProgress(
-          learner: learner,
-          materialId: materialId,
-          sourceVersionId: sourceId,
-        ),
-        closeTo(0.42, 0.0001),
-      );
-      expect(
-        await reopened.store.listenResumeChunk(
-          learner: learner,
-          materialId: materialId,
-          sourceVersionId: sourceId,
-        ),
-        1,
-      );
+    expect(
+      await reopened.store.readerResumeProgress(learner: learner, materialId: materialId, sourceVersionId: sourceId),
+      closeTo(0.42, 0.0001),
+    );
+    expect(
+      await reopened.store.listenResumeChunk(learner: learner, materialId: materialId, sourceVersionId: sourceId),
+      1,
+    );
 
-      expect(
-        await reopened.store.activeMaterials(learner: otherLearner),
-        isEmpty,
-      );
+    expect(await reopened.store.activeMaterials(learner: otherLearner), isEmpty);
 
-      await tester.pumpWidget(
-        MaterialApp(
-          theme: SesliOgrenTheme.light(),
-          home: LivingDeskReviewScope(
-            child: ProductShellScreen(runtime: reopened),
-          ),
-        ),
-      );
-      await _pumpUntilFound(tester, find.text('Kaynağı gözden geçir'));
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: SesliOgrenTheme.light(),
+        home: LivingDeskReviewScope(child: ProductShellScreen(runtime: reopened)),
+      ),
+    );
+    await _pumpUntilFound(tester, find.text('Kaynağı gözden geçir'));
 
-      expect(find.text('Kalıcı biyoloji notu'), findsWidgets);
-      expect(find.text('Kaynağı gözden geçir'), findsOneWidget);
-      expect(find.byKey(const ValueKey('first-value-intent')), findsNothing);
-      expect(tester.takeException(), isNull);
-    },
-  );
+    expect(find.text('Kalıcı biyoloji notu'), findsWidgets);
+    expect(find.text('Kaynağı gözden geçir'), findsOneWidget);
+    expect(find.byKey(const ValueKey('first-value-intent')), findsNothing);
+    expect(tester.takeException(), isNull);
+  });
 
   test('active Recall attempt and assistance survive close and reopen without duplicate evidence', () async {
     final directory = await Directory.systemTemp.createTemp('sesli-ogren-active-recall-reopen-');
@@ -217,14 +164,8 @@ void main() {
       sourceName: 'Yarım deneme biyoloji notu',
     );
 
-    final firstPrompt = await firstRuntime.recall.createCurrentPrompt(
-      learner: learner,
-      materialId: materialId,
-    );
-    final firstSession = await firstRuntime.recall.openAttempt(
-      learner: learner,
-      actionId: firstPrompt.id,
-    );
+    final firstPrompt = await firstRuntime.recall.createCurrentPrompt(learner: learner, materialId: materialId);
+    final firstSession = await firstRuntime.recall.openAttempt(learner: learner, actionId: firstPrompt.id);
     final hint = await firstRuntime.recall.requestHint(
       learner: learner,
       actionId: firstPrompt.id,
@@ -233,22 +174,14 @@ void main() {
     await firstRuntime.close();
 
     final reopened = await _openRuntime(path: dbPath, learner: learner);
-    final resumedPrompt = await reopened.recall.createCurrentPrompt(
-      learner: learner,
-      materialId: materialId,
-    );
+    final resumedPrompt = await reopened.recall.createCurrentPrompt(learner: learner, materialId: materialId);
     expect(resumedPrompt.id, firstPrompt.id);
 
-    final resumedSession = await reopened.recall.openAttempt(
-      learner: learner,
-      actionId: resumedPrompt.id,
-    );
+    final resumedSession = await reopened.recall.openAttempt(learner: learner, actionId: resumedPrompt.id);
     expect(resumedSession.attempt.attemptId, firstSession.attempt.attemptId);
     expect(resumedSession.assistance, hint.assistance);
 
-    final action = await reopened.store
-        .learningTruthStore()
-        .recallAction(learner: learner, actionId: resumedPrompt.id);
+    final action = await reopened.store.learningTruthStore().recallAction(learner: learner, actionId: resumedPrompt.id);
     expect(action, isNotNull);
 
     final submitted = await reopened.recall.submit(
@@ -259,10 +192,7 @@ void main() {
       answer: action!.expectedAnswer,
     );
     expect(submitted.evidence.assistance, hint.assistance);
-    expect(
-      submitted.nextAction.kind,
-      NextLearningActionKind.retryRecallWithoutHint,
-    );
+    expect(submitted.nextAction.kind, NextLearningActionKind.retryRecallWithoutHint);
 
     final replayed = await reopened.recall.submit(
       learner: learner,
@@ -273,10 +203,7 @@ void main() {
     );
     expect(replayed.evidence.id, submitted.evidence.id);
 
-    final source = await reopened.store.currentSourceVersion(
-      learner: learner,
-      materialId: materialId,
-    );
+    final source = await reopened.store.currentSourceVersion(learner: learner, materialId: materialId);
     expect(source, isNotNull);
     final evidence = await reopened.store.learningTruthStore().evidenceForMaterial(
       learner: learner,
@@ -288,16 +215,9 @@ void main() {
 
     final reopenedAgain = await _openRuntime(path: dbPath, learner: learner);
     addTearDown(reopenedAgain.close);
-    final continuation = await reopenedAgain.recall.reopen(
-      learner: learner,
-      materialId: materialId,
-    );
+    final continuation = await reopenedAgain.recall.reopen(learner: learner, materialId: materialId);
     expect(continuation, isNotNull);
     expect(continuation!.state.latestEvidenceId, submitted.evidence.id);
-    expect(
-      continuation.nextAction.kind,
-      NextLearningActionKind.retryRecallWithoutHint,
-    );
+    expect(continuation.nextAction.kind, NextLearningActionKind.retryRecallWithoutHint);
   });
-
 }

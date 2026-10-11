@@ -310,14 +310,8 @@ void main() {
           'Bitkiler karbondioksit kullanır ve oksijen açığa çıkarır.',
       sourceName: 'Yeni tamamlanan biyoloji notu',
     );
-    final completedPrompt = await recall.createCurrentPrompt(
-      learner: runtime.learner,
-      materialId: completedMaterial,
-    );
-    final completedSession = await recall.openAttempt(
-      learner: runtime.learner,
-      actionId: completedPrompt.id,
-    );
+    final completedPrompt = await recall.createCurrentPrompt(learner: runtime.learner, materialId: completedMaterial);
+    final completedSession = await recall.openAttempt(learner: runtime.learner, actionId: completedPrompt.id);
     final completedAction = await store.learningTruthStore().recallAction(
       learner: runtime.learner,
       actionId: completedPrompt.id,
