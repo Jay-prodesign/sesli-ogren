@@ -995,32 +995,35 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
                 child: LayoutBuilder(
                   builder: (context, constraints) {
                     final compactChoices =
-                        constraints.maxWidth < 330 || MediaQuery.textScalerOf(context).scale(1) > 1.25;
-                    final pdfChoice = FilledButton.icon(
+                        constraints.maxWidth < 350 || MediaQuery.textScalerOf(context).scale(1) > 1.2;
+                    final pdfChoice = _SourceChoiceCard(
                       key: const ValueKey('source-choice-pdf'),
-                      onPressed: _busy ? null : _pickPdf,
-                      style: FilledButton.styleFrom(
-                        backgroundColor: AtelierStyle.ink,
-                        foregroundColor: Colors.white,
-                        minimumSize: const Size.fromHeight(54),
-                      ),
-                      icon: const Icon(Icons.picture_as_pdf_outlined),
-                      label: Text(_busy ? 'Hazırlanıyor…' : 'PDF seç'),
+                      icon: Icons.picture_as_pdf_outlined,
+                      eyebrow: 'PDF',
+                      title: _busy ? 'Hazırlanıyor…' : 'PDF seç',
+                      body: 'Ders notunu veya bir bölümü getir. Metni çıkarıp aynı kaynakta çalışmaya devam ederiz.',
+                      primary: true,
+                      enabled: !_busy,
+                      onTap: _pickPdf,
                     );
-                    final textChoice = OutlinedButton.icon(
+                    final textChoice = _SourceChoiceCard(
                       key: const ValueKey('source-choice-text'),
-                      onPressed: _busy ? null : _switchToTextSource,
-                      style: OutlinedButton.styleFrom(minimumSize: const Size.fromHeight(54)),
-                      icon: const Icon(Icons.notes_rounded),
-                      label: const Text('Metin yapıştır'),
+                      icon: Icons.notes_rounded,
+                      eyebrow: 'METİN',
+                      title: 'Metin yapıştır',
+                      body: 'Notunu doğrudan yapıştır. Kaynak sürümü korunur; sonra Reader, Dinle ve Hatırla aynı metne bağlanır.',
+                      primary: false,
+                      enabled: !_busy,
+                      onTap: _switchToTextSource,
                     );
                     if (compactChoices) {
                       return Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [pdfChoice, const SizedBox(height: 8), textChoice],
+                        children: [pdfChoice, const SizedBox(height: 10), textChoice],
                       );
                     }
                     return Row(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         Expanded(child: pdfChoice),
                         const SizedBox(width: 10),
@@ -2028,6 +2031,101 @@ class _MessageCard extends StatelessWidget {
           const SizedBox(height: 8),
           Text(body),
         ],
+      ),
+    );
+  }
+}
+
+class _SourceChoiceCard extends StatelessWidget {
+  const _SourceChoiceCard({
+    required this.icon,
+    required this.eyebrow,
+    required this.title,
+    required this.body,
+    required this.primary,
+    required this.enabled,
+    required this.onTap,
+    super.key,
+  });
+
+  final IconData icon;
+  final String eyebrow;
+  final String title;
+  final String body;
+  final bool primary;
+  final bool enabled;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final background = primary ? AtelierStyle.focus : AtelierStyle.paper;
+    final foreground = primary ? Colors.white : AtelierStyle.ink;
+    final muted = primary ? const Color(0xFFD6DDF0) : AtelierStyle.muted;
+    final accent = primary ? AtelierStyle.mark : AtelierStyle.teal;
+    return Semantics(
+      button: true,
+      enabled: enabled,
+      label: '$title. $body',
+      child: Material(
+        color: background,
+        borderRadius: BorderRadius.circular(18),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: enabled ? onTap : null,
+          child: Container(
+            constraints: const BoxConstraints(minHeight: 154),
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 15),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(18),
+              border: Border.all(color: primary ? AtelierStyle.focus : AtelierStyle.line),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: primary ? Colors.white.withValues(alpha: 0.10) : AtelierStyle.mint,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(9),
+                    child: Icon(icon, color: accent, size: 22),
+                  ),
+                ),
+                const SizedBox(height: 13),
+                Text(
+                  eyebrow,
+                  style: TextStyle(
+                    color: accent,
+                    fontSize: 10,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 0.9,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  title,
+                  style: TextStyle(color: foreground, fontSize: 17, height: 1.2, fontWeight: FontWeight.w900),
+                ),
+                const SizedBox(height: 6),
+                Text(body, style: TextStyle(color: muted, fontSize: 12, height: 1.38)),
+                const Spacer(),
+                const SizedBox(height: 10),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    Text(
+                      'Seç',
+                      style: TextStyle(color: accent, fontSize: 12, fontWeight: FontWeight.w900),
+                    ),
+                    const SizedBox(width: 5),
+                    Icon(Icons.arrow_forward_rounded, color: accent, size: 18),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }
