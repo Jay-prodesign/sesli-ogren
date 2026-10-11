@@ -102,7 +102,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('Özet oluştur'));
+    await tester.tap(find.text('Kaynağa bağlı özet oluştur'));
     await tester.pumpAndSettle();
 
     expect(gateway.submitCalls, 1);
@@ -176,7 +176,7 @@ void main() {
     expect(find.text('Önceki özet işi doğrulanamadı.'), findsOneWidget);
     expect(find.textContaining('Çifte üretim veya ücret riski'), findsOneWidget);
     expect(find.text('Önceki işi yeniden kontrol et'), findsOneWidget);
-    expect(find.text('Özet oluştur'), findsNothing);
+    expect(find.text('Kaynağa bağlı özet oluştur'), findsNothing);
     expect(gateway.submitCalls, 0);
     expect(tester.takeException(), isNull);
   });
@@ -213,7 +213,7 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Özet oluştur'));
+    await tester.tap(find.text('Kaynağa bağlı özet oluştur'));
     await tester.pumpAndSettle();
 
     expect(find.byKey(const ValueKey('quick-recap-utility-actions')), findsOneWidget);
@@ -247,7 +247,7 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Özet oluştur'));
+    await tester.tap(find.text('Kaynağa bağlı özet oluştur'));
     for (var i = 0; i < 40 && find.textContaining('Sunucuya ulaşılamadı').evaluate().isEmpty; i++) {
       await tester.pump(const Duration(milliseconds: 50));
     }
