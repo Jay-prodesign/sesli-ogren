@@ -181,7 +181,7 @@ void main() {
     expect(find.textContaining('Fotosentez'), findsWidgets);
 
     Navigator.of(tester.element(find.byType(SourceReaderScreen))).pop();
-    await tester.pumpAndSettle();
+    await pumpUntilFound(tester, find.text('İlk aktif denemeni yap'));
     expect(find.byKey(const ValueKey('first-value-intent')), findsNothing);
     expect(find.text('İlk aktif denemeni yap'), findsOneWidget);
 
