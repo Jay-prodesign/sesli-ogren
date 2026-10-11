@@ -57,6 +57,13 @@ Future<void> _pumpUntilFound(WidgetTester tester, Finder finder, {int maxPumps =
   fail('Expected repaired product shell was not reached within bounded pumps.');
 }
 
+Future<void> _tapVisible(WidgetTester tester, Finder finder) async {
+  await tester.scrollUntilVisible(finder, 220, scrollable: find.byType(Scrollable).last);
+  await tester.pump();
+  await tester.tap(finder);
+  await tester.pump();
+}
+
 void main() {
   sqfliteFfiInit();
 
@@ -81,26 +88,24 @@ void main() {
       ),
     );
     await _pumpUntilFound(tester, find.text('İlk kaynağımı ekle'));
-    await tester.tap(find.text('İlk kaynağımı ekle'));
+    await _tapVisible(tester, find.text('İlk kaynağımı ekle'));
     await _pumpUntilFound(tester, find.byType(LearningSliceScreen));
     await _pumpUntilFound(tester, find.text('İLK KAYNAĞIN'));
-    await tester.tap(find.text('Metin yapıştır'));
-    await tester.pump();
+    await _tapVisible(tester, find.text('Metin yapıştır'));
 
     await tester.enterText(
       find.byKey(const ValueKey('pasted-material-text')),
       'Fotosentez sırasında klorofil ışık enerjisinin soğurulmasına yardım eder.',
     );
-    await tester.tap(find.text('Başlık ekle · isteğe bağlı'));
-    await tester.pump();
+    await _tapVisible(tester, find.text('Başlık ekle · isteğe bağlı'));
     await tester.enterText(find.byKey(const ValueKey('pasted-material-title')), 'Biyoloji · Fotosentez');
-    await tester.tap(find.text('Metni ekle · çalışma alanını aç'));
+    await _tapVisible(tester, find.text('Metni ekle · çalışma alanını aç'));
     await _pumpUntilFound(tester, find.byKey(const ValueKey('first-value-intent')));
 
     expect(find.byType(MaterialWorkspaceScreen), findsOneWidget);
     expect(find.text('Biyoloji · Fotosentez'), findsWidgets);
     expect(find.text('Önce kaynağın tamamını bir kez gör.'), findsOneWidget);
-    await tester.tap(find.text('Kaynağı aç'));
+    await _tapVisible(tester, find.text('Kaynağı aç'));
     await _pumpUntilFound(tester, find.byType(SourceReaderScreen));
     Navigator.of(tester.element(find.byType(SourceReaderScreen))).pop();
     await _pumpUntilFound(tester, find.byKey(const ValueKey('la0040-atelier-workspace')));

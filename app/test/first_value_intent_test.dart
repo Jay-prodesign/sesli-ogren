@@ -128,6 +128,12 @@ void main() {
     expect(find.text('İLK 60 SANİYE'), findsOneWidget);
     expect(find.text('Önce kaynağın tamamını bir kez gör.'), findsOneWidget);
     expect(find.text('Kaynağı aç'), findsOneWidget);
+    await tester.scrollUntilVisible(
+      find.byKey(const ValueKey('first-intent-listen-direct')),
+      220,
+      scrollable: find.byType(Scrollable).last,
+    );
+    await tester.pump();
     expect(find.text('Kaynağı dinle'), findsOneWidget);
     expect(find.text('Hızlı özetle genel resmi gör'), findsNothing);
     expect(find.text('Diğer çalışma yolları'), findsOneWidget);

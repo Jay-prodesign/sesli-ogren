@@ -38,6 +38,14 @@ Future<void> _tapVisible(WidgetTester tester, Finder finder) async {
   await tester.pump();
 }
 
+Future<void> _pumpUntilGone(WidgetTester tester, Finder finder, {int maxPumps = 40}) async {
+  for (var i = 0; i < maxPumps; i++) {
+    await tester.pump(const Duration(milliseconds: 20));
+    if (finder.evaluate().isEmpty) return;
+  }
+  fail('Golden Journey kept the previous route mounted past the transition window.');
+}
+
 void main() {
   sqfliteFfiInit();
 
@@ -89,6 +97,7 @@ void main() {
 
     await _tapVisible(tester, find.text('Kaynağı kapat ve hatırla'));
     await _pumpUntilFound(tester, find.byKey(const ValueKey('la0040-atelier-recall')));
+    await _pumpUntilGone(tester, find.byType(SourceReaderScreen));
 
     expect(find.byType(SourceReaderScreen), findsNothing);
     expect(find.text('KAYNAK KAPALI · ŞİMDİ SEN'), findsOneWidget);
