@@ -9,6 +9,7 @@ import 'package:sesli_ogren/src/app/app_runtime.dart';
 import 'package:sesli_ogren/src/app/app_theme.dart';
 import 'package:sesli_ogren/src/app/atelier_learning_surfaces.dart';
 import 'package:sesli_ogren/src/app/explain_back_screen.dart';
+import 'package:sesli_ogren/src/app/first_value_intent_surface.dart';
 import 'package:sesli_ogren/src/app/focus_screen.dart';
 import 'package:sesli_ogren/src/app/listen_screen.dart';
 import 'package:sesli_ogren/src/app/learning_slice_screen.dart';
@@ -293,6 +294,46 @@ void main() {
     expect(find.text('Metin yapıştır'), findsOneWidget);
     expect(tester.takeException(), isNull);
     await expectLater(find.byType(Scaffold), matchesGoldenFile('goldens/la0040_source_acquisition_390x844.png'));
+  });
+
+  testWidgets('LA-0040 first-value intent', (tester) async {
+    await capture(
+      tester,
+      'la0040_first_value_intent_390x844',
+      FirstValueIntentSurface(
+        material: material,
+        sourceText: source,
+        sourceVersion: sourceVersion,
+        onReadSource: () {},
+        onQuickRecap: () {},
+        onRecall: () {},
+        onListen: () {},
+        onFocus: () {},
+      ),
+    );
+    expect(find.text('Şimdi bununla ne yapmak istiyorsun?'), findsOneWidget);
+    expect(find.text('Sen öner · Önce kaynağı oku'), findsOneWidget);
+  });
+
+  testWidgets('LA-0040 first-value intent survives 320px + large type', (tester) async {
+    await capture(
+      tester,
+      'la0040_first_value_intent_320_text150',
+      FirstValueIntentSurface(
+        material: material,
+        sourceText: source,
+        sourceVersion: sourceVersion,
+        onReadSource: () {},
+        onQuickRecap: () {},
+        onRecall: () {},
+        onListen: () {},
+        onFocus: () {},
+      ),
+      size: const Size(320, 700),
+      textScaler: const TextScaler.linear(1.5),
+    );
+    expect(find.text('Şimdi bununla ne yapmak istiyorsun?'), findsOneWidget);
+    expect(find.text('Birlikte çalışalım'), findsOneWidget);
   });
 
   testWidgets('LA-0040 source Reader', (tester) async {

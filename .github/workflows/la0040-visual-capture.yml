@@ -8,6 +8,7 @@ on:
       - "app/lib/src/app/atelier_learning_surfaces.dart"
       - "app/lib/src/app/learning_slice_screen.dart"
       - "app/lib/src/app/material_workspace_screen.dart"
+      - "app/lib/src/app/first_value_intent_surface.dart"
       - "app/lib/src/app/listen_screen.dart"
       - "app/lib/src/app/source_reader_screen.dart"
       - "app/lib/src/app/account_entry_screen.dart"
