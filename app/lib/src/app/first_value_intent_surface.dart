@@ -126,7 +126,11 @@ class FirstValueIntentSurface extends StatelessWidget {
           _recommendationTitle,
           style: TextStyle(
             color: Colors.white,
-            fontSize: tightCompact ? 16 : compact ? 18 : 22,
+            fontSize: tightCompact
+                ? 16
+                : compact
+                ? 18
+                : 22,
             height: 1.16,
             fontWeight: FontWeight.w900,
             letterSpacing: -0.35,
@@ -152,9 +156,7 @@ class FirstValueIntentSurface extends StatelessWidget {
       child: SafeArea(
         top: false,
         child: ListView(
-          padding: tightCompact
-              ? const EdgeInsets.fromLTRB(16, 8, 16, 26)
-              : const EdgeInsets.fromLTRB(21, 14, 21, 34),
+          padding: tightCompact ? const EdgeInsets.fromLTRB(16, 8, 16, 26) : const EdgeInsets.fromLTRB(21, 14, 21, 34),
           children: [
             Text(
               material.mediaType == SourceMediaType.pdf ? 'PDF KAYNAĞIN HAZIR' : 'KAYNAĞIN HAZIR',
@@ -170,17 +172,39 @@ class FirstValueIntentSurface extends StatelessWidget {
               material.title,
               style: TextStyle(
                 color: AtelierStyle.ink,
-                fontSize: tightCompact ? 19 : compact ? 22 : 28,
+                fontSize: tightCompact
+                    ? 19
+                    : compact
+                    ? 22
+                    : 28,
                 height: 1.12,
                 fontWeight: FontWeight.w900,
                 letterSpacing: -0.45,
               ),
             ),
-            SizedBox(height: tightCompact ? 6 : compact ? 9 : 13),
+            SizedBox(
+              height: tightCompact
+                  ? 6
+                  : compact
+                  ? 9
+                  : 13,
+            ),
             AtelierSourceTrustStrip(sourceVersion: sourceVersion, showSourceName: !compact),
-            SizedBox(height: tightCompact ? 7 : compact ? 10 : 14),
+            SizedBox(
+              height: tightCompact
+                  ? 7
+                  : compact
+                  ? 10
+                  : 14,
+            ),
             const AtelierLearningRail(phase: AtelierLearningPhase.source),
-            SizedBox(height: tightCompact ? 8 : compact ? 12 : 16),
+            SizedBox(
+              height: tightCompact
+                  ? 8
+                  : compact
+                  ? 12
+                  : 16,
+            ),
             Container(
               key: const ValueKey('first-value-recommendation-card'),
               padding: tightCompact
@@ -230,7 +254,13 @@ class FirstValueIntentSurface extends StatelessWidget {
                         Expanded(child: guideCopy),
                       ],
                     ),
-                  SizedBox(height: tightCompact ? 8 : compact ? 12 : 17),
+                  SizedBox(
+                    height: tightCompact
+                        ? 8
+                        : compact
+                        ? 12
+                        : 17,
+                  ),
                   FilledButton.icon(
                     key: const ValueKey('first-intent-recommend'),
                     onPressed: _recommendedAction,
@@ -242,17 +272,19 @@ class FirstValueIntentSurface extends StatelessWidget {
                     icon: Icon(_recommendListenFirst ? Icons.headphones_rounded : Icons.menu_book_outlined),
                     label: Text(_recommendedActionLabel),
                   ),
-                  SizedBox(height: tightCompact ? 5 : compact ? 7 : 10),
+                  SizedBox(
+                    height: tightCompact
+                        ? 5
+                        : compact
+                        ? 7
+                        : 10,
+                  ),
                   Text(
                     'Bu adım hazırlık. Öğrenme durumun yalnız kaynağı kapatıp kendi Hatırla denemeni yaptığında değişir.',
                     maxLines: tightCompact ? 2 : null,
                     overflow: tightCompact ? TextOverflow.ellipsis : TextOverflow.visible,
                     textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: const Color(0xFFB9C5E4),
-                      fontSize: tightCompact ? 9.5 : 11.5,
-                      height: 1.4,
-                    ),
+                    style: TextStyle(color: const Color(0xFFB9C5E4), fontSize: tightCompact ? 9.5 : 11.5, height: 1.4),
                   ),
                 ],
               ),
