@@ -39,8 +39,8 @@ authority. The current repo `CURRENT_HANDOFF.md` and
 `EXECUTION_STATE.json` project that same live cursor. Evidence is SHA-specific;
 resolve the live branch HEAD before making exact-head claims.
 
-Because the mission is `IN_PROGRESS`, this mutable return intentionally does not pin a
-product SHA or cached CI verdict. Resolve the live branch HEAD and applicable workflow
+Because the mission is `IN_PROGRESS`, this mutable return intentionally does not pin a product SHA
+or cached CI verdict. Resolve the live branch HEAD and applicable workflow
 runs from GitHub before any exact-head claim or mutation. Exact SHA evidence remains in
 immutable Git/CI history or milestone evidence.
 
