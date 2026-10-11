@@ -55,11 +55,9 @@ class LivingStudyDeskHome extends StatelessWidget {
   static const _canvas = AppPalette.canvas;
   static const _paper = AppPalette.surface;
   static const _ink = AppPalette.ink;
-  static const _focus = AppPalette.primaryDark;
   static const _sub = AppPalette.inkMuted;
   static const _accent = AppPalette.primary;
   static const _line = AppPalette.outline;
-  static const _mark = AppPalette.momentum;
 
   bool get _hasReaderResume =>
       continuation == null && readerResumePreferred && readerResumeProgress > 0.02 && readerResumeProgress < 0.95;
