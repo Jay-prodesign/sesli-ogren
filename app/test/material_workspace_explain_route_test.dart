@@ -206,6 +206,8 @@ void main() {
     expect(find.byType(SourceReaderScreen), findsOneWidget);
     expect(find.text('Kaynak onarım notu'), findsWidgets);
 
+    await tester.tap(find.byTooltip('Okuma ve öğrenme seçenekleri'));
+    await tester.pumpAndSettle();
     await tester.tap(find.text('Kaynağı kapat ve hatırla'));
     await _pumpUntilFound(tester, find.byKey(const ValueKey('la0040-atelier-recall')));
     expect(find.text('Önce kaynağı gözden geçir'), findsNothing);
