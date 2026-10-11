@@ -575,6 +575,15 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> with WidgetsBinding
     final paper = living ? AtelierStyle.paper : Theme.of(context).colorScheme.surfaceContainerLow;
     final line = living ? AtelierStyle.line : Theme.of(context).colorScheme.outlineVariant;
     final ink = living ? AtelierStyle.ink : Theme.of(context).colorScheme.onSurface;
+    final showStudyFallback =
+        status?.summary == null &&
+        _boundSource != null &&
+        (_restoreUncertain ||
+            _error != null ||
+            status?.state == 'FAILED_RETRYABLE' ||
+            status?.state == 'FAILED_FINAL' ||
+            status?.state == 'CANCELLED' ||
+            status?.failureClass == 'reconciliation_required');
     return Scaffold(
       backgroundColor: living ? AtelierStyle.canvas : null,
       appBar: AppBar(
@@ -946,6 +955,48 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> with WidgetsBinding
           else if (status?.state == 'FAILED_RETRYABLE')
             const Text('Özet üretimi geçici olarak başarısız oldu. Güvenli yeniden deneme kullanılabilir.'),
           if (_error != null) Text(_error!, style: TextStyle(color: Theme.of(context).colorScheme.error)),
+          if (showStudyFallback) ...[
+            const SizedBox(height: 14),
+            DecoratedBox(
+              key: const ValueKey('quick-recap-study-fallback'),
+              decoration: BoxDecoration(
+                color: paper,
+                borderRadius: BorderRadius.circular(18),
+                border: Border.all(color: line),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 15, 16, 16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Text(
+                      'Öğrenmeyi durdurma.',
+                      style: Theme.of(context).textTheme.titleSmall?.copyWith(color: ink, fontWeight: FontWeight.w900),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      'Kaynağın hâlâ hazır. AI özetini beklemeden kaynağı açabilir veya kaynağı kapatıp kendi Hatırla denemene geçebilirsin.',
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: muted, height: 1.42),
+                    ),
+                    const SizedBox(height: 12),
+                    OutlinedButton.icon(
+                      style: outlineStyle,
+                      onPressed: _openOriginalSource,
+                      icon: const Icon(Icons.menu_book_outlined),
+                      label: const Text('Kaynağı aç'),
+                    ),
+                    const SizedBox(height: 7),
+                    FilledButton.icon(
+                      style: primaryStyle,
+                      onPressed: _openRecall,
+                      icon: const Icon(Icons.psychology_alt_outlined),
+                      label: const Text('Hatırlamayı dene'),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
         ],
       ),
     );
