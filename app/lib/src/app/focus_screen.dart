@@ -388,47 +388,57 @@ class _FocusScreenState extends State<FocusScreen> {
       body: ListView(
         padding: const EdgeInsets.fromLTRB(20, 16, 20, 36),
         children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              DecoratedBox(
-                decoration: BoxDecoration(color: mark, borderRadius: BorderRadius.circular(16)),
-                child: Padding(
-                  padding: const EdgeInsets.all(6),
-                  child: CompanionView(state: busy ? CompanionVisualState.think : CompanionVisualState.idle, size: 56),
-                ),
-              ),
-              const SizedBox(width: 13),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    DecoratedBox(
-                      decoration: BoxDecoration(
-                        color: living ? AtelierStyle.mint : const Color(0xFFF0F9D7),
-                        borderRadius: BorderRadius.circular(999),
+          DecoratedBox(
+            decoration: BoxDecoration(
+              color: hero,
+              borderRadius: BorderRadius.circular(24),
+              boxShadow: [BoxShadow(color: hero.withValues(alpha: 0.14), blurRadius: 24, offset: const Offset(0, 12))],
+            ),
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(18, 17, 18, 18),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  DecoratedBox(
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.10),
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(6),
+                      child: CompanionView(
+                        state: busy ? CompanionVisualState.think : CompanionVisualState.idle,
+                        size: 56,
                       ),
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
-                        child: Text(
+                    ),
+                  ),
+                  const SizedBox(width: 13),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
                           'KISA ODAK · 3 ADIM',
                           style: theme.textTheme.labelSmall?.copyWith(
-                            color: markInk,
+                            color: mark,
                             fontWeight: FontWeight.w900,
-                            letterSpacing: 0.45,
+                            letterSpacing: 0.6,
                           ),
                         ),
-                      ),
+                        const SizedBox(height: 8),
+                        Text(
+                          'Kaynağı netleştir, sonra aktif olarak doğrula.',
+                          style: theme.textTheme.headlineSmall?.copyWith(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                      ],
                     ),
-                    const SizedBox(height: 9),
-                    Text(
-                      'Kaynağı netleştir, sonra aktif olarak doğrula.',
-                      style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w800),
-                    ),
-                  ],
-                ),
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
           const SizedBox(height: 14),
           KeyedSubtree(
@@ -449,8 +459,8 @@ class _FocusScreenState extends State<FocusScreen> {
           DecoratedBox(
             decoration: BoxDecoration(
               color: paper,
-              borderRadius: BorderRadius.circular(18),
-              border: Border.all(color: line),
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: const [BoxShadow(color: Color(0x0D14224A), blurRadius: 18, offset: Offset(0, 8))],
             ),
             child: Padding(
               padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),

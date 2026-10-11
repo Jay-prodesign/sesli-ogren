@@ -404,7 +404,7 @@ class _AccountOverviewLoadingCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final living = LivingDeskReviewScope.active(context);
-    final hero = living ? AtelierStyle.ink : AppPalette.primaryDark;
+    final hero = living ? AtelierStyle.focus : AppPalette.primaryDark;
     final muted = Colors.white.withValues(alpha: 0.72);
     return DecoratedBox(
       decoration: BoxDecoration(
@@ -473,7 +473,7 @@ class _AccountOverviewCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final living = LivingDeskReviewScope.active(context);
-    final hero = living ? AtelierStyle.ink : AppPalette.primaryDark;
+    final hero = living ? AtelierStyle.focus : AppPalette.primaryDark;
     final knownPlan = switch (overview.plan) {
       'free' || 'premium' || 'tester' => true,
       _ => false,
@@ -738,7 +738,9 @@ class _ProfilePanel extends StatelessWidget {
       decoration: BoxDecoration(
         color: living ? AtelierStyle.paper : AppPalette.surface,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: living ? AtelierStyle.line : AppPalette.outline),
+        boxShadow: living
+            ? const [BoxShadow(color: Color(0x0D14224A), blurRadius: 18, offset: Offset(0, 8))]
+            : null,
       ),
       child: Column(children: children),
     );

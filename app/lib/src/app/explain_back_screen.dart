@@ -254,41 +254,54 @@ class _ExplainBackScreenState extends State<ExplainBackScreen> {
         child: ListView(
           padding: const EdgeInsets.fromLTRB(20, 18, 20, 36),
           children: [
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                DecoratedBox(
-                  decoration: BoxDecoration(color: accentSoft, borderRadius: BorderRadius.circular(16)),
-                  child: const Padding(
-                    padding: EdgeInsets.all(6),
-                    child: CompanionView(state: CompanionVisualState.listen, size: 54),
-                  ),
-                ),
-                const SizedBox(width: 13),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      DecoratedBox(
-                        decoration: BoxDecoration(color: accentSoft, borderRadius: BorderRadius.circular(999)),
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
-                          child: Text(
+            DecoratedBox(
+              decoration: BoxDecoration(
+                color: AtelierStyle.focus,
+                borderRadius: BorderRadius.circular(24),
+                boxShadow: const [BoxShadow(color: Color(0x1A14224A), blurRadius: 24, offset: Offset(0, 12))],
+              ),
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(18, 17, 18, 18),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    DecoratedBox(
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.10),
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: const Padding(
+                        padding: EdgeInsets.all(6),
+                        child: CompanionView(state: CompanionVisualState.listen, size: 54),
+                      ),
+                    ),
+                    const SizedBox(width: 13),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
                             'KAYNAĞA BAKMADAN',
-                            style: Theme.of(context).textTheme.labelSmall
-                                ?.copyWith(color: accent, fontWeight: FontWeight.w900, letterSpacing: 0.4),
+                            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                              color: AtelierStyle.mark,
+                              fontWeight: FontWeight.w900,
+                              letterSpacing: 0.6,
+                            ),
                           ),
-                        ),
+                          const SizedBox(height: 8),
+                          Text(
+                            'Anladığını kendi cümlelerinle açıkla.',
+                            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                        ],
                       ),
-                      const SizedBox(height: 9),
-                      Text(
-                        'Anladığını kendi cümlelerinle açıkla.',
-                        style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
-                      ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
-              ],
+              ),
             ),
             const SizedBox(height: 14),
             KeyedSubtree(

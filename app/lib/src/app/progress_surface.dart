@@ -122,7 +122,9 @@ class ProgressSurface extends StatelessWidget {
             decoration: BoxDecoration(
               color: living ? AtelierStyle.paper : theme.colorScheme.surface,
               borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: living ? AtelierStyle.line : theme.colorScheme.outlineVariant),
+              boxShadow: living
+                  ? const [BoxShadow(color: Color(0x0D14224A), blurRadius: 18, offset: Offset(0, 8))]
+                  : null,
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -240,14 +242,10 @@ class _ProgressCard extends StatelessWidget {
           }
         : legacySoft;
     return Card(
-      elevation: living ? 0 : null,
+      elevation: living ? 1 : null,
+      shadowColor: living ? const Color(0x140F1F47) : null,
       color: living ? AtelierStyle.paper : null,
-      shape: living
-          ? RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(18),
-              side: const BorderSide(color: AtelierStyle.line),
-            )
-          : null,
+      shape: living ? RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)) : null,
       child: InkWell(
         key: ValueKey('progress-continue-${item.material.id.value}'),
         onTap: onPressed,
@@ -304,7 +302,7 @@ class _ProgressCard extends StatelessWidget {
             ),
             DecoratedBox(
               decoration: BoxDecoration(
-                color: living ? AtelierStyle.ink : AppPalette.primaryDark,
+                color: living ? AtelierStyle.focus : AppPalette.primaryDark,
                 borderRadius: const BorderRadius.vertical(bottom: Radius.circular(18)),
               ),
               child: Padding(

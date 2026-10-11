@@ -1364,15 +1364,11 @@ class _LibraryMaterialCard extends StatelessWidget {
         : stateAccent;
 
     return Card(
-      elevation: 0,
+      elevation: living ? 1 : null,
+      shadowColor: living ? const Color(0x140F1F47) : null,
       color: living ? AtelierStyle.paper : null,
       clipBehavior: Clip.antiAlias,
-      shape: living
-          ? RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(18),
-              side: const BorderSide(color: AtelierStyle.line),
-            )
-          : null,
+      shape: living ? RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)) : null,
       child: Column(
         children: [
           InkWell(
@@ -1455,7 +1451,7 @@ class _LibraryMaterialCard extends StatelessWidget {
               key: ValueKey('library-continue-${material.id.value}'),
               onTap: onContinue,
               child: DecoratedBox(
-                decoration: BoxDecoration(color: living ? AtelierStyle.ink : AppPalette.primaryDark),
+                decoration: BoxDecoration(color: living ? AtelierStyle.focus : AppPalette.primaryDark),
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(15, 12, 15, 13),
                   child: Row(
@@ -1560,10 +1556,7 @@ class _ContextCard extends StatelessWidget {
     final accent = isListen ? AppPalette.signal : AppPalette.primary;
     return Material(
       color: soft.withValues(alpha: 0.42),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
-        side: BorderSide(color: accent.withValues(alpha: 0.14)),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: onPressed,
@@ -1576,7 +1569,6 @@ class _ContextCard extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: AppPalette.surface,
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: accent.withValues(alpha: 0.10)),
                 ),
                 child: Padding(
                   padding: const EdgeInsets.all(9),
