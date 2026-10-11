@@ -225,6 +225,16 @@ Future<void> pumpUntilFound(WidgetTester tester, Finder finder, {int maxPumps = 
   fail('Expected widget was not reached within bounded pumps.');
 }
 
+Future<void> pumpUntilGone(WidgetTester tester, Finder finder, {int maxPumps = 100}) async {
+  for (var i = 0; i < maxPumps; i++) {
+    await tester.pump(const Duration(milliseconds: 20));
+    if (finder.evaluate().isEmpty) {
+      return;
+    }
+  }
+  fail('Expected widget to leave the tree within bounded pumps.');
+}
+
 Future<void> scrollUntilFound(
   WidgetTester tester,
   Finder target, {
@@ -849,9 +859,9 @@ void main() {
     Navigator.of(tester.element(find.textContaining('öğrenme kanıtı oluşturmaz'))).pop();
     await pumpUntilFound(tester, find.byType(MaterialWorkspaceScreen));
 
-    final otherPaths = find.widgetWithText(TextButton, 'Diğer yollar').hitTestable();
-    await pumpUntilFound(tester, otherPaths);
-    await tester.tap(otherPaths);
+    final otherPathsAfterFocus = find.widgetWithText(TextButton, 'Diğer yollar').hitTestable();
+    await pumpUntilFound(tester, otherPathsAfterFocus);
+    await tester.tap(otherPathsAfterFocus);
     await pumpUntilFound(tester, find.byKey(const ValueKey('workspace-other-study-paths-scroll')));
     await tapVisible(tester, find.text('Kendi cümlelerimle anlat'));
     await pumpUntilFound(tester, find.text('Anlatımımı değerlendir'));
