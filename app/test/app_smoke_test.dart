@@ -1748,8 +1748,10 @@ void main() {
     await tapVisible(tester, find.byKey(const ValueKey('la0040-living-material-open')));
     await pumpUntilFound(tester, find.byType(MaterialWorkspaceScreen));
 
-    final workspaceScroll =
-        find.descendant(of: find.byType(MaterialWorkspaceScreen), matching: find.byType(Scrollable));
+    final workspaceScroll = find.descendant(
+      of: find.byType(MaterialWorkspaceScreen),
+      matching: find.byType(Scrollable),
+    );
     await scrollUntilFound(tester, find.text('Diğer yollar'), scrollable: workspaceScroll);
     await tapVisible(tester, find.text('Diğer yollar'));
     await pumpUntilFound(tester, find.byKey(const ValueKey('workspace-other-study-paths-scroll')));
