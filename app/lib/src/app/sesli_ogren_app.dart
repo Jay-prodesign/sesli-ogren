@@ -268,46 +268,58 @@ class _RuntimeLoadingScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: AtelierStyle.canvas,
       body: SafeArea(
-        child: Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 390),
-            child: Padding(
-              padding: const EdgeInsets.all(24),
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  color: AtelierStyle.focus,
-                  borderRadius: BorderRadius.circular(28),
-                  boxShadow: const [BoxShadow(color: Color(0x1A14224A), blurRadius: 30, offset: Offset(0, 16))],
-                ),
-                child: const Padding(
-                  padding: EdgeInsets.fromLTRB(22, 22, 22, 24),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      CompanionView(state: CompanionVisualState.think, size: 96),
-                      SizedBox(height: 18),
-                      Text(
-                        'ÇALIŞMA MASAN HAZIRLANIYOR',
-                        style: TextStyle(
-                          color: AtelierStyle.mark,
-                          fontSize: 10,
-                          fontWeight: FontWeight.w900,
-                          letterSpacing: 0.9,
+        child: LayoutBuilder(
+          builder: (context, constraints) => SingleChildScrollView(
+            child: ConstrainedBox(
+              constraints: BoxConstraints(minHeight: constraints.maxHeight),
+              child: Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 390),
+                  child: Padding(
+                    padding: const EdgeInsets.all(24),
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        color: AtelierStyle.focus,
+                        borderRadius: BorderRadius.circular(28),
+                        boxShadow: const [BoxShadow(color: Color(0x1A14224A), blurRadius: 30, offset: Offset(0, 16))],
+                      ),
+                      child: const Padding(
+                        padding: EdgeInsets.fromLTRB(22, 22, 22, 24),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            CompanionView(state: CompanionVisualState.think, size: 96),
+                            SizedBox(height: 18),
+                            Text(
+                              'ÇALIŞMA MASAN HAZIRLANIYOR',
+                              style: TextStyle(
+                                color: AtelierStyle.mark,
+                                fontSize: 10,
+                                fontWeight: FontWeight.w900,
+                                letterSpacing: 0.9,
+                              ),
+                            ),
+                            SizedBox(height: 9),
+                            Text(
+                              'Öğrenme alanın hazırlanıyor…',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 22,
+                                height: 1.15,
+                                fontWeight: FontWeight.w900,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                            SizedBox(height: 16),
+                            LinearProgressIndicator(
+                              color: AtelierStyle.aqua,
+                              backgroundColor: Color(0x26FFFFFF),
+                              borderRadius: BorderRadius.all(Radius.circular(99)),
+                            ),
+                          ],
                         ),
                       ),
-                      SizedBox(height: 9),
-                      Text(
-                        'Öğrenme alanın hazırlanıyor…',
-                        style: TextStyle(color: Colors.white, fontSize: 22, height: 1.15, fontWeight: FontWeight.w900),
-                        textAlign: TextAlign.center,
-                      ),
-                      SizedBox(height: 16),
-                      LinearProgressIndicator(
-                        color: AtelierStyle.aqua,
-                        backgroundColor: Color(0x26FFFFFF),
-                        borderRadius: BorderRadius.all(Radius.circular(99)),
-                      ),
-                    ],
+                    ),
                   ),
                 ),
               ),
