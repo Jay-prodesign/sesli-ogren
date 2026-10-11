@@ -198,6 +198,16 @@ class AtelierWorkspace extends StatelessWidget {
             padding: const EdgeInsets.fromLTRB(16, 4, 16, 18),
             children: [
               ListTile(
+                key: const ValueKey('workspace-other-quick-recap'),
+                leading: const Icon(Icons.auto_awesome_outlined),
+                title: const Text('Hızlı özet'),
+                subtitle: const Text('Kaynağa bağlı kısa bir genel bakış al. Bu hazırlıktır; öğrenme kanıtı oluşturmaz.'),
+                onTap: () {
+                  Navigator.of(sheetContext).pop();
+                  onQuickRecap();
+                },
+              ),
+              ListTile(
                 leading: const Icon(Icons.auto_awesome_outlined),
                 title: const Text('Kaynağı bana açıkla'),
                 subtitle: const Text('Kaynağa bağlı açıklamayı oku. Bu hazırlıktır; öğrenme kanıtı oluşturmaz.'),
@@ -287,13 +297,6 @@ class AtelierWorkspace extends StatelessWidget {
                         ),
                         icon: const Icon(Icons.menu_book_outlined),
                         label: const Text('Tam metni oku'),
-                      ),
-                      TextButton.icon(
-                        key: const ValueKey('la0040-atelier-workspace-recap'),
-                        onPressed: onQuickRecap,
-                        style: TextButton.styleFrom(foregroundColor: AtelierStyle.teal),
-                        icon: const Icon(Icons.auto_awesome_outlined),
-                        label: const Text('Hızlı özet'),
                       ),
                       TextButton.icon(
                         key: const ValueKey('la0040-atelier-workspace-update-source'),

@@ -91,6 +91,7 @@ void main() {
 
     expect(find.byKey(const ValueKey('first-intent-other-paths-scroll')), findsOneWidget);
     expect(find.text('Dinle'), findsOneWidget);
+    expect(find.text('Hızlı özet'), findsOneWidget);
     expect(find.text('Bildiğimi kontrol et'), findsOneWidget);
     expect(find.text('Birlikte odaklanalım'), findsOneWidget);
     expect(tester.takeException(), isNull);
@@ -127,7 +128,8 @@ void main() {
     expect(find.text('İLK 60 SANİYE'), findsOneWidget);
     expect(find.text('Önce kaynağın tamamını bir kez gör.'), findsOneWidget);
     expect(find.text('Kaynağı aç'), findsOneWidget);
-    expect(find.text('Hızlı özetle genel resmi gör'), findsOneWidget);
+    expect(find.text('Kaynağı dinle'), findsOneWidget);
+    expect(find.text('Hızlı özetle genel resmi gör'), findsNothing);
     expect(find.text('Diğer çalışma yolları'), findsOneWidget);
     expect(find.textContaining('Öğrenme durumun yalnız'), findsOneWidget);
 
@@ -143,6 +145,7 @@ void main() {
 
     await _tapVisible(tester, find.text('Diğer yollar'));
     await tester.pumpAndSettle();
+    expect(find.text('Hızlı özet'), findsOneWidget);
     expect(find.text('Odaklan'), findsOneWidget);
     await tester.tap(find.text('Odaklan'));
     await _pumpUntilFound(tester, find.text('KISA ODAK · 3 ADIM'));

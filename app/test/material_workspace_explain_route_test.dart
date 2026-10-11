@@ -147,6 +147,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byKey(const ValueKey('workspace-other-study-paths-scroll')), findsOneWidget);
+    expect(find.text('Hızlı özet'), findsOneWidget);
     expect(find.text('Kaynağı bana açıkla'), findsOneWidget);
     expect(find.text('Kendi cümlelerimle anlat'), findsOneWidget);
     expect(find.text('Odaklan'), findsOneWidget);

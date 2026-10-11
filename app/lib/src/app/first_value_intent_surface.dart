@@ -26,20 +26,16 @@ class FirstValueIntentSurface extends StatelessWidget {
   final VoidCallback onListen;
   final VoidCallback onFocus;
 
-  bool get _recommendRecapFirst => sourceText.trim().replaceAll(RegExp(r'\s+'), ' ').length > 1800;
+  String get _recommendationTitle => 'Önce kaynağın tamamını bir kez gör.';
 
-  String get _recommendationTitle =>
-      _recommendRecapFirst ? 'Önce genel resmi kısa bir özetle al.' : 'Önce kaynağın tamamını bir kez gör.';
+  String get _recommendationReason =>
+      'Gerçek kaynağın bu öğrenme ilişkisinin ana malzemesi. Önce Reader’da aç; sonra istersen dinleyebilir veya kaynağı kapatıp ne kaldığını sınayabilirsin.';
 
-  String get _recommendationReason => _recommendRecapFirst
-      ? 'Kaynağın uzun. Tamamını baştan sona tüketmek yerine önce kaynağa bağlı kısa bir harita çıkar; sonra kaynağı kapatıp ne kaldığını sınarsın.'
-      : 'Kaynağın kısa. Önce bütünü gör; sonra kaynağı kapatıp gerçekten ne kaldığını sınarsın.';
+  VoidCallback get _recommendedAction => onReadSource;
 
-  VoidCallback get _recommendedAction => _recommendRecapFirst ? onQuickRecap : onReadSource;
+  String get _recommendedActionLabel => 'Kaynağı aç';
 
-  String get _recommendedActionLabel => _recommendRecapFirst ? 'Hızlı özetle başla' : 'Kaynağı aç';
-
-  IconData get _recommendedActionIcon => _recommendRecapFirst ? Icons.auto_awesome_outlined : Icons.menu_book_outlined;
+  IconData get _recommendedActionIcon => Icons.menu_book_outlined;
 
   void _showOtherPaths(BuildContext context) {
     showModalBottomSheet<void>(
@@ -67,6 +63,16 @@ class FirstValueIntentSurface extends StatelessWidget {
                 onTap: () {
                   Navigator.of(sheetContext).pop();
                   onListen();
+                },
+              ),
+              ListTile(
+                key: const ValueKey('first-intent-recap'),
+                leading: const Icon(Icons.auto_awesome_outlined),
+                title: const Text('Hızlı özet'),
+                subtitle: const Text('Kaynağa bağlı kısa bir genel bakış al. Bu hazırlıktır; öğrenme kanıtı oluşturmaz.'),
+                onTap: () {
+                  Navigator.of(sheetContext).pop();
+                  onQuickRecap();
                 },
               ),
               ListTile(
@@ -102,9 +108,7 @@ class FirstValueIntentSurface extends StatelessWidget {
     final textScale = MediaQuery.textScalerOf(context).scale(1);
     final compact = width < 350 || textScale > 1.25;
     final tightCompact = width < 350 && textScale > 1.2;
-    final compactReason = _recommendRecapFirst
-        ? 'Önce kısa bir harita çıkar; sonra kaynağı kapatıp ne kaldığını sınarsın.'
-        : 'Önce bütünü gör; sonra kaynağı kapatıp ne kaldığını sınarsın.';
+    const compactReason = 'Önce bütünü gör; sonra kaynağı kapatıp ne kaldığını sınarsın.';
 
     final guideCopy = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -290,23 +294,21 @@ class FirstValueIntentSurface extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Text(
-                    _recommendRecapFirst
-                        ? 'Kaynağın kendisine doğrudan geçmek mi istiyorsun?'
-                        : 'Daha hızlı bir genel bakış mı istiyorsun?',
-                    style: const TextStyle(color: AtelierStyle.ink, fontSize: 14, fontWeight: FontWeight.w800),
+                  const Text(
+                    'Okumak yerine dinlemek mi istiyorsun?',
+                    style: TextStyle(color: AtelierStyle.ink, fontSize: 14, fontWeight: FontWeight.w800),
                   ),
                   const SizedBox(height: 9),
                   OutlinedButton.icon(
-                    key: ValueKey(_recommendRecapFirst ? 'first-intent-read-direct' : 'first-intent-recap'),
-                    onPressed: _recommendRecapFirst ? onReadSource : onQuickRecap,
+                    key: const ValueKey('first-intent-listen-direct'),
+                    onPressed: onListen,
                     style: OutlinedButton.styleFrom(
                       foregroundColor: AtelierStyle.teal,
                       minimumSize: const Size.fromHeight(48),
                       side: const BorderSide(color: AtelierStyle.line),
                     ),
-                    icon: Icon(_recommendRecapFirst ? Icons.menu_book_outlined : Icons.auto_awesome_outlined),
-                    label: Text(_recommendRecapFirst ? 'Kaynağı doğrudan aç' : 'Hızlı özetle genel resmi gör'),
+                    icon: const Icon(Icons.headphones_rounded),
+                    label: const Text('Kaynağı dinle'),
                   ),
                   const SizedBox(height: 5),
                   TextButton.icon(
