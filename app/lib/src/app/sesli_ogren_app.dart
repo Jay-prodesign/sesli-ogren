@@ -218,7 +218,6 @@ class _AccountDeletedScreen extends StatelessWidget {
                                 fontWeight: FontWeight.w900,
                                 letterSpacing: 0.9,
                               ),
-                              style: TextStyle(color: Colors.white.withValues(alpha: 0.76), height: 1.45),
                               textAlign: TextAlign.center,
                             ),
                             const SizedBox(height: 8),
@@ -421,6 +420,7 @@ class _RuntimeErrorScreenState extends State<_RuntimeErrorScreen> {
                               configurationError
                                   ? 'Öğrenme verisi açılmadı. Güvenli bağlantı yapılandırması gerekiyor.'
                                   : 'Öğrenme verisi açılmadan yeniden deneyebilir veya başka bir hesapla giriş yapabilirsin.',
+                              style: TextStyle(color: Colors.white.withValues(alpha: 0.76), height: 1.45),
                               textAlign: TextAlign.center,
                             ),
                             if (_switchError != null) ...[
@@ -429,7 +429,7 @@ class _RuntimeErrorScreenState extends State<_RuntimeErrorScreen> {
                                 liveRegion: true,
                                 child: Text(
                                   _switchError!,
-                                  style: TextStyle(color: Theme.of(context).colorScheme.error),
+                                  style: const TextStyle(color: Color(0xFFFFB9BE), height: 1.4),
                                   textAlign: TextAlign.center,
                                 ),
                               ),
