@@ -47,6 +47,36 @@ class _NoTextPdfExtractor implements PdfTextExtractor {
   }
 }
 
+final class _MemoryPlatformFile extends PlatformFile {
+  _MemoryPlatformFile({required this.name, required Uint8List bytes}) : _bytes = Uint8List.fromList(bytes);
+
+  final Uint8List _bytes;
+
+  @override
+  final String name;
+
+  @override
+  String? get path => null;
+
+  @override
+  Uri get uri => Uri.parse('memory:///$name');
+
+  @override
+  Never get xFile => throw UnsupportedError('Memory test file has no platform XFile.');
+
+  @override
+  int? lengthSync() => _bytes.length;
+
+  @override
+  Future<int?> length() async => _bytes.length;
+
+  @override
+  Future<Uint8List> readAsBytes() async => Uint8List.fromList(_bytes);
+
+  @override
+  Stream<Uint8List> readAsByteStream() => Stream<Uint8List>.value(Uint8List.fromList(_bytes));
+}
+
 class _RecordingAccountDeletionGateway implements AccountDeletionGateway {
   int calls = 0;
 
@@ -461,7 +491,7 @@ void main() {
         home: LivingDeskReviewScope(
           child: LearningSliceScreen(
             runtime: runtime,
-            pickPdfFile: () async => PlatformFile(name: 'scan.pdf', size: bytes.length, bytes: bytes),
+            pickPdfFile: () async => _MemoryPlatformFile(name: 'scan.pdf', bytes: bytes),
           ),
         ),
       ),
