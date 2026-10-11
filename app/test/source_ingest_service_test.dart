@@ -33,6 +33,17 @@ class _RecordingPdfExtractor implements PdfTextExtractor {
   }
 }
 
+class _FailingPdfExtractor implements PdfTextExtractor {
+  const _FailingPdfExtractor(this.kind);
+
+  final PdfTextExtractionFailureKind kind;
+
+  @override
+  Future<ExtractedPdf> extract(Uint8List bytes, {required String sourceName}) {
+    throw PdfTextExtractionException('typed pdf failure', kind: kind);
+  }
+}
+
 void main() {
   sqfliteFfiInit();
 
@@ -384,6 +395,34 @@ void main() {
       (await store.currentSourceVersion(learner: learnerA, materialId: material))?.identity.sourceVersionId,
       textAgain.sourceVersion.identity.sourceVersionId,
     );
+  });
+
+  test('PDF extraction failures preserve typed recovery reason across ingest boundary', () async {
+    const cases = <PdfTextExtractionFailureKind, SourceIngestFailureKind>{
+      PdfTextExtractionFailureKind.pageLimit: SourceIngestFailureKind.pdfPageLimit,
+      PdfTextExtractionFailureKind.textLimit: SourceIngestFailureKind.pdfTextLimit,
+      PdfTextExtractionFailureKind.noExtractableText: SourceIngestFailureKind.pdfNoExtractableText,
+      PdfTextExtractionFailureKind.parseFailure: SourceIngestFailureKind.pdfParseFailure,
+    };
+    final bytes = Uint8List.fromList([0x25, 0x50, 0x44, 0x46, 0x2D, 0x31]);
+
+    for (final entry in cases.entries) {
+      final typed = SourceIngestService(store: store, pdfTextExtractor: _FailingPdfExtractor(entry.key));
+      await expectLater(
+        typed.ingestPdf(
+          learner: learnerA,
+          materialId: material,
+          bytes: bytes,
+          originalName: 'test.pdf',
+        ),
+        throwsA(
+          isA<SourceIngestException>()
+              .having((error) => error.kind, 'kind', entry.value)
+              .having((error) => error.message, 'message', 'typed pdf failure'),
+        ),
+      );
+    }
+    expect(await store.material(learner: learnerA, materialId: material), isNull);
   });
 
   test('malformed PDF fails before parser execution', () async {

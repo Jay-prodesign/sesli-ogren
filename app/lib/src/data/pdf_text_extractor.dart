@@ -35,7 +35,10 @@ class PdfrxPdfTextExtractor implements PdfTextExtractor {
       await _ensureInitialized();
       document = await PdfDocument.openData(bytes, sourceName: sourceName);
       if (document.pages.length > maxPageCount) {
-        throw const PdfTextExtractionException('PDF exceeds the bounded page safety limit.');
+        throw const PdfTextExtractionException(
+          'PDF exceeds the bounded page safety limit.',
+          kind: PdfTextExtractionFailureKind.pageLimit,
+        );
       }
 
       final buffer = StringBuffer();
@@ -48,7 +51,10 @@ class PdfrxPdfTextExtractor implements PdfTextExtractor {
         }
         final separatorLength = buffer.length == 0 ? 0 : 2;
         if (buffer.length + separatorLength + pageText.length > maxExtractedCharacters) {
-          throw const PdfTextExtractionException('PDF extracted text exceeds the bounded safety limit.');
+          throw const PdfTextExtractionException(
+            'PDF extracted text exceeds the bounded safety limit.',
+            kind: PdfTextExtractionFailureKind.textLimit,
+          );
         }
         if (separatorLength > 0) {
           buffer.write('\n\n');
@@ -60,13 +66,19 @@ class PdfrxPdfTextExtractor implements PdfTextExtractor {
 
       final extracted = buffer.toString();
       if (extracted.isEmpty) {
-        throw const PdfTextExtractionException('PDF contains no extractable text. OCR is not enabled in M5.');
+        throw const PdfTextExtractionException(
+          'PDF contains no extractable text. OCR is not enabled in M5.',
+          kind: PdfTextExtractionFailureKind.noExtractableText,
+        );
       }
       return ExtractedPdf(text: extracted, anchors: List.unmodifiable(anchors), pageCount: document.pages.length);
     } on PdfTextExtractionException {
       rethrow;
     } catch (_) {
-      throw const PdfTextExtractionException('PDF could not be parsed safely.');
+      throw const PdfTextExtractionException(
+        'PDF could not be parsed safely.',
+        kind: PdfTextExtractionFailureKind.parseFailure,
+      );
     } finally {
       await document?.dispose();
     }
@@ -75,10 +87,16 @@ class PdfrxPdfTextExtractor implements PdfTextExtractor {
   static String _normalize(String text) => text.replaceAll('\r\n', '\n').replaceAll('\r', '\n').trim();
 }
 
+enum PdfTextExtractionFailureKind { pageLimit, textLimit, noExtractableText, parseFailure }
+
 class PdfTextExtractionException implements Exception {
-  const PdfTextExtractionException(this.message);
+  const PdfTextExtractionException(
+    this.message, {
+    this.kind = PdfTextExtractionFailureKind.parseFailure,
+  });
 
   final String message;
+  final PdfTextExtractionFailureKind kind;
 
   @override
   String toString() => 'PdfTextExtractionException: $message';

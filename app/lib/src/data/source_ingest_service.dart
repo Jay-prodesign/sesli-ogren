@@ -62,10 +62,16 @@ class SourceIngestService {
 
   void validatePdfByteSize(int byteSize) {
     if (byteSize <= 0) {
-      throw const SourceIngestException('PDF cannot be empty.');
+      throw const SourceIngestException(
+        'PDF cannot be empty.',
+        kind: SourceIngestFailureKind.emptyPdf,
+      );
     }
     if (byteSize > maxPdfBytes) {
-      throw const SourceIngestException('PDF exceeds the bounded M5 byte safety limit.');
+      throw const SourceIngestException(
+        'PDF exceeds the bounded M5 byte safety limit.',
+        kind: SourceIngestFailureKind.pdfTooLarge,
+      );
     }
   }
 
@@ -78,7 +84,10 @@ class SourceIngestService {
     _requireIdentity(learner: learner, materialId: materialId);
     validatePdfByteSize(bytes.length);
     if (!_hasPdfHeader(bytes)) {
-      throw const SourceIngestException('Selected file is not a supported PDF source.');
+      throw const SourceIngestException(
+        'Selected file is not a supported PDF source.',
+        kind: SourceIngestFailureKind.invalidPdf,
+      );
     }
 
     final safeName = _validatedTitle(_safeFileName(originalName), fallback: 'document.pdf');
@@ -86,9 +95,18 @@ class SourceIngestService {
     try {
       extracted = await _pdfTextExtractor.extract(bytes, sourceName: safeName);
     } on PdfTextExtractionException catch (error) {
-      throw SourceIngestException(error.message);
+      final kind = switch (error.kind) {
+        PdfTextExtractionFailureKind.pageLimit => SourceIngestFailureKind.pdfPageLimit,
+        PdfTextExtractionFailureKind.textLimit => SourceIngestFailureKind.pdfTextLimit,
+        PdfTextExtractionFailureKind.noExtractableText => SourceIngestFailureKind.pdfNoExtractableText,
+        PdfTextExtractionFailureKind.parseFailure => SourceIngestFailureKind.pdfParseFailure,
+      };
+      throw SourceIngestException(error.message, kind: kind);
     } catch (_) {
-      throw const SourceIngestException('PDF could not be processed safely.');
+      throw const SourceIngestException(
+        'PDF could not be processed safely.',
+        kind: SourceIngestFailureKind.pdfParseFailure,
+      );
     }
 
     if (extracted.text.length > maxTextCharacters) {
@@ -240,10 +258,25 @@ class SourceIngestService {
   }
 }
 
+enum SourceIngestFailureKind {
+  emptyPdf,
+  pdfTooLarge,
+  invalidPdf,
+  pdfPageLimit,
+  pdfTextLimit,
+  pdfNoExtractableText,
+  pdfParseFailure,
+  other,
+}
+
 class SourceIngestException implements Exception {
-  const SourceIngestException(this.message);
+  const SourceIngestException(
+    this.message, {
+    this.kind = SourceIngestFailureKind.other,
+  });
 
   final String message;
+  final SourceIngestFailureKind kind;
 
   @override
   String toString() => 'SourceIngestException: $message';

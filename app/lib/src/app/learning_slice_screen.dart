@@ -25,6 +25,7 @@ class LearningSliceScreen extends StatefulWidget {
     this.autoAdvanceContinuation = false,
     this.startInSourceEditor = false,
     this.sourceGateway = const SupabaseSourceSummaryGateway(),
+    this.pickPdfFile,
     super.key,
   });
 
@@ -33,6 +34,9 @@ class LearningSliceScreen extends StatefulWidget {
   final bool autoAdvanceContinuation;
   final bool startInSourceEditor;
   final SupabaseSourceSummaryGateway sourceGateway;
+
+  /// Test/review seam only. Production uses the platform FilePicker.
+  final Future<PlatformFile?> Function()? pickPdfFile;
 
   @override
   State<LearningSliceScreen> createState() => _LearningSliceScreenState();
@@ -248,11 +252,14 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
     if (_busy) return;
     PlatformFile? file;
     try {
-      file = await FilePicker.pickFile(
-        type: FileType.custom,
-        allowedExtensions: const ['pdf'],
-        dialogTitle: 'Çalışmak istediğin PDF’i seç',
-      );
+      final injectedPicker = widget.pickPdfFile;
+      file = injectedPicker != null
+          ? await injectedPicker()
+          : await FilePicker.pickFile(
+              type: FileType.custom,
+              allowedExtensions: const ['pdf'],
+              dialogTitle: 'Çalışmak istediğin PDF’i seç',
+            );
     } catch (_) {
       if (!mounted) return;
       setState(() {
@@ -346,11 +353,42 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
       );
       if (!mounted) return;
       setState(() {
-        _inlineError = 'PDF işlenemedi. Tekrar deneyebilir; dosyada seçilebilir metin yoksa aynı bölümü metin olarak yapıştırabilirsin.';
+        _inlineError = _pdfFailureMessage(error);
       });
     } finally {
       _setBusy(false);
     }
+  }
+
+  String _pdfFailureMessage(Object error) {
+    if (error is! SourceIngestException) {
+      return 'PDF işlenemedi. Başka bir PDF seçebilir veya aynı bölümü metin olarak yapıştırabilirsin.';
+    }
+    return switch (error.kind) {
+      SourceIngestFailureKind.emptyPdf => 'Seçtiğin PDF boş görünüyor. Başka bir dosya seç veya metni doğrudan yapıştır.',
+      SourceIngestFailureKind.pdfTooLarge =>
+        'Bu PDF güvenli dosya sınırını aşıyor. Daha küçük bir PDF seç veya çalışacağın bölümü metin olarak yapıştır.',
+      SourceIngestFailureKind.invalidPdf =>
+        'Bu dosya geçerli bir PDF olarak doğrulanamadı. Başka bir PDF seç veya metni doğrudan yapıştır.',
+      SourceIngestFailureKind.pdfPageLimit =>
+        'Bu PDF güvenli sayfa sınırını aşıyor. Çalışacağın bölümü daha küçük bir PDF veya metin olarak ekle.',
+      SourceIngestFailureKind.pdfTextLimit =>
+        'Bu PDF’deki seçilebilir metin güvenli işleme sınırını aşıyor. Çalışacağın bölümü daha küçük bir PDF veya metin olarak ekle.',
+      SourceIngestFailureKind.pdfNoExtractableText =>
+        'Bu PDF’de seçilebilir metin bulunamadı. Görüntü taraması/OCR bu sürümde yok; çalışacağın bölümü metin olarak yapıştır.',
+      SourceIngestFailureKind.pdfParseFailure =>
+        'PDF güvenli biçimde açılamadı. Dosya bozuk veya korumalı olabilir; başka bir PDF seç veya metni doğrudan yapıştır.',
+      SourceIngestFailureKind.other =>
+        'PDF işlenemedi. Başka bir PDF seçebilir veya aynı bölümü metin olarak yapıştırabilirsin.',
+    };
+  }
+
+  void _switchToTextSource() {
+    if (_busy) return;
+    setState(() {
+      _sourceEntryMode = _SourceEntryMode.text;
+      _inlineError = null;
+    });
   }
 
   String _pastedSourceName(String text) {
@@ -964,14 +1002,7 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
                     );
                     final textChoice = OutlinedButton.icon(
                       key: const ValueKey('source-choice-text'),
-                      onPressed: _busy
-                          ? null
-                          : () {
-                              setState(() {
-                                _sourceEntryMode = _SourceEntryMode.text;
-                                _inlineError = null;
-                              });
-                            },
+                      onPressed: _busy ? null : _switchToTextSource,
                       style: OutlinedButton.styleFrom(minimumSize: const Size.fromHeight(54)),
                       icon: const Icon(Icons.notes_rounded),
                       label: const Text('Metin yapıştır'),
@@ -1014,7 +1045,20 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
                   ],
                 ),
               ),
-              if (_inlineError != null) ...[const SizedBox(height: 12), _InlineNotice(text: _inlineError!)],
+              if (_inlineError != null) ...[
+                const SizedBox(height: 12),
+                _InlineNotice(text: _inlineError!),
+                const SizedBox(height: 4),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: TextButton.icon(
+                    key: const ValueKey('source-pdf-fallback-text'),
+                    onPressed: _busy ? null : _switchToTextSource,
+                    icon: const Icon(Icons.notes_rounded),
+                    label: const Text('Metin olarak ekle'),
+                  ),
+                ),
+              ],
             ] else ...[
               Row(
                 children: [

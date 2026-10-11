@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sesli_ogren/src/account/account_deletion_gateway.dart';
@@ -31,6 +32,18 @@ class _UnusedPdfExtractor implements PdfTextExtractor {
   @override
   Future<ExtractedPdf> extract(Uint8List bytes, {required String sourceName}) {
     throw UnimplementedError();
+  }
+}
+
+class _NoTextPdfExtractor implements PdfTextExtractor {
+  const _NoTextPdfExtractor();
+
+  @override
+  Future<ExtractedPdf> extract(Uint8List bytes, {required String sourceName}) {
+    throw const PdfTextExtractionException(
+      'PDF contains no extractable text. OCR is not enabled in M5.',
+      kind: PdfTextExtractionFailureKind.noExtractableText,
+    );
   }
 }
 
@@ -431,6 +444,44 @@ void main() {
     expect(find.text('Çalışma materyalini ekle'), findsOneWidget);
     expect(find.text('Kaynağı ekle ve aç'), findsOneWidget);
     expect(find.text('İpucu'), findsNothing);
+  });
+
+  testWidgets('image-only PDF failure offers a one-tap text fallback without persisting a broken source', (tester) async {
+    final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
+    addTearDown(store.close);
+    final ingest = SourceIngestService(store: store, pdfTextExtractor: const _NoTextPdfExtractor());
+    final runtime = AppRuntime(
+      learner: AppRuntime.localM5LearnerFixture,
+      store: store,
+      ingest: ingest,
+      recall: RecallLearningService(sourceStore: store, learningStore: store.learningTruthStore()),
+      telemetry: store.operationalTelemetry(),
+    );
+    final bytes = Uint8List.fromList([0x25, 0x50, 0x44, 0x46, 0x2D, 0x31]);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: LivingDeskReviewScope(
+          child: LearningSliceScreen(
+            runtime: runtime,
+            pickPdfFile: () async => PlatformFile(name: 'scan.pdf', size: bytes.length, bytes: bytes),
+          ),
+        ),
+      ),
+    );
+    await pumpUntilFound(tester, find.text('PDF seç'));
+    await tapVisible(tester, find.text('PDF seç'));
+    await pumpUntilFound(tester, find.textContaining('seçilebilir metin bulunamadı'));
+
+    expect(find.byKey(const ValueKey('source-pdf-fallback-text')), findsOneWidget);
+    expect(await store.material(learner: runtime.learner, materialId: AppRuntime.primaryMaterialId), isNull);
+
+    await tapVisible(tester, find.byKey(const ValueKey('source-pdf-fallback-text')));
+    await pumpUntilFound(tester, find.byKey(const ValueKey('pasted-material-text')));
+
+    expect(find.textContaining('seçilebilir metin bulunamadı'), findsNothing);
+    expect(find.byKey(const ValueKey('pasted-material-text')), findsOneWidget);
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('source to Recall result persists and reopens as one continuation', (tester) async {
