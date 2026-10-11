@@ -2,6 +2,7 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter_tts/flutter_tts.dart';
 import 'package:sesli_ogren/src/app/app_runtime.dart';
 import 'package:sesli_ogren/src/app/listen_screen.dart';
 import 'package:sesli_ogren/src/data/pdf_text_extractor.dart';
@@ -18,6 +19,22 @@ class _UnusedPdfExtractor implements PdfTextExtractor {
   @override
   Future<ExtractedPdf> extract(Uint8List bytes, {required String sourceName}) {
     throw UnimplementedError();
+  }
+}
+
+class _UnavailableTurkishFlutterTts extends FlutterTts {
+  var speakCalls = 0;
+
+  @override
+  Future<dynamic> stop() async => 1;
+
+  @override
+  Future<dynamic> isLanguageAvailable(String language) async => false;
+
+  @override
+  Future<dynamic> speak(String text, {bool focus = false}) async {
+    speakCalls += 1;
+    return 1;
   }
 }
 
@@ -117,6 +134,26 @@ Future<void> _tapVisible(WidgetTester tester, Finder finder) async {
 
 void main() {
   sqfliteFfiInit();
+
+  test('device speech fails closed when the requested Turkish locale is unavailable', () async {
+    final tts = _UnavailableTurkishFlutterTts();
+    final output = DeviceSpeechOutput(tts: tts);
+    final errors = <Object>[];
+    var started = false;
+
+    await output.speak(
+      'Türkçe kaynak metni',
+      locale: 'tr-TR',
+      onStart: () => started = true,
+      onDone: () {},
+      onError: errors.add,
+    );
+
+    expect(started, isFalse);
+    expect(tts.speakCalls, 0);
+    expect(errors, hasLength(1));
+    expect(errors.single.toString(), contains('device_tts_language_unavailable:tr-TR'));
+  });
 
   testWidgets('Listen exposes an in-place retry when the current source cannot be loaded', (tester) async {
     final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);

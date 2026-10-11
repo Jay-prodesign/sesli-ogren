@@ -41,6 +41,17 @@ final class DeviceSpeechOutput implements SpeechOutput {
       ], IosTextToSpeechAudioMode.spokenAudio);
     }
 
+    final canCheckLanguage = kIsWeb ||
+        defaultTargetPlatform == TargetPlatform.android ||
+        defaultTargetPlatform == TargetPlatform.iOS ||
+        defaultTargetPlatform == TargetPlatform.macOS;
+    if (canCheckLanguage) {
+      final available = await _tts.isLanguageAvailable(locale);
+      if (available != true) {
+        throw StateError('device_tts_language_unavailable:$locale');
+      }
+    }
+
     await _tts.setLanguage(locale);
     await _tts.setPitch(1.0);
     await _tts.setVolume(1.0);

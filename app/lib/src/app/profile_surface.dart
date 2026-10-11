@@ -304,7 +304,7 @@ class _ProfileSurfaceState extends State<ProfileSurface> {
             const _ProfileTile(
               icon: Icons.record_voice_over_outlined,
               title: 'Dinleme sesi',
-              subtitle: 'Cihazın Türkçe sesi',
+              subtitle: 'Türkçe ses · cihaz desteği dinlerken doğrulanır',
               iconBackground: AppPalette.signalSoft,
               iconForeground: AppPalette.signal,
             ),
