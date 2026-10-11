@@ -91,6 +91,20 @@ class _MaterialWorkspaceScreenState extends State<MaterialWorkspaceScreen> {
       sourceVersionId: sourceVersionId,
     );
     if (!mounted) return;
+    // Revalidate the source identity after the asynchronous resume read. An
+    // updated document must not reopen a stale Reader snapshot.
+    final currentSource = await widget.runtime.store.currentSourceVersion(
+      learner: widget.runtime.learner,
+      materialId: data.material.id,
+    );
+    if (!mounted) return;
+    if (currentSource?.identity.sourceVersionId != sourceVersionId) {
+      setState(() => _snapshot = _load());
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Kaynak güncellendi. Güncel sürümü açmak için tekrar dokun.')),
+      );
+      return;
+    }
     final treatment = LearningVisualTreatmentScope.maybeOf(context);
     final livingReview = LivingDeskReviewScope.active(context);
     await Navigator.of(context).push<void>(
