@@ -68,15 +68,14 @@ void main() {
     );
     await _pumpUntilFound(tester, find.byKey(const ValueKey('first-value-intent')));
 
-    expect(find.text('Şimdi bununla ne yapmak istiyorsun?'), findsOneWidget);
-    expect(find.text('Dinlemek istiyorum'), findsOneWidget);
-    expect(find.text('Hızlıca anlamak istiyorum'), findsOneWidget);
-    expect(find.text('Bildiğimi kontrol etmek istiyorum'), findsOneWidget);
-    expect(find.text('Birlikte çalışalım'), findsOneWidget);
-    expect(find.text('Sen öner · Önce kaynağı oku'), findsOneWidget);
-    expect(find.textContaining('Henüz öğrenme kanıtın yok'), findsOneWidget);
+    expect(find.text('İLK 60 SANİYE'), findsOneWidget);
+    expect(find.text('Önce kaynağın tamamını bir kez gör.'), findsOneWidget);
+    expect(find.text('Kaynağı aç'), findsOneWidget);
+    expect(find.text('Hızlı özetle orientasyon al'), findsOneWidget);
+    expect(find.text('Diğer çalışma yolları'), findsOneWidget);
+    expect(find.textContaining('Öğrenme durumun yalnız'), findsOneWidget);
 
-    await _tapVisible(tester, find.text('Sen öner · Önce kaynağı oku'));
+    await _tapVisible(tester, find.text('Kaynağı aç'));
     await _pumpUntilFound(tester, find.byType(SourceReaderScreen));
     expect(find.text('İlk değer notu'), findsWidgets);
     await tester.pageBack();

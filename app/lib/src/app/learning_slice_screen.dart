@@ -1058,20 +1058,11 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
                 ),
               ],
             ] else ...[
-              Row(
-                children: [
-                  const Expanded(
-                    child: Text(
-                      'METİN KAYNAĞI',
-                      style: TextStyle(
-                        color: AtelierStyle.teal,
-                        fontSize: 10,
-                        fontWeight: FontWeight.w900,
-                        letterSpacing: 0.9,
-                      ),
-                    ),
-                  ),
-                  TextButton(
+              LayoutBuilder(
+                builder: (context, constraints) {
+                  final compactHeader =
+                      constraints.maxWidth < 350 || MediaQuery.textScalerOf(context).scale(1) > 1.2;
+                  final changeSource = TextButton.icon(
                     onPressed: _busy
                         ? null
                         : () {
@@ -1080,9 +1071,26 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
                               _inlineError = null;
                             });
                           },
-                    child: const Text('Kaynak türünü değiştir'),
-                  ),
-                ],
+                    icon: const Icon(Icons.swap_horiz_rounded, size: 18),
+                    label: const Text('Kaynak türünü değiştir'),
+                  );
+                  const label = Text(
+                    'METİN KAYNAĞI',
+                    style: TextStyle(
+                      color: AtelierStyle.teal,
+                      fontSize: 10,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: 0.9,
+                    ),
+                  );
+                  if (compactHeader) {
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [label, const SizedBox(height: 2), changeSource],
+                    );
+                  }
+                  return Row(children: [const Expanded(child: label), changeSource]);
+                },
               ),
               const SizedBox(height: 8),
               TextField(

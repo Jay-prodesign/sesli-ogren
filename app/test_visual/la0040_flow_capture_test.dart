@@ -306,8 +306,9 @@ void main() {
         onFocus: () {},
       ),
     );
-    expect(find.text('Şimdi bununla ne yapmak istiyorsun?'), findsOneWidget);
-    expect(find.text('Sen öner · Önce kaynağı oku'), findsOneWidget);
+    expect(find.text('İLK 60 SANİYE'), findsOneWidget);
+    expect(find.text('Kaynağı aç'), findsOneWidget);
+    expect(find.byKey(const ValueKey('first-value-recommendation-card')), findsOneWidget);
   });
 
   testWidgets('LA-0040 first-value intent survives 320px + large type', (tester) async {
@@ -327,8 +328,8 @@ void main() {
       size: const Size(320, 700),
       textScaler: const TextScaler.linear(1.5),
     );
-    expect(find.text('Şimdi bununla ne yapmak istiyorsun?'), findsOneWidget);
-    expect(find.text('Birlikte çalışalım'), findsOneWidget);
+    expect(find.text('İLK 60 SANİYE'), findsOneWidget);
+    expect(find.text('Diğer çalışma yolları'), findsOneWidget);
   });
 
   testWidgets('LA-0040 source Reader', (tester) async {
