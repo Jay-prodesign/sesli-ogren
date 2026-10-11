@@ -168,6 +168,7 @@ void main() {
     await _pumpUntilFound(tester, find.byType(SourceReaderScreen));
     Navigator.of(tester.element(find.byType(SourceReaderScreen))).pop();
     await _pumpUntilFound(tester, find.byType(MaterialWorkspaceScreen));
+    await _pumpUntilFound(tester, find.byKey(const ValueKey('la0040-atelier-workspace')).hitTestable());
 
     final workspaceScroll = find.descendant(
       of: find.byType(MaterialWorkspaceScreen),
