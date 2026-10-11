@@ -150,19 +150,13 @@ class _SesliOgrenAppState extends State<SesliOgrenApp> {
                 if (snapshot.hasData) {
                   final runtime = snapshot.data!;
                   return FirstRunOnboardingGate(
-                    child: const bool.fromEnvironment('LA0040_LEGACY_SHELL', defaultValue: false)
-                        ? ProductShellScreen(
-                            runtime: runtime,
-                            onAccountDeleted: _handleAccountDeleted,
-                            onSignOut: _handleSignOut,
-                          )
-                        : LivingDeskReviewScope(
-                            child: ProductShellScreen(
-                              runtime: runtime,
-                              onAccountDeleted: _handleAccountDeleted,
-                              onSignOut: _handleSignOut,
-                            ),
-                          ),
+                    child: LivingDeskReviewScope(
+                      child: ProductShellScreen(
+                        runtime: runtime,
+                        onAccountDeleted: _handleAccountDeleted,
+                        onSignOut: _handleSignOut,
+                      ),
+                    ),
                   );
                 }
                 if (snapshot.hasError) {
@@ -201,24 +195,64 @@ class _AccountDeletedScreen extends StatelessWidget {
                   constraints: const BoxConstraints(maxWidth: 440),
                   child: Padding(
                     padding: const EdgeInsets.all(24),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Icon(Icons.check_circle_outline_rounded, size: 72),
-                        const SizedBox(height: 18),
-                        Text(
-                          'Hesabın ve verilerin silindi.',
-                          style: Theme.of(context).textTheme.headlineSmall,
-                          textAlign: TextAlign.center,
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        color: AtelierStyle.focus,
+                        borderRadius: BorderRadius.circular(28),
+                        boxShadow: const [
+                          BoxShadow(color: Color(0x1A14224A), blurRadius: 30, offset: Offset(0, 16)),
+                        ],
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.fromLTRB(22, 22, 22, 24),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const CompanionView(state: CompanionVisualState.success, size: 96),
+                            const SizedBox(height: 18),
+                            const Text(
+                              'YENİDEN BAŞLAMAYA HAZIR',
+                              style: TextStyle(
+                                color: AtelierStyle.mark,
+                                fontSize: 10,
+                                fontWeight: FontWeight.w900,
+                                letterSpacing: 0.9,
+                              ),
+                              style: TextStyle(color: Colors.white.withValues(alpha: 0.76), height: 1.45),
+                              textAlign: TextAlign.center,
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              'Hesabın ve verilerin silindi.',
+                              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w900,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                            const SizedBox(height: 10),
+                            Text(
+                              'Yeni bir öğrenme alanı oluşturmak istersen sıfırdan başlayabilirsin.',
+                              style: TextStyle(color: Colors.white.withValues(alpha: 0.76), height: 1.45),
+                              textAlign: TextAlign.center,
+                            ),
+                            const SizedBox(height: 22),
+                            SizedBox(
+                              width: double.infinity,
+                              child: FilledButton.icon(
+                                style: FilledButton.styleFrom(
+                                  backgroundColor: AtelierStyle.pulse,
+                                  foregroundColor: Colors.white,
+                                  minimumSize: const Size.fromHeight(52),
+                                ),
+                                onPressed: onStartFresh,
+                                icon: const Icon(Icons.add_rounded),
+                                label: const Text('Yeni öğrenme alanı oluştur'),
+                              ),
+                            ),
+                          ],
                         ),
-                        const SizedBox(height: 10),
-                        const Text(
-                          'Yeni bir öğrenme alanı oluşturmak istersen sıfırdan başlayabilirsin.',
-                          textAlign: TextAlign.center,
-                        ),
-                        const SizedBox(height: 20),
-                        FilledButton(onPressed: onStartFresh, child: const Text('Yeni öğrenme alanı oluştur')),
-                      ],
+                      ),
                     ),
                   ),
                 ),
@@ -236,18 +270,60 @@ class _RuntimeLoadingScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
+    return Scaffold(
+      backgroundColor: AtelierStyle.canvas,
       body: SafeArea(
         child: Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              CompanionView(state: CompanionVisualState.think, size: 112),
-              SizedBox(height: 20),
-              CircularProgressIndicator(),
-              SizedBox(height: 12),
-              Text('Öğrenme alanın hazırlanıyor…'),
-            ],
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 390),
+            child: Padding(
+              padding: const EdgeInsets.all(24),
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  color: AtelierStyle.focus,
+                  borderRadius: BorderRadius.circular(28),
+                  boxShadow: const [
+                    BoxShadow(color: Color(0x1A14224A), blurRadius: 30, offset: Offset(0, 16)),
+                  ],
+                ),
+                child: const Padding(
+                  padding: EdgeInsets.fromLTRB(22, 22, 22, 24),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      CompanionView(state: CompanionVisualState.think, size: 96),
+                      SizedBox(height: 18),
+                      Text(
+                        'ÇALIŞMA MASAN HAZIRLANIYOR',
+                        style: TextStyle(
+                          color: AtelierStyle.mark,
+                          fontSize: 10,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: 0.9,
+                        ),
+                      ),
+                      SizedBox(height: 9),
+                      Text(
+                        'Öğrenme alanın hazırlanıyor…',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 22,
+                          height: 1.15,
+                          fontWeight: FontWeight.w900,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      SizedBox(height: 16),
+                      LinearProgressIndicator(
+                        color: AtelierStyle.aqua,
+                        backgroundColor: Color(0x26FFFFFF),
+                        borderRadius: BorderRadius.all(Radius.circular(99)),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
           ),
         ),
       ),
@@ -293,6 +369,7 @@ class _RuntimeErrorScreenState extends State<_RuntimeErrorScreen> {
   Widget build(BuildContext context) {
     final configurationError = widget.error is LearnerAuthConfigurationException;
     return Scaffold(
+      backgroundColor: AtelierStyle.canvas,
       body: SafeArea(
         child: LayoutBuilder(
           builder: (context, constraints) => SingleChildScrollView(
@@ -306,9 +383,11 @@ class _RuntimeErrorScreenState extends State<_RuntimeErrorScreen> {
                     padding: const EdgeInsets.all(24),
                     child: DecoratedBox(
                       decoration: BoxDecoration(
-                        color: AtelierStyle.paper,
-                        borderRadius: BorderRadius.circular(22),
-                        border: Border.all(color: AtelierStyle.line),
+                        color: AtelierStyle.focus,
+                        borderRadius: BorderRadius.circular(28),
+                        boxShadow: const [
+                          BoxShadow(color: Color(0x1A14224A), blurRadius: 30, offset: Offset(0, 16)),
+                        ],
                       ),
                       child: Padding(
                         padding: const EdgeInsets.all(22),
@@ -316,12 +395,25 @@ class _RuntimeErrorScreenState extends State<_RuntimeErrorScreen> {
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             const CompanionView(state: CompanionVisualState.think, size: 96),
+                            const SizedBox(height: 16),
+                            const Text(
+                              'GÜVENLİ DURAK',
+                              style: TextStyle(
+                                color: AtelierStyle.mark,
+                                fontSize: 10,
+                                fontWeight: FontWeight.w900,
+                                letterSpacing: 0.9,
+                              ),
+                            ),
                             const SizedBox(height: 20),
                             Text(
                               configurationError
                                   ? 'Uygulama bağlantısı henüz yapılandırılmadı.'
                                   : 'Güvenli öğrenme oturumu açılamadı.',
-                              style: Theme.of(context).textTheme.titleLarge,
+                              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w900,
+                              ),
                               textAlign: TextAlign.center,
                             ),
                             const SizedBox(height: 10),
@@ -345,7 +437,7 @@ class _RuntimeErrorScreenState extends State<_RuntimeErrorScreen> {
                             const SizedBox(height: 20),
                             FilledButton(
                               style: FilledButton.styleFrom(
-                                backgroundColor: AtelierStyle.teal,
+                                backgroundColor: AtelierStyle.pulse,
                                 foregroundColor: Colors.white,
                               ),
                               onPressed: _switchingAccount ? null : widget.onRetry,
@@ -354,6 +446,7 @@ class _RuntimeErrorScreenState extends State<_RuntimeErrorScreen> {
                             if (widget.onUseAnotherAccount != null) ...[
                               const SizedBox(height: 8),
                               TextButton.icon(
+                                style: TextButton.styleFrom(foregroundColor: AtelierStyle.aqua),
                                 onPressed: _switchingAccount ? null : _useAnotherAccount,
                                 icon: _switchingAccount
                                     ? const SizedBox.square(
