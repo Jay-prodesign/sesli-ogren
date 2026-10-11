@@ -509,7 +509,7 @@ class _Unavailable extends StatelessWidget {
       builder: (context, constraints) => SingleChildScrollView(
         key: const ValueKey('explain-unavailable-scroll'),
         child: ConstrainedBox(
-          constraints: BoxConstraints(minHeight: constraints.maxHeight),
+          constraints: const BoxConstraints(),
           child: Center(
             child: Padding(
               padding: const EdgeInsets.all(28),

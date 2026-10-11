@@ -131,7 +131,10 @@ void main() {
     await tester.scrollUntilVisible(
       find.text('Materyale dön'),
       140,
-      scrollable: find.byKey(const ValueKey('explain-unavailable-scroll')),
+      scrollable: find.descendant(
+        of: find.byKey(const ValueKey('explain-unavailable-scroll')),
+        matching: find.byType(Scrollable),
+      ),
     );
     await tester.pump();
     expect(find.text('Hatırla ile devam et'), findsOneWidget);

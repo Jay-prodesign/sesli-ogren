@@ -189,7 +189,7 @@ class _AccountDeletedScreen extends StatelessWidget {
           builder: (context, constraints) => SingleChildScrollView(
             key: const ValueKey('account-deleted-scroll'),
             child: ConstrainedBox(
-              constraints: BoxConstraints(minHeight: constraints.maxHeight),
+              constraints: const BoxConstraints(),
               child: Center(
                 child: ConstrainedBox(
                   constraints: const BoxConstraints(maxWidth: 440),
@@ -363,7 +363,7 @@ class _RuntimeErrorScreenState extends State<_RuntimeErrorScreen> {
           builder: (context, constraints) => SingleChildScrollView(
             key: const ValueKey('runtime-error-scroll'),
             child: ConstrainedBox(
-              constraints: BoxConstraints(minHeight: constraints.maxHeight),
+              constraints: const BoxConstraints(),
               child: Center(
                 child: ConstrainedBox(
                   constraints: const BoxConstraints(maxWidth: 440),

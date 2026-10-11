@@ -781,22 +781,33 @@ class AtelierRecall extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Row(
-              children: [
-                Icon(Icons.visibility_off_outlined, color: AtelierStyle.mark, size: 17),
-                SizedBox(width: 8),
-                Text(
-                  'KAYNAĞA BAKMADAN',
-                  style: TextStyle(
-                    color: AtelierStyle.mark,
-                    fontSize: 10,
-                    fontWeight: FontWeight.w900,
-                    letterSpacing: 1,
-                  ),
-                ),
-                Spacer(),
-                CompanionView(state: CompanionVisualState.think, size: 42),
-              ],
+            LayoutBuilder(
+              builder: (context, constraints) {
+                final compactHeader =
+                    constraints.maxWidth < 280 || MediaQuery.textScalerOf(context).scale(1) > 1.25;
+                return Row(
+                  children: [
+                    const Icon(Icons.visibility_off_outlined, color: AtelierStyle.mark, size: 17),
+                    const SizedBox(width: 8),
+                    const Expanded(
+                      child: Text(
+                        'KAYNAĞA BAKMADAN',
+                        softWrap: true,
+                        style: TextStyle(
+                          color: AtelierStyle.mark,
+                          fontSize: 10,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: 1,
+                        ),
+                      ),
+                    ),
+                    if (!compactHeader) ...[
+                      const SizedBox(width: 8),
+                      const CompanionView(state: CompanionVisualState.think, size: 42),
+                    ],
+                  ],
+                );
+              },
             ),
             const SizedBox(height: 17),
             Semantics(

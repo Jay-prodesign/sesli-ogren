@@ -539,9 +539,9 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
       future: _snapshot,
       builder: (context, snapshot) {
         if (snapshot.hasError) {
-          return Center(
-            child: Padding(
-              padding: const EdgeInsets.all(28),
+          return SingleChildScrollView(
+            padding: const EdgeInsets.all(28),
+            child: Center(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -569,9 +569,9 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
           );
         }
         if (!snapshot.hasData) {
-          return const Center(
-            child: Padding(
-              padding: EdgeInsets.all(28),
+          return const SingleChildScrollView(
+            padding: EdgeInsets.all(28),
+            child: Center(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [

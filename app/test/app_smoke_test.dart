@@ -347,8 +347,9 @@ void main() {
     );
     await tester.pump();
 
-    expect(find.byKey(const ValueKey('progress-header-stacked')), findsOneWidget);
-    expect(find.text('KANITA DAYALI'), findsOneWidget);
+    expect(find.text('HATIRLAMA GEÇMİŞİN'), findsOneWidget);
+    expect(find.text('İlerleme'), findsOneWidget);
+    expect(find.textContaining('öğrenme durumunu aktif hatırlama değiştirir'), findsOneWidget);
     expect(tester.takeException(), isNull);
 
     final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
@@ -398,7 +399,10 @@ void main() {
     await tester.scrollUntilVisible(
       find.text('Başka hesapla giriş yap'),
       160,
-      scrollable: find.byKey(const ValueKey('runtime-error-scroll')),
+      scrollable: find.descendant(
+        of: find.byKey(const ValueKey('runtime-error-scroll')),
+        matching: find.byType(Scrollable),
+      ),
     );
     await tester.pump();
     expect(find.text('Yeniden dene'), findsOneWidget);
@@ -453,7 +457,10 @@ void main() {
     await tester.scrollUntilVisible(
       find.text('Yeni öğrenme alanı oluştur'),
       160,
-      scrollable: find.byKey(const ValueKey('account-deleted-scroll')),
+      scrollable: find.descendant(
+        of: find.byKey(const ValueKey('account-deleted-scroll')),
+        matching: find.byType(Scrollable),
+      ),
     );
     await tester.pump();
     expect(find.text('Yeni öğrenme alanı oluştur').hitTestable(), findsOneWidget);
