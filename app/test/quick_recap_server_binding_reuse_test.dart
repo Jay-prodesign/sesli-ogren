@@ -133,11 +133,7 @@ void main() {
     final recapScroll = find.descendant(of: find.byType(QuickRecapScreen), matching: find.byType(Scrollable));
     await _scrollUntilFound(tester, find.text('Şimdi hatırla'), scrollable: recapScroll);
     expect(find.text('Orijinal kaynağı aç'), findsOneWidget);
-    await _scrollUntilFound(
-      tester,
-      find.byKey(const ValueKey('quick-recap-utility-actions')),
-      scrollable: recapScroll,
-    );
+    await _scrollUntilFound(tester, find.byKey(const ValueKey('quick-recap-utility-actions')), scrollable: recapScroll);
     expect(find.text('Özeti dinle'), findsOneWidget);
 
     // A generated, persisted recap must be usable outside the app.
