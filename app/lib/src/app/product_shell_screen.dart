@@ -303,7 +303,7 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
           builder: (readerContext) {
             final screen = SourceReaderScreen(
               title: material.title,
-              sourceText: extracted?.normalizedText ?? '',
+              sourceText: extracted.normalizedText,
               sourceVersion: source,
               initialProgress: initialReaderProgress,
               onProgressChanged: (progress) => widget.runtime.store.saveReaderResumeProgress(
