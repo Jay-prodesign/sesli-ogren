@@ -340,6 +340,20 @@ def check_state(r: Report, state: dict, task_status: dict[str, str]) -> None:
     r.check(bool(sha_re.match(str(git.get("base_sha", "")))), f"{rel}: git.base_sha must be a 40-hex SHA")
     if git.get("head_sha") is not None:
         r.check(bool(sha_re.match(str(git["head_sha"]))), f"{rel}: git.head_sha must be a 40-hex SHA")
+    if status == "IN_PROGRESS":
+        r.check(
+            git.get("head_sha") is None,
+            f"{rel}: git.head_sha must be null while IN_PROGRESS; resolve live branch HEAD instead of pinning mutable state",
+        )
+        observed_ci = state.get("observed_ci") or {}
+        r.check(
+            observed_ci.get("mode") == "RESOLVE_LIVE",
+            f"{rel}: IN_PROGRESS observed_ci must use RESOLVE_LIVE instead of cached SHA/CI evidence",
+        )
+        r.check(
+            "observed_product_head" not in observed_ci,
+            f"{rel}: IN_PROGRESS observed_ci must not cache observed_product_head",
+        )
     if status == "AWAITING_BRAIN_REVIEW":
         for key in ["head_sha", "pr_number", "pr_url"]:
             r.check(git.get(key) not in (None, ""), f"{rel}: git.{key} required when AWAITING_BRAIN_REVIEW")
@@ -454,6 +468,20 @@ def check_execution_coherence(r: Report, state: dict | None) -> None:
         r.check(
             "blocked dependency does not stop independent admitted work" in normalized_return,
             "ENGINEER_RETURN.md: blocker isolation semantics are missing",
+        )
+        for rel in ["docs/agent/CURRENT_HANDOFF.md", "docs/agent/ENGINEER_RETURN.md"]:
+            pinned = re.findall(r"\b[0-9a-f]{40}\b", live_texts.get(rel, ""))
+            r.check(
+                not pinned,
+                f"{rel}: IN_PROGRESS live cursor must not pin exact SHA(s); resolve GitHub live: {pinned}",
+            )
+        r.check(
+            "does not pin a product sha" in handoff,
+            "CURRENT_HANDOFF.md: IN_PROGRESS live verification must explicitly avoid pinned product SHA evidence",
+        )
+        r.check(
+            "does not pin a product sha" in engineer_return.lower(),
+            "ENGINEER_RETURN.md: IN_PROGRESS evidence boundary must explicitly avoid pinned product SHA evidence",
         )
 
 

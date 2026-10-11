@@ -39,12 +39,10 @@ authority. The current repo `CURRENT_HANDOFF.md` and
 `EXECUTION_STATE.json` project that same live cursor. Evidence is SHA-specific;
 resolve the live branch HEAD before making exact-head claims.
 
-The last Drive-recorded validated product milestone before later branch movement
-was `fccab0a2045e23288f0c1dc8bc3f59c39f546ec0`: product-bounded validation,
-visual capture, bootstrap, account-deletion validation, and iOS/Android platform
-build validation were recorded PASS for that exact milestone. Those results do
-not automatically prove later heads. The repo state contains later source-repair
-work, so fresh verification is required after further mutations.
+Because the mission is `IN_PROGRESS`, this mutable return intentionally does not pin a
+product SHA or cached CI verdict. Resolve the live branch HEAD and applicable workflow
+runs from GitHub before any exact-head claim or mutation. Exact SHA evidence remains in
+immutable Git/CI history or milestone evidence.
 
 ## Next executable loop
 

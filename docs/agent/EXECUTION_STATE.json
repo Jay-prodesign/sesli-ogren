@@ -33,14 +33,14 @@
   "git": {
     "branch": "feat/full-product-shell-continuity",
     "base_sha": "d9088dd9bcf4a07a0841c617fbaa0651160e6c79",
-    "head_sha": "e4f4d61f99e36d3f3d7c6483679052e5053812d8",
-    "head_sha_semantics": "Last resolved live branch HEAD before this state-file commit; resolve branch API for exact current HEAD because updating this file necessarily advances the branch.",
+    "head_sha": null,
+    "head_sha_semantics": "IN_PROGRESS live cursor intentionally does not pin a head SHA; resolve the branch ref from GitHub before any SHA-specific claim or mutation.",
     "pr_number": 13,
     "pr_url": "https://github.com/Jay-prodesign/sesli-ogren/pull/13",
     "pr_state": "OPEN_DRAFT_UNMERGED",
     "merged": false,
     "main_role": "DEFAULT_BRANCH_NOT_RUNNABLE_PRODUCT_SELECTOR",
-    "head_sha_note": "Fresh live branch head after focused source-repair UI + regression test batch; resolve live branch API before the next mutation."
+    "head_sha_note": "Exact SHA evidence belongs in immutable Git/CI history or milestone evidence, not this mutable live state."
   },
   "next_handoff": {
     "id": "LA-0039_LA-0040_INTEGRATED_OUTCOME",
@@ -53,14 +53,9 @@
     "Protected production/release/spend/secrets/destructive actions remain owner-gated."
   ],
   "observed_ci": {
-    "observed_product_head": "d7aff1352fa20d3d2da2e460df1aa5127ce21ec6",
-    "bootstrap_validation": "PASS",
-    "account_deletion_bounded_validation": "PASS",
-    "la0040_visual_capture": "PASS",
-    "product_bounded_validation": "FAIL_CANONICAL_FORMAT_ONLY; analyze/tests skipped",
-    "ios_simulator_compile": "PASS",
-    "android_release_compile": "IN_PROGRESS_AT_OBSERVATION",
-    "rule": "Evidence is SHA-specific. Re-query live workflows after new product/control commits; a failure blocks only the covered claim/surface."
+    "mode": "RESOLVE_LIVE",
+    "source": "GitHub branch ref + applicable workflow runs",
+    "rule": "While IN_PROGRESS, do not cache an observed product SHA or CI verdict here. Resolve live evidence at run start and after mutations; exact SHA evidence remains in immutable CI/Git history."
   },
   "current_outcome": {
     "product_truth": "Learner-owned PDF/text → authoritative source/version/provenance → Reader/Listen or source-hidden Recall → truthful correct/unknown/hinted result with source evidence → explainable next action → persistence/reopen/recovery.",
@@ -77,7 +72,7 @@
     ]
   },
   "protected_gate": "Merge/release/deploy/publication, paid-provider/spend activation, credentials/secrets, destructive real-user-data operation, licensing/visibility change, serious irreversible product/architecture pivot, and cross-project mutation require applicable explicit owner authority.",
-  "next_action": "Verify the focused source-repair→retry batch with canonical format/analyze/widget checks, fix any failure, then continue the next dependency-ready LA-0039/LA-0040 product outcome without a routine review stop.",
+  "next_action": "Resolve live branch/CI, fix any real current defect, then continue the highest-value dependency-ready LA-0039/LA-0040 product outcome without a routine review stop.",
   "canonical_source_refs": [
     "CURRENT_EXECUTION_STATE — Learning App",
     "MASTER_ROADMAP — Learning App",
@@ -88,7 +83,7 @@
     "D-070 canonical D/Knot identity",
     "D-076 provenance/licensing"
   ],
-  "updated_at": "2026-10-10",
+  "updated_at": "2026-10-11",
   "auto_agent_bridge": {
     "status": "AUTO_AGENT_BRIDGE_BLOCKED",
     "role": "Optional historical wake-up/delegation path; not required for active direct execution.",

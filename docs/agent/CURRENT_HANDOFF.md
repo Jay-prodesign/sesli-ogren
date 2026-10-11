@@ -8,7 +8,7 @@
 
 **Repository truth:** `Jay-prodesign/sesli-ogren`, branch `feat/full-product-shell-continuity`, draft PR #13, open/unmerged/unreleased. Resolve live branch HEAD from GitHub before making SHA-specific claims; `main` is not the runnable product selector.
 
-**Current verification at the start of this repair run:** at former product HEAD `d7aff1352fa20d3d2da2e460df1aa5127ce21ec6`, bootstrap validation, account-deletion bounded validation, LA-0040 visual capture, and iOS simulator compile passed. Product-bounded validation failed only canonical Dart formatting in `learning_slice_screen.dart`; analyze/tests were skipped. Android release compile was still in progress when observed. These results are historical as soon as branch HEAD advances and must not be generalized to newer commits.
+**Live verification rule:** while this mission is `IN_PROGRESS`, this mutable handoff does not pin a product SHA or cached CI result. Resolve the live branch HEAD and applicable workflow runs from GitHub at run start and after mutations. Exact SHA evidence belongs in immutable Git/CI history or milestone evidence, not in this live cursor.
 
 **Current execution priorities:** first keep the control plane consistent with this single cursor; then finish the integrated source→learn→evidence→next-action→resume experience, repair relevant current CI/product defects, strengthen recoverable errors and continuity, and continue dependency-ready settings/account/accessibility/commercial-readiness work already inside the approved roadmap corridor. Group related implementation and validate proportionately at meaningful milestones.
 

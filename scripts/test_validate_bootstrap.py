@@ -192,6 +192,26 @@ class ValidatorNegativeTests(unittest.TestCase):
         self.set_state(next_action="Finish the current check and wait.")
         self.assertFailsWith(r"IN_PROGRESS next_action must explicitly continue")
 
+    def test_in_progress_head_sha_must_not_be_pinned(self) -> None:
+        s = self.state()
+        s["git"]["head_sha"] = "a" * 40
+        self.write(STATE, json.dumps(s, indent=2, ensure_ascii=False) + "\n")
+        self.assertFailsWith(r"git\.head_sha must be null while IN_PROGRESS")
+
+    def test_in_progress_observed_ci_must_resolve_live(self) -> None:
+        s = self.state()
+        s["observed_ci"] = {"observed_product_head": "b" * 40, "product_bounded_validation": "FAIL"}
+        self.write(STATE, json.dumps(s, indent=2, ensure_ascii=False) + "\n")
+        self.assertFailsWith(r"IN_PROGRESS observed_ci must use RESOLVE_LIVE")
+
+    def test_live_handoff_cannot_pin_exact_sha(self) -> None:
+        path = self.root / "docs/agent/CURRENT_HANDOFF.md"
+        path.write_text(
+            path.read_text(encoding="utf-8") + "\nPinned current head: " + ("c" * 40) + "\n",
+            encoding="utf-8",
+        )
+        self.assertFailsWith(r"CURRENT_HANDOFF\.md: IN_PROGRESS live cursor must not pin exact SHA")
+
     # --- D-024 reuse -------------------------------------------------------
     def test_register_missing(self) -> None:
         (self.root / "docs/provenance/OPEN_SOURCE_REUSE_REGISTER.md").unlink()
