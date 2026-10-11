@@ -32,9 +32,11 @@ Future<void> _pumpUntilFound(WidgetTester tester, Finder finder, {int maxPumps =
 }
 
 Future<void> _tapVisible(WidgetTester tester, Finder finder) async {
-  await tester.scrollUntilVisible(finder, 220, scrollable: find.byType(Scrollable).last);
+  await tester.ensureVisible(finder);
+  final target = finder.hitTestable();
+  await _pumpUntilFound(tester, target);
+  await tester.tap(target);
   await tester.pump();
-  await tester.tap(finder);
 }
 
 void main() {
@@ -100,9 +102,16 @@ void main() {
     expect(find.text('Hızlı özet'), findsOneWidget);
     expect(find.text('Bildiğimi kontrol et'), findsOneWidget);
     final focusPath = find.text('Birlikte odaklanalım');
-    await tester.scrollUntilVisible(focusPath, 140, scrollable: find.byType(Scrollable).last);
+    await tester.scrollUntilVisible(
+      focusPath,
+      140,
+      scrollable: find.descendant(
+        of: find.byKey(const ValueKey('first-intent-other-paths-scroll')),
+        matching: find.byType(Scrollable),
+      ),
+    );
     await tester.pump();
-    expect(focusPath, findsOneWidget);
+    expect(focusPath.hitTestable(), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 
