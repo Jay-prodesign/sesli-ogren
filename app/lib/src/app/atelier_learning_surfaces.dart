@@ -2,26 +2,27 @@ import 'package:flutter/material.dart';
 
 import '../domain/learning_contracts.dart';
 import '../domain/learning_truth.dart';
+import 'app_theme.dart';
 import 'companion_view.dart';
 import 'source_text_matching.dart';
 
 /// One source-led art direction across Reader, Recall and Result.
 /// Source/learning models and outcome classification stay canonical.
 abstract final class AtelierStyle {
-  static const canvas = Color(0xFFF7F8FC);
-  static const paper = Color(0xFFFFFFFF);
-  static const ink = Color(0xFF111827);
-  static const muted = Color(0xFF667085);
-  static const line = Color(0xFFE4E7EC);
+  static const canvas = AppPalette.canvas;
+  static const paper = AppPalette.surface;
+  static const ink = AppPalette.ink;
+  static const muted = AppPalette.inkMuted;
+  static const line = AppPalette.outline;
 
-  static const pulse = Color(0xFF3657FF);
-  static const pulseSoft = Color(0xFFEEF1FF);
-  static const focus = Color(0xFF14224A);
-  static const aqua = Color(0xFF20BFA9);
-  static const aquaSoft = Color(0xFFE6F8F4);
-  static const mark = Color(0xFFC9F45D);
-  static const attention = Color(0xFF9A623E);
-  static const attentionSoft = Color(0xFFFFF1D9);
+  static const pulse = AppPalette.primary;
+  static const pulseSoft = AppPalette.primarySoft;
+  static const focus = AppPalette.primaryDark;
+  static const aqua = AppPalette.signal;
+  static const aquaSoft = AppPalette.signalSoft;
+  static const mark = AppPalette.momentum;
+  static const attention = AppPalette.attention;
+  static const attentionSoft = AppPalette.attentionSoft;
 
   // Compatibility alias while the current integrated slice is migrated.
   static const teal = pulse;
