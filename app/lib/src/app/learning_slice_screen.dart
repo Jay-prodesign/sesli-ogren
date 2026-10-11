@@ -1791,15 +1791,13 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
           const SizedBox(height: 10),
           Text(continuation.nextAction.reasonText),
           const SizedBox(height: 20),
-          if (needsSource) ...[
+          if (needsSource)
             FilledButton.icon(
               onPressed: _busy ? null : _reviewContinuationSource,
               icon: const Icon(Icons.menu_book_outlined),
               label: const Text('Kaynağı gözden geçir'),
-            ),
-            const SizedBox(height: 8),
-            OutlinedButton(onPressed: _busy ? null : _openRecallSafely, child: const Text('Yeniden hatırlamayı dene')),
-          ] else if (canRetry)
+            )
+          else if (canRetry)
             FilledButton.icon(
               onPressed: _busy ? null : _openRecallSafely,
               icon: const Icon(Icons.refresh_rounded),

@@ -6,6 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:sesli_ogren/src/app/app_runtime.dart';
 import 'package:sesli_ogren/src/app/app_theme.dart';
 import 'package:sesli_ogren/src/app/living_study_desk_home.dart';
+import 'package:sesli_ogren/src/app/learning_slice_screen.dart';
 import 'package:sesli_ogren/src/app/product_shell_screen.dart';
 import 'package:sesli_ogren/src/data/pdf_text_extractor.dart';
 import 'package:sesli_ogren/src/data/source_ingest_service.dart';
@@ -47,6 +48,51 @@ Future<void> _pumpUntilFound(WidgetTester tester, Finder finder, {int maxPumps =
 
 void main() {
   sqfliteFfiInit();
+
+  testWidgets('review-source continuation cannot bypass source review before hidden recall', (tester) async {
+    final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
+    addTearDown(store.close);
+    final ingest = SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor());
+    final runtime = AppRuntime(
+      learner: AppRuntime.localM5LearnerFixture,
+      store: store,
+      ingest: ingest,
+      recall: RecallLearningService(sourceStore: store, learningStore: store.learningTruthStore()),
+      telemetry: store.operationalTelemetry(),
+    );
+    const materialId = MaterialId('continuation-review-source-first');
+    await ingest.ingestPastedText(
+      learner: runtime.learner,
+      materialId: materialId,
+      text:
+          'Fotosentez ışık enerjisini kimyasal enerjiye dönüştürür. '
+          'Klorofil ışığın soğurulmasına yardım eder.',
+      sourceName: 'Continuation kaynak notu',
+    );
+    final prompt = await runtime.recall.createCurrentPrompt(learner: runtime.learner, materialId: materialId);
+    final attempt = await runtime.recall.openAttempt(learner: runtime.learner, actionId: prompt.id);
+    final result = await runtime.recall.submit(
+      learner: runtime.learner,
+      actionId: prompt.id,
+      attemptId: attempt.attempt.attemptId,
+      disposition: RecallResponseDisposition.unknown,
+      answer: '',
+    );
+    expect(result.nextAction.kind, NextLearningActionKind.reviewSourceThenRecall);
+
+    await tester.pumpWidget(
+      MaterialApp(home: LearningSliceScreen(runtime: runtime, materialId: materialId)),
+    );
+    await _pumpUntilFound(tester, find.text('Önce kaynağı gözden geçir'));
+
+    expect(find.text('Yeniden hatırlamayı dene'), findsNothing);
+    await tester.tap(find.text('Kaynağı gözden geçir'));
+    await _pumpUntilFound(tester, find.text('Bu bölümü yeniden kur'));
+
+    expect(find.text('Kaynağı kapat ve yeniden dene'), findsOneWidget);
+    expect(find.byKey(const ValueKey('atelier-source-trust')), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
 
   testWidgets('durable learner continuity survives a real SQLite close and reopen', (tester) async {
     tester.view.physicalSize = const Size(390, 844);
