@@ -515,10 +515,7 @@ class _AccountOverviewCard extends StatelessWidget {
       return LayoutBuilder(
         builder: (context, constraints) {
           final stack = constraints.maxWidth < 300 || MediaQuery.textScalerOf(context).scale(1) > 1.3;
-          final labelWidget = Text(
-            label,
-            style: theme.textTheme.bodyMedium?.copyWith(color: AppPalette.ink),
-          );
+          final labelWidget = Text(label, style: theme.textTheme.bodyMedium?.copyWith(color: AppPalette.ink));
           final valueWidget = Text(
             value,
             style: theme.textTheme.labelLarge?.copyWith(
@@ -533,7 +530,11 @@ class _AccountOverviewCard extends StatelessWidget {
             );
           }
           return Row(
-            children: [Expanded(child: labelWidget), const SizedBox(width: 10), valueWidget],
+            children: [
+              Expanded(child: labelWidget),
+              const SizedBox(width: 10),
+              valueWidget,
+            ],
           );
         },
       );
