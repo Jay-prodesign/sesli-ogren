@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sesli_ogren/src/app/app_runtime.dart';
+import 'package:sesli_ogren/src/app/first_value_intent_surface.dart';
 import 'package:sesli_ogren/src/app/learning_slice_screen.dart';
 import 'package:sesli_ogren/src/app/product_shell_screen.dart';
 import 'package:sesli_ogren/src/app/living_study_desk_home.dart';
@@ -92,6 +93,64 @@ Future<void> pumpUntilFound(WidgetTester tester, Finder finder, {int maxPumps = 
 }
 
 void main() {
+  testWidgets('first-value recommendation CTA stays in the first viewport at 320px and 150% text', (tester) async {
+    tester.view.physicalSize = const Size(320, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
+    addTearDown(store.close);
+    final ingest = SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor());
+    const materialId = MaterialId('first-value-large-text');
+    final ingested = await ingest.ingestPastedText(
+      learner: AppRuntime.localM5LearnerFixture,
+      materialId: materialId,
+      text:
+          'Fotosentez ışık enerjisini kimyasal enerjiye dönüştürür. '
+          'Klorofil ışığın soğurulmasına yardım eder.',
+      sourceName: 'Fotosentez: ışık ve enerji',
+    );
+    final material = await store.material(
+      learner: AppRuntime.localM5LearnerFixture,
+      materialId: materialId,
+    );
+    expect(material, isNotNull);
+
+    var recommendedOpens = 0;
+    await tester.pumpWidget(
+      MaterialApp(
+        builder: (context, child) => MediaQuery(
+          data: MediaQuery.of(context).copyWith(
+            disableAnimations: true,
+            textScaler: const TextScaler.linear(1.5),
+          ),
+          child: child!,
+        ),
+        home: FirstValueIntentSurface(
+          material: material!,
+          sourceText: ingested.extractedContent.normalizedText,
+          sourceVersion: ingested.sourceVersion,
+          onReadSource: () => recommendedOpens += 1,
+          onQuickRecap: () {},
+          onRecall: () {},
+          onListen: () {},
+          onFocus: () {},
+        ),
+      ),
+    );
+    await tester.pump();
+
+    final cta = find.byKey(const ValueKey('first-intent-recommend'));
+    expect(cta, findsOneWidget);
+    expect(cta.hitTestable(), findsOneWidget);
+    expect(tester.getBottomRight(cta).dy, lessThanOrEqualTo(844));
+
+    await tester.tap(cta);
+    expect(recommendedOpens, 1);
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('first session flows from empty Home through source intent and back to a usable Home', (tester) async {
     usePhoneViewport(tester);
     final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);

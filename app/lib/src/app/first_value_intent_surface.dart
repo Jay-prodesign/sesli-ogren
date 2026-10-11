@@ -104,28 +104,45 @@ class FirstValueIntentSurface extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final compact = MediaQuery.sizeOf(context).width < 350 || MediaQuery.textScalerOf(context).scale(1) > 1.25;
+    final width = MediaQuery.sizeOf(context).width;
+    final textScale = MediaQuery.textScalerOf(context).scale(1);
+    final compact = width < 350 || textScale > 1.25;
+    final tightCompact = width < 350 && textScale > 1.2;
+    final compactReason = _recommendListenFirst
+        ? 'Önce yapıyı dinle; sonra kaynağı kapatıp ne kaldığını sınarsın.'
+        : 'Önce bütünü gör; sonra kaynağı kapatıp ne kaldığını sınarsın.';
 
     final guideCopy = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'İLK 60 SANİYE',
-          style: TextStyle(color: AtelierStyle.mark, fontSize: 10, fontWeight: FontWeight.w900, letterSpacing: 1),
-        ),
-        const SizedBox(height: 6),
+        if (!tightCompact) ...[
+          const Text(
+            'İLK 60 SANİYE',
+            style: TextStyle(color: AtelierStyle.mark, fontSize: 10, fontWeight: FontWeight.w900, letterSpacing: 1),
+          ),
+          const SizedBox(height: 6),
+        ],
         Text(
           _recommendationTitle,
           style: TextStyle(
             color: Colors.white,
-            fontSize: compact ? 18 : 22,
-            height: 1.18,
+            fontSize: tightCompact ? 16 : compact ? 18 : 22,
+            height: 1.16,
             fontWeight: FontWeight.w900,
             letterSpacing: -0.35,
           ),
         ),
-        const SizedBox(height: 7),
-        Text(_recommendationReason, style: const TextStyle(color: Color(0xFFD6DDF0), fontSize: 12.5, height: 1.45)),
+        SizedBox(height: tightCompact ? 4 : 7),
+        Text(
+          tightCompact ? compactReason : _recommendationReason,
+          maxLines: tightCompact ? 3 : null,
+          overflow: tightCompact ? TextOverflow.ellipsis : TextOverflow.visible,
+          style: TextStyle(
+            color: const Color(0xFFD6DDF0),
+            fontSize: tightCompact ? 10.5 : 12.5,
+            height: tightCompact ? 1.35 : 1.45,
+          ),
+        ),
       ],
     );
 
@@ -135,7 +152,9 @@ class FirstValueIntentSurface extends StatelessWidget {
       child: SafeArea(
         top: false,
         child: ListView(
-          padding: const EdgeInsets.fromLTRB(21, 14, 21, 34),
+          padding: tightCompact
+              ? const EdgeInsets.fromLTRB(16, 8, 16, 26)
+              : const EdgeInsets.fromLTRB(21, 14, 21, 34),
           children: [
             Text(
               material.mediaType == SourceMediaType.pdf ? 'PDF KAYNAĞIN HAZIR' : 'KAYNAĞIN HAZIR',
@@ -151,29 +170,51 @@ class FirstValueIntentSurface extends StatelessWidget {
               material.title,
               style: TextStyle(
                 color: AtelierStyle.ink,
-                fontSize: compact ? 22 : 28,
+                fontSize: tightCompact ? 19 : compact ? 22 : 28,
                 height: 1.12,
                 fontWeight: FontWeight.w900,
                 letterSpacing: -0.45,
               ),
             ),
-            SizedBox(height: compact ? 9 : 13),
+            SizedBox(height: tightCompact ? 6 : compact ? 9 : 13),
             AtelierSourceTrustStrip(sourceVersion: sourceVersion, showSourceName: !compact),
-            SizedBox(height: compact ? 10 : 14),
+            SizedBox(height: tightCompact ? 7 : compact ? 10 : 14),
             const AtelierLearningRail(phase: AtelierLearningPhase.source),
-            SizedBox(height: compact ? 12 : 16),
+            SizedBox(height: tightCompact ? 8 : compact ? 12 : 16),
             Container(
               key: const ValueKey('first-value-recommendation-card'),
-              padding: EdgeInsets.fromLTRB(18, compact ? 17 : 19, 18, 18),
+              padding: tightCompact
+                  ? const EdgeInsets.fromLTRB(14, 11, 14, 12)
+                  : EdgeInsets.fromLTRB(18, compact ? 17 : 19, 18, 18),
               decoration: BoxDecoration(
                 color: AtelierStyle.focus,
-                borderRadius: BorderRadius.circular(22),
+                borderRadius: BorderRadius.circular(tightCompact ? 18 : 22),
                 boxShadow: const [BoxShadow(color: Color(0x1A14224A), blurRadius: 24, offset: Offset(0, 12))],
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  if (compact) ...[
+                  if (tightCompact) ...[
+                    const Row(
+                      children: [
+                        CompanionView(state: CompanionVisualState.think, size: 36),
+                        SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            'İLK 60 SANİYE',
+                            style: TextStyle(
+                              color: AtelierStyle.mark,
+                              fontSize: 9.5,
+                              fontWeight: FontWeight.w900,
+                              letterSpacing: 0.9,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    guideCopy,
+                  ] else if (compact) ...[
                     const Align(
                       alignment: Alignment.centerLeft,
                       child: CompanionView(state: CompanionVisualState.think, size: 48),
@@ -189,23 +230,29 @@ class FirstValueIntentSurface extends StatelessWidget {
                         Expanded(child: guideCopy),
                       ],
                     ),
-                  SizedBox(height: compact ? 12 : 17),
+                  SizedBox(height: tightCompact ? 8 : compact ? 12 : 17),
                   FilledButton.icon(
                     key: const ValueKey('first-intent-recommend'),
                     onPressed: _recommendedAction,
                     style: FilledButton.styleFrom(
                       backgroundColor: AtelierStyle.mark,
                       foregroundColor: AtelierStyle.focus,
-                      minimumSize: const Size.fromHeight(54),
+                      minimumSize: Size.fromHeight(tightCompact ? 46 : 54),
                     ),
                     icon: Icon(_recommendListenFirst ? Icons.headphones_rounded : Icons.menu_book_outlined),
                     label: Text(_recommendedActionLabel),
                   ),
-                  SizedBox(height: compact ? 7 : 10),
-                  const Text(
+                  SizedBox(height: tightCompact ? 5 : compact ? 7 : 10),
+                  Text(
                     'Bu adım hazırlık. Öğrenme durumun yalnız kaynağı kapatıp kendi Hatırla denemeni yaptığında değişir.',
+                    maxLines: tightCompact ? 2 : null,
+                    overflow: tightCompact ? TextOverflow.ellipsis : TextOverflow.visible,
                     textAlign: TextAlign.center,
-                    style: TextStyle(color: Color(0xFFB9C5E4), fontSize: 11.5, height: 1.4),
+                    style: TextStyle(
+                      color: const Color(0xFFB9C5E4),
+                      fontSize: tightCompact ? 9.5 : 11.5,
+                      height: 1.4,
+                    ),
                   ),
                 ],
               ),
