@@ -783,8 +783,7 @@ class AtelierRecall extends StatelessWidget {
           children: [
             LayoutBuilder(
               builder: (context, constraints) {
-                final compactHeader =
-                    constraints.maxWidth < 280 || MediaQuery.textScalerOf(context).scale(1) > 1.25;
+                final compactHeader = constraints.maxWidth < 280 || MediaQuery.textScalerOf(context).scale(1) > 1.25;
                 return Row(
                   children: [
                     const Icon(Icons.visibility_off_outlined, color: AtelierStyle.mark, size: 17),
