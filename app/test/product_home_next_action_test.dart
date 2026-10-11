@@ -530,24 +530,21 @@ void main() {
     expect(find.byType(MaterialWorkspaceScreen), findsOneWidget);
     expect(LivingDeskReviewScope.active(tester.element(find.byType(MaterialWorkspaceScreen))), isTrue);
 
-    final quickRecapButton = find.byKey(const ValueKey('la0040-atelier-workspace-recap'));
-    expect(quickRecapButton, findsOneWidget);
-    await tapVisible(tester, quickRecapButton);
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 450));
-    expect(find.byType(QuickRecapScreen), findsOneWidget);
+    await tapVisible(tester, find.text('Diğer yollar'));
+    await pumpUntilFound(tester, find.byKey(const ValueKey('workspace-other-study-paths-scroll')));
+    final quickRecapButton = find.byKey(const ValueKey('workspace-other-quick-recap')).hitTestable();
+    await pumpUntilFound(tester, quickRecapButton);
+    await tester.tap(quickRecapButton);
+    await pumpUntilFound(tester, find.byType(QuickRecapScreen));
     expect(LivingDeskReviewScope.active(tester.element(find.byType(QuickRecapScreen))), isTrue);
 
     Navigator.of(tester.element(find.byType(QuickRecapScreen))).pop();
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 700));
+    final listenButton = find.byKey(const ValueKey('la0040-atelier-workspace-listen')).hitTestable();
+    await pumpUntilFound(tester, listenButton);
     expect(find.byType(MaterialWorkspaceScreen), findsOneWidget);
 
-    final listenButton = find.byKey(const ValueKey('la0040-atelier-workspace-listen'));
-    expect(listenButton, findsOneWidget);
     await tester.tap(listenButton);
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 450));
+    await pumpUntilFound(tester, find.byType(ListenScreen));
     expect(find.byType(ListenScreen), findsOneWidget);
     expect(LivingDeskReviewScope.active(tester.element(find.byType(ListenScreen))), isTrue);
   });
