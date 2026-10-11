@@ -231,7 +231,11 @@ void main() {
       telemetry: store.operationalTelemetry(),
     );
 
-    await tester.pumpWidget(MaterialApp(home: ProductShellScreen(runtime: runtime)));
+    await tester.pumpWidget(
+      MaterialApp(
+        home: LivingDeskReviewScope(child: ProductShellScreen(runtime: runtime)),
+      ),
+    );
     await _pumpUntilFound(tester, find.text('Biyoloji · Fotosentez'));
     await tester.tap(find.text('Kütüphane').last);
     await tester.pumpAndSettle();

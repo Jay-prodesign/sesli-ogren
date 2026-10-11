@@ -119,8 +119,11 @@ void main() {
     await _pumpUntilFound(tester, find.text('Kendi başına hatırladın'));
 
     expect(find.byType(ProductShellScreen), findsOneWidget);
-    expect(find.text('Kendi başına hatırladın. Sonraki bağımsız deneme daha sonra.'), findsOneWidget);
     expect(find.text('Çalışma alanına dön'), findsOneWidget);
+    final durableEvidence = find.text('İlk bağımsız hatırlaman kaydedildi. Kalıcılığı sonraki deneme gösterecek.');
+    await tester.scrollUntilVisible(durableEvidence, 180, scrollable: find.byType(Scrollable).last);
+    await tester.pump();
+    expect(durableEvidence, findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 }

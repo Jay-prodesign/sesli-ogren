@@ -99,7 +99,10 @@ void main() {
     expect(find.text('Dinle'), findsOneWidget);
     expect(find.text('Hızlı özet'), findsOneWidget);
     expect(find.text('Bildiğimi kontrol et'), findsOneWidget);
-    expect(find.text('Birlikte odaklanalım'), findsOneWidget);
+    final focusPath = find.text('Birlikte odaklanalım');
+    await tester.scrollUntilVisible(focusPath, 140, scrollable: find.byType(Scrollable).last);
+    await tester.pump();
+    expect(focusPath, findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 

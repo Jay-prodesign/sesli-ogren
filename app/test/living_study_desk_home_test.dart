@@ -59,6 +59,7 @@ void main() {
     WidgetTester tester, {
     required LearningContinuation continuation,
     required VoidCallback onOpenWorkspace,
+    required VoidCallback onOpenReader,
     required VoidCallback onOpenLearning,
   }) async {
     await tester.pumpWidget(
@@ -72,6 +73,7 @@ void main() {
             sourceText: 'Fotosentez sırasında klorofil ışık enerjisinin yakalanmasına yardım eder.',
             otherMaterials: const [],
             onOpenWorkspace: onOpenWorkspace,
+            onOpenReader: onOpenReader,
             onOpenLearning: onOpenLearning,
             onOpenListen: () {},
             onOpenMaterial: (_) {},
@@ -87,35 +89,40 @@ void main() {
   ) async {
     usePhoneViewport(tester);
     var workspaceOpens = 0;
+    var readerOpens = 0;
     var learningOpens = 0;
     await pumpHome(
       tester,
       continuation: continuationFor(RecallOutcome.correct, RecallStateKind.retrievedOnce),
       onOpenWorkspace: () => workspaceOpens++,
+      onOpenReader: () => readerOpens++,
       onOpenLearning: () => learningOpens++,
     );
 
     expect(find.text('Kendi başına hatırladın'), findsOneWidget);
     expect(find.textContaining('Kalıcılığı sonraki deneme gösterecek'), findsOneWidget);
     expect(find.byKey(const ValueKey('la0040-home-evidence-payoff')), findsOneWidget);
-    expect(find.text('Bu deneme tamam. Kaynağın burada.'), findsOneWidget);
-    expect(find.text('Kaynağa dön'), findsOneWidget);
+    expect(find.text('Bu tur tamam. Sonra yeniden hatırla.'), findsOneWidget);
+    expect(find.text('Çalışma alanına dön'), findsOneWidget);
     final cta = find.byKey(const ValueKey('la0040-living-continue'));
     await tapHomeCta(tester, cta);
     await tester.pump();
 
     expect(workspaceOpens, 1);
+    expect(readerOpens, 0);
     expect(learningOpens, 0);
   });
 
   testWidgets('review-required Home CTA keeps the learner in the repair and Recall journey', (tester) async {
     usePhoneViewport(tester);
     var workspaceOpens = 0;
+    var readerOpens = 0;
     var learningOpens = 0;
     await pumpHome(
       tester,
       continuation: continuationFor(RecallOutcome.unknown, RecallStateKind.notAssessed),
       onOpenWorkspace: () => workspaceOpens++,
+      onOpenReader: () => readerOpens++,
       onOpenLearning: () => learningOpens++,
     );
 
@@ -129,6 +136,7 @@ void main() {
     await tester.pump();
 
     expect(workspaceOpens, 0);
-    expect(learningOpens, 1);
+    expect(readerOpens, 1);
+    expect(learningOpens, 0);
   });
 }
