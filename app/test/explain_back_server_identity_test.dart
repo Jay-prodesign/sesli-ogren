@@ -346,9 +346,7 @@ void main() {
       findsOneWidget,
     );
     expect(
-      find.byWidgetPredicate(
-        (widget) => widget is CompanionView && widget.state == CompanionVisualState.correct,
-      ),
+      find.byWidgetPredicate((widget) => widget is CompanionView && widget.state == CompanionVisualState.correct),
       findsNothing,
     );
     expect(find.text('Hatırla ile devam et'), findsOneWidget);
