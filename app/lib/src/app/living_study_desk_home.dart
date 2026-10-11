@@ -262,10 +262,7 @@ class LivingStudyDeskHome extends StatelessWidget {
             ),
           ),
         ),
-        if (includeReason) ...[
-          SizedBox(height: compactFirstViewport ? 3 : 5),
-          nextReasonCopy(reasonSize: reasonSize),
-        ],
+        if (includeReason) ...[SizedBox(height: compactFirstViewport ? 3 : 5), nextReasonCopy(reasonSize: reasonSize)],
       ],
     );
 
@@ -430,10 +427,7 @@ class LivingStudyDeskHome extends StatelessWidget {
             ),
           ),
         ),
-        if (compactFirstViewport) ...[
-          const SizedBox(height: 6),
-          nextReasonCopy(reasonSize: 11.5),
-        ],
+        if (compactFirstViewport) ...[const SizedBox(height: 6), nextReasonCopy(reasonSize: 11.5)],
         const SizedBox(height: 6),
         Align(
           alignment: Alignment.center,
