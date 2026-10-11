@@ -1,0 +1,63 @@
+name: flutter-proof
+
+# CMD-0008 (LA-0017): exact-head verification of the Architecture Proof Flutter client at
+# spike/architecture-proof/client on the repository SDK pin (.flutter-version). Read-only; no secrets.
+# Third-party actions are pinned to immutable commit SHAs (provenance: REUSE-0004, REUSE-0005).
+# flutter-action caching is disabled so its internal mutable-tag cache steps never execute.
+
+on:
+  pull_request:
+    paths:
+      - ".flutter-version"
+      - "spike/architecture-proof/client/**"
+      - ".github/workflows/flutter-proof.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: flutter-proof-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  proof:
+    name: Flutter proof client
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: spike/architecture-proof/client
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+
+      - name: Read Flutter pin
+        id: flutter_pin
+        working-directory: .
+        shell: bash
+        run: |
+          version="$(tr -d '[:space:]' < .flutter-version)"
+          test -n "$version"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
+        with:
+          channel: stable
+          flutter-version: ${{ steps.flutter_pin.outputs.version }}
+          cache: false
+          pub-cache: false
+
+      - name: Resolve dependencies
+        run: flutter pub get
+
+      - name: Format check
+        run: dart format --output=none --set-exit-if-changed .
+
+      - name: Analyze
+        run: flutter analyze
+
+      - name: Test
+        run: flutter test

@@ -1,0 +1,207 @@
+{
+ "fixture_id": "R7-FIX-FRA",
+ "fixture_version": "1.0",
+ "domain_label": "Mathematics · Fraction equivalence",
+ "voice_locale": "en-US",
+ "source": {
+  "id": "R7-SRC-FRA-001",
+  "version": "1.0",
+  "authority": "Project-authored synthetic QA fixture",
+  "text": "Two fractions represent the same quantity when they describe the same proportion of a whole. Multiplying or dividing the numerator and denominator by the same nonzero number changes the representation but preserves the value. In this fixture, 1/2 and 2/4 are equivalent.",
+  "provenance": "Created inside Learning App Round 7 QA on 2026-09-30; synthetic test content."
+ },
+ "objective": "Explain why 1/2 and 2/4 represent an equal quantity.",
+ "orientation": "Two different-looking fractions. The question is whether they describe the same part of one whole.",
+ "teaching": [
+  {
+   "text": "A whole can be split into equal parts. 1/2 is 1 of 2 equal parts.",
+   "reveal": [
+    "whole",
+    "half",
+    "e_part_half"
+   ]
+  },
+  {
+   "text": "2/4 is 2 of 4 equal parts of the same whole.",
+   "reveal": [
+    "fourths",
+    "e_part_fourths"
+   ]
+  },
+  {
+   "text": "Multiplying numerator and denominator by the same number, here 2, changes the representation but keeps the same proportion. So 1/2 and 2/4 are equivalent.",
+   "reveal": [
+    "e_scale",
+    "value",
+    "e_same_half",
+    "e_same_fourths"
+   ]
+  }
+ ],
+ "challenge": {
+  "prompt": "Explain why 1/2 and 2/4 represent the same quantity.",
+  "focus": [
+   "half",
+   "fourths"
+  ],
+  "visibility": {
+   "e_scale": "OPEN",
+   "value": "OPEN",
+   "e_same_half": "OPEN",
+   "e_same_fourths": "OPEN"
+  }
+ },
+ "responses": {
+  "STRONG": "Numerator and denominator of 1/2 are both multiplied by 2, so 2/4 describes the same proportion of the whole.",
+  "PARTIAL": "1/2 = 2/4. The shaded parts match, but I can't say why.",
+  "MISCONCEPTION": "2/4 is larger, because 2 and 4 are larger than 1 and 2."
+ },
+ "branches": {
+  "STRONG": {
+   "feedback": "You explained the common scaling and the unchanged proportion.",
+   "next_action": "Continue: test the same relation on another pair.",
+   "reason_code": "R_CONTINUE_AFTER_STRONG",
+   "focus": [
+    "value",
+    "e_scale"
+   ],
+   "visibility": {}
+  },
+  "PARTIAL": {
+   "feedback": "Your representation is right: the shaded parts match. The reason is still missing.",
+   "hint": "Compare how the numerator and the denominator changed from 1/2 to 2/4.",
+   "repair_prompt": "What was done to both the numerator and the denominator to get from 1/2 to 2/4?",
+   "repair_answer": "Both were multiplied by 2.",
+   "next_action": "Targeted explanation retry.",
+   "reason_code": "R_REPAIR_PARTIAL",
+   "focus": [
+    "e_scale"
+   ],
+   "visibility": {
+    "e_scale": "OPEN"
+   }
+  },
+  "MISCONCEPTION": {
+   "feedback": "Your answer compares the size of the numbers, not the part of the whole.",
+   "corrective": "Larger numbers do not mean a larger quantity here. The shaded part of 2/4 covers exactly the same extent of the whole as 1/2.",
+   "repair_prompt": "Look at the two bars. Does 2/4 cover more of the whole than 1/2, or the same?",
+   "repair_answer": "The same.",
+   "next_action": "Corrective teaching, then a smaller comparison check.",
+   "reason_code": "R_REPAIR_MISCONCEPTION",
+   "focus": [
+    "value",
+    "e_same_half",
+    "e_same_fourths"
+   ],
+   "visibility": {
+    "e_scale": "DIMMED"
+   }
+  },
+  "UNKNOWN": {
+   "feedback": "The input channel failed before your answer was captured. Nothing about your understanding was recorded.",
+   "next_action": "Retry, or answer in text instead.",
+   "reason_code": "R_RETRY_UNKNOWN",
+   "focus": [],
+   "visibility": {}
+  }
+ },
+ "completion": {
+  "summary": "You explained why 1/2 and 2/4 are equivalent: the same scaling of numerator and denominator keeps the same proportion.",
+  "next_continuation": "Continue: another equivalent pair."
+ },
+ "scene": {
+  "source_ref": "R7-SRC-FRA-001",
+  "domain_theme": "fraction_relation",
+  "theme_confidence": 0.9,
+  "nodes": [
+   {
+    "id": "whole",
+    "role": "whole",
+    "label": "One whole",
+    "semantic_ref": "part-whole"
+   },
+   {
+    "id": "half",
+    "role": "part",
+    "label": "1/2",
+    "semantic_ref": "part-whole",
+    "attrs": {
+     "numerator": 1,
+     "denominator": 2
+    }
+   },
+   {
+    "id": "fourths",
+    "role": "part",
+    "label": "2/4",
+    "semantic_ref": "part-whole",
+    "attrs": {
+     "numerator": 2,
+     "denominator": 4
+    }
+   },
+   {
+    "id": "value",
+    "role": "invariant",
+    "label": "Same proportion of the whole",
+    "semantic_ref": "invariant value"
+   }
+  ],
+  "edges": [
+   {
+    "id": "e_part_half",
+    "from": "whole",
+    "to": "half",
+    "relation": "2 equal parts",
+    "direction": "forward",
+    "semantic_ref": "part-whole"
+   },
+   {
+    "id": "e_part_fourths",
+    "from": "whole",
+    "to": "fourths",
+    "relation": "4 equal parts",
+    "direction": "forward",
+    "semantic_ref": "part-whole"
+   },
+   {
+    "id": "e_scale",
+    "from": "half",
+    "to": "fourths",
+    "relation": "× 2 / × 2",
+    "direction": "forward",
+    "semantic_ref": "common nonzero scaling"
+   },
+   {
+    "id": "e_same_half",
+    "from": "half",
+    "to": "value",
+    "relation": "represents",
+    "direction": "forward",
+    "semantic_ref": "same proportion"
+   },
+   {
+    "id": "e_same_fourths",
+    "from": "fourths",
+    "to": "value",
+    "relation": "represents",
+    "direction": "forward",
+    "semantic_ref": "same proportion"
+   }
+  ],
+  "primitives": [
+   "NODE",
+   "PARTITION",
+   "PAIR",
+   "PATH",
+   "FOCUS_MARK"
+  ],
+  "layout_hint": "PARTITION",
+  "decorative_tokens": [
+   "subtle_grid"
+  ],
+  "motion_cue": "partition_morph",
+  "evidence_state": "UNKNOWN",
+  "fallback_level": "FULL"
+ }
+}

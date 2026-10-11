@@ -1,0 +1,653 @@
+import 'dart:typed_data';
+
+import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:sesli_ogren/src/app/app_runtime.dart';
+import 'package:sesli_ogren/src/app/first_value_intent_surface.dart';
+import 'package:sesli_ogren/src/app/learning_slice_screen.dart';
+import 'package:sesli_ogren/src/app/product_shell_screen.dart';
+import 'package:sesli_ogren/src/app/living_study_desk_home.dart';
+import 'package:sesli_ogren/src/app/listen_screen.dart';
+import 'package:sesli_ogren/src/app/material_workspace_screen.dart';
+import 'package:sesli_ogren/src/app/quick_recap_screen.dart';
+import 'package:sesli_ogren/src/app/source_reader_screen.dart';
+import 'package:sesli_ogren/src/data/pdf_text_extractor.dart';
+import 'package:sesli_ogren/src/data/source_ingest_service.dart';
+import 'package:sesli_ogren/src/data/sqlite_source_store.dart';
+import 'package:sesli_ogren/src/domain/learning_contracts.dart';
+import 'package:sesli_ogren/src/domain/learning_truth.dart';
+import 'package:sesli_ogren/src/learning/recall_learning_service.dart';
+import 'package:sqflite_common_ffi/sqflite_ffi.dart';
+
+class _UnusedPdfExtractor implements PdfTextExtractor {
+  const _UnusedPdfExtractor();
+
+  @override
+  Future<ExtractedPdf> extract(Uint8List bytes, {required String sourceName}) {
+    throw UnimplementedError();
+  }
+}
+
+Future<AppRuntime> _runtimeWithEvidence({
+  required RecallResponseDisposition disposition,
+  required bool submitCorrectAnswer,
+}) async {
+  final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
+  final ingest = SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor());
+  final recall = RecallLearningService(sourceStore: store, learningStore: store.learningTruthStore());
+  final runtime = AppRuntime(
+    learner: AppRuntime.localM5LearnerFixture,
+    store: store,
+    ingest: ingest,
+    recall: recall,
+    telemetry: store.operationalTelemetry(),
+  );
+
+  await ingest.ingestPastedText(
+    learner: runtime.learner,
+    materialId: AppRuntime.primaryMaterialId,
+    text:
+        'Fotosentez sırasında klorofil ışık enerjisini kimyasal enerjiye dönüştürmeye yardımcı olur. '
+        'Bitkiler karbondioksit kullanır ve oksijen açığa çıkarır. '
+        'Mitokondri hücresel solunumla kullanılabilir enerji üretimine katkı sağlar.',
+    sourceName: 'Biyoloji çalışma notu',
+  );
+  final prompt = await recall.createCurrentPrompt(learner: runtime.learner, materialId: AppRuntime.primaryMaterialId);
+  final session = await recall.openAttempt(learner: runtime.learner, actionId: prompt.id);
+  final action = await store.learningTruthStore().recallAction(learner: runtime.learner, actionId: prompt.id);
+  await recall.submit(
+    learner: runtime.learner,
+    actionId: prompt.id,
+    attemptId: session.attempt.attemptId,
+    disposition: disposition,
+    answer: submitCorrectAnswer ? action!.expectedAnswer : '',
+  );
+  return runtime;
+}
+
+Widget _testApp(Widget home) => MaterialApp(
+  builder: (context, child) =>
+      MediaQuery(data: MediaQuery.of(context).copyWith(disableAnimations: true), child: child!),
+  home: home,
+);
+
+void usePhoneViewport(WidgetTester tester) {
+  tester.view.physicalSize = const Size(390, 844);
+  tester.view.devicePixelRatio = 1;
+  addTearDown(tester.view.resetPhysicalSize);
+  addTearDown(tester.view.resetDevicePixelRatio);
+}
+
+Future<void> tapVisible(WidgetTester tester, Finder finder) async {
+  await tester.ensureVisible(finder);
+  await tester.pump();
+  await tester.tap(finder);
+}
+
+Future<void> pumpUntilFound(WidgetTester tester, Finder finder, {int maxPumps = 100}) async {
+  for (var i = 0; i < maxPumps; i++) {
+    await tester.pump(const Duration(milliseconds: 20));
+    if (finder.evaluate().isNotEmpty) return;
+  }
+  fail('Expected source-first route state was not reached within bounded pumps.');
+}
+
+void main() {
+  testWidgets('first-value recommendation CTA stays in the first viewport at 320px and 150% text', (tester) async {
+    tester.view.physicalSize = const Size(320, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
+    addTearDown(store.close);
+    final ingest = SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor());
+    const materialId = MaterialId('first-value-large-text');
+    final ingested = await ingest.ingestPastedText(
+      learner: AppRuntime.localM5LearnerFixture,
+      materialId: materialId,
+      text:
+          'Fotosentez ışık enerjisini kimyasal enerjiye dönüştürür. '
+          'Klorofil ışığın soğurulmasına yardım eder.',
+      sourceName: 'Fotosentez: ışık ve enerji',
+    );
+    final material = await store.material(learner: AppRuntime.localM5LearnerFixture, materialId: materialId);
+    expect(material, isNotNull);
+
+    var recommendedOpens = 0;
+    await tester.pumpWidget(
+      MaterialApp(
+        builder: (context, child) => MediaQuery(
+          data: MediaQuery.of(context).copyWith(disableAnimations: true, textScaler: const TextScaler.linear(1.5)),
+          child: child!,
+        ),
+        home: FirstValueIntentSurface(
+          material: material!,
+          sourceText: ingested.extractedContent.normalizedText,
+          sourceVersion: ingested.sourceVersion,
+          onReadSource: () => recommendedOpens += 1,
+          onQuickRecap: () {},
+          onRecall: () {},
+          onListen: () {},
+          onFocus: () {},
+        ),
+      ),
+    );
+    await tester.pump();
+
+    final cta = find.byKey(const ValueKey('first-intent-recommend'));
+    expect(cta, findsOneWidget);
+    expect(cta.hitTestable(), findsOneWidget);
+    expect(tester.getBottomRight(cta).dy, lessThanOrEqualTo(844));
+
+    await tester.tap(cta);
+    expect(recommendedOpens, 1);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('first session flows from empty Home through source intent and back to a usable Home', (tester) async {
+    usePhoneViewport(tester);
+    final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
+    addTearDown(store.close);
+    final ingest = SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor());
+    final runtime = AppRuntime(
+      learner: AppRuntime.localM5LearnerFixture,
+      store: store,
+      ingest: ingest,
+      recall: RecallLearningService(sourceStore: store, learningStore: store.learningTruthStore()),
+      telemetry: store.operationalTelemetry(),
+    );
+
+    await tester.pumpWidget(_testApp(LivingDeskReviewScope(child: ProductShellScreen(runtime: runtime))));
+    await pumpUntilFound(tester, find.text('İlk kaynağımı ekle'));
+
+    await tapVisible(tester, find.text('İlk kaynağımı ekle'));
+    await pumpUntilFound(tester, find.text('Metin yapıştır'));
+    await tapVisible(tester, find.text('Metin yapıştır'));
+    await pumpUntilFound(tester, find.byKey(const ValueKey('pasted-material-text')));
+
+    await tester.enterText(
+      find.byKey(const ValueKey('pasted-material-text')),
+      'Fotosentez ışık enerjisini kimyasal enerjiye dönüştürür. Klorofil ışığın soğurulmasına yardım eder.',
+    );
+    await tapVisible(tester, find.text('Metni ekle · çalışma alanını aç'));
+    await pumpUntilFound(tester, find.byKey(const ValueKey('first-value-intent')));
+
+    expect(find.text('Önce kaynağın tamamını bir kez gör.'), findsOneWidget);
+    expect(find.text('Kaynağı aç'), findsOneWidget);
+
+    await tapVisible(tester, find.text('Kaynağı aç'));
+    await pumpUntilFound(tester, find.byType(SourceReaderScreen));
+    expect(find.textContaining('Fotosentez'), findsWidgets);
+
+    Navigator.of(tester.element(find.byType(SourceReaderScreen))).pop();
+    await pumpUntilFound(tester, find.text('İlk aktif denemeni yap'));
+    expect(find.byKey(const ValueKey('first-value-intent')), findsNothing);
+    expect(find.text('İlk aktif denemeni yap'), findsOneWidget);
+
+    Navigator.of(tester.element(find.byType(MaterialWorkspaceScreen))).pop();
+    await pumpUntilFound(tester, find.text('Kaldığın yer hazır.'));
+    expect(find.text('İlk hatırlama denemeni yap'), findsOneWidget);
+    expect(find.text('Hatırlamayı dene'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('Home review action opens the persisted repair continuation', (tester) async {
+    usePhoneViewport(tester);
+    final runtime = await _runtimeWithEvidence(
+      disposition: RecallResponseDisposition.unknown,
+      submitCorrectAnswer: false,
+    );
+    addTearDown(runtime.close);
+
+    await tester.pumpWidget(_testApp(ProductShellScreen(runtime: runtime)));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+
+    final action = find.text('Kaynağı gözden geçir');
+    expect(action, findsOneWidget);
+    await tapVisible(tester, action);
+    await pumpUntilFound(tester, find.byType(SourceReaderScreen));
+
+    expect(find.byType(SourceReaderScreen), findsOneWidget);
+    expect(find.text('Kaynağı kapat ve hatırla'), findsOneWidget);
+  });
+
+  testWidgets('Library continuation opens the canonical repair step', (tester) async {
+    usePhoneViewport(tester);
+    final runtime = await _runtimeWithEvidence(
+      disposition: RecallResponseDisposition.unknown,
+      submitCorrectAnswer: false,
+    );
+    addTearDown(runtime.close);
+
+    await tester.pumpWidget(_testApp(LivingDeskReviewScope(child: ProductShellScreen(runtime: runtime))));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 150));
+
+    await tapVisible(tester, find.text('Kütüphane'));
+    await tester.pump(const Duration(milliseconds: 150));
+    final continueAction = find.byKey(ValueKey('library-continue-${AppRuntime.primaryMaterialId.value}'));
+    expect(continueAction, findsOneWidget);
+    await tapVisible(tester, continueAction);
+    await pumpUntilFound(tester, find.byType(SourceReaderScreen));
+
+    expect(find.byType(SourceReaderScreen), findsOneWidget);
+    expect(find.text('Kaynağı kapat ve hatırla'), findsOneWidget);
+  });
+
+  testWidgets('Progress exposes and opens the same canonical repair action as Home and Library', (tester) async {
+    usePhoneViewport(tester);
+    final runtime = await _runtimeWithEvidence(
+      disposition: RecallResponseDisposition.unknown,
+      submitCorrectAnswer: false,
+    );
+    addTearDown(runtime.close);
+
+    await tester.pumpWidget(_testApp(LivingDeskReviewScope(child: ProductShellScreen(runtime: runtime))));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 150));
+
+    await tapVisible(tester, find.text('İlerleme'));
+    await tester.pump(const Duration(milliseconds: 150));
+
+    expect(find.text('Kaynağı gözden geçir'), findsOneWidget);
+    final continueAction = find.byKey(ValueKey('progress-continue-${AppRuntime.primaryMaterialId.value}'));
+    expect(continueAction, findsOneWidget);
+    await tapVisible(tester, continueAction);
+    await pumpUntilFound(tester, find.byType(SourceReaderScreen));
+
+    expect(find.byType(SourceReaderScreen), findsOneWidget);
+    expect(find.text('Kaynağı kapat ve hatırla'), findsOneWidget);
+  });
+
+  testWidgets('Home other-material entry preserves that material canonical repair action', (tester) async {
+    usePhoneViewport(tester);
+    final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
+    var now = DateTime.utc(2026, 10, 11, 12);
+    final ingest = SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor(), now: () => now);
+    final recall = RecallLearningService(sourceStore: store, learningStore: store.learningTruthStore(), now: () => now);
+    final runtime = AppRuntime(
+      learner: AppRuntime.localM5LearnerFixture,
+      store: store,
+      ingest: ingest,
+      recall: recall,
+      telemetry: store.operationalTelemetry(),
+    );
+    addTearDown(runtime.close);
+
+    const repairMaterial = MaterialId('home-other-repair');
+    await ingest.ingestPastedText(
+      learner: runtime.learner,
+      materialId: repairMaterial,
+      text:
+          'Mitokondri hücresel solunumla enerji dönüşümüne katkı sağlar. '
+          'ATP hücrenin doğrudan kullanabildiği enerji taşıyıcılarından biridir.',
+      sourceName: 'Enerji onarım notu',
+    );
+    final repairPrompt = await recall.createCurrentPrompt(learner: runtime.learner, materialId: repairMaterial);
+    final repairSession = await recall.openAttempt(learner: runtime.learner, actionId: repairPrompt.id);
+    await recall.submit(
+      learner: runtime.learner,
+      actionId: repairPrompt.id,
+      attemptId: repairSession.attempt.attemptId,
+      disposition: RecallResponseDisposition.unknown,
+      answer: '',
+    );
+
+    now = now.add(const Duration(minutes: 1));
+    await ingest.ingestPastedText(
+      learner: runtime.learner,
+      materialId: AppRuntime.primaryMaterialId,
+      text:
+          'Fotosentez sırasında klorofil ışık enerjisinin yakalanmasına yardım eder. '
+          'Bitkiler bu süreçte karbondioksit kullanır.',
+      sourceName: 'Güncel çalışma notu',
+    );
+    final currentPrompt = await recall.createCurrentPrompt(
+      learner: runtime.learner,
+      materialId: AppRuntime.primaryMaterialId,
+    );
+    final currentSession = await recall.openAttempt(learner: runtime.learner, actionId: currentPrompt.id);
+    await recall.submit(
+      learner: runtime.learner,
+      actionId: currentPrompt.id,
+      attemptId: currentSession.attempt.attemptId,
+      disposition: RecallResponseDisposition.unknown,
+      answer: '',
+    );
+
+    await tester.pumpWidget(_testApp(LivingDeskReviewScope(child: ProductShellScreen(runtime: runtime))));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 150));
+
+    expect(find.text('Güncel çalışma notu'), findsWidgets);
+    expect(find.text('Enerji onarım notu'), findsOneWidget);
+    await tapVisible(tester, find.text('Enerji onarım notu'));
+    await pumpUntilFound(tester, find.byType(SourceReaderScreen));
+
+    expect(find.text('Kaynağı kapat ve hatırla'), findsOneWidget);
+    expect(find.byType(MaterialWorkspaceScreen), findsNothing);
+  });
+
+  testWidgets('Home and Progress keep the canonical next-action reason complete at large text', (tester) async {
+    tester.view.physicalSize = const Size(320, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    final runtime = await _runtimeWithEvidence(
+      disposition: RecallResponseDisposition.unknown,
+      submitCorrectAnswer: false,
+    );
+    addTearDown(runtime.close);
+    final continuation = await runtime.recall.reopen(
+      learner: runtime.learner,
+      materialId: AppRuntime.primaryMaterialId,
+    );
+    expect(continuation, isNotNull);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        builder: (context, child) => MediaQuery(
+          data: MediaQuery.of(context).copyWith(disableAnimations: true, textScaler: const TextScaler.linear(1.6)),
+          child: child!,
+        ),
+        home: LivingDeskReviewScope(child: ProductShellScreen(runtime: runtime)),
+      ),
+    );
+    await pumpUntilFound(tester, find.byKey(const ValueKey('la0040-home-next-reason')));
+
+    final homeReason = tester.widget<Text>(find.byKey(const ValueKey('la0040-home-next-reason')));
+    expect(homeReason.data, continuation!.nextAction.reasonText);
+    expect(homeReason.maxLines, isNull);
+    expect(homeReason.overflow, isNull);
+
+    final progressNav = find.byIcon(Icons.insights_outlined).hitTestable();
+    await pumpUntilFound(tester, progressNav);
+    await tester.tap(progressNav);
+    await tester.pump();
+    await pumpUntilFound(tester, find.byKey(ValueKey('progress-next-reason-${AppRuntime.primaryMaterialId.value}')));
+
+    final progressReason = tester.widget<Text>(
+      find.byKey(ValueKey('progress-next-reason-${AppRuntime.primaryMaterialId.value}')),
+    );
+    expect(progressReason.data, continuation.nextAction.reasonText);
+    expect(progressReason.maxLines, isNull);
+    expect(progressReason.overflow, isNull);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('Home keeps the primary next-action CTA in the first viewport at 320px and 150% text', (tester) async {
+    tester.view.physicalSize = const Size(320, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    final runtime = await _runtimeWithEvidence(
+      disposition: RecallResponseDisposition.answer,
+      submitCorrectAnswer: true,
+    );
+    addTearDown(runtime.close);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        builder: (context, child) => MediaQuery(
+          data: MediaQuery.of(context).copyWith(disableAnimations: true, textScaler: const TextScaler.linear(1.5)),
+          child: child!,
+        ),
+        home: LivingDeskReviewScope(child: ProductShellScreen(runtime: runtime)),
+      ),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 180));
+
+    final cta = find.byKey(const ValueKey('la0040-living-continue'));
+    expect(cta, findsOneWidget);
+    expect(cta.hitTestable(), findsOneWidget);
+    expect(tester.getBottomRight(cta).dy, lessThanOrEqualTo(844));
+    expect(find.text('Bu tur tamam. Sonra yeniden hatırla.'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('Home prioritizes a material that needs repair over a newer completed material', (tester) async {
+    usePhoneViewport(tester);
+    final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
+    var now = DateTime.utc(2026, 10, 11, 12);
+    final ingest = SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor(), now: () => now);
+    final recall = RecallLearningService(sourceStore: store, learningStore: store.learningTruthStore(), now: () => now);
+    final runtime = AppRuntime(
+      learner: AppRuntime.localM5LearnerFixture,
+      store: store,
+      ingest: ingest,
+      recall: recall,
+      telemetry: store.operationalTelemetry(),
+    );
+    addTearDown(runtime.close);
+
+    const repairMaterial = MaterialId('home-priority-repair');
+    await ingest.ingestPastedText(
+      learner: runtime.learner,
+      materialId: repairMaterial,
+      text:
+          'Mitokondri hücresel solunumla enerji dönüşümüne katkı sağlar. '
+          'ATP hücrenin doğrudan kullanabildiği enerji taşıyıcılarından biridir.',
+      sourceName: 'Enerji onarım notu',
+    );
+    final repairPrompt = await recall.createCurrentPrompt(learner: runtime.learner, materialId: repairMaterial);
+    final repairSession = await recall.openAttempt(learner: runtime.learner, actionId: repairPrompt.id);
+    await recall.submit(
+      learner: runtime.learner,
+      actionId: repairPrompt.id,
+      attemptId: repairSession.attempt.attemptId,
+      disposition: RecallResponseDisposition.unknown,
+      answer: '',
+    );
+
+    now = now.add(const Duration(minutes: 1));
+
+    const completedMaterial = MaterialId('home-priority-completed');
+    await ingest.ingestPastedText(
+      learner: runtime.learner,
+      materialId: completedMaterial,
+      text:
+          'Fotosentez sırasında klorofil ışık enerjisini kimyasal enerjiye dönüştürmeye yardım eder. '
+          'Bitkiler karbondioksit kullanır ve oksijen açığa çıkarır.',
+      sourceName: 'Yeni tamamlanan biyoloji notu',
+    );
+    final completedPrompt = await recall.createCurrentPrompt(learner: runtime.learner, materialId: completedMaterial);
+    final completedSession = await recall.openAttempt(learner: runtime.learner, actionId: completedPrompt.id);
+    final completedAction = await store.learningTruthStore().recallAction(
+      learner: runtime.learner,
+      actionId: completedPrompt.id,
+    );
+    await recall.submit(
+      learner: runtime.learner,
+      actionId: completedPrompt.id,
+      attemptId: completedSession.attempt.attemptId,
+      disposition: RecallResponseDisposition.answer,
+      answer: completedAction!.expectedAnswer,
+    );
+
+    await tester.pumpWidget(_testApp(LivingDeskReviewScope(child: ProductShellScreen(runtime: runtime))));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 180));
+
+    expect(find.text('Enerji onarım notu'), findsWidgets);
+    expect(find.text('Kaynağa dön, sonra yeniden dene'), findsOneWidget);
+    final repairAction = find.text('Kaynağı gözden geçir');
+    expect(repairAction, findsOneWidget);
+
+    await tapVisible(tester, repairAction);
+    await pumpUntilFound(tester, find.byType(SourceReaderScreen));
+
+    expect(find.text('Kaynağı kapat ve hatırla'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('Home completed action returns to the material workspace instead of forcing passive review', (
+    tester,
+  ) async {
+    usePhoneViewport(tester);
+    final runtime = await _runtimeWithEvidence(
+      disposition: RecallResponseDisposition.answer,
+      submitCorrectAnswer: true,
+    );
+    addTearDown(runtime.close);
+
+    await tester.pumpWidget(_testApp(ProductShellScreen(runtime: runtime)));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+
+    final action = find.text('Çalışma alanına dön');
+    expect(action, findsOneWidget);
+    await tapVisible(tester, action);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+
+    expect(find.text('Biyoloji çalışma notu'), findsWidgets);
+    expect(find.byType(MaterialWorkspaceScreen), findsOneWidget);
+    expect(find.byType(SourceReaderScreen), findsNothing);
+    expect(find.byType(LearningSliceScreen), findsNothing);
+  });
+  testWidgets('source-first scope survives Home to Workspace, Recap and Listen routes', (tester) async {
+    usePhoneViewport(tester);
+    final runtime = await _runtimeWithEvidence(
+      disposition: RecallResponseDisposition.answer,
+      submitCorrectAnswer: true,
+    );
+    addTearDown(runtime.close);
+
+    await tester.pumpWidget(_testApp(LivingDeskReviewScope(child: ProductShellScreen(runtime: runtime))));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+
+    final workspaceEntry = find.byKey(const ValueKey('la0040-living-material-open'));
+    expect(workspaceEntry, findsOneWidget);
+    await tapVisible(tester, workspaceEntry);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 450));
+    expect(find.byType(MaterialWorkspaceScreen), findsOneWidget);
+    expect(LivingDeskReviewScope.active(tester.element(find.byType(MaterialWorkspaceScreen))), isTrue);
+
+    await tapVisible(tester, find.text('Diğer yollar'));
+    await pumpUntilFound(tester, find.byKey(const ValueKey('workspace-other-study-paths-scroll')));
+    final quickRecapButton = find.byKey(const ValueKey('workspace-other-quick-recap')).hitTestable();
+    await pumpUntilFound(tester, quickRecapButton);
+    await tester.tap(quickRecapButton);
+    await pumpUntilFound(tester, find.byType(QuickRecapScreen));
+    expect(LivingDeskReviewScope.active(tester.element(find.byType(QuickRecapScreen))), isTrue);
+
+    Navigator.of(tester.element(find.byType(QuickRecapScreen))).pop();
+    final listenButton = find.byKey(const ValueKey('la0040-atelier-workspace-listen')).hitTestable();
+    await pumpUntilFound(tester, listenButton);
+    expect(find.byType(MaterialWorkspaceScreen), findsOneWidget);
+
+    await tester.tap(listenButton);
+    await pumpUntilFound(tester, find.byType(ListenScreen));
+    expect(find.byType(ListenScreen), findsOneWidget);
+    expect(LivingDeskReviewScope.active(tester.element(find.byType(ListenScreen))), isTrue);
+  });
+
+  testWidgets('source replacement returns Home to a fresh active-learning start', (tester) async {
+    usePhoneViewport(tester);
+    final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
+    addTearDown(store.close);
+    final ingest = SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor());
+    final runtime = AppRuntime(
+      learner: AppRuntime.localM5LearnerFixture,
+      store: store,
+      ingest: ingest,
+      recall: RecallLearningService(sourceStore: store, learningStore: store.learningTruthStore()),
+      telemetry: store.operationalTelemetry(),
+    );
+    const materialId = AppRuntime.primaryMaterialId;
+    final first = await ingest.ingestPastedText(
+      learner: runtime.learner,
+      materialId: materialId,
+      text: 'Klorofil ışık enerjisinin soğurulmasına yardım eder. Bitkiler enerji üretir.',
+      sourceName: 'Biyoloji sürüm 1',
+    );
+    await store.saveReaderResumeProgress(
+      learner: runtime.learner,
+      materialId: materialId,
+      sourceVersionId: first.sourceVersion.identity.sourceVersionId,
+      progress: 0.51,
+      updatedAt: DateTime.utc(2026, 10, 10, 8),
+    );
+
+    final prompt = await runtime.recall.createCurrentPrompt(learner: runtime.learner, materialId: materialId);
+    final action = await store.learningTruthStore().recallAction(learner: runtime.learner, actionId: prompt.id);
+    expect(action, isNotNull);
+    final attempt = await runtime.recall.openAttempt(learner: runtime.learner, actionId: prompt.id);
+    await runtime.recall.submit(
+      learner: runtime.learner,
+      actionId: prompt.id,
+      attemptId: attempt.attempt.attemptId,
+      disposition: RecallResponseDisposition.answer,
+      answer: action!.expectedAnswer,
+    );
+
+    await ingest.ingestPastedText(
+      learner: runtime.learner,
+      materialId: materialId,
+      text: 'Mitokondri hücresel solunumla enerji üretimine katkı sağlar. Yeni ve ayrı kaynak sürümü.',
+      sourceName: 'Biyoloji sürüm 2',
+    );
+
+    await tester.pumpWidget(_testApp(LivingDeskReviewScope(child: ProductShellScreen(runtime: runtime))));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 150));
+
+    expect(find.text('İlk hatırlama denemeni yap'), findsOneWidget);
+    expect(find.text('Okumaya devam et'), findsNothing);
+    expect(find.text('Dinlemeye devam et'), findsNothing);
+    expect(find.text('Biyoloji sürüm 2'), findsWidgets);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('Home resumes the exact Reader source position before passive alternatives', (tester) async {
+    usePhoneViewport(tester);
+    final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
+    addTearDown(store.close);
+    final ingest = SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor());
+    final runtime = AppRuntime(
+      learner: AppRuntime.localM5LearnerFixture,
+      store: store,
+      ingest: ingest,
+      recall: RecallLearningService(sourceStore: store, learningStore: store.learningTruthStore()),
+      telemetry: store.operationalTelemetry(),
+    );
+    const materialId = AppRuntime.primaryMaterialId;
+    final source = await ingest.ingestPastedText(
+      learner: runtime.learner,
+      materialId: materialId,
+      text: List<String>.generate(
+        80,
+        (index) => 'Bölüm ${index + 1}: Fotosentez ışık enerjisini dönüştürür.',
+      ).join(' '),
+      sourceName: 'Uzun biyoloji notu',
+    );
+    await store.saveReaderResumeProgress(
+      learner: runtime.learner,
+      materialId: materialId,
+      sourceVersionId: source.sourceVersion.identity.sourceVersionId,
+      progress: 0.47,
+      updatedAt: DateTime.utc(2026, 10, 10, 9),
+    );
+
+    await tester.pumpWidget(_testApp(LivingDeskReviewScope(child: ProductShellScreen(runtime: runtime))));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 150));
+
+    expect(find.text('Okumaya kaldığın yerden devam et'), findsOneWidget);
+    final action = find.text('Okumaya devam et');
+    expect(action, findsOneWidget);
+    await tapVisible(tester, action);
+    await pumpUntilFound(tester, find.byType(SourceReaderScreen));
+
+    expect(find.byType(SourceReaderScreen), findsOneWidget);
+    expect(find.text('Uzun biyoloji notu'), findsWidgets);
+    expect(tester.takeException(), isNull);
+  });
+}

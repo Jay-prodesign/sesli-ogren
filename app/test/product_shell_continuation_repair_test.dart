@@ -1,0 +1,336 @@
+import 'dart:typed_data';
+
+import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:sesli_ogren/src/app/app_runtime.dart';
+import 'package:sesli_ogren/src/app/product_shell_screen.dart';
+import 'package:sesli_ogren/src/app/learning_slice_screen.dart';
+import 'package:sesli_ogren/src/app/listen_screen.dart';
+import 'package:sesli_ogren/src/app/living_study_desk_home.dart';
+import 'package:sesli_ogren/src/app/material_workspace_screen.dart';
+import 'package:sesli_ogren/src/app/source_reader_screen.dart';
+import 'package:sesli_ogren/src/data/pdf_text_extractor.dart';
+import 'package:sesli_ogren/src/data/source_ingest_service.dart';
+import 'package:sesli_ogren/src/data/sqlite_source_store.dart';
+import 'package:sesli_ogren/src/domain/authenticated_learner.dart';
+import 'package:sesli_ogren/src/domain/learning_contracts.dart';
+import 'package:sesli_ogren/src/domain/learning_truth.dart';
+import 'package:sesli_ogren/src/learning/recall_learning_service.dart';
+import 'package:sqflite_common_ffi/sqflite_ffi.dart';
+
+class _UnusedPdfExtractor implements PdfTextExtractor {
+  const _UnusedPdfExtractor();
+
+  @override
+  Future<ExtractedPdf> extract(Uint8List bytes, {required String sourceName}) {
+    throw UnimplementedError();
+  }
+}
+
+class _RepairingRecallService extends RecallLearningService {
+  _RepairingRecallService({required super.sourceStore, required super.learningStore});
+
+  int reopenCalls = 0;
+  int repairCalls = 0;
+
+  @override
+  Future<LearningContinuation?> reopen({required AuthenticatedLearner learner, required MaterialId materialId}) async {
+    reopenCalls++;
+    throw const RecallLearningException('simulated stale derived projection');
+  }
+
+  @override
+  Future<LearningContinuation?> repairContinuation({
+    required AuthenticatedLearner learner,
+    required MaterialId materialId,
+  }) async {
+    repairCalls++;
+    return null;
+  }
+}
+
+Future<void> _pumpUntilFound(WidgetTester tester, Finder finder, {int maxPumps = 200}) async {
+  for (var i = 0; i < maxPumps; i++) {
+    await tester.pump(const Duration(milliseconds: 20));
+    if (finder.evaluate().isNotEmpty) return;
+  }
+  fail('Expected repaired product shell was not reached within bounded pumps.');
+}
+
+Future<void> _pumpUntilGone(WidgetTester tester, Finder finder, {int maxPumps = 200}) async {
+  for (var i = 0; i < maxPumps; i++) {
+    await tester.pump(const Duration(milliseconds: 20));
+    if (finder.evaluate().isEmpty) return;
+  }
+  fail('Expected route was not dismissed within bounded pumps.');
+}
+
+Future<void> _tapVisible(WidgetTester tester, Finder finder) async {
+  await tester.scrollUntilVisible(finder, 220, scrollable: find.byType(Scrollable).last);
+  await tester.pump();
+  await tester.tap(finder);
+  await tester.pump();
+}
+
+void main() {
+  sqfliteFfiInit();
+
+  testWidgets('first material outcome goes from empty Home through source entry into the real Workspace', (
+    tester,
+  ) async {
+    final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
+    addTearDown(store.close);
+    final ingest = SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor());
+    const learner = AppRuntime.localM5LearnerFixture;
+    final runtime = AppRuntime(
+      learner: learner,
+      store: store,
+      ingest: ingest,
+      recall: RecallLearningService(sourceStore: store, learningStore: store.learningTruthStore()),
+      telemetry: store.operationalTelemetry(),
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: LivingDeskReviewScope(child: ProductShellScreen(runtime: runtime)),
+      ),
+    );
+    await _pumpUntilFound(tester, find.text('İlk kaynağımı ekle'));
+    await _tapVisible(tester, find.text('İlk kaynağımı ekle'));
+    await _pumpUntilFound(tester, find.byType(LearningSliceScreen));
+    await _pumpUntilFound(tester, find.text('İLK KAYNAĞIN'));
+    await _tapVisible(tester, find.text('Metin yapıştır'));
+
+    await tester.enterText(
+      find.byKey(const ValueKey('pasted-material-text')),
+      'Fotosentez sırasında klorofil ışık enerjisinin soğurulmasına yardım eder.',
+    );
+    await _tapVisible(tester, find.text('Başlık ekle · isteğe bağlı'));
+    await tester.enterText(find.byKey(const ValueKey('pasted-material-title')), 'Biyoloji · Fotosentez');
+    await _tapVisible(tester, find.text('Metni ekle · çalışma alanını aç'));
+    await _pumpUntilFound(tester, find.byKey(const ValueKey('first-value-intent')));
+
+    expect(find.byType(MaterialWorkspaceScreen), findsOneWidget);
+    expect(find.text('Biyoloji · Fotosentez'), findsWidgets);
+    expect(find.text('Önce kaynağın tamamını bir kez gör.'), findsOneWidget);
+    await _tapVisible(tester, find.text('Kaynağı aç'));
+    await _pumpUntilFound(tester, find.byType(SourceReaderScreen));
+    Navigator.of(tester.element(find.byType(SourceReaderScreen))).pop();
+    await _pumpUntilFound(tester, find.byKey(const ValueKey('la0040-atelier-workspace')));
+
+    await tester.scrollUntilVisible(
+      find.text('KAYNAK ÖNİZLEMESİ'),
+      220,
+      scrollable: find.descendant(of: find.byType(MaterialWorkspaceScreen), matching: find.byType(Scrollable)),
+    );
+    await tester.pump();
+    expect(find.text('KAYNAK ÖNİZLEMESİ'), findsOneWidget);
+    expect(find.byKey(const ValueKey('la0040-atelier-workspace-recall')), findsOneWidget);
+    expect(find.text('Kütüphane şu anda yüklenemedi.'), findsNothing);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('Home review source handoff reaches hidden Recall without asking for the same review twice', (
+    tester,
+  ) async {
+    final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
+    addTearDown(store.close);
+    final ingest = SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor());
+    const learner = AppRuntime.localM5LearnerFixture;
+    const materialId = MaterialId('home-review-to-recall');
+    await ingest.ingestPastedText(
+      learner: learner,
+      materialId: materialId,
+      text: 'Fotosentez ışık enerjisini kimyasal enerjiye dönüştürür. Klorofil ışığın soğurulmasına yardım eder.',
+      sourceName: 'Home review notu',
+    );
+    final runtime = AppRuntime(
+      learner: learner,
+      store: store,
+      ingest: ingest,
+      recall: RecallLearningService(sourceStore: store, learningStore: store.learningTruthStore()),
+      telemetry: store.operationalTelemetry(),
+    );
+    final prompt = await runtime.recall.createCurrentPrompt(learner: learner, materialId: materialId);
+    final attempt = await runtime.recall.openAttempt(learner: learner, actionId: prompt.id);
+    final result = await runtime.recall.submit(
+      learner: learner,
+      actionId: prompt.id,
+      attemptId: attempt.attempt.attemptId,
+      disposition: RecallResponseDisposition.unknown,
+      answer: '',
+    );
+    expect(result.nextAction.kind, NextLearningActionKind.reviewSourceThenRecall);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: LivingDeskReviewScope(child: ProductShellScreen(runtime: runtime)),
+      ),
+    );
+    await _pumpUntilFound(tester, find.text('Kaynağı gözden geçir'));
+    await tester.tap(find.text('Kaynağı gözden geçir'));
+    await _pumpUntilFound(tester, find.byType(SourceReaderScreen));
+
+    await tester.tap(find.text('Kaynağı kapat ve hatırla'));
+    await _pumpUntilFound(tester, find.byKey(const ValueKey('la0040-atelier-recall')));
+
+    expect(find.text('Önce kaynağı gözden geçir'), findsNothing);
+    expect(find.byKey(const ValueKey('la0040-atelier-recall')), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('reader navigation keeps Home available after returning', (tester) async {
+    final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
+    addTearDown(store.close);
+    final ingest = SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor());
+    const learner = AppRuntime.localM5LearnerFixture;
+    await ingest.ingestPastedText(
+      learner: learner,
+      materialId: const MaterialId('reader-return-material'),
+      text: 'Fotosentez bitkilerde gerçekleşir ve ışık enerjisi kullanır.',
+      sourceName: 'Biyoloji · Fotosentez',
+    );
+    final runtime = AppRuntime(
+      learner: learner,
+      store: store,
+      ingest: ingest,
+      recall: RecallLearningService(sourceStore: store, learningStore: store.learningTruthStore()),
+      telemetry: store.operationalTelemetry(),
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: LivingDeskReviewScope(child: ProductShellScreen(runtime: runtime)),
+      ),
+    );
+    await _pumpUntilFound(tester, find.text('Biyoloji · Fotosentez'));
+    await tester.tap(find.text('Kütüphane'));
+    await tester.pump(const Duration(milliseconds: 120));
+    final libraryMaterialCard = find.ancestor(
+      of: find.text('Biyoloji · Fotosentez').last,
+      matching: find.byType(InkWell),
+    );
+    await tester.tap(libraryMaterialCard.last);
+    await _pumpUntilFound(tester, find.byKey(const ValueKey('la0040-atelier-workspace-reader')));
+    await tester.tap(find.byKey(const ValueKey('la0040-atelier-workspace-reader')));
+    await _pumpUntilFound(tester, find.byType(SourceReaderScreen));
+    expect(find.byType(SourceReaderScreen), findsOneWidget);
+    Navigator.of(tester.element(find.byType(SourceReaderScreen))).pop();
+    await _pumpUntilFound(tester, find.byType(MaterialWorkspaceScreen));
+    expect(find.byType(MaterialWorkspaceScreen), findsOneWidget);
+    Navigator.of(tester.element(find.byType(MaterialWorkspaceScreen))).pop();
+    await _pumpUntilFound(tester, find.byType(ProductShellScreen));
+    expect(find.byType(ProductShellScreen), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('reader to Listen to Recall keeps the active route and returns to Library', (tester) async {
+    final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
+    addTearDown(store.close);
+    final ingest = SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor());
+    const learner = AppRuntime.localM5LearnerFixture;
+    await ingest.ingestPastedText(
+      learner: learner,
+      materialId: const MaterialId('reader-listen-recall-material'),
+      text: 'Fotosentez bitkilerde gerçekleşir ve ışık enerjisi kullanır.',
+      sourceName: 'Biyoloji · Fotosentez',
+    );
+    final runtime = AppRuntime(
+      learner: learner,
+      store: store,
+      ingest: ingest,
+      recall: RecallLearningService(sourceStore: store, learningStore: store.learningTruthStore()),
+      telemetry: store.operationalTelemetry(),
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: LivingDeskReviewScope(child: ProductShellScreen(runtime: runtime)),
+      ),
+    );
+    await _pumpUntilFound(tester, find.text('Biyoloji · Fotosentez'));
+    await tester.tap(find.text('Kütüphane').last);
+    await tester.pump(const Duration(milliseconds: 120));
+    final libraryMaterialCard = find.ancestor(
+      of: find.text('Biyoloji · Fotosentez').last,
+      matching: find.byType(InkWell),
+    );
+    await tester.tap(libraryMaterialCard.last);
+    await _pumpUntilFound(tester, find.byKey(const ValueKey('la0040-atelier-workspace-reader')));
+    await tester.tap(find.byKey(const ValueKey('la0040-atelier-workspace-reader')));
+    await _pumpUntilFound(tester, find.byType(SourceReaderScreen));
+    expect(find.byType(SourceReaderScreen), findsOneWidget);
+
+    final readerMenu = find.byTooltip('Okuma ve öğrenme seçenekleri').hitTestable();
+    await _pumpUntilFound(tester, readerMenu);
+    await tester.tap(readerMenu);
+    final listenAction = find.text('Kaynağı dinle').hitTestable();
+    await _pumpUntilFound(tester, listenAction);
+    await tester.tap(listenAction);
+    // Listen may show a continuously animated playback indicator; waiting for
+    // every scheduled frame to settle would never complete.
+    await _pumpUntilFound(tester, find.byType(ListenScreen));
+    await _pumpUntilGone(tester, find.byType(SourceReaderScreen));
+    expect(find.byType(ListenScreen), findsOneWidget);
+
+    final recallAction = find.widgetWithText(OutlinedButton, 'Şimdi hatırlamayı dene').hitTestable();
+    await tester.scrollUntilVisible(
+      find.widgetWithText(OutlinedButton, 'Şimdi hatırlamayı dene'),
+      180,
+      scrollable: find.descendant(of: find.byType(ListenScreen), matching: find.byType(Scrollable)),
+    );
+    await tester.ensureVisible(find.widgetWithText(OutlinedButton, 'Şimdi hatırlamayı dene'));
+    await _pumpUntilFound(tester, recallAction);
+    await tester.tap(recallAction);
+    await _pumpUntilGone(tester, find.byType(ListenScreen));
+    await _pumpUntilFound(tester, find.byType(LearningSliceScreen));
+    expect(find.byType(LearningSliceScreen), findsOneWidget);
+    Navigator.of(tester.element(find.byType(LearningSliceScreen))).pop();
+    await _pumpUntilGone(tester, find.byType(LearningSliceScreen));
+    final activeWorkspace = find.byType(MaterialWorkspaceScreen).hitTestable();
+    await _pumpUntilFound(tester, activeWorkspace);
+    expect(activeWorkspace, findsOneWidget);
+    Navigator.of(tester.element(activeWorkspace)).pop();
+    await _pumpUntilGone(tester, find.byType(MaterialWorkspaceScreen));
+    final activeShell = find.byType(ProductShellScreen).hitTestable();
+    await _pumpUntilFound(tester, activeShell);
+    expect(activeShell, findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('product shell repairs stale continuation without blocking the library', (tester) async {
+    final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
+    addTearDown(store.close);
+    final ingest = SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor());
+    const learner = AppRuntime.localM5LearnerFixture;
+    await ingest.ingestPastedText(
+      learner: learner,
+      materialId: const MaterialId('repair-shell-material'),
+      text: 'Fotosentez ışık enerjisini kimyasal enerjiye dönüştürür.',
+      sourceName: 'Biyoloji · Fotosentez',
+    );
+
+    final recall = _RepairingRecallService(sourceStore: store, learningStore: store.learningTruthStore());
+    final runtime = AppRuntime(
+      learner: learner,
+      store: store,
+      ingest: ingest,
+      recall: recall,
+      telemetry: store.operationalTelemetry(),
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: MediaQuery(
+          data: const MediaQueryData(disableAnimations: true),
+          child: ProductShellScreen(runtime: runtime),
+        ),
+      ),
+    );
+
+    await _pumpUntilFound(tester, find.text('Biyoloji · Fotosentez'));
+    expect(find.text('Kütüphane şu anda yüklenemedi.'), findsNothing);
+    expect(recall.reopenCalls, greaterThan(0));
+    expect(recall.repairCalls, greaterThan(0));
+  });
+}

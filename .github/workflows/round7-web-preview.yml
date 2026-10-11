@@ -1,0 +1,131 @@
+name: round7-phone-preview
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: round7-phone-preview
+  cancel-in-progress: true
+
+jobs:
+  phone-preview:
+    name: Temporary Phone HTTPS Preview
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    defaults:
+      run:
+        working-directory: proof/round7-p1-runtime
+
+    steps:
+      - name: Check out exact preview source
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+
+      - name: Read Flutter pin
+        id: pin
+        working-directory: .
+        run: |
+          set -euo pipefail
+          version="$(tr -d '[:space:]' < .flutter-version)"
+          test -n "$version"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+      - name: Install pinned Flutter
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
+        with:
+          channel: stable
+          flutter-version: ${{ steps.pin.outputs.version }}
+          cache: false
+          pub-cache: false
+
+      - name: Resolve dependencies
+        run: flutter pub get
+
+      - name: Build exact Flutter Web preview
+        run: |
+          set -euo pipefail
+          flutter build web \
+            --release \
+            --base-href "/" \
+            --dart-define=GIT_SHA=${GITHUB_SHA}
+          test -s build/web/index.html
+          test -s build/web/flutter_bootstrap.js
+          test -s build/web/main.dart.js
+
+      - name: Start local preview server
+        run: |
+          set -euo pipefail
+          python3 -m http.server 8080 --directory build/web >server.log 2>&1 &
+          echo $! > server.pid
+          for i in $(seq 1 30); do
+            if curl --fail --silent http://127.0.0.1:8080/index.html >/dev/null; then
+              exit 0
+            fi
+            sleep 1
+          done
+          cat server.log || true
+          exit 1
+
+      - name: Open free Cloudflare Quick Tunnel
+        id: tunnel
+        run: |
+          set -euo pipefail
+          curl --fail --silent --show-error --location \
+            "https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64" \
+            -o cloudflared
+          chmod +x cloudflared
+
+          ./cloudflared tunnel \
+            --url http://127.0.0.1:8080 \
+            --no-autoupdate >cloudflared.log 2>&1 &
+          echo $! > tunnel.pid
+
+          URL=""
+          for i in $(seq 1 90); do
+            URL=$(grep -oE 'https://[-a-z0-9]+\.trycloudflare\.com' cloudflared.log | head -n 1 || true)
+            [ -n "$URL" ] && break
+            sleep 1
+          done
+
+          [ -n "$URL" ] || { cat cloudflared.log || true; exit 1; }
+
+          for i in $(seq 1 30); do
+            curl --fail --silent --location "$URL/index.html" >/dev/null && break
+            sleep 2
+          done
+          curl --fail --silent --location "$URL/index.html" >/dev/null
+
+          echo "url=$URL" >> "$GITHUB_OUTPUT"
+          echo "PHONE_PREVIEW_URL=$URL" >> "$GITHUB_ENV"
+
+          echo "### Learning App phone preview" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "$URL" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "Source commit: \`${GITHUB_SHA}\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "Free temporary Cloudflare Quick Tunnel. No account or paid service required." >> "$GITHUB_STEP_SUMMARY"
+
+          echo "PHONE_PREVIEW_URL: $URL"
+          printf '%s\n' "$URL" > "$RUNNER_TEMP/learning-app-phone-preview-url.txt"
+
+      - name: Upload live phone preview URL
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: learning-app-phone-preview-url
+          path: ${{ runner.temp }}/learning-app-phone-preview-url.txt
+          if-no-files-found: error
+          retention-days: 1
+
+      - name: Keep phone preview alive
+        run: |
+          set -euo pipefail
+          echo "Learning App phone preview: $PHONE_PREVIEW_URL"
+          for i in $(seq 1 110); do
+            kill -0 "$(cat server.pid)" || { cat server.log || true; exit 1; }
+            kill -0 "$(cat tunnel.pid)" || { cat cloudflared.log || true; exit 1; }
+            sleep 60
+          done

@@ -1,0 +1,695 @@
+import 'dart:convert';
+
+import 'package:crypto/crypto.dart';
+import 'package:flutter/material.dart';
+
+import '../domain/learning_contracts.dart';
+import '../generation/supabase_source_summary_gateway.dart';
+import '../learning/focus_help_gateway.dart';
+import 'app_runtime.dart';
+import 'app_theme.dart';
+import 'atelier_learning_surfaces.dart';
+import 'companion_view.dart';
+import 'explain_back_screen.dart';
+import 'explain_screen.dart';
+import 'learning_slice_screen.dart';
+import 'la0040_visual_treatments.dart';
+import 'living_study_desk_home.dart';
+
+String _foldTurkish(String value) =>
+    value.replaceAll('I', 'i').replaceAll('ı', 'i').toLowerCase().replaceAll('\u0307', '');
+
+class FocusScreen extends StatefulWidget {
+  const FocusScreen({
+    required this.runtime,
+    required this.source,
+    required this.sourceText,
+    this.onReadSource,
+    this.sourceGateway = const SupabaseSourceSummaryGateway(),
+    super.key,
+  });
+
+  final AppRuntime runtime;
+  final SourceVersionRecord source;
+  final String sourceText;
+  final VoidCallback? onReadSource;
+  final SupabaseSourceSummaryGateway sourceGateway;
+
+  @override
+  State<FocusScreen> createState() => _FocusScreenState();
+}
+
+class _FocusScreenState extends State<FocusScreen> {
+  final question = TextEditingController();
+
+  Widget _preserveProductExperience(Widget screen) {
+    final treatment = LearningVisualTreatmentScope.maybeOf(context);
+    if (treatment != null) return LearningVisualTreatmentScope(treatment: treatment, child: screen);
+    return LivingDeskReviewScope.active(context) ? LivingDeskReviewScope(child: screen) : screen;
+  }
+
+  FocusHelpResult? help;
+  bool busy = false;
+  bool _sourceChanged = false;
+
+  @override
+  void dispose() {
+    question.dispose();
+    super.dispose();
+  }
+
+  Future<void> _openDirectExplanation() => Navigator.of(context).push<void>(
+    MaterialPageRoute(
+      builder: (_) => _preserveProductExperience(ExplainScreen(runtime: widget.runtime, source: widget.source)),
+    ),
+  );
+
+  Future<void> _openRecall() => Navigator.of(context).push<void>(
+    MaterialPageRoute(
+      builder: (_) => _preserveProductExperience(
+        LearningSliceScreen(runtime: widget.runtime, materialId: widget.source.identity.materialId),
+      ),
+    ),
+  );
+
+  Future<void> _openExplainBack() => Navigator.of(context).push<void>(
+    MaterialPageRoute(
+      builder: (_) => _preserveProductExperience(ExplainBackScreen(runtime: widget.runtime, source: widget.source)),
+    ),
+  );
+
+  FocusHelpResult _localSourceHint() {
+    final source = widget.sourceText.trim();
+    final learnerQuestion = question.text.trim();
+    if (learnerQuestion.isEmpty) {
+      return const FocusHelpUnavailable('İpucu için takıldığın noktayı kısa bir cümleyle yaz.');
+    }
+    if (source.isEmpty) {
+      return const FocusHelpUnavailable('Güncel kaynak metni olmadığı için güvenilir ipucu veremiyoruz.');
+    }
+
+    final stopWords = <String>{
+      'acaba',
+      'ama',
+      'bana',
+      'bunu',
+      'burada',
+      'daha',
+      'diye',
+      'gibi',
+      'hangi',
+      'icin',
+      'için',
+      'kadar',
+      'kim',
+      'mi',
+      'mı',
+      'mu',
+      'mü',
+      'nasil',
+      'nasıl',
+      'neden',
+      'nedir',
+      'olan',
+      'olarak',
+      've',
+      'veya',
+      'şey',
+    };
+    final terms = RegExp(r'[A-Za-zÇĞİÖŞÜçğıöşü0-9]+')
+        .allMatches(_foldTurkish(learnerQuestion))
+        .map((match) => match.group(0)!)
+        .where((term) => term.length >= 4 && !stopWords.contains(term))
+        .toSet();
+
+    if (terms.isEmpty) {
+      return const FocusHelpUnavailable(
+        'Sorunu biraz daha somutlaştır. Kaynakta geçen bir kavramı veya terimi yazarsan ilgili bölümü gösterebiliriz.',
+      );
+    }
+
+    final segments = source
+        .split(RegExp(r'(?:[.!?]+\s+)|(?:\n+)'))
+        .map((segment) => segment.trim())
+        .where((segment) => segment.length >= 12)
+        .toList(growable: false);
+
+    String? best;
+    var bestScore = 0;
+    for (final segment in segments) {
+      final normalized = _foldTurkish(segment);
+      final score = terms.where(normalized.contains).length;
+      if (score > bestScore) {
+        best = segment;
+        bestScore = score;
+      }
+    }
+
+    if (best == null || bestScore == 0) {
+      return const FocusHelpUnavailable(
+        'Soruna kaynakta güvenle bağlayabildiğimiz bir bölüm bulamadık. Sorunda kaynaktaki anahtar terimlerden birini kullan.',
+      );
+    }
+
+    final excerpt = best.length <= 280 ? best : '${best.substring(0, 277).trimRight()}…';
+    return FocusHelpReady(
+      sourceVersionId: widget.source.identity.sourceVersionId,
+      sourceContentDigest: widget.source.identity.contentDigest,
+      text: 'Kaynak ipucu: “$excerpt”\n\nBu bölümdeki ilişkiyi kendi cümlelerinle yeniden kurmayı dene.',
+      sourceCues: [excerpt],
+      executionRef: 'local:source-cue-v1',
+    );
+  }
+
+  Future<FocusHelpResult> _requestServerHelp(FocusHelpKind kind) async {
+    final learnerQuestion = question.text.trim();
+    if (learnerQuestion.length < 2) {
+      return const FocusHelpUnavailable('Takıldığın noktayı kısa ve somut bir soruyla yaz.');
+    }
+
+    final currentSource = await widget.runtime.store.currentSourceVersion(
+      learner: widget.runtime.learner,
+      materialId: widget.source.identity.materialId,
+    );
+    if (currentSource == null ||
+        currentSource.identity.sourceVersionId != widget.source.identity.sourceVersionId ||
+        currentSource.identity.contentDigest != widget.source.identity.contentDigest) {
+      return const FocusHelpUnavailable('Kaynak değişti. Güncel materyalden yeniden Odaklan aç.');
+    }
+
+    final material = await widget.runtime.store.material(
+      learner: widget.runtime.learner,
+      materialId: widget.source.identity.materialId,
+    );
+    final extracted = await widget.runtime.store.extractedContentForSource(
+      learner: widget.runtime.learner,
+      sourceVersionId: widget.source.identity.sourceVersionId,
+    );
+    if (material == null ||
+        extracted == null ||
+        !extracted.isValid ||
+        extracted.sourceContentDigest != widget.source.identity.contentDigest) {
+      return const FocusHelpUnavailable('Güncel kaynak güvenilir biçimde okunamıyor.');
+    }
+
+    final normalizedSource = extracted.normalizedText.trim();
+    if (normalizedSource.isEmpty) {
+      return const FocusHelpUnavailable('Güncel kaynak metni boş.');
+    }
+    final groundingContentHash = sha256.convert(utf8.encode(normalizedSource)).toString();
+
+    var serverMaterialId = await widget.runtime.store.summaryServerMaterialId(
+      learner: widget.runtime.learner,
+      materialId: widget.source.identity.materialId,
+      sourceVersionId: widget.source.identity.sourceVersionId,
+    );
+
+    if (serverMaterialId == null) {
+      final staleServerMaterialId = await widget.runtime.store.summaryServerMaterialId(
+        learner: widget.runtime.learner,
+        materialId: widget.source.identity.materialId,
+      );
+      if (staleServerMaterialId != null) {
+        final removed = await widget.sourceGateway.deleteServerMaterial(staleServerMaterialId);
+        if (!removed) {
+          return const FocusHelpUnavailable('Önceki kaynak kopyası güvenli biçimde temizlenemedi.');
+        }
+        await widget.runtime.store.clearSummaryJob(
+          learner: widget.runtime.learner,
+          materialId: widget.source.identity.materialId,
+        );
+        await widget.runtime.store.clearServerMaterialBinding(
+          learner: widget.runtime.learner,
+          materialId: widget.source.identity.materialId,
+        );
+      }
+
+      serverMaterialId = await widget.sourceGateway.ensureServerMaterial(
+        source: SourceIngestResult(material: material, sourceVersion: currentSource, extractedContent: extracted),
+      );
+
+      final sourceAfterBinding = await widget.runtime.store.currentSourceVersion(
+        learner: widget.runtime.learner,
+        materialId: widget.source.identity.materialId,
+      );
+      if (sourceAfterBinding?.identity.sourceVersionId != widget.source.identity.sourceVersionId ||
+          sourceAfterBinding?.identity.contentDigest != widget.source.identity.contentDigest) {
+        await widget.sourceGateway.deleteServerMaterial(serverMaterialId);
+        return const FocusHelpUnavailable('Kaynak değişti; eski sürüm için AI yardımı göstermiyoruz.');
+      }
+
+      await widget.runtime.store.saveServerMaterialBinding(
+        learner: widget.runtime.learner,
+        materialId: widget.source.identity.materialId,
+        sourceVersionId: widget.source.identity.sourceVersionId,
+        serverMaterialId: serverMaterialId,
+      );
+    }
+
+    final result = await widget.runtime.focusHelp.help(
+      FocusHelpRequest(
+        materialId: widget.source.identity.materialId,
+        sourceVersionId: widget.source.identity.sourceVersionId,
+        sourceContentDigest: widget.source.identity.contentDigest,
+        kind: kind,
+        outputLocale: 'tr-TR',
+        learnerQuestion: learnerQuestion,
+        serverMaterialId: serverMaterialId,
+        groundingContentHash: groundingContentHash,
+      ),
+    );
+
+    final sourceAfterHelp = await widget.runtime.store.currentSourceVersion(
+      learner: widget.runtime.learner,
+      materialId: widget.source.identity.materialId,
+    );
+    if (sourceAfterHelp?.identity.sourceVersionId != widget.source.identity.sourceVersionId ||
+        sourceAfterHelp?.identity.contentDigest != widget.source.identity.contentDigest) {
+      return const FocusHelpUnavailable('Kaynak değişti; eski sürüme ait yanıtı göstermiyoruz.');
+    }
+    return result;
+  }
+
+  Future<FocusHelpResult> _localHintForCurrentSource() async {
+    final currentSource = await widget.runtime.store.currentSourceVersion(
+      learner: widget.runtime.learner,
+      materialId: widget.source.identity.materialId,
+    );
+    if (currentSource == null ||
+        currentSource.identity.sourceVersionId != widget.source.identity.sourceVersionId ||
+        currentSource.identity.contentDigest != widget.source.identity.contentDigest) {
+      return const FocusHelpUnavailable('Kaynak değişti. Güncel materyalden yeniden Odaklan aç.');
+    }
+    return _localSourceHint();
+  }
+
+  Future<bool> _sourceStillCurrent() async {
+    final currentSource = await widget.runtime.store.currentSourceVersion(
+      learner: widget.runtime.learner,
+      materialId: widget.source.identity.materialId,
+    );
+    return currentSource?.identity.sourceVersionId == widget.source.identity.sourceVersionId &&
+        currentSource?.identity.contentDigest == widget.source.identity.contentDigest;
+  }
+
+  void _recoverFromSourceChange() {
+    final onReadSource = widget.onReadSource;
+    if (onReadSource != null) {
+      onReadSource();
+      return;
+    }
+    Navigator.of(context).maybePop();
+  }
+
+  Future<void> request(FocusHelpKind kind) async {
+    if (busy || _sourceChanged) return;
+    setState(() {
+      busy = true;
+      help = null;
+    });
+
+    if (!await _sourceStillCurrent()) {
+      if (!mounted) return;
+      setState(() {
+        busy = false;
+        _sourceChanged = true;
+        help = const FocusHelpUnavailable('Kaynak değişti. Eski sürüme bağlı yardımı yeniden göndermiyoruz.');
+      });
+      return;
+    }
+
+    if (widget.runtime.focusHelp is UnavailableFocusHelpGateway) {
+      if (kind == FocusHelpKind.hint) {
+        final result = _localSourceHint();
+        final stillCurrent = await _sourceStillCurrent();
+        if (!mounted) return;
+        setState(() {
+          busy = false;
+          _sourceChanged = !stillCurrent;
+          help = stillCurrent
+              ? result
+              : const FocusHelpUnavailable('Kaynak değişti. Eski sürüme bağlı yardımı göstermiyoruz.');
+        });
+        return;
+      }
+      if (mounted) setState(() => busy = false);
+      await _openDirectExplanation();
+      return;
+    }
+
+    FocusHelpResult result;
+    try {
+      result = await _requestServerHelp(kind);
+    } catch (_) {
+      result = const FocusHelpUnavailable('Kaynağa bağlı AI yardımına şu anda ulaşılamıyor.');
+    }
+    if (kind == FocusHelpKind.hint && result is FocusHelpUnavailable) {
+      result = await _localHintForCurrentSource();
+    }
+
+    final stillCurrent = await _sourceStillCurrent();
+    if (!mounted) return;
+    setState(() {
+      busy = false;
+      _sourceChanged = !stillCurrent;
+      help = !stillCurrent
+          ? const FocusHelpUnavailable('Kaynak değişti. Eski sürüme bağlı yardımı göstermiyoruz.')
+          : result is FocusHelpReady && !result.matches(widget.source.identity)
+          ? const FocusHelpUnavailable('Kaynak değişti; eski yanıtı göstermiyoruz.')
+          : result;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final readyHelp = help is FocusHelpReady ? help as FocusHelpReady : null;
+    final unavailable = help is FocusHelpUnavailable ? help as FocusHelpUnavailable : null;
+    final living = LivingDeskReviewScope.active(context);
+    final accent = living ? AtelierStyle.aqua : AppPalette.signal;
+    final accentSoft = living ? AtelierStyle.aquaSoft : AppPalette.signalSoft;
+    final paper = living ? AtelierStyle.paper : AppPalette.surface;
+    final ink = living ? AtelierStyle.ink : theme.colorScheme.onSurface;
+    final hero = living ? AtelierStyle.paper : AppPalette.primaryDark;
+    final mark = living ? AtelierStyle.mark : AppPalette.momentum;
+    final markInk = living ? AtelierStyle.ink : AppPalette.momentumInk;
+    final sourceText = widget.sourceText.trim();
+    final sourcePreviewTruncated = sourceText.length > 1800;
+    final sourcePreview = sourcePreviewTruncated ? '${sourceText.substring(0, 1799).trimRight()}…' : sourceText;
+
+    return Scaffold(
+      backgroundColor: living ? AtelierStyle.canvas : null,
+      appBar: AppBar(
+        title: const Text('Odaklan'),
+        backgroundColor: living ? AtelierStyle.canvas : null,
+        foregroundColor: living ? AtelierStyle.ink : null,
+      ),
+      body: ListView(
+        padding: const EdgeInsets.fromLTRB(20, 16, 20, 36),
+        children: [
+          DecoratedBox(
+            decoration: BoxDecoration(
+              color: hero,
+              borderRadius: BorderRadius.circular(22),
+              border: living ? const Border(left: BorderSide(color: AtelierStyle.aqua, width: 4)) : null,
+              boxShadow: living
+                  ? const [BoxShadow(color: Color(0x1014224A), blurRadius: 20, offset: Offset(0, 8))]
+                  : [BoxShadow(color: hero.withValues(alpha: 0.14), blurRadius: 24, offset: const Offset(0, 12))],
+            ),
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(18, 17, 18, 18),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  DecoratedBox(
+                    decoration: BoxDecoration(
+                      color: living ? AtelierStyle.aquaSoft : Colors.white.withValues(alpha: 0.10),
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(6),
+                      child: CompanionView(
+                        state: busy ? CompanionVisualState.think : CompanionVisualState.idle,
+                        size: 56,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 13),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'KISA ODAK · 3 ADIM',
+                          style: theme.textTheme.labelSmall?.copyWith(
+                            color: living ? AtelierStyle.aqua : mark,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: 0.6,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          'Kaynağı netleştir, sonra aktif olarak doğrula.',
+                          style: theme.textTheme.headlineSmall?.copyWith(
+                            color: living ? ink : Colors.white,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 14),
+          KeyedSubtree(
+            key: const ValueKey('focus-source-trust'),
+            child: AtelierSourceTrustStrip(sourceVersion: widget.source),
+          ),
+          const SizedBox(height: 12),
+          DecoratedBox(
+            decoration: BoxDecoration(color: accentSoft, borderRadius: BorderRadius.circular(14)),
+            child: const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 13, vertical: 11),
+              child: Text('Bu oturum güncel kaynağa bağlıdır. Yardım almak tek başına öğrenme kanıtı oluşturmaz.'),
+            ),
+          ),
+          const SizedBox(height: 22),
+          Text('1 · Konuyu yeniden kur', style: theme.textTheme.titleMedium),
+          const SizedBox(height: 9),
+          DecoratedBox(
+            decoration: BoxDecoration(
+              color: paper,
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: const [BoxShadow(color: Color(0x0D14224A), blurRadius: 18, offset: Offset(0, 8))],
+            ),
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Icon(Icons.article_outlined, color: accent, size: 18),
+                      const SizedBox(width: 7),
+                      Expanded(
+                        child: Text(
+                          sourcePreviewTruncated ? 'Kaynak metni · kısa görünüm' : 'Kaynak metni',
+                          style: theme.textTheme.labelMedium?.copyWith(color: accent, fontWeight: FontWeight.w800),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    sourcePreview,
+                    key: const ValueKey('focus-source-preview'),
+                    style: theme.textTheme.bodyMedium?.copyWith(height: 1.5, color: ink),
+                  ),
+                  if (sourcePreviewTruncated) ...[
+                    const SizedBox(height: 10),
+                    Text(
+                      'Kısa Odak yalnız sınırlı bir kaynak görünümü gösterir; yardım ve doğrulama güncel tam kaynak kimliğine bağlı kalır.',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: living ? AtelierStyle.muted : theme.colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                    if (widget.onReadSource != null) ...[
+                      const SizedBox(height: 4),
+                      TextButton.icon(
+                        onPressed: widget.onReadSource,
+                        icon: const Icon(Icons.menu_book_outlined),
+                        label: const Text('Kaynağın tamamını oku'),
+                      ),
+                    ],
+                  ],
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 22),
+          Text('2 · Takıldığın noktayı sor', style: theme.textTheme.titleMedium),
+          const SizedBox(height: 9),
+          TextField(
+            controller: question,
+            enabled: !busy && !_sourceChanged,
+            maxLength: 600,
+            maxLines: 4,
+            decoration: const InputDecoration(hintText: 'Neyi netleştirmek istiyorsun?'),
+          ),
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final stackActions = constraints.maxWidth < 340 || MediaQuery.textScalerOf(context).scale(1) > 1.25;
+              final hintButton = OutlinedButton.icon(
+                onPressed: busy || _sourceChanged ? null : () => request(FocusHelpKind.hint),
+                icon: const Icon(Icons.lightbulb_outline_rounded),
+                label: const Text('İpucu ver'),
+              );
+              final explainButton = FilledButton.icon(
+                style: living
+                    ? FilledButton.styleFrom(backgroundColor: AtelierStyle.pulse, foregroundColor: Colors.white)
+                    : null,
+                onPressed: busy || _sourceChanged ? null : () => request(FocusHelpKind.directExplanation),
+                icon: const Icon(Icons.auto_awesome_outlined),
+                label: const Text('Sorumu açıkla'),
+              );
+              if (stackActions) {
+                return Column(
+                  key: const ValueKey('focus-help-actions-stacked'),
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [hintButton, const SizedBox(height: 8), explainButton],
+                );
+              }
+              return Row(
+                children: [
+                  Expanded(child: hintButton),
+                  const SizedBox(width: 8),
+                  Expanded(child: explainButton),
+                ],
+              );
+            },
+          ),
+          if (busy) ...[const SizedBox(height: 12), const LinearProgressIndicator()],
+          if (readyHelp != null) ...[
+            const SizedBox(height: 16),
+            DecoratedBox(
+              decoration: BoxDecoration(color: accentSoft, borderRadius: BorderRadius.circular(18)),
+              child: Padding(
+                padding: const EdgeInsets.all(15),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      readyHelp.matches(widget.source.identity)
+                          ? readyHelp.text
+                          : 'Kaynak değişti; eski yanıtı göstermiyoruz.',
+                    ),
+                    if (readyHelp.sourceCues.isNotEmpty && readyHelp.matches(widget.source.identity)) ...[
+                      const SizedBox(height: 14),
+                      Text(
+                        'Kaynak dayanakları',
+                        style: theme.textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w800),
+                      ),
+                      const SizedBox(height: 6),
+                      for (final cue in readyHelp.sourceCues)
+                        Padding(padding: const EdgeInsets.only(bottom: 5), child: Text('• $cue')),
+                    ],
+                  ],
+                ),
+              ),
+            ),
+          ],
+          if (unavailable != null) ...[
+            const SizedBox(height: 16),
+            DecoratedBox(
+              decoration: BoxDecoration(
+                color: living ? AtelierStyle.attentionSoft : AppPalette.attentionSoft,
+                borderRadius: BorderRadius.circular(18),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(15),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Icon(
+                          Icons.info_outline_rounded,
+                          color: living ? AtelierStyle.attention : AppPalette.attention,
+                          size: 20,
+                        ),
+                        const SizedBox(width: 9),
+                        Expanded(child: Text(unavailable.reason)),
+                      ],
+                    ),
+                    if (_sourceChanged) ...[
+                      const SizedBox(height: 12),
+                      OutlinedButton.icon(
+                        onPressed: _recoverFromSourceChange,
+                        icon: const Icon(Icons.menu_book_outlined),
+                        label: Text(widget.onReadSource == null ? 'Güncel çalışmaya dön' : 'Güncel kaynağı aç'),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+            ),
+          ],
+          const SizedBox(height: 22),
+          DecoratedBox(
+            decoration: BoxDecoration(color: hero, borderRadius: BorderRadius.circular(18)),
+            child: Padding(
+              padding: const EdgeInsets.all(15),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      DecoratedBox(
+                        decoration: BoxDecoration(color: mark, borderRadius: BorderRadius.circular(999)),
+                        child: Padding(
+                          padding: const EdgeInsets.all(7),
+                          child: Icon(Icons.arrow_forward_rounded, color: markInk, size: 17),
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          '3 · Şimdi yardım almadan aktif olarak doğrula.',
+                          style: theme.textTheme.bodyMedium?.copyWith(color: Colors.white, fontWeight: FontWeight.w700),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 14),
+                  LayoutBuilder(
+                    builder: (context, constraints) {
+                      final stackActions =
+                          constraints.maxWidth < 340 || MediaQuery.textScalerOf(context).scale(1) > 1.25;
+                      final recallButton = OutlinedButton.icon(
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: Colors.white,
+                          side: BorderSide(color: Colors.white.withValues(alpha: 0.30)),
+                        ),
+                        onPressed: _openRecall,
+                        icon: const Icon(Icons.psychology_alt_outlined),
+                        label: Text(_sourceChanged ? 'Güncel kaynakla Hatırla' : 'Hatırla'),
+                      );
+                      final explainBackButton = FilledButton.icon(
+                        style: FilledButton.styleFrom(
+                          backgroundColor: Colors.white,
+                          foregroundColor: living ? AtelierStyle.focus : AppPalette.primaryDark,
+                        ),
+                        onPressed: _sourceChanged ? null : _openExplainBack,
+                        icon: const Icon(Icons.record_voice_over_outlined),
+                        label: const Text('Kendi cümlelerinle anlat'),
+                      );
+                      if (stackActions) {
+                        return Column(
+                          key: const ValueKey('focus-next-actions-stacked'),
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [recallButton, const SizedBox(height: 8), explainBackButton],
+                        );
+                      }
+                      return Row(
+                        children: [
+                          Expanded(child: recallButton),
+                          const SizedBox(width: 8),
+                          Expanded(child: explainBackButton),
+                        ],
+                      );
+                    },
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}

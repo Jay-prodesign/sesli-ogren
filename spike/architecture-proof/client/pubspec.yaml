@@ -1,0 +1,16 @@
+name: la_spike_client
+description: "Architecture Proof (LA-0013) client contract: canonical Dart models over the persisted Library/Artifact/Job rows. Proof-only; not the product app."
+publish_to: 'none'
+version: 0.0.1
+
+environment:
+  sdk: ^3.12.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0

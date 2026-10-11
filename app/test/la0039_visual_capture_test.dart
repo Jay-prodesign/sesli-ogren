@@ -1,0 +1,616 @@
+import 'dart:io';
+
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:sesli_ogren/src/app/app_runtime.dart';
+import 'package:sesli_ogren/src/app/app_theme.dart';
+import 'package:sesli_ogren/src/app/explain_back_screen.dart';
+import 'package:sesli_ogren/src/app/explain_screen.dart';
+import 'package:sesli_ogren/src/app/focus_screen.dart';
+import 'package:sesli_ogren/src/app/learning_slice_screen.dart';
+import 'package:sesli_ogren/src/app/la0040_visual_treatments.dart';
+import 'package:sesli_ogren/src/app/living_study_desk_home.dart';
+import 'package:sesli_ogren/src/app/listen_screen.dart';
+import 'package:sesli_ogren/src/app/material_workspace_screen.dart';
+import 'package:sesli_ogren/src/app/product_shell_screen.dart';
+import 'package:sesli_ogren/src/domain/learning_contracts.dart';
+import 'package:sesli_ogren/src/domain/learning_truth.dart';
+import 'package:sesli_ogren/src/data/pdf_text_extractor.dart';
+import 'package:sesli_ogren/src/data/source_ingest_service.dart';
+import 'package:sesli_ogren/src/data/sqlite_source_store.dart';
+import 'package:sesli_ogren/src/generation/grounded_explain_gateway.dart';
+import 'package:sesli_ogren/src/learning/recall_learning_service.dart';
+import 'package:sqflite_common_ffi/sqflite_ffi.dart';
+
+const _captureEnabled = bool.fromEnvironment('LA0039_VISUAL_CAPTURE');
+
+class _UnusedPdfExtractor implements PdfTextExtractor {
+  const _UnusedPdfExtractor();
+
+  @override
+  Future<ExtractedPdf> extract(Uint8List bytes, {required String sourceName}) {
+    throw UnimplementedError();
+  }
+}
+
+class _ReadyExplainGateway implements GroundedExplainGateway {
+  const _ReadyExplainGateway();
+
+  @override
+  Future<GroundedExplainResult> explain(GroundedExplainRequest request) async => GroundedExplainReady(
+    sourceVersionId: request.sourceVersionId,
+    sourceContentDigest: request.sourceContentDigest,
+    explanation: 'Fotosentezde bitki, ışık enerjisini kullanarak su ve karbondioksitten kimyasal enerji depolayan moleküller üretir.',
+    keyPoints: const [
+      'Işık enerjisi süreci başlatır.',
+      'Karbondioksit ve su kaynak olarak kullanılır.',
+      'Enerji kimyasal biçimde depolanır.',
+    ],
+    language: 'tr-TR',
+    executionRef: 'visual-review:grounded-explain',
+  );
+}
+
+Future<void> _pumpUntilFound(WidgetTester tester, Finder finder, {int maxPumps = 120}) async {
+  for (var i = 0; i < maxPumps; i++) {
+    await tester.pump(const Duration(milliseconds: 20));
+    if (finder.evaluate().isNotEmpty) return;
+  }
+  fail('Expected visual-review widget was not reached within bounded pumps.');
+}
+
+Future<void> _loadReviewFonts() async {
+  final flutterRoot = Platform.environment['FLUTTER_ROOT'];
+  if (flutterRoot == null || flutterRoot.isEmpty) {
+    fail('FLUTTER_ROOT is required for deterministic LA-0039 visual review fonts.');
+  }
+
+  Future<ByteData> readFont(String fileName) async {
+    final bytes = await File('$flutterRoot/bin/cache/artifacts/material_fonts/$fileName').readAsBytes();
+    return ByteData.sublistView(bytes);
+  }
+
+  final roboto = FontLoader('Roboto')..addFont(readFont('Roboto-Regular.ttf'));
+  final materialIcons = FontLoader('MaterialIcons')..addFont(readFont('MaterialIcons-Regular.otf'));
+  await Future.wait([roboto.load(), materialIcons.load()]);
+}
+
+Widget _phoneFrame(Widget child, {TextScaler textScaler = TextScaler.noScaling}) {
+  final baseTheme = SesliOgrenTheme.light();
+  return MaterialApp(
+    debugShowCheckedModeBanner: false,
+    theme: baseTheme.copyWith(
+      textTheme: baseTheme.textTheme.apply(fontFamily: 'Roboto'),
+      primaryTextTheme: baseTheme.primaryTextTheme.apply(fontFamily: 'Roboto'),
+      filledButtonTheme: FilledButtonThemeData(
+        style: (baseTheme.filledButtonTheme.style ?? const ButtonStyle()).copyWith(
+          textStyle: const WidgetStatePropertyAll(TextStyle(fontFamily: 'Roboto', fontWeight: FontWeight.w700)),
+        ),
+      ),
+      outlinedButtonTheme: OutlinedButtonThemeData(
+        style: (baseTheme.outlinedButtonTheme.style ?? const ButtonStyle()).copyWith(
+          textStyle: const WidgetStatePropertyAll(TextStyle(fontFamily: 'Roboto', fontWeight: FontWeight.w700)),
+        ),
+      ),
+      textButtonTheme: TextButtonThemeData(
+        style: (baseTheme.textButtonTheme.style ?? const ButtonStyle()).copyWith(
+          textStyle: const WidgetStatePropertyAll(TextStyle(fontFamily: 'Roboto', fontWeight: FontWeight.w700)),
+        ),
+      ),
+    ),
+    home: MediaQuery(
+      data: MediaQueryData(disableAnimations: true, textScaler: textScaler),
+      child: child,
+    ),
+  );
+}
+
+Future<void> _precacheCompanion(WidgetTester tester) async {
+  final context = tester.element(find.byType(MaterialApp));
+  await tester.runAsync(() => precacheImage(const AssetImage('assets/companions/D_KNOT_128.webp'), context));
+  await tester.pump(const Duration(milliseconds: 120));
+}
+
+void main() {
+  sqfliteFfiInit();
+
+  testWidgets('capture LA-0039 representative Golden Product Slice', (tester) async {
+    await tester.runAsync(_loadReviewFonts);
+
+    tester.view.physicalSize = const Size(780, 1688);
+    tester.view.devicePixelRatio = 2;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
+    addTearDown(store.close);
+
+    final ingest = SourceIngestService(
+      store: store,
+      pdfTextExtractor: const _UnusedPdfExtractor(),
+      now: () => DateTime.utc(2026, 10, 7, 12),
+    );
+    final recall = RecallLearningService(
+      sourceStore: store,
+      learningStore: store.learningTruthStore(),
+      now: () => DateTime.utc(2026, 10, 7, 12, 1),
+    );
+    final runtime = AppRuntime(
+      learner: AppRuntime.localM5LearnerFixture,
+      store: store,
+      ingest: ingest,
+      recall: recall,
+      telemetry: store.operationalTelemetry(),
+      explain: const _ReadyExplainGateway(),
+    );
+
+    await ingest.ingestPastedText(
+      learner: runtime.learner,
+      materialId: AppRuntime.primaryMaterialId,
+      text:
+          'Fotosentez sırasında klorofil ışık enerjisini kimyasal enerjiye dönüştürmeye yardımcı olur. '
+          'Bitkiler karbondioksit ve suyu kullanır; süreç sonunda kimyasal enerji depolanır.',
+      sourceName: 'Biyoloji — Fotosentez Notları',
+    );
+
+    final source = await store.currentSourceVersion(learner: runtime.learner, materialId: AppRuntime.primaryMaterialId);
+    final extracted = source == null
+        ? null
+        : await store.extractedContentForSource(
+            learner: runtime.learner,
+            sourceVersionId: source.identity.sourceVersionId,
+          );
+    expect(source, isNotNull);
+    expect(extracted, isNotNull);
+
+    await tester.pumpWidget(_phoneFrame(ProductShellScreen(runtime: runtime)));
+    await _pumpUntilFound(tester, find.text('KALDIĞIN MATERYAL'));
+    await _precacheCompanion(tester);
+    await tester.pump(const Duration(milliseconds: 200));
+    await expectLater(find.byType(Scaffold).first, matchesGoldenFile('goldens/la0039_home.png'));
+
+    await tester.tap(find.byIcon(Icons.library_books_outlined));
+    await tester.pump(const Duration(milliseconds: 200));
+    await expectLater(find.byType(Scaffold).first, matchesGoldenFile('goldens/la0040_library.png'));
+
+    await tester.tap(find.byIcon(Icons.insights_outlined));
+    await tester.pump(const Duration(milliseconds: 200));
+    await expectLater(find.byType(Scaffold).first, matchesGoldenFile('goldens/la0040_progress.png'));
+
+    await tester.tap(find.byIcon(Icons.person_outline_rounded));
+    await _pumpUntilFound(tester, find.text('Profil ve Ayarlar'));
+    await tester.pump(const Duration(milliseconds: 200));
+    await expectLater(find.byType(Scaffold).first, matchesGoldenFile('goldens/la0040_profile.png'));
+
+    await tester.pumpWidget(
+      _phoneFrame(MaterialWorkspaceScreen(runtime: runtime, materialId: AppRuntime.primaryMaterialId)),
+    );
+    await _pumpUntilFound(tester, find.text('SIRADAKİ ADIM'));
+    await tester.pump(const Duration(milliseconds: 200));
+    await expectLater(find.byType(Scaffold).first, matchesGoldenFile('goldens/la0039_workspace.png'));
+
+    await tester.pumpWidget(_phoneFrame(ListenScreen(runtime: runtime, materialId: AppRuntime.primaryMaterialId)));
+    await _pumpUntilFound(tester, find.text('DİNLEME'));
+    await tester.pump(const Duration(milliseconds: 200));
+    await expectLater(find.byType(Scaffold).first, matchesGoldenFile('goldens/la0040_listen.png'));
+
+    await tester.pumpWidget(
+      _phoneFrame(FocusScreen(runtime: runtime, source: source!, sourceText: extracted!.normalizedText)),
+    );
+    await _pumpUntilFound(tester, find.text('Odaklan'));
+    await tester.pump(const Duration(milliseconds: 200));
+    await expectLater(find.byType(Scaffold).first, matchesGoldenFile('goldens/la0040_focus.png'));
+
+    await tester.pumpWidget(_phoneFrame(ExplainScreen(runtime: runtime, source: source)));
+    await _pumpUntilFound(tester, find.text('Kaynağına dayalı açıklama'));
+    await tester.pump(const Duration(milliseconds: 200));
+    await expectLater(find.byType(Scaffold).first, matchesGoldenFile('goldens/la0040_explain.png'));
+
+    await tester.pumpWidget(_phoneFrame(ExplainBackScreen(runtime: runtime, source: source)));
+    await _pumpUntilFound(tester, find.text('Anlatımımı değerlendir'));
+    await tester.pump(const Duration(milliseconds: 200));
+    await expectLater(find.byType(Scaffold).first, matchesGoldenFile('goldens/la0040_explain_back.png'));
+
+    final prompt = await recall.createCurrentPrompt(learner: runtime.learner, materialId: AppRuntime.primaryMaterialId);
+    final action = await store.learningTruthStore().recallAction(learner: runtime.learner, actionId: prompt.id);
+    expect(action, isNotNull);
+
+    await tester.pumpWidget(
+      _phoneFrame(LearningSliceScreen(runtime: runtime, materialId: AppRuntime.primaryMaterialId)),
+    );
+    await _pumpUntilFound(tester, find.text('Hatırla'));
+    await tester.pump(const Duration(milliseconds: 200));
+    await expectLater(find.byType(Scaffold).first, matchesGoldenFile('goldens/la0040_recall_prompt.png'));
+
+    await tester.enterText(find.byType(TextField), action!.expectedAnswer);
+    await tester.tap(find.text('Yanıtla'));
+    await _pumpUntilFound(tester, find.text('İpucusuz hatırladın'));
+    expect(find.text('Sıradaki adıma geç'), findsOneWidget);
+    await tester.pump(const Duration(milliseconds: 200));
+    await expectLater(find.byType(Scaffold).first, matchesGoldenFile('goldens/la0039_recall_payoff.png'));
+
+    const stressMaterialId = MaterialId('la0040-visual-stress');
+    final stressIngest = SourceIngestService(
+      store: store,
+      pdfTextExtractor: const _UnusedPdfExtractor(),
+      now: () => DateTime.utc(2026, 10, 7, 13),
+    );
+    final stressRecall = RecallLearningService(
+      sourceStore: store,
+      learningStore: store.learningTruthStore(),
+      now: () => DateTime.utc(2026, 10, 7, 13, 1),
+    );
+    final stressRuntime = AppRuntime(
+      learner: runtime.learner,
+      store: store,
+      ingest: stressIngest,
+      recall: stressRecall,
+      telemetry: store.operationalTelemetry(),
+      explain: const _ReadyExplainGateway(),
+    );
+
+    await stressIngest.ingestPastedText(
+      learner: stressRuntime.learner,
+      materialId: stressMaterialId,
+      text:
+          'Fotosentez, hücresel enerji dönüşümleri ve bitkilerde ışığa bağlı tepkimeler bu uzun çalışma notunda '
+          'birlikte ele alınır. Klorofil ışık enerjisinin kimyasal enerjiye dönüşümünde rol alır.',
+      sourceName: 'Biyoloji — Fotosentez ve Hücresel Enerji Dönüşümleri Uzun Çalışma Notları',
+    );
+
+    tester.view.physicalSize = const Size(640, 1400);
+    await tester.pumpWidget(_phoneFrame(ProductShellScreen(runtime: stressRuntime)));
+    await _pumpUntilFound(tester, find.textContaining('Fotosentez ve Hücresel Enerji'));
+    await tester.pump(const Duration(milliseconds: 200));
+    await expectLater(find.byType(Scaffold).first, matchesGoldenFile('goldens/la0040_stress_narrow_home.png'));
+
+    tester.view.physicalSize = const Size(780, 1688);
+    await tester.pumpWidget(
+      _phoneFrame(
+        MaterialWorkspaceScreen(runtime: stressRuntime, materialId: stressMaterialId),
+        textScaler: TextScaler.linear(1.3),
+      ),
+    );
+    await _pumpUntilFound(tester, find.text('SIRADAKİ ADIM'));
+    await tester.pump(const Duration(milliseconds: 200));
+    await expectLater(find.byType(Scaffold).first, matchesGoldenFile('goldens/la0040_stress_text130_workspace.png'));
+
+    await stressRecall.createCurrentPrompt(learner: stressRuntime.learner, materialId: stressMaterialId);
+    await tester.pumpWidget(
+      _phoneFrame(
+        LearningSliceScreen(runtime: stressRuntime, materialId: stressMaterialId),
+        textScaler: TextScaler.linear(1.5),
+      ),
+    );
+    await _pumpUntilFound(tester, find.text('Hatırla'));
+    await tester.pump(const Duration(milliseconds: 200));
+    await expectLater(find.byType(Scaffold).first, matchesGoldenFile('goldens/la0040_stress_text150_recall.png'));
+  }, skip: !_captureEnabled);
+
+  testWidgets('capture LA-0040 real-data treatment comparison', (tester) async {
+    await tester.runAsync(_loadReviewFonts);
+    tester.view.physicalSize = const Size(780, 1688);
+    tester.view.devicePixelRatio = 2;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    for (final lane in LearningVisualTreatment.values) {
+      final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
+      final ingest = SourceIngestService(
+        store: store,
+        pdfTextExtractor: const _UnusedPdfExtractor(),
+        now: () => DateTime.utc(2026, 10, 7, 12),
+      );
+      final recall = RecallLearningService(
+        sourceStore: store,
+        learningStore: store.learningTruthStore(),
+        now: () => DateTime.utc(2026, 10, 7, 12, 1),
+      );
+      final runtime = AppRuntime(
+        learner: AppRuntime.localM5LearnerFixture,
+        store: store,
+        ingest: ingest,
+        recall: recall,
+        telemetry: store.operationalTelemetry(),
+        explain: const _ReadyExplainGateway(),
+      );
+      await ingest.ingestPastedText(
+        learner: runtime.learner,
+        materialId: AppRuntime.primaryMaterialId,
+        text:
+            'Fotosentez sırasında klorofil ışık enerjisini kimyasal enerjiye '
+            'dönüştürmeye yardımcı olur. Bitkiler karbondioksit ve suyu kullanır; '
+            'süreç sonunda kimyasal enerji depolanır.',
+        sourceName: 'Biyoloji — Fotosentez Notları',
+      );
+
+      await tester.pumpWidget(
+        _phoneFrame(
+          LearningVisualTreatmentScope(
+            treatment: lane,
+            child: ProductShellScreen(runtime: runtime),
+          ),
+        ),
+      );
+      await _pumpUntilFound(tester, find.byKey(ValueKey('la0040-home-${lane.name}')));
+      await _precacheCompanion(tester);
+      await tester.pump(const Duration(milliseconds: 200));
+      await expectLater(
+        find.byType(Scaffold).first,
+        matchesGoldenFile('goldens/la0040_treatment_${lane.name}_home.png'),
+      );
+
+      await tester.ensureVisible(find.text('Materyalle devam et'));
+      await tester.pump(const Duration(milliseconds: 80));
+      await tester.tap(find.text('Materyalle devam et'));
+      // Capture the real pushed route, preserving the chosen visual treatment.
+      await _pumpUntilFound(tester, find.byKey(ValueKey('la0040-workspace-${lane.name}')));
+      await tester.pump(const Duration(milliseconds: 200));
+      await expectLater(
+        find.byType(Scaffold).last,
+        matchesGoldenFile('goldens/la0040_treatment_${lane.name}_workspace.png'),
+      );
+
+      final prompt = await recall.createCurrentPrompt(
+        learner: runtime.learner,
+        materialId: AppRuntime.primaryMaterialId,
+      );
+      final action = await store.learningTruthStore().recallAction(learner: runtime.learner, actionId: prompt.id);
+      expect(action, isNotNull);
+
+      await tester.ensureVisible(find.text('Kaynaktan hatırla'));
+      await tester.pump(const Duration(milliseconds: 80));
+      await tester.tap(find.text('Kaynaktan hatırla'));
+      // The Recall route must inherit the same lane and persist its own attempt.
+      await _pumpUntilFound(tester, find.byKey(ValueKey('la0040-prompt-${lane.name}')));
+      await tester.pump(const Duration(milliseconds: 200));
+      await expectLater(
+        find.byType(Scaffold).last,
+        matchesGoldenFile('goldens/la0040_treatment_${lane.name}_prompt.png'),
+      );
+
+      await tester.ensureVisible(find.byType(TextField));
+      await tester.enterText(find.byType(TextField), action!.expectedAnswer);
+      await tester.ensureVisible(find.text('Yanıtla'));
+      await tester.tap(find.text('Yanıtla'));
+      await _pumpUntilFound(tester, find.byKey(ValueKey('la0040-result-${lane.name}')));
+      expect(find.text('Sıradaki adıma geç'), findsOneWidget);
+      // Small-label contrast must remain readable under each candidate
+      // surface (4.5:1 for regular text, not a subjective color-only check).
+      final nextActionLabel = find.text('ŞİMDİ NE YAPMALI?');
+      expect(nextActionLabel, findsOneWidget);
+      final foreground = tester.widget<Text>(nextActionLabel).style!.color!;
+      final background = Theme.of(tester.element(nextActionLabel)).scaffoldBackgroundColor;
+      final lighter = foreground.computeLuminance() > background.computeLuminance()
+          ? foreground.computeLuminance()
+          : background.computeLuminance();
+      final darker = foreground.computeLuminance() < background.computeLuminance()
+          ? foreground.computeLuminance()
+          : background.computeLuminance();
+      expect((lighter + 0.05) / (darker + 0.05), greaterThanOrEqualTo(4.5));
+      await tester.pump(const Duration(milliseconds: 200));
+      await expectLater(
+        find.byType(Scaffold).last,
+        matchesGoldenFile('goldens/la0040_treatment_${lane.name}_result.png'),
+      );
+
+      // Exercise the persisted negative path on the SAME material and
+      // scoped review route. A prior independent result cannot convert an
+      // unknown or hinted attempt into unassisted success.
+      await tester.ensureVisible(find.text('Sıradaki adıma geç'));
+      await tester.tap(find.text('Sıradaki adıma geç'));
+      await _pumpUntilFound(tester, find.text('Hatırlamaya dön'));
+      await tester.tap(find.text('Hatırlamaya dön'));
+      await _pumpUntilFound(tester, find.byKey(ValueKey('la0040-prompt-${lane.name}')));
+      await tester.ensureVisible(find.text('Bilmiyorum'));
+      await tester.tap(find.text('Bilmiyorum'));
+      await _pumpUntilFound(tester, find.byKey(ValueKey('la0040-result-${lane.name}')));
+      await tester.pump(const Duration(milliseconds: 280));
+      expect(find.text('Henüz yanıt veremedin'), findsOneWidget);
+      expect(find.text('İpucusuz hatırladın'), findsNothing);
+
+      await tester.ensureVisible(find.text('Sıradaki adıma geç'));
+      await tester.tap(find.text('Sıradaki adıma geç'));
+      await _pumpUntilFound(tester, find.text('Hatırlamaya dön'));
+      await tester.tap(find.text('Hatırlamaya dön'));
+      await _pumpUntilFound(tester, find.byKey(ValueKey('la0040-prompt-${lane.name}')));
+      await tester.ensureVisible(find.text('İpucu'));
+      await tester.tap(find.text('İpucu'));
+      await tester.pump(const Duration(milliseconds: 180));
+      await tester.enterText(find.byType(TextField), action.expectedAnswer);
+      await tester.ensureVisible(find.text('Yanıtla'));
+      await tester.tap(find.text('Yanıtla'));
+      await _pumpUntilFound(tester, find.byKey(ValueKey('la0040-result-${lane.name}')));
+      await tester.pump(const Duration(milliseconds: 280));
+      expect(find.text('Destekle doğru yanıt'), findsOneWidget);
+      expect(find.text('İpucusuz hatırladın'), findsNothing);
+
+      final storedSource = await store.currentSourceVersion(
+        learner: runtime.learner,
+        materialId: AppRuntime.primaryMaterialId,
+      );
+      expect(storedSource, isNotNull);
+      final evidence = await store.learningTruthStore().evidenceForMaterial(
+        learner: runtime.learner,
+        materialId: AppRuntime.primaryMaterialId,
+        sourceVersionId: storedSource!.identity.sourceVersionId,
+      );
+      expect(evidence.any((row) => row.outcome == RecallOutcome.unknown), isTrue);
+      expect(evidence.any((row) => row.assistance == RecallAssistance.hint), isTrue);
+
+      await tester.pumpWidget(const SizedBox());
+      await store.close();
+    }
+  }, skip: !_captureEnabled);
+
+  testWidgets('capture living study desk actual empty and owned material Home', (tester) async {
+    await tester.runAsync(_loadReviewFonts);
+    tester.view.physicalSize = const Size(780, 1688);
+    tester.view.devicePixelRatio = 2;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
+    final ingest = SourceIngestService(
+      store: store,
+      pdfTextExtractor: const _UnusedPdfExtractor(),
+      now: () => DateTime.utc(2026, 10, 8, 12),
+    );
+    final recall = RecallLearningService(
+      sourceStore: store,
+      learningStore: store.learningTruthStore(),
+      now: () => DateTime.utc(2026, 10, 8, 12, 1),
+    );
+    final runtime = AppRuntime(
+      learner: AppRuntime.localM5LearnerFixture,
+      store: store,
+      ingest: ingest,
+      recall: recall,
+      telemetry: store.operationalTelemetry(),
+      explain: const _ReadyExplainGateway(),
+    );
+
+    await tester.pumpWidget(_phoneFrame(LivingDeskReviewScope(child: ProductShellScreen(runtime: runtime))));
+    await _pumpUntilFound(tester, find.byKey(const ValueKey('la0040-living-home-empty')));
+    expect(find.text('İlk materyalini ekle'), findsOneWidget);
+    expect(find.text('Biyoloji — Fotosentez Notları'), findsNothing);
+    await tester.pump(const Duration(milliseconds: 180));
+    await expectLater(find.byType(Scaffold).first, matchesGoldenFile('goldens/la0040_living_home_empty.png'));
+
+    // Reset the mounted Home so its real Future snapshot reloads after ingest.
+    await tester.pumpWidget(const SizedBox());
+    await ingest.ingestPastedText(
+      learner: runtime.learner,
+      materialId: AppRuntime.primaryMaterialId,
+      text:
+          'Fotosentez sırasında klorofil ışık enerjisini kimyasal enerjiye '
+          'dönüştürmeye yardımcı olur. Bitkiler karbondioksit ve suyu kullanır; '
+          'süreç sonunda kimyasal enerji depolanır. '
+          'Yapraklardaki klorofil ışığı yakalayarak bu dönüşümün başlamasına '
+          'yardımcı olur. Fotosentez yalnızca karbondioksit tüketimi olarak '
+          'düşünülmemelidir; enerji dönüşümü ve madde kullanımı aynı sürecin '
+          'parçalarıdır. Farklı çevre koşullarında ışık miktarı bu sürecin '
+          'hızını etkileyebilir. Bitkinin yaptığı madde dönüşümü ile '
+          'ışığın sağladığı enerji birbirinden ayrılmalıdır. '
+          'Bu özgün test notu öğrenciye ait gerçek materyal akışını örnekler.',
+      sourceName: 'Biyoloji — Fotosentez Notları',
+    );
+    await tester.pumpWidget(_phoneFrame(LivingDeskReviewScope(child: ProductShellScreen(runtime: runtime))));
+    await _pumpUntilFound(tester, find.byKey(const ValueKey('la0040-living-home-populated')));
+    expect(find.text('Biyoloji — Fotosentez Notları'), findsOneWidget);
+    expect(find.text('Çalışmaya devam et'), findsOneWidget);
+    expect(find.byKey(const ValueKey('la0040-atelier-home-promise')), findsOneWidget);
+    expect(find.byKey(const ValueKey('la0040-source-to-recall-thread')), findsOneWidget);
+    expect(find.byKey(const ValueKey('la0040-living-material-open')), findsOneWidget);
+    final continueRect = tester.getRect(find.byKey(const ValueKey('la0040-living-continue')));
+    final navigationRect = tester.getRect(find.byType(NavigationBar));
+    expect(continueRect.bottom, lessThanOrEqualTo(navigationRect.top));
+    await tester.pump(const Duration(milliseconds: 180));
+    await expectLater(find.byType(Scaffold).first, matchesGoldenFile('goldens/la0040_living_home_populated.png'));
+
+    // Narrow and scaled layouts must keep the real actions reachable.
+    tester.view.physicalSize = const Size(640, 1400);
+    await tester.pump(const Duration(milliseconds: 150));
+    await expectLater(find.byType(Scaffold).first, matchesGoldenFile('goldens/la0040_living_home_narrow.png'));
+    await tester.ensureVisible(find.byKey(const ValueKey('la0040-living-continue')));
+    await tester.pump(const Duration(milliseconds: 120));
+    expect(find.byKey(const ValueKey('la0040-living-continue')), findsOneWidget);
+
+    await tester.pumpWidget(const SizedBox());
+    tester.view.physicalSize = const Size(780, 1688);
+    await tester.pumpWidget(
+      _phoneFrame(
+        LivingDeskReviewScope(child: ProductShellScreen(runtime: runtime)),
+        textScaler: const TextScaler.linear(1.5),
+      ),
+    );
+    await _pumpUntilFound(tester, find.byKey(const ValueKey('la0040-living-home-populated')));
+    await tester.pump(const Duration(milliseconds: 120));
+    await expectLater(find.byType(Scaffold).first, matchesGoldenFile('goldens/la0040_living_home_scale150.png'));
+
+    // Cross-app visual design must survive BOTH narrow and large type together.
+    tester.view.physicalSize = const Size(640, 1400);
+    await tester.pump(const Duration(milliseconds: 140));
+    expect(tester.takeException(), isNull);
+    await expectLater(find.byType(Scaffold).first, matchesGoldenFile('goldens/la0040_atelier_home_320_text150.png'));
+    tester.view.physicalSize = const Size(780, 1688);
+    await tester.pump(const Duration(milliseconds: 140));
+    // The primary action remains visible even when large text causes the
+    // source document to scroll; never hide it behind the tab navigation.
+    final scaledButton = tester.getRect(find.byKey(const ValueKey('la0040-living-continue')));
+    final scaledNavigation = tester.getRect(find.byType(NavigationBar));
+    expect(scaledButton.bottom, lessThanOrEqualTo(scaledNavigation.top));
+    await tester.pump(const Duration(milliseconds: 180));
+    await tester.tap(find.byKey(const ValueKey('la0040-living-continue')));
+    await _pumpUntilFound(tester, find.byKey(const ValueKey('la0040-atelier-workspace')));
+    await tester.pump(const Duration(milliseconds: 160));
+    await expectLater(find.byType(Scaffold).last, matchesGoldenFile('goldens/la0040_atelier_workspace.png'));
+
+    // Real learner-owned source flows through the same route and persisted
+    // Recall engine. No decorative mock answers or invented success metrics.
+    final prompt = await recall.createCurrentPrompt(learner: runtime.learner, materialId: AppRuntime.primaryMaterialId);
+    final action = await store.learningTruthStore().recallAction(learner: runtime.learner, actionId: prompt.id);
+    expect(action, isNotNull);
+    await tester.tap(find.byKey(const ValueKey('la0040-atelier-workspace-recall')));
+    await _pumpUntilFound(tester, find.byKey(const ValueKey('la0040-atelier-recall')));
+    expect(find.text(action!.expectedAnswer), findsNothing);
+    expect(find.byKey(const ValueKey('la0040-source-evidence-reveal')), findsNothing);
+    await tester.pump(const Duration(milliseconds: 160));
+    await expectLater(find.byType(Scaffold).last, matchesGoldenFile('goldens/la0040_atelier_recall.png'));
+
+    await tester.enterText(find.byKey(const ValueKey('la0040-atelier-answer')), action.expectedAnswer);
+    await tester.ensureVisible(find.byKey(const ValueKey('la0040-atelier-submit')));
+    await tester.tap(find.byKey(const ValueKey('la0040-atelier-submit')));
+    await _pumpUntilFound(tester, find.byKey(const ValueKey('la0040-atelier-result')));
+    expect(find.text('Bir kez bağımsız hatırladın'), findsOneWidget);
+    expect(find.byKey(const ValueKey('la0040-source-evidence-reveal')), findsOneWidget);
+    await tester.pump(const Duration(milliseconds: 300));
+    await expectLater(find.byType(Scaffold).last, matchesGoldenFile('goldens/la0040_atelier_result.png'));
+
+    tester.view.physicalSize = const Size(640, 1400);
+    await tester.pump(const Duration(milliseconds: 160));
+    expect(tester.takeException(), isNull);
+    await expectLater(find.byType(Scaffold).last, matchesGoldenFile('goldens/la0040_atelier_result_320_text150.png'));
+    tester.view.physicalSize = const Size(780, 1688);
+    await tester.pump(const Duration(milliseconds: 120));
+
+    await tester.ensureVisible(find.byKey(const ValueKey('la0040-atelier-next')));
+    await tester.tap(find.byKey(const ValueKey('la0040-atelier-next')));
+    await _pumpUntilFound(tester, find.text('Hatırlamaya dön'));
+    await tester.tap(find.text('Hatırlamaya dön'));
+    await _pumpUntilFound(tester, find.byKey(const ValueKey('la0040-atelier-recall')));
+    await tester.ensureVisible(find.text('Bilmiyorum'));
+    await tester.tap(find.text('Bilmiyorum'));
+    await _pumpUntilFound(tester, find.byKey(const ValueKey('la0040-atelier-result')));
+    // AnimatedSwitcher retains the prior result for a short exit transition.
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(find.text('Bu kez bilmiyorum dedin'), findsOneWidget);
+    expect(find.text('Bir kez bağımsız hatırladın'), findsNothing);
+    expect(find.byKey(const ValueKey('la0040-source-evidence-reveal')), findsOneWidget);
+    await tester.pump(const Duration(milliseconds: 160));
+    await expectLater(find.byType(Scaffold).last, matchesGoldenFile('goldens/la0040_atelier_unknown.png'));
+
+    await tester.ensureVisible(find.byKey(const ValueKey('la0040-atelier-next')));
+    await tester.tap(find.byKey(const ValueKey('la0040-atelier-next')));
+    await _pumpUntilFound(tester, find.text('Hatırlamaya dön'));
+    await tester.tap(find.text('Hatırlamaya dön'));
+    await _pumpUntilFound(tester, find.byKey(const ValueKey('la0040-atelier-recall')));
+    await tester.ensureVisible(find.text('İpucu'));
+    await tester.tap(find.text('İpucu'));
+    await tester.pump(const Duration(milliseconds: 100));
+    await tester.enterText(find.byKey(const ValueKey('la0040-atelier-answer')), action.expectedAnswer);
+    await tester.ensureVisible(find.byKey(const ValueKey('la0040-atelier-submit')));
+    await tester.tap(find.byKey(const ValueKey('la0040-atelier-submit')));
+    await _pumpUntilFound(tester, find.byKey(const ValueKey('la0040-atelier-result')));
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(find.text('İpucuyla doğru yanıt'), findsOneWidget);
+    expect(find.text('Bir kez bağımsız hatırladın'), findsNothing);
+    expect(find.byKey(const ValueKey('la0040-source-evidence-reveal')), findsOneWidget);
+    await tester.pump(const Duration(milliseconds: 160));
+    await expectLater(find.byType(Scaffold).last, matchesGoldenFile('goldens/la0040_atelier_hinted.png'));
+
+    await tester.pumpWidget(const SizedBox());
+    await store.close();
+  }, skip: !_captureEnabled);
+}

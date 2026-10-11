@@ -1,0 +1,771 @@
+import 'dart:io';
+
+import 'package:flutter/services.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:sesli_ogren/src/account/account_overview_gateway.dart';
+import 'package:sesli_ogren/src/app/account_entry_screen.dart';
+import 'package:sesli_ogren/src/app/app_runtime.dart';
+import 'package:sesli_ogren/src/app/app_theme.dart';
+import 'package:sesli_ogren/src/app/atelier_learning_surfaces.dart';
+import 'package:sesli_ogren/src/app/explain_back_screen.dart';
+import 'package:sesli_ogren/src/app/first_value_intent_surface.dart';
+import 'package:sesli_ogren/src/app/focus_screen.dart';
+import 'package:sesli_ogren/src/app/listen_screen.dart';
+import 'package:sesli_ogren/src/app/learning_slice_screen.dart';
+import 'package:sesli_ogren/src/app/product_shell_screen.dart';
+import 'package:sesli_ogren/src/app/quick_recap_screen.dart';
+import 'package:sesli_ogren/src/app/living_study_desk_home.dart';
+import 'package:sesli_ogren/src/app/source_reader_screen.dart';
+import 'package:sesli_ogren/src/data/pdf_text_extractor.dart';
+import 'package:sesli_ogren/src/data/source_ingest_service.dart';
+import 'package:sesli_ogren/src/data/sqlite_source_store.dart';
+import 'package:sesli_ogren/src/domain/authenticated_learner.dart';
+import 'package:sesli_ogren/src/domain/learning_contracts.dart';
+import 'package:sesli_ogren/src/domain/learning_truth.dart';
+import 'package:sesli_ogren/src/learning/recall_learning_service.dart';
+import 'package:sesli_ogren/src/speech/device_speech_output.dart';
+import 'package:sqflite_common_ffi/sqflite_ffi.dart';
+
+class _UnusedPdfExtractor implements PdfTextExtractor {
+  const _UnusedPdfExtractor();
+
+  @override
+  Future<ExtractedPdf> extract(Uint8List bytes, {required String sourceName}) {
+    throw UnimplementedError();
+  }
+}
+
+class _VisualAccountOverviewGateway implements AccountOverviewGateway {
+  const _VisualAccountOverviewGateway();
+
+  @override
+  Future<AccountOverview?> load({required AuthenticatedLearner learner}) async => AccountOverview(
+    locale: 'tr-TR',
+    accountStatus: 'active',
+    plan: 'free',
+    entitlementStatus: 'active',
+    usage: [
+      AccountUsageEntry(periodStart: DateTime.utc(2026, 10, 11), capability: 'explain', consumed: 3),
+      AccountUsageEntry(periodStart: DateTime.utc(2026, 10, 11), capability: 'summary', consumed: 2),
+    ],
+    dailyLimits: const {'summary_daily': 20, 'explain_daily': 20, 'focus_daily': 20, 'explain_back_daily': 20},
+  );
+}
+
+class _NoopSpeechOutput implements SpeechOutput {
+  const _NoopSpeechOutput();
+
+  @override
+  Future<void> speak(
+    String text, {
+    required String locale,
+    required VoidCallback onStart,
+    required VoidCallback onDone,
+    required ValueChanged<Object> onError,
+    double rateMultiplier = 1.0,
+  }) async {}
+
+  @override
+  Future<void> stop() async {}
+
+  @override
+  Future<void> dispose() async {}
+}
+
+void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+  sqfliteFfiInit();
+
+  setUpAll(() async {
+    Future<void> loadFont(String family, String path) async {
+      final bytes = await File(path).readAsBytes();
+      final loader = FontLoader(family)..addFont(Future.value(ByteData.sublistView(bytes)));
+      await loader.load();
+    }
+
+    await loadFont('Roboto', '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf');
+    final flutterRoot = Platform.environment['FLUTTER_ROOT'];
+    if (flutterRoot == null || flutterRoot.isEmpty) {
+      throw StateError('FLUTTER_ROOT is required for material icon capture.');
+    }
+    await loadFont('MaterialIcons', '$flutterRoot/bin/cache/artifacts/material_fonts/MaterialIcons-Regular.otf');
+  });
+
+  final now = DateTime.utc(2026, 10, 8);
+  const materialId = MaterialId('visual-fixture');
+  const versionId = SourceVersionId('visual-version');
+  const evidenceId = LearnerEvidenceId('visual-evidence');
+  const source =
+      'Fotosentez sırasında bitkiler ışık enerjisini kimyasal enerjiye dönüştürür. Klorofil ışığın soğurulmasında görev alır. Bu süreçte karbondioksit ve su kullanılır.';
+  final material = MaterialRecord(
+    id: materialId,
+    title: 'Fotosentez: ışık ve enerji',
+    mediaType: SourceMediaType.pastedText,
+    lifecycleStatus: MaterialLifecycleStatus.active,
+    processingState: MaterialProcessingState.ready,
+    createdAt: now,
+    updatedAt: now,
+  );
+  final sourceVersion = SourceVersionRecord(
+    identity: const SourceVersionIdentity(
+      materialId: materialId,
+      sourceVersionId: versionId,
+      contentDigest: 'visual-source-digest',
+      trustClass: SourceTrustClass.userProvided,
+      knowledgeClass: SourceKnowledgeClass.learnerOwned,
+    ),
+    mediaType: SourceMediaType.pastedText,
+    sourceName: 'Fotosentez: ışık ve enerji',
+    mimeType: 'text/plain',
+    byteSize: source.length,
+    inlineText: source,
+    createdAt: now,
+  );
+  final evidence = LearnerEvidence(
+    id: evidenceId,
+    attemptId: const RecallAttemptId('visual-attempt'),
+    actionId: const RecallActionId('visual-action'),
+    materialId: materialId,
+    sourceVersionId: versionId,
+    extractedContentId: const ExtractedContentId('visual-extract'),
+    outcome: RecallOutcome.correct,
+    assistance: RecallAssistance.none,
+    responseDigest: 'visual-only',
+    responseLength: 9,
+    ruleVersion: RecallTruthPolicy.evidenceRuleVersion,
+    createdAt: now,
+  );
+  final state = LearnerState(
+    materialId: materialId,
+    sourceVersionId: versionId,
+    kind: RecallStateKind.retrievedOnce,
+    evidenceCount: 1,
+    latestEvidenceId: evidenceId,
+    ruleVersion: RecallTruthPolicy.stateRuleVersion,
+    updatedAt: now,
+  );
+  final next = RecallTruthPolicy.nextActionFor(
+    materialId: materialId,
+    sourceVersionId: versionId,
+    evidenceId: evidenceId,
+    outcome: RecallOutcome.correct,
+    createdAt: now,
+  );
+  final continuation = LearningContinuation(state: state, nextAction: next);
+  final result = RecallAttemptResult(
+    evidence: evidence,
+    state: state,
+    nextAction: next,
+    correctAnswer: 'Fotosentez',
+    sourceExcerpt: 'Fotosentez sırasında bitkiler ışık enerjisini kimyasal enerjiye dönüştürür.',
+  );
+
+  Future<void> capture(
+    WidgetTester tester,
+    String name,
+    Widget child, {
+    Size size = const Size(390, 844),
+    TextScaler textScaler = TextScaler.noScaling,
+  }) async {
+    tester.view.physicalSize = size;
+    tester.view.devicePixelRatio = 1;
+    await tester.pumpWidget(
+      MaterialApp(
+        debugShowCheckedModeBanner: false,
+        theme: SesliOgrenTheme.light(),
+        home: MediaQuery(
+          data: MediaQueryData(textScaler: textScaler, disableAnimations: true),
+          child: Scaffold(body: child),
+        ),
+      ),
+    );
+    // Resolve asynchronously decoded character assets before capturing the first frame.
+    await tester.runAsync(() async {
+      await Future<void>.delayed(const Duration(milliseconds: 250));
+    });
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(tester.takeException(), isNull);
+    await expectLater(find.byType(Scaffold), matchesGoldenFile('goldens/$name.png'));
+    tester.view.resetPhysicalSize();
+    tester.view.resetDevicePixelRatio();
+  }
+
+  testWidgets('LA-0040 populated Home', (tester) async {
+    await capture(
+      tester,
+      'la0040_home_populated_390x844',
+      LivingStudyDeskHome(
+        material: material,
+        continuation: continuation,
+        sourceText: source,
+        otherMaterials: const [],
+        onOpenWorkspace: () {},
+        onOpenLearning: () {},
+        onOpenListen: () {},
+        onOpenMaterial: (_) {},
+      ),
+    );
+  });
+
+  testWidgets('LA-0040 populated Home survives 320px + large type', (tester) async {
+    await capture(
+      tester,
+      'la0040_home_populated_320_text150',
+      SingleChildScrollView(
+        child: SizedBox(
+          height: 920,
+          child: LivingStudyDeskHome(
+            material: material,
+            continuation: continuation,
+            sourceText: source,
+            otherMaterials: const [],
+            onOpenWorkspace: () {},
+            onOpenLearning: () {},
+            onOpenListen: () {},
+            onOpenMaterial: (_) {},
+          ),
+        ),
+      ),
+      size: const Size(320, 700),
+      textScaler: const TextScaler.linear(1.5),
+    );
+  });
+
+  testWidgets('LA-0040 empty Home survives 320px + large type', (tester) async {
+    await capture(
+      tester,
+      'la0040_home_empty_320_text150',
+      SingleChildScrollView(
+        child: SizedBox(
+          height: 980,
+          child: LivingStudyDeskHome(
+            material: null,
+            continuation: null,
+            sourceText: null,
+            otherMaterials: const [],
+            onOpenWorkspace: () {},
+            onOpenLearning: () {},
+            onOpenListen: () {},
+            onOpenMaterial: (_) {},
+          ),
+        ),
+      ),
+      size: const Size(320, 700),
+      textScaler: const TextScaler.linear(1.5),
+    );
+  });
+
+  testWidgets('LA-0040 first source acquisition', (tester) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
+    addTearDown(store.close);
+    final runtime = AppRuntime(
+      learner: AppRuntime.localM5LearnerFixture,
+      store: store,
+      ingest: SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor()),
+      recall: RecallLearningService(sourceStore: store, learningStore: store.learningTruthStore()),
+      telemetry: store.operationalTelemetry(),
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        debugShowCheckedModeBanner: false,
+        theme: SesliOgrenTheme.light(),
+        home: MediaQuery(
+          data: const MediaQueryData(disableAnimations: true),
+          child: LivingDeskReviewScope(child: LearningSliceScreen(runtime: runtime)),
+        ),
+      ),
+    );
+    for (var i = 0; i < 30 && find.text('PDF seç').evaluate().isEmpty; i++) {
+      await tester.pump(const Duration(milliseconds: 30));
+    }
+    expect(find.text('PDF seç'), findsOneWidget);
+    expect(find.text('Metin yapıştır'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+    await expectLater(find.byType(Scaffold), matchesGoldenFile('goldens/la0040_source_acquisition_390x844.png'));
+  });
+
+  testWidgets('LA-0040 first-value intent', (tester) async {
+    await capture(
+      tester,
+      'la0040_first_value_intent_390x844',
+      FirstValueIntentSurface(
+        material: material,
+        sourceText: source,
+        sourceVersion: sourceVersion,
+        onReadSource: () {},
+        onQuickRecap: () {},
+        onRecall: () {},
+        onListen: () {},
+        onFocus: () {},
+      ),
+    );
+    expect(find.text('İLK 60 SANİYE'), findsOneWidget);
+    expect(find.text('Kaynağı aç'), findsOneWidget);
+    expect(find.byKey(const ValueKey('first-value-recommendation-card')), findsOneWidget);
+  });
+
+  testWidgets('LA-0040 first-value intent survives 320px + large type', (tester) async {
+    await capture(
+      tester,
+      'la0040_first_value_intent_320_text150',
+      FirstValueIntentSurface(
+        material: material,
+        sourceText: source,
+        sourceVersion: sourceVersion,
+        onReadSource: () {},
+        onQuickRecap: () {},
+        onRecall: () {},
+        onListen: () {},
+        onFocus: () {},
+      ),
+      size: const Size(320, 700),
+      textScaler: const TextScaler.linear(1.5),
+    );
+    expect(find.text('İLK 60 SANİYE'), findsOneWidget);
+    await tester.scrollUntilVisible(find.text('Diğer çalışma yolları'), 180, scrollable: find.byType(Scrollable).last);
+    await tester.pump();
+    expect(find.text('Diğer çalışma yolları'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('LA-0040 source Reader', (tester) async {
+    await capture(
+      tester,
+      'la0040_reader_390x844',
+      AtelierWorkspace(
+        material: material,
+        sourceText: source,
+        sourceVersion: sourceVersion,
+        continuation: continuation,
+        onReadSource: () {},
+        onQuickRecap: () {},
+        onUpdateSource: () {},
+        onRecall: () {},
+        onListen: () {},
+        onGroundedExplain: () {},
+        onExplain: () {},
+        onFocus: () {},
+      ),
+    );
+    expect(
+      find.byKey(const ValueKey('la0040-atelier-workspace-update-source')),
+      findsOneWidget,
+      reason: 'source-update-control-visible',
+    );
+  });
+
+  testWidgets('LA-0040 Workspace survives 320px + large type', (tester) async {
+    await capture(
+      tester,
+      'la0040_workspace_320_text150',
+      AtelierWorkspace(
+        material: material,
+        sourceText: source,
+        sourceVersion: sourceVersion,
+        continuation: continuation,
+        onReadSource: () {},
+        onQuickRecap: () {},
+        onUpdateSource: () {},
+        onRecall: () {},
+        onListen: () {},
+        onGroundedExplain: () {},
+        onExplain: () {},
+        onFocus: () {},
+      ),
+      size: const Size(320, 700),
+      textScaler: const TextScaler.linear(1.5),
+    );
+  });
+
+  testWidgets('LA-0040 account entry', (tester) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        debugShowCheckedModeBanner: false,
+        theme: SesliOgrenTheme.light(),
+        home: MediaQuery(
+          data: const MediaQueryData(disableAnimations: true),
+          child: AccountEntryScreen(
+            requestOtp: (_) async {},
+            verifyOtp: ({required email, required token}) async =>
+                const AuthenticatedLearner(id: LearnerId('visual-account-user')),
+            onAuthenticated: (_) async {},
+          ),
+        ),
+      ),
+    );
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(tester.takeException(), isNull);
+    await expectLater(find.byType(Scaffold), matchesGoldenFile('goldens/la0040_account_entry_390x844.png'));
+  });
+
+  testWidgets('LA-0040 source-first Listen', (tester) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
+    addTearDown(store.close);
+    final ingest = SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor());
+    final runtime = AppRuntime(
+      learner: AppRuntime.localM5LearnerFixture,
+      store: store,
+      ingest: ingest,
+      recall: RecallLearningService(sourceStore: store, learningStore: store.learningTruthStore()),
+      telemetry: store.operationalTelemetry(),
+    );
+    const listenMaterialId = MaterialId('visual-listen-material');
+    await ingest.ingestPastedText(
+      learner: runtime.learner,
+      materialId: listenMaterialId,
+      text: source,
+      sourceName: 'Fotosentez: ışık ve enerji',
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        debugShowCheckedModeBanner: false,
+        theme: SesliOgrenTheme.light(),
+        home: LivingDeskReviewScope(
+          child: ListenScreen(
+            runtime: runtime,
+            materialId: listenMaterialId,
+            speechOutput: const _NoopSpeechOutput(),
+            onRecall: () {},
+          ),
+        ),
+      ),
+    );
+    await tester.pump(const Duration(milliseconds: 500));
+    expect(tester.takeException(), isNull);
+    await expectLater(find.byType(Scaffold), matchesGoldenFile('goldens/la0040_listen_390x844.png'));
+  });
+
+  testWidgets('LA-0040 source-first Listen survives 320px + large type', (tester) async {
+    tester.view.physicalSize = const Size(320, 700);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
+    addTearDown(store.close);
+    final ingest = SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor());
+    final runtime = AppRuntime(
+      learner: AppRuntime.localM5LearnerFixture,
+      store: store,
+      ingest: ingest,
+      recall: RecallLearningService(sourceStore: store, learningStore: store.learningTruthStore()),
+      telemetry: store.operationalTelemetry(),
+    );
+    const listenMaterialId = MaterialId('visual-listen-large-type');
+    const longTitle = 'Fotosentez: ışık enerjisi ve hücresel dönüşüm için uzun çalışma notu';
+    await ingest.ingestPastedText(
+      learner: runtime.learner,
+      materialId: listenMaterialId,
+      text: source,
+      sourceName: longTitle,
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        debugShowCheckedModeBanner: false,
+        theme: SesliOgrenTheme.light(),
+        home: MediaQuery(
+          data: const MediaQueryData(textScaler: TextScaler.linear(1.5), disableAnimations: true),
+          child: LivingDeskReviewScope(
+            child: ListenScreen(
+              runtime: runtime,
+              materialId: listenMaterialId,
+              speechOutput: const _NoopSpeechOutput(),
+              onRecall: () {},
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pump(const Duration(milliseconds: 500));
+    expect(find.text(longTitle), findsOneWidget);
+    expect(tester.takeException(), isNull);
+    await expectLater(find.byType(Scaffold), matchesGoldenFile('goldens/la0040_listen_320_text150.png'));
+  });
+
+  testWidgets('LA-0040 real source Reader', (tester) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        debugShowCheckedModeBanner: false,
+        theme: SesliOgrenTheme.light(),
+        home: LivingDeskReviewScope(
+          child: SourceReaderScreen(
+            title: material.title,
+            sourceText: source,
+            sourceVersion: sourceVersion,
+            onListen: () {},
+            onRecap: () {},
+            onRecall: () {},
+          ),
+        ),
+      ),
+    );
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(tester.takeException(), isNull);
+    await expectLater(find.byType(Scaffold), matchesGoldenFile('goldens/la0040_source_reader_390x844.png'));
+  });
+
+  testWidgets('LA-0040 real source Reader survives 320px + large type', (tester) async {
+    tester.view.physicalSize = const Size(320, 700);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        debugShowCheckedModeBanner: false,
+        theme: SesliOgrenTheme.light(),
+        home: MediaQuery(
+          data: const MediaQueryData(textScaler: TextScaler.linear(1.5), disableAnimations: true),
+          child: LivingDeskReviewScope(
+            child: SourceReaderScreen(
+              title: material.title,
+              sourceText: source,
+              onListen: () {},
+              onRecap: () {},
+              onRecall: () {},
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(find.text('Kaynağı kapat ve hatırla'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+    await expectLater(find.byType(Scaffold), matchesGoldenFile('goldens/la0040_source_reader_320_text150.png'));
+  });
+
+  testWidgets('LA-0040 secondary learning tools', (tester) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
+    addTearDown(store.close);
+    final ingest = SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor());
+    final runtime = AppRuntime(
+      learner: AppRuntime.localM5LearnerFixture,
+      store: store,
+      ingest: ingest,
+      recall: RecallLearningService(sourceStore: store, learningStore: store.learningTruthStore()),
+      telemetry: store.operationalTelemetry(),
+    );
+    const toolMaterialId = MaterialId('visual-secondary-tools');
+    await ingest.ingestPastedText(
+      learner: runtime.learner,
+      materialId: toolMaterialId,
+      text: source,
+      sourceName: material.title,
+    );
+    final currentSource = await store.currentSourceVersion(learner: runtime.learner, materialId: toolMaterialId);
+    expect(currentSource, isNotNull);
+    final sourceForTools = currentSource!;
+
+    Future<void> captureScreen(String name, Widget child) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          debugShowCheckedModeBanner: false,
+          theme: SesliOgrenTheme.light(),
+          home: MediaQuery(
+            data: const MediaQueryData(disableAnimations: true),
+            child: LivingDeskReviewScope(child: child),
+          ),
+        ),
+      );
+      await tester.pump(const Duration(milliseconds: 500));
+      expect(tester.takeException(), isNull);
+      await expectLater(find.byType(Scaffold), matchesGoldenFile('goldens/$name.png'));
+    }
+
+    await captureScreen('la0040_quick_recap_390x844', QuickRecapScreen(runtime: runtime, materialId: toolMaterialId));
+    await captureScreen(
+      'la0040_focus_390x844',
+      FocusScreen(runtime: runtime, source: sourceForTools, sourceText: source),
+    );
+    await captureScreen('la0040_explain_back_390x844', ExplainBackScreen(runtime: runtime, source: sourceForTools));
+  });
+
+  testWidgets('LA-0040 source-hidden Recall', (tester) async {
+    final controller = TextEditingController();
+    addTearDown(controller.dispose);
+    await capture(
+      tester,
+      'la0040_recall_390x844',
+      SingleChildScrollView(
+        padding: const EdgeInsets.all(20),
+        child: AtelierRecall(
+          prompt: const RecallPrompt(
+            id: RecallActionId('visual-action'),
+            materialId: materialId,
+            sourceVersionId: versionId,
+            promptText: '_____ sırasında bitkiler ışık enerjisini kimyasal enerjiye dönüştürür.',
+            anchor: SourceAnchor(startOffset: 75, endOffset: 84),
+            ruleVersion: RecallLearningService.promptRuleVersion,
+          ),
+          controller: controller,
+          busy: false,
+          onSubmit: () {},
+          onHint: () {},
+          onReveal: () {},
+          onUnknown: () {},
+        ),
+      ),
+    );
+  });
+
+  testWidgets('LA-0040 integrated shell Home Progress Profile', (tester) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
+    addTearDown(store.close);
+    final ingest = SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor());
+    final recall = RecallLearningService(sourceStore: store, learningStore: store.learningTruthStore());
+    final runtime = AppRuntime(
+      learner: AppRuntime.localM5LearnerFixture,
+      store: store,
+      ingest: ingest,
+      recall: recall,
+      telemetry: store.operationalTelemetry(),
+      accountOverview: const _VisualAccountOverviewGateway(),
+    );
+    final ingested = await ingest.ingestPastedText(
+      learner: runtime.learner,
+      materialId: const MaterialId('visual-shell-material'),
+      text: source,
+      sourceName: 'Fotosentez: ışık ve enerji',
+    );
+    final prompt = await recall.createCurrentPrompt(learner: runtime.learner, materialId: ingested.material.id);
+    final attempt = await recall.openAttempt(learner: runtime.learner, actionId: prompt.id);
+    await recall.submit(
+      learner: runtime.learner,
+      actionId: prompt.id,
+      attemptId: attempt.attempt.attemptId,
+      disposition: RecallResponseDisposition.answer,
+      answer: 'Fotosentez',
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        debugShowCheckedModeBanner: false,
+        theme: SesliOgrenTheme.light(),
+        home: LivingDeskReviewScope(child: ProductShellScreen(runtime: runtime)),
+      ),
+    );
+    for (var i = 0; i < 40 && find.text('Kaldığın yer hazır.').evaluate().isEmpty; i++) {
+      await tester.pump(const Duration(milliseconds: 30));
+    }
+    expect(tester.takeException(), isNull);
+    await expectLater(find.byType(Scaffold), matchesGoldenFile('goldens/la0040_shell_home_390x844.png'));
+
+    await tester.tap(find.text('Kütüphane'));
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(find.byKey(const ValueKey('library-material-list')), findsOneWidget);
+    expect(tester.takeException(), isNull);
+    await expectLater(find.byType(Scaffold), matchesGoldenFile('goldens/la0040_shell_library_390x844.png'));
+
+    await tester.tap(find.text('İlerleme'));
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(find.text('İlerleme'), findsWidgets);
+    expect(tester.takeException(), isNull);
+    await expectLater(find.byType(Scaffold), matchesGoldenFile('goldens/la0040_shell_progress_390x844.png'));
+
+    await tester.tap(find.text('Profil'));
+    for (var i = 0; i < 40 && find.text('Ücretsiz plan').evaluate().isEmpty; i++) {
+      await tester.pump(const Duration(milliseconds: 30));
+    }
+    await tester.pump(const Duration(milliseconds: 400));
+    expect(find.text('Profil ve Ayarlar'), findsOneWidget);
+    expect(find.text('Ücretsiz plan'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+    await expectLater(find.byType(Scaffold), matchesGoldenFile('goldens/la0040_shell_profile_390x844.png'));
+  });
+
+  testWidgets('LA-0040 source-evidence Result', (tester) async {
+    await capture(
+      tester,
+      'la0040_result_390x844',
+      SingleChildScrollView(
+        padding: const EdgeInsets.all(20),
+        child: AtelierResult(
+          result: result,
+          answerInMemory: 'Fotosentez',
+          onContinue: () {},
+          sourceVersion: sourceVersion,
+        ),
+      ),
+    );
+  });
+
+  testWidgets('LA-0040 Recall and Result survive 320px + large type', (tester) async {
+    final controller = TextEditingController();
+    addTearDown(controller.dispose);
+    await capture(
+      tester,
+      'la0040_recall_320_text150',
+      SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
+        child: AtelierRecall(
+          prompt: const RecallPrompt(
+            id: RecallActionId('visual-action'),
+            materialId: materialId,
+            sourceVersionId: versionId,
+            promptText: '_____ sırasında bitkiler ışık enerjisini kimyasal enerjiye dönüştürür.',
+            anchor: SourceAnchor(startOffset: 75, endOffset: 84),
+            ruleVersion: RecallLearningService.promptRuleVersion,
+          ),
+          controller: controller,
+          busy: false,
+          onSubmit: () {},
+          onHint: () {},
+          onReveal: () {},
+          onUnknown: () {},
+        ),
+      ),
+      size: const Size(320, 700),
+      textScaler: const TextScaler.linear(1.5),
+    );
+
+    await capture(
+      tester,
+      'la0040_result_320_text150',
+      SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
+        child: AtelierResult(
+          result: result,
+          answerInMemory: 'Fotosentez',
+          onContinue: () {},
+          sourceVersion: sourceVersion,
+        ),
+      ),
+      size: const Size(320, 700),
+      textScaler: const TextScaler.linear(1.5),
+    );
+  });
+}
