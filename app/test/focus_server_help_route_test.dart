@@ -66,6 +66,63 @@ Future<void> _pumpUntilFound(WidgetTester tester, Finder finder, {int maxPumps =
 void main() {
   sqfliteFfiInit();
 
+  testWidgets('Focus bounds very long source rendering and offers the real Reader path', (tester) async {
+    final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
+    addTearDown(store.close);
+
+    final ingest = SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor());
+    const materialId = MaterialId('focus-bounded-preview');
+    final sourceText = List.generate(
+      180,
+      (index) => index == 179
+          ? 'SON-BÖLÜM-İŞARETİ Bu uzak bölüm tam kaynakta korunur.'
+          : 'Bölüm $index fotosentez ve enerji dönüşümü hakkında kaynak bilgisi içerir.',
+    ).join(' ');
+    await ingest.ingestPastedText(
+      learner: AppRuntime.localM5LearnerFixture,
+      materialId: materialId,
+      text: sourceText,
+      sourceName: 'Uzun biyoloji notu',
+    );
+    final source = await store.currentSourceVersion(
+      learner: AppRuntime.localM5LearnerFixture,
+      materialId: materialId,
+    );
+    expect(source, isNotNull);
+
+    final runtime = AppRuntime(
+      learner: AppRuntime.localM5LearnerFixture,
+      store: store,
+      ingest: ingest,
+      recall: RecallLearningService(sourceStore: store, learningStore: store.learningTruthStore()),
+      telemetry: store.operationalTelemetry(),
+    );
+    var readerOpens = 0;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: FocusScreen(
+          runtime: runtime,
+          source: source!,
+          sourceText: sourceText,
+          onReadSource: () => readerOpens++,
+        ),
+      ),
+    );
+    await tester.pump();
+
+    final preview = tester.widget<Text>(find.byKey(const ValueKey('focus-source-preview')));
+    expect(preview.data, isNotNull);
+    expect(preview.data!.length, lessThanOrEqualTo(1800));
+    expect(preview.data, isNot(contains('SON-BÖLÜM-İŞARETİ')));
+    expect(find.text('Kaynak metni · kısa görünüm'), findsOneWidget);
+    expect(find.text('Kaynağın tamamını oku'), findsOneWidget);
+
+    await _tapVisible(tester, find.text('Kaynağın tamamını oku'));
+    expect(readerOpens, 1);
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('Focus sends the exact server source binding and renders grounded help', (tester) async {
     final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
     addTearDown(store.close);

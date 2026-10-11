@@ -200,8 +200,18 @@ class _MaterialWorkspaceScreenState extends State<MaterialWorkspaceScreen> {
   Future<void> _openFocus(_WorkspaceSnapshot data) async {
     await Navigator.of(context).push<void>(
       MaterialPageRoute(
-        builder: (_) => _preserveProductExperience(
-          FocusScreen(runtime: widget.runtime, source: data.source, sourceText: data.extracted?.normalizedText ?? ''),
+        builder: (focusContext) => _preserveProductExperience(
+          FocusScreen(
+            runtime: widget.runtime,
+            source: data.source,
+            sourceText: data.extracted?.normalizedText ?? '',
+            onReadSource: () {
+              Navigator.of(focusContext).pop();
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                if (mounted) _readCurrentSource();
+              });
+            },
+          ),
         ),
       ),
     );

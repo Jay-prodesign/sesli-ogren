@@ -24,6 +24,7 @@ class FocusScreen extends StatefulWidget {
     required this.runtime,
     required this.source,
     required this.sourceText,
+    this.onReadSource,
     this.sourceGateway = const SupabaseSourceSummaryGateway(),
     super.key,
   });
@@ -31,6 +32,7 @@ class FocusScreen extends StatefulWidget {
   final AppRuntime runtime;
   final SourceVersionRecord source;
   final String sourceText;
+  final VoidCallback? onReadSource;
   final SupabaseSourceSummaryGateway sourceGateway;
 
   @override
@@ -334,6 +336,9 @@ class _FocusScreenState extends State<FocusScreen> {
     final hero = living ? AtelierStyle.ink : AppPalette.primaryDark;
     final mark = living ? AtelierStyle.mark : AppPalette.momentum;
     final markInk = living ? AtelierStyle.ink : AppPalette.momentumInk;
+    final sourceText = widget.sourceText.trim();
+    final sourcePreviewTruncated = sourceText.length > 1800;
+    final sourcePreview = sourcePreviewTruncated ? '${sourceText.substring(0, 1799).trimRight()}…' : sourceText;
 
     return Scaffold(
       backgroundColor: living ? AtelierStyle.canvas : null,
@@ -419,13 +424,34 @@ class _FocusScreenState extends State<FocusScreen> {
                       Icon(Icons.article_outlined, color: accent, size: 18),
                       const SizedBox(width: 7),
                       Text(
-                        'Kaynak metni',
+                        sourcePreviewTruncated ? 'Kaynak metni · kısa görünüm' : 'Kaynak metni',
                         style: theme.textTheme.labelMedium?.copyWith(color: accent, fontWeight: FontWeight.w800),
                       ),
                     ],
                   ),
                   const SizedBox(height: 10),
-                  Text(widget.sourceText, style: theme.textTheme.bodyMedium?.copyWith(height: 1.5, color: ink)),
+                  Text(
+                    sourcePreview,
+                    key: const ValueKey('focus-source-preview'),
+                    style: theme.textTheme.bodyMedium?.copyWith(height: 1.5, color: ink),
+                  ),
+                  if (sourcePreviewTruncated) ...[
+                    const SizedBox(height: 10),
+                    Text(
+                      'Kısa Odak yalnız sınırlı bir kaynak görünümü gösterir; yardım ve doğrulama güncel tam kaynak kimliğine bağlı kalır.',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: living ? AtelierStyle.muted : theme.colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                    if (widget.onReadSource != null) ...[
+                      const SizedBox(height: 4),
+                      TextButton.icon(
+                        onPressed: widget.onReadSource,
+                        icon: const Icon(Icons.menu_book_outlined),
+                        label: const Text('Kaynağın tamamını oku'),
+                      ),
+                    ],
+                  ],
                 ],
               ),
             ),
