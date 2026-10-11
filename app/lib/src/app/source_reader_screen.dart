@@ -397,6 +397,7 @@ class _SourceReaderScreenState extends State<SourceReaderScreen> {
                 ),
               ),
               LinearProgressIndicator(
+                key: const ValueKey('reader-progress'),
                 value: _readingProgress,
                 minHeight: living ? 4 : 3,
                 color: accent,
