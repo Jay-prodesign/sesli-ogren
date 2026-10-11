@@ -7,6 +7,7 @@ import 'app_runtime.dart';
 import 'app_theme.dart';
 import 'companion_view.dart';
 import 'explain_back_screen.dart';
+import 'explain_screen.dart';
 import 'first_value_intent_surface.dart';
 import 'focus_screen.dart';
 import 'learning_slice_screen.dart';
@@ -235,7 +236,19 @@ class _MaterialWorkspaceScreenState extends State<MaterialWorkspaceScreen> {
     });
   }
 
-  Future<void> _openExplain(SourceVersionRecord source) async {
+  Future<void> _openGroundedExplain(SourceVersionRecord source) async {
+    await Navigator.of(context).push<void>(
+      MaterialPageRoute(
+        builder: (_) => _preserveProductExperience(ExplainScreen(runtime: widget.runtime, source: source)),
+      ),
+    );
+    if (!mounted) return;
+    setState(() {
+      _snapshot = _load();
+    });
+  }
+
+  Future<void> _openExplainBack(SourceVersionRecord source) async {
     await Navigator.of(context).push<void>(
       MaterialPageRoute(
         builder: (_) => _preserveProductExperience(ExplainBackScreen(runtime: widget.runtime, source: source)),
@@ -321,7 +334,8 @@ class _MaterialWorkspaceScreenState extends State<MaterialWorkspaceScreen> {
                 _consumeFirstValueIntent();
                 _openListen();
               },
-              onExplain: () => _openExplain(snapshot.data!.source),
+              onGroundedExplain: () => _openGroundedExplain(snapshot.data!.source),
+              onExplain: () => _openExplainBack(snapshot.data!.source),
               onFocus: () {
                 _consumeFirstValueIntent();
                 _openFocus(snapshot.data!);
@@ -343,6 +357,7 @@ class _WorkspaceBody extends StatelessWidget {
     required this.onUpdateSource,
     required this.onReadSource,
     required this.onListen,
+    required this.onGroundedExplain,
     required this.onExplain,
     required this.onFocus,
   });
@@ -354,6 +369,7 @@ class _WorkspaceBody extends StatelessWidget {
   final VoidCallback onUpdateSource;
   final VoidCallback onReadSource;
   final VoidCallback onListen;
+  final VoidCallback onGroundedExplain;
   final VoidCallback onExplain;
   final VoidCallback onFocus;
 
@@ -386,6 +402,7 @@ class _WorkspaceBody extends StatelessWidget {
         onUpdateSource: onUpdateSource,
         onRecall: onRecall,
         onListen: onListen,
+        onGroundedExplain: onGroundedExplain,
         onExplain: onExplain,
         onFocus: onFocus,
       );

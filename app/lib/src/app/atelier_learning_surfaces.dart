@@ -117,6 +117,7 @@ class AtelierWorkspace extends StatelessWidget {
     required this.onUpdateSource,
     required this.onRecall,
     required this.onListen,
+    required this.onGroundedExplain,
     required this.onExplain,
     required this.onFocus,
     super.key,
@@ -131,6 +132,7 @@ class AtelierWorkspace extends StatelessWidget {
   final VoidCallback onUpdateSource;
   final VoidCallback onRecall;
   final VoidCallback onListen;
+  final VoidCallback onGroundedExplain;
   final VoidCallback onExplain;
   final VoidCallback onFocus;
 
@@ -187,9 +189,18 @@ class AtelierWorkspace extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               ListTile(
+                leading: const Icon(Icons.auto_awesome_outlined),
+                title: const Text('Kaynağı bana açıkla'),
+                subtitle: const Text('Kaynağa bağlı açıklamayı oku. Bu hazırlıktır; öğrenme kanıtı oluşturmaz.'),
+                onTap: () {
+                  Navigator.of(sheetContext).pop();
+                  onGroundedExplain();
+                },
+              ),
+              ListTile(
                 leading: const Icon(Icons.record_voice_over_outlined),
-                title: const Text('Kendi cümlelerinle açıkla'),
-                subtitle: const Text('Kaynağa bağlı aktif açıklama çalışması.'),
+                title: const Text('Kendi cümlelerimle anlat'),
+                subtitle: const Text('Aktif açıklama denemesi yap ve kaynağa bağlı geri bildirim al.'),
                 onTap: () {
                   Navigator.of(sheetContext).pop();
                   onExplain();
