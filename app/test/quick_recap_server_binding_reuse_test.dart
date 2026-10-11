@@ -74,7 +74,9 @@ Future<void> _scrollUntilFound(
   int maxDrags = 12,
 }) async {
   for (var i = 0; i < maxDrags && target.evaluate().isEmpty; i++) {
-    await tester.drag(scrollable, const Offset(0, -180));
+    final activeScrollables = scrollable.hitTestable();
+    expect(activeScrollables, findsWidgets);
+    await tester.drag(activeScrollables.first, const Offset(0, -180));
     await tester.pump();
   }
   expect(target, findsOneWidget);
@@ -147,7 +149,8 @@ void main() {
     addTearDown(() => tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, null));
     await tester.tap(find.text('Diğer araçlar'));
     await _pumpUntilFound(tester, find.text('Özeti kopyala'));
-    await tester.tap(find.text('Özeti kopyala'));
+    await tester.tap(find.text('Özeti kopyala').hitTestable());
+    await tester.pump();
     await _pumpUntilFound(tester, find.text('Özet panoya kopyalandı'));
     expect(copiedText, contains('Kaynağa bağlı kısa özet.'));
     expect(copiedText, contains('Hızlı özet —'));
@@ -239,6 +242,7 @@ void main() {
     final create = find.byKey(const ValueKey('quick-recap-create'));
     await _scrollUntilFound(tester, create, scrollable: recapScroll);
     await tester.tap(create);
+    await _pumpUntilFound(tester, find.text('Kaynağa bağlı kısa özet.'));
     await _scrollUntilFound(tester, find.byKey(const ValueKey('quick-recap-utility-actions')), scrollable: recapScroll);
 
     expect(find.byKey(const ValueKey('quick-recap-utility-actions')), findsOneWidget);
