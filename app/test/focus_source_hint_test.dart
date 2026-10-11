@@ -175,8 +175,19 @@ void main() {
         ),
       ),
     );
-    await _pumpUntilFound(tester, find.byKey(const ValueKey('focus-help-actions-stacked')));
+    await tester.scrollUntilVisible(
+      find.byKey(const ValueKey('focus-help-actions-stacked')),
+      220,
+      scrollable: find.byType(Scrollable).last,
+    );
+    await tester.pump();
     expect(find.byKey(const ValueKey('focus-help-actions-stacked')), findsOneWidget);
+    await tester.scrollUntilVisible(
+      find.byKey(const ValueKey('focus-next-actions-stacked')),
+      220,
+      scrollable: find.byType(Scrollable).last,
+    );
+    await tester.pump();
     expect(find.byKey(const ValueKey('focus-next-actions-stacked')), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
