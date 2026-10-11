@@ -1,0 +1,200 @@
+import 'dart:io';
+
+import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:sesli_ogren/src/app/app_runtime.dart';
+import 'package:sesli_ogren/src/app/app_theme.dart';
+import 'package:sesli_ogren/src/app/la0040_visual_treatments.dart';
+import 'package:sesli_ogren/src/app/product_shell_screen.dart';
+import 'package:sesli_ogren/src/data/pdf_text_extractor.dart';
+import 'package:sesli_ogren/src/data/source_ingest_service.dart';
+import 'package:sesli_ogren/src/data/sqlite_source_store.dart';
+import 'package:sesli_ogren/src/domain/authenticated_learner.dart';
+import 'package:sesli_ogren/src/domain/learning_contracts.dart';
+import 'package:sesli_ogren/src/learning/recall_learning_service.dart';
+import 'package:sqflite_common_ffi/sqflite_ffi.dart';
+
+class _UnusedPdfExtractor implements PdfTextExtractor {
+  const _UnusedPdfExtractor();
+
+  @override
+  Future<ExtractedPdf> extract(List<int> bytes, {required String sourceName}) {
+    throw UnimplementedError();
+  }
+}
+
+Future<AppRuntime> _openRuntime({
+  required String path,
+  required AuthenticatedLearner learner,
+}) async {
+  final store = await SqliteSourceStore.open(
+    factory: databaseFactoryFfiNoIsolate,
+    path: path,
+  );
+  final ingest = SourceIngestService(
+    store: store,
+    pdfTextExtractor: const _UnusedPdfExtractor(),
+  );
+  return AppRuntime(
+    learner: learner,
+    store: store,
+    ingest: ingest,
+    recall: RecallLearningService(
+      sourceStore: store,
+      learningStore: store.learningTruthStore(),
+    ),
+    telemetry: store.operationalTelemetry(),
+  );
+}
+
+Future<void> _pumpUntilFound(
+  WidgetTester tester,
+  Finder finder, {
+  int maxPumps = 30,
+}) async {
+  for (var i = 0; i < maxPumps; i++) {
+    await tester.pump(const Duration(milliseconds: 40));
+    if (finder.evaluate().isNotEmpty) return;
+  }
+  fail('Expected widget was not reached within bounded pumps.');
+}
+
+void main() {
+  sqfliteFfiInit();
+
+  testWidgets(
+    'durable learner continuity survives a real SQLite close and reopen',
+    (tester) async {
+      tester.view.physicalSize = const Size(390, 844);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      final directory = await Directory.systemTemp.createTemp(
+        'sesli-ogren-durable-reopen-',
+      );
+      addTearDown(() async {
+        if (await directory.exists()) {
+          await directory.delete(recursive: true);
+        }
+      });
+      final dbPath = '${directory.path}/learning.sqlite';
+
+      const learner = AuthenticatedLearner(
+        id: LearnerId('durable-reopen-learner'),
+      );
+      const otherLearner = AuthenticatedLearner(
+        id: LearnerId('durable-reopen-other'),
+      );
+      const materialId = MaterialId('durable-reopen-material');
+
+      final firstRuntime = await _openRuntime(path: dbPath, learner: learner);
+      final ingestResult = await firstRuntime.ingest.ingestPastedText(
+        learner: learner,
+        materialId: materialId,
+        text:
+            'Fotosentez ışık enerjisini kimyasal enerjiye dönüştürür. '
+            'Klorofil ışığın soğurulmasına yardım eder. '
+            'Bitkiler süreçte karbondioksit ve su kullanır.',
+        sourceName: 'Kalıcı biyoloji notu',
+      );
+      final sourceId = ingestResult.sourceVersion.identity.sourceVersionId;
+
+      await firstRuntime.store.saveReaderResumeProgress(
+        learner: learner,
+        materialId: materialId,
+        sourceVersionId: sourceId,
+        progress: 0.42,
+        updatedAt: DateTime.utc(2026, 10, 11, 7),
+      );
+      await firstRuntime.store.saveListenResumeChunk(
+        learner: learner,
+        materialId: materialId,
+        sourceVersionId: sourceId,
+        chunkIndex: 1,
+        updatedAt: DateTime.utc(2026, 10, 11, 7, 1),
+      );
+
+      final prompt = await firstRuntime.recall.createCurrentPrompt(
+        learner: learner,
+        materialId: materialId,
+      );
+      final attempt = await firstRuntime.recall.openAttempt(
+        learner: learner,
+        actionId: prompt.id,
+      );
+      final submitted = await firstRuntime.recall.submit(
+        learner: learner,
+        actionId: prompt.id,
+        attemptId: attempt.attempt.attemptId,
+        disposition: RecallResponseDisposition.unknown,
+        answer: '',
+      );
+      expect(
+        submitted.nextAction.kind,
+        NextLearningActionKind.reviewSourceThenRecall,
+      );
+
+      await firstRuntime.close();
+
+      final reopened = await _openRuntime(path: dbPath, learner: learner);
+      addTearDown(reopened.close);
+
+      final materials = await reopened.store.activeMaterials(learner: learner);
+      expect(materials.map((item) => item.id), contains(materialId));
+
+      final continuation = await reopened.recall.reopen(
+        learner: learner,
+        materialId: materialId,
+      );
+      expect(continuation, isNotNull);
+      expect(
+        continuation!.nextAction.kind,
+        NextLearningActionKind.reviewSourceThenRecall,
+      );
+      expect(continuation.state.latestEvidenceId, submitted.evidence.id);
+
+      expect(
+        await reopened.store.readerResumeProgress(
+          learner: learner,
+          materialId: materialId,
+          sourceVersionId: sourceId,
+        ),
+        closeTo(0.42, 0.0001),
+      );
+      expect(
+        await reopened.store.listenResumeChunk(
+          learner: learner,
+          materialId: materialId,
+          sourceVersionId: sourceId,
+        ),
+        1,
+      );
+
+      final otherRuntime = await _openRuntime(
+        path: dbPath,
+        learner: otherLearner,
+      );
+      expect(
+        await otherRuntime.store.activeMaterials(learner: otherLearner),
+        isEmpty,
+      );
+      await otherRuntime.close();
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: SesliOgrenTheme.light(),
+          home: LivingDeskReviewScope(
+            child: ProductShellScreen(runtime: reopened),
+          ),
+        ),
+      );
+      await _pumpUntilFound(tester, find.text('Kaynağı gözden geçir'));
+
+      expect(find.text('Kalıcı biyoloji notu'), findsWidgets);
+      expect(find.text('Kaynağı gözden geçir'), findsOneWidget);
+      expect(find.byKey(const ValueKey('first-value-intent')), findsNothing);
+      expect(tester.takeException(), isNull);
+    },
+  );
+}
