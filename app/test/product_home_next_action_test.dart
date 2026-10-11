@@ -111,20 +111,14 @@ void main() {
           'Klorofil ışığın soğurulmasına yardım eder.',
       sourceName: 'Fotosentez: ışık ve enerji',
     );
-    final material = await store.material(
-      learner: AppRuntime.localM5LearnerFixture,
-      materialId: materialId,
-    );
+    final material = await store.material(learner: AppRuntime.localM5LearnerFixture, materialId: materialId);
     expect(material, isNotNull);
 
     var recommendedOpens = 0;
     await tester.pumpWidget(
       MaterialApp(
         builder: (context, child) => MediaQuery(
-          data: MediaQuery.of(context).copyWith(
-            disableAnimations: true,
-            textScaler: const TextScaler.linear(1.5),
-          ),
+          data: MediaQuery.of(context).copyWith(disableAnimations: true, textScaler: const TextScaler.linear(1.5)),
           child: child!,
         ),
         home: FirstValueIntentSurface(
