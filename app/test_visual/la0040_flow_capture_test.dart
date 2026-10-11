@@ -329,7 +329,14 @@ void main() {
       textScaler: const TextScaler.linear(1.5),
     );
     expect(find.text('İLK 60 SANİYE'), findsOneWidget);
+    await tester.scrollUntilVisible(
+      find.text('Diğer çalışma yolları'),
+      180,
+      scrollable: find.byType(Scrollable).last,
+    );
+    await tester.pump();
     expect(find.text('Diğer çalışma yolları'), findsOneWidget);
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('LA-0040 source Reader', (tester) async {
