@@ -555,6 +555,7 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> with WidgetsBinding
     final status = _status;
     final living = LivingDeskReviewScope.active(context);
     final accent = living ? AtelierStyle.teal : Theme.of(context).colorScheme.primary;
+    final accentSoft = Theme.of(context).colorScheme.secondaryContainer;
     final muted = living ? AtelierStyle.muted : Theme.of(context).colorScheme.onSurfaceVariant;
     final outlineStyle = living
         ? OutlinedButton.styleFrom(
@@ -644,7 +645,9 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> with WidgetsBinding
               decoration: BoxDecoration(
                 color: paper,
                 borderRadius: BorderRadius.circular(20),
-                border: living ? const Border(left: BorderSide(color: AtelierStyle.pulse, width: 4)) : Border.all(color: line),
+                border: living
+                    ? const Border(left: BorderSide(color: AtelierStyle.pulse, width: 4))
+                    : Border.all(color: line),
                 boxShadow: living
                     ? const [BoxShadow(color: Color(0x1014224A), blurRadius: 20, offset: Offset(0, 8))]
                     : null,
@@ -672,8 +675,7 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> with WidgetsBinding
                       const SizedBox(height: 6),
                       Text(
                         'Özet yalnız bu kaynak sürümünden hazırlanır. Sana yön verir; öğrenme durumunu ancak kendi Hatırla denemen değiştirir.',
-                        style: Theme.of(context).textTheme.bodyMedium
-                            ?.copyWith(color: muted, height: 1.42),
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: muted, height: 1.42),
                       ),
                     ],
                   );
@@ -720,10 +722,8 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> with WidgetsBinding
                                 Expanded(
                                   child: Text(
                                     'Önceki özet işi kontrol ediliyor…',
-                                    style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                                      color: ink,
-                                      fontWeight: FontWeight.w700,
-                                    ),
+                                    style: Theme.of(context).textTheme.labelLarge
+                                        ?.copyWith(color: ink, fontWeight: FontWeight.w700),
                                   ),
                                 ),
                               ],

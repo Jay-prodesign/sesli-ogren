@@ -199,9 +199,7 @@ class _AccountDeletedScreen extends StatelessWidget {
                       decoration: BoxDecoration(
                         color: AtelierStyle.focus,
                         borderRadius: BorderRadius.circular(28),
-                        boxShadow: const [
-                          BoxShadow(color: Color(0x1A14224A), blurRadius: 30, offset: Offset(0, 16)),
-                        ],
+                        boxShadow: const [BoxShadow(color: Color(0x1A14224A), blurRadius: 30, offset: Offset(0, 16))],
                       ),
                       child: Padding(
                         padding: const EdgeInsets.fromLTRB(22, 22, 22, 24),
@@ -223,10 +221,8 @@ class _AccountDeletedScreen extends StatelessWidget {
                             const SizedBox(height: 8),
                             Text(
                               'Hesabın ve verilerin silindi.',
-                              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w900,
-                              ),
+                              style: Theme.of(context).textTheme.headlineSmall
+                                  ?.copyWith(color: Colors.white, fontWeight: FontWeight.w900),
                               textAlign: TextAlign.center,
                             ),
                             const SizedBox(height: 10),
@@ -281,9 +277,7 @@ class _RuntimeLoadingScreen extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: AtelierStyle.focus,
                   borderRadius: BorderRadius.circular(28),
-                  boxShadow: const [
-                    BoxShadow(color: Color(0x1A14224A), blurRadius: 30, offset: Offset(0, 16)),
-                  ],
+                  boxShadow: const [BoxShadow(color: Color(0x1A14224A), blurRadius: 30, offset: Offset(0, 16))],
                 ),
                 child: const Padding(
                   padding: EdgeInsets.fromLTRB(22, 22, 22, 24),
@@ -304,12 +298,7 @@ class _RuntimeLoadingScreen extends StatelessWidget {
                       SizedBox(height: 9),
                       Text(
                         'Öğrenme alanın hazırlanıyor…',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 22,
-                          height: 1.15,
-                          fontWeight: FontWeight.w900,
-                        ),
+                        style: TextStyle(color: Colors.white, fontSize: 22, height: 1.15, fontWeight: FontWeight.w900),
                         textAlign: TextAlign.center,
                       ),
                       SizedBox(height: 16),
@@ -384,9 +373,7 @@ class _RuntimeErrorScreenState extends State<_RuntimeErrorScreen> {
                       decoration: BoxDecoration(
                         color: AtelierStyle.focus,
                         borderRadius: BorderRadius.circular(28),
-                        boxShadow: const [
-                          BoxShadow(color: Color(0x1A14224A), blurRadius: 30, offset: Offset(0, 16)),
-                        ],
+                        boxShadow: const [BoxShadow(color: Color(0x1A14224A), blurRadius: 30, offset: Offset(0, 16))],
                       ),
                       child: Padding(
                         padding: const EdgeInsets.all(22),
@@ -409,10 +396,8 @@ class _RuntimeErrorScreenState extends State<_RuntimeErrorScreen> {
                               configurationError
                                   ? 'Uygulama bağlantısı henüz yapılandırılmadı.'
                                   : 'Güvenli öğrenme oturumu açılamadı.',
-                              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w900,
-                              ),
+                              style: Theme.of(context).textTheme.titleLarge
+                                  ?.copyWith(color: Colors.white, fontWeight: FontWeight.w900),
                               textAlign: TextAlign.center,
                             ),
                             const SizedBox(height: 10),

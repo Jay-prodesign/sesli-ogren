@@ -54,19 +54,12 @@ class ProgressSurface extends StatelessWidget {
       children: [
         Text(
           'HATIRLAMA GEÇMİŞİN',
-          style: theme.textTheme.labelSmall?.copyWith(
-            color: accent,
-            fontWeight: FontWeight.w900,
-            letterSpacing: 0.9,
-          ),
+          style: theme.textTheme.labelSmall?.copyWith(color: accent, fontWeight: FontWeight.w900, letterSpacing: 0.9),
         ),
         const SizedBox(height: 7),
         Text(
           'İlerleme',
-          style: theme.textTheme.headlineMedium?.copyWith(
-            color: ink,
-            fontWeight: living ? FontWeight.w900 : null,
-          ),
+          style: theme.textTheme.headlineMedium?.copyWith(color: ink, fontWeight: living ? FontWeight.w900 : null),
         ),
         const SizedBox(height: 8),
         Text(
@@ -299,7 +292,10 @@ class _ProgressCard extends StatelessWidget {
                           Text(
                             reason,
                             key: ValueKey('progress-next-reason-${item.material.id.value}'),
-                            style: theme.textTheme.bodySmall?.copyWith(color: living ? AtelierStyle.muted : Colors.white, height: 1.4),
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: living ? AtelierStyle.muted : Colors.white,
+                              height: 1.4,
+                            ),
                           ),
                         ],
                       ),

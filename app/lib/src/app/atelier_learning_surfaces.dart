@@ -61,10 +61,7 @@ class AtelierSourceTrustStrip extends StatelessWidget {
           key: const ValueKey('atelier-source-trust'),
           width: double.infinity,
           padding: const EdgeInsets.fromLTRB(13, 11, 13, 12),
-          decoration: BoxDecoration(
-            color: AtelierStyle.pulseSoft,
-            borderRadius: BorderRadius.circular(12),
-          ),
+          decoration: BoxDecoration(color: AtelierStyle.pulseSoft, borderRadius: BorderRadius.circular(12)),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -315,10 +312,7 @@ class AtelierWorkspace extends StatelessWidget {
                     key: const ValueKey('la0040-atelier-compact-action-context'),
                     width: double.infinity,
                     padding: const EdgeInsets.fromLTRB(14, 13, 14, 14),
-                    decoration: BoxDecoration(
-                      color: AtelierStyle.pulseSoft,
-                      borderRadius: BorderRadius.circular(16),
-                    ),
+                    decoration: BoxDecoration(color: AtelierStyle.pulseSoft, borderRadius: BorderRadius.circular(16)),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [

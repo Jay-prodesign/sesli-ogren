@@ -451,7 +451,12 @@ class _CompactEntryJourneyStep extends StatelessWidget {
       Expanded(
         child: Text(
           label,
-          style: const TextStyle(color: AtelierStyle.ink, fontSize: 11, fontWeight: FontWeight.w900, letterSpacing: 0.5),
+          style: const TextStyle(
+            color: AtelierStyle.ink,
+            fontSize: 11,
+            fontWeight: FontWeight.w900,
+            letterSpacing: 0.5,
+          ),
         ),
       ),
     ],

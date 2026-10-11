@@ -502,7 +502,9 @@ class _ListenScreenState extends State<ListenScreen> {
                                 : hasResume
                                 ? 'Kaldığın yer: bölüm ${resumeChunk + 1} / ${source.chunks.length} · $completedChunks bölüm tamamlandı'
                                 : 'Dinleme henüz başlamadı · ${source.chunks.length} bölüm',
-                            style: theme.textTheme.bodySmall?.copyWith(color: living ? muted : Colors.white.withValues(alpha: 0.72)),
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: living ? muted : Colors.white.withValues(alpha: 0.72),
+                            ),
                           ),
                         ),
                       ],

@@ -428,10 +428,8 @@ class _AccountOverviewLoadingCard extends StatelessWidget {
               children: [
                 Text(
                   'Hesap alanın hazırlanıyor',
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    color: AppPalette.ink,
-                    fontWeight: FontWeight.w800,
-                  ),
+                  style: Theme.of(context).textTheme.titleLarge
+                      ?.copyWith(color: AppPalette.ink, fontWeight: FontWeight.w800),
                 ),
                 const SizedBox(height: 5),
                 Text(
@@ -519,9 +517,7 @@ class _AccountOverviewCard extends StatelessWidget {
         color: living ? AtelierStyle.paper : AppPalette.surface,
         borderRadius: BorderRadius.circular(22),
         border: living ? const Border(left: BorderSide(color: AtelierStyle.pulse, width: 4)) : null,
-        boxShadow: living
-            ? const [BoxShadow(color: Color(0x0A14224A), blurRadius: 18, offset: Offset(0, 7))]
-            : null,
+        boxShadow: living ? const [BoxShadow(color: Color(0x0A14224A), blurRadius: 18, offset: Offset(0, 7))] : null,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -546,7 +542,10 @@ class _AccountOverviewCard extends StatelessWidget {
                       children: [
                         Text(
                           planLabel,
-                          style: theme.textTheme.titleLarge?.copyWith(color: AppPalette.ink, fontWeight: FontWeight.w800),
+                          style: theme.textTheme.titleLarge?.copyWith(
+                            color: AppPalette.ink,
+                            fontWeight: FontWeight.w800,
+                          ),
                         ),
                         const SizedBox(height: 4),
                         Text(statusLabel, style: theme.textTheme.bodyMedium?.copyWith(color: AppPalette.inkMuted)),
@@ -581,7 +580,11 @@ class _AccountOverviewCard extends StatelessWidget {
               }
               return Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children: [Expanded(child: identity), const SizedBox(width: 10), badge],
+                children: [
+                  Expanded(child: identity),
+                  const SizedBox(width: 10),
+                  badge,
+                ],
               );
             },
           ),
