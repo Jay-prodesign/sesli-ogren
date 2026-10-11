@@ -42,12 +42,16 @@ class FirstValueIntentSurface extends StatelessWidget {
   void _showOtherPaths(BuildContext context) {
     showModalBottomSheet<void>(
       context: context,
+      isScrollControlled: true,
       showDragHandle: true,
       builder: (sheetContext) => SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(12, 0, 12, 18),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
+        child: ConstrainedBox(
+          constraints: BoxConstraints(maxHeight: MediaQuery.sizeOf(sheetContext).height * 0.82),
+          child: ListView(
+            key: const ValueKey('first-intent-other-paths-scroll'),
+            primary: false,
+            shrinkWrap: true,
+            padding: const EdgeInsets.fromLTRB(12, 0, 12, 18),
             children: [
               const ListTile(
                 title: Text('Başka bir çalışma yolu'),
@@ -139,11 +143,9 @@ class FirstValueIntentSurface extends StatelessWidget {
         SizedBox(height: tightCompact ? 4 : 7),
         Text(
           tightCompact ? compactReason : _recommendationReason,
-          maxLines: tightCompact ? 3 : null,
-          overflow: tightCompact ? TextOverflow.ellipsis : TextOverflow.visible,
           style: TextStyle(
             color: const Color(0xFFD6DDF0),
-            fontSize: tightCompact ? 10.5 : 12.5,
+            fontSize: tightCompact ? 11 : 12.5,
             height: tightCompact ? 1.35 : 1.45,
           ),
         ),
@@ -281,10 +283,8 @@ class FirstValueIntentSurface extends StatelessWidget {
                   ),
                   Text(
                     'Bu adım hazırlık. Öğrenme durumun yalnız kaynağı kapatıp kendi Hatırla denemeni yaptığında değişir.',
-                    maxLines: tightCompact ? 2 : null,
-                    overflow: tightCompact ? TextOverflow.ellipsis : TextOverflow.visible,
                     textAlign: TextAlign.center,
-                    style: TextStyle(color: const Color(0xFFB9C5E4), fontSize: tightCompact ? 9.5 : 11.5, height: 1.4),
+                    style: TextStyle(color: const Color(0xFFB9C5E4), fontSize: tightCompact ? 10.5 : 11.5, height: 1.4),
                   ),
                 ],
               ),

@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sesli_ogren/src/app/app_runtime.dart';
+import 'package:sesli_ogren/src/app/living_study_desk_home.dart';
 import 'package:sesli_ogren/src/app/material_workspace_screen.dart';
 import 'package:sesli_ogren/src/data/pdf_text_extractor.dart';
 import 'package:sesli_ogren/src/data/source_ingest_service.dart';
@@ -105,6 +106,51 @@ void main() {
     await tester.tap(find.text('Geri dön'));
     await tester.pumpAndSettle();
     expect(find.text('Çalışma alanını aç'), findsOneWidget);
+  });
+
+  testWidgets('Workspace alternate study paths remain usable at narrow large text', (tester) async {
+    tester.view.physicalSize = const Size(320, 520);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
+    addTearDown(store.close);
+    final ingest = SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor());
+    const materialId = MaterialId('workspace-large-text-paths');
+    await ingest.ingestPastedText(
+      learner: AppRuntime.localM5LearnerFixture,
+      materialId: materialId,
+      text: 'Fotosentez ışık enerjisini kimyasal enerjiye dönüştürür. Çalışma yolları büyük yazıda da erişilebilir kalmalıdır.',
+      sourceName: 'Büyük yazı çalışma notu',
+    );
+    final runtime = AppRuntime(
+      learner: AppRuntime.localM5LearnerFixture,
+      store: store,
+      ingest: ingest,
+      recall: RecallLearningService(sourceStore: store, learningStore: store.learningTruthStore()),
+      telemetry: store.operationalTelemetry(),
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: MediaQuery(
+          data: const MediaQueryData(textScaler: TextScaler.linear(1.6)),
+          child: LivingDeskReviewScope(
+            child: MaterialWorkspaceScreen(runtime: runtime, materialId: materialId),
+          ),
+        ),
+      ),
+    );
+    await _pumpUntilFound(tester, find.text('Diğer yollar'));
+    await _tapVisible(tester, find.text('Diğer yollar'));
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const ValueKey('workspace-other-study-paths-scroll')), findsOneWidget);
+    expect(find.text('Kaynağı bana açıkla'), findsOneWidget);
+    expect(find.text('Kendi cümlelerimle anlat'), findsOneWidget);
+    expect(find.text('Odaklan'), findsOneWidget);
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('Material Workspace Açıkla opens active Explain-back, not generated teaching', (tester) async {

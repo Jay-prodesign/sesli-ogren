@@ -184,12 +184,16 @@ class AtelierWorkspace extends StatelessWidget {
   void _showOtherStudyPaths(BuildContext context) {
     showModalBottomSheet<void>(
       context: context,
+      isScrollControlled: true,
       showDragHandle: true,
       builder: (sheetContext) => SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 4, 16, 18),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
+        child: ConstrainedBox(
+          constraints: BoxConstraints(maxHeight: MediaQuery.sizeOf(sheetContext).height * 0.82),
+          child: ListView(
+            key: const ValueKey('workspace-other-study-paths-scroll'),
+            primary: false,
+            shrinkWrap: true,
+            padding: const EdgeInsets.fromLTRB(16, 4, 16, 18),
             children: [
               ListTile(
                 leading: const Icon(Icons.auto_awesome_outlined),

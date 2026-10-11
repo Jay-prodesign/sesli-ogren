@@ -40,6 +40,66 @@ Future<void> _tapVisible(WidgetTester tester, Finder finder) async {
 void main() {
   sqfliteFfiInit();
 
+  testWidgets('first value keeps learning truth and alternate paths usable at narrow large text', (tester) async {
+    tester.view.physicalSize = const Size(320, 560);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
+    addTearDown(store.close);
+    final ingest = SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor());
+    final runtime = AppRuntime(
+      learner: AppRuntime.localM5LearnerFixture,
+      store: store,
+      ingest: ingest,
+      recall: RecallLearningService(sourceStore: store, learningStore: store.learningTruthStore()),
+      telemetry: store.operationalTelemetry(),
+    );
+    const materialId = MaterialId('first-value-large-text');
+    await ingest.ingestPastedText(
+      learner: runtime.learner,
+      materialId: materialId,
+      text: 'Fotosentez ışık enerjisini kimyasal enerjiye dönüştürür. Bu kısa kaynak büyük yazıda da öğrenme gerçeğini eksiksiz göstermelidir.',
+      sourceName: 'Büyük yazı ilk değer notu',
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: MediaQuery(
+          data: const MediaQueryData(textScaler: TextScaler.linear(1.6)),
+          child: LivingDeskReviewScope(
+            child: MaterialWorkspaceScreen(runtime: runtime, materialId: materialId, showFirstValueIntent: true),
+          ),
+        ),
+      ),
+    );
+    await _pumpUntilFound(tester, find.byKey(const ValueKey('first-value-intent')));
+
+    final reason = tester.widget<Text>(
+      find.text('Önce bütünü gör; sonra kaynağı kapatıp ne kaldığını sınarsın.'),
+    );
+    expect(reason.maxLines, isNull);
+    expect(reason.overflow, isNull);
+
+    final evidenceTruth = tester.widget<Text>(
+      find.text(
+        'Bu adım hazırlık. Öğrenme durumun yalnız kaynağı kapatıp kendi Hatırla denemeni yaptığında değişir.',
+      ),
+    );
+    expect(evidenceTruth.maxLines, isNull);
+    expect(evidenceTruth.overflow, isNull);
+
+    await _tapVisible(tester, find.text('Diğer çalışma yolları'));
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const ValueKey('first-intent-other-paths-scroll')), findsOneWidget);
+    expect(find.text('Dinle'), findsOneWidget);
+    expect(find.text('Bildiğimi kontrol et'), findsOneWidget);
+    expect(find.text('Birlikte odaklanalım'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('new source asks one intent question before evidence and keeps paths reversible', (tester) async {
     final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
     addTearDown(store.close);
