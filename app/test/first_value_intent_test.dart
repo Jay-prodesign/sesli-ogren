@@ -93,7 +93,7 @@ void main() {
     expect(evidenceTruth.overflow, isNull);
 
     await _tapVisible(tester, find.text('Diğer çalışma yolları'));
-    await tester.pumpAndSettle();
+    await _pumpUntilFound(tester, find.byKey(const ValueKey('first-intent-other-paths-scroll')));
 
     expect(find.byKey(const ValueKey('first-intent-other-paths-scroll')), findsOneWidget);
     expect(find.text('Dinle'), findsOneWidget);

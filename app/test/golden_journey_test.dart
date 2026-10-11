@@ -119,7 +119,7 @@ void main() {
     await _pumpUntilFound(tester, find.text('Kendi başına hatırladın'));
 
     expect(find.byType(ProductShellScreen), findsOneWidget);
-    expect(find.text('İlk bağımsız hatırlaman kaydedildi. Kalıcılığı sonraki deneme gösterecek.'), findsOneWidget);
+    expect(find.text('Kendi başına hatırladın. Sonraki bağımsız deneme daha sonra.'), findsOneWidget);
     expect(find.text('Çalışma alanına dön'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });

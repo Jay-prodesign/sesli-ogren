@@ -318,6 +318,10 @@ void main() {
     );
 
     firstSpeech.finishCurrentChunk();
+    await tester.pump(const Duration(milliseconds: 120));
+    final listenScrollable = tester.state<ScrollableState>(find.byType(Scrollable).first);
+    listenScrollable.position.jumpTo(0);
+    await tester.pump();
     await _pumpUntilFound(tester, find.text('Tüm bölümler dinlendi · Hatırlamayı deneyebilirsin'));
     expect(
       tester.widget<LinearProgressIndicator>(find.byKey(const ValueKey('listen-progress'), skipOffstage: false)).value,

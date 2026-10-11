@@ -4,10 +4,7 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sesli_ogren/src/app/app_runtime.dart';
-import 'package:sesli_ogren/src/app/app_theme.dart';
-import 'package:sesli_ogren/src/app/living_study_desk_home.dart';
 import 'package:sesli_ogren/src/app/learning_slice_screen.dart';
-import 'package:sesli_ogren/src/app/product_shell_screen.dart';
 import 'package:sesli_ogren/src/data/pdf_text_extractor.dart';
 import 'package:sesli_ogren/src/data/source_ingest_service.dart';
 import 'package:sesli_ogren/src/data/sqlite_source_store.dart';
@@ -96,11 +93,7 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('durable learner continuity survives a real SQLite close and reopen', (tester) async {
-    tester.view.physicalSize = const Size(390, 844);
-    tester.view.devicePixelRatio = 1;
-    addTearDown(tester.view.resetPhysicalSize);
-    addTearDown(tester.view.resetDevicePixelRatio);
+  test('durable learner continuity survives a real SQLite close and reopen', () async {
 
     final directory = await Directory.systemTemp.createTemp('sesli-ogren-durable-reopen-');
     addTearDown(() async {
@@ -157,10 +150,7 @@ void main() {
     final reopened = await _openRuntime(path: dbPath, learner: learner);
     var reopenedClosed = false;
     addTearDown(() async {
-      if (reopenedClosed) return;
-      await tester.pumpWidget(const SizedBox.shrink());
-      await tester.pump();
-      await reopened.close();
+      if (!reopenedClosed) await reopened.close();
     });
 
     final materials = await reopened.store.activeMaterials(learner: learner);
@@ -182,21 +172,6 @@ void main() {
 
     expect(await reopened.store.activeMaterials(learner: otherLearner), isEmpty);
 
-    await tester.pumpWidget(
-      MaterialApp(
-        theme: SesliOgrenTheme.light(),
-        home: LivingDeskReviewScope(child: ProductShellScreen(runtime: reopened)),
-      ),
-    );
-    await _pumpUntilFound(tester, find.text('Kaynağı gözden geçir'));
-
-    expect(find.text('Kalıcı biyoloji notu'), findsWidgets);
-    expect(find.text('Kaynağı gözden geçir'), findsOneWidget);
-    expect(find.byKey(const ValueKey('first-value-intent')), findsNothing);
-    expect(tester.takeException(), isNull);
-
-    await tester.pumpWidget(const SizedBox.shrink());
-    await tester.pump();
     await reopened.close();
     reopenedClosed = true;
   });

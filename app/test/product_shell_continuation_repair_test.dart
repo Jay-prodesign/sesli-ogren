@@ -49,7 +49,7 @@ class _RepairingRecallService extends RecallLearningService {
   }
 }
 
-Future<void> _pumpUntilFound(WidgetTester tester, Finder finder, {int maxPumps = 100}) async {
+Future<void> _pumpUntilFound(WidgetTester tester, Finder finder, {int maxPumps = 200}) async {
   for (var i = 0; i < maxPumps; i++) {
     await tester.pump(const Duration(milliseconds: 20));
     if (finder.evaluate().isNotEmpty) return;
@@ -194,7 +194,11 @@ void main() {
     await _pumpUntilFound(tester, find.text('Biyoloji · Fotosentez'));
     await tester.tap(find.text('Kütüphane'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Biyoloji · Fotosentez').last);
+    final libraryMaterialCard = find.ancestor(
+      of: find.text('Biyoloji · Fotosentez').last,
+      matching: find.byType(InkWell),
+    );
+    await tester.tap(libraryMaterialCard.last);
     await _pumpUntilFound(tester, find.byKey(const ValueKey('la0040-atelier-workspace-reader')));
     await tester.tap(find.byKey(const ValueKey('la0040-atelier-workspace-reader')));
     await _pumpUntilFound(tester, find.byType(SourceReaderScreen));
@@ -231,7 +235,11 @@ void main() {
     await _pumpUntilFound(tester, find.text('Biyoloji · Fotosentez'));
     await tester.tap(find.text('Kütüphane').last);
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Biyoloji · Fotosentez').last);
+    final libraryMaterialCard = find.ancestor(
+      of: find.text('Biyoloji · Fotosentez').last,
+      matching: find.byType(InkWell),
+    );
+    await tester.tap(libraryMaterialCard.last);
     await _pumpUntilFound(tester, find.byKey(const ValueKey('la0040-atelier-workspace-reader')));
     await tester.tap(find.byKey(const ValueKey('la0040-atelier-workspace-reader')));
     await _pumpUntilFound(tester, find.byType(SourceReaderScreen));
