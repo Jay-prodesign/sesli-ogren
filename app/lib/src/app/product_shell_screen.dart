@@ -276,6 +276,9 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
         sourceVersionId: source.identity.sourceVersionId,
       );
       if (!mounted) return;
+      if (extracted == null || extracted.normalizedText.trim().isEmpty) {
+        throw StateError('reader_text_unavailable');
+      }
       // The source may change while its extracted text or resume position is
       // loading. Never render an old snapshot as the current Reader.
       final currentSource = await widget.runtime.store.currentSourceVersion(
