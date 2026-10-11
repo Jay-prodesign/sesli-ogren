@@ -569,7 +569,10 @@ class _FocusScreenState extends State<FocusScreen> {
           if (unavailable != null) ...[
             const SizedBox(height: 16),
             DecoratedBox(
-              decoration: BoxDecoration(color: AppPalette.attentionSoft, borderRadius: BorderRadius.circular(18)),
+              decoration: BoxDecoration(
+                color: living ? AtelierStyle.attentionSoft : AppPalette.attentionSoft,
+                borderRadius: BorderRadius.circular(18),
+              ),
               child: Padding(
                 padding: const EdgeInsets.all(15),
                 child: Column(
@@ -578,7 +581,11 @@ class _FocusScreenState extends State<FocusScreen> {
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Icon(Icons.info_outline_rounded, color: AppPalette.attention, size: 20),
+                        Icon(
+                          Icons.info_outline_rounded,
+                          color: living ? AtelierStyle.attention : AppPalette.attention,
+                          size: 20,
+                        ),
                         const SizedBox(width: 9),
                         Expanded(child: Text(unavailable.reason)),
                       ],
@@ -640,7 +647,7 @@ class _FocusScreenState extends State<FocusScreen> {
                       final explainBackButton = FilledButton.icon(
                         style: FilledButton.styleFrom(
                           backgroundColor: Colors.white,
-                          foregroundColor: AppPalette.primaryDark,
+                          foregroundColor: living ? AtelierStyle.focus : AppPalette.primaryDark,
                         ),
                         onPressed: _sourceChanged ? null : _openExplainBack,
                         icon: const Icon(Icons.record_voice_over_outlined),

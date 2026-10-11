@@ -362,17 +362,23 @@ class _UnavailableResult extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => DecoratedBox(
-    decoration: BoxDecoration(color: AppPalette.attentionSoft, borderRadius: BorderRadius.circular(18)),
+    decoration: BoxDecoration(
+      color: LivingDeskReviewScope.active(context) ? AtelierStyle.attentionSoft : AppPalette.attentionSoft,
+      borderRadius: BorderRadius.circular(18),
+    ),
     child: Padding(
       padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Row(
+          Row(
             children: [
-              Icon(Icons.fact_check_outlined),
-              SizedBox(width: 8),
-              CompanionView(state: CompanionVisualState.think, size: 42),
+              Icon(
+                Icons.fact_check_outlined,
+                color: LivingDeskReviewScope.active(context) ? AtelierStyle.attention : null,
+              ),
+              const SizedBox(width: 8),
+              const CompanionView(state: CompanionVisualState.think, size: 42),
             ],
           ),
           const SizedBox(height: 10),
@@ -444,7 +450,9 @@ class _EvaluatedResult extends StatelessWidget {
 
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: isStrong ? (living ? AtelierStyle.mint : AppPalette.successSoft) : AppPalette.attentionSoft,
+        color: isStrong
+            ? (living ? AtelierStyle.mint : AppPalette.successSoft)
+            : (living ? AtelierStyle.attentionSoft : AppPalette.attentionSoft),
         borderRadius: BorderRadius.circular(18),
       ),
       child: Padding(

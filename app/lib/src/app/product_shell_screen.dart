@@ -1351,7 +1351,7 @@ class _LibraryMaterialCard extends StatelessWidget {
             RecallStateKind.notAssessed => AtelierStyle.canvas,
             RecallStateKind.developing => AtelierStyle.mint,
             RecallStateKind.retrievedOnce => AtelierStyle.mint,
-            RecallStateKind.needsReview => const Color(0xFFFFF1D9),
+            RecallStateKind.needsReview => AtelierStyle.attentionSoft,
           }
         : stateSoft;
     final resolvedStateAccent = living
@@ -1359,7 +1359,7 @@ class _LibraryMaterialCard extends StatelessWidget {
             RecallStateKind.notAssessed => AtelierStyle.muted,
             RecallStateKind.developing => AtelierStyle.teal,
             RecallStateKind.retrievedOnce => AtelierStyle.teal,
-            RecallStateKind.needsReview => const Color(0xFF9A623E),
+            RecallStateKind.needsReview => AtelierStyle.attention,
           }
         : stateAccent;
 

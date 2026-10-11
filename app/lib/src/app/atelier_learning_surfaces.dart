@@ -20,6 +20,8 @@ abstract final class AtelierStyle {
   static const aqua = Color(0xFF20BFA9);
   static const aquaSoft = Color(0xFFE6F8F4);
   static const mark = Color(0xFFC9F45D);
+  static const attention = Color(0xFF9A623E);
+  static const attentionSoft = Color(0xFFFFF1D9);
 
   // Compatibility alias while the current integrated slice is migrated.
   static const teal = pulse;
@@ -947,7 +949,7 @@ class AtelierResult extends StatelessWidget {
     final responseColor = independent
         ? AtelierStyle.mint
         : assisted
-        ? const Color(0xFFFFF1D9)
+        ? AtelierStyle.attentionSoft
         : const Color(0xFFF1F0EC);
     final spans = <TextSpan>[];
     if (match == null) {
@@ -1015,7 +1017,7 @@ class AtelierResult extends StatelessWidget {
                 color: independent
                     ? AtelierStyle.teal
                     : assisted
-                    ? const Color(0xFFC48B33)
+                    ? AtelierStyle.attention
                     : AtelierStyle.muted,
                 width: 4,
               ),
