@@ -513,16 +513,19 @@ class LivingStudyDeskHome extends StatelessWidget {
             Semantics(
               button: true,
               label: '${item.title} materyalinde kaldığın öğrenme adımına devam et',
-              child: ListTile(
-                contentPadding: EdgeInsets.zero,
-                leading: Icon(
-                  item.mediaType == SourceMediaType.pdf ? Icons.picture_as_pdf_outlined : Icons.notes_rounded,
-                  color: _accent,
+              child: Material(
+                color: Colors.transparent,
+                child: ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  leading: Icon(
+                    item.mediaType == SourceMediaType.pdf ? Icons.picture_as_pdf_outlined : Icons.notes_rounded,
+                    color: _accent,
+                  ),
+                  title: Text(item.title, maxLines: 2, overflow: TextOverflow.ellipsis),
+                  subtitle: const Text('Sıradaki öğrenme adımını aç'),
+                  trailing: const Icon(Icons.chevron_right_rounded, color: _sub),
+                  onTap: () => onOpenMaterial(item.id),
                 ),
-                title: Text(item.title, maxLines: 2, overflow: TextOverflow.ellipsis),
-                subtitle: const Text('Sıradaki öğrenme adımını aç'),
-                trailing: const Icon(Icons.chevron_right_rounded, color: _sub),
-                onTap: () => onOpenMaterial(item.id),
               ),
             ),
         ],
