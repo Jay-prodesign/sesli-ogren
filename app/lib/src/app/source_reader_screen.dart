@@ -145,7 +145,7 @@ class _SourceReaderScreenState extends State<SourceReaderScreen> {
 
   Future<void> _runLearningAction(VoidCallback? action) async {
     final callback = widget.onProgressChanged;
-    if (callback != null && !_sourceFitsViewport) {
+    if (callback != null) {
       try {
         await callback(_readingProgress);
         _lastReportedProgress = _readingProgress;

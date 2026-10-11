@@ -180,12 +180,12 @@ void main() {
     await pumpUntilFound(tester, find.byType(SourceReaderScreen));
     expect(find.textContaining('Fotosentez'), findsWidgets);
 
-    await tester.pageBack();
+    Navigator.of(tester.element(find.byType(SourceReaderScreen))).pop();
     await tester.pumpAndSettle();
     expect(find.byKey(const ValueKey('first-value-intent')), findsNothing);
     expect(find.text('İlk aktif denemeni yap'), findsOneWidget);
 
-    await tester.pageBack();
+    Navigator.of(tester.element(find.byType(MaterialWorkspaceScreen))).pop();
     await pumpUntilFound(tester, find.text('Kaldığın yer hazır.'));
     expect(find.text('İlk hatırlama denemeni yap'), findsOneWidget);
     expect(find.text('Hatırlamayı dene'), findsOneWidget);

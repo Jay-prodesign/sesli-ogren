@@ -80,8 +80,8 @@ void main() {
         home: LivingDeskReviewScope(child: ProductShellScreen(runtime: runtime)),
       ),
     );
-    await _pumpUntilFound(tester, find.text('Kaynak ekle'));
-    await tester.tap(find.text('Kaynak ekle'));
+    await _pumpUntilFound(tester, find.text('İlk kaynağımı ekle'));
+    await tester.tap(find.text('İlk kaynağımı ekle'));
     await _pumpUntilFound(tester, find.byType(LearningSliceScreen));
     await _pumpUntilFound(tester, find.text('İLK KAYNAĞIN'));
     await tester.tap(find.text('Metin yapıştır'));
@@ -102,7 +102,7 @@ void main() {
     expect(find.text('Önce kaynağın tamamını bir kez gör.'), findsOneWidget);
     await tester.tap(find.text('Kaynağı aç'));
     await _pumpUntilFound(tester, find.byType(SourceReaderScreen));
-    await tester.pageBack();
+    Navigator.of(tester.element(find.byType(SourceReaderScreen))).pop();
     await _pumpUntilFound(tester, find.byKey(const ValueKey('la0040-atelier-workspace')));
 
     expect(find.text('KAYNAK ÖNİZLEMESİ'), findsOneWidget);
@@ -130,7 +130,7 @@ void main() {
       telemetry: store.operationalTelemetry(),
     );
 
-    await tester.pumpWidget(MaterialApp(home: ProductShellScreen(runtime: runtime)));
+    await tester.pumpWidget(MaterialApp(home: LivingDeskReviewScope(child: ProductShellScreen(runtime: runtime))));
     await _pumpUntilFound(tester, find.text('Biyoloji · Fotosentez'));
     await tester.tap(find.text('Kütüphane'));
     await tester.pumpAndSettle();
@@ -139,7 +139,7 @@ void main() {
     await tester.tap(find.byKey(const ValueKey('la0040-atelier-workspace-reader')));
     await _pumpUntilFound(tester, find.byType(SourceReaderScreen));
     expect(find.byType(SourceReaderScreen), findsOneWidget);
-    await tester.pageBack();
+    Navigator.of(tester.element(find.byType(SourceReaderScreen))).pop();
     await tester.pumpAndSettle();
     expect(find.byType(ProductShellScreen), findsOneWidget);
     expect(tester.takeException(), isNull);

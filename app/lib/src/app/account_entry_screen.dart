@@ -168,13 +168,15 @@ class _AccountEntryScreenState extends State<AccountEntryScreen> {
                         ),
                       ),
                       SizedBox(width: 10),
-                      Text(
-                        'sesli öğren',
-                        style: TextStyle(
-                          color: AtelierStyle.ink,
-                          fontSize: 20,
-                          fontWeight: FontWeight.w900,
-                          letterSpacing: -0.8,
+                      Expanded(
+                        child: Text(
+                          'sesli öğren',
+                          style: TextStyle(
+                            color: AtelierStyle.ink,
+                            fontSize: 20,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: -0.8,
+                          ),
                         ),
                       ),
                     ],

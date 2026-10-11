@@ -458,12 +458,15 @@ class _FocusScreenState extends State<FocusScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Icon(Icons.article_outlined, color: accent, size: 18),
                       const SizedBox(width: 7),
-                      Text(
-                        sourcePreviewTruncated ? 'Kaynak metni · kısa görünüm' : 'Kaynak metni',
-                        style: theme.textTheme.labelMedium?.copyWith(color: accent, fontWeight: FontWeight.w800),
+                      Expanded(
+                        child: Text(
+                          sourcePreviewTruncated ? 'Kaynak metni · kısa görünüm' : 'Kaynak metni',
+                          style: theme.textTheme.labelMedium?.copyWith(color: accent, fontWeight: FontWeight.w800),
+                        ),
                       ),
                     ],
                   ),

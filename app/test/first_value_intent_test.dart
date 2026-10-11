@@ -78,7 +78,7 @@ void main() {
     await _tapVisible(tester, find.text('Kaynağı aç'));
     await _pumpUntilFound(tester, find.byType(SourceReaderScreen));
     expect(find.text('İlk değer notu'), findsWidgets);
-    await tester.pageBack();
+    Navigator.of(tester.element(find.byType(SourceReaderScreen))).pop();
     await tester.pumpAndSettle();
 
     expect(find.byKey(const ValueKey('first-value-intent')), findsNothing);

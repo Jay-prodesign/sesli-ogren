@@ -107,7 +107,13 @@ void main() {
     await firstRuntime.close();
 
     final reopened = await _openRuntime(path: dbPath, learner: learner);
-    addTearDown(reopened.close);
+    var reopenedClosed = false;
+    addTearDown(() async {
+      if (reopenedClosed) return;
+      await tester.pumpWidget(const SizedBox.shrink());
+      await tester.pump();
+      await reopened.close();
+    });
 
     final materials = await reopened.store.activeMaterials(learner: learner);
     expect(materials.map((item) => item.id), contains(materialId));
@@ -140,6 +146,11 @@ void main() {
     expect(find.text('Kaynağı gözden geçir'), findsOneWidget);
     expect(find.byKey(const ValueKey('first-value-intent')), findsNothing);
     expect(tester.takeException(), isNull);
+
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.pump();
+    await reopened.close();
+    reopenedClosed = true;
   });
 
   test('active Recall attempt and assistance survive close and reopen without duplicate evidence', () async {
