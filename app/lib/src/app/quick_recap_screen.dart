@@ -701,8 +701,8 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> with WidgetsBinding
                         key: const ValueKey('quick-recap-create'),
                         style: living
                             ? FilledButton.styleFrom(
-                                backgroundColor: AtelierStyle.mark,
-                                foregroundColor: AtelierStyle.focus,
+                                backgroundColor: AtelierStyle.pulse,
+                                foregroundColor: Colors.white,
                                 minimumSize: const Size.fromHeight(52),
                               )
                             : primaryStyle,

@@ -184,7 +184,11 @@ class _AccountEntryScreenState extends State<AccountEntryScreen> {
                   const SizedBox(height: 20),
                   Container(
                     padding: const EdgeInsets.fromLTRB(22, 22, 18, 22),
-                    decoration: BoxDecoration(color: AtelierStyle.ink, borderRadius: BorderRadius.circular(24)),
+                    decoration: BoxDecoration(
+                      color: AtelierStyle.focus,
+                      borderRadius: BorderRadius.circular(26),
+                      boxShadow: const [BoxShadow(color: Color(0x1A14224A), blurRadius: 30, offset: Offset(0, 16))],
+                    ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -236,7 +240,7 @@ class _AccountEntryScreenState extends State<AccountEntryScreen> {
                         const SizedBox(height: 10),
                         const Text(
                           'Sesli Öğren kaynağını açık tutar, sonra onu kapatıp neyi kendi başına hatırladığını görmeni sağlar.',
-                          style: TextStyle(color: Color(0xFFDCE8E5), fontSize: 14, height: 1.45),
+                          style: TextStyle(color: Color(0xFFD6DDF0), fontSize: 14, height: 1.45),
                         ),
                         const SizedBox(height: 18),
                         LayoutBuilder(
@@ -287,8 +291,8 @@ class _AccountEntryScreenState extends State<AccountEntryScreen> {
                     padding: const EdgeInsets.fromLTRB(20, 20, 20, 18),
                     decoration: BoxDecoration(
                       color: AtelierStyle.paper,
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: AtelierStyle.line),
+                      borderRadius: BorderRadius.circular(22),
+                      boxShadow: const [BoxShadow(color: Color(0x0D14224A), blurRadius: 20, offset: Offset(0, 8))],
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -428,7 +432,7 @@ class _EntryJourneyArrow extends StatelessWidget {
   @override
   Widget build(BuildContext context) => const Padding(
     padding: EdgeInsets.only(top: 4),
-    child: Icon(Icons.arrow_forward_rounded, color: Color(0xFF8DA7A1), size: 16),
+    child: Icon(Icons.arrow_forward_rounded, color: Color(0xFF8696C4), size: 16),
   );
 }
 
@@ -459,6 +463,6 @@ class _EntryJourneyDownArrow extends StatelessWidget {
   @override
   Widget build(BuildContext context) => const Padding(
     padding: EdgeInsets.symmetric(vertical: 5, horizontal: 3),
-    child: Icon(Icons.arrow_downward_rounded, color: Color(0xFF8DA7A1), size: 15),
+    child: Icon(Icons.arrow_downward_rounded, color: Color(0xFF8696C4), size: 15),
   );
 }

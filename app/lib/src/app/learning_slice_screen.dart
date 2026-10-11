@@ -1943,8 +1943,8 @@ class _ResultNextActionBar extends StatelessWidget {
                       key: const ValueKey('la0040-result-sticky-next'),
                       onPressed: onPressed,
                       style: FilledButton.styleFrom(
-                        backgroundColor: AtelierStyle.mark,
-                        foregroundColor: AtelierStyle.focus,
+                        backgroundColor: AtelierStyle.pulse,
+                        foregroundColor: Colors.white,
                         minimumSize: const Size.fromHeight(50),
                       ),
                       icon: const Icon(Icons.arrow_forward_rounded),
@@ -1982,8 +1982,8 @@ class _ResultNextActionBar extends StatelessWidget {
                       key: const ValueKey('la0040-result-sticky-next'),
                       onPressed: onPressed,
                       style: FilledButton.styleFrom(
-                        backgroundColor: AtelierStyle.mark,
-                        foregroundColor: AtelierStyle.focus,
+                        backgroundColor: AtelierStyle.pulse,
+                        foregroundColor: Colors.white,
                         minimumSize: const Size(0, 48),
                       ),
                       icon: const Icon(Icons.arrow_forward_rounded),

@@ -257,8 +257,8 @@ class FirstValueIntentSurface extends StatelessWidget {
                     key: const ValueKey('first-intent-recommend'),
                     onPressed: _recommendedAction,
                     style: FilledButton.styleFrom(
-                      backgroundColor: AtelierStyle.mark,
-                      foregroundColor: AtelierStyle.focus,
+                      backgroundColor: AtelierStyle.pulse,
+                      foregroundColor: Colors.white,
                       minimumSize: Size.fromHeight(tightCompact ? 46 : 54),
                     ),
                     icon: Icon(_recommendedActionIcon),
