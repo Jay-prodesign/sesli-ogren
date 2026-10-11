@@ -832,8 +832,9 @@ void main() {
     Finder workspaceScroll() =>
         find.descendant(of: find.byType(MaterialWorkspaceScreen), matching: find.byType(Scrollable));
 
-    await scrollUntilFound(tester, find.text('Diğer yollar'), scrollable: workspaceScroll());
-    await tapVisible(tester, find.text('Diğer yollar'));
+    final otherPaths = find.widgetWithText(TextButton, 'Diğer yollar').hitTestable();
+    await pumpUntilFound(tester, otherPaths);
+    await tester.tap(otherPaths);
     await pumpUntilFound(tester, find.byKey(const ValueKey('workspace-other-study-paths-scroll')));
     await tapVisible(tester, find.text('Odaklan'));
     await pumpUntilFound(tester, find.text('KISA ODAK · 3 ADIM'));
@@ -848,8 +849,9 @@ void main() {
     Navigator.of(tester.element(find.textContaining('öğrenme kanıtı oluşturmaz'))).pop();
     await pumpUntilFound(tester, find.byType(MaterialWorkspaceScreen));
 
-    await scrollUntilFound(tester, find.text('Diğer yollar'), scrollable: workspaceScroll());
-    await tapVisible(tester, find.text('Diğer yollar'));
+    final otherPaths = find.widgetWithText(TextButton, 'Diğer yollar').hitTestable();
+    await pumpUntilFound(tester, otherPaths);
+    await tester.tap(otherPaths);
     await pumpUntilFound(tester, find.byKey(const ValueKey('workspace-other-study-paths-scroll')));
     await tapVisible(tester, find.text('Kendi cümlelerimle anlat'));
     await pumpUntilFound(tester, find.text('Anlatımımı değerlendir'));
@@ -1766,12 +1768,9 @@ void main() {
     await tapVisible(tester, find.byKey(const ValueKey('la0040-living-material-open')));
     await pumpUntilFound(tester, find.byType(MaterialWorkspaceScreen));
 
-    final workspaceScroll = find.descendant(
-      of: find.byType(MaterialWorkspaceScreen),
-      matching: find.byType(Scrollable),
-    );
-    await scrollUntilFound(tester, find.text('Diğer yollar'), scrollable: workspaceScroll);
-    await tapVisible(tester, find.text('Diğer yollar'));
+    final otherPaths = find.widgetWithText(TextButton, 'Diğer yollar').hitTestable();
+    await pumpUntilFound(tester, otherPaths);
+    await tester.tap(otherPaths);
     await pumpUntilFound(tester, find.byKey(const ValueKey('workspace-other-study-paths-scroll')));
     await tapVisible(tester, find.text('Kendi cümlelerimle anlat'));
     await pumpUntilFound(tester, find.text('Anlatımımı değerlendir'));
@@ -1786,7 +1785,8 @@ void main() {
     await tester.pump();
 
     expect(find.textContaining('öğrenme kanıtı olarak kaydetmiyoruz'), findsOneWidget);
-    expect(find.bySemanticsLabel('Düğüm düşünüyor'), findsOneWidget);
+    final companion = tester.widget<CompanionView>(find.byType(CompanionView).first);
+    expect(companion.state, CompanionVisualState.think);
     expect(find.bySemanticsLabel('Düğüm destek oluyor'), findsNothing);
     expect(find.text('Anlatımında temel fikirler görünüyor'), findsNothing);
   });
