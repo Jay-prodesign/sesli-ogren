@@ -110,11 +110,7 @@ void main() {
     Navigator.of(tester.element(find.byType(SourceReaderScreen))).pop();
     await _pumpUntilFound(tester, find.byKey(const ValueKey('la0040-atelier-workspace')));
 
-    await tester.scrollUntilVisible(
-      find.text('KAYNAK ÖNİZLEMESİ'),
-      220,
-      scrollable: find.byType(Scrollable).last,
-    );
+    await tester.scrollUntilVisible(find.text('KAYNAK ÖNİZLEMESİ'), 220, scrollable: find.byType(Scrollable).last);
     await tester.pump();
     expect(find.text('KAYNAK ÖNİZLEMESİ'), findsOneWidget);
     expect(find.byKey(const ValueKey('la0040-atelier-workspace-recall')), findsOneWidget);
