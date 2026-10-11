@@ -236,7 +236,13 @@ class LivingStudyDeskHome extends StatelessWidget {
         ? CompanionVisualState.idle
         : CompanionVisualState.think;
 
-    Widget nextStepCopy({required double titleSize, required double reasonSize}) => Column(
+    Widget nextReasonCopy({required double reasonSize}) => Text(
+      _why,
+      key: const ValueKey('la0040-home-next-reason'),
+      style: TextStyle(color: _sub, fontSize: reasonSize, height: 1.4),
+    );
+
+    Widget nextStepCopy({required double titleSize, required double reasonSize, bool includeReason = true}) => Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Semantics(
@@ -256,12 +262,10 @@ class LivingStudyDeskHome extends StatelessWidget {
             ),
           ),
         ),
-        SizedBox(height: compactFirstViewport ? 3 : 5),
-        Text(
-          _why,
-          key: const ValueKey('la0040-home-next-reason'),
-          style: TextStyle(color: _sub, fontSize: reasonSize, height: 1.4),
-        ),
+        if (includeReason) ...[
+          SizedBox(height: compactFirstViewport ? 3 : 5),
+          nextReasonCopy(reasonSize: reasonSize),
+        ],
       ],
     );
 
@@ -378,7 +382,7 @@ class LivingStudyDeskHome extends StatelessWidget {
                       ],
                     ),
                     const SizedBox(height: 4),
-                    nextStepCopy(titleSize: 17.5, reasonSize: 11.5),
+                    nextStepCopy(titleSize: 17.5, reasonSize: 11.5, includeReason: false),
                   ],
                 )
               : Row(
@@ -426,6 +430,10 @@ class LivingStudyDeskHome extends StatelessWidget {
             ),
           ),
         ),
+        if (compactFirstViewport) ...[
+          const SizedBox(height: 6),
+          nextReasonCopy(reasonSize: 11.5),
+        ],
         const SizedBox(height: 6),
         Align(
           alignment: Alignment.center,
