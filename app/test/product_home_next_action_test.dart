@@ -304,6 +304,18 @@ void main() {
           'Bitkiler bu süreçte karbondioksit kullanır.',
       sourceName: 'Güncel çalışma notu',
     );
+    final currentPrompt = await recall.createCurrentPrompt(
+      learner: runtime.learner,
+      materialId: AppRuntime.primaryMaterialId,
+    );
+    final currentSession = await recall.openAttempt(learner: runtime.learner, actionId: currentPrompt.id);
+    await recall.submit(
+      learner: runtime.learner,
+      actionId: currentPrompt.id,
+      attemptId: currentSession.attempt.attemptId,
+      disposition: RecallResponseDisposition.unknown,
+      answer: '',
+    );
 
     await tester.pumpWidget(_testApp(LivingDeskReviewScope(child: ProductShellScreen(runtime: runtime))));
     await tester.pump();
@@ -351,7 +363,10 @@ void main() {
     expect(homeReason.maxLines, isNull);
     expect(homeReason.overflow, isNull);
 
-    await tapVisible(tester, find.text('İlerleme').last);
+    final progressNav = find.byIcon(Icons.insights_outlined).hitTestable();
+    await pumpUntilFound(tester, progressNav);
+    await tester.tap(progressNav);
+    await tester.pump();
     await pumpUntilFound(tester, find.byKey(ValueKey('progress-next-reason-${AppRuntime.primaryMaterialId.value}')));
 
     final progressReason = tester.widget<Text>(
@@ -398,8 +413,9 @@ void main() {
   testWidgets('Home prioritizes a material that needs repair over a newer completed material', (tester) async {
     usePhoneViewport(tester);
     final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
-    final ingest = SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor());
-    final recall = RecallLearningService(sourceStore: store, learningStore: store.learningTruthStore());
+    var now = DateTime.utc(2026, 10, 11, 12);
+    final ingest = SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor(), now: () => now);
+    final recall = RecallLearningService(sourceStore: store, learningStore: store.learningTruthStore(), now: () => now);
     final runtime = AppRuntime(
       learner: AppRuntime.localM5LearnerFixture,
       store: store,
@@ -428,7 +444,7 @@ void main() {
       answer: '',
     );
 
-    await Future<void>.delayed(const Duration(milliseconds: 2));
+    now = now.add(const Duration(minutes: 1));
 
     const completedMaterial = MaterialId('home-priority-completed');
     await ingest.ingestPastedText(
