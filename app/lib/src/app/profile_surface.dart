@@ -721,11 +721,8 @@ class _ProfileSectionLabel extends StatelessWidget {
     return Text(
       text,
       style: living
-          ? Theme.of(context).textTheme.labelMedium?.copyWith(
-              color: AtelierStyle.pulse,
-              fontWeight: FontWeight.w900,
-              letterSpacing: 0.7,
-            )
+          ? Theme.of(context).textTheme.labelMedium
+                ?.copyWith(color: AtelierStyle.pulse, fontWeight: FontWeight.w900, letterSpacing: 0.7)
           : Theme.of(context).textTheme.titleMedium,
     );
   }

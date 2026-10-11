@@ -965,10 +965,7 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
                 liveRegion: true,
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                  decoration: BoxDecoration(
-                    color: AtelierStyle.pulseSoft,
-                    borderRadius: BorderRadius.circular(16),
-                  ),
+                  decoration: BoxDecoration(color: AtelierStyle.pulseSoft, borderRadius: BorderRadius.circular(16)),
                   child: const Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -1035,10 +1032,7 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
               const SizedBox(height: 12),
               Container(
                 padding: const EdgeInsets.fromLTRB(13, 11, 13, 11),
-                decoration: BoxDecoration(
-                  color: AtelierStyle.pulseSoft,
-                  borderRadius: BorderRadius.circular(16),
-                ),
+                decoration: BoxDecoration(color: AtelierStyle.pulseSoft, borderRadius: BorderRadius.circular(16)),
                 child: const Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [

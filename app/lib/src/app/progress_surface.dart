@@ -63,8 +63,7 @@ class ProgressSurface extends StatelessWidget {
               padding: const EdgeInsets.fromLTRB(18, 17, 18, 18),
               child: LayoutBuilder(
                 builder: (context, constraints) {
-                  final stackHeader =
-                      constraints.maxWidth < 340 || MediaQuery.textScalerOf(context).scale(16) >= 22;
+                  final stackHeader = constraints.maxWidth < 340 || MediaQuery.textScalerOf(context).scale(16) >= 22;
                   final copy = Column(
                     key: stackHeader ? const ValueKey('progress-header-stacked') : null,
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -97,10 +96,7 @@ class ProgressSurface extends StatelessWidget {
                     ],
                   );
                   final badge = DecoratedBox(
-                    decoration: BoxDecoration(
-                      color: AtelierStyle.mark,
-                      borderRadius: BorderRadius.circular(999),
-                    ),
+                    decoration: BoxDecoration(color: AtelierStyle.mark, borderRadius: BorderRadius.circular(999)),
                     child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                       child: Text(
@@ -121,7 +117,11 @@ class ProgressSurface extends StatelessWidget {
                   }
                   return Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [Expanded(child: copy), const SizedBox(width: 12), badge],
+                    children: [
+                      Expanded(child: copy),
+                      const SizedBox(width: 12),
+                      badge,
+                    ],
                   );
                 },
               ),
