@@ -789,6 +789,11 @@ void main() {
     expect(find.text('Fotosentez çalışma notu'), findsWidgets);
 
     await tapVisible(tester, find.text('Fotosentez çalışma notu').last);
+    await pumpUntilFound(tester, find.byKey(const ValueKey('first-value-intent')));
+    await tapVisible(tester, find.text('Kaynağı aç'));
+    await pumpUntilFound(tester, find.byType(SourceReaderScreen));
+    Navigator.of(tester.element(find.byType(SourceReaderScreen))).pop();
+    await pumpUntilFound(tester, find.byType(MaterialWorkspaceScreen));
     await pumpUntilFound(tester, find.text('Öğrenme durumu'));
 
     expect(find.text('Öğrenme durumu'), findsOneWidget);
@@ -1713,6 +1718,11 @@ void main() {
     await tester.pumpWidget(MaterialApp(home: ProductShellScreen(runtime: runtime)));
     await pumpUntilFound(tester, find.text('Biyoloji notu'));
     await tapVisible(tester, find.text('Biyoloji notu').last);
+    await pumpUntilFound(tester, find.byKey(const ValueKey('first-value-intent')));
+    await tapVisible(tester, find.text('Kaynağı aç'));
+    await pumpUntilFound(tester, find.byType(SourceReaderScreen));
+    Navigator.of(tester.element(find.byType(SourceReaderScreen))).pop();
+    await pumpUntilFound(tester, find.byType(MaterialWorkspaceScreen));
     await pumpUntilFound(tester, find.text('Açıkla'));
     await tapVisible(tester, find.text('Açıkla'));
     await pumpUntilFound(tester, find.text('Anlatımımı değerlendir'));
