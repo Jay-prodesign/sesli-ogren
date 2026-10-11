@@ -264,7 +264,6 @@ void main() {
   testWidgets('Home other-material entry preserves that material canonical repair action', (tester) async {
     usePhoneViewport(tester);
     final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
-    addTearDown(store.close);
     final ingest = SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor());
     final recall = RecallLearningService(sourceStore: store, learningStore: store.learningTruthStore());
     final runtime = AppRuntime(
