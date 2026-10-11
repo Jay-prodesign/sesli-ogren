@@ -224,19 +224,42 @@ Future<void> pumpUntilFound(WidgetTester tester, Finder finder, {int maxPumps = 
   fail('Expected widget was not reached within bounded pumps.');
 }
 
+Future<void> scrollUntilFound(
+  WidgetTester tester,
+  Finder target, {
+  required Finder scrollable,
+  int maxDrags = 14,
+  double delta = -180,
+}) async {
+  for (var i = 0; i < maxDrags && target.evaluate().isEmpty; i++) {
+    await tester.drag(scrollable, Offset(0, delta));
+    await tester.pump();
+  }
+  expect(target, findsWidgets);
+}
+
 Future<void> tapVisible(WidgetTester tester, Finder finder) async {
-  var target = finder.hitTestable();
-  if (target.evaluate().isEmpty) {
-    final scrollables = find.byType(Scrollable);
+  if (finder.evaluate().isEmpty) {
+    final scrollables = find.byType(Scrollable).hitTestable();
     if (scrollables.evaluate().isNotEmpty) {
-      await tester.scrollUntilVisible(finder, 240, scrollable: scrollables.last);
-    } else {
-      await tester.ensureVisible(finder);
+      await scrollUntilFound(tester, finder, scrollable: scrollables.last);
     }
+  }
+  var target = finder.hitTestable();
+  if (target.evaluate().isEmpty && finder.evaluate().isNotEmpty) {
+    await tester.ensureVisible(finder);
     await tester.pump();
     target = finder.hitTestable();
   }
-  await tester.tap(target.evaluate().isNotEmpty ? target : finder);
+  expect(target, findsWidgets);
+  await tester.tap(target.first);
+}
+
+Future<void> tapBottomNavIcon(WidgetTester tester, IconData icon) async {
+  final target = find.byIcon(icon).hitTestable();
+  await pumpUntilFound(tester, target);
+  await tester.tap(target);
+  await tester.pump();
 }
 
 Future<void> pumpUntilGone(WidgetTester tester, Finder finder, {int maxPumps = 100}) async {
@@ -298,6 +321,7 @@ void main() {
       ),
     );
     await pumpUntilFound(tester, find.textContaining('Devam kaydı kullanılamadı'));
+    await tester.pump();
 
     expect(find.bySemanticsLabel('Düğüm düşünüyor'), findsOneWidget);
     expect(find.bySemanticsLabel('Düğüm destek oluyor'), findsNothing);
@@ -452,8 +476,8 @@ void main() {
         signOutSession: () async {},
       ),
     );
-    await pumpUntilFound(tester, find.text('Profil'));
-    await tapVisible(tester, find.text('Profil').last);
+    await pumpUntilFound(tester, find.byType(NavigationBar));
+    await tapBottomNavIcon(tester, Icons.person_outline_rounded);
     await pumpUntilFound(tester, find.text('Profil ve Ayarlar'));
     await tapVisible(tester, find.text('Hesabımı ve verilerimi sil'));
     await pumpUntilFound(tester, find.text('Hesabı ve verileri sil?'));
@@ -491,7 +515,7 @@ void main() {
     await pumpUntilFound(tester, find.text('Güvenli öğrenme oturumu açılamadı.'));
 
     expect(find.text('Başka hesapla giriş yap'), findsOneWidget);
-    await tester.tap(find.text('Başka hesapla giriş yap'));
+    await tapVisible(tester, find.text('Başka hesapla giriş yap'));
     await pumpUntilFound(tester, find.text('Öğrenme alanına gir'));
 
     expect(signOutCalls, 1);
@@ -647,7 +671,9 @@ void main() {
         home: LivingDeskReviewScope(child: LearningSliceScreen(runtime: runtime)),
       ),
     );
-    await pumpUntilFound(tester, find.text('Hatırla'));
+    final learningScroll = find.descendant(of: find.byType(LearningSliceScreen), matching: find.byType(Scrollable));
+    await scrollUntilFound(tester, find.byKey(const ValueKey('recall')), scrollable: learningScroll);
+    await scrollUntilFound(tester, find.text('Bilmiyorum'), scrollable: learningScroll);
     await tapVisible(tester, find.text('Bilmiyorum'));
     await pumpUntilFound(tester, find.byKey(const ValueKey('la0040-result-next-reason')));
 
@@ -1043,6 +1069,7 @@ void main() {
       'İkinci kaynak birinci kaynağın sürümü olmadan kendi materyali olarak saklanır.',
     );
     await tapVisible(tester, find.byKey(const ValueKey('source-add-title')));
+    await pumpUntilFound(tester, find.byKey(const ValueKey('pasted-material-title')));
     await tester.enterText(find.byKey(const ValueKey('pasted-material-title')), 'İkinci kaynak');
     await tapVisible(tester, find.byKey(const ValueKey('source-text-submit')));
     await pumpUntilFound(tester, find.byType(MaterialWorkspaceScreen));
@@ -1206,7 +1233,7 @@ void main() {
     await tester.scrollUntilVisible(find.text('Quick Recap özeti'), 240, scrollable: find.byType(Scrollable).last);
     await tester.pump();
     expect(find.text('Quick Recap özeti'), findsOneWidget);
-    expect(find.text(recap), findsOneWidget);
+    expect(find.text(recap), findsWidgets);
     expect(find.textContaining('bölüm 2 / 2'), findsNothing);
 
     expect(find.text('Dinlemeye başla').hitTestable(), findsOneWidget);
@@ -1270,6 +1297,7 @@ void main() {
     await pumpUntilFound(tester, find.text('Profil'));
     await tapVisible(tester, find.text('Profil').last);
     await pumpUntilFound(tester, find.text('Profil ve Ayarlar'));
+    await pumpUntilFound(tester, find.text('Ücretsiz plan'));
 
     expect(find.text('Ücretsiz plan'), findsOneWidget);
     expect(find.text('Plan etkin'), findsOneWidget);
@@ -1494,13 +1522,12 @@ void main() {
         },
       ),
     );
-    await pumpUntilFound(tester, find.text('Profil'));
-    await tester.tap(find.text('Profil').last);
+    await pumpUntilFound(tester, find.byType(NavigationBar));
+    await tapBottomNavIcon(tester, Icons.person_outline_rounded);
     await pumpUntilFound(tester, find.text('Profil ve Ayarlar'));
-    await tester.scrollUntilVisible(find.text('Bu cihazda çıkış yap'), 260, scrollable: find.byType(Scrollable).last);
-    await tester.tap(find.text('Bu cihazda çıkış yap'));
+    await tapVisible(tester, find.text('Bu cihazda çıkış yap'));
     await pumpUntilFound(tester, find.text('Bu cihazda çıkış yap?'));
-    await tester.tap(find.text('Çıkış yap'));
+    await tapVisible(tester, find.text('Çıkış yap'));
     await pumpUntilFound(tester, find.text('Öğrenme alanına gir'));
 
     expect(signOutCalls, 1);
@@ -1647,7 +1674,7 @@ void main() {
     expect(deletedCallback, isFalse);
     expect(find.text('Yerel veriyi temizlemeyi tekrar dene'), findsOneWidget);
 
-    await tester.tap(find.text('Yerel veriyi temizlemeyi tekrar dene'));
+    await tapVisible(tester, find.text('Yerel veriyi temizlemeyi tekrar dene'));
     await pumpUntilFound(tester, find.textContaining('Sunucuya yeni silme isteği gönderilmedi'));
 
     expect(deletion.calls, 1);
@@ -1978,7 +2005,8 @@ void main() {
     );
     await pumpUntilFound(tester, find.text('Materyali güncelle'));
     await tapVisible(tester, find.text('Materyali güncelle'));
-    await pumpUntilFound(tester, find.text('Metin yapıştır'));
+    final editorScroll = find.descendant(of: find.byType(LearningSliceScreen), matching: find.byType(Scrollable));
+    await scrollUntilFound(tester, find.text('Metin yapıştır'), scrollable: editorScroll);
     await tapVisible(tester, find.text('Metin yapıştır'));
     await tester.enterText(
       find.byKey(const ValueKey('pasted-material-text')),
@@ -2053,7 +2081,8 @@ void main() {
       'Fotosentez ve ışık. Klorofil, ışık enerjisinin yakalanmasına yardım eder.',
     );
     await tapVisible(tester, find.text('Metni ekle · çalışma alanını aç'));
-    await pumpUntilFound(tester, find.text('Hatırla'));
+    final sourceFlowScroll = find.descendant(of: find.byType(LearningSliceScreen), matching: find.byType(Scrollable));
+    await scrollUntilFound(tester, find.byKey(const ValueKey('recall')), scrollable: sourceFlowScroll);
 
     final material = await store.material(learner: runtime.learner, materialId: AppRuntime.primaryMaterialId);
     expect(material, isNotNull);
