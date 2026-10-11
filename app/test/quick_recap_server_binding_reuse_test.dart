@@ -60,6 +60,13 @@ class _DispatchFailureGateway extends _RecordingSummaryGateway {
   Future<ServerSummaryStatus> status(String jobId) async => const ServerSummaryStatus(state: 'QUEUED');
 }
 
+Future<void> _pumpUntilFound(WidgetTester tester, Finder finder, {int maxPumps = 80}) async {
+  for (var i = 0; i < maxPumps && finder.evaluate().isEmpty; i++) {
+    await tester.pump(const Duration(milliseconds: 50));
+  }
+  expect(finder, findsOneWidget);
+}
+
 void main() {
   sqfliteFfiInit();
 
@@ -100,10 +107,10 @@ void main() {
         home: QuickRecapScreen(runtime: runtime, materialId: materialId, summaryGateway: gateway),
       ),
     );
-    await tester.pumpAndSettle();
+    await _pumpUntilFound(tester, find.byKey(const ValueKey('quick-recap-create')));
 
-    await tester.tap(find.text('Kaynağa bağlı özet oluştur'));
-    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('quick-recap-create')));
+    await _pumpUntilFound(tester, find.text('Kaynağa bağlı kısa özet.'));
 
     expect(gateway.submitCalls, 1);
     expect(gateway.deletedMaterialIds, isEmpty);
@@ -123,9 +130,9 @@ void main() {
     expect(find.text('Orijinal kaynağı aç'), findsOneWidget);
     expect(find.text('Özeti dinle'), findsOneWidget);
     await tester.tap(find.text('Diğer araçlar'));
-    await tester.pumpAndSettle();
+    await _pumpUntilFound(tester, find.text('Özeti kopyala'));
     await tester.tap(find.text('Özeti kopyala'));
-    await tester.pumpAndSettle();
+    await _pumpUntilFound(tester, find.text('Özet panoya kopyalandı'));
     expect(copiedText, contains('Kaynağa bağlı kısa özet.'));
     expect(copiedText, contains('Hızlı özet —'));
     expect(copiedText, contains('Sesli Öğren'));
@@ -212,9 +219,9 @@ void main() {
         ),
       ),
     );
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Kaynağa bağlı özet oluştur'));
-    await tester.pumpAndSettle();
+    await _pumpUntilFound(tester, find.byKey(const ValueKey('quick-recap-create')));
+    await tester.tap(find.byKey(const ValueKey('quick-recap-create')));
+    await _pumpUntilFound(tester, find.byKey(const ValueKey('quick-recap-utility-actions')));
 
     expect(find.byKey(const ValueKey('quick-recap-utility-actions')), findsOneWidget);
     expect(find.text('Özeti dinle'), findsOneWidget);
@@ -246,8 +253,8 @@ void main() {
         home: QuickRecapScreen(runtime: runtime, materialId: materialId, summaryGateway: gateway),
       ),
     );
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Kaynağa bağlı özet oluştur'));
+    await _pumpUntilFound(tester, find.byKey(const ValueKey('quick-recap-create')));
+    await tester.tap(find.byKey(const ValueKey('quick-recap-create')));
     for (var i = 0; i < 40 && find.textContaining('Sunucuya ulaşılamadı').evaluate().isEmpty; i++) {
       await tester.pump(const Duration(milliseconds: 50));
     }
