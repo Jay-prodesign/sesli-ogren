@@ -210,6 +210,13 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
       }
     }
     final continuation = progressItem?.continuation;
+    if (continuation?.nextAction.kind == NextLearningActionKind.reviewSourceThenRecall) {
+      // A review recommendation must expose the source before another
+      // source-hidden attempt; opening Recall directly contradicts the
+      // learner's persisted next-action reason.
+      await _openSourceReader(materialId);
+      return;
+    }
     if (continuation?.nextAction.kind == NextLearningActionKind.repeatRecallLater) {
       await _openWorkspace(materialId);
       return;
