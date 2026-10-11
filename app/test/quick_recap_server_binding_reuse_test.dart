@@ -67,6 +67,19 @@ Future<void> _pumpUntilFound(WidgetTester tester, Finder finder, {int maxPumps =
   expect(finder, findsOneWidget);
 }
 
+Future<void> _scrollUntilFound(
+  WidgetTester tester,
+  Finder target, {
+  required Finder scrollable,
+  int maxDrags = 12,
+}) async {
+  for (var i = 0; i < maxDrags && target.evaluate().isEmpty; i++) {
+    await tester.drag(scrollable, const Offset(0, -180));
+    await tester.pump();
+  }
+  expect(target, findsOneWidget);
+}
+
 void main() {
   sqfliteFfiInit();
 
@@ -117,6 +130,16 @@ void main() {
     expect(find.byKey(const ValueKey('quick-recap-source-trust')), findsOneWidget);
     expect(find.text('Biyoloji notu'), findsWidgets);
     expect(find.text('Kaynağa bağlı kısa özet.'), findsOneWidget);
+    final recapScroll = find.descendant(of: find.byType(QuickRecapScreen), matching: find.byType(Scrollable));
+    await _scrollUntilFound(tester, find.text('Şimdi hatırla'), scrollable: recapScroll);
+    expect(find.text('Orijinal kaynağı aç'), findsOneWidget);
+    await _scrollUntilFound(
+      tester,
+      find.byKey(const ValueKey('quick-recap-utility-actions')),
+      scrollable: recapScroll,
+    );
+    expect(find.text('Özeti dinle'), findsOneWidget);
+
     // A generated, persisted recap must be usable outside the app.
     String? copiedText;
     tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (call) async {
@@ -126,9 +149,6 @@ void main() {
       return null;
     });
     addTearDown(() => tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, null));
-    expect(find.text('Şimdi hatırla'), findsOneWidget);
-    expect(find.text('Orijinal kaynağı aç'), findsOneWidget);
-    expect(find.text('Özeti dinle'), findsOneWidget);
     await tester.tap(find.text('Diğer araçlar'));
     await _pumpUntilFound(tester, find.text('Özeti kopyala'));
     await tester.tap(find.text('Özeti kopyala'));
@@ -219,9 +239,15 @@ void main() {
         ),
       ),
     );
-    await _pumpUntilFound(tester, find.byKey(const ValueKey('quick-recap-create')));
-    await tester.tap(find.byKey(const ValueKey('quick-recap-create')));
-    await _pumpUntilFound(tester, find.byKey(const ValueKey('quick-recap-utility-actions')));
+    final recapScroll = find.descendant(of: find.byType(QuickRecapScreen), matching: find.byType(Scrollable));
+    final create = find.byKey(const ValueKey('quick-recap-create'));
+    await _scrollUntilFound(tester, create, scrollable: recapScroll);
+    await tester.tap(create);
+    await _scrollUntilFound(
+      tester,
+      find.byKey(const ValueKey('quick-recap-utility-actions')),
+      scrollable: recapScroll,
+    );
 
     expect(find.byKey(const ValueKey('quick-recap-utility-actions')), findsOneWidget);
     expect(find.text('Özeti dinle'), findsOneWidget);
