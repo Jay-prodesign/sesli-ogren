@@ -223,20 +223,66 @@ class LivingStudyDeskHome extends StatelessWidget {
     final current = material!;
     final hasRecallEvidence = continuation != null && continuation!.state.kind != RecallStateKind.notAssessed;
     final hasActiveContinuation = continuation != null || _hasReaderResume || _hasListenResume;
+    final textScale = MediaQuery.textScalerOf(context).scale(1);
+    final compactFirstViewport = MediaQuery.sizeOf(context).width < 350 && textScale > 1.2;
+    final companionState = _hasListenResume
+        ? CompanionVisualState.listen
+        : hasRecallEvidence
+        ? CompanionVisualState.idle
+        : CompanionVisualState.think;
+
+    Widget nextStepCopy({required double titleSize, required double reasonSize}) => Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Semantics(
+          header: true,
+          label: 'Sıradaki öğrenme adımı',
+          value: _nextStep,
+          child: ExcludeSemantics(
+            child: Text(
+              _nextStep,
+              style: TextStyle(
+                color: _ink,
+                fontSize: titleSize,
+                height: 1.16,
+                fontWeight: FontWeight.w900,
+                letterSpacing: -0.35,
+              ),
+            ),
+          ),
+        ),
+        SizedBox(height: compactFirstViewport ? 3 : 5),
+        Text(
+          _why,
+          maxLines: compactFirstViewport ? 3 : null,
+          overflow: compactFirstViewport ? TextOverflow.ellipsis : TextOverflow.visible,
+          style: TextStyle(color: _sub, fontSize: reasonSize, height: 1.4),
+        ),
+      ],
+    );
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           'Kaldığın yer hazır.',
-          key: ValueKey('la0040-atelier-home-promise'),
-          style: TextStyle(color: _ink, fontSize: 31, height: 1.05, fontWeight: FontWeight.w900, letterSpacing: -1.2),
+          key: const ValueKey('la0040-atelier-home-promise'),
+          style: TextStyle(
+            color: _ink,
+            fontSize: compactFirstViewport ? 24 : 31,
+            height: 1.05,
+            fontWeight: FontWeight.w900,
+            letterSpacing: compactFirstViewport ? -0.7 : -1.2,
+          ),
         ),
-        const SizedBox(height: 9),
-        const Text(
-          'Kaynağın, son denemen ve sıradaki adım tek yerde.',
-          style: TextStyle(color: _sub, fontSize: 15, height: 1.45),
+        SizedBox(height: compactFirstViewport ? 5 : 9),
+        Text(
+          compactFirstViewport
+              ? 'Kaynağın ve sıradaki adımın hazır.'
+              : 'Kaynağın, son denemen ve sıradaki adım tek yerde.',
+          style: TextStyle(color: _sub, fontSize: compactFirstViewport ? 13 : 15, height: 1.4),
         ),
-        const SizedBox(height: 17),
+        SizedBox(height: compactFirstViewport ? 10 : 17),
         Material(
           color: _paper,
           borderRadius: BorderRadius.circular(14),
@@ -246,15 +292,17 @@ class LivingStudyDeskHome extends StatelessWidget {
             onTap: onOpenWorkspace,
             child: Container(
               width: double.infinity,
-              padding: const EdgeInsets.fromLTRB(16, 14, 15, 14),
+              padding: compactFirstViewport
+                  ? const EdgeInsets.fromLTRB(13, 10, 12, 10)
+                  : const EdgeInsets.fromLTRB(16, 14, 15, 14),
               decoration: const BoxDecoration(
                 border: Border(left: BorderSide(color: _accent, width: 3)),
               ),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Icon(Icons.auto_stories_outlined, color: _accent, size: 21),
-                  const SizedBox(width: 11),
+                  Icon(Icons.auto_stories_outlined, color: _accent, size: compactFirstViewport ? 19 : 21),
+                  SizedBox(width: compactFirstViewport ? 8 : 11),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -273,8 +321,8 @@ class LivingStudyDeskHome extends StatelessWidget {
                           current.title,
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                            fontSize: 19,
+                          style: TextStyle(
+                            fontSize: compactFirstViewport ? 16 : 19,
                             height: 1.18,
                             letterSpacing: -0.35,
                             fontWeight: FontWeight.w900,
@@ -284,9 +332,9 @@ class LivingStudyDeskHome extends StatelessWidget {
                         const SizedBox(height: 5),
                         Text(
                           _preview,
-                          maxLines: 2,
+                          maxLines: compactFirstViewport ? 1 : 2,
                           overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(fontSize: 13, color: _sub, height: 1.4),
+                          style: TextStyle(fontSize: compactFirstViewport ? 11.5 : 13, color: _sub, height: 1.4),
                         ),
                       ],
                     ),
@@ -298,65 +346,65 @@ class LivingStudyDeskHome extends StatelessWidget {
             ),
           ),
         ),
-        const SizedBox(height: 16),
+        SizedBox(height: compactFirstViewport ? 10 : 16),
         Container(
           key: const ValueKey('la0040-source-to-recall-thread'),
           padding: const EdgeInsets.fromLTRB(2, 0, 0, 0),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              SizedBox(
-                width: 62,
-                child: CompanionView(
-                  state: _hasListenResume
-                      ? CompanionVisualState.listen
-                      : hasRecallEvidence
-                      ? CompanionVisualState.idle
-                      : CompanionVisualState.think,
-                  size: 60,
-                ),
-              ),
-              const SizedBox(width: 9),
-              Expanded(
-                child: Column(
+          child: compactFirstViewport
+              ? Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      hasActiveContinuation ? _continuationLabel : 'ŞİMDİ',
-                      style: const TextStyle(
-                        color: _accent,
-                        fontSize: 10,
-                        fontWeight: FontWeight.w900,
-                        letterSpacing: 0.9,
-                      ),
-                    ),
-                    const SizedBox(height: 6),
-                    Semantics(
-                      header: true,
-                      label: 'Sıradaki öğrenme adımı',
-                      value: _nextStep,
-                      child: ExcludeSemantics(
-                        child: Text(
-                          _nextStep,
-                          style: const TextStyle(
-                            color: _ink,
-                            fontSize: 22,
-                            height: 1.16,
-                            fontWeight: FontWeight.w900,
-                            letterSpacing: -0.35,
+                    Row(
+                      children: [
+                        CompanionView(state: companionState, size: 42),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            hasActiveContinuation ? _continuationLabel : 'ŞİMDİ',
+                            style: const TextStyle(
+                              color: _accent,
+                              fontSize: 9.5,
+                              fontWeight: FontWeight.w900,
+                              letterSpacing: 0.8,
+                            ),
                           ),
                         ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    nextStepCopy(titleSize: 17.5, reasonSize: 11.5),
+                  ],
+                )
+              : Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    SizedBox(
+                      width: 62,
+                      child: CompanionView(state: companionState, size: 60),
+                    ),
+                    const SizedBox(width: 9),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            hasActiveContinuation ? _continuationLabel : 'ŞİMDİ',
+                            style: const TextStyle(
+                              color: _accent,
+                              fontSize: 10,
+                              fontWeight: FontWeight.w900,
+                              letterSpacing: 0.9,
+                            ),
+                          ),
+                          const SizedBox(height: 6),
+                          nextStepCopy(titleSize: 22, reasonSize: 13),
+                        ],
                       ),
                     ),
-                    const SizedBox(height: 5),
-                    Text(_why, style: const TextStyle(color: _sub, fontSize: 13, height: 1.4)),
                   ],
                 ),
-              ),
-            ],
-          ),
         ),
-        const SizedBox(height: 12),
+        SizedBox(height: compactFirstViewport ? 8 : 12),
         KeyedSubtree(
           key: const ValueKey('la0040-living-next-step-open'),
           child: SizedBox(
@@ -369,7 +417,7 @@ class LivingStudyDeskHome extends StatelessWidget {
               style: FilledButton.styleFrom(
                 backgroundColor: _ink,
                 foregroundColor: Colors.white,
-                minimumSize: const Size.fromHeight(54),
+                minimumSize: Size.fromHeight(compactFirstViewport ? 48 : 54),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               ),
             ),

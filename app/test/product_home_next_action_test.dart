@@ -266,6 +266,41 @@ void main() {
     expect(find.byType(MaterialWorkspaceScreen), findsNothing);
   });
 
+  testWidgets('Home keeps the primary next-action CTA in the first viewport at 320px and 150% text', (tester) async {
+    tester.view.physicalSize = const Size(320, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    final runtime = await _runtimeWithEvidence(
+      disposition: RecallResponseDisposition.answer,
+      submitCorrectAnswer: true,
+    );
+    addTearDown(runtime.close);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        builder: (context, child) => MediaQuery(
+          data: MediaQuery.of(context).copyWith(
+            disableAnimations: true,
+            textScaler: const TextScaler.linear(1.5),
+          ),
+          child: child!,
+        ),
+        home: LivingDeskReviewScope(child: ProductShellScreen(runtime: runtime)),
+      ),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 180));
+
+    final cta = find.byKey(const ValueKey('la0040-living-continue'));
+    expect(cta, findsOneWidget);
+    expect(cta.hitTestable(), findsOneWidget);
+    expect(tester.getBottomRight(cta).dy, lessThanOrEqualTo(844));
+    expect(find.text('Bu tur tamam. Sonra yeniden hatırla.'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('Home prioritizes a material that needs repair over a newer completed material', (tester) async {
     usePhoneViewport(tester);
     final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
