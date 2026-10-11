@@ -154,6 +154,12 @@ class _CompanionViewState extends State<CompanionView> with SingleTickerProvider
                   errorBuilder: (context, error, stackTrace) =>
                       Center(child: Text('Düğüm', style: Theme.of(context).textTheme.titleMedium)),
                 ),
+                if (widget.state != CompanionVisualState.idle)
+                  Positioned(
+                    right: widget.size * 0.035,
+                    bottom: widget.size * 0.035,
+                    child: _CompanionStateBadge(state: widget.state, companionSize: widget.size),
+                  ),
               ],
             ),
           ),
@@ -161,6 +167,50 @@ class _CompanionViewState extends State<CompanionView> with SingleTickerProvider
       ),
     );
   }
+
+class _CompanionStateBadge extends StatelessWidget {
+  const _CompanionStateBadge({required this.state, required this.companionSize});
+
+  final CompanionVisualState state;
+  final double companionSize;
+
+  IconData get _icon => switch (state) {
+    CompanionVisualState.listen => Icons.headphones_rounded,
+    CompanionVisualState.think => Icons.lightbulb_outline_rounded,
+    CompanionVisualState.speak => Icons.graphic_eq_rounded,
+    CompanionVisualState.correct => Icons.check_rounded,
+    CompanionVisualState.success => Icons.star_rounded,
+    CompanionVisualState.idle => Icons.circle,
+  };
+
+  Color get _background => switch (state) {
+    CompanionVisualState.listen => const Color(0xFF0E6F86),
+    CompanionVisualState.think => const Color(0xFF6E58A6),
+    CompanionVisualState.speak => const Color(0xFF315F9D),
+    CompanionVisualState.correct => const Color(0xFFB0692C),
+    CompanionVisualState.success => const Color(0xFF4D7C2D),
+    CompanionVisualState.idle => const Color(0xFF557A67),
+  };
+
+  @override
+  Widget build(BuildContext context) {
+    final badgeSize = (companionSize * 0.27).clamp(16.0, 34.0);
+    return ExcludeSemantics(
+      child: Container(
+        width: badgeSize,
+        height: badgeSize,
+        decoration: BoxDecoration(
+          color: _background,
+          shape: BoxShape.circle,
+          border: Border.all(color: Colors.white, width: (badgeSize * 0.09).clamp(1.5, 2.5)),
+          boxShadow: const [BoxShadow(color: Color(0x22000000), blurRadius: 6, offset: Offset(0, 2))],
+        ),
+        alignment: Alignment.center,
+        child: Icon(_icon, color: Colors.white, size: badgeSize * 0.56),
+      ),
+    );
+  }
+}
 
   static Color _haloColor(CompanionVisualState state) => switch (state) {
     CompanionVisualState.idle => const Color(0xFFBEDDD0),
