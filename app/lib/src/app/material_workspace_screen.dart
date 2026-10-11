@@ -108,7 +108,25 @@ class _MaterialWorkspaceScreenState extends State<MaterialWorkspaceScreen> {
               progress: progress,
               updatedAt: DateTime.now().toUtc(),
             ),
-            onListen: () => _replaceReaderWith(readerContext, ListenScreen(runtime: widget.runtime, materialId: widget.materialId)),
+            onListen: () => _replaceReaderWith(
+              readerContext,
+              Builder(
+                builder: (listenContext) => ListenScreen(
+                  runtime: widget.runtime,
+                  materialId: widget.materialId,
+                  onRecall: () => _replaceReaderWith(
+                    listenContext,
+                    LearningSliceScreen(runtime: widget.runtime, materialId: widget.materialId),
+                  ),
+                  onReadSource: () {
+                    Navigator.of(listenContext).pop();
+                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                      if (mounted) _readCurrentSource();
+                    });
+                  },
+                ),
+              ),
+            ),
             onRecap: () => _replaceReaderWith(
               readerContext,
               QuickRecapScreen(runtime: widget.runtime, materialId: widget.materialId),
