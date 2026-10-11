@@ -7,6 +7,7 @@ import 'app_runtime.dart';
 import 'app_theme.dart';
 import 'companion_view.dart';
 import 'explain_back_screen.dart';
+import 'first_value_intent_surface.dart';
 import 'focus_screen.dart';
 import 'learning_slice_screen.dart';
 import 'la0040_visual_treatments.dart';
@@ -17,10 +18,16 @@ import 'quick_recap_screen.dart';
 import 'source_reader_screen.dart';
 
 class MaterialWorkspaceScreen extends StatefulWidget {
-  const MaterialWorkspaceScreen({required this.runtime, required this.materialId, super.key});
+  const MaterialWorkspaceScreen({
+    required this.runtime,
+    required this.materialId,
+    this.showFirstValueIntent = false,
+    super.key,
+  });
 
   final AppRuntime runtime;
   final MaterialId materialId;
+  final bool showFirstValueIntent;
 
   @override
   State<MaterialWorkspaceScreen> createState() => _MaterialWorkspaceScreenState();
@@ -289,6 +296,7 @@ class _MaterialWorkspaceScreenState extends State<MaterialWorkspaceScreen> {
                 data.continuation?.nextAction.kind == NextLearningActionKind.retryRecallWithoutHint;
             return _WorkspaceBody(
               data: data,
+              showFirstValueIntent: widget.showFirstValueIntent,
               onRecall: () => _openRecall(autoAdvanceContinuation: shouldContinueCurrent),
               onQuickRecap: _openQuickRecap,
               onUpdateSource: _openSourceEditor,
@@ -307,6 +315,7 @@ class _MaterialWorkspaceScreenState extends State<MaterialWorkspaceScreen> {
 class _WorkspaceBody extends StatelessWidget {
   const _WorkspaceBody({
     required this.data,
+    required this.showFirstValueIntent,
     required this.onRecall,
     required this.onQuickRecap,
     required this.onUpdateSource,
@@ -317,6 +326,7 @@ class _WorkspaceBody extends StatelessWidget {
   });
 
   final _WorkspaceSnapshot data;
+  final bool showFirstValueIntent;
   final VoidCallback onRecall;
   final VoidCallback onQuickRecap;
   final VoidCallback onUpdateSource;
@@ -330,6 +340,20 @@ class _WorkspaceBody extends StatelessWidget {
     final theme = Theme.of(context);
     final candidate = LearningVisualTreatmentScope.maybeOf(context);
     if (LivingDeskReviewScope.active(context)) {
+      if (showFirstValueIntent &&
+          data.continuation == null &&
+          data.extracted?.normalizedText.trim().isNotEmpty == true) {
+        return FirstValueIntentSurface(
+          material: data.material,
+          sourceText: data.extracted!.normalizedText,
+          sourceVersion: data.source,
+          onReadSource: onReadSource,
+          onQuickRecap: onQuickRecap,
+          onRecall: onRecall,
+          onListen: onListen,
+          onFocus: onFocus,
+        );
+      }
       return AtelierWorkspace(
         material: data.material,
         sourceText: data.extracted?.normalizedText ?? '',

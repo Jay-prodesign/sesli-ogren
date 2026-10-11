@@ -179,7 +179,7 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
     if (!mounted) return;
     setState(_refresh);
     if (sourceAdded == true) {
-      await _openWorkspace(materialId);
+      await _openWorkspace(materialId, showFirstValueIntent: true);
     }
   }
 
@@ -209,14 +209,18 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
     await _openLearningFor(materialId, autoAdvanceContinuation: continuation != null);
   }
 
-  Future<void> _openWorkspace([MaterialId? materialId]) async {
+  Future<void> _openWorkspace([MaterialId? materialId], {bool showFirstValueIntent = false}) async {
     final selected = materialId ?? (await _snapshot).material?.id;
     if (selected == null || !mounted) return;
     final treatment = LearningVisualTreatmentScope.maybeOf(context);
     await Navigator.of(context).push<void>(
       MaterialPageRoute(
         builder: (_) {
-          final screen = MaterialWorkspaceScreen(runtime: widget.runtime, materialId: selected);
+          final screen = MaterialWorkspaceScreen(
+            runtime: widget.runtime,
+            materialId: selected,
+            showFirstValueIntent: showFirstValueIntent,
+          );
           if (treatment != null) return LearningVisualTreatmentScope(treatment: treatment, child: screen);
           return LivingDeskReviewScope.active(context) ? LivingDeskReviewScope(child: screen) : screen;
         },
