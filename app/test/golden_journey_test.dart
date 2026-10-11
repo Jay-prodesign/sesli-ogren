@@ -116,9 +116,11 @@ void main() {
     expect(find.byKey(const ValueKey('la0040-atelier-workspace')), findsOneWidget);
 
     Navigator.of(tester.element(find.byType(MaterialWorkspaceScreen))).pop();
-    await _pumpUntilFound(tester, find.text('Kendi başına hatırladın'));
+    await _pumpUntilGone(tester, find.byType(MaterialWorkspaceScreen));
+    await _pumpUntilFound(tester, find.text('Çalışma alanına dön'));
 
     expect(find.byType(ProductShellScreen), findsOneWidget);
+    expect(find.text('Kendi başına hatırladın'), findsOneWidget);
     final workspaceReturn = find.text('Çalışma alanına dön');
     await tester.scrollUntilVisible(workspaceReturn, 180, scrollable: find.byType(Scrollable).last);
     await tester.pump();
