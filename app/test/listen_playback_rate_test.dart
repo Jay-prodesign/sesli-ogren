@@ -268,11 +268,17 @@ void main() {
     await _tapVisible(tester, find.text('Dinlemeye başla'));
     await tester.pump();
     expect(firstSpeech.lastRateMultiplier, 1.25);
-    expect(tester.widget<LinearProgressIndicator>(find.byKey(const ValueKey('listen-progress'), skipOffstage: false)).value, 0);
+    expect(
+      tester.widget<LinearProgressIndicator>(find.byKey(const ValueKey('listen-progress'), skipOffstage: false)).value,
+      0,
+    );
 
     firstSpeech.finishCurrentChunk();
     await _pumpUntilFound(tester, find.text('Tüm bölümler dinlendi · Hatırlamayı deneyebilirsin'));
-    expect(tester.widget<LinearProgressIndicator>(find.byKey(const ValueKey('listen-progress'), skipOffstage: false)).value, 1);
+    expect(
+      tester.widget<LinearProgressIndicator>(find.byKey(const ValueKey('listen-progress'), skipOffstage: false)).value,
+      1,
+    );
 
     await tester.pumpWidget(const SizedBox.shrink());
     await tester.pump();
