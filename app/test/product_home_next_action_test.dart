@@ -265,16 +265,8 @@ void main() {
     usePhoneViewport(tester);
     final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
     var now = DateTime.utc(2026, 10, 11, 12);
-    final ingest = SourceIngestService(
-      store: store,
-      pdfTextExtractor: const _UnusedPdfExtractor(),
-      now: () => now,
-    );
-    final recall = RecallLearningService(
-      sourceStore: store,
-      learningStore: store.learningTruthStore(),
-      now: () => now,
-    );
+    final ingest = SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor(), now: () => now);
+    final recall = RecallLearningService(sourceStore: store, learningStore: store.learningTruthStore(), now: () => now);
     final runtime = AppRuntime(
       learner: AppRuntime.localM5LearnerFixture,
       store: store,
