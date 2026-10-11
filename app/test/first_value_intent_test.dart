@@ -62,11 +62,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: LivingDeskReviewScope(
-          child: MaterialWorkspaceScreen(
-            runtime: runtime,
-            materialId: materialId,
-            showFirstValueIntent: true,
-          ),
+          child: MaterialWorkspaceScreen(runtime: runtime, materialId: materialId, showFirstValueIntent: true),
         ),
       ),
     );

@@ -231,10 +231,7 @@ void main() {
       text: 'Fotosentez ışık enerjisini kimyasal enerjiye dönüştürür.',
       sourceName: 'Biyoloji notu',
     );
-    final source = await store.currentSourceVersion(
-      learner: AppRuntime.localM5LearnerFixture,
-      materialId: materialId,
-    );
+    final source = await store.currentSourceVersion(learner: AppRuntime.localM5LearnerFixture, materialId: materialId);
     expect(source, isNotNull);
 
     const serverMaterialId = '88888888-8888-4888-8888-888888888888';
@@ -254,7 +251,11 @@ void main() {
       explainBack: _RecordingExplainBackGateway(kind: ExplainBackEvaluationKind.notEvaluable),
     );
 
-    await tester.pumpWidget(MaterialApp(home: ExplainBackScreen(runtime: runtime, source: source)));
+    await tester.pumpWidget(
+      MaterialApp(
+        home: ExplainBackScreen(runtime: runtime, source: source),
+      ),
+    );
     await tester.enterText(find.byType(TextField), 'Bilmiyorum.');
     await _tapVisible(tester, find.text('Anlatımımı değerlendir'));
     await _pumpUntilFound(tester, find.text('Bu yanıttan güvenilir sonuç çıkaramıyoruz'));

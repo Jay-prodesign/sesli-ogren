@@ -55,12 +55,7 @@ class FirstValueIntentSurface extends StatelessWidget {
             const SizedBox(height: 8),
             Text(
               material.title,
-              style: const TextStyle(
-                color: AtelierStyle.ink,
-                fontSize: 27,
-                height: 1.14,
-                fontWeight: FontWeight.w900,
-              ),
+              style: const TextStyle(color: AtelierStyle.ink, fontSize: 27, height: 1.14, fontWeight: FontWeight.w900),
             ),
             const SizedBox(height: 14),
             AtelierSourceTrustStrip(sourceVersion: sourceVersion),
@@ -77,12 +72,7 @@ class FirstValueIntentSurface extends StatelessWidget {
                 children: [
                   const Text(
                     'Şimdi bununla ne yapmak istiyorsun?',
-                    style: TextStyle(
-                      color: AtelierStyle.ink,
-                      fontSize: 19,
-                      height: 1.25,
-                      fontWeight: FontWeight.w900,
-                    ),
+                    style: TextStyle(color: AtelierStyle.ink, fontSize: 19, height: 1.25, fontWeight: FontWeight.w900),
                   ),
                   const SizedBox(height: 7),
                   const Text(
@@ -125,10 +115,7 @@ class FirstValueIntentSurface extends StatelessWidget {
                     label: Text(recommendedLabel),
                   ),
                   const SizedBox(height: 8),
-                  Text(
-                    recommendation,
-                    style: const TextStyle(color: AtelierStyle.muted, fontSize: 11.5, height: 1.4),
-                  ),
+                  Text(recommendation, style: const TextStyle(color: AtelierStyle.muted, fontSize: 11.5, height: 1.4)),
                 ],
               ),
             ),

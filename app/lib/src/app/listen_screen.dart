@@ -266,8 +266,7 @@ class _ListenScreenState extends State<ListenScreen> {
     } catch (_) {
       if (!mounted) return;
       setState(() {
-        _error =
-            'Kaynak sesi güvenle durdurulamadı. Hatırla açılmadı; sesi durdurup tekrar deneyebilirsin.';
+        _error = 'Kaynak sesi güvenle durdurulamadı. Hatırla açılmadı; sesi durdurup tekrar deneyebilirsin.';
       });
       return;
     }

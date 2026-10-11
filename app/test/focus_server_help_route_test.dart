@@ -84,10 +84,7 @@ void main() {
       text: sourceText,
       sourceName: 'Uzun biyoloji notu',
     );
-    final source = await store.currentSourceVersion(
-      learner: AppRuntime.localM5LearnerFixture,
-      materialId: materialId,
-    );
+    final source = await store.currentSourceVersion(learner: AppRuntime.localM5LearnerFixture, materialId: materialId);
     expect(source, isNotNull);
 
     final runtime = AppRuntime(
@@ -101,12 +98,7 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
-        home: FocusScreen(
-          runtime: runtime,
-          source: source!,
-          sourceText: sourceText,
-          onReadSource: () => readerOpens++,
-        ),
+        home: FocusScreen(runtime: runtime, source: source!, sourceText: sourceText, onReadSource: () => readerOpens++),
       ),
     );
     await tester.pump();

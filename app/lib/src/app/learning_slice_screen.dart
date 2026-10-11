@@ -365,19 +365,17 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
       return 'PDF işlenemedi. Başka bir PDF seçebilir veya aynı bölümü metin olarak yapıştırabilirsin.';
     }
     return switch (error.kind) {
-      SourceIngestFailureKind.emptyPdf => 'Seçtiğin PDF boş görünüyor. Başka bir dosya seç veya metni doğrudan yapıştır.',
+      SourceIngestFailureKind.emptyPdf =>
+        'Seçtiğin PDF boş görünüyor. Başka bir dosya seç veya metni doğrudan yapıştır.',
       SourceIngestFailureKind.pdfTooLarge =>
         'Bu PDF güvenli dosya sınırını aşıyor. Daha küçük bir PDF seç veya çalışacağın bölümü metin olarak yapıştır.',
       SourceIngestFailureKind.invalidPdf =>
         'Bu dosya geçerli bir PDF olarak doğrulanamadı. Başka bir PDF seç veya metni doğrudan yapıştır.',
       SourceIngestFailureKind.pdfPageLimit =>
         'Bu PDF güvenli sayfa sınırını aşıyor. Çalışacağın bölümü daha küçük bir PDF veya metin olarak ekle.',
-      SourceIngestFailureKind.pdfTextLimit =>
-        'Bu PDF’deki seçilebilir metin güvenli işleme sınırını aşıyor. Çalışacağın bölümü daha küçük bir PDF veya metin olarak ekle.',
-      SourceIngestFailureKind.pdfNoExtractableText =>
-        'Bu PDF’de seçilebilir metin bulunamadı. Görüntü taraması/OCR bu sürümde yok; çalışacağın bölümü metin olarak yapıştır.',
-      SourceIngestFailureKind.pdfParseFailure =>
-        'PDF güvenli biçimde açılamadı. Dosya bozuk veya korumalı olabilir; başka bir PDF seç veya metni doğrudan yapıştır.',
+      SourceIngestFailureKind.pdfTextLimit => 'Bu PDF’deki seçilebilir metin güvenli işleme sınırını aşıyor. Çalışacağın bölümü daha küçük bir PDF veya metin olarak ekle.',
+      SourceIngestFailureKind.pdfNoExtractableText => 'Bu PDF’de seçilebilir metin bulunamadı. Görüntü taraması/OCR bu sürümde yok; çalışacağın bölümü metin olarak yapıştır.',
+      SourceIngestFailureKind.pdfParseFailure => 'PDF güvenli biçimde açılamadı. Dosya bozuk veya korumalı olabilir; başka bir PDF seç veya metni doğrudan yapıştır.',
       SourceIngestFailureKind.other =>
         'PDF işlenemedi. Başka bir PDF seçebilir veya aynı bölümü metin olarak yapıştırabilirsin.',
     };

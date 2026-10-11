@@ -49,12 +49,7 @@ class _VisualAccountOverviewGateway implements AccountOverviewGateway {
       AccountUsageEntry(periodStart: DateTime.utc(2026, 10, 11), capability: 'explain', consumed: 3),
       AccountUsageEntry(periodStart: DateTime.utc(2026, 10, 11), capability: 'summary', consumed: 2),
     ],
-    dailyLimits: const {
-      'summary_daily': 20,
-      'explain_daily': 20,
-      'focus_daily': 20,
-      'explain_back_daily': 20,
-    },
+    dailyLimits: const {'summary_daily': 20, 'explain_daily': 20, 'focus_daily': 20, 'explain_back_daily': 20},
   );
 }
 

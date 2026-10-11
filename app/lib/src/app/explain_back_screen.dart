@@ -375,12 +375,7 @@ class _UnavailableResult extends StatelessWidget {
 }
 
 class _EvaluatedResult extends StatelessWidget {
-  const _EvaluatedResult({
-    required this.result,
-    required this.onRetry,
-    required this.onRecall,
-    required this.onBack,
-  });
+  const _EvaluatedResult({required this.result, required this.onRetry, required this.onRecall, required this.onBack});
 
   final ExplainBackEvaluated result;
   final VoidCallback onRetry;

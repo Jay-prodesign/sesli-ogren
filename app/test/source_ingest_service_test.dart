@@ -409,12 +409,7 @@ void main() {
     for (final entry in cases.entries) {
       final typed = SourceIngestService(store: store, pdfTextExtractor: _FailingPdfExtractor(entry.key));
       await expectLater(
-        typed.ingestPdf(
-          learner: learnerA,
-          materialId: material,
-          bytes: bytes,
-          originalName: 'test.pdf',
-        ),
+        typed.ingestPdf(learner: learnerA, materialId: material, bytes: bytes, originalName: 'test.pdf'),
         throwsA(
           isA<SourceIngestException>()
               .having((error) => error.kind, 'kind', entry.value)

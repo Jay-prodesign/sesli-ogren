@@ -62,10 +62,7 @@ class SourceIngestService {
 
   void validatePdfByteSize(int byteSize) {
     if (byteSize <= 0) {
-      throw const SourceIngestException(
-        'PDF cannot be empty.',
-        kind: SourceIngestFailureKind.emptyPdf,
-      );
+      throw const SourceIngestException('PDF cannot be empty.', kind: SourceIngestFailureKind.emptyPdf);
     }
     if (byteSize > maxPdfBytes) {
       throw const SourceIngestException(
@@ -270,10 +267,7 @@ enum SourceIngestFailureKind {
 }
 
 class SourceIngestException implements Exception {
-  const SourceIngestException(
-    this.message, {
-    this.kind = SourceIngestFailureKind.other,
-  });
+  const SourceIngestException(this.message, {this.kind = SourceIngestFailureKind.other});
 
   final String message;
   final SourceIngestFailureKind kind;

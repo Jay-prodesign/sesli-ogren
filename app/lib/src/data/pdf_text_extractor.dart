@@ -90,10 +90,7 @@ class PdfrxPdfTextExtractor implements PdfTextExtractor {
 enum PdfTextExtractionFailureKind { pageLimit, textLimit, noExtractableText, parseFailure }
 
 class PdfTextExtractionException implements Exception {
-  const PdfTextExtractionException(
-    this.message, {
-    this.kind = PdfTextExtractionFailureKind.parseFailure,
-  });
+  const PdfTextExtractionException(this.message, {this.kind = PdfTextExtractionFailureKind.parseFailure});
 
   final String message;
   final PdfTextExtractionFailureKind kind;
