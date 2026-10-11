@@ -339,10 +339,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         builder: (context, child) => MediaQuery(
-          data: MediaQuery.of(context).copyWith(
-            disableAnimations: true,
-            textScaler: const TextScaler.linear(1.6),
-          ),
+          data: MediaQuery.of(context).copyWith(disableAnimations: true, textScaler: const TextScaler.linear(1.6)),
           child: child!,
         ),
         home: LivingDeskReviewScope(child: ProductShellScreen(runtime: runtime)),
