@@ -82,6 +82,15 @@ Future<void> _scrollUntilFound(
   expect(target, findsOneWidget);
 }
 
+Future<void> _tapVisible(WidgetTester tester, Finder finder) async {
+  await tester.ensureVisible(finder.first);
+  for (var i = 0; i < 20 && finder.hitTestable().evaluate().isEmpty; i++) {
+    await tester.pump(const Duration(milliseconds: 20));
+  }
+  expect(finder.hitTestable(), findsWidgets);
+  await tester.tap(finder.hitTestable().first);
+}
+
 void main() {
   sqfliteFfiInit();
 
@@ -147,9 +156,9 @@ void main() {
       return null;
     });
     addTearDown(() => tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, null));
-    await tester.tap(find.text('Diğer araçlar'));
+    await _tapVisible(tester, find.text('Diğer araçlar'));
     await _pumpUntilFound(tester, find.text('Özeti kopyala'));
-    await tester.tap(find.text('Özeti kopyala').hitTestable());
+    await _tapVisible(tester, find.text('Özeti kopyala'));
     await tester.pump();
     await _pumpUntilFound(tester, find.text('Özet panoya kopyalandı'));
     expect(copiedText, contains('Kaynağa bağlı kısa özet.'));
@@ -241,7 +250,7 @@ void main() {
     final recapScroll = find.descendant(of: find.byType(QuickRecapScreen), matching: find.byType(Scrollable));
     final create = find.byKey(const ValueKey('quick-recap-create'));
     await _scrollUntilFound(tester, create, scrollable: recapScroll);
-    await tester.tap(create);
+    await _tapVisible(tester, create);
     await _pumpUntilFound(tester, find.text('Kaynağa bağlı kısa özet.'));
     await _scrollUntilFound(tester, find.byKey(const ValueKey('quick-recap-utility-actions')), scrollable: recapScroll);
 
