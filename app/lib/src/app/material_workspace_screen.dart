@@ -56,7 +56,7 @@ class _MaterialWorkspaceScreenState extends State<MaterialWorkspaceScreen> {
     setState(() => _showFirstValueIntent = false);
   }
 
-  Future<_WorkspaceSnapshot?> _load() async {
+  Future<_WorkspaceSnapshot?> _load({bool retryOnSourceChange = true}) async {
     final material = await widget.runtime.store.material(
       learner: widget.runtime.learner,
       materialId: widget.materialId,
@@ -79,6 +79,16 @@ class _MaterialWorkspaceScreenState extends State<MaterialWorkspaceScreen> {
         learner: widget.runtime.learner,
         materialId: material.id,
       );
+    }
+
+    // Source replacement may land while extraction/continuation is loading.
+    // Do not compose one Workspace from an old source snapshot and newer truth.
+    final currentSource = await widget.runtime.store.currentSourceVersion(
+      learner: widget.runtime.learner,
+      materialId: material.id,
+    );
+    if (currentSource?.identity.sourceVersionId != source.identity.sourceVersionId) {
+      return retryOnSourceChange ? _load(retryOnSourceChange: false) : null;
     }
     return _WorkspaceSnapshot(material: material, source: source, extracted: extracted, continuation: continuation);
   }
@@ -105,6 +115,14 @@ class _MaterialWorkspaceScreenState extends State<MaterialWorkspaceScreen> {
       );
       return;
     }
+    final extracted = data.extracted;
+    if (extracted == null || !extracted.isValid || extracted.normalizedText.trim().isEmpty) {
+      setState(() => _snapshot = _load());
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Bu kaynak için okunabilir güncel metin bulunamadı. Kaynağı kontrol edip tekrar dene.')),
+      );
+      return;
+    }
     final treatment = LearningVisualTreatmentScope.maybeOf(context);
     final livingReview = LivingDeskReviewScope.active(context);
     await Navigator.of(context).push<void>(
@@ -112,7 +130,7 @@ class _MaterialWorkspaceScreenState extends State<MaterialWorkspaceScreen> {
         builder: (readerContext) {
           final screen = SourceReaderScreen(
             title: data.material.title,
-            sourceText: data.extracted?.normalizedText ?? '',
+            sourceText: extracted.normalizedText,
             sourceVersion: data.source,
             initialProgress: initialProgress,
             onProgressChanged: (progress) => widget.runtime.store.saveReaderResumeProgress(

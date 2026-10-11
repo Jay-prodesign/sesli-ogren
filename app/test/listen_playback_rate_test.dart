@@ -89,6 +89,7 @@ class _StopFailingSpeechOutput implements SpeechOutput {
 
 class _RecordingSpeechOutput implements SpeechOutput {
   double? lastRateMultiplier;
+  String? lastText;
   VoidCallback? _onDone;
 
   void finishCurrentChunk() {
@@ -106,6 +107,7 @@ class _RecordingSpeechOutput implements SpeechOutput {
     required ValueChanged<Object> onError,
     double rateMultiplier = 1.0,
   }) async {
+    lastText = text;
     lastRateMultiplier = rateMultiplier;
     _onDone = onDone;
     onStart();
@@ -228,6 +230,46 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Dinlemeyi aç'), findsOneWidget);
+  });
+
+  testWidgets('Listen never starts playback from a superseded source version', (tester) async {
+    final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
+    addTearDown(store.close);
+    final ingest = SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor());
+    const materialId = MaterialId('listen-current-source-guard');
+    await ingest.ingestPastedText(
+      learner: AppRuntime.localM5LearnerFixture,
+      materialId: materialId,
+      text: 'Eski kaynak fotosentezin ışık enerjisini kimyasal enerjiye dönüştürdüğünü anlatır.',
+      sourceName: 'Eski biyoloji notu',
+    );
+    final runtime = AppRuntime(
+      learner: AppRuntime.localM5LearnerFixture,
+      store: store,
+      ingest: ingest,
+      recall: RecallLearningService(sourceStore: store, learningStore: store.learningTruthStore()),
+      telemetry: store.operationalTelemetry(),
+    );
+    final speech = _RecordingSpeechOutput();
+
+    await tester.pumpWidget(
+      MaterialApp(home: ListenScreen(runtime: runtime, materialId: materialId, speechOutput: speech)),
+    );
+    await _pumpUntilFound(tester, find.textContaining('Eski kaynak fotosentezin'));
+
+    await ingest.ingestPastedText(
+      learner: AppRuntime.localM5LearnerFixture,
+      materialId: materialId,
+      text: 'Yeni kaynak mitokondrinin hücresel solunum sırasında enerji üretimine katkısını anlatır.',
+      sourceName: 'Yeni biyoloji notu',
+    );
+
+    await _tapVisible(tester, find.text('Dinlemeye başla'));
+    await _pumpUntilFound(tester, find.textContaining('Yeni kaynak mitokondrinin'));
+
+    expect(speech.lastText, isNull);
+    expect(find.textContaining('Eski kaynak fotosentezin'), findsNothing);
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('Listen persists playback speed and passes it to device speech', (tester) async {

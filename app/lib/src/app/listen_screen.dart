@@ -55,7 +55,7 @@ class _ListenScreenState extends State<ListenScreen> {
     _source = _load();
   }
 
-  Future<_ListenSource?> _load() async {
+  Future<_ListenSource?> _load({bool retryOnSourceChange = true}) async {
     final version = await widget.runtime.store.currentSourceVersion(
       learner: widget.runtime.learner,
       materialId: widget.materialId,
@@ -88,6 +88,13 @@ class _ListenScreenState extends State<ListenScreen> {
         : 0;
     final resumeChunk = storedResume >= 0 && storedResume < chunks.length ? storedResume : 0;
     final playbackRate = await widget.runtime.store.listenRate(learner: widget.runtime.learner);
+    final currentVersion = await widget.runtime.store.currentSourceVersion(
+      learner: widget.runtime.learner,
+      materialId: widget.materialId,
+    );
+    if (currentVersion?.identity.sourceVersionId != version.identity.sourceVersionId) {
+      return retryOnSourceChange ? _load(retryOnSourceChange: false) : null;
+    }
     return _ListenSource(
       name: widget.titleOverride?.trim().isNotEmpty == true ? widget.titleOverride!.trim() : version.sourceName,
       text: text,
@@ -99,6 +106,43 @@ class _ListenScreenState extends State<ListenScreen> {
   }
 
   Future<void> _play(_ListenSource source, {int? fromChunk}) async {
+    if (_startingPlayback || _speaking) return;
+    setState(() {
+      _error = null;
+      _startingPlayback = true;
+      _speaking = false;
+      _finishedListening = false;
+    });
+
+    SourceVersionRecord? currentVersion;
+    try {
+      currentVersion = await widget.runtime.store.currentSourceVersion(
+        learner: widget.runtime.learner,
+        materialId: widget.materialId,
+      );
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        _startingPlayback = false;
+        _error =
+            'Güncel kaynak doğrulanamadı. Eski bir metni oynatmamak için dinleme başlatılmadı; tekrar deneyebilirsin.';
+      });
+      return;
+    }
+    if (!mounted) return;
+    if (currentVersion?.identity.sourceVersionId != source.sourceVersion.identity.sourceVersionId) {
+      setState(() {
+        _startingPlayback = false;
+        _speaking = false;
+        _resumeChunkOverride = null;
+        _currentChunkIndex = 0;
+        _finishedListening = false;
+        _source = _load();
+        _error = 'Kaynak güncellendi. Eski sürüm oynatılmadı; güncel sürüm yeniden yükleniyor.';
+      });
+      return;
+    }
+
     final start = fromChunk ?? _resumeChunkOverride ?? source.resumeChunk;
     final safeStart = start >= 0 && start < source.chunks.length ? start : 0;
     final rate = _playbackRate ?? source.playbackRate;
