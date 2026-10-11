@@ -378,10 +378,7 @@ class LivingStudyDeskHome extends StatelessWidget {
               : Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    SizedBox(
-                      width: 62,
-                      child: CompanionView(state: companionState, size: 60),
-                    ),
+                    SizedBox(width: 62, child: CompanionView(state: companionState, size: 60)),
                     const SizedBox(width: 9),
                     Expanded(
                       child: Column(
