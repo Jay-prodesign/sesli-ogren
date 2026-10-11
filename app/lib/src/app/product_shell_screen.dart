@@ -179,7 +179,7 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
     if (!mounted) return;
     setState(_refresh);
     if (sourceAdded == true) {
-      await _openWorkspace(materialId, showFirstValueIntent: true);
+      await _openWorkspace(materialId, true);
     }
   }
 
@@ -209,7 +209,7 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
     await _openLearningFor(materialId, autoAdvanceContinuation: continuation != null);
   }
 
-  Future<void> _openWorkspace([MaterialId? materialId], {bool showFirstValueIntent = false}) async {
+  Future<void> _openWorkspace([MaterialId? materialId, bool showFirstValueIntent = false]) async {
     final selected = materialId ?? (await _snapshot).material?.id;
     if (selected == null || !mounted) return;
     final treatment = LearningVisualTreatmentScope.maybeOf(context);
