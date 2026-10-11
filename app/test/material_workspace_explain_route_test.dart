@@ -31,6 +31,19 @@ Future<void> _pumpUntilFound(WidgetTester tester, Finder finder, {int maxPumps =
   fail('Expected workspace widget was not reached within bounded pumps.');
 }
 
+Future<void> _scrollUntilFound(
+  WidgetTester tester,
+  Finder target, {
+  required Finder scrollable,
+  int maxDrags = 12,
+}) async {
+  for (var i = 0; i < maxDrags && target.evaluate().isEmpty; i++) {
+    await tester.drag(scrollable, const Offset(0, -180));
+    await tester.pump();
+  }
+  expect(target, findsOneWidget);
+}
+
 Future<void> _tapVisible(WidgetTester tester, Finder finder) async {
   await tester.ensureVisible(finder);
   await tester.pump();
@@ -144,13 +157,20 @@ void main() {
         ),
       ),
     );
-    await _pumpUntilFound(tester, find.byKey(const ValueKey('first-value-intent')));
-    await _tapVisible(tester, find.text('Kaynağı aç'));
+    final firstIntent = find.byKey(const ValueKey('first-value-intent'));
+    await _pumpUntilFound(tester, firstIntent);
+    final intentScroll = find.descendant(of: firstIntent, matching: find.byType(Scrollable));
+    final openSource = find.byKey(const ValueKey('first-intent-recommend'));
+    await _scrollUntilFound(tester, openSource, scrollable: intentScroll);
+    await _tapVisible(tester, openSource);
     await _pumpUntilFound(tester, find.byType(SourceReaderScreen));
     Navigator.of(tester.element(find.byType(SourceReaderScreen))).pop();
-    await _pumpUntilFound(tester, find.text('Diğer yollar'));
+    await _pumpUntilFound(tester, find.byType(MaterialWorkspaceScreen));
 
-    await _tapVisible(tester, find.text('Diğer yollar'));
+    final workspaceScroll = find.descendant(of: find.byType(MaterialWorkspaceScreen), matching: find.byType(Scrollable));
+    final otherPaths = find.text('Diğer yollar');
+    await _scrollUntilFound(tester, otherPaths, scrollable: workspaceScroll);
+    await _tapVisible(tester, otherPaths);
     await _pumpUntilFound(tester, find.byKey(const ValueKey('workspace-other-study-paths-scroll')));
 
     expect(find.byKey(const ValueKey('workspace-other-study-paths-scroll')), findsOneWidget);
