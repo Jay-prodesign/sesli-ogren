@@ -167,7 +167,10 @@ void main() {
     Navigator.of(tester.element(find.byType(SourceReaderScreen))).pop();
     await _pumpUntilFound(tester, find.byType(MaterialWorkspaceScreen));
 
-    final workspaceScroll = find.descendant(of: find.byType(MaterialWorkspaceScreen), matching: find.byType(Scrollable));
+    final workspaceScroll = find.descendant(
+      of: find.byType(MaterialWorkspaceScreen),
+      matching: find.byType(Scrollable),
+    );
     final otherPaths = find.text('Diğer yollar');
     await _scrollUntilFound(tester, otherPaths, scrollable: workspaceScroll);
     await _tapVisible(tester, otherPaths);
