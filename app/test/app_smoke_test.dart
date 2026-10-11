@@ -804,31 +804,31 @@ void main() {
       MaterialApp(
         home: MediaQuery(
           data: const MediaQueryData(disableAnimations: true),
-          child: ProductShellScreen(runtime: runtime),
+          child: LivingDeskReviewScope(child: ProductShellScreen(runtime: runtime)),
         ),
       ),
     );
-    await pumpUntilFound(tester, find.text('KALDIĞIN MATERYAL'));
+    await pumpUntilFound(tester, find.byKey(const ValueKey('la0040-living-home-populated')));
 
     expect(find.text('Kütüphane'), findsOneWidget);
-    expect(find.byKey(const ValueKey('home-continuation-hero')), findsOneWidget);
-    expect(find.text('KALDIĞIN MATERYAL'), findsOneWidget);
     expect(find.text('Fotosentez çalışma notu'), findsWidgets);
+    final materialCard = find.byKey(const ValueKey('la0040-living-material-open'));
+    expect(materialCard, findsOneWidget);
+    await tapVisible(tester, materialCard);
 
-    await tapVisible(tester, find.text('Fotosentez çalışma notu').last);
-    await pumpUntilFound(tester, find.byKey(const ValueKey('first-value-intent')));
-    await tapVisible(tester, find.text('Kaynağı aç'));
-    await pumpUntilFound(tester, find.byType(SourceReaderScreen));
-    Navigator.of(tester.element(find.byType(SourceReaderScreen))).pop();
     await pumpUntilFound(tester, find.byType(MaterialWorkspaceScreen));
-    await pumpUntilFound(tester, find.text('Öğrenme durumu'));
+    await pumpUntilFound(tester, find.byKey(const ValueKey('la0040-atelier-workspace')));
+    expect(LivingDeskReviewScope.active(tester.element(find.byType(MaterialWorkspaceScreen))), isTrue);
+    expect(find.text('Fotosentez çalışma notu'), findsWidgets);
+    expect(find.byKey(const ValueKey('la0040-atelier-workspace-reader')), findsOneWidget);
 
-    expect(find.text('Öğrenme durumu'), findsOneWidget);
-    expect(find.text('Henüz ölçülmedi'), findsWidgets);
-    expect(find.text('SIRADAKİ ADIM'), findsOneWidget);
-    expect(find.text('Hatırla ile devam'), findsOneWidget);
+    Finder workspaceScroll() =>
+        find.descendant(of: find.byType(MaterialWorkspaceScreen), matching: find.byType(Scrollable));
 
-    await tapVisible(tester, find.text('Odaklan').last);
+    await scrollUntilFound(tester, find.text('Diğer yollar'), scrollable: workspaceScroll());
+    await tapVisible(tester, find.text('Diğer yollar'));
+    await pumpUntilFound(tester, find.byKey(const ValueKey('workspace-other-study-paths-scroll')));
+    await tapVisible(tester, find.text('Odaklan'));
     await pumpUntilFound(tester, find.text('KISA ODAK · 3 ADIM'));
     expect(find.byKey(const ValueKey('focus-source-trust')), findsOneWidget);
     expect(find.text('Fotosentez çalışma notu'), findsWidgets);
@@ -840,29 +840,38 @@ void main() {
     await pumpUntilFound(tester, find.textContaining('öğrenme kanıtı oluşturmaz'));
     Navigator.of(tester.element(find.textContaining('öğrenme kanıtı oluşturmaz'))).pop();
     await pumpUntilFound(tester, find.byType(MaterialWorkspaceScreen));
-    expect(find.text('Kaynağa hızlı bakış'), findsOneWidget);
-    await tapVisible(tester, find.text('Açıkla'));
+
+    await scrollUntilFound(tester, find.text('Diğer yollar'), scrollable: workspaceScroll());
+    await tapVisible(tester, find.text('Diğer yollar'));
+    await pumpUntilFound(tester, find.byKey(const ValueKey('workspace-other-study-paths-scroll')));
+    await tapVisible(tester, find.text('Kendi cümlelerimle anlat'));
     await pumpUntilFound(tester, find.text('Anlatımımı değerlendir'));
+
     expect(find.text('Kendi cümlelerinle anlat'), findsOneWidget);
     expect(find.textContaining('öğrenme kanıtı veya ustalık iddiası oluşturmaz'), findsOneWidget);
     expect(find.text('Kaynağına dayalı açıklama'), findsNothing);
+
     Navigator.of(tester.element(find.text('Anlatımımı değerlendir'))).pop();
-    await tester.pump(const Duration(milliseconds: 300));
-    expect(find.text('Hatırla'), findsWidgets);
-    expect(find.text('Dinle'), findsOneWidget);
+    await pumpUntilFound(tester, find.byType(MaterialWorkspaceScreen));
+    await scrollUntilFound(
+      tester,
+      find.byKey(const ValueKey('la0040-atelier-workspace-listen')),
+      scrollable: workspaceScroll(),
+    );
+    expect(find.byKey(const ValueKey('la0040-atelier-workspace-listen')), findsOneWidget);
+    expect(tester.takeException(), isNull);
   });
 
-  testWidgets('Home resumes the most recently studied material, not merely the newest upload', (tester) async {
+  testWidgets('Home resumes an active Reader checkpoint ahead of a newer untouched upload', (tester) async {
     final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
     addTearDown(store.close);
     var now = DateTime.utc(2026, 10, 6, 9);
     final ingest = SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor(), now: () => now);
-    final recall = RecallLearningService(sourceStore: store, learningStore: store.learningTruthStore(), now: () => now);
     final runtime = AppRuntime(
       learner: AppRuntime.localM5LearnerFixture,
       store: store,
       ingest: ingest,
-      recall: recall,
+      recall: RecallLearningService(sourceStore: store, learningStore: store.learningTruthStore(), now: () => now),
       telemetry: store.operationalTelemetry(),
     );
 
@@ -873,6 +882,9 @@ void main() {
       text: 'Eski materyal için yeterince uzun ve anlamlı bir çalışma metni.',
       sourceName: 'Eski materyal',
     );
+    final olderSource = await store.currentSourceVersion(learner: runtime.learner, materialId: olderId);
+    expect(olderSource, isNotNull);
+
     now = DateTime.utc(2026, 10, 6, 10);
     await ingest.ingestPastedText(
       learner: runtime.learner,
@@ -881,25 +893,31 @@ void main() {
       sourceName: 'Yeni materyal',
     );
 
-    now = DateTime.utc(2026, 10, 6, 11);
-    final prompt = await recall.createCurrentPrompt(learner: runtime.learner, materialId: olderId);
-    final session = await recall.openAttempt(learner: runtime.learner, actionId: prompt.id);
-    final action = await store.learningTruthStore().recallAction(learner: runtime.learner, actionId: prompt.id);
-    await recall.submit(
+    await store.saveReaderResumeProgress(
       learner: runtime.learner,
-      actionId: prompt.id,
-      attemptId: session.attempt.attemptId,
-      disposition: RecallResponseDisposition.answer,
-      answer: action!.expectedAnswer,
+      materialId: olderId,
+      sourceVersionId: olderSource!.identity.sourceVersionId,
+      progress: 0.46,
+      updatedAt: DateTime.utc(2026, 10, 6, 11),
     );
 
-    await tester.pumpWidget(MaterialApp(home: ProductShellScreen(runtime: runtime)));
-    await pumpUntilFound(tester, find.text('KALDIĞIN MATERYAL'));
-    await tapVisible(tester, find.text('Çalışma alanına dön'));
-    await pumpUntilFound(tester, find.text('Eski materyal'));
+    await tester.pumpWidget(
+      MaterialApp(
+        home: LivingDeskReviewScope(child: ProductShellScreen(runtime: runtime)),
+      ),
+    );
+    await pumpUntilFound(tester, find.text('Okumaya kaldığın yerden devam et'));
 
+    final activeMaterialCard = find.byKey(const ValueKey('la0040-living-material-open'));
+    expect(find.descendant(of: activeMaterialCard, matching: find.text('Eski materyal')), findsOneWidget);
+    expect(find.descendant(of: activeMaterialCard, matching: find.text('Yeni materyal')), findsNothing);
+    expect(find.text('Yeni materyal'), findsOneWidget);
+
+    await tapVisible(tester, find.text('Okumaya devam et'));
+    await pumpUntilFound(tester, find.byType(SourceReaderScreen));
     expect(find.text('Eski materyal'), findsWidgets);
     expect(find.text('Yeni materyal'), findsNothing);
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('durable Listen checkpoint resumes across Home, Library and Progress without creating mastery', (
@@ -1721,16 +1739,21 @@ void main() {
       sourceName: 'Biyoloji notu',
     );
 
-    await tester.pumpWidget(MaterialApp(home: ProductShellScreen(runtime: runtime)));
-    await pumpUntilFound(tester, find.text('Biyoloji notu'));
-    await tapVisible(tester, find.text('Biyoloji notu').last);
-    await pumpUntilFound(tester, find.byKey(const ValueKey('first-value-intent')));
-    await tapVisible(tester, find.text('Kaynağı aç'));
-    await pumpUntilFound(tester, find.byType(SourceReaderScreen));
-    Navigator.of(tester.element(find.byType(SourceReaderScreen))).pop();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: LivingDeskReviewScope(child: ProductShellScreen(runtime: runtime)),
+      ),
+    );
+    await pumpUntilFound(tester, find.byKey(const ValueKey('la0040-living-home-populated')));
+    await tapVisible(tester, find.byKey(const ValueKey('la0040-living-material-open')));
     await pumpUntilFound(tester, find.byType(MaterialWorkspaceScreen));
-    await pumpUntilFound(tester, find.text('Açıkla'));
-    await tapVisible(tester, find.text('Açıkla'));
+
+    final workspaceScroll =
+        find.descendant(of: find.byType(MaterialWorkspaceScreen), matching: find.byType(Scrollable));
+    await scrollUntilFound(tester, find.text('Diğer yollar'), scrollable: workspaceScroll);
+    await tapVisible(tester, find.text('Diğer yollar'));
+    await pumpUntilFound(tester, find.byKey(const ValueKey('workspace-other-study-paths-scroll')));
+    await tapVisible(tester, find.text('Kendi cümlelerimle anlat'));
     await pumpUntilFound(tester, find.text('Anlatımımı değerlendir'));
 
     expect(find.text('Kendi cümlelerinle anlat'), findsOneWidget);
@@ -1740,6 +1763,7 @@ void main() {
     await tester.enterText(find.byType(TextField), 'Fotosentez ışık enerjisini kimyasal enerjiye dönüştürür.');
     await tapVisible(tester, find.text('Anlatımımı değerlendir'));
     await pumpUntilFound(tester, find.text('Henüz güvenilir değerlendirme yok'));
+    await tester.pump();
 
     expect(find.textContaining('öğrenme kanıtı olarak kaydetmiyoruz'), findsOneWidget);
     expect(find.bySemanticsLabel('Düğüm düşünüyor'), findsOneWidget);
