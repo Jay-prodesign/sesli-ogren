@@ -489,7 +489,7 @@ class _WorkspaceBody extends StatelessWidget {
         const SizedBox(height: 24),
         Text('Öğrenme durumu', style: theme.textTheme.titleMedium),
         const SizedBox(height: 10),
-        _LearningStatusCard(continuation: data.continuation, onRecall: onRecall),
+        _LearningStatusCard(continuation: data.continuation, onRecall: onRecall, onReadSource: onReadSource),
         const SizedBox(height: 24),
         Row(
           children: [
@@ -683,15 +683,19 @@ class _WorkspaceBody extends StatelessWidget {
 }
 
 class _LearningStatusCard extends StatelessWidget {
-  const _LearningStatusCard({required this.continuation, required this.onRecall});
+  const _LearningStatusCard({required this.continuation, required this.onRecall, required this.onReadSource});
 
   final LearningContinuation? continuation;
   final VoidCallback onRecall;
+  final VoidCallback onReadSource;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final state = continuation?.state.kind;
+    final nextKind = continuation?.nextAction.kind;
+    final reviewFirst = nextKind == NextLearningActionKind.reviewSourceThenRecall;
+    final waitUntilLater = nextKind == NextLearningActionKind.repeatRecallLater;
     final (title, body) = switch (state) {
       RecallStateKind.retrievedOnce => (
         'Bir kez bağımsız hatırlandı',
@@ -758,9 +762,9 @@ class _LearningStatusCard extends StatelessWidget {
             const SizedBox(height: 18),
             FilledButton.icon(
               style: FilledButton.styleFrom(backgroundColor: Colors.white, foregroundColor: AppPalette.primaryDark),
-              onPressed: onRecall,
-              icon: const Icon(Icons.psychology_alt_rounded),
-              label: const Text('Hatırla ile devam'),
+              onPressed: reviewFirst || waitUntilLater ? onReadSource : onRecall,
+              icon: Icon(reviewFirst || waitUntilLater ? Icons.menu_book_outlined : Icons.psychology_alt_rounded),
+              label: Text(reviewFirst ? 'Önce kaynağı gözden geçir' : waitUntilLater ? 'Kaynağa dön' : 'Hatırla ile devam'),
             ),
           ],
         ),
