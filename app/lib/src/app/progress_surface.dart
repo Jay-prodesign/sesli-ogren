@@ -52,102 +52,47 @@ class ProgressSurface extends StatelessWidget {
     return ListView(
       padding: const EdgeInsets.fromLTRB(20, 24, 20, 32),
       children: [
-        if (living)
-          DecoratedBox(
-            decoration: BoxDecoration(
-              color: AtelierStyle.focus,
-              borderRadius: BorderRadius.circular(26),
-              boxShadow: const [BoxShadow(color: Color(0x1A14224A), blurRadius: 26, offset: Offset(0, 13))],
-            ),
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(18, 17, 18, 18),
-              child: LayoutBuilder(
-                builder: (context, constraints) {
-                  final stackHeader = constraints.maxWidth < 340 || MediaQuery.textScalerOf(context).scale(16) >= 22;
-                  final copy = Column(
-                    key: stackHeader ? const ValueKey('progress-header-stacked') : null,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'HATIRLAMA GEÇMİŞİN',
-                        style: TextStyle(
-                          color: AtelierStyle.mark,
-                          fontSize: 10,
-                          fontWeight: FontWeight.w900,
-                          letterSpacing: 0.9,
-                        ),
-                      ),
-                      const SizedBox(height: 7),
-                      Text(
-                        'İlerleme',
-                        style: theme.textTheme.headlineMedium?.copyWith(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w900,
-                        ),
-                      ),
-                      const SizedBox(height: 7),
-                      Text(
-                        'Buradaki durumlar yalnız kaynağa bakmadan yaptığın Hatırla denemelerinden gelir.',
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          color: Colors.white.withValues(alpha: 0.78),
-                          height: 1.4,
-                        ),
-                      ),
-                    ],
-                  );
-                  final badge = DecoratedBox(
-                    decoration: BoxDecoration(color: AtelierStyle.mark, borderRadius: BorderRadius.circular(999)),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                      child: Text(
-                        'KANITA DAYALI',
-                        style: theme.textTheme.labelSmall?.copyWith(
-                          color: AtelierStyle.focus,
-                          fontWeight: FontWeight.w900,
-                          letterSpacing: 0.45,
-                        ),
-                      ),
-                    ),
-                  );
-                  if (stackHeader) {
-                    return Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [copy, const SizedBox(height: 12), badge],
-                    );
-                  }
-                  return Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Expanded(child: copy),
-                      const SizedBox(width: 12),
-                      badge,
-                    ],
-                  );
-                },
-              ),
-            ),
-          )
-        else ...[
-          Text('İlerleme', style: theme.textTheme.headlineMedium),
-          const SizedBox(height: 8),
-          Text(
-            'Buradaki durumlar yalnız kaynağa bakmadan yaptığın Hatırla denemelerinden gelir.',
-            style: theme.textTheme.bodyMedium?.copyWith(color: muted),
+        Text(
+          'HATIRLAMA GEÇMİŞİN',
+          style: theme.textTheme.labelSmall?.copyWith(
+            color: accent,
+            fontWeight: FontWeight.w900,
+            letterSpacing: 0.9,
           ),
-        ],
+        ),
+        const SizedBox(height: 7),
+        Text(
+          'İlerleme',
+          style: theme.textTheme.headlineMedium?.copyWith(
+            color: ink,
+            fontWeight: living ? FontWeight.w900 : null,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          'Burada yalnız kendi başına yaptığın Hatırla denemelerinin kanıtı görünür.',
+          style: theme.textTheme.bodyMedium?.copyWith(color: muted, height: 1.42),
+        ),
         const SizedBox(height: 13),
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Icon(Icons.verified_outlined, color: accent, size: 18),
-            const SizedBox(width: 8),
-            Expanded(
-              child: Text(
-                'Okumak ve dinlemek hazırlanmandır; ilerlemeyi aktif hatırlama değiştirir.',
-                style: theme.textTheme.bodySmall?.copyWith(color: muted, height: 1.4),
+        Container(
+          padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
+          decoration: BoxDecoration(
+            color: living ? AtelierStyle.pulseSoft : theme.colorScheme.surfaceContainerLow,
+            borderRadius: BorderRadius.circular(14),
+          ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Icon(Icons.verified_outlined, color: accent, size: 18),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  'Okumak ve dinlemek hazırlıktır; öğrenme durumunu aktif hatırlama değiştirir.',
+                  style: theme.textTheme.bodySmall?.copyWith(color: muted, height: 1.4),
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
         const SizedBox(height: 24),
         if (items.isEmpty)
@@ -156,9 +101,7 @@ class ProgressSurface extends StatelessWidget {
             decoration: BoxDecoration(
               color: living ? AtelierStyle.paper : theme.colorScheme.surface,
               borderRadius: BorderRadius.circular(20),
-              boxShadow: living
-                  ? const [BoxShadow(color: Color(0x0D14224A), blurRadius: 18, offset: Offset(0, 8))]
-                  : null,
+              border: living ? const Border(left: BorderSide(color: AtelierStyle.pulse, width: 4)) : null,
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -166,7 +109,7 @@ class ProgressSurface extends StatelessWidget {
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    const CompanionView(state: CompanionVisualState.idle, size: 64),
+                    const CompanionView(state: CompanionVisualState.idle, size: 58),
                     const SizedBox(width: 13),
                     Expanded(
                       child: Column(
@@ -178,7 +121,7 @@ class ProgressSurface extends StatelessWidget {
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            'Bir kaynak ekle; sonra kaynağı kapatıp Hatırla ile ilk gerçek denemeni yap.',
+                            'Bir kaynak ekle; sonra kaynağı kapatıp ilk gerçek denemeni yap.',
                             style: theme.textTheme.bodySmall?.copyWith(color: muted, height: 1.4),
                           ),
                         ],
@@ -322,7 +265,7 @@ class _ProgressCard extends StatelessWidget {
             ),
             DecoratedBox(
               decoration: BoxDecoration(
-                color: living ? AtelierStyle.focus : AppPalette.primaryDark,
+                color: living ? AppPalette.primarySoft : AppPalette.primaryDark,
                 borderRadius: const BorderRadius.vertical(bottom: Radius.circular(18)),
               ),
               child: Padding(
@@ -332,12 +275,12 @@ class _ProgressCard extends StatelessWidget {
                   children: [
                     DecoratedBox(
                       decoration: BoxDecoration(
-                        color: living ? AtelierStyle.mark : AppPalette.momentum,
+                        color: living ? AtelierStyle.pulse : AppPalette.momentum,
                         borderRadius: BorderRadius.circular(999),
                       ),
                       child: Padding(
                         padding: const EdgeInsets.all(6),
-                        child: Icon(actionIcon, color: living ? AtelierStyle.ink : AppPalette.momentumInk, size: 16),
+                        child: Icon(actionIcon, color: living ? Colors.white : AppPalette.momentumInk, size: 16),
                       ),
                     ),
                     const SizedBox(width: 9),
@@ -348,7 +291,7 @@ class _ProgressCard extends StatelessWidget {
                           Text(
                             actionLabel,
                             style: theme.textTheme.labelMedium?.copyWith(
-                              color: Colors.white,
+                              color: living ? AtelierStyle.ink : Colors.white,
                               fontWeight: FontWeight.w900,
                             ),
                           ),
@@ -356,7 +299,7 @@ class _ProgressCard extends StatelessWidget {
                           Text(
                             reason,
                             key: ValueKey('progress-next-reason-${item.material.id.value}'),
-                            style: theme.textTheme.bodySmall?.copyWith(color: Colors.white, height: 1.4),
+                            style: theme.textTheme.bodySmall?.copyWith(color: living ? AtelierStyle.muted : Colors.white, height: 1.4),
                           ),
                         ],
                       ),

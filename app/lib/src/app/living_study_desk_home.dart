@@ -534,9 +534,8 @@ class LivingStudyDeskHome extends StatelessWidget {
         width: compact ? 58 : 84,
         height: compact ? 58 : 84,
         decoration: BoxDecoration(
-          color: _focus,
-          borderRadius: BorderRadius.circular(compact ? 18 : 24),
-          border: Border.all(color: AppPalette.primary),
+          color: AppPalette.primarySoft,
+          borderRadius: BorderRadius.circular(compact ? 16 : 20),
         ),
         child: Center(
           child: CompanionView(state: CompanionVisualState.idle, size: compact ? 52 : 74),
@@ -547,13 +546,13 @@ class LivingStudyDeskHome extends StatelessWidget {
         children: [
           const Text(
             'İLK OTURUM',
-            style: TextStyle(color: _mark, fontSize: 10, fontWeight: FontWeight.w900, letterSpacing: 1),
+            style: TextStyle(color: _accent, fontSize: 10, fontWeight: FontWeight.w900, letterSpacing: 1),
           ),
           const SizedBox(height: 8),
           Text(
             'Bir sayfa getir.\nBirlikte çalışalım.',
             style: TextStyle(
-              color: Colors.white,
+              color: _ink,
               fontSize: compact ? 25 : 32,
               height: 1.05,
               fontWeight: FontWeight.w900,
@@ -563,7 +562,7 @@ class LivingStudyDeskHome extends StatelessWidget {
           const SizedBox(height: 10),
           const Text(
             'PDF ya da metin. Sonra kaynağı kapatıp neyi gerçekten hatırladığını gör.',
-            style: TextStyle(color: Color(0xFFD6DDF0), fontSize: 14, height: 1.45),
+            style: TextStyle(color: _sub, fontSize: 14, height: 1.45),
           ),
         ],
       );
@@ -575,9 +574,10 @@ class LivingStudyDeskHome extends StatelessWidget {
             width: double.infinity,
             padding: EdgeInsets.fromLTRB(20, compact ? 18 : 20, 20, 20),
             decoration: BoxDecoration(
-              color: _focus,
-              borderRadius: BorderRadius.circular(26),
-              boxShadow: const [BoxShadow(color: Color(0x1A14224A), blurRadius: 30, offset: Offset(0, 16))],
+              color: _paper,
+              borderRadius: BorderRadius.circular(24),
+              border: const Border(left: BorderSide(color: _accent, width: 4)),
+              boxShadow: const [BoxShadow(color: Color(0x1014224A), blurRadius: 24, offset: Offset(0, 10))],
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,

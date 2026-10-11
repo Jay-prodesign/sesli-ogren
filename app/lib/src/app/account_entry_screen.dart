@@ -185,9 +185,10 @@ class _AccountEntryScreenState extends State<AccountEntryScreen> {
                   Container(
                     padding: const EdgeInsets.fromLTRB(22, 22, 18, 22),
                     decoration: BoxDecoration(
-                      color: AtelierStyle.focus,
-                      borderRadius: BorderRadius.circular(26),
-                      boxShadow: const [BoxShadow(color: Color(0x1A14224A), blurRadius: 30, offset: Offset(0, 16))],
+                      color: AtelierStyle.paper,
+                      borderRadius: BorderRadius.circular(24),
+                      border: const Border(left: BorderSide(color: AtelierStyle.pulse, width: 4)),
+                      boxShadow: const [BoxShadow(color: Color(0x1014224A), blurRadius: 24, offset: Offset(0, 10))],
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -195,7 +196,7 @@ class _AccountEntryScreenState extends State<AccountEntryScreen> {
                         const Text(
                           'KAYNAĞINLA ÇALIŞ · GERÇEKTEN HATIRLA',
                           style: TextStyle(
-                            color: AtelierStyle.mark,
+                            color: AtelierStyle.pulse,
                             fontSize: 10,
                             fontWeight: FontWeight.w900,
                             letterSpacing: 1,
@@ -209,7 +210,7 @@ class _AccountEntryScreenState extends State<AccountEntryScreen> {
                             const headline = Text(
                               'Kaynağını getir.\nGerçekten hatırla.',
                               style: TextStyle(
-                                color: Colors.white,
+                                color: AtelierStyle.ink,
                                 fontSize: 29,
                                 height: 1.06,
                                 fontWeight: FontWeight.w900,
@@ -240,7 +241,7 @@ class _AccountEntryScreenState extends State<AccountEntryScreen> {
                         const SizedBox(height: 10),
                         const Text(
                           'Sesli Öğren kaynağını açık tutar, sonra onu kapatıp neyi kendi başına hatırladığını görmeni sağlar.',
-                          style: TextStyle(color: Color(0xFFD6DDF0), fontSize: 14, height: 1.45),
+                          style: TextStyle(color: AtelierStyle.muted, fontSize: 14, height: 1.45),
                         ),
                         const SizedBox(height: 18),
                         LayoutBuilder(
@@ -412,7 +413,7 @@ class _EntryJourneyStep extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Column(
     children: [
-      Icon(icon, color: AtelierStyle.mark, size: 19),
+      Icon(icon, color: AtelierStyle.pulse, size: 19),
       const SizedBox(height: 6),
       Text(
         label,
@@ -420,7 +421,7 @@ class _EntryJourneyStep extends StatelessWidget {
         maxLines: 1,
         overflow: TextOverflow.fade,
         softWrap: false,
-        style: const TextStyle(color: Colors.white, fontSize: 8, fontWeight: FontWeight.w900, letterSpacing: 0.4),
+        style: const TextStyle(color: AtelierStyle.ink, fontSize: 8, fontWeight: FontWeight.w900, letterSpacing: 0.4),
       ),
     ],
   );
@@ -432,7 +433,7 @@ class _EntryJourneyArrow extends StatelessWidget {
   @override
   Widget build(BuildContext context) => const Padding(
     padding: EdgeInsets.only(top: 4),
-    child: Icon(Icons.arrow_forward_rounded, color: Color(0xFF8696C4), size: 16),
+    child: Icon(Icons.arrow_forward_rounded, color: AtelierStyle.muted, size: 16),
   );
 }
 
@@ -445,12 +446,12 @@ class _CompactEntryJourneyStep extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Row(
     children: [
-      Icon(icon, color: AtelierStyle.mark, size: 19),
+      Icon(icon, color: AtelierStyle.pulse, size: 19),
       const SizedBox(width: 10),
       Expanded(
         child: Text(
           label,
-          style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.w900, letterSpacing: 0.5),
+          style: const TextStyle(color: AtelierStyle.ink, fontSize: 11, fontWeight: FontWeight.w900, letterSpacing: 0.5),
         ),
       ),
     ],
@@ -463,6 +464,6 @@ class _EntryJourneyDownArrow extends StatelessWidget {
   @override
   Widget build(BuildContext context) => const Padding(
     padding: EdgeInsets.symmetric(vertical: 5, horizontal: 3),
-    child: Icon(Icons.arrow_downward_rounded, color: Color(0xFF8696C4), size: 15),
+    child: Icon(Icons.arrow_downward_rounded, color: AtelierStyle.muted, size: 15),
   );
 }

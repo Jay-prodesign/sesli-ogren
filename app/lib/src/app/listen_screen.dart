@@ -315,18 +315,18 @@ class _ListenScreenState extends State<ListenScreen> {
     final theme = Theme.of(context);
     final living = LivingDeskReviewScope.active(context);
     final compactHero = MediaQuery.sizeOf(context).width < 340 || MediaQuery.textScalerOf(context).scale(1) > 1.25;
-    final hero = living ? AtelierStyle.ink : AppPalette.primaryDark;
-    final accent = living ? AtelierStyle.teal : AppPalette.signal;
-    final accentSoft = living ? AtelierStyle.mint : AppPalette.signalSoft;
+    final hero = living ? AtelierStyle.paper : AppPalette.primaryDark;
+    final accent = living ? AtelierStyle.aqua : AppPalette.signal;
+    final accentSoft = living ? AtelierStyle.aquaSoft : AppPalette.signalSoft;
     final surface = living ? AtelierStyle.paper : AppPalette.surface;
     final line = living ? AtelierStyle.line : AppPalette.outline;
     final ink = living ? AtelierStyle.ink : AppPalette.ink;
     final muted = living ? AtelierStyle.muted : theme.colorScheme.onSurfaceVariant;
-    final truthSoft = living ? AtelierStyle.mint : AppPalette.attentionSoft;
-    final truthAccent = living ? AtelierStyle.teal : AppPalette.attention;
-    final progressAccent = living ? AtelierStyle.mark : AppPalette.signal;
+    final truthSoft = living ? AtelierStyle.aquaSoft : AppPalette.attentionSoft;
+    final truthAccent = living ? AtelierStyle.aqua : AppPalette.attention;
+    final progressAccent = living ? AtelierStyle.aqua : AppPalette.signal;
     final primaryButtonStyle = living
-        ? FilledButton.styleFrom(backgroundColor: AtelierStyle.ink, foregroundColor: Colors.white)
+        ? FilledButton.styleFrom(backgroundColor: AtelierStyle.aqua, foregroundColor: AtelierStyle.focus)
         : null;
     final outlineButtonStyle = living
         ? OutlinedButton.styleFrom(
@@ -426,7 +426,7 @@ class _ListenScreenState extends State<ListenScreen> {
               source.name,
               maxLines: compactHero ? null : 2,
               overflow: compactHero ? TextOverflow.visible : TextOverflow.ellipsis,
-              style: theme.textTheme.titleLarge?.copyWith(color: Colors.white),
+              style: theme.textTheme.titleLarge?.copyWith(color: living ? ink : Colors.white),
             );
 
             return ListView(
@@ -442,7 +442,14 @@ class _ListenScreenState extends State<ListenScreen> {
                   const SizedBox(height: 12),
                 ],
                 DecoratedBox(
-                  decoration: BoxDecoration(color: hero, borderRadius: BorderRadius.circular(living ? 20 : 24)),
+                  decoration: BoxDecoration(
+                    color: hero,
+                    borderRadius: BorderRadius.circular(living ? 20 : 24),
+                    border: living ? const Border(left: BorderSide(color: AtelierStyle.aqua, width: 4)) : null,
+                    boxShadow: living
+                        ? const [BoxShadow(color: Color(0x1014224A), blurRadius: 22, offset: Offset(0, 9))]
+                        : null,
+                  ),
                   child: Padding(
                     padding: const EdgeInsets.fromLTRB(16, 14, 16, 15),
                     child: Column(
@@ -478,7 +485,7 @@ class _ListenScreenState extends State<ListenScreen> {
                             key: const ValueKey('listen-progress'),
                             minHeight: 6,
                             value: progress,
-                            backgroundColor: Colors.white.withValues(alpha: 0.12),
+                            backgroundColor: living ? AppPalette.surfaceMuted : Colors.white.withValues(alpha: 0.12),
                             color: progressAccent,
                             semanticsLabel: 'Dinleme ilerlemesi',
                             semanticsValue: '${(progress * 100).round()}',
@@ -495,7 +502,7 @@ class _ListenScreenState extends State<ListenScreen> {
                                 : hasResume
                                 ? 'Kaldığın yer: bölüm ${resumeChunk + 1} / ${source.chunks.length} · $completedChunks bölüm tamamlandı'
                                 : 'Dinleme henüz başlamadı · ${source.chunks.length} bölüm',
-                            style: theme.textTheme.bodySmall?.copyWith(color: Colors.white.withValues(alpha: 0.72)),
+                            style: theme.textTheme.bodySmall?.copyWith(color: living ? muted : Colors.white.withValues(alpha: 0.72)),
                           ),
                         ),
                       ],

@@ -610,7 +610,7 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
           ? NavigationBarTheme(
               data: NavigationBarThemeData(
                 backgroundColor: AtelierStyle.paper,
-                indicatorColor: AtelierStyle.pulseSoft,
+                indicatorColor: Colors.transparent,
                 labelTextStyle: WidgetStateProperty.resolveWith(
                   (states) => TextStyle(
                     color: states.contains(WidgetState.selected) ? AtelierStyle.pulse : AtelierStyle.muted,
@@ -1216,9 +1216,12 @@ class _LibrarySurfaceState extends State<_LibrarySurface> {
           const SizedBox(height: 14),
           SizedBox(
             width: double.infinity,
-            child: OutlinedButton.icon(
+            child: FilledButton.icon(
               key: const ValueKey('library-add-material'),
               onPressed: widget.onAddMaterial,
+              style: living
+                  ? FilledButton.styleFrom(backgroundColor: AtelierStyle.pulse, foregroundColor: Colors.white)
+                  : null,
               icon: const Icon(Icons.add_rounded),
               label: const Text('Yeni kaynak ekle'),
             ),
@@ -1451,7 +1454,7 @@ class _LibraryMaterialCard extends StatelessWidget {
               key: ValueKey('library-continue-${material.id.value}'),
               onTap: onContinue,
               child: DecoratedBox(
-                decoration: BoxDecoration(color: living ? AtelierStyle.focus : AppPalette.primaryDark),
+                decoration: BoxDecoration(color: living ? AppPalette.primarySoft : AppPalette.primaryDark),
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(15, 12, 15, 13),
                   child: Row(
@@ -1459,14 +1462,14 @@ class _LibraryMaterialCard extends StatelessWidget {
                     children: [
                       DecoratedBox(
                         decoration: BoxDecoration(
-                          color: living ? AtelierStyle.mark : AppPalette.momentum,
+                          color: living ? AtelierStyle.pulse : AppPalette.momentum,
                           borderRadius: BorderRadius.circular(999),
                         ),
                         child: Padding(
                           padding: const EdgeInsets.all(6),
                           child: Icon(
                             Icons.arrow_forward_rounded,
-                            color: living ? AtelierStyle.ink : AppPalette.momentumInk,
+                            color: living ? Colors.white : AppPalette.momentumInk,
                             size: 16,
                           ),
                         ),
@@ -1479,7 +1482,7 @@ class _LibraryMaterialCard extends StatelessWidget {
                             Text(
                               _continueLabel,
                               style: theme.textTheme.labelMedium?.copyWith(
-                                color: Colors.white,
+                                color: living ? AtelierStyle.ink : Colors.white,
                                 fontWeight: FontWeight.w800,
                               ),
                             ),
@@ -1489,7 +1492,7 @@ class _LibraryMaterialCard extends StatelessWidget {
                               maxLines: 2,
                               overflow: TextOverflow.ellipsis,
                               style: theme.textTheme.bodySmall?.copyWith(
-                                color: Colors.white.withValues(alpha: 0.72),
+                                color: living ? AtelierStyle.muted : Colors.white.withValues(alpha: 0.72),
                                 height: 1.35,
                               ),
                             ),

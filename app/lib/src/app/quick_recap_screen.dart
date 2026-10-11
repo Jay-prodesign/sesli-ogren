@@ -563,7 +563,7 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> with WidgetsBinding
           )
         : null;
     final primaryStyle = living
-        ? FilledButton.styleFrom(backgroundColor: AtelierStyle.ink, foregroundColor: Colors.white)
+        ? FilledButton.styleFrom(backgroundColor: AtelierStyle.pulse, foregroundColor: Colors.white)
         : null;
     final paper = living ? AtelierStyle.paper : Theme.of(context).colorScheme.surfaceContainerLow;
     final line = living ? AtelierStyle.line : Theme.of(context).colorScheme.outlineVariant;
@@ -642,11 +642,11 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> with WidgetsBinding
               key: const ValueKey('quick-recap-start-card'),
               padding: const EdgeInsets.fromLTRB(17, 16, 17, 17),
               decoration: BoxDecoration(
-                color: living ? AtelierStyle.focus : paper,
+                color: paper,
                 borderRadius: BorderRadius.circular(20),
-                border: living ? null : Border.all(color: line),
+                border: living ? const Border(left: BorderSide(color: AtelierStyle.pulse, width: 4)) : Border.all(color: line),
                 boxShadow: living
-                    ? const [BoxShadow(color: Color(0x1814224A), blurRadius: 22, offset: Offset(0, 10))]
+                    ? const [BoxShadow(color: Color(0x1014224A), blurRadius: 20, offset: Offset(0, 8))]
                     : null,
               ),
               child: LayoutBuilder(
@@ -658,7 +658,7 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> with WidgetsBinding
                       Text(
                         'HAZIRLIK · KANIT DEĞİL',
                         style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                          color: living ? AtelierStyle.mark : accent,
+                          color: living ? AtelierStyle.pulse : accent,
                           fontWeight: FontWeight.w900,
                           letterSpacing: 0.85,
                         ),
@@ -667,13 +667,13 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> with WidgetsBinding
                       Text(
                         'Önce genel resmi çıkaralım.',
                         style: Theme.of(context).textTheme.titleLarge
-                            ?.copyWith(color: living ? Colors.white : ink, fontWeight: FontWeight.w900),
+                            ?.copyWith(color: ink, fontWeight: FontWeight.w900),
                       ),
                       const SizedBox(height: 6),
                       Text(
                         'Özet yalnız bu kaynak sürümünden hazırlanır. Sana yön verir; öğrenme durumunu ancak kendi Hatırla denemen değiştirir.',
                         style: Theme.of(context).textTheme.bodyMedium
-                            ?.copyWith(color: living ? const Color(0xFFD6DDF0) : muted, height: 1.42),
+                            ?.copyWith(color: muted, height: 1.42),
                       ),
                     ],
                   );
@@ -704,7 +704,7 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> with WidgetsBinding
                             key: const ValueKey('quick-recap-restore-loading'),
                             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
                             decoration: BoxDecoration(
-                              color: living ? Colors.white.withValues(alpha: 0.10) : accentSoft,
+                              color: living ? AtelierStyle.pulseSoft : accentSoft,
                               borderRadius: BorderRadius.circular(14),
                             ),
                             child: Row(
@@ -721,7 +721,7 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> with WidgetsBinding
                                   child: Text(
                                     'Önceki özet işi kontrol ediliyor…',
                                     style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                                      color: living ? Colors.white.withValues(alpha: 0.82) : ink,
+                                      color: ink,
                                       fontWeight: FontWeight.w700,
                                     ),
                                   ),

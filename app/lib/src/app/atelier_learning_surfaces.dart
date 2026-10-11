@@ -63,8 +63,7 @@ class AtelierSourceTrustStrip extends StatelessWidget {
           padding: const EdgeInsets.fromLTRB(13, 11, 13, 12),
           decoration: BoxDecoration(
             color: AtelierStyle.pulseSoft,
-            borderRadius: BorderRadius.circular(16),
-            boxShadow: const [BoxShadow(color: Color(0x0D14224A), blurRadius: 18, offset: Offset(0, 8))],
+            borderRadius: BorderRadius.circular(12),
           ),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -317,9 +316,8 @@ class AtelierWorkspace extends StatelessWidget {
                     width: double.infinity,
                     padding: const EdgeInsets.fromLTRB(14, 13, 14, 14),
                     decoration: BoxDecoration(
-                      color: AtelierStyle.mint,
-                      borderRadius: BorderRadius.circular(14),
-                      border: Border.all(color: AtelierStyle.line),
+                      color: AtelierStyle.pulseSoft,
+                      borderRadius: BorderRadius.circular(16),
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -431,8 +429,9 @@ class AtelierWorkspace extends StatelessWidget {
           Container(
             padding: const EdgeInsets.fromLTRB(17, 12, 17, 14),
             decoration: const BoxDecoration(
-              color: AtelierStyle.focus,
-              borderRadius: BorderRadius.vertical(top: Radius.circular(21)),
+              color: AtelierStyle.paper,
+              border: Border(top: BorderSide(color: AtelierStyle.line)),
+              boxShadow: [BoxShadow(color: Color(0x1214224A), blurRadius: 18, offset: Offset(0, -6))],
             ),
             child: compactSurface
                 ? FilledButton.icon(
@@ -452,12 +451,12 @@ class AtelierWorkspace extends StatelessWidget {
                     children: [
                       Row(
                         children: [
-                          Icon(_activeStepIcon, color: AtelierStyle.mark, size: 18),
+                          Icon(_activeStepIcon, color: AtelierStyle.pulse, size: 18),
                           const SizedBox(width: 7),
                           const Text(
                             'ŞİMDİ',
                             style: TextStyle(
-                              color: AtelierStyle.mark,
+                              color: AtelierStyle.pulse,
                               fontSize: 10,
                               fontWeight: FontWeight.w900,
                               letterSpacing: 0.8,
@@ -468,12 +467,12 @@ class AtelierWorkspace extends StatelessWidget {
                       const SizedBox(height: 6),
                       Text(
                         _activeStepTitle,
-                        style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w900, fontSize: 17),
+                        style: const TextStyle(color: AtelierStyle.ink, fontWeight: FontWeight.w900, fontSize: 17),
                       ),
                       const SizedBox(height: 3),
                       Text(
                         _activeStepReason,
-                        style: const TextStyle(color: Color(0xFFD6DDF0), fontSize: 12, height: 1.3),
+                        style: const TextStyle(color: AtelierStyle.muted, fontSize: 12, height: 1.3),
                       ),
                       const SizedBox(height: 10),
                       FilledButton.icon(
@@ -504,7 +503,7 @@ class AtelierWorkspace extends StatelessWidget {
                           );
                           final more = TextButton.icon(
                             onPressed: () => _showOtherStudyPaths(context),
-                            style: TextButton.styleFrom(foregroundColor: Colors.white),
+                            style: TextButton.styleFrom(foregroundColor: AtelierStyle.pulse),
                             icon: const Icon(Icons.more_horiz_rounded),
                             label: const Text('Diğer yollar'),
                           );
@@ -531,7 +530,7 @@ class AtelierWorkspace extends StatelessWidget {
                       const Text(
                         'Okuma ve dinleme hazırlık; öğrenme durumunu aktif Hatırla denemesi günceller.',
                         textAlign: TextAlign.center,
-                        style: TextStyle(color: Color(0xFFB6C8C4), fontSize: 11, height: 1.35),
+                        style: TextStyle(color: AtelierStyle.muted, fontSize: 11, height: 1.35),
                       ),
                     ],
                   ),
@@ -576,7 +575,7 @@ class AtelierLearningRail extends StatelessWidget {
       child: ExcludeSemantics(
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 9),
-          decoration: BoxDecoration(color: AppPalette.surfaceMuted, borderRadius: BorderRadius.circular(16)),
+          decoration: const BoxDecoration(color: Colors.transparent),
           child: LayoutBuilder(
             builder: (context, constraints) {
               final compact = constraints.maxWidth < 360 || MediaQuery.textScalerOf(context).scale(1) > 1.2;
@@ -774,22 +773,7 @@ class AtelierRecall extends StatelessWidget {
           letterSpacing: -0.8,
         ),
       ),
-      const SizedBox(height: 10),
-      const Row(
-        key: ValueKey('la0040-recall-companion-guidance'),
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          CompanionView(state: CompanionVisualState.think, size: 52),
-          SizedBox(width: 10),
-          Expanded(
-            child: Text(
-              'Kaynağı kapattık. Sorunun istediği kısa kavramı hatırlamaya çalış. Takılırsan yardım alabilirsin.',
-              style: TextStyle(color: AtelierStyle.muted, fontSize: 13, height: 1.4),
-            ),
-          ),
-        ],
-      ),
-      const SizedBox(height: 16),
+      const SizedBox(height: 14),
       Container(
         width: double.infinity,
         padding: const EdgeInsets.fromLTRB(19, 19, 19, 23),
@@ -810,6 +794,8 @@ class AtelierRecall extends StatelessWidget {
                     letterSpacing: 1,
                   ),
                 ),
+                Spacer(),
+                CompanionView(state: CompanionVisualState.think, size: 42),
               ],
             ),
             const SizedBox(height: 17),

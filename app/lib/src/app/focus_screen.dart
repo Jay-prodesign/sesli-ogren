@@ -366,11 +366,11 @@ class _FocusScreenState extends State<FocusScreen> {
     final readyHelp = help is FocusHelpReady ? help as FocusHelpReady : null;
     final unavailable = help is FocusHelpUnavailable ? help as FocusHelpUnavailable : null;
     final living = LivingDeskReviewScope.active(context);
-    final accent = living ? AtelierStyle.teal : AppPalette.signal;
+    final accent = living ? AtelierStyle.aqua : AppPalette.signal;
     final accentSoft = living ? AtelierStyle.aquaSoft : AppPalette.signalSoft;
     final paper = living ? AtelierStyle.paper : AppPalette.surface;
     final ink = living ? AtelierStyle.ink : theme.colorScheme.onSurface;
-    final hero = living ? AtelierStyle.focus : AppPalette.primaryDark;
+    final hero = living ? AtelierStyle.paper : AppPalette.primaryDark;
     final mark = living ? AtelierStyle.mark : AppPalette.momentum;
     final markInk = living ? AtelierStyle.ink : AppPalette.momentumInk;
     final sourceText = widget.sourceText.trim();
@@ -390,8 +390,11 @@ class _FocusScreenState extends State<FocusScreen> {
           DecoratedBox(
             decoration: BoxDecoration(
               color: hero,
-              borderRadius: BorderRadius.circular(24),
-              boxShadow: [BoxShadow(color: hero.withValues(alpha: 0.14), blurRadius: 24, offset: const Offset(0, 12))],
+              borderRadius: BorderRadius.circular(22),
+              border: living ? const Border(left: BorderSide(color: AtelierStyle.aqua, width: 4)) : null,
+              boxShadow: living
+                  ? const [BoxShadow(color: Color(0x1014224A), blurRadius: 20, offset: Offset(0, 8))]
+                  : [BoxShadow(color: hero.withValues(alpha: 0.14), blurRadius: 24, offset: const Offset(0, 12))],
             ),
             child: Padding(
               padding: const EdgeInsets.fromLTRB(18, 17, 18, 18),
@@ -400,7 +403,7 @@ class _FocusScreenState extends State<FocusScreen> {
                 children: [
                   DecoratedBox(
                     decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.10),
+                      color: living ? AtelierStyle.aquaSoft : Colors.white.withValues(alpha: 0.10),
                       borderRadius: BorderRadius.circular(16),
                     ),
                     child: Padding(
@@ -419,7 +422,7 @@ class _FocusScreenState extends State<FocusScreen> {
                         Text(
                           'KISA ODAK · 3 ADIM',
                           style: theme.textTheme.labelSmall?.copyWith(
-                            color: mark,
+                            color: living ? AtelierStyle.aqua : mark,
                             fontWeight: FontWeight.w900,
                             letterSpacing: 0.6,
                           ),
@@ -428,7 +431,7 @@ class _FocusScreenState extends State<FocusScreen> {
                         Text(
                           'Kaynağı netleştir, sonra aktif olarak doğrula.',
                           style: theme.textTheme.headlineSmall?.copyWith(
-                            color: Colors.white,
+                            color: living ? ink : Colors.white,
                             fontWeight: FontWeight.w800,
                           ),
                         ),
@@ -526,7 +529,7 @@ class _FocusScreenState extends State<FocusScreen> {
               );
               final explainButton = FilledButton.icon(
                 style: living
-                    ? FilledButton.styleFrom(backgroundColor: AtelierStyle.teal, foregroundColor: Colors.white)
+                    ? FilledButton.styleFrom(backgroundColor: AtelierStyle.pulse, foregroundColor: Colors.white)
                     : null,
                 onPressed: busy || _sourceChanged ? null : () => request(FocusHelpKind.directExplanation),
                 icon: const Icon(Icons.auto_awesome_outlined),

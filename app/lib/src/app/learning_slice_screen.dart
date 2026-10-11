@@ -921,11 +921,8 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
       return Container(
         key: const ValueKey('source'),
         padding: const EdgeInsets.fromLTRB(20, 19, 20, 21),
-        decoration: BoxDecoration(
-          color: AtelierStyle.paper,
-          borderRadius: BorderRadius.circular(18),
-          border: Border.all(color: AtelierStyle.line),
-          boxShadow: const [BoxShadow(color: Color(0x0B15313A), blurRadius: 18, offset: Offset(0, 8))],
+        decoration: const BoxDecoration(
+          border: Border(left: BorderSide(color: AtelierStyle.pulse, width: 4)),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,

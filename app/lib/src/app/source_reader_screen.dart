@@ -470,8 +470,9 @@ class _SourceReaderScreenState extends State<SourceReaderScreen> {
                 label: 'Kaynak açık. Hatırla düğmesi kaynağı kapatıp aktif denemeyi başlatır.',
                 child: DecoratedBox(
                   decoration: const BoxDecoration(
-                    color: AtelierStyle.focus,
-                    borderRadius: BorderRadius.vertical(top: Radius.circular(22)),
+                    color: AtelierStyle.paper,
+                    border: Border(top: BorderSide(color: AtelierStyle.line)),
+                    boxShadow: [BoxShadow(color: Color(0x1214224A), blurRadius: 18, offset: Offset(0, -6))],
                   ),
                   child: Padding(
                     padding: const EdgeInsets.fromLTRB(16, 8, 16, 10),
@@ -486,7 +487,8 @@ class _SourceReaderScreenState extends State<SourceReaderScreen> {
                                 style: living
                                     ? OutlinedButton.styleFrom(
                                         foregroundColor: AtelierStyle.aqua,
-                                        side: const BorderSide(color: AtelierStyle.aqua),
+                                        backgroundColor: AtelierStyle.aquaSoft,
+                                        side: BorderSide.none,
                                         minimumSize: const Size(0, 48),
                                       )
                                     : OutlinedButton.styleFrom(minimumSize: const Size(0, 48)),
@@ -508,7 +510,7 @@ class _SourceReaderScreenState extends State<SourceReaderScreen> {
                               )
                             : widget.onRecap != null
                             ? TextButton.icon(
-                                style: TextButton.styleFrom(foregroundColor: Colors.white),
+                                style: TextButton.styleFrom(foregroundColor: AtelierStyle.pulse),
                                 onPressed: () => unawaited(_runLearningAction(widget.onRecap)),
                                 icon: const Icon(Icons.auto_awesome),
                                 label: const Text('Hızlı özet'),
