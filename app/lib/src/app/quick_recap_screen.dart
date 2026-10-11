@@ -8,6 +8,7 @@ import '../domain/learning_contracts.dart';
 import '../generation/supabase_source_summary_gateway.dart';
 import 'app_runtime.dart';
 import 'atelier_learning_surfaces.dart';
+import 'companion_view.dart';
 import 'listen_screen.dart';
 import 'learning_slice_screen.dart';
 import 'la0040_visual_treatments.dart';
@@ -637,13 +638,92 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> with WidgetsBinding
             ),
             const SizedBox(height: 12),
           ] else if (_jobId == null)
-            FilledButton.icon(
-              style: primaryStyle,
-              onPressed: (_busy || _restoring) ? null : _submit,
-              icon: const Icon(Icons.auto_awesome),
-              label: const Text('Özet oluştur'),
+            Container(
+              key: const ValueKey('quick-recap-start-card'),
+              padding: const EdgeInsets.fromLTRB(17, 16, 17, 17),
+              decoration: BoxDecoration(
+                color: living ? AtelierStyle.focus : paper,
+                borderRadius: BorderRadius.circular(20),
+                border: living ? null : Border.all(color: line),
+                boxShadow: living
+                    ? const [BoxShadow(color: Color(0x1814224A), blurRadius: 22, offset: Offset(0, 10))]
+                    : null,
+              ),
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  final compact =
+                      constraints.maxWidth < 340 || MediaQuery.textScalerOf(context).scale(1) > 1.2;
+                  final guidance = Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'HAZIRLIK · KANIT DEĞİL',
+                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                          color: living ? AtelierStyle.mark : accent,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: 0.85,
+                        ),
+                      ),
+                      const SizedBox(height: 5),
+                      Text(
+                        'Önce genel resmi çıkaralım.',
+                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          color: living ? Colors.white : ink,
+                          fontWeight: FontWeight.w900,
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        'Özet yalnız bu kaynak sürümünden hazırlanır. Sana yön verir; öğrenme durumunu ancak kendi Hatırla denemen değiştirir.',
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: living ? const Color(0xFFD6DDF0) : muted,
+                          height: 1.42,
+                        ),
+                      ),
+                    ],
+                  );
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      if (compact) ...[
+                        const Align(
+                          alignment: Alignment.centerLeft,
+                          child: CompanionView(state: CompanionVisualState.think, size: 54),
+                        ),
+                        const SizedBox(height: 9),
+                        guidance,
+                      ] else
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const CompanionView(state: CompanionVisualState.think, size: 62),
+                            const SizedBox(width: 12),
+                            Expanded(child: guidance),
+                          ],
+                        ),
+                      const SizedBox(height: 14),
+                      FilledButton.icon(
+                        key: const ValueKey('quick-recap-create'),
+                        style: living
+                            ? FilledButton.styleFrom(
+                                backgroundColor: AtelierStyle.mark,
+                                foregroundColor: AtelierStyle.focus,
+                                minimumSize: const Size.fromHeight(52),
+                              )
+                            : primaryStyle,
+                        onPressed: (_busy || _restoring) ? null : _submit,
+                        icon: const Icon(Icons.auto_awesome_outlined),
+                        label: const Text('Kaynağa bağlı özet oluştur'),
+                      ),
+                    ],
+                  );
+                },
+              ),
             ),
-          if (_busy || _restoring) const LinearProgressIndicator(),
+          if (_busy || _restoring) ...[
+            const SizedBox(height: 10),
+            const LinearProgressIndicator(),
+          ],
           if (_jobId != null && status?.summary == null) ...[
             Text(_statusLabel(status), style: Theme.of(context).textTheme.titleMedium),
             if (_statusDetail(status) != null) ...[const SizedBox(height: 6), Text(_statusDetail(status)!)],
