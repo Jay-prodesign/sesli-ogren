@@ -278,7 +278,7 @@ class _MaterialWorkspaceScreenState extends State<MaterialWorkspaceScreen> {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Icon(Icons.sync_problem_outlined, size: 40),
+                      const CompanionView(state: CompanionVisualState.think, size: 72),
                       const SizedBox(height: 12),
                       const Text('Materyal açılamadı.', textAlign: TextAlign.center),
                       const SizedBox(height: 8),
@@ -308,7 +308,29 @@ class _MaterialWorkspaceScreenState extends State<MaterialWorkspaceScreen> {
               );
             }
             if (!snapshot.hasData) {
-              return const Center(child: CircularProgressIndicator());
+              return const Center(
+                child: Padding(
+                  padding: EdgeInsets.all(28),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      CompanionView(state: CompanionVisualState.think, size: 72),
+                      SizedBox(height: 14),
+                      Text(
+                        'Çalışma alanın hazırlanıyor…',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(color: AtelierStyle.ink, fontSize: 17, fontWeight: FontWeight.w900),
+                      ),
+                      SizedBox(height: 6),
+                      Text(
+                        'Güncel kaynağın ve gerçek sıradaki adımın birlikte açılıyor.',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(color: AtelierStyle.muted, height: 1.4),
+                      ),
+                    ],
+                  ),
+                ),
+              );
             }
             final data = snapshot.data!;
             final shouldContinueCurrent =

@@ -490,7 +490,7 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(Icons.sync_problem_rounded, size: 40),
+                  const CompanionView(state: CompanionVisualState.think, size: 76),
                   const SizedBox(height: 12),
                   Text(
                     'Kütüphane şu anda yüklenemedi.',
@@ -514,7 +514,29 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
           );
         }
         if (!snapshot.hasData) {
-          return const Center(child: CircularProgressIndicator());
+          return const Center(
+            child: Padding(
+              padding: EdgeInsets.all(28),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  CompanionView(state: CompanionVisualState.think, size: 76),
+                  SizedBox(height: 14),
+                  Text(
+                    'Kaldığın yeri açıyorum…',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(color: AtelierStyle.ink, fontSize: 17, fontWeight: FontWeight.w900),
+                  ),
+                  SizedBox(height: 6),
+                  Text(
+                    'Kaynakların ve sıradaki öğrenme adımın birlikte yükleniyor.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(color: AtelierStyle.muted, height: 1.4),
+                  ),
+                ],
+              ),
+            ),
+          );
         }
         final data = snapshot.data!;
         return Column(

@@ -192,7 +192,29 @@ class _ExplainScreenState extends State<ExplainScreen> {
               return _unavailable(GroundedExplainUnavailableReason.temporaryFailure);
             }
             if (!snapshot.hasData) {
-              return const Center(child: CircularProgressIndicator());
+              return const Center(
+                child: Padding(
+                  padding: EdgeInsets.all(28),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      CompanionView(state: CompanionVisualState.think, size: 72),
+                      SizedBox(height: 14),
+                      Text(
+                        'Kaynağından açıklamayı hazırlıyorum…',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(color: AtelierStyle.ink, fontSize: 17, fontWeight: FontWeight.w900),
+                      ),
+                      SizedBox(height: 6),
+                      Text(
+                        'Yalnız güncel kaynak sürümü kullanılıyor.',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(color: AtelierStyle.muted, height: 1.4),
+                      ),
+                    ],
+                  ),
+                ),
+              );
             }
             final result = snapshot.data!;
             if (result is GroundedExplainReady) {
@@ -487,7 +509,7 @@ class _Unavailable extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.auto_awesome_outlined, size: 42),
+            const CompanionView(state: CompanionVisualState.think, size: 72),
             const SizedBox(height: 14),
             Text(title, style: Theme.of(context).textTheme.titleLarge, textAlign: TextAlign.center),
             const SizedBox(height: 8),
