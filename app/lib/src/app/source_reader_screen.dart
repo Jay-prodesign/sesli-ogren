@@ -442,6 +442,7 @@ class _SourceReaderScreenState extends State<SourceReaderScreen> {
                     )
                   : SelectionArea(
                       child: ListView(
+                        key: const ValueKey('reader-source-scroll'),
                         controller: _readingScroll,
                         padding: const EdgeInsets.fromLTRB(20, 16, 20, 28),
                         children: [

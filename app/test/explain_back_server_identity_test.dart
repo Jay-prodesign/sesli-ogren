@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sesli_ogren/src/app/app_runtime.dart';
 import 'package:sesli_ogren/src/app/explain_back_screen.dart';
+import 'package:sesli_ogren/src/app/companion_view.dart';
 import 'package:sesli_ogren/src/data/pdf_text_extractor.dart';
 import 'package:sesli_ogren/src/data/source_ingest_service.dart';
 import 'package:sesli_ogren/src/data/sqlite_source_store.dart';
@@ -274,7 +275,12 @@ void main() {
     expect(find.text('Tekrar kendi cümlelerimle anlat'), findsOneWidget);
     expect(find.text('Önceki çalışmaya dön'), findsOneWidget);
     expect(find.textContaining('bağımsız Hatırla kanıtının yerini tutmaz'), findsOneWidget);
-    expect(find.bySemanticsLabel('Düğüm destek oluyor'), findsOneWidget);
+    expect(
+      find.byWidgetPredicate(
+        (widget) => widget is CompanionView && widget.state == CompanionVisualState.correct,
+      ),
+      findsOneWidget,
+    );
     expect(explainBack.lastRequest, isNotNull);
     expect(explainBack.lastRequest!.materialId.value, serverMaterialId);
     expect(explainBack.lastRequest!.sourceVersionId, source.identity.sourceVersionId);
@@ -337,8 +343,18 @@ void main() {
     await _tapVisible(tester, find.text('Anlatımımı değerlendir'));
     await _pumpUntilFound(tester, find.text('Bu yanıttan güvenilir sonuç çıkaramıyoruz'));
 
-    expect(find.bySemanticsLabel('Düğüm düşünüyor'), findsOneWidget);
-    expect(find.bySemanticsLabel('Düğüm destek oluyor'), findsNothing);
+    expect(
+      find.byWidgetPredicate(
+        (widget) => widget is CompanionView && widget.state == CompanionVisualState.think,
+      ),
+      findsOneWidget,
+    );
+    expect(
+      find.byWidgetPredicate(
+        (widget) => widget is CompanionView && widget.state == CompanionVisualState.correct,
+      ),
+      findsNothing,
+    );
     expect(find.text('Hatırla ile devam et'), findsOneWidget);
     expect(find.text('Önceki çalışmaya dön'), findsOneWidget);
     expect(find.textContaining('bağımsız Hatırla kanıtının yerini tutmaz'), findsOneWidget);

@@ -178,13 +178,13 @@ void main() {
     await tester.pump();
 
     for (var i = 0; i < 8 && find.byKey(const ValueKey('focus-help-actions-stacked')).evaluate().isEmpty; i++) {
-      await tester.drag(find.byType(Scrollable).last, const Offset(0, -180));
+      await tester.drag(find.byType(ListView).first, const Offset(0, -180));
       await tester.pump();
     }
     expect(find.byKey(const ValueKey('focus-help-actions-stacked')), findsOneWidget);
 
     for (var i = 0; i < 10 && find.byKey(const ValueKey('focus-next-actions-stacked')).evaluate().isEmpty; i++) {
-      await tester.drag(find.byType(Scrollable).last, const Offset(0, -180));
+      await tester.drag(find.byType(ListView).first, const Offset(0, -180));
       await tester.pump();
     }
     expect(find.byKey(const ValueKey('focus-next-actions-stacked')), findsOneWidget);

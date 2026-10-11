@@ -71,7 +71,7 @@ void main() {
     expect(find.text('İLK 60 SANİYE'), findsOneWidget);
     expect(find.text('Önce kaynağın tamamını bir kez gör.'), findsOneWidget);
     expect(find.text('Kaynağı aç'), findsOneWidget);
-    expect(find.text('Hızlı özetle orientasyon al'), findsOneWidget);
+    expect(find.text('Hızlı özetle genel resmi gör'), findsOneWidget);
     expect(find.text('Diğer çalışma yolları'), findsOneWidget);
     expect(find.textContaining('Öğrenme durumun yalnız'), findsOneWidget);
 

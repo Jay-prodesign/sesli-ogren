@@ -95,9 +95,16 @@ void main() {
     await tester.pump();
     await tester.enterText(find.byKey(const ValueKey('pasted-material-title')), 'Biyoloji · Fotosentez');
     await tester.tap(find.text('Metni ekle · çalışma alanını aç'));
-    await _pumpUntilFound(tester, find.byType(MaterialWorkspaceScreen));
+    await _pumpUntilFound(tester, find.byKey(const ValueKey('first-value-intent')));
 
+    expect(find.byType(MaterialWorkspaceScreen), findsOneWidget);
     expect(find.text('Biyoloji · Fotosentez'), findsWidgets);
+    expect(find.text('Önce kaynağın tamamını bir kez gör.'), findsOneWidget);
+    await tester.tap(find.text('Kaynağı aç'));
+    await _pumpUntilFound(tester, find.byType(SourceReaderScreen));
+    await tester.pageBack();
+    await _pumpUntilFound(tester, find.byKey(const ValueKey('la0040-atelier-workspace')));
+
     expect(find.text('KAYNAK ÖNİZLEMESİ'), findsOneWidget);
     expect(find.byKey(const ValueKey('la0040-atelier-workspace-recall')), findsOneWidget);
     expect(find.text('Kütüphane şu anda yüklenemedi.'), findsNothing);
@@ -127,8 +134,10 @@ void main() {
     await _pumpUntilFound(tester, find.text('Biyoloji · Fotosentez'));
     await tester.tap(find.text('Kütüphane'));
     await tester.pumpAndSettle();
-    await tester.tap(find.byTooltip('Son kaynağı oku'));
-    await tester.pumpAndSettle();
+    await tester.tap(find.text('Biyoloji · Fotosentez').last);
+    await _pumpUntilFound(tester, find.byKey(const ValueKey('la0040-atelier-workspace-reader')));
+    await tester.tap(find.byKey(const ValueKey('la0040-atelier-workspace-reader')));
+    await _pumpUntilFound(tester, find.byType(SourceReaderScreen));
     expect(find.byType(SourceReaderScreen), findsOneWidget);
     await tester.pageBack();
     await tester.pumpAndSettle();
@@ -159,8 +168,10 @@ void main() {
     await _pumpUntilFound(tester, find.text('Biyoloji · Fotosentez'));
     await tester.tap(find.text('Kütüphane').last);
     await tester.pumpAndSettle();
-    await tester.tap(find.byTooltip('Son kaynağı oku'));
-    await tester.pumpAndSettle();
+    await tester.tap(find.text('Biyoloji · Fotosentez').last);
+    await _pumpUntilFound(tester, find.byKey(const ValueKey('la0040-atelier-workspace-reader')));
+    await tester.tap(find.byKey(const ValueKey('la0040-atelier-workspace-reader')));
+    await _pumpUntilFound(tester, find.byType(SourceReaderScreen));
     expect(find.byType(SourceReaderScreen), findsOneWidget);
 
     await tester.tap(find.byTooltip('Okuma ve öğrenme seçenekleri'));

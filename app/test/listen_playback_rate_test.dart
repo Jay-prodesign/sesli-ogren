@@ -268,11 +268,11 @@ void main() {
     await _tapVisible(tester, find.text('Dinlemeye başla'));
     await tester.pump();
     expect(firstSpeech.lastRateMultiplier, 1.25);
-    expect(tester.getSemantics(find.bySemanticsLabel('Dinleme ilerlemesi')).value, '0');
+    expect(tester.widget<LinearProgressIndicator>(find.byKey(const ValueKey('listen-progress'))).value, 0);
 
     firstSpeech.finishCurrentChunk();
     await _pumpUntilFound(tester, find.text('Tüm bölümler dinlendi · Hatırlamayı deneyebilirsin'));
-    expect(tester.getSemantics(find.bySemanticsLabel('Dinleme ilerlemesi')).value, '100');
+    expect(tester.widget<LinearProgressIndicator>(find.byKey(const ValueKey('listen-progress'))).value, 1);
 
     await tester.pumpWidget(const SizedBox.shrink());
     await tester.pump();
@@ -375,7 +375,9 @@ void main() {
     await tester.pump();
 
     expect(find.textContaining('Kaynağın ve dinleme konumun korunuyor'), findsOneWidget);
-    expect(find.text('Klorofil ışık enerjisinin soğurulmasına yardım eder.'), findsOneWidget);
+    expect(find.text('Klorofil ışık enerjisinin soğurulmasına yardım eder.'), findsWidgets);
+    expect(find.byKey(const ValueKey('listen-current-source-segment')), findsOneWidget);
+    expect(find.byKey(const ValueKey('listen-source-transcript')), findsOneWidget);
     expect(find.text('Şimdi hatırlamayı dene'), findsOneWidget);
     await _tapVisible(tester, find.text('Şimdi hatırlamayı dene'));
     await tester.pump();

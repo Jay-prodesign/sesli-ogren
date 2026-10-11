@@ -475,6 +475,7 @@ class _ListenScreenState extends State<ListenScreen> {
                         ClipRRect(
                           borderRadius: BorderRadius.circular(999),
                           child: LinearProgressIndicator(
+                            key: const ValueKey('listen-progress'),
                             minHeight: 6,
                             value: progress,
                             backgroundColor: Colors.white.withValues(alpha: 0.12),

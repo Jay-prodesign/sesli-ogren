@@ -27,7 +27,10 @@ void main() {
 
     expect(find.descendant(of: find.byType(AppBar), matching: find.text('Biyoloji notu')), findsOneWidget);
     expect(find.byType(RichText), findsWidgets);
-    expect(find.bySemanticsLabel('Okuma ilerlemesi'), findsOneWidget);
+    expect(
+      find.bySemanticsLabel(RegExp(r'^(Kaynak görünümü, tamamı ekranda|Okuma konumu)$')),
+      findsOneWidget,
+    );
 
     await tester.tap(find.byTooltip('Metinde ara'));
     await tester.pumpAndSettle();
@@ -122,15 +125,18 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 50));
 
-    final scrollable = tester.state<ScrollableState>(find.byType(Scrollable).last);
+    final sourceScroll = find.byKey(const ValueKey('reader-source-scroll'));
+    final scrollable = tester.state<ScrollableState>(
+      find.descendant(of: sourceScroll, matching: find.byType(Scrollable)).first,
+    );
     expect(scrollable.position.maxScrollExtent, greaterThan(0));
     final restored = scrollable.position.pixels / scrollable.position.maxScrollExtent;
     expect(restored, closeTo(0.5, 0.08));
     expect(find.byKey(const ValueKey('reader-resume-restored')), findsOneWidget);
     expect(find.text('Kaldığın yer geri açıldı · %50'), findsOneWidget);
 
-    await tester.drag(find.byType(Scrollable).last, const Offset(0, -240));
-    await tester.pump();
+    await tester.drag(sourceScroll, const Offset(0, -240));
+    await tester.pump(const Duration(milliseconds: 20));
     expect(reported, isNotEmpty);
     expect(reported.last, greaterThan(0.5));
 
@@ -150,11 +156,11 @@ void main() {
       ),
     );
     await tester.pump();
-    await tester.drag(find.byType(Scrollable).last, const Offset(0, -180));
+    await tester.drag(find.byKey(const ValueKey('reader-source-scroll')), const Offset(0, -180));
     await tester.pump();
     reported.clear();
     await tester.tap(find.text('Kaynağı kapat ve hatırla'));
-    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 20));
 
     expect(recalled, 1);
     expect(reported, isNotEmpty);

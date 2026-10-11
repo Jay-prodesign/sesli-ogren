@@ -244,30 +244,15 @@ class _AccountEntryScreenState extends State<AccountEntryScreen> {
                             if (compactJourney) {
                               return const Column(
                                 key: ValueKey('account-entry-journey-compact'),
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
                                 children: [
-                                  Row(
-                                    children: [
-                                      Expanded(
-                                        child: _EntryJourneyStep(icon: Icons.auto_stories_outlined, label: 'KAYNAK'),
-                                      ),
-                                      _EntryJourneyArrow(),
-                                      Expanded(
-                                        child: _EntryJourneyStep(icon: Icons.visibility_off_outlined, label: 'KAPAT'),
-                                      ),
-                                    ],
-                                  ),
-                                  SizedBox(height: 12),
-                                  Row(
-                                    children: [
-                                      Expanded(
-                                        child: _EntryJourneyStep(icon: Icons.psychology_alt_outlined, label: 'HATIRLA'),
-                                      ),
-                                      _EntryJourneyArrow(),
-                                      Expanded(
-                                        child: _EntryJourneyStep(icon: Icons.find_in_page_outlined, label: 'KANIT'),
-                                      ),
-                                    ],
-                                  ),
+                                  _CompactEntryJourneyStep(icon: Icons.auto_stories_outlined, label: 'KAYNAK'),
+                                  _EntryJourneyDownArrow(),
+                                  _CompactEntryJourneyStep(icon: Icons.visibility_off_outlined, label: 'KAPAT'),
+                                  _EntryJourneyDownArrow(),
+                                  _CompactEntryJourneyStep(icon: Icons.psychology_alt_outlined, label: 'HATIRLA'),
+                                  _EntryJourneyDownArrow(),
+                                  _CompactEntryJourneyStep(icon: Icons.find_in_page_outlined, label: 'KANIT'),
                                 ],
                               );
                             }
@@ -442,5 +427,41 @@ class _EntryJourneyArrow extends StatelessWidget {
   Widget build(BuildContext context) => const Padding(
     padding: EdgeInsets.only(top: 4),
     child: Icon(Icons.arrow_forward_rounded, color: Color(0xFF8DA7A1), size: 16),
+  );
+}
+
+class _CompactEntryJourneyStep extends StatelessWidget {
+  const _CompactEntryJourneyStep({required this.icon, required this.label});
+
+  final IconData icon;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) => Row(
+    children: [
+      Icon(icon, color: AtelierStyle.mark, size: 19),
+      const SizedBox(width: 10),
+      Expanded(
+        child: Text(
+          label,
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 11,
+            fontWeight: FontWeight.w900,
+            letterSpacing: 0.5,
+          ),
+        ),
+      ),
+    ],
+  );
+}
+
+class _EntryJourneyDownArrow extends StatelessWidget {
+  const _EntryJourneyDownArrow();
+
+  @override
+  Widget build(BuildContext context) => const Padding(
+    padding: EdgeInsets.symmetric(vertical: 5, horizontal: 3),
+    child: Icon(Icons.arrow_downward_rounded, color: Color(0xFF8DA7A1), size: 15),
   );
 }
