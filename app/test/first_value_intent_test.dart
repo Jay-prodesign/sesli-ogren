@@ -170,8 +170,18 @@ void main() {
     await _tapVisible(tester, find.text('Diğer yollar'));
     await _pumpUntilFound(tester, find.byKey(const ValueKey('workspace-other-study-paths-scroll')));
     expect(find.text('Hızlı özet'), findsOneWidget);
-    expect(find.text('Odaklan'), findsOneWidget);
-    await tester.tap(find.text('Odaklan'));
+    final focusAction = find.text('Odaklan');
+    await tester.scrollUntilVisible(
+      focusAction,
+      140,
+      scrollable: find.descendant(
+        of: find.byKey(const ValueKey('workspace-other-study-paths-scroll')),
+        matching: find.byType(Scrollable),
+      ),
+    );
+    final visibleFocusAction = focusAction.hitTestable();
+    await _pumpUntilFound(tester, visibleFocusAction);
+    await tester.tap(visibleFocusAction);
     await _pumpUntilFound(tester, find.text('KISA ODAK · 3 ADIM'));
     expect(find.byType(FocusScreen), findsOneWidget);
     expect(tester.takeException(), isNull);
