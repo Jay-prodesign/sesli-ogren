@@ -91,10 +91,12 @@ class _MaterialWorkspaceScreenState extends State<MaterialWorkspaceScreen> {
       sourceVersionId: sourceVersionId,
     );
     if (!mounted) return;
+    final treatment = LearningVisualTreatmentScope.maybeOf(context);
+    final livingReview = LivingDeskReviewScope.active(context);
     await Navigator.of(context).push<void>(
       MaterialPageRoute(
-        builder: (_) => _preserveProductExperience(
-          SourceReaderScreen(
+        builder: (readerContext) {
+          final screen = SourceReaderScreen(
             title: data.material.title,
             sourceText: data.extracted?.normalizedText ?? '',
             sourceVersion: data.source,
@@ -106,21 +108,34 @@ class _MaterialWorkspaceScreenState extends State<MaterialWorkspaceScreen> {
               progress: progress,
               updatedAt: DateTime.now().toUtc(),
             ),
-            onListen: () {
-              Navigator.of(context).pop();
-              _openListen();
-            },
-            onRecap: () {
-              Navigator.of(context).pop();
-              _openQuickRecap();
-            },
-            onRecall: () {
-              Navigator.of(context).pop();
-              _openRecall();
-            },
-          ),
-        ),
+            onListen: () => _replaceReaderWith(readerContext, ListenScreen(runtime: widget.runtime, materialId: widget.materialId)),
+            onRecap: () => _replaceReaderWith(
+              readerContext,
+              QuickRecapScreen(runtime: widget.runtime, materialId: widget.materialId),
+            ),
+            onRecall: () => _replaceReaderWith(
+              readerContext,
+              LearningSliceScreen(runtime: widget.runtime, materialId: widget.materialId),
+            ),
+          );
+          if (treatment != null) return LearningVisualTreatmentScope(treatment: treatment, child: screen);
+          return livingReview ? LivingDeskReviewScope(child: screen) : screen;
+        },
       ),
+    );
+    if (mounted) setState(() => _snapshot = _load());
+  }
+
+  void _replaceReaderWith(BuildContext readerContext, Widget destination) {
+    final treatment = LearningVisualTreatmentScope.maybeOf(context);
+    final livingReview = LivingDeskReviewScope.active(context);
+    final wrapped = treatment != null
+        ? LearningVisualTreatmentScope(treatment: treatment, child: destination)
+        : livingReview
+            ? LivingDeskReviewScope(child: destination)
+            : destination;
+    Navigator.of(readerContext).pushReplacement<void, void>(
+      MaterialPageRoute<void>(builder: (_) => wrapped),
     );
   }
 
