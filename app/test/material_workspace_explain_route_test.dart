@@ -139,7 +139,11 @@ void main() {
         home: MediaQuery(
           data: const MediaQueryData(textScaler: TextScaler.linear(1.6)),
           child: LivingDeskReviewScope(
-            child: MaterialWorkspaceScreen(runtime: runtime, materialId: materialId),
+            child: MaterialWorkspaceScreen(
+              runtime: runtime,
+              materialId: materialId,
+              showFirstValueIntent: true,
+            ),
           ),
         ),
       ),
