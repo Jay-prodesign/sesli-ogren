@@ -1220,11 +1220,7 @@ void main() {
       ),
     );
     await pumpUntilFound(tester, find.text('Quick Recap'));
-    await tester.scrollUntilVisible(
-      find.text('Quick Recap özeti'),
-      240,
-      scrollable: find.byType(Scrollable).last,
-    );
+    await tester.scrollUntilVisible(find.text('Quick Recap özeti'), 240, scrollable: find.byType(Scrollable).last);
     await tester.pump();
     expect(find.text('Quick Recap özeti'), findsOneWidget);
     expect(find.text(recap), findsOneWidget);
