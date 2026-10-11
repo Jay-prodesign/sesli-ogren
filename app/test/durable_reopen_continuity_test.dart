@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -18,7 +19,7 @@ class _UnusedPdfExtractor implements PdfTextExtractor {
   const _UnusedPdfExtractor();
 
   @override
-  Future<ExtractedPdf> extract(List<int> bytes, {required String sourceName}) {
+  Future<ExtractedPdf> extract(Uint8List bytes, {required String sourceName}) {
     throw UnimplementedError();
   }
 }
@@ -171,15 +172,10 @@ void main() {
         1,
       );
 
-      final otherRuntime = await _openRuntime(
-        path: dbPath,
-        learner: otherLearner,
-      );
       expect(
-        await otherRuntime.store.activeMaterials(learner: otherLearner),
+        await reopened.store.activeMaterials(learner: otherLearner),
         isEmpty,
       );
-      await otherRuntime.close();
 
       await tester.pumpWidget(
         MaterialApp(
