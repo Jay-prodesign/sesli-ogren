@@ -144,9 +144,14 @@ void main() {
         ),
       ),
     );
+    await _pumpUntilFound(tester, find.byKey(const ValueKey('first-value-intent')));
+    await _tapVisible(tester, find.text('Kaynağı aç'));
+    await _pumpUntilFound(tester, find.byType(SourceReaderScreen));
+    Navigator.of(tester.element(find.byType(SourceReaderScreen))).pop();
     await _pumpUntilFound(tester, find.text('Diğer yollar'));
+
     await _tapVisible(tester, find.text('Diğer yollar'));
-    await tester.pumpAndSettle();
+    await _pumpUntilFound(tester, find.byKey(const ValueKey('workspace-other-study-paths-scroll')));
 
     expect(find.byKey(const ValueKey('workspace-other-study-paths-scroll')), findsOneWidget);
     expect(find.text('Hızlı özet'), findsOneWidget);
