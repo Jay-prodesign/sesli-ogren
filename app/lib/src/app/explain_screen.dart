@@ -202,26 +202,32 @@ class _ExplainScreenState extends State<ExplainScreen> {
               return _unavailable(GroundedExplainUnavailableReason.temporaryFailure);
             }
             if (!snapshot.hasData) {
-              return const Center(
-                child: Padding(
-                  padding: EdgeInsets.all(28),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      CompanionView(state: CompanionVisualState.think, size: 72),
-                      SizedBox(height: 14),
-                      Text(
-                        'Kaynağından açıklamayı hazırlıyorum…',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(color: AtelierStyle.ink, fontSize: 17, fontWeight: FontWeight.w900),
+              return LayoutBuilder(
+                builder: (context, constraints) => SingleChildScrollView(
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                    child: const Padding(
+                      padding: EdgeInsets.all(28),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          CompanionView(state: CompanionVisualState.think, size: 72),
+                          SizedBox(height: 14),
+                          Text(
+                            'Kaynağından açıklamayı hazırlıyorum…',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(color: AtelierStyle.ink, fontSize: 17, fontWeight: FontWeight.w900),
+                          ),
+                          SizedBox(height: 6),
+                          Text(
+                            'Yalnız güncel kaynak sürümü kullanılıyor.',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(color: AtelierStyle.muted, height: 1.4),
+                          ),
+                        ],
                       ),
-                      SizedBox(height: 6),
-                      Text(
-                        'Yalnız güncel kaynak sürümü kullanılıyor.',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(color: AtelierStyle.muted, height: 1.4),
-                      ),
-                    ],
+                    ),
                   ),
                 ),
               );
