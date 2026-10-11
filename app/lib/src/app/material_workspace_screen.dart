@@ -109,14 +109,18 @@ class _MaterialWorkspaceScreenState extends State<MaterialWorkspaceScreen> {
     );
     if (!mounted) return;
     if (currentSource?.identity.sourceVersionId != sourceVersionId) {
-      setState(() => _snapshot = _load());
+      setState(() {
+        _snapshot = _load();
+      });
       ScaffoldMessenger.of(context)
           .showSnackBar(const SnackBar(content: Text('Kaynak güncellendi. Güncel sürümü açmak için tekrar dokun.')));
       return;
     }
     final extracted = data.extracted;
     if (extracted == null || !extracted.isValid || extracted.normalizedText.trim().isEmpty) {
-      setState(() => _snapshot = _load());
+      setState(() {
+        _snapshot = _load();
+      });
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Bu kaynak için okunabilir güncel metin bulunamadı. Kaynağı kontrol edip tekrar dene.'),
@@ -182,7 +186,11 @@ class _MaterialWorkspaceScreenState extends State<MaterialWorkspaceScreen> {
         },
       ),
     );
-    if (mounted) setState(() => _snapshot = _load());
+    if (mounted) {
+      setState(() {
+        _snapshot = _load();
+      });
+    }
   }
 
   void _replaceReaderWith(BuildContext readerContext, Widget destination) {
