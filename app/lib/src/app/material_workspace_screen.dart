@@ -844,7 +844,7 @@ class _StudyToolTile extends StatelessWidget {
 CompanionVisualState _companionState(RecallStateKind? state) => switch (state) {
   RecallStateKind.retrievedOnce => CompanionVisualState.success,
   RecallStateKind.developing => CompanionVisualState.idle,
-  RecallStateKind.needsReview => CompanionVisualState.correct,
+  RecallStateKind.needsReview => CompanionVisualState.think,
   RecallStateKind.notAssessed || null => CompanionVisualState.listen,
 };
 
