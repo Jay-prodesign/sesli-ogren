@@ -253,7 +253,6 @@ class _Ready extends StatelessWidget {
     final theme = Theme.of(context);
     final living = LivingDeskReviewScope.active(context);
     final accent = living ? AtelierStyle.teal : AppPalette.attention;
-    final accentSoft = living ? AtelierStyle.mint : AppPalette.attentionSoft;
     final paper = living ? AtelierStyle.paper : AppPalette.surface;
     final line = living ? AtelierStyle.line : AppPalette.outline;
     final hero = living ? AtelierStyle.ink : AppPalette.primaryDark;

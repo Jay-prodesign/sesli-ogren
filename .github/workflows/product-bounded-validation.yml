@@ -31,7 +31,7 @@ jobs:
             echo "run_full=true" >> "$GITHUB_OUTPUT"
           elif printf '%s' "$message" | grep -Fq "[product-ci]"; then
             echo "run_full=true" >> "$GITHUB_OUTPUT"
-          elif printf '%s' "$message" | grep -Fq "[milestone-ci]" && ! printf '%s' "$message" | grep -Fq "[visual-ci]"; then
+          elif printf '%s' "$message" | grep -Fq "[milestone-ci]"; then
             echo "run_full=true" >> "$GITHUB_OUTPUT"
           else
             echo "run_full=false" >> "$GITHUB_OUTPUT"
