@@ -42,6 +42,27 @@ class _RecordingServerMaterialGateway extends SupabaseSourceSummaryGateway {
   }
 }
 
+class _MutatingExplainGateway implements GroundedExplainGateway {
+  _MutatingExplainGateway(this.beforeReturn);
+
+  final Future<void> Function() beforeReturn;
+  int calls = 0;
+
+  @override
+  Future<GroundedExplainResult> explain(GroundedExplainRequest request) async {
+    calls += 1;
+    await beforeReturn();
+    return GroundedExplainReady(
+      sourceVersionId: request.sourceVersionId,
+      sourceContentDigest: request.sourceContentDigest,
+      explanation: 'Bu eski kaynak sürümüne ait açıklama ekranda görünmemeli.',
+      keyPoints: const ['Eski sürüm'],
+      language: 'tr-TR',
+      executionRef: 'test:mutating-grounded-explain',
+    );
+  }
+}
+
 class _RecordingExplainGateway implements GroundedExplainGateway {
   GroundedExplainRequest? lastRequest;
 
@@ -108,6 +129,58 @@ void main() {
     await tester.tap(find.text('Hatırla ile devam et'));
     await _pumpUntilFound(tester, find.text('Hatırla'));
     expect(find.text('Hatırla'), findsOneWidget);
+  });
+
+  testWidgets('Explain suppresses a generated result when the source changes in flight', (tester) async {
+    final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
+    addTearDown(store.close);
+
+    final ingest = SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor());
+    const materialId = MaterialId('grounded-explain-inflight-source-change');
+    final first = await ingest.ingestPastedText(
+      learner: AppRuntime.localM5LearnerFixture,
+      materialId: materialId,
+      text: 'İlk kaynak sürümü fotosentezde ışık enerjisini açıklar.',
+      sourceName: 'Biyoloji notu',
+    );
+    const serverMaterialId = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
+    await store.saveServerMaterialBinding(
+      learner: AppRuntime.localM5LearnerFixture,
+      materialId: materialId,
+      sourceVersionId: first.sourceVersion.identity.sourceVersionId,
+      serverMaterialId: serverMaterialId,
+    );
+
+    final explain = _MutatingExplainGateway(() async {
+      await ingest.ingestPastedText(
+        learner: AppRuntime.localM5LearnerFixture,
+        materialId: materialId,
+        text: 'İkinci kaynak sürümü fotosentezde kimyasal enerji depolanmasını günceller.',
+        sourceName: 'Biyoloji notu',
+      );
+    });
+    final runtime = AppRuntime(
+      learner: AppRuntime.localM5LearnerFixture,
+      store: store,
+      ingest: ingest,
+      recall: RecallLearningService(sourceStore: store, learningStore: store.learningTruthStore()),
+      telemetry: store.operationalTelemetry(),
+      explain: explain,
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: ExplainScreen(runtime: runtime, source: first.sourceVersion),
+      ),
+    );
+    await _pumpUntilFound(tester, find.text('Kaynak değişti'));
+
+    expect(explain.calls, 1);
+    expect(find.textContaining('eski kaynak sürümüne ait açıklama ekranda görünmemeli'), findsNothing);
+    expect(find.text('Yeniden dene'), findsNothing);
+    expect(find.text('Güncel kaynakla Hatırla'), findsOneWidget);
+    expect(find.text('Güncel çalışmaya dön'), findsOneWidget);
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('Explain uses persisted server material identity for a local source', (tester) async {

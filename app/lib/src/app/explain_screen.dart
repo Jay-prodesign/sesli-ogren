@@ -133,7 +133,7 @@ class _ExplainScreenState extends State<ExplainScreen> {
         serverMaterialId = createdServerMaterialId;
       }
 
-      return await widget.runtime.explain.explain(
+      final result = await widget.runtime.explain.explain(
         GroundedExplainRequest(
           materialId: MaterialId(serverMaterialId),
           sourceVersionId: widget.source.identity.sourceVersionId,
@@ -142,6 +142,16 @@ class _ExplainScreenState extends State<ExplainScreen> {
           outputLocale: 'tr-TR',
         ),
       );
+
+      final sourceAfterExplain = await widget.runtime.store.currentSourceVersion(
+        learner: widget.runtime.learner,
+        materialId: widget.source.identity.materialId,
+      );
+      if (sourceAfterExplain?.identity.sourceVersionId != widget.source.identity.sourceVersionId ||
+          sourceAfterExplain?.identity.contentDigest != widget.source.identity.contentDigest) {
+        return const GroundedExplainUnavailable(reason: GroundedExplainUnavailableReason.staleSource);
+      }
+      return result;
     } catch (_) {
       return const GroundedExplainUnavailable(reason: GroundedExplainUnavailableReason.temporaryFailure);
     }
@@ -494,8 +504,8 @@ class _Unavailable extends StatelessWidget {
       ),
       GroundedExplainUnavailableReason.staleSource => (
         'Kaynak değişti',
-        'Eski kaynak sürümüne ait açıklamayı göstermiyoruz. Güncel kaynakla yeniden dene.',
-        true,
+        'Eski kaynak sürümüne ait açıklamayı göstermiyoruz. Güncel çalışma akışına dön veya Hatırla ile devam et.',
+        false,
       ),
       GroundedExplainUnavailableReason.temporaryFailure => (
         'Açıklama şu anda alınamadı',
@@ -526,10 +536,21 @@ class _Unavailable extends StatelessWidget {
               OutlinedButton.icon(
                 onPressed: onRecall,
                 icon: const Icon(Icons.psychology_alt_outlined),
-                label: const Text('Hatırla ile devam et'),
+                label: Text(
+                  reason == GroundedExplainUnavailableReason.staleSource
+                      ? 'Güncel kaynakla Hatırla'
+                      : 'Hatırla ile devam et',
+                ),
               ),
             if (onRecall != null) const SizedBox(height: 4),
-            TextButton(onPressed: onBack, child: const Text('Materyale dön')),
+            TextButton(
+              onPressed: onBack,
+              child: Text(
+                reason == GroundedExplainUnavailableReason.staleSource
+                    ? 'Güncel çalışmaya dön'
+                    : 'Materyale dön',
+              ),
+            ),
           ],
         ),
       ),
