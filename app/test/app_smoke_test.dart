@@ -1623,7 +1623,9 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
-        home: ProfileSurface(runtime: runtime, onAccountDeleted: () => deletedCallback = true),
+        home: Scaffold(
+          body: ProfileSurface(runtime: runtime, onAccountDeleted: () => deletedCallback = true),
+        ),
       ),
     );
     await pumpUntilFound(tester, find.text('Ücretsiz plan'));
