@@ -302,17 +302,21 @@ class _ListenScreenState extends State<ListenScreen> {
   }
 
   Future<void> _handoffToRecall() async {
-    // Recall is source-hidden. If native speech cannot be stopped, do not open
-    // Recall while the source may still be audible.
+    // Recall is source-hidden. Native speech must stop before the source can be
+    // hidden only when playback is actually active or still starting. When the
+    // learner has not started audio, there is no audible source to gate on.
+    final sourceMayBeAudible = _speaking || _startingPlayback;
     _playToken++;
-    try {
-      await _speech.stop();
-    } catch (_) {
-      if (!mounted) return;
-      setState(() {
-        _error = 'Kaynak sesi güvenle durdurulamadı. Hatırla açılmadı; sesi durdurup tekrar deneyebilirsin.';
-      });
-      return;
+    if (sourceMayBeAudible) {
+      try {
+        await _speech.stop();
+      } catch (_) {
+        if (!mounted) return;
+        setState(() {
+          _error = 'Kaynak sesi güvenle durdurulamadı. Hatırla açılmadı; sesi durdurup tekrar deneyebilirsin.';
+        });
+        return;
+      }
     }
     if (!mounted) return;
     setState(() {
