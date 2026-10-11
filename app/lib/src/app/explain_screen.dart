@@ -505,43 +505,51 @@ class _Unavailable extends StatelessWidget {
         true,
       ),
     };
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(28),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const CompanionView(state: CompanionVisualState.think, size: 72),
-            const SizedBox(height: 14),
-            Text(title, style: Theme.of(context).textTheme.titleLarge, textAlign: TextAlign.center),
-            const SizedBox(height: 8),
-            Text(body, textAlign: TextAlign.center),
-            const SizedBox(height: 18),
-            if (retryable)
-              FilledButton.icon(
-                onPressed: onRetry,
-                icon: const Icon(Icons.refresh_rounded),
-                label: const Text('Yeniden dene'),
-              ),
-            if (retryable) const SizedBox(height: 8),
-            if (onRecall != null)
-              OutlinedButton.icon(
-                onPressed: onRecall,
-                icon: const Icon(Icons.psychology_alt_outlined),
-                label: Text(
-                  reason == GroundedExplainUnavailableReason.staleSource
-                      ? 'Güncel kaynakla Hatırla'
-                      : 'Hatırla ile devam et',
-                ),
-              ),
-            if (onRecall != null) const SizedBox(height: 4),
-            TextButton(
-              onPressed: onBack,
-              child: Text(
-                reason == GroundedExplainUnavailableReason.staleSource ? 'Güncel çalışmaya dön' : 'Materyale dön',
+    return LayoutBuilder(
+      builder: (context, constraints) => SingleChildScrollView(
+        key: const ValueKey('explain-unavailable-scroll'),
+        child: ConstrainedBox(
+          constraints: BoxConstraints(minHeight: constraints.maxHeight),
+          child: Center(
+            child: Padding(
+              padding: const EdgeInsets.all(28),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const CompanionView(state: CompanionVisualState.think, size: 72),
+                  const SizedBox(height: 14),
+                  Text(title, style: Theme.of(context).textTheme.titleLarge, textAlign: TextAlign.center),
+                  const SizedBox(height: 8),
+                  Text(body, textAlign: TextAlign.center),
+                  const SizedBox(height: 18),
+                  if (retryable)
+                    FilledButton.icon(
+                      onPressed: onRetry,
+                      icon: const Icon(Icons.refresh_rounded),
+                      label: const Text('Yeniden dene'),
+                    ),
+                  if (retryable) const SizedBox(height: 8),
+                  if (onRecall != null)
+                    OutlinedButton.icon(
+                      onPressed: onRecall,
+                      icon: const Icon(Icons.psychology_alt_outlined),
+                      label: Text(
+                        reason == GroundedExplainUnavailableReason.staleSource
+                            ? 'Güncel kaynakla Hatırla'
+                            : 'Hatırla ile devam et',
+                      ),
+                    ),
+                  if (onRecall != null) const SizedBox(height: 4),
+                  TextButton(
+                    onPressed: onBack,
+                    child: Text(
+                      reason == GroundedExplainUnavailableReason.staleSource ? 'Güncel çalışmaya dön' : 'Materyale dön',
+                    ),
+                  ),
+                ],
               ),
             ),
-          ],
+          ),
         ),
       ),
     );

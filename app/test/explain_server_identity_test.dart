@@ -91,6 +91,54 @@ Future<void> _pumpUntilFound(WidgetTester tester, Finder finder, {int maxPumps =
 void main() {
   sqfliteFfiInit();
 
+  testWidgets('Explain recovery remains reachable on a short large-text screen', (tester) async {
+    tester.view.physicalSize = const Size(320, 420);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
+    addTearDown(store.close);
+    final ingest = SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor());
+    const materialId = MaterialId('explain-large-text-recovery');
+    await ingest.ingestPastedText(
+      learner: AppRuntime.localM5LearnerFixture,
+      materialId: materialId,
+      text: 'Fotosentez sırasında klorofil ışığın soğurulmasına yardım eder.',
+      sourceName: 'Büyük yazı açıklama notu',
+    );
+    final source = await store.currentSourceVersion(learner: AppRuntime.localM5LearnerFixture, materialId: materialId);
+    expect(source, isNotNull);
+    final runtime = AppRuntime(
+      learner: AppRuntime.localM5LearnerFixture,
+      store: store,
+      ingest: ingest,
+      recall: RecallLearningService(sourceStore: store, learningStore: store.learningTruthStore()),
+      telemetry: store.operationalTelemetry(),
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: MediaQuery(
+          data: const MediaQueryData(textScaler: TextScaler.linear(1.6)),
+          child: ExplainScreen(runtime: runtime, source: source!),
+        ),
+      ),
+    );
+    await _pumpUntilFound(tester, find.byKey(const ValueKey('explain-unavailable-scroll')));
+
+    expect(find.text('Açıklama henüz hazır değil'), findsOneWidget);
+    await tester.scrollUntilVisible(
+      find.text('Materyale dön'),
+      140,
+      scrollable: find.byKey(const ValueKey('explain-unavailable-scroll')),
+    );
+    await tester.pump();
+    expect(find.text('Hatırla ile devam et'), findsOneWidget);
+    expect(find.text('Materyale dön').hitTestable(), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('Explain provider failure keeps the learner moving through Recall or back to the material', (
     tester,
   ) async {
