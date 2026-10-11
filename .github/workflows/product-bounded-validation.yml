@@ -74,16 +74,24 @@ jobs:
           git diff --exit-code
       - run: flutter analyze
       - name: Core Golden Journey tests
-        run: >-
-          flutter test --reporter expanded
-          test/golden_journey_test.dart
-          test/product_shell_continuation_repair_test.dart
-          test/product_home_next_action_test.dart
-          test/first_value_intent_test.dart
-          test/source_reader_screen_test.dart
-          test/listen_playback_rate_test.dart
-          test/durable_reopen_continuity_test.dart
-          test/living_study_desk_home_test.dart
-          test/recall_learning_service_test.dart
+        shell: bash
+        run: |
+          set -euo pipefail
+          tests=(
+            test/golden_journey_test.dart
+            test/product_shell_continuation_repair_test.dart
+            test/product_home_next_action_test.dart
+            test/first_value_intent_test.dart
+            test/source_reader_screen_test.dart
+            test/listen_playback_rate_test.dart
+            test/durable_reopen_continuity_test.dart
+            test/living_study_desk_home_test.dart
+            test/recall_learning_service_test.dart
+          )
+          for test_file in "${tests[@]}"; do
+            echo "::group::core:${test_file}"
+            timeout 75s flutter test --reporter expanded "${test_file}"
+            echo "::endgroup::"
+          done
       - name: Bounded expanded tests
         run: timeout 240s flutter test --reporter expanded
