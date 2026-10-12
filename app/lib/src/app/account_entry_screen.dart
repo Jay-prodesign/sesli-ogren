@@ -301,7 +301,11 @@ class _AccountEntryScreenState extends State<AccountEntryScreen> {
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         Text(
-                          _codeRequested ? 'Kodunu gir' : 'Öğrenme alanına gir',
+                          _codeRequested
+                              ? 'Kodunu gir'
+                              : widget.onContinueWithoutAccount != null
+                              ? 'Hesabını bağla'
+                              : 'Öğrenme alanına gir',
                           style: theme.textTheme.headlineSmall?.copyWith(
                             color: AtelierStyle.ink,
                             fontWeight: FontWeight.w900,
@@ -311,6 +315,8 @@ class _AccountEntryScreenState extends State<AccountEntryScreen> {
                         Text(
                           _codeRequested
                               ? '${_emailController.text.trim()} adresine gönderilen 6 haneli kodu gir.'
+                              : widget.onContinueWithoutAccount != null
+                              ? 'Hesap isteğe bağlıdır. E-posta ile bağlanabilir veya cihazdaki öğrenmene hesapsız devam edebilirsin.'
                               : 'E-posta adresinle giriş yap veya yeni hesabını oluştur. Şifre gerekmiyor.',
                           style: theme.textTheme.bodyMedium?.copyWith(color: AtelierStyle.muted, height: 1.45),
                         ),
