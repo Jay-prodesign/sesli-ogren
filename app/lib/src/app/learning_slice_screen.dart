@@ -682,7 +682,8 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
           final independentSuccess =
               result.evidence.outcome == RecallOutcome.correct && result.evidence.assistance == RecallAssistance.none;
           final developing =
-              result.evidence.outcome == RecallOutcome.partial || result.evidence.outcome == RecallOutcome.helpedCorrect;
+              result.evidence.outcome == RecallOutcome.partial ||
+              result.evidence.outcome == RecallOutcome.helpedCorrect;
           if (independentSuccess) {
             await HapticFeedback.mediumImpact();
           } else if (developing) {

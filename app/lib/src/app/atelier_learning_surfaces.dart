@@ -61,7 +61,7 @@ class AtelierSourceTrustStrip extends StatelessWidget {
         child: Container(
           key: const ValueKey('atelier-source-trust'),
           width: double.infinity,
-          padding: const EdgeInsets.fromLTRB(13, 11, 13, 12),
+          padding: EdgeInsets.fromLTRB(13, compactEvidence ? 9 : 11, 13, compactEvidence ? 10 : 12),
           decoration: BoxDecoration(color: AtelierStyle.pulseSoft, borderRadius: BorderRadius.circular(12)),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -203,12 +203,10 @@ class AtelierWorkspace extends StatelessWidget {
         switch (state.kind) {
           RecallStateKind.needsReview =>
             'Son deneme eksik ya da yanlış geri çağırma gösterdi; sıradaki adım kaynaktan onarım.',
-          RecallStateKind.developing =>
-            'Son deneme kısmi ya da destekliydi; bu sonuç ustalık olarak yorumlanmıyor.',
+          RecallStateKind.developing => 'Son deneme kısmi ya da destekliydi; bu sonuç ustalık olarak yorumlanmıyor.',
           RecallStateKind.retrievedOnce =>
             'Son deneme ipucusuz doğruydu; kalıcılık sonraki bağımsız denemede yeniden değerlendirilecek.',
-          RecallStateKind.notAssessed =>
-            'Bu sürüm için bağımsız doğru geri çağırma henüz kaydedilmedi.',
+          RecallStateKind.notAssessed => 'Bu sürüm için bağımsız doğru geri çağırma henüz kaydedilmedi.',
         };
   }
 
@@ -220,6 +218,16 @@ class AtelierWorkspace extends StatelessWidget {
       RecallStateKind.developing => 'Son deneme kısmi ya da destekliydi; bu henüz ustalık değil.',
       RecallStateKind.retrievedOnce => 'İpucusuz doğru hatırladın; kalıcılık henüz doğrulanmadı.',
       RecallStateKind.notAssessed => 'Bağımsız doğru geri çağırma henüz kaydedilmedi.',
+    };
+  }
+
+  String get _evidenceCompactDetail {
+    return switch (continuation?.state.kind) {
+      RecallStateKind.needsReview => 'Sıradaki adım: kaynaktan kısa onarım.',
+      RecallStateKind.developing => 'Sıradaki hedef: ipucusuz hatırlama.',
+      RecallStateKind.retrievedOnce => 'Kalıcılık sonraki bağımsız denemede ölçülür.',
+      RecallStateKind.notAssessed => 'Bağımsız hatırlama henüz yok.',
+      null => 'Bağımsız hatırlama henüz yok.',
     };
   }
 
@@ -366,7 +374,9 @@ class AtelierWorkspace extends StatelessWidget {
               ListTile(
                 leading: const Icon(Icons.center_focus_strong),
                 title: const Text('Takıldığım noktayı netleştir'),
-                subtitle: const Text('Bu kaynağın belirli bir bölümüne odaklan; bu da tek başına öğrenme kanıtı değildir.'),
+                subtitle: const Text(
+                  'Bu kaynağın belirli bir bölümüne odaklan; bu da tek başına öğrenme kanıtı değildir.',
+                ),
                 onTap: () {
                   Navigator.of(sheetContext).pop();
                   onFocus();
@@ -386,7 +396,9 @@ class AtelierWorkspace extends StatelessWidget {
               ListTile(
                 leading: const Icon(Icons.record_voice_over_outlined),
                 title: const Text('Kendi cümlelerimle anlat'),
-                subtitle: const Text('Kaynağı kapatıp kendi açıklamanı kur ve kaynakla karşılaştırılmış geri bildirim al.'),
+                subtitle: const Text(
+                  'Kaynağı kapatıp kendi açıklamanı kur ve kaynakla karşılaştırılmış geri bildirim al.',
+                ),
                 onTap: () {
                   Navigator.of(sheetContext).pop();
                   onExplain();
