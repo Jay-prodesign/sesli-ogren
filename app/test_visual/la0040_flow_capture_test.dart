@@ -206,6 +206,7 @@ void main() {
         onOpenMaterial: (_) {},
       ),
     );
+    expect(find.byKey(const ValueKey('home-next-companion')), findsOneWidget);
   });
 
   testWidgets('LA-0040 populated Home survives 320px + large type', (tester) async {
@@ -382,6 +383,8 @@ void main() {
       size: const Size(320, 700),
       textScaler: const TextScaler.linear(1.5),
     );
+    expect(find.byKey(const ValueKey('workspace-compact-companion')), findsOneWidget);
+    expect(find.byType(AtelierLearningRail), findsNothing);
   });
 
   testWidgets('LA-0040 account entry', (tester) async {

@@ -989,9 +989,7 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
             ),
             const SizedBox(height: 9),
             Text(
-              _editingExistingSource
-                  ? 'Yeni sürümü ekle.\nGeçmişin kaynakla karışmasın.'
-                  : 'Bir sayfa getir.\nGerisini birlikte çalışalım.',
+              _editingExistingSource ? 'Yeni sürümü ekle.' : 'Kaynağını getir.',
               style: const TextStyle(
                 color: AtelierStyle.ink,
                 fontSize: 28,
@@ -1003,8 +1001,8 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
             const SizedBox(height: 10),
             Text(
               _editingExistingSource
-                  ? 'Yeni kaynak sürümü eski öğrenme kanıtını devralmaz.'
-                  : 'PDF ya da metin. Önce kaynağın görünür kalır; sonra kapatıp Hatırla ile denersin.',
+                  ? 'Yeni sürüm eski öğrenme kanıtını devralmaz.'
+                  : 'PDF ya da metin. Kaynak açık kalır; hazır olduğunda kapatıp hatırlarsın.',
               style: const TextStyle(color: AtelierStyle.muted, fontSize: 14, height: 1.45),
             ),
 
@@ -1045,7 +1043,7 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
                       icon: Icons.picture_as_pdf_outlined,
                       eyebrow: 'PDF',
                       title: _busy ? 'Hazırlanıyor…' : 'PDF seç',
-                      body: 'Ders notunu veya bir bölümü getir. Metni çıkarıp aynı kaynakta çalışmaya devam ederiz.',
+                      body: 'Notunu getir. Metni çıkarıp aynı kaynakta çalışırsın.',
                       primary: true,
                       enabled: !_busy,
                       onTap: _pickPdf,
@@ -1055,7 +1053,7 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
                       icon: Icons.notes_rounded,
                       eyebrow: 'METİN',
                       title: 'Metin yapıştır',
-                      body: 'Notunu doğrudan yapıştır. Kaynak sürümü korunur; sonra Reader, Dinle ve Hatırla aynı metne bağlanır.',
+                      body: 'Notunu yapıştır. Reader, Dinle ve Hatırla aynı kaynağa bağlanır.',
                       primary: false,
                       enabled: !_busy,
                       onTap: _switchToTextSource,
@@ -1099,7 +1097,7 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
                     SizedBox(width: 9),
                     Expanded(
                       child: Text(
-                        'Kaynağın önce açılır. Öğrenme durumun yalnız kendi Hatırla denemenle değişir.',
+                        'Öğrenme durumunu yalnız kendi Hatırla denemen değiştirir.',
                         style: TextStyle(color: AtelierStyle.ink, fontSize: 12.5, height: 1.38),
                       ),
                     ),
