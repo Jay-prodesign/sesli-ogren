@@ -66,9 +66,11 @@ Future<void> _pumpUntilGone(WidgetTester tester, Finder finder, {int maxPumps = 
 }
 
 Future<void> _tapVisible(WidgetTester tester, Finder finder) async {
-  await tester.scrollUntilVisible(finder, 220, scrollable: find.byType(Scrollable).last);
+  await tester.ensureVisible(finder);
   await tester.pump();
-  await tester.tap(finder);
+  final target = finder.hitTestable();
+  expect(target, findsOneWidget);
+  await tester.tap(target);
   await tester.pump();
 }
 
