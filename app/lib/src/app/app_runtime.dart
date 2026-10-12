@@ -43,9 +43,7 @@ class AppRuntime {
   static const localLearner = LearnerIdentity.local();
 
   /// Explicit M5 authenticated fixture only.
-  static const localM5LearnerFixture = LearnerIdentity.authenticated(
-    id: LearnerId('m5-local-authenticated-learner'),
-  );
+  static const localM5LearnerFixture = LearnerIdentity.authenticated(id: LearnerId('m5-local-authenticated-learner'));
 
   static const primaryMaterialId = MaterialId('m5-primary-material');
 
