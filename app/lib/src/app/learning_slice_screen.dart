@@ -879,7 +879,7 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
                           ),
                           child: Padding(
                             padding: const EdgeInsets.all(6),
-                            child: CompanionView(state: _companionState, size: compactResultHeader ? 68 : 88),
+                            child: CompanionView(state: _companionState, size: compactResultHeader ? 58 : 66),
                           ),
                         ),
                         const SizedBox(width: 14),
