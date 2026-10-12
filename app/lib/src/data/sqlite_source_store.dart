@@ -1524,6 +1524,20 @@ ORDER BY c.ordinal ASC
     required DateTime reviewedAt,
   }) {
     return _database.transaction((transaction) async {
+      final materialRows = await transaction.query(
+        'materials',
+        columns: ['current_source_version_id', 'lifecycle_status', 'deleted_at_utc'],
+        where: 'learner_id = ? AND material_id = ?',
+        whereArgs: [learner.id.value, set.materialId.value],
+        limit: 1,
+      );
+      if (materialRows.isEmpty ||
+          materialRows.single['lifecycle_status'] != MaterialLifecycleStatus.active.name ||
+          materialRows.single['deleted_at_utc'] != null ||
+          materialRows.single['current_source_version_id'] != set.sourceVersionId.value) {
+        throw const SourceStoreConflict('Flashcard response is stale for the current source version.');
+      }
+
       final sessionRows = await transaction.query(
         'flashcard_sessions',
         where: 'learner_id = ? AND flashcard_set_id = ?',

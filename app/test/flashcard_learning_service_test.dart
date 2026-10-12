@@ -184,6 +184,17 @@ void main() {
           'Oksijenli solunumda oksijen önemli bir girdidir.',
     );
 
+    await expectLater(
+      store.recordFlashcardResponse(
+        learner: learner,
+        set: first.set,
+        card: firstCard,
+        response: FlashcardResponse.remembered,
+        reviewedAt: DateTime.utc(2026, 10, 12, 13),
+      ),
+      throwsA(isA<SourceStoreConflict>()),
+    );
+
     final second = await service.openCurrentSet(learner: learner, materialId: materialId);
     expect(second.set.id, isNot(first.set.id));
     expect(second.set.sourceVersionId, isNot(first.set.sourceVersionId));
