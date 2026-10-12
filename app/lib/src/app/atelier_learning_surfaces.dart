@@ -53,8 +53,7 @@ class AtelierSourceTrustStrip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final versionLabel = sourceVersion.isCurrent ? 'GÜNCEL SÜRÜM' : 'ÖNCEKİ SÜRÜM';
-    final compactEvidence =
-        MediaQuery.sizeOf(context).width < 340 || MediaQuery.textScalerOf(context).scale(1) > 1.25;
+    final compactEvidence = MediaQuery.sizeOf(context).width < 340 || MediaQuery.textScalerOf(context).scale(1) > 1.25;
     return Semantics(
       container: true,
       label:
