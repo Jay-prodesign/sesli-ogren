@@ -25,7 +25,7 @@ class SupabaseLearnerAuth {
     final client = await _clientForConfiguredProject();
     final currentUser = client.auth.currentSession?.user;
     if (currentUser == null) return null;
-    return AuthenticatedLearner(id: LearnerId(currentUser.id));
+    return LearnerIdentity.authenticated(id: LearnerId(currentUser.id));
   }
 
   static Future<void> requestEmailOtp(String email) async {
@@ -53,7 +53,7 @@ class SupabaseLearnerAuth {
       if (user == null || session == null) {
         throw const LearnerAuthenticationException('Doğrulama tamamlandı ancak güvenli oturum açılamadı.');
       }
-      return AuthenticatedLearner(id: LearnerId(user.id));
+      return LearnerIdentity.authenticated(id: LearnerId(user.id));
     } on LearnerAuthenticationException {
       rethrow;
     } catch (_) {
