@@ -854,11 +854,7 @@ void main() {
       of: find.byKey(const ValueKey('workspace-other-study-paths-scroll')),
       matching: find.byType(Scrollable),
     );
-    await scrollUntilFound(
-      tester,
-      find.byKey(const ValueKey('workspace-other-focus')),
-      scrollable: otherPathsScroll,
-    );
+    await scrollUntilFound(tester, find.byKey(const ValueKey('workspace-other-focus')), scrollable: otherPathsScroll);
     await tapVisible(tester, find.byKey(const ValueKey('workspace-other-focus')));
     await pumpUntilFound(tester, find.text('KISA ODAK · 3 ADIM'));
     expect(find.byKey(const ValueKey('focus-source-trust')), findsOneWidget);
@@ -2090,7 +2086,12 @@ void main() {
     await pumpUntilFound(tester, find.text('Materyali güncelle'));
     await tapVisible(tester, find.text('Materyali güncelle'));
     final editorScroll = find.descendant(of: find.byType(LearningSliceScreen), matching: find.byType(Scrollable));
-    await scrollUntilFound(tester, find.byKey(const ValueKey('source-choice-text')), scrollable: editorScroll, delta: 180);
+    await scrollUntilFound(
+      tester,
+      find.byKey(const ValueKey('source-choice-text')),
+      scrollable: editorScroll,
+      delta: 180,
+    );
     await tapVisible(tester, find.byKey(const ValueKey('source-choice-text')));
     await tester.enterText(
       find.byKey(const ValueKey('pasted-material-text')),
