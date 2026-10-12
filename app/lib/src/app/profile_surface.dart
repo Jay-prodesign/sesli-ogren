@@ -288,8 +288,7 @@ class _ProfileSurfaceState extends State<ProfileSurface> {
                     _ProfileTile(
                       icon: Icons.cloud_off_rounded,
                       title: 'Hesap bilgisi doğrulanamadı',
-                      subtitle:
-                          'Plan veya kullanım bilgisini tahmin etmiyoruz. Bağlantı geri geldiğinde yeniden deneyebilirsin.',
+                      subtitle: 'Plan veya kullanım bilgisini tahmin etmiyoruz. Bağlantı geri geldiğinde yeniden deneyebilirsin.',
                       iconBackground: AppPalette.attentionSoft,
                       iconForeground: AppPalette.attention,
                     ),
@@ -397,12 +396,10 @@ class _ProfileSurfaceState extends State<ProfileSurface> {
                   : _remoteDeletionConfirmed
                   ? 'Sunucu hesabı silindi. Bu cihazdaki yerel öğrenme verilerinin temizliği tamamlanmayı bekliyor.'
                   : switch (_resolvedOverview?.accountStatus) {
-                      'deletion_requested' =>
-                        'Hesap silme isteği sunucuda bekliyor. Aynı silme isteğini tekrar göndermiyoruz; süreç tamamlanana kadar bu durum korunur.',
+                      'deletion_requested' => 'Hesap silme isteği sunucuda bekliyor. Aynı silme isteğini tekrar göndermiyoruz; süreç tamamlanana kadar bu durum korunur.',
                       'deleted' =>
                         'Sunucu hesabı silinmiş olarak bildiriyor. Bu ekrandan yeni bir silme isteği gönderilmiyor.',
-                      _ =>
-                        'Tek tek materyalleri Kütüphane’den silebilirsin. Hesap silme tüm hesap ve öğrenme verilerini kapsar.',
+                      _ => 'Tek tek materyalleri Kütüphane’den silebilirsin. Hesap silme tüm hesap ve öğrenme verilerini kapsar.',
                     },
               iconBackground: local ? AppPalette.signalSoft : const Color(0xFFFDE7E5),
               iconForeground: local ? AppPalette.signal : AppPalette.destructive,
