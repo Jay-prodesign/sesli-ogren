@@ -16,6 +16,7 @@ import 'package:sesli_ogren/src/app/listen_screen.dart';
 import 'package:sesli_ogren/src/app/learning_slice_screen.dart';
 import 'package:sesli_ogren/src/app/product_shell_screen.dart';
 import 'package:sesli_ogren/src/app/quick_recap_screen.dart';
+import 'package:sesli_ogren/src/app/quiz_screen.dart';
 import 'package:sesli_ogren/src/app/living_study_desk_home.dart';
 import 'package:sesli_ogren/src/app/source_reader_screen.dart';
 import 'package:sesli_ogren/src/data/pdf_text_extractor.dart';
@@ -621,6 +622,218 @@ void main() {
     expect(find.text('Tekrar gerekli'), findsOneWidget);
     expect(tester.takeException(), isNull);
     await expectLater(find.byType(Scaffold), matchesGoldenFile('goldens/la0040_flashcards_revealed_320_text150.png'));
+  });
+
+  testWidgets('LA-0040 source-grounded Quiz / Practice Test', (tester) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
+    addTearDown(store.close);
+    final ingest = SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor());
+    final runtime = AppRuntime(
+      learner: AppRuntime.localM5LearnerFixture,
+      store: store,
+      ingest: ingest,
+      recall: RecallLearningService(sourceStore: store, learningStore: store.learningTruthStore()),
+      telemetry: store.operationalTelemetry(),
+    );
+    const quizMaterialId = MaterialId('visual-quiz');
+    await ingest.ingestPastedText(
+      learner: runtime.learner,
+      materialId: quizMaterialId,
+      sourceName: material.title,
+      text:
+          'Fotosentez sırasında bitkiler ışık enerjisini kimyasal enerjiye dönüştürür. '
+          'Klorofil ışığın soğurulmasında önemli görev alır. '
+          'Karbondioksit ve su kullanılarak glikoz üretimine katkı sağlanır.',
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        debugShowCheckedModeBanner: false,
+        theme: SesliOgrenTheme.light(),
+        home: MediaQuery(
+          data: const MediaQueryData(disableAnimations: true),
+          child: LivingDeskReviewScope(child: QuizScreen(runtime: runtime, materialId: quizMaterialId)),
+        ),
+      ),
+    );
+    for (var i = 0; i < 60 && find.byKey(const ValueKey('quiz-submit')).evaluate().isEmpty; i++) {
+      await tester.pump(const Duration(milliseconds: 30));
+    }
+    expect(find.byKey(const ValueKey('quiz-submit')), findsOneWidget);
+    expect(find.byKey(const ValueKey('quiz-source-evidence')), findsNothing);
+    expect(find.byKey(const ValueKey('quiz-companion')), findsOneWidget);
+    expect(tester.takeException(), isNull);
+    await expectLater(find.byType(Scaffold), matchesGoldenFile('goldens/la0040_quiz_390x844.png'));
+
+    await tester.tap(find.byKey(const ValueKey('quiz-option-0')));
+    await tester.pump();
+    await tester.tap(find.byKey(const ValueKey('quiz-submit')));
+    for (var i = 0; i < 60 && find.byKey(const ValueKey('quiz-source-evidence')).evaluate().isEmpty; i++) {
+      await tester.pump(const Duration(milliseconds: 30));
+    }
+    expect(find.text('Doğru.'), findsOneWidget);
+    expect(find.byKey(const ValueKey('quiz-source-evidence')), findsOneWidget);
+    await expectLater(find.byType(Scaffold), matchesGoldenFile('goldens/la0040_quiz_feedback_390x844.png'));
+
+    await tester.tap(find.byKey(const ValueKey('quiz-next')));
+    for (var i = 0; i < 60 && find.text('SORU 2 / 3').evaluate().isEmpty; i++) {
+      await tester.pump(const Duration(milliseconds: 30));
+    }
+    await tester.tap(find.byKey(const ValueKey('quiz-unknown')));
+    for (var i = 0; i < 60 && find.byKey(const ValueKey('quiz-source-evidence')).evaluate().isEmpty; i++) {
+      await tester.pump(const Duration(milliseconds: 30));
+    }
+    await tester.tap(find.byKey(const ValueKey('quiz-next')));
+    for (var i = 0; i < 60 && find.text('SORU 3 / 3').evaluate().isEmpty; i++) {
+      await tester.pump(const Duration(milliseconds: 30));
+    }
+    await tester.tap(find.byKey(const ValueKey('quiz-unknown')));
+    for (var i = 0; i < 60 && find.byKey(const ValueKey('quiz-source-evidence')).evaluate().isEmpty; i++) {
+      await tester.pump(const Duration(milliseconds: 30));
+    }
+    await tester.tap(find.byKey(const ValueKey('quiz-next')));
+    for (var i = 0; i < 60 && find.byKey(const ValueKey('quiz-complete')).evaluate().isEmpty; i++) {
+      await tester.pump(const Duration(milliseconds: 30));
+    }
+    expect(find.byKey(const ValueKey('quiz-complete')), findsOneWidget);
+    expect(find.text('1 doğru · 0 yanlış · 2 bilmiyorum'), findsOneWidget);
+    expect(find.textContaining('genel ustalık, sınav hazır oluşu veya kalıcı öğrenme iddiası değildir'), findsOneWidget);
+    await expectLater(find.byType(Scaffold), matchesGoldenFile('goldens/la0040_quiz_complete_390x844.png'));
+  });
+
+  testWidgets('LA-0040 Quiz source-change recovery', (tester) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
+    addTearDown(store.close);
+    final ingest = SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor());
+    final runtime = AppRuntime(
+      learner: AppRuntime.localM5LearnerFixture,
+      store: store,
+      ingest: ingest,
+      recall: RecallLearningService(sourceStore: store, learningStore: store.learningTruthStore()),
+      telemetry: store.operationalTelemetry(),
+    );
+    const quizMaterialId = MaterialId('visual-quiz-source-change');
+    await ingest.ingestPastedText(
+      learner: runtime.learner,
+      materialId: quizMaterialId,
+      sourceName: 'İlk quiz kaynağı',
+      text:
+          'Fotosentez ışık enerjisini kimyasal enerjiye dönüştürür. '
+          'Klorofil ışığın soğurulmasına yardım eder. '
+          'Karbondioksit süreçte önemli bir girdidir.',
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        debugShowCheckedModeBanner: false,
+        theme: SesliOgrenTheme.light(),
+        home: MediaQuery(
+          data: const MediaQueryData(disableAnimations: true),
+          child: LivingDeskReviewScope(child: QuizScreen(runtime: runtime, materialId: quizMaterialId)),
+        ),
+      ),
+    );
+    for (var i = 0; i < 60 && find.byKey(const ValueKey('quiz-submit')).evaluate().isEmpty; i++) {
+      await tester.pump(const Duration(milliseconds: 30));
+    }
+    await tester.tap(find.byKey(const ValueKey('quiz-option-0')));
+    await tester.pump();
+
+    await ingest.ingestPastedText(
+      learner: runtime.learner,
+      materialId: quizMaterialId,
+      sourceName: 'Güncel quiz kaynağı',
+      text:
+          'Hücresel solunum glikozdaki enerjiyi kullanılabilir enerjiye dönüştürür. '
+          'Mitokondri hücresel enerji dönüşümünde önemli görev alır. '
+          'Oksijenli solunumda oksijen temel girdilerden biridir.',
+    );
+    await tester.tap(find.byKey(const ValueKey('quiz-submit')));
+    for (var i = 0; i < 60 && find.byKey(const ValueKey('quiz-recovery-notice')).evaluate().isEmpty; i++) {
+      await tester.pump(const Duration(milliseconds: 30));
+    }
+    expect(find.text('Güncel quiz kaynağı'), findsOneWidget);
+    expect(find.text('Önceki quiz yanıtı kaydedilmedi. Güncel kaynaktan devam ediyorsun.'), findsOneWidget);
+    expect(find.byKey(const ValueKey('quiz-source-evidence')), findsNothing);
+    expect(tester.takeException(), isNull);
+    await expectLater(find.byType(Scaffold), matchesGoldenFile('goldens/la0040_quiz_source_changed_390x844.png'));
+  });
+
+  testWidgets('LA-0040 Quiz survives 320px + large type', (tester) async {
+    tester.view.physicalSize = const Size(320, 700);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
+    addTearDown(store.close);
+    final ingest = SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor());
+    final runtime = AppRuntime(
+      learner: AppRuntime.localM5LearnerFixture,
+      store: store,
+      ingest: ingest,
+      recall: RecallLearningService(sourceStore: store, learningStore: store.learningTruthStore()),
+      telemetry: store.operationalTelemetry(),
+    );
+    const quizMaterialId = MaterialId('visual-quiz-large');
+    await ingest.ingestPastedText(
+      learner: runtime.learner,
+      materialId: quizMaterialId,
+      sourceName: 'Fotosentez ve ışık enerjisi için uzun quiz çalışma notu',
+      text:
+          'Fotosentez sırasında bitkiler ışık enerjisini kimyasal enerjiye dönüştürür. '
+          'Klorofil ışığın soğurulmasında önemli görev alır. '
+          'Karbondioksit ve su kullanılarak glikoz üretimine katkı sağlanır.',
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        debugShowCheckedModeBanner: false,
+        theme: SesliOgrenTheme.light(),
+        home: MediaQuery(
+          data: const MediaQueryData(textScaler: TextScaler.linear(1.5), disableAnimations: true),
+          child: LivingDeskReviewScope(child: QuizScreen(runtime: runtime, materialId: quizMaterialId)),
+        ),
+      ),
+    );
+    for (var i = 0; i < 60 && find.byKey(const ValueKey('quiz-submit')).evaluate().isEmpty; i++) {
+      await tester.pump(const Duration(milliseconds: 30));
+    }
+    expect(find.byKey(const ValueKey('quiz-submit')), findsOneWidget);
+    expect(find.byKey(const ValueKey('quiz-companion')), findsOneWidget);
+    expect(tester.takeException(), isNull);
+    await expectLater(find.byType(Scaffold), matchesGoldenFile('goldens/la0040_quiz_320_text150.png'));
+
+    await tester.scrollUntilVisible(
+      find.byKey(const ValueKey('quiz-option-0')),
+      160,
+      scrollable: find.byKey(const ValueKey('quiz-scroll')),
+    );
+    await tester.tap(find.byKey(const ValueKey('quiz-option-0')));
+    await tester.pump();
+    await tester.tap(find.byKey(const ValueKey('quiz-submit')));
+    for (var i = 0; i < 60 && find.byKey(const ValueKey('quiz-source-evidence')).evaluate().isEmpty; i++) {
+      await tester.pump(const Duration(milliseconds: 30));
+    }
+    await tester.scrollUntilVisible(
+      find.byKey(const ValueKey('quiz-source-evidence')),
+      160,
+      scrollable: find.byKey(const ValueKey('quiz-scroll')),
+    );
+    await tester.pump();
+    expect(find.byKey(const ValueKey('quiz-next')), findsOneWidget);
+    expect(tester.takeException(), isNull);
+    await expectLater(find.byType(Scaffold), matchesGoldenFile('goldens/la0040_quiz_feedback_320_text150.png'));
   });
 
   testWidgets('LA-0040 source-first Listen', (tester) async {
