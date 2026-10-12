@@ -252,20 +252,22 @@ void main() {
     );
     await _pumpUntilFound(tester, find.byKey(const ValueKey('quiz-submit')));
     expect(find.byKey(const ValueKey('quiz-companion')), findsOneWidget);
-    await tester.scrollUntilVisible(
-      find.byKey(const ValueKey('quiz-option-0')),
-      160,
-      scrollable: find.byType(Scrollable).last,
-    );
-    await tester.tap(find.byKey(const ValueKey('quiz-option-0')).hitTestable());
+    final option = find.byKey(const ValueKey('quiz-option-0'));
+    for (var i = 0; i < 8 && option.hitTestable().evaluate().isEmpty; i++) {
+      await tester.drag(find.byType(Scrollable).last, const Offset(0, -120), warnIfMissed: false);
+      await tester.pump();
+    }
+    expect(option.hitTestable(), findsOneWidget);
+    await tester.tap(option.hitTestable());
     await tester.pump();
     await tester.tap(find.byKey(const ValueKey('quiz-submit')));
     await _pumpUntilFound(tester, find.byKey(const ValueKey('quiz-source-evidence')));
-    await tester.scrollUntilVisible(
-      find.byKey(const ValueKey('quiz-source-evidence')),
-      160,
-      scrollable: find.byType(Scrollable).last,
-    );
+    final evidence = find.byKey(const ValueKey('quiz-source-evidence'));
+    for (var i = 0; i < 8 && evidence.hitTestable().evaluate().isEmpty; i++) {
+      await tester.drag(find.byType(Scrollable).last, const Offset(0, -120), warnIfMissed: false);
+      await tester.pump();
+    }
+    expect(evidence.hitTestable(), findsOneWidget);
     expect(find.byKey(const ValueKey('quiz-next')), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
