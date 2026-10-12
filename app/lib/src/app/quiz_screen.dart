@@ -388,7 +388,15 @@ class _QuizStudyView extends StatelessWidget {
             ),
       body: SafeArea(
         child: completed
-            ? _QuizComplete(data: data, compact: compact, busy: busy, onRestart: onRestart)
+            ? _QuizComplete(
+                data: data,
+                compact: compact,
+                busy: busy,
+                onReturn: () {
+                  Navigator.of(context).maybePop();
+                },
+                onRestart: onRestart,
+              )
             : ListView(
                 key: const ValueKey('quiz-scroll'),
                 padding: EdgeInsets.fromLTRB(16, 10, 16, compact ? 34 : 46),
@@ -664,16 +672,24 @@ class _OptionTile extends StatelessWidget {
 }
 
 class _QuizComplete extends StatelessWidget {
-  const _QuizComplete({required this.data, required this.compact, required this.busy, required this.onRestart});
+  const _QuizComplete({
+    required this.data,
+    required this.compact,
+    required this.busy,
+    required this.onReturn,
+    required this.onRestart,
+  });
 
   final _QuizViewData data;
   final bool compact;
   final bool busy;
+  final VoidCallback onReturn;
   final VoidCallback onRestart;
 
   @override
   Widget build(BuildContext context) {
     final session = data.study.session;
+    final needsRepair = session.incorrectCount > 0 || session.unknownCount > 0;
     return SingleChildScrollView(
       key: const ValueKey('quiz-complete'),
       padding: const EdgeInsets.fromLTRB(16, 18, 16, 32),
@@ -722,19 +738,37 @@ class _QuizComplete extends StatelessWidget {
                   'Bu tur yalnız bu kaynak sürümündeki quiz yanıtlarını özetler; genel ustalık, sınav hazır oluşu veya kalıcı öğrenme iddiası değildir.',
                   style: TextStyle(color: AtelierStyle.muted, height: 1.45),
                 ),
+                const SizedBox(height: 12),
+                Text(
+                  needsRepair
+                      ? 'Sıradaki yararlı adım: yanlış veya “bilmiyorum” kalan noktaları kaynakta onar, sonra yeniden dene.'
+                      : 'Bu turda tüm yanıtların kaynakla eşleşti. Kalıcılık için daha sonra yeniden hatırlama gerekir.',
+                  key: const ValueKey('quiz-next-reason'),
+                  style: const TextStyle(color: AtelierStyle.ink, height: 1.4, fontWeight: FontWeight.w700),
+                ),
                 const SizedBox(height: 18),
                 SizedBox(
                   width: double.infinity,
                   child: FilledButton.icon(
-                    key: const ValueKey('quiz-restart'),
-                    onPressed: busy ? null : onRestart,
-                    icon: const Icon(Icons.refresh_rounded),
-                    label: const Text('Quizi yeniden çöz'),
+                    key: const ValueKey('quiz-return-workspace'),
+                    onPressed: busy ? null : onReturn,
+                    icon: Icon(needsRepair ? Icons.menu_book_outlined : Icons.arrow_back_rounded),
+                    label: Text(needsRepair ? 'Eksikleri kaynakta onar' : 'Çalışma alanına dön'),
                     style: FilledButton.styleFrom(
                       backgroundColor: AtelierStyle.pulse,
                       foregroundColor: Colors.white,
                       minimumSize: const Size.fromHeight(52),
                     ),
+                  ),
+                ),
+                const SizedBox(height: 6),
+                SizedBox(
+                  width: double.infinity,
+                  child: OutlinedButton.icon(
+                    key: const ValueKey('quiz-restart'),
+                    onPressed: busy ? null : onRestart,
+                    icon: const Icon(Icons.refresh_rounded),
+                    label: const Text('Quizi yeniden çöz'),
                   ),
                 ),
               ],

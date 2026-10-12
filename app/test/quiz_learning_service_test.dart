@@ -85,6 +85,15 @@ void main() {
     expect(durable.session.correctCount, 1);
     expect(durable.session.unknownCount, 1);
 
+    final answerHistory = await store.quizAnswerHistory(learner: learner, setId: first.set.id);
+    expect(answerHistory, hasLength(2));
+    expect(answerHistory.first.questionId, firstQuestion.id);
+    expect(answerHistory.first.kind, QuizAnswerKind.selected);
+    expect(answerHistory.first.isCorrect, isTrue);
+    expect(answerHistory.last.questionId, secondQuestion.id);
+    expect(answerHistory.last.kind, QuizAnswerKind.unknown);
+    expect(answerHistory.last.isCorrect, isNull);
+
     final restarted = await service.restartSession(learner: learner, materialId: materialId);
     expect(restarted.session.cursorIndex, 0);
     expect(restarted.session.correctCount, 0);
@@ -127,6 +136,8 @@ void main() {
     final localReopened = await service.openCurrentSet(learner: local, materialId: materialId);
     expect(localReopened.session.cursorIndex, 1);
     expect(localReopened.reviews, isNotEmpty);
+    expect(await store.quizAnswerHistory(learner: local, setId: localState.set.id), hasLength(1));
+    expect(await store.quizAnswerHistory(learner: account, setId: accountState.set.id), isEmpty);
   });
 
   test('source update creates a new quiz and stale answer fails closed', () async {
@@ -184,5 +195,6 @@ void main() {
       generationVersion: QuizLearningService.generationVersion,
     );
     expect(historicalSet?.id, first.set.id);
+    expect(await store.quizAnswerHistory(learner: learner, setId: first.set.id), isEmpty);
   });
 }

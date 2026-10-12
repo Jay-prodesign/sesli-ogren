@@ -24,6 +24,24 @@ class QuizQuestionId {
 
 enum QuizAnswerKind { selected, unknown }
 
+class QuizAnswerRecord {
+  const QuizAnswerRecord({
+    required this.questionId,
+    required this.setId,
+    required this.kind,
+    required this.selectedOptionIndex,
+    required this.isCorrect,
+    required this.answeredAt,
+  });
+
+  final QuizQuestionId questionId;
+  final QuizSetId setId;
+  final QuizAnswerKind kind;
+  final int? selectedOptionIndex;
+  final bool? isCorrect;
+  final DateTime answeredAt;
+}
+
 class QuizQuestionRecord {
   const QuizQuestionRecord({
     required this.id,

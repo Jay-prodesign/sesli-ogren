@@ -481,6 +481,24 @@ CREATE TABLE IF NOT EXISTS quiz_questions (
 )
 ''');
     await db.execute('''
+CREATE TABLE IF NOT EXISTS quiz_answers (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  learner_id TEXT NOT NULL,
+  question_id TEXT NOT NULL,
+  quiz_set_id TEXT NOT NULL,
+  answer_kind TEXT NOT NULL,
+  selected_option_index INTEGER,
+  is_correct INTEGER,
+  answered_at_utc TEXT NOT NULL,
+  FOREIGN KEY (learner_id, question_id)
+    REFERENCES quiz_questions (learner_id, question_id) ON DELETE CASCADE,
+  FOREIGN KEY (learner_id, quiz_set_id)
+    REFERENCES quiz_sets (learner_id, quiz_set_id) ON DELETE CASCADE,
+  CHECK (answer_kind IN ('selected', 'unknown')),
+  CHECK (is_correct IS NULL OR is_correct IN (0, 1))
+)
+''');
+    await db.execute('''
 CREATE TABLE IF NOT EXISTS quiz_reviews (
   learner_id TEXT NOT NULL,
   question_id TEXT NOT NULL,
@@ -522,6 +540,10 @@ CREATE TABLE IF NOT EXISTS quiz_sessions (
     await db.execute('''
 CREATE INDEX IF NOT EXISTS idx_quiz_sets_material
 ON quiz_sets (learner_id, material_id, source_version_id)
+''');
+    await db.execute('''
+CREATE INDEX IF NOT EXISTS idx_quiz_answers_set
+ON quiz_answers (learner_id, quiz_set_id, id)
 ''');
   }
 
@@ -1846,6 +1868,30 @@ ON CONFLICT(learner_id, flashcard_set_id) DO UPDATE SET
     });
   }
 
+  Future<List<QuizAnswerRecord>> quizAnswerHistory({
+    required AuthenticatedLearner learner,
+    required QuizSetId setId,
+  }) async {
+    final rows = await _database.query(
+      'quiz_answers',
+      where: 'learner_id = ? AND quiz_set_id = ?',
+      whereArgs: [learner.id.value, setId.value],
+      orderBy: 'id ASC',
+    );
+    return rows
+        .map(
+          (row) => QuizAnswerRecord(
+            questionId: QuizQuestionId(row['question_id']! as String),
+            setId: QuizSetId(row['quiz_set_id']! as String),
+            kind: QuizAnswerKind.values.byName(row['answer_kind']! as String),
+            selectedOptionIndex: row['selected_option_index'] as int?,
+            isCorrect: row['is_correct'] == null ? null : row['is_correct'] == 1,
+            answeredAt: DateTime.parse(row['answered_at_utc']! as String).toUtc(),
+          ),
+        )
+        .toList(growable: false);
+  }
+
   Future<List<QuizQuestionReviewState>> quizReviews({
     required AuthenticatedLearner learner,
     required QuizSetId setId,
@@ -1947,6 +1993,16 @@ ORDER BY q.ordinal ASC
       final incorrectIncrement = isCorrect == false ? 1 : 0;
       final unknownIncrement = kind == QuizAnswerKind.unknown ? 1 : 0;
       final timestamp = answeredAt.toUtc().toIso8601String();
+
+      await transaction.insert('quiz_answers', {
+        'learner_id': learner.id.value,
+        'question_id': question.id.value,
+        'quiz_set_id': set.id.value,
+        'answer_kind': kind.name,
+        'selected_option_index': selectedOptionIndex,
+        'is_correct': isCorrect == null ? null : (isCorrect ? 1 : 0),
+        'answered_at_utc': timestamp,
+      });
 
       await transaction.rawInsert(
         '''

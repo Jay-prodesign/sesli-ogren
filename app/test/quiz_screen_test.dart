@@ -98,6 +98,16 @@ void main() {
     await tester.tap(find.byKey(const ValueKey('quiz-unknown')));
     await _pumpUntilFound(tester, find.text('Bilmiyorum olarak kaydedildi.'));
     expect(find.byKey(const ValueKey('quiz-source-evidence')), findsOneWidget);
+
+    await tester.tap(find.byKey(const ValueKey('quiz-next')));
+    await _pumpUntilFound(tester, find.text('SORU 3 / 3'));
+    await tester.tap(find.byKey(const ValueKey('quiz-unknown')));
+    await _pumpUntilFound(tester, find.text('Bilmiyorum olarak kaydedildi.'));
+    await tester.tap(find.byKey(const ValueKey('quiz-next')));
+    await _pumpUntilFound(tester, find.byKey(const ValueKey('quiz-complete')));
+    expect(find.byKey(const ValueKey('quiz-return-workspace')), findsOneWidget);
+    expect(find.text('Eksikleri kaynakta onar'), findsOneWidget);
+    expect(find.byKey(const ValueKey('quiz-restart')), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 
