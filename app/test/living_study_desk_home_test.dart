@@ -4,8 +4,8 @@ import 'package:sesli_ogren/src/app/living_study_desk_home.dart';
 import 'package:sesli_ogren/src/domain/learning_contracts.dart';
 import 'package:sesli_ogren/src/domain/learning_truth.dart';
 
-void usePhoneViewport(WidgetTester tester) {
-  tester.view.physicalSize = const Size(390, 844);
+void usePhoneViewport(WidgetTester tester, {Size size = const Size(390, 844)}) {
+  tester.view.physicalSize = size;
   tester.view.devicePixelRatio = 1;
   addTearDown(tester.view.resetPhysicalSize);
   addTearDown(tester.view.resetDevicePixelRatio);
@@ -61,11 +61,16 @@ void main() {
     required VoidCallback onOpenWorkspace,
     required VoidCallback onOpenReader,
     required VoidCallback onOpenLearning,
+    double textScale = 1,
   }) async {
     await tester.pumpWidget(
       MaterialApp(
-        builder: (context, child) =>
-            MediaQuery(data: MediaQuery.of(context).copyWith(disableAnimations: true), child: child!),
+        builder: (context, child) => MediaQuery(
+          data: MediaQuery.of(
+            context,
+          ).copyWith(disableAnimations: true, textScaler: TextScaler.linear(textScale)),
+          child: child!,
+        ),
         home: Scaffold(
           body: LivingStudyDeskHome(
             material: material,
@@ -138,5 +143,53 @@ void main() {
     expect(workspaceOpens, 0);
     expect(readerOpens, 1);
     expect(learningOpens, 0);
+  });
+
+  testWidgets('prominent D/Knot hierarchy remains usable at 320px with large text', (tester) async {
+    usePhoneViewport(tester, size: const Size(320, 844));
+    await pumpHome(
+      tester,
+      continuation: continuationFor(RecallOutcome.unknown, RecallStateKind.notAssessed),
+      onOpenWorkspace: () {},
+      onOpenReader: () {},
+      onOpenLearning: () {},
+      textScale: 1.5,
+    );
+
+    expect(find.text('Kaynağın ve sıradaki adımın hazır.'), findsOneWidget);
+    expect(find.text('Kaynağı gözden geçir'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('empty Home keeps first-source action usable at 320px with large text', (tester) async {
+    usePhoneViewport(tester, size: const Size(320, 844));
+    await tester.pumpWidget(
+      MaterialApp(
+        builder: (context, child) => MediaQuery(
+          data: MediaQuery.of(
+            context,
+          ).copyWith(disableAnimations: true, textScaler: TextScaler.linear(1.5)),
+          child: child!,
+        ),
+        home: Scaffold(
+          body: LivingStudyDeskHome(
+            material: null,
+            continuation: null,
+            sourceText: null,
+            otherMaterials: const [],
+            onOpenWorkspace: () {},
+            onOpenReader: () {},
+            onOpenLearning: () {},
+            onOpenListen: () {},
+            onOpenMaterial: (_) {},
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    expect(find.text('Birlikte\nöğrenelim.'), findsOneWidget);
+    expect(find.byKey(const ValueKey('la0040-living-add')), findsOneWidget);
+    expect(tester.takeException(), isNull);
   });
 }
