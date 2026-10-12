@@ -212,6 +212,17 @@ class AtelierWorkspace extends StatelessWidget {
         };
   }
 
+  String get _evidenceCompactDetail {
+    final state = continuation?.state;
+    if (state == null) return 'İlk Hatırla denemesi henüz yapılmadı.';
+    return switch (state.kind) {
+      RecallStateKind.needsReview => 'Son deneme kaynak onarımı gerektiriyor.',
+      RecallStateKind.developing => 'Son deneme kısmi ya da destekliydi; bu henüz ustalık değil.',
+      RecallStateKind.retrievedOnce => 'İpucusuz doğru hatırladın; kalıcılık henüz doğrulanmadı.',
+      RecallStateKind.notAssessed => 'Bağımsız doğru geri çağırma henüz kaydedilmedi.',
+    };
+  }
+
   IconData get _evidenceIcon {
     return switch (continuation?.state.kind) {
       RecallStateKind.needsReview => Icons.build_circle_outlined,
@@ -221,7 +232,7 @@ class AtelierWorkspace extends StatelessWidget {
     };
   }
 
-  Widget _evidenceState() {
+  Widget _evidenceState({required bool compact}) {
     final state = continuation?.state;
     if (state == null) return const SizedBox.shrink();
     return Semantics(
@@ -282,7 +293,7 @@ class AtelierWorkspace extends StatelessWidget {
                     ),
                     const SizedBox(height: 3),
                     Text(
-                      _evidenceDetail,
+                      compact ? _evidenceCompactDetail : _evidenceDetail,
                       style: const TextStyle(color: AtelierStyle.muted, fontSize: 12, height: 1.35),
                     ),
                   ],
@@ -448,7 +459,7 @@ class AtelierWorkspace extends StatelessWidget {
                 ],
                 if (continuation != null) ...[
                   const SizedBox(height: 10),
-                  _evidenceState(),
+                  _evidenceState(compact: compactSurface),
                 ],
                 const SizedBox(height: 17),
                 if (sourceText.trim().isNotEmpty) ...[
