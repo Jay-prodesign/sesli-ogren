@@ -78,7 +78,7 @@ void main() {
     );
     await _pumpUntilFound(tester, find.byKey(const ValueKey('first-value-intent')));
 
-    final reasonFinder = find.text('Önce bütünü gör; sonra kaynağı kapatıp ne kaldığını sınarsın.');
+    final reasonFinder = find.text('Sonra kaynağı kapatıp ne kaldığını sınarsın.');
     await tester.scrollUntilVisible(reasonFinder, 180, scrollable: find.byType(Scrollable).last);
     await tester.pump();
     final reason = tester.widget<Text>(reasonFinder);
@@ -99,10 +99,17 @@ void main() {
     expect(find.text('Dinle'), findsOneWidget);
     expect(find.text('Hızlı özet'), findsOneWidget);
     expect(find.text('Bildiğimi kontrol et'), findsOneWidget);
-    final focusPath = find.byKey(const ValueKey('first-intent-focus'));
-    await _tapVisible(tester, focusPath);
-    await _pumpUntilFound(tester, find.byType(FocusScreen));
-    expect(find.byType(FocusScreen), findsOneWidget);
+    final focusPath = find.text('Birlikte odaklanalım');
+    await tester.scrollUntilVisible(
+      focusPath,
+      140,
+      scrollable: find.descendant(
+        of: find.byKey(const ValueKey('first-intent-other-paths-scroll')),
+        matching: find.byType(Scrollable),
+      ),
+    );
+    await tester.pump();
+    expect(focusPath.hitTestable(), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 
