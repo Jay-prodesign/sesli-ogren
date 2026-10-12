@@ -26,6 +26,7 @@ class _FlashcardScreenState extends State<FlashcardScreen> {
   bool _revealed = false;
   bool _busy = false;
   String? _inlineError;
+  String? _recoveryNotice;
 
   @override
   void initState() {
@@ -60,6 +61,7 @@ class _FlashcardScreenState extends State<FlashcardScreen> {
       _revealed = false;
       _busy = false;
       _inlineError = null;
+      _recoveryNotice = null;
       _data = null;
       _future = _load();
     });
@@ -95,6 +97,7 @@ class _FlashcardScreenState extends State<FlashcardScreen> {
     setState(() {
       _busy = true;
       _inlineError = null;
+      _recoveryNotice = null;
     });
     try {
       final next = await widget.runtime.flashcards.recordResponse(
@@ -111,12 +114,17 @@ class _FlashcardScreenState extends State<FlashcardScreen> {
         _data = _FlashcardViewData(material: data.material, source: data.source, study: next);
         _revealed = false;
         _busy = false;
+        _recoveryNotice = null;
       });
     } catch (_) {
       if (!mounted) return;
       setState(() {
         _busy = false;
-        _inlineError = 'Bu kart yanıtı kaydedilemedi. Güncel kartı yeniden yükleyip tekrar deneyebilirsin.';
+        _revealed = false;
+        _inlineError = null;
+        _data = null;
+        _recoveryNotice = 'Önceki kart yanıtı kaydedilmedi. Güncel kaynaktan devam ediyorsun.';
+        _future = _load();
       });
     }
   }
@@ -167,6 +175,7 @@ class _FlashcardScreenState extends State<FlashcardScreen> {
           revealed: _revealed,
           busy: _busy,
           inlineError: _inlineError,
+          recoveryNotice: _recoveryNotice,
           onReveal: _reveal,
           onAgain: () => _respond(FlashcardResponse.again),
           onRemembered: () => _respond(FlashcardResponse.remembered),
@@ -279,6 +288,7 @@ class _FlashcardStudyView extends StatelessWidget {
     required this.revealed,
     required this.busy,
     required this.inlineError,
+    required this.recoveryNotice,
     required this.onReveal,
     required this.onAgain,
     required this.onRemembered,
@@ -290,6 +300,7 @@ class _FlashcardStudyView extends StatelessWidget {
   final bool revealed;
   final bool busy;
   final String? inlineError;
+  final String? recoveryNotice;
   final VoidCallback onReveal;
   final VoidCallback onAgain;
   final VoidCallback onRemembered;
@@ -393,6 +404,30 @@ class _FlashcardStudyView extends StatelessWidget {
             ),
             const SizedBox(height: 11),
             AtelierSourceTrustStrip(sourceVersion: data.source, showSourceName: !compact),
+            if (recoveryNotice != null) ...[
+              const SizedBox(height: 10),
+              Container(
+                key: const ValueKey('flashcards-recovery-notice'),
+                padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
+                decoration: BoxDecoration(
+                  color: AtelierStyle.attentionSoft,
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Icon(Icons.sync_rounded, color: AtelierStyle.pulse, size: 19),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        recoveryNotice!,
+                        style: const TextStyle(color: AtelierStyle.ink, fontSize: 12.5, height: 1.4),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
             const SizedBox(height: 16),
             if (completed)
               _FlashcardCompletion(study: study, busy: busy, onRestart: onRestart, compact: compact)
@@ -568,7 +603,7 @@ class _FlashcardStudyView extends StatelessWidget {
                           key: const ValueKey('flashcards-inline-reload'),
                           onPressed: busy ? null : onReload,
                           icon: const Icon(Icons.refresh_rounded),
-                          label: const Text('Güncel kartları yükle'),
+                          label: const Text('Kartları yeniden yükle'),
                         ),
                       ),
                     ],

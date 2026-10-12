@@ -552,11 +552,13 @@ void main() {
           'Oksijenli solunumda oksijen temel girdilerden biridir.',
     );
     await tester.tap(find.byKey(const ValueKey('flashcards-remembered')));
-    for (var i = 0; i < 50 && find.byKey(const ValueKey('flashcards-inline-reload')).evaluate().isEmpty; i++) {
+    for (var i = 0; i < 50 && find.byKey(const ValueKey('flashcards-recovery-notice')).evaluate().isEmpty; i++) {
       await tester.pump(const Duration(milliseconds: 30));
     }
-    expect(find.byKey(const ValueKey('flashcards-inline-error')), findsOneWidget);
-    expect(find.text('Güncel kartları yükle'), findsOneWidget);
+    expect(find.byKey(const ValueKey('flashcards-inline-error')), findsNothing);
+    expect(find.text('Güncel kart kaynağı'), findsOneWidget);
+    expect(find.text('Önceki kart yanıtı kaydedilmedi. Güncel kaynaktan devam ediyorsun.'), findsOneWidget);
+    expect(find.byKey(const ValueKey('flashcards-answer')), findsNothing);
     expect(tester.takeException(), isNull);
     await expectLater(
       find.byType(Scaffold),

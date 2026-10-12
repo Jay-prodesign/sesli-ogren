@@ -153,14 +153,12 @@ void main() {
     );
 
     await tester.tap(find.byKey(const ValueKey('flashcards-remembered')));
-    await _pumpUntilFound(tester, find.byKey(const ValueKey('flashcards-inline-reload')));
-    expect(find.byKey(const ValueKey('flashcards-inline-error')), findsOneWidget);
-    expect(find.text('Güncel kartları yükle'), findsOneWidget);
-
-    await tester.tap(find.byKey(const ValueKey('flashcards-inline-reload')));
-    await _pumpUntilFound(tester, find.byKey(const ValueKey('flashcards-reveal')));
+    await _pumpUntilFound(tester, find.byKey(const ValueKey('flashcards-recovery-notice')));
+    expect(find.byKey(const ValueKey('flashcards-inline-error')), findsNothing);
     expect(find.text('Güncel kart kaynağı'), findsOneWidget);
+    expect(find.text('Önceki kart yanıtı kaydedilmedi. Güncel kaynaktan devam ediyorsun.'), findsOneWidget);
     expect(find.byKey(const ValueKey('flashcards-answer')), findsNothing);
+    expect(find.byKey(const ValueKey('flashcards-reveal')), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 
