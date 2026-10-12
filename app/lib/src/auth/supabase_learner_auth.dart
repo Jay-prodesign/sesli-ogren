@@ -51,6 +51,13 @@ class SupabaseLearnerAuth {
   static Future<void> requestEmailOtp(String email) async {
     final normalized = _normalizedEmail(email);
     final client = await _clientForConfiguredProject();
+    // Signing in with OTP creates/switches identity; it is NOT an upgrade of an
+    // anonymous learner. Never silently strand that learner's source/evidence.
+    if (client.auth.currentUser?.isAnonymous == true) {
+      throw const LearnerAuthenticationException(
+        'Misafir ilerlemeni korumak için hesap bağlama henüz hazır değil. Bu oturumda öğrenmeye devam edebilirsin.',
+      );
+    }
     try {
       await client.auth.signInWithOtp(email: normalized, shouldCreateUser: true);
     } catch (_) {
