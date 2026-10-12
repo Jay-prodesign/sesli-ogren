@@ -310,6 +310,8 @@ void main() {
     expect(find.text('İLK 60 SANİYE'), findsOneWidget);
     expect(find.text('Kaynağı aç'), findsOneWidget);
     expect(find.byKey(const ValueKey('first-value-recommendation-card')), findsOneWidget);
+    expect(find.byKey(const ValueKey('first-intent-companion')), findsOneWidget);
+    expect(find.byType(AtelierLearningRail), findsNothing);
   });
 
   testWidgets('LA-0040 first-value intent survives 320px + large type', (tester) async {
@@ -330,6 +332,8 @@ void main() {
       textScaler: const TextScaler.linear(1.5),
     );
     expect(find.text('İLK 60 SANİYE'), findsOneWidget);
+    expect(find.byKey(const ValueKey('first-intent-companion')), findsOneWidget);
+    expect(find.byType(AtelierLearningRail), findsNothing);
     await tester.scrollUntilVisible(find.text('Diğer çalışma yolları'), 180, scrollable: find.byType(Scrollable).last);
     await tester.pump();
     expect(find.text('Diğer çalışma yolları'), findsOneWidget);

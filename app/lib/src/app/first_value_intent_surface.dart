@@ -26,10 +26,9 @@ class FirstValueIntentSurface extends StatelessWidget {
   final VoidCallback onListen;
   final VoidCallback onFocus;
 
-  String get _recommendationTitle => 'Önce kaynağın tamamını bir kez gör.';
+  String get _recommendationTitle => 'Önce kaynağı bir kez gör.';
 
-  String get _recommendationReason =>
-      'Gerçek kaynağın bu öğrenme ilişkisinin ana malzemesi. Önce Reader’da aç; sonra istersen dinleyebilir veya kaynağı kapatıp ne kaldığını sınayabilirsin.';
+  String get _recommendationReason => 'Önce bütünü gör. Sonra kaynağı kapatıp ne kaldığını sınarsın.';
 
   VoidCallback get _recommendedAction => onReadSource;
 
@@ -52,14 +51,14 @@ class FirstValueIntentSurface extends StatelessWidget {
             padding: const EdgeInsets.fromLTRB(12, 0, 12, 18),
             children: [
               const ListTile(
-                title: Text('Başka bir çalışma yolu'),
-                subtitle: Text('Aynı kaynaktasın. Seçimin kalıcı bir mod değil.'),
+                title: Text('Başka bir yol seç'),
+                subtitle: Text('Aynı kaynakta kalırsın. Seçimin kalıcı değil.'),
               ),
               ListTile(
                 key: const ValueKey('first-intent-listen'),
                 leading: const Icon(Icons.headphones_rounded),
                 title: const Text('Dinle'),
-                subtitle: const Text('Kaynağın genel akışını sesli olarak takip et.'),
+                subtitle: const Text('Kaynağı sesli takip et.'),
                 onTap: () {
                   Navigator.of(sheetContext).pop();
                   onListen();
@@ -69,9 +68,7 @@ class FirstValueIntentSurface extends StatelessWidget {
                 key: const ValueKey('first-intent-recap'),
                 leading: const Icon(Icons.auto_awesome_outlined),
                 title: const Text('Hızlı özet'),
-                subtitle: const Text(
-                  'Kaynağa bağlı kısa bir genel bakış al. Bu hazırlıktır; öğrenme kanıtı oluşturmaz.',
-                ),
+                subtitle: const Text('Kısa genel bakış al; bu kanıt değildir.'),
                 onTap: () {
                   Navigator.of(sheetContext).pop();
                   onQuickRecap();
@@ -81,7 +78,7 @@ class FirstValueIntentSurface extends StatelessWidget {
                 key: const ValueKey('first-intent-recall'),
                 leading: const Icon(Icons.psychology_alt_outlined),
                 title: const Text('Bildiğimi kontrol et'),
-                subtitle: const Text('Kaynak kapanır; kendi hatırladığınla kısa bir aktif deneme yaparsın.'),
+                subtitle: const Text('Kaynak kapanır; kendi hatırladığınla denersin.'),
                 onTap: () {
                   Navigator.of(sheetContext).pop();
                   onRecall();
@@ -91,7 +88,7 @@ class FirstValueIntentSurface extends StatelessWidget {
                 key: const ValueKey('first-intent-focus'),
                 leading: const Icon(Icons.center_focus_strong_rounded),
                 title: const Text('Birlikte odaklanalım'),
-                subtitle: const Text('Kaynağın küçük bir bölümünü adım adım çalış.'),
+                subtitle: const Text('Küçük bir bölümü adım adım çalış.'),
                 onTap: () {
                   Navigator.of(sheetContext).pop();
                   onFocus();
@@ -190,18 +187,10 @@ class FirstValueIntentSurface extends StatelessWidget {
             AtelierSourceTrustStrip(sourceVersion: sourceVersion, showSourceName: !compact),
             SizedBox(
               height: tightCompact
-                  ? 7
-                  : compact
-                  ? 10
-                  : 14,
-            ),
-            const AtelierLearningRail(phase: AtelierLearningPhase.source),
-            SizedBox(
-              height: tightCompact
                   ? 8
                   : compact
-                  ? 12
-                  : 16,
+                  ? 11
+                  : 15,
             ),
             Container(
               key: const ValueKey('first-value-recommendation-card'),
@@ -219,7 +208,11 @@ class FirstValueIntentSurface extends StatelessWidget {
                   if (tightCompact) ...[
                     const Row(
                       children: [
-                        CompanionView(state: CompanionVisualState.think, size: 36),
+                        CompanionView(
+                          key: ValueKey('first-intent-companion'),
+                          state: CompanionVisualState.think,
+                          size: 52,
+                        ),
                         SizedBox(width: 8),
                         Expanded(
                           child: Text(
@@ -239,7 +232,11 @@ class FirstValueIntentSurface extends StatelessWidget {
                   ] else if (compact) ...[
                     const Align(
                       alignment: Alignment.centerLeft,
-                      child: CompanionView(state: CompanionVisualState.think, size: 48),
+                      child: CompanionView(
+                        key: ValueKey('first-intent-companion'),
+                        state: CompanionVisualState.think,
+                        size: 68,
+                      ),
                     ),
                     const SizedBox(height: 7),
                     guideCopy,
@@ -247,7 +244,11 @@ class FirstValueIntentSurface extends StatelessWidget {
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const CompanionView(state: CompanionVisualState.think, size: 68),
+                        const CompanionView(
+                          key: ValueKey('first-intent-companion'),
+                          state: CompanionVisualState.think,
+                          size: 88,
+                        ),
                         const SizedBox(width: 13),
                         Expanded(child: guideCopy),
                       ],
@@ -278,7 +279,7 @@ class FirstValueIntentSurface extends StatelessWidget {
                         : 10,
                   ),
                   Text(
-                    'Bu adım hazırlık. Öğrenme durumun yalnız kaynağı kapatıp kendi Hatırla denemeni yaptığında değişir.',
+                    'Hatırla denemesi öğrenme kanıtını oluşturur.',
                     textAlign: TextAlign.center,
                     style: TextStyle(color: const Color(0xFFB9C5E4), fontSize: tightCompact ? 10.5 : 11.5, height: 1.4),
                   ),
@@ -297,7 +298,7 @@ class FirstValueIntentSurface extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   const Text(
-                    'Okumak yerine dinlemek mi istiyorsun?',
+                    'Dinleyerek hazırlan',
                     style: TextStyle(color: AtelierStyle.ink, fontSize: 14, fontWeight: FontWeight.w800),
                   ),
                   const SizedBox(height: 9),
@@ -322,12 +323,7 @@ class FirstValueIntentSurface extends StatelessWidget {
                 ],
               ),
             ),
-            const SizedBox(height: 12),
-            const Text(
-              'Aynı kaynakta kalırsın: Kaynak → Kapat → Hatırla → Kanıt. Yolunu daha sonra değiştirebilirsin.',
-              textAlign: TextAlign.center,
-              style: TextStyle(color: AtelierStyle.muted, fontSize: 11.5, height: 1.4),
-            ),
+
           ],
         ),
       ),

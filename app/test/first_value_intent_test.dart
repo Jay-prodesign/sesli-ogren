@@ -86,7 +86,7 @@ void main() {
     expect(reason.overflow, isNull);
 
     final evidenceFinder = find.text(
-      'Bu adım hazırlık. Öğrenme durumun yalnız kaynağı kapatıp kendi Hatırla denemeni yaptığında değişir.',
+      'Hatırla denemesi öğrenme kanıtını oluşturur.',
     );
     await tester.scrollUntilVisible(evidenceFinder, 180, scrollable: find.byType(Scrollable).last);
     await tester.pump();
@@ -144,7 +144,7 @@ void main() {
     await _pumpUntilFound(tester, find.byKey(const ValueKey('first-value-intent')));
 
     expect(find.text('İLK 60 SANİYE'), findsOneWidget);
-    expect(find.text('Önce kaynağın tamamını bir kez gör.'), findsOneWidget);
+    expect(find.text('Önce kaynağı bir kez gör.'), findsOneWidget);
     expect(find.text('Kaynağı aç'), findsOneWidget);
     await tester.scrollUntilVisible(
       find.byKey(const ValueKey('first-intent-listen-direct')),
@@ -155,7 +155,7 @@ void main() {
     expect(find.text('Kaynağı dinle'), findsOneWidget);
     expect(find.text('Hızlı özetle genel resmi gör'), findsNothing);
     expect(find.text('Diğer çalışma yolları'), findsOneWidget);
-    expect(find.textContaining('Öğrenme durumun yalnız'), findsOneWidget);
+    expect(find.text('Hatırla denemesi öğrenme kanıtını oluşturur.'), findsOneWidget);
 
     await _tapVisible(tester, find.text('Kaynağı aç'));
     await _pumpUntilFound(tester, find.byType(SourceReaderScreen));
