@@ -1418,7 +1418,6 @@ class _LibraryMaterialCard extends StatelessWidget {
       child: Column(
         children: [
           InkWell(
-            key: ValueKey('library-open-${material.id.value}'),
             onTap: onPressed,
             child: Column(
               children: [
