@@ -165,9 +165,9 @@ void main() {
 
     expect(find.byKey(const ValueKey('first-value-intent')), findsNothing);
     expect(find.text('İlk aktif denemeni yap'), findsOneWidget);
-    expect(find.text('Diğer yollar'), findsOneWidget);
+    expect(find.text('Diğer çalışma yolları'), findsOneWidget);
 
-    await _tapVisible(tester, find.text('Diğer yollar'));
+    await _tapVisible(tester, find.text('Diğer çalışma yolları'));
     await _pumpUntilFound(tester, find.byKey(const ValueKey('workspace-other-study-paths-scroll')));
     expect(find.text('Hızlı özet'), findsOneWidget);
     final focusAction = find.text('Odaklan');
