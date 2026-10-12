@@ -163,7 +163,7 @@ class _SourceReaderScreenState extends State<SourceReaderScreen> {
     final quietFeedback = (media?.disableAnimations ?? false) || (media?.accessibleNavigation ?? false);
     if (!quietFeedback) {
       try {
-        await HapticFeedback.selectionClick();
+        unawaited(HapticFeedback.selectionClick().catchError((_) {}));
       } catch (_) {
         // Haptics are acknowledgement only; they must never block navigation.
       }

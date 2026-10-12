@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -684,13 +686,12 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
           final developing =
               result.evidence.outcome == RecallOutcome.partial ||
               result.evidence.outcome == RecallOutcome.helpedCorrect;
-          if (independentSuccess) {
-            await HapticFeedback.mediumImpact();
-          } else if (developing) {
-            await HapticFeedback.lightImpact();
-          } else {
-            await HapticFeedback.selectionClick();
-          }
+          final feedback = independentSuccess
+              ? HapticFeedback.mediumImpact()
+              : developing
+              ? HapticFeedback.lightImpact()
+              : HapticFeedback.selectionClick();
+          unawaited(feedback.catchError((_) {}));
         } catch (_) {
           // Feedback must never become learning-state authority or block the result.
         }
