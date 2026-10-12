@@ -516,8 +516,8 @@ class _FlashcardStudyView extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 16),
-                    AnimatedSwitcher(
-                      duration: reducedMotion || !revealed ? Duration.zero : const Duration(milliseconds: 200),
+                    KeyedSubtree(
+                      key: ValueKey(revealed ? 'flashcards-revealed-answer' : 'flashcards-hidden-answer'),
                       child: revealed
                           ? Semantics(
                               liveRegion: true,
