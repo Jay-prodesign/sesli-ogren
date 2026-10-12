@@ -255,10 +255,7 @@ void main() {
     await tester.scrollUntilVisible(
       find.byKey(const ValueKey('quiz-option-0')),
       160,
-      scrollable: find.descendant(
-        of: find.byKey(const ValueKey('quiz-scroll')),
-        matching: find.byType(Scrollable),
-      ),
+      scrollable: find.descendant(of: find.byKey(const ValueKey('quiz-scroll')), matching: find.byType(Scrollable)),
     );
     await tester.tap(find.byKey(const ValueKey('quiz-option-0')));
     await tester.pump();
@@ -267,10 +264,7 @@ void main() {
     await tester.scrollUntilVisible(
       find.byKey(const ValueKey('quiz-source-evidence')),
       160,
-      scrollable: find.descendant(
-        of: find.byKey(const ValueKey('quiz-scroll')),
-        matching: find.byType(Scrollable),
-      ),
+      scrollable: find.descendant(of: find.byKey(const ValueKey('quiz-scroll')), matching: find.byType(Scrollable)),
     );
     expect(find.byKey(const ValueKey('quiz-next')), findsOneWidget);
     expect(tester.takeException(), isNull);
