@@ -282,9 +282,7 @@ class LivingStudyDeskHome extends StatelessWidget {
         ),
         SizedBox(height: compactFirstViewport ? 5 : 9),
         Text(
-          compactFirstViewport
-              ? 'Kaynağın ve sıradaki adımın hazır.'
-              : 'Kaynağın hazır. Sıradaki adımın belli.',
+          compactFirstViewport ? 'Kaynağın ve sıradaki adımın hazır.' : 'Kaynağın hazır. Sıradaki adımın belli.',
           style: TextStyle(color: _sub, fontSize: compactFirstViewport ? 13 : 15, height: 1.4),
         ),
         SizedBox(height: compactFirstViewport ? 10 : 17),
@@ -568,10 +566,7 @@ class LivingStudyDeskHome extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 10),
-          const Text(
-            'Kaynağını ekle. Oku, dinle, hatırla.',
-            style: TextStyle(color: _sub, fontSize: 14, height: 1.45),
-          ),
+          const Text('Kaynağını ekle. Oku, dinle, hatırla.', style: TextStyle(color: _sub, fontSize: 14, height: 1.45)),
         ],
       );
 

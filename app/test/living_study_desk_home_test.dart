@@ -66,9 +66,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         builder: (context, child) => MediaQuery(
-          data: MediaQuery.of(
-            context,
-          ).copyWith(disableAnimations: true, textScaler: TextScaler.linear(textScale)),
+          data: MediaQuery.of(context).copyWith(disableAnimations: true, textScaler: TextScaler.linear(textScale)),
           child: child!,
         ),
         home: Scaffold(
@@ -166,9 +164,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         builder: (context, child) => MediaQuery(
-          data: MediaQuery.of(
-            context,
-          ).copyWith(disableAnimations: true, textScaler: TextScaler.linear(1.5)),
+          data: MediaQuery.of(context).copyWith(disableAnimations: true, textScaler: TextScaler.linear(1.5)),
           child: child!,
         ),
         home: Scaffold(
