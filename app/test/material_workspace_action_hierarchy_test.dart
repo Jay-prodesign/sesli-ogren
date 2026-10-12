@@ -41,6 +41,9 @@ void main() {
   Widget frame({
     required bool disableAnimations,
     LearningContinuation? continuation,
+    String sourceText =
+        'Klorofil ışık enerjisinin kimyasal enerjiye dönüşümünde rol alır. '
+        'Bitkiler karbondioksit ve suyu kullanır.',
     required VoidCallback onReadSource,
     required VoidCallback onRecall,
     required VoidCallback onListen,
@@ -53,9 +56,7 @@ void main() {
         child: Scaffold(
           body: AtelierWorkspace(
             material: material(),
-            sourceText:
-                'Klorofil ışık enerjisinin kimyasal enerjiye dönüşümünde rol alır. '
-                'Bitkiler karbondioksit ve suyu kullanır.',
+            sourceText: sourceText,
             sourceVersion: source(),
             continuation: continuation,
             onReadSource: onReadSource,
@@ -128,6 +129,29 @@ void main() {
     await tester.tap(flashcardAction.hitTestable());
     await tester.pump();
     expect(flashcards, 1);
+  });
+
+  testWidgets('Workspace keeps source recovery actions reachable when extracted text is unavailable', (tester) async {
+    var readSource = 0;
+
+    await tester.pumpWidget(
+      frame(
+        disableAnimations: false,
+        sourceText: '',
+        onReadSource: () => readSource += 1,
+        onRecall: () {},
+        onListen: () {},
+      ),
+    );
+
+    expect(find.byKey(const ValueKey('la0040-atelier-workspace-reader')), findsOneWidget);
+    expect(find.byKey(const ValueKey('la0040-atelier-workspace-update-source')), findsOneWidget);
+    expect(find.text('Bu kaynağın metni henüz okunamıyor.'), findsOneWidget);
+
+    await tester.tap(find.byKey(const ValueKey('la0040-atelier-workspace-reader')));
+    await tester.pump();
+    expect(readSource, 1);
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('Workspace review recommendation makes source repair the primary action and honors Reduced Motion', (
