@@ -96,6 +96,7 @@ class _FlashcardScreenState extends State<FlashcardScreen> {
     if (data == null || card == null || !_revealed || _busy) return;
     setState(() {
       _busy = true;
+      _revealed = false;
       _inlineError = null;
       _recoveryNotice = null;
     });
