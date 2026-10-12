@@ -82,6 +82,14 @@ Future<void> _openLibraryTab(WidgetTester tester) async {
   expect(activeLibrary, findsOneWidget);
 }
 
+Finder _workspaceReadSourceAction() => find
+    .byWidgetPredicate(
+      (widget) =>
+          widget is Text &&
+          (widget.data == 'Tam kaynağı aç' || widget.data == 'Kaynağın tamamını oku'),
+    )
+    .hitTestable();
+
 void main() {
   sqfliteFfiInit();
 
@@ -220,8 +228,11 @@ void main() {
     expect(libraryMaterialTitle, findsOneWidget);
     await tester.tap(libraryMaterialTitle);
     await _pumpUntilFound(tester, find.byType(MaterialWorkspaceScreen));
-    await _pumpUntilFound(tester, find.byKey(const ValueKey('la0040-atelier-workspace-reader')), maxPumps: 400);
-    await _tapVisible(tester, find.byKey(const ValueKey('la0040-atelier-workspace-reader')));
+    final readSource = _workspaceReadSourceAction();
+    await _pumpUntilFound(tester, readSource, maxPumps: 400);
+    expect(readSource, findsOneWidget);
+    await tester.tap(readSource);
+    await tester.pump();
     await _pumpUntilFound(tester, find.byType(SourceReaderScreen));
     expect(find.byType(SourceReaderScreen), findsOneWidget);
     Navigator.of(tester.element(find.byType(SourceReaderScreen))).pop();
@@ -264,8 +275,11 @@ void main() {
     expect(libraryMaterialTitle, findsOneWidget);
     await tester.tap(libraryMaterialTitle);
     await _pumpUntilFound(tester, find.byType(MaterialWorkspaceScreen));
-    await _pumpUntilFound(tester, find.byKey(const ValueKey('la0040-atelier-workspace-reader')), maxPumps: 400);
-    await _tapVisible(tester, find.byKey(const ValueKey('la0040-atelier-workspace-reader')));
+    final readSource = _workspaceReadSourceAction();
+    await _pumpUntilFound(tester, readSource, maxPumps: 400);
+    expect(readSource, findsOneWidget);
+    await tester.tap(readSource);
+    await tester.pump();
     await _pumpUntilFound(tester, find.byType(SourceReaderScreen));
     expect(find.byType(SourceReaderScreen), findsOneWidget);
 
