@@ -117,13 +117,11 @@ class _SesliOgrenAppState extends State<SesliOgrenApp> {
   }
 
   void _handleAccountDeleted() {
-    final runtime = _runtime;
-    _runtime = null;
-    if (runtime != null) {
-      unawaited(runtime.close());
-    }
+    // Remote/account-scoped data has been removed, but the device-local
+    // namespace is a separate learner_id and must remain intact.
     setState(() {
       _showAccountEntry = false;
+      _openingAuthenticated = false;
       _accountDeleted = true;
     });
   }
@@ -161,7 +159,6 @@ class _SesliOgrenAppState extends State<SesliOgrenApp> {
   }
 
   void _startFresh() {
-    _runtime = null;
     setState(() {
       _accountDeleted = false;
       _showAccountEntry = false;
@@ -257,7 +254,7 @@ class _AccountDeletedScreen extends StatelessWidget {
                             const CompanionView(state: CompanionVisualState.success, size: 96),
                             const SizedBox(height: 18),
                             const Text(
-                              'YENİDEN BAŞLAMAYA HAZIR',
+                              'HESAP SİLİNDİ',
                               style: TextStyle(
                                 color: AtelierStyle.mark,
                                 fontSize: 10,
@@ -268,14 +265,14 @@ class _AccountDeletedScreen extends StatelessWidget {
                             ),
                             const SizedBox(height: 8),
                             Text(
-                              'Hesabın ve verilerin silindi.',
+                              'Hesabın ve hesaba bağlı verilerin silindi.',
                               style: Theme.of(context).textTheme.headlineSmall
                                   ?.copyWith(color: Colors.white, fontWeight: FontWeight.w900),
                               textAlign: TextAlign.center,
                             ),
                             const SizedBox(height: 10),
                             Text(
-                              'Yeni bir öğrenme alanı oluşturmak istersen sıfırdan başlayabilirsin.',
+                              'Bu cihazdaki hesapsız öğrenme alanın ayrı tutulduğu için korunur. İstersen doğrudan yerel çalışmalarına dönebilirsin.',
                               style: TextStyle(color: Colors.white.withValues(alpha: 0.76), height: 1.45),
                               textAlign: TextAlign.center,
                             ),
@@ -290,7 +287,7 @@ class _AccountDeletedScreen extends StatelessWidget {
                                 ),
                                 onPressed: onStartFresh,
                                 icon: const Icon(Icons.add_rounded),
-                                label: const Text('Yeni öğrenme alanı oluştur'),
+                                label: const Text('Cihazdaki öğrenmeye dön'),
                               ),
                             ),
                           ],
