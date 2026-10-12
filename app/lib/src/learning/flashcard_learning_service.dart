@@ -2,7 +2,7 @@ import 'dart:convert';
 
 import 'package:crypto/crypto.dart';
 
-import '../data/sqlite_sourcestore.dart';
+import '../data/sqlite_source_store.dart';
 import '../domain/authenticated_learner.dart';
 import '../domain/flashcard_learning.dart';
 import '../domain/learning_contracts.dart';
