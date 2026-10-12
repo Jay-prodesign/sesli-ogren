@@ -99,17 +99,10 @@ void main() {
     expect(find.text('Dinle'), findsOneWidget);
     expect(find.text('Hızlı özet'), findsOneWidget);
     expect(find.text('Bildiğimi kontrol et'), findsOneWidget);
-    final focusPath = find.text('Birlikte odaklanalım');
-    await tester.scrollUntilVisible(
-      focusPath,
-      140,
-      scrollable: find.descendant(
-        of: find.byKey(const ValueKey('first-intent-other-paths-scroll')),
-        matching: find.byType(Scrollable),
-      ),
-    );
-    await tester.pump();
-    expect(focusPath.hitTestable(), findsOneWidget);
+    final focusPath = find.byKey(const ValueKey('first-intent-focus'));
+    await _tapVisible(tester, focusPath);
+    await _pumpUntilFound(tester, find.byType(FocusScreen));
+    expect(find.byType(FocusScreen), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 
