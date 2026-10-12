@@ -850,10 +850,7 @@ void main() {
     await pumpUntilFound(tester, otherPaths);
     await tester.tap(otherPaths);
     await pumpUntilFound(tester, find.byKey(const ValueKey('workspace-other-study-paths-scroll')));
-    final otherPathsScroll = find.descendant(
-      of: find.byKey(const ValueKey('workspace-other-study-paths-scroll')),
-      matching: find.byType(Scrollable),
-    );
+    final otherPathsScroll = find.byKey(const ValueKey('workspace-other-study-paths-scroll'));
     await scrollUntilFound(tester, find.byKey(const ValueKey('workspace-other-focus')), scrollable: otherPathsScroll);
     await tapVisible(tester, find.byKey(const ValueKey('workspace-other-focus')));
     await pumpUntilFound(tester, find.text('KISA ODAK · 3 ADIM'));
@@ -874,10 +871,7 @@ void main() {
     await pumpUntilFound(tester, otherPathsAfterFocus);
     await tester.tap(otherPathsAfterFocus);
     await pumpUntilFound(tester, find.byKey(const ValueKey('workspace-other-study-paths-scroll')));
-    final explainPathsScroll = find.descendant(
-      of: find.byKey(const ValueKey('workspace-other-study-paths-scroll')),
-      matching: find.byType(Scrollable),
-    );
+    final explainPathsScroll = find.byKey(const ValueKey('workspace-other-study-paths-scroll'));
     await scrollUntilFound(
       tester,
       find.byKey(const ValueKey('workspace-other-explain-back')),
@@ -1731,10 +1725,10 @@ void main() {
     await scrollUntilFound(tester, deleteAccount, scrollable: profileScroll);
     await tapVisible(tester, deleteAccount);
     await pumpUntilFound(tester, find.text('Hesabı ve verileri sil?'));
-    await tester.tap(find.text('Devam et'));
+    await tapVisible(tester, find.text('Devam et'));
     await pumpUntilFound(tester, find.text('Son onay'));
-    await tester.tap(find.text('Kalıcı olarak sil'));
-    await pumpUntilFound(tester, find.textContaining('Hesap sunucuda silindi ancak'));
+    await tapVisible(tester, find.text('Kalıcı olarak sil'));
+    await pumpUntilFound(tester, find.text('Yerel veriyi temizlemeyi tekrar dene'));
 
     expect(deletion.calls, 1);
     expect(deletedCallback, isFalse);
@@ -1800,10 +1794,7 @@ void main() {
     await pumpUntilFound(tester, otherPaths);
     await tester.tap(otherPaths);
     await pumpUntilFound(tester, find.byKey(const ValueKey('workspace-other-study-paths-scroll')));
-    final explainPathsScroll = find.descendant(
-      of: find.byKey(const ValueKey('workspace-other-study-paths-scroll')),
-      matching: find.byType(Scrollable),
-    );
+    final explainPathsScroll = find.byKey(const ValueKey('workspace-other-study-paths-scroll'));
     await scrollUntilFound(
       tester,
       find.byKey(const ValueKey('workspace-other-explain-back')),
@@ -1822,7 +1813,8 @@ void main() {
     await tester.pump();
 
     expect(find.textContaining('öğrenme kanıtı olarak kaydetmiyoruz'), findsOneWidget);
-    expect(find.bySemanticsLabel('Düğüm düşünüyor'), findsOneWidget);
+    final companions = tester.widgetList<CompanionView>(find.byType(CompanionView));
+    expect(companions.any((companion) => companion.state == CompanionVisualState.think), isTrue);
     expect(find.bySemanticsLabel('Düğüm destek oluyor'), findsNothing);
     expect(find.text('Anlatımında temel fikirler görünüyor'), findsNothing);
   });
@@ -2086,15 +2078,10 @@ void main() {
     await pumpUntilFound(tester, find.text('Materyali güncelle'));
     await tapVisible(tester, find.text('Materyali güncelle'));
     final editorScroll = find.descendant(of: find.byType(LearningSliceScreen), matching: find.byType(Scrollable));
-    await scrollUntilFound(
-      tester,
-      find.byKey(const ValueKey('source-choice-text')),
-      scrollable: editorScroll,
-      delta: 180,
-    );
-    await tapVisible(tester, find.byKey(const ValueKey('source-choice-text')));
+    final pastedSource = find.byKey(const ValueKey('pasted-material-text'));
+    await scrollUntilFound(tester, pastedSource, scrollable: editorScroll, delta: 180);
     await tester.enterText(
-      find.byKey(const ValueKey('pasted-material-text')),
+      pastedSource,
       'Yeni kaynak sürümü mitokondri ve hücresel solunum hakkında ayrı bilgi verir.',
     );
     await tapVisible(tester, find.text('Yeni sürümü ekle ve aç'));
