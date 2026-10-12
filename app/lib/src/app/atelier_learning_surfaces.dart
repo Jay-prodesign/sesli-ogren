@@ -184,6 +184,117 @@ class AtelierWorkspace extends StatelessWidget {
 
   bool get _sourcePreviewIsTrimmed => sourceText.trim().replaceAll(RegExp(r'\s+'), ' ').length > 640;
 
+  String get _evidenceHeadline {
+    return switch (continuation?.state.kind) {
+      RecallStateKind.needsReview => 'Kaynak onarımı gerekiyor',
+      RecallStateKind.developing => 'Hatırlama gelişiyor',
+      RecallStateKind.retrievedOnce => 'Bağımsız hatırlama görüldü',
+      RecallStateKind.notAssessed => 'Henüz bağımsız kanıt yok',
+      null => 'Henüz öğrenme kanıtı yok',
+    };
+  }
+
+  String get _evidenceDetail {
+    final state = continuation?.state;
+    if (state == null) return 'İlk aktif Hatırla denemesi henüz yapılmadı.';
+    final count = state.evidenceCount;
+    final countLead = '$count Hatırla denemesi kaydedildi. ';
+    return countLead +
+        switch (state.kind) {
+          RecallStateKind.needsReview =>
+            'Son deneme eksik ya da yanlış geri çağırma gösterdi; sıradaki adım kaynaktan onarım.',
+          RecallStateKind.developing =>
+            'Son deneme kısmi ya da destekliydi; bu sonuç ustalık olarak yorumlanmıyor.',
+          RecallStateKind.retrievedOnce =>
+            'Son deneme ipucusuz doğruydu; kalıcılık sonraki bağımsız denemede yeniden değerlendirilecek.',
+          RecallStateKind.notAssessed =>
+            'Bu sürüm için bağımsız doğru geri çağırma henüz kaydedilmedi.',
+        };
+  }
+
+  IconData get _evidenceIcon {
+    return switch (continuation?.state.kind) {
+      RecallStateKind.needsReview => Icons.build_circle_outlined,
+      RecallStateKind.developing => Icons.trending_up_rounded,
+      RecallStateKind.retrievedOnce => Icons.check_circle_outline_rounded,
+      RecallStateKind.notAssessed || null => Icons.radio_button_unchecked_rounded,
+    };
+  }
+
+  Widget _evidenceState() {
+    final state = continuation?.state;
+    if (state == null) return const SizedBox.shrink();
+    return Semantics(
+      container: true,
+      label: 'Öğrenme kanıtı. $_evidenceHeadline. $_evidenceDetail',
+      child: ExcludeSemantics(
+        child: Container(
+          key: const ValueKey('workspace-evidence-state'),
+          width: double.infinity,
+          padding: const EdgeInsets.fromLTRB(13, 11, 13, 12),
+          decoration: BoxDecoration(
+            color: AtelierStyle.pulseSoft,
+            borderRadius: BorderRadius.circular(15),
+            border: const Border(left: BorderSide(color: AtelierStyle.pulse, width: 3)),
+          ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Icon(_evidenceIcon, color: AtelierStyle.pulse, size: 19),
+              const SizedBox(width: 9),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Expanded(
+                          child: Text(
+                            'ÖĞRENME KANITI',
+                            style: TextStyle(
+                              color: AtelierStyle.pulse,
+                              fontSize: 9.5,
+                              fontWeight: FontWeight.w900,
+                              letterSpacing: 0.9,
+                            ),
+                          ),
+                        ),
+                        Text(
+                          '${state.evidenceCount} DENEME',
+                          style: const TextStyle(
+                            color: AtelierStyle.muted,
+                            fontSize: 9,
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      _evidenceHeadline,
+                      style: const TextStyle(
+                        color: AtelierStyle.ink,
+                        fontSize: 14.5,
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+                    const SizedBox(height: 3),
+                    Text(
+                      _evidenceDetail,
+                      style: const TextStyle(color: AtelierStyle.muted, fontSize: 12, height: 1.35),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   void _showOtherStudyPaths(BuildContext context) {
     showModalBottomSheet<void>(
       context: context,
@@ -198,13 +309,35 @@ class AtelierWorkspace extends StatelessWidget {
             shrinkWrap: true,
             padding: const EdgeInsets.fromLTRB(16, 4, 16, 18),
             children: [
+              const Text(
+                'Bu kaynakla başka bir yol seç',
+                style: TextStyle(
+                  color: AtelierStyle.ink,
+                  fontSize: 20,
+                  height: 1.15,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+              const SizedBox(height: 6),
+              const Text(
+                'Sıradaki öneri öğrenme kanıtına dayanır. Aşağıdaki yollar bağlamsal alternatiflerdir; pasif hazırlık tek başına öğrenme kanıtı oluşturmaz.',
+                style: TextStyle(color: AtelierStyle.muted, fontSize: 12.5, height: 1.4),
+              ),
+              const SizedBox(height: 16),
+              const Text(
+                'HAZIRLIK',
+                style: TextStyle(
+                  color: AtelierStyle.teal,
+                  fontSize: 9.5,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: 0.9,
+                ),
+              ),
               ListTile(
                 key: const ValueKey('workspace-other-quick-recap'),
                 leading: const Icon(Icons.auto_awesome_outlined),
-                title: const Text('Hızlı özet'),
-                subtitle: const Text(
-                  'Kaynağa bağlı kısa bir genel bakış al. Bu hazırlıktır; öğrenme kanıtı oluşturmaz.',
-                ),
+                title: const Text('Kaynağı hızlıca toparla'),
+                subtitle: const Text('Kaynağa bağlı kısa bir genel bakış al; bu hazırlıktır, kanıt değildir.'),
                 onTap: () {
                   Navigator.of(sheetContext).pop();
                   onQuickRecap();
@@ -212,29 +345,40 @@ class AtelierWorkspace extends StatelessWidget {
               ),
               ListTile(
                 leading: const Icon(Icons.auto_awesome_outlined),
-                title: const Text('Kaynağı bana açıkla'),
-                subtitle: const Text('Kaynağa bağlı açıklamayı oku. Bu hazırlıktır; öğrenme kanıtı oluşturmaz.'),
+                title: const Text('Zor kısmı kaynaktan açıkla'),
+                subtitle: const Text('Kaynağa bağlı açıklamayı oku; cevap kaynakta yoksa sistem bunu söylemelidir.'),
                 onTap: () {
                   Navigator.of(sheetContext).pop();
                   onGroundedExplain();
                 },
               ),
               ListTile(
-                leading: const Icon(Icons.record_voice_over_outlined),
-                title: const Text('Kendi cümlelerimle anlat'),
-                subtitle: const Text('Aktif açıklama denemesi yap ve kaynağa bağlı geri bildirim al.'),
-                onTap: () {
-                  Navigator.of(sheetContext).pop();
-                  onExplain();
-                },
-              ),
-              ListTile(
                 leading: const Icon(Icons.center_focus_strong),
-                title: const Text('Odaklan'),
-                subtitle: const Text('Kaynağın bir bölümünü daha yakından çalış.'),
+                title: const Text('Takıldığım noktayı netleştir'),
+                subtitle: const Text('Bu kaynağın belirli bir bölümüne odaklan; bu da tek başına mastery kanıtı değildir.'),
                 onTap: () {
                   Navigator.of(sheetContext).pop();
                   onFocus();
+                },
+              ),
+              const Divider(color: AtelierStyle.line),
+              const SizedBox(height: 8),
+              const Text(
+                'AKTİF ÇALIŞMA',
+                style: TextStyle(
+                  color: AtelierStyle.pulse,
+                  fontSize: 9.5,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: 0.9,
+                ),
+              ),
+              ListTile(
+                leading: const Icon(Icons.record_voice_over_outlined),
+                title: const Text('Kendi cümlelerimle anlat'),
+                subtitle: const Text('Kaynağı kapatıp kendi açıklamanı kur ve kaynakla karşılaştırılmış geri bildirim al.'),
+                onTap: () {
+                  Navigator.of(sheetContext).pop();
+                  onExplain();
                 },
               ),
             ],
@@ -300,6 +444,10 @@ class AtelierWorkspace extends StatelessWidget {
                 if (sourceVersion != null) ...[
                   const SizedBox(height: 14),
                   AtelierSourceTrustStrip(sourceVersion: sourceVersion!),
+                ],
+                if (continuation != null) ...[
+                  const SizedBox(height: 10),
+                  _evidenceState(),
                 ],
                 const SizedBox(height: 17),
                 if (sourceText.trim().isNotEmpty) ...[
@@ -402,6 +550,7 @@ class AtelierWorkspace extends StatelessWidget {
                               label: const Text('Dinleyerek hazırlan'),
                             ),
                             TextButton.icon(
+                              key: const ValueKey('workspace-other-study-paths'),
                               onPressed: () => _showOtherStudyPaths(context),
                               icon: const Icon(Icons.more_horiz_rounded),
                               label: const Text('Diğer çalışma yolları'),
@@ -566,6 +715,7 @@ class AtelierWorkspace extends StatelessWidget {
                             ),
                           );
                           final more = TextButton.icon(
+                            key: const ValueKey('workspace-other-study-paths'),
                             onPressed: () => _showOtherStudyPaths(context),
                             style: TextButton.styleFrom(foregroundColor: AtelierStyle.pulse),
                             icon: const Icon(Icons.more_horiz_rounded),
