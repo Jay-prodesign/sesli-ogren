@@ -5,6 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:sesli_ogren/src/app/app_runtime.dart';
 import 'package:sesli_ogren/src/app/focus_screen.dart';
 import 'package:sesli_ogren/src/app/living_study_desk_home.dart';
+import 'package:sesli_ogren/src/app/listen_screen.dart';
 import 'package:sesli_ogren/src/app/material_workspace_screen.dart';
 import 'package:sesli_ogren/src/app/source_reader_screen.dart';
 import 'package:sesli_ogren/src/data/pdf_text_extractor.dart';
@@ -105,18 +106,9 @@ void main() {
     expect(find.text('Dinle'), findsOneWidget);
     expect(find.text('Hızlı özet'), findsOneWidget);
     expect(find.text('Bildiğimi kontrol et'), findsOneWidget);
-    final focusPath = find.byKey(const ValueKey('first-intent-focus'));
-    await tester.scrollUntilVisible(
-      focusPath,
-      140,
-      scrollable: find.descendant(
-        of: find.byKey(const ValueKey('first-intent-other-paths-scroll')),
-        matching: find.byType(Scrollable),
-      ),
-    );
-    await tester.ensureVisible(focusPath);
-    await tester.pump();
-    expect(focusPath.hitTestable(), findsOneWidget);
+    await _tapVisible(tester, find.text('Dinle'));
+    await _pumpUntilFound(tester, find.byType(ListenScreen));
+    expect(find.byType(ListenScreen), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 
