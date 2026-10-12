@@ -703,45 +703,28 @@ class AtelierWorkspace extends StatelessWidget {
                         label: Text(_activeStepLabel),
                       ),
                       const SizedBox(height: 7),
-                      LayoutBuilder(
-                        builder: (context, constraints) {
-                          final compactActions =
-                              constraints.maxWidth < 340 || MediaQuery.textScalerOf(context).scale(1) > 1.2;
-                          final listen = OutlinedButton.icon(
-                            key: const ValueKey('la0040-atelier-workspace-listen'),
-                            onPressed: runListenAction,
-                            icon: const Icon(Icons.headphones_rounded),
-                            label: const Text('Dinleyerek hazırlan'),
-                            style: OutlinedButton.styleFrom(
-                              foregroundColor: AtelierStyle.aqua,
-                              side: const BorderSide(color: AtelierStyle.aqua),
-                            ),
-                          );
-                          final more = TextButton.icon(
-                            key: const ValueKey('workspace-other-study-paths'),
-                            onPressed: () => _showOtherStudyPaths(context),
-                            style: TextButton.styleFrom(foregroundColor: AtelierStyle.pulse),
-                            icon: const Icon(Icons.more_horiz_rounded),
-                            label: const Text('Diğer çalışma yolları'),
-                          );
-                          if (compactActions) {
-                            return Column(
-                              crossAxisAlignment: CrossAxisAlignment.stretch,
-                              children: [
-                                listen,
-                                const SizedBox(height: 4),
-                                Center(child: more),
-                              ],
-                            );
-                          }
-                          return Row(
-                            children: [
-                              Expanded(child: listen),
-                              const SizedBox(width: 7),
-                              more,
-                            ],
-                          );
-                        },
+                      SizedBox(
+                        width: double.infinity,
+                        child: OutlinedButton.icon(
+                          key: const ValueKey('la0040-atelier-workspace-listen'),
+                          onPressed: runListenAction,
+                          icon: const Icon(Icons.headphones_rounded),
+                          label: const Text('Dinleyerek hazırlan'),
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: AtelierStyle.aqua,
+                            side: const BorderSide(color: AtelierStyle.aqua),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Center(
+                        child: TextButton.icon(
+                          key: const ValueKey('workspace-other-study-paths'),
+                          onPressed: () => _showOtherStudyPaths(context),
+                          style: TextButton.styleFrom(foregroundColor: AtelierStyle.pulse),
+                          icon: const Icon(Icons.more_horiz_rounded),
+                          label: const Text('Diğer çalışma yolları'),
+                        ),
                       ),
                       const SizedBox(height: 4),
                       const Text(
