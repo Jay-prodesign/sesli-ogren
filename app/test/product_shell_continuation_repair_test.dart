@@ -212,7 +212,7 @@ void main() {
     );
     await tester.tap(libraryMaterialCard.last);
     await _pumpUntilFound(tester, find.byKey(const ValueKey('la0040-atelier-workspace-reader')));
-    await tester.tap(find.byKey(const ValueKey('la0040-atelier-workspace-reader')));
+    await _tapVisible(tester, find.byKey(const ValueKey('la0040-atelier-workspace-reader')));
     await _pumpUntilFound(tester, find.byType(SourceReaderScreen));
     expect(find.byType(SourceReaderScreen), findsOneWidget);
     Navigator.of(tester.element(find.byType(SourceReaderScreen))).pop();
@@ -257,7 +257,7 @@ void main() {
     );
     await tester.tap(libraryMaterialCard.last);
     await _pumpUntilFound(tester, find.byKey(const ValueKey('la0040-atelier-workspace-reader')));
-    await tester.tap(find.byKey(const ValueKey('la0040-atelier-workspace-reader')));
+    await _tapVisible(tester, find.byKey(const ValueKey('la0040-atelier-workspace-reader')));
     await _pumpUntilFound(tester, find.byType(SourceReaderScreen));
     expect(find.byType(SourceReaderScreen), findsOneWidget);
 
