@@ -14,13 +14,7 @@ import 'product_shell_screen.dart';
 import 'living_study_desk_home.dart';
 
 class SesliOgrenApp extends StatefulWidget {
-  const SesliOgrenApp({
-    this.restoreSession,
-    this.openRuntime,
-    this.openLocalRuntime,
-    this.signOutSession,
-    super.key,
-  });
+  const SesliOgrenApp({this.restoreSession, this.openRuntime, this.openLocalRuntime, this.signOutSession, super.key});
 
   /// Test/review seams only. Production restores Supabase when available and
   /// otherwise opens the truthful device-local learning runtime.
@@ -210,10 +204,7 @@ class _SesliOgrenAppState extends State<SesliOgrenApp> {
       home: _accountDeleted
           ? _AccountDeletedScreen(onStartFresh: _startFresh)
           : _showAccountEntry
-          ? AccountEntryScreen(
-              onAuthenticated: _handleAuthenticated,
-              onContinueWithoutAccount: _continueWithoutAccount,
-            )
+          ? AccountEntryScreen(onAuthenticated: _handleAuthenticated, onContinueWithoutAccount: _continueWithoutAccount)
           : FutureBuilder<AppRuntime?>(
               future: _runtimeFuture,
               builder: (context, snapshot) {
