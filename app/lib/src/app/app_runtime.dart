@@ -92,6 +92,41 @@ class AppRuntime {
     );
   }
 
+  /// Rebinds the already-open local data plane to an authenticated namespace.
+  ///
+  /// The SQLite handle and local learning services are deliberately reused so
+  /// account connection cannot close or overwrite the device-local namespace.
+  /// Cloud-capable gateways are enabled only for a verified authenticated
+  /// identity.
+  AppRuntime asAuthenticated(AuthenticatedLearner authenticatedLearner) {
+    if (!authenticatedLearner.isAuthenticated) {
+      throw ArgumentError.value(authenticatedLearner.kind, 'authenticatedLearner', 'Expected authenticated identity.');
+    }
+    return AppRuntime(
+      learner: authenticatedLearner,
+      store: store,
+      ingest: ingest,
+      recall: recall,
+      telemetry: telemetry,
+      explain: const SupabaseGroundedExplainGateway(),
+      explainBack: const SupabaseExplainBackGateway(),
+      focusHelp: const SupabaseFocusHelpGateway(),
+      accountOverview: const SupabaseAccountOverviewGateway(),
+      accountDeletion: const SupabaseAccountDeletionGateway(),
+    );
+  }
+
+  /// Returns to the device-local namespace without reopening or closing the
+  /// shared SQLite data plane. Local and authenticated rows remain separated by
+  /// learner_id, so neither namespace fabricates or absorbs the other's truth.
+  AppRuntime asLocal() => AppRuntime(
+    learner: localLearner,
+    store: store,
+    ingest: ingest,
+    recall: recall,
+    telemetry: telemetry,
+  );
+
   Future<void> deleteAccount() async {
     await accountDeletion.deleteAccount(learner: learner);
     try {
