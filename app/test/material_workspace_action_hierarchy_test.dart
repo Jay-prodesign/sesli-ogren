@@ -114,7 +114,7 @@ void main() {
     expect(switcher.duration, const Duration(milliseconds: 220));
 
     await tester.tap(find.byKey(const ValueKey('workspace-other-study-paths')));
-    await tester.pumpAndSettle();
+    await tester.pump(const Duration(milliseconds: 400));
     expect(find.text('Bu kaynakla başka bir yol seç'), findsOneWidget);
     expect(find.text('HAZIRLIK'), findsOneWidget);
     expect(find.text('AKTİF ÇALIŞMA'), findsOneWidget);
@@ -135,7 +135,7 @@ void main() {
     expect(flashcards, 1);
 
     await tester.tap(find.byKey(const ValueKey('workspace-other-study-paths')));
-    await tester.pumpAndSettle();
+    await tester.pump(const Duration(milliseconds: 400));
     final quizAction = find.byKey(const ValueKey('workspace-other-quiz'));
     expect(quizAction, findsOneWidget);
     await tester.scrollUntilVisible(

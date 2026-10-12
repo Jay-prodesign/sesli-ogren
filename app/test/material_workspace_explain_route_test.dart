@@ -178,13 +178,17 @@ void main() {
     await _scrollUntilFound(tester, otherPaths, scrollable: workspaceScroll);
     await _tapVisible(tester, otherPaths);
     await _pumpUntilFound(tester, find.byKey(const ValueKey('workspace-other-study-paths-scroll')));
-    await tester.pumpAndSettle();
+    // D/Knot/workspace motion can schedule frames continuously; advance the
+    // modal transition without waiting for the whole app to become idle.
+    await tester.pump(const Duration(milliseconds: 400));
 
     expect(find.byKey(const ValueKey('workspace-other-study-paths-scroll')), findsOneWidget);
     final pathsScroll = find.byKey(const ValueKey('workspace-other-study-paths-scroll'));
     for (final actionKey in const [
       ValueKey('workspace-other-quick-recap'),
       ValueKey('workspace-other-grounded-explain'),
+      ValueKey('workspace-other-flashcards'),
+      ValueKey('workspace-other-quiz'),
       ValueKey('workspace-other-focus'),
       ValueKey('workspace-other-explain-back'),
     ]) {

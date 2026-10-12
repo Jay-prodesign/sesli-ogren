@@ -47,6 +47,19 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
     _refresh();
   }
 
+  @override
+  void didUpdateWidget(covariant ProductShellScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (identical(oldWidget.runtime, widget.runtime)) return;
+
+    // Account/local namespace transitions reuse the same shell position in the
+    // widget tree. Never carry an authenticated snapshot or Profile tab into
+    // the device-local runtime (or vice versa).
+    _index = 0;
+    _deletingMaterialId = null;
+    _refresh();
+  }
+
   void _refresh() {
     _snapshot = _loadSnapshot();
   }

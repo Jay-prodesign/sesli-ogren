@@ -948,9 +948,19 @@ void main() {
     await tapVisible(tester, materialCard);
 
     await pumpUntilFound(tester, find.byType(MaterialWorkspaceScreen));
-    await pumpUntilFound(tester, find.byKey(const ValueKey('la0040-atelier-workspace')));
     expect(LivingDeskReviewScope.active(tester.element(find.byType(MaterialWorkspaceScreen))), isTrue);
     expect(find.text('Fotosentez çalışma notu'), findsWidgets);
+
+    // A brand-new source enters the canonical First Value step before the
+    // ordinary Workspace. Consume that intent through the real Reader, then
+    // verify the persistent Workspace that follows.
+    await pumpUntilFound(tester, find.byKey(const ValueKey('first-value-intent')));
+    await tapVisible(tester, find.byKey(const ValueKey('first-intent-recommend')));
+    await pumpUntilFound(tester, find.byType(SourceReaderScreen));
+    expect(find.textContaining('Fotosentez'), findsWidgets);
+    Navigator.of(tester.element(find.byType(SourceReaderScreen))).pop();
+    await pumpUntilFound(tester, find.byType(MaterialWorkspaceScreen));
+    await pumpUntilFound(tester, find.byKey(const ValueKey('la0040-atelier-workspace')));
     expect(find.byKey(const ValueKey('la0040-atelier-workspace-reader')), findsOneWidget);
 
     Finder workspaceScroll() =>
@@ -960,7 +970,7 @@ void main() {
     await pumpUntilFound(tester, otherPaths);
     await tester.tap(otherPaths);
     await pumpUntilFound(tester, find.byKey(const ValueKey('workspace-other-study-paths-scroll')));
-    await tester.pumpAndSettle();
+    await tester.pump(const Duration(milliseconds: 400));
     final otherPathsScroll = find.byKey(const ValueKey('workspace-other-study-paths-scroll'));
     await scrollUntilFound(tester, find.byKey(const ValueKey('workspace-other-focus')), scrollable: otherPathsScroll);
     await tapVisible(tester, find.byKey(const ValueKey('workspace-other-focus')));
@@ -974,7 +984,7 @@ void main() {
     await pumpUntilFound(tester, otherPathsAfterFocus);
     await tester.tap(otherPathsAfterFocus);
     await pumpUntilFound(tester, find.byKey(const ValueKey('workspace-other-study-paths-scroll')));
-    await tester.pumpAndSettle();
+    await tester.pump(const Duration(milliseconds: 400));
     final explainPathsScroll = find.byKey(const ValueKey('workspace-other-study-paths-scroll'));
     await scrollUntilFound(
       tester,
@@ -1906,7 +1916,7 @@ void main() {
     await pumpUntilFound(tester, otherPaths);
     await tester.tap(otherPaths);
     await pumpUntilFound(tester, find.byKey(const ValueKey('workspace-other-study-paths-scroll')));
-    await tester.pumpAndSettle();
+    await tester.pump(const Duration(milliseconds: 400));
     final explainPathsScroll = find.byKey(const ValueKey('workspace-other-study-paths-scroll'));
     await scrollUntilFound(
       tester,
