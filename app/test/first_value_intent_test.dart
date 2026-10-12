@@ -78,7 +78,7 @@ void main() {
     );
     await _pumpUntilFound(tester, find.byKey(const ValueKey('first-value-intent')));
 
-    final reasonFinder = find.text('Sonra kaynağı kapatıp ne kaldığını sınarsın.');
+    final reasonFinder = find.text('Önce bütünü gör; sonra kaynağı kapatıp ne kaldığını sınarsın.');
     await tester.scrollUntilVisible(reasonFinder, 180, scrollable: find.byType(Scrollable).last);
     await tester.pump();
     final reason = tester.widget<Text>(reasonFinder);
