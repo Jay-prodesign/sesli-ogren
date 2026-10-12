@@ -78,15 +78,21 @@ void main() {
     );
     await _pumpUntilFound(tester, find.byKey(const ValueKey('first-value-intent')));
 
-    final reasonFinder = find.text('Sonra kaynağı kapatıp ne kaldığını sınarsın.');
-    await tester.scrollUntilVisible(reasonFinder, 180, scrollable: find.byType(Scrollable).last);
+    final firstValueScroll = find.descendant(
+      of: find.byKey(const ValueKey('first-value-intent')),
+      matching: find.byType(Scrollable),
+    );
+    expect(firstValueScroll, findsOneWidget);
+
+    final reasonFinder = find.text('Önce bütünü gör; sonra kaynağı kapatıp ne kaldığını sınarsın.');
+    await tester.scrollUntilVisible(reasonFinder, 180, scrollable: firstValueScroll);
     await tester.pump();
     final reason = tester.widget<Text>(reasonFinder);
     expect(reason.maxLines, isNull);
     expect(reason.overflow, isNull);
 
     final evidenceFinder = find.text('Hatırla denemesi öğrenme kanıtını oluşturur.');
-    await tester.scrollUntilVisible(evidenceFinder, 180, scrollable: find.byType(Scrollable).last);
+    await tester.scrollUntilVisible(evidenceFinder, 180, scrollable: firstValueScroll);
     await tester.pump();
     final evidenceTruth = tester.widget<Text>(evidenceFinder);
     expect(evidenceTruth.maxLines, isNull);
