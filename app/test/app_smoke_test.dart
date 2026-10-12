@@ -1715,10 +1715,6 @@ void main() {
 
   testWidgets('remote deletion is never resubmitted when only local cleanup failed', (tester) async {
     final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
-    addTearDown(() async {
-      try {
-          } catch (_) {}
-    });
     final deletion = _RecordingAccountDeletionGateway();
     final runtime = _LocalCleanupFailingRuntime(
       learner: AppRuntime.localM5LearnerFixture,
