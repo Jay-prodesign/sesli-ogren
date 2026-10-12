@@ -392,7 +392,8 @@ class AtelierWorkspace extends StatelessWidget {
   Widget build(BuildContext context) {
     final media = MediaQuery.of(context);
     final compactSurface = media.size.width < 340 || media.textScaler.scale(1) > 1.25;
-    final motionDuration = media.disableAnimations ? Duration.zero : const Duration(milliseconds: 220);
+    final reducedMotion = media.disableAnimations || media.accessibleNavigation;
+    final motionDuration = reducedMotion ? Duration.zero : const Duration(milliseconds: 220);
     final activeStepKey = continuation?.nextAction.kind.name ?? 'first-recall';
     final primaryAction = switch (continuation?.nextAction.kind) {
       NextLearningActionKind.reviewSourceThenRecall || NextLearningActionKind.repeatRecallLater => onReadSource,
@@ -400,14 +401,14 @@ class AtelierWorkspace extends StatelessWidget {
     };
 
     void runPrimaryAction() {
-      if (!media.disableAnimations) {
+      if (!reducedMotion) {
         HapticFeedback.selectionClick();
       }
       primaryAction();
     }
 
     void runListenAction() {
-      if (!media.disableAnimations) {
+      if (!reducedMotion) {
         HapticFeedback.selectionClick();
       }
       onListen();
