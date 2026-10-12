@@ -672,7 +672,7 @@ void main() {
     expect(tester.takeException(), isNull);
     await expectLater(find.byType(Scaffold), matchesGoldenFile('goldens/la0040_quiz_390x844.png'));
 
-    await tester.tap(find.byKey(const ValueKey('quiz-option-0')));
+    await tester.tap(find.byKey(const ValueKey('quiz-option-0')).hitTestable());
     await tester.pump();
     await tester.tap(find.byKey(const ValueKey('quiz-submit')));
     for (var i = 0; i < 60 && find.byKey(const ValueKey('quiz-source-evidence')).evaluate().isEmpty; i++) {
@@ -753,7 +753,7 @@ void main() {
     for (var i = 0; i < 60 && find.byKey(const ValueKey('quiz-submit')).evaluate().isEmpty; i++) {
       await tester.pump(const Duration(milliseconds: 30));
     }
-    await tester.tap(find.byKey(const ValueKey('quiz-option-0')));
+    await tester.tap(find.byKey(const ValueKey('quiz-option-0')).hitTestable());
     await tester.pump();
 
     await ingest.ingestPastedText(
@@ -826,9 +826,9 @@ void main() {
     await tester.scrollUntilVisible(
       find.byKey(const ValueKey('quiz-option-0')),
       160,
-      scrollable: find.descendant(of: find.byKey(const ValueKey('quiz-scroll')), matching: find.byType(Scrollable)),
+      scrollable: find.byType(Scrollable).last,
     );
-    await tester.tap(find.byKey(const ValueKey('quiz-option-0')));
+    await tester.tap(find.byKey(const ValueKey('quiz-option-0')).hitTestable());
     await tester.pump();
     await tester.tap(find.byKey(const ValueKey('quiz-submit')));
     for (var i = 0; i < 60 && find.byKey(const ValueKey('quiz-source-evidence')).evaluate().isEmpty; i++) {
@@ -837,7 +837,7 @@ void main() {
     await tester.scrollUntilVisible(
       find.byKey(const ValueKey('quiz-source-evidence')),
       160,
-      scrollable: find.descendant(of: find.byKey(const ValueKey('quiz-scroll')), matching: find.byType(Scrollable)),
+      scrollable: find.byType(Scrollable).last,
     );
     await tester.pump();
     expect(find.byKey(const ValueKey('quiz-next')), findsOneWidget);

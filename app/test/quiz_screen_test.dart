@@ -72,7 +72,7 @@ void main() {
     expect(find.byKey(const ValueKey('quiz-source-evidence')), findsNothing);
     expect(find.byKey(const ValueKey('quiz-answer-feedback')), findsNothing);
 
-    await tester.tap(find.byKey(const ValueKey('quiz-option-0')));
+    await tester.tap(find.byKey(const ValueKey('quiz-option-0')).hitTestable());
     await tester.pump();
     await tester.tap(find.byKey(const ValueKey('quiz-submit')));
     await _pumpUntilFound(tester, find.byKey(const ValueKey('quiz-source-evidence')));
@@ -173,7 +173,7 @@ void main() {
       ),
     );
     await _pumpUntilFound(tester, find.byKey(const ValueKey('quiz-submit')));
-    await tester.tap(find.byKey(const ValueKey('quiz-option-0')));
+    await tester.tap(find.byKey(const ValueKey('quiz-option-0')).hitTestable());
     await tester.pump();
 
     await runtime.ingest.ingestPastedText(
@@ -255,16 +255,16 @@ void main() {
     await tester.scrollUntilVisible(
       find.byKey(const ValueKey('quiz-option-0')),
       160,
-      scrollable: find.descendant(of: find.byKey(const ValueKey('quiz-scroll')), matching: find.byType(Scrollable)),
+      scrollable: find.byType(Scrollable).last,
     );
-    await tester.tap(find.byKey(const ValueKey('quiz-option-0')));
+    await tester.tap(find.byKey(const ValueKey('quiz-option-0')).hitTestable());
     await tester.pump();
     await tester.tap(find.byKey(const ValueKey('quiz-submit')));
     await _pumpUntilFound(tester, find.byKey(const ValueKey('quiz-source-evidence')));
     await tester.scrollUntilVisible(
       find.byKey(const ValueKey('quiz-source-evidence')),
       160,
-      scrollable: find.descendant(of: find.byKey(const ValueKey('quiz-scroll')), matching: find.byType(Scrollable)),
+      scrollable: find.byType(Scrollable).last,
     );
     expect(find.byKey(const ValueKey('quiz-next')), findsOneWidget);
     expect(tester.takeException(), isNull);
