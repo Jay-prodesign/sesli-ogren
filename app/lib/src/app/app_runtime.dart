@@ -9,6 +9,7 @@ import '../data/sqlite_source_store.dart';
 import '../domain/authenticated_learner.dart';
 import '../domain/learning_contracts.dart';
 import '../learning/flashcard_learning_service.dart';
+import '../learning/quiz_learning_service.dart';
 import '../learning/explain_back_gateway.dart';
 import '../learning/focus_help_gateway.dart';
 import '../learning/recall_learning_service.dart';
@@ -34,12 +35,14 @@ class AppRuntime {
     required this.recall,
     required this.telemetry,
     FlashcardLearningService? flashcards,
+    QuizLearningService? quiz,
     this.explain = const UnavailableGroundedExplainGateway(),
     this.explainBack = const UnavailableExplainBackGateway(),
     this.focusHelp = const UnavailableFocusHelpGateway(),
     this.accountOverview = const UnavailableAccountOverviewGateway(),
     this.accountDeletion = const UnavailableAccountDeletionGateway(),
-  }) : flashcards = flashcards ?? FlashcardLearningService(store: store);
+  }) : flashcards = flashcards ?? FlashcardLearningService(store: store),
+       quiz = quiz ?? QuizLearningService(store: store);
 
   /// Device-local production namespace. It is explicitly not an account.
   static const localLearner = LearnerIdentity.local();
@@ -57,6 +60,7 @@ class AppRuntime {
   final SourceIngestService ingest;
   final RecallLearningService recall;
   final FlashcardLearningService flashcards;
+  final QuizLearningService quiz;
   final OperationalTelemetry telemetry;
   final GroundedExplainGateway explain;
   final ExplainBackGateway explainBack;
