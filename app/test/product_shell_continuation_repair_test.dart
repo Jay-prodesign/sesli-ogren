@@ -83,24 +83,22 @@ Future<void> _openLibraryTab(WidgetTester tester) async {
 }
 
 Future<void> _openWorkspaceSource(WidgetTester tester) async {
-  await _pumpUntilFound(tester, find.byType(MaterialWorkspaceScreen));
-  final candidates = [
-    find.byKey(const ValueKey('first-intent-recommend')),
-    find.byKey(const ValueKey('la0040-atelier-workspace-reader')),
-    find.text('Kaynağın tamamını oku'),
-  ];
+  final workspace = find.byType(MaterialWorkspaceScreen);
+  await _pumpUntilFound(tester, workspace);
+  final readSource = find.descendant(of: workspace, matching: find.byIcon(Icons.menu_book_outlined));
   for (var i = 0; i < 200; i++) {
     await tester.pump(const Duration(milliseconds: 20));
-    for (final candidate in candidates) {
-      if (candidate.evaluate().isEmpty) continue;
-      await tester.ensureVisible(candidate);
-      await tester.pump();
-      await tester.tap(candidate);
-      await tester.pump();
-      return;
+    if (find.text('Materyal açılamadı.').evaluate().isNotEmpty) {
+      fail('Workspace entered its recovery state instead of exposing the current source.');
     }
+    if (readSource.evaluate().isEmpty) continue;
+    await tester.ensureVisible(readSource.first);
+    await tester.pump();
+    await tester.tap(readSource.first);
+    await tester.pump();
+    return;
   }
-  fail('Expected a valid Workspace source-reading action.');
+  fail('Expected the Workspace source-reading action.');
 }
 
 void main() {
