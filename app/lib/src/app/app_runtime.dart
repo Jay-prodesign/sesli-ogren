@@ -39,8 +39,11 @@ class AppRuntime {
     this.accountDeletion = const UnavailableAccountDeletionGateway(),
   });
 
-  /// Explicit M5 fixture only. It is not a production authentication claim.
-  static const localM5LearnerFixture = AuthenticatedLearner(id: LearnerId('m5-local-authenticated-learner'));
+  /// Device-local production namespace. It is explicitly not an account.
+  static const localLearner = LearnerIdentity.local();
+
+  /// Explicit M5 authenticated fixture only.
+  static const localM5LearnerFixture = LearnerIdentity.authenticated(id: LearnerId('m5-local-authenticated-learner'));
 
   static const primaryMaterialId = MaterialId('m5-primary-material');
 
@@ -75,6 +78,54 @@ class AppRuntime {
       accountDeletion: const SupabaseAccountDeletionGateway(),
     );
   }
+
+  static Future<AppRuntime> openLocal() async {
+    final store = await SqliteSourceStore.open();
+    final ingest = SourceIngestService(store: store, pdfTextExtractor: const PdfrxPdfTextExtractor());
+    final recall = RecallLearningService(sourceStore: store, learningStore: store.learningTruthStore());
+    return AppRuntime(
+      learner: localLearner,
+      store: store,
+      ingest: ingest,
+      recall: recall,
+      telemetry: store.operationalTelemetry(),
+    );
+  }
+
+  /// Rebinds the already-open local data plane to an authenticated namespace.
+  ///
+  /// The SQLite handle and local learning services are deliberately reused so
+  /// account connection cannot close or overwrite the device-local namespace.
+  /// Cloud-capable gateways are enabled only for a verified authenticated
+  /// identity.
+  AppRuntime asAuthenticated(AuthenticatedLearner authenticatedLearner) {
+    if (!authenticatedLearner.isAuthenticated) {
+      throw ArgumentError.value(authenticatedLearner.kind, 'authenticatedLearner', 'Expected authenticated identity.');
+    }
+    return AppRuntime(
+      learner: authenticatedLearner,
+      store: store,
+      ingest: ingest,
+      recall: recall,
+      telemetry: telemetry,
+      explain: const SupabaseGroundedExplainGateway(),
+      explainBack: const SupabaseExplainBackGateway(),
+      focusHelp: const SupabaseFocusHelpGateway(),
+      accountOverview: const SupabaseAccountOverviewGateway(),
+      accountDeletion: const SupabaseAccountDeletionGateway(),
+    );
+  }
+
+  /// Returns to the device-local namespace without reopening or closing the
+  /// shared SQLite data plane. Local and authenticated rows remain separated by
+  /// learner_id, so neither namespace fabricates or absorbs the other's truth.
+  AppRuntime asLocal() => AppRuntime(
+    learner: localLearner,
+    store: store,
+    ingest: ingest,
+    recall: recall,
+    telemetry: telemetry,
+  );
 
   Future<void> deleteAccount() async {
     await accountDeletion.deleteAccount(learner: learner);

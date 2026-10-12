@@ -19,11 +19,18 @@ import 'profile_surface.dart';
 import 'progress_surface.dart';
 
 class ProductShellScreen extends StatefulWidget {
-  const ProductShellScreen({required this.runtime, this.onAccountDeleted, this.onSignOut, super.key});
+  const ProductShellScreen({
+    required this.runtime,
+    this.onAccountDeleted,
+    this.onSignOut,
+    this.onConnectAccount,
+    super.key,
+  });
 
   final AppRuntime runtime;
   final VoidCallback? onAccountDeleted;
   final Future<void> Function()? onSignOut;
+  final VoidCallback? onConnectAccount;
 
   @override
   State<ProductShellScreen> createState() => _ProductShellScreenState();
@@ -532,6 +539,7 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
         runtime: widget.runtime,
         onAccountDeleted: widget.onAccountDeleted,
         onSignOut: widget.onSignOut,
+        onConnectAccount: widget.onConnectAccount,
       );
     }
 

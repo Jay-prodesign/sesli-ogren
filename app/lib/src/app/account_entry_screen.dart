@@ -9,12 +9,14 @@ import 'companion_view.dart';
 class AccountEntryScreen extends StatefulWidget {
   const AccountEntryScreen({
     required this.onAuthenticated,
+    this.onContinueWithoutAccount,
     this.requestOtp = SupabaseLearnerAuth.requestEmailOtp,
     this.verifyOtp = SupabaseLearnerAuth.verifyEmailOtp,
     super.key,
   });
 
   final Future<void> Function(AuthenticatedLearner learner) onAuthenticated;
+  final VoidCallback? onContinueWithoutAccount;
   final Future<void> Function(String email) requestOtp;
   final Future<AuthenticatedLearner> Function({required String email, required String token}) verifyOtp;
 
@@ -299,7 +301,11 @@ class _AccountEntryScreenState extends State<AccountEntryScreen> {
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         Text(
-                          _codeRequested ? 'Kodunu gir' : 'Öğrenme alanına gir',
+                          _codeRequested
+                              ? 'Kodunu gir'
+                              : widget.onContinueWithoutAccount != null
+                              ? 'Hesabını bağla'
+                              : 'Öğrenme alanına gir',
                           style: theme.textTheme.headlineSmall?.copyWith(
                             color: AtelierStyle.ink,
                             fontWeight: FontWeight.w900,
@@ -309,6 +315,8 @@ class _AccountEntryScreenState extends State<AccountEntryScreen> {
                         Text(
                           _codeRequested
                               ? '${_emailController.text.trim()} adresine gönderilen 6 haneli kodu gir.'
+                              : widget.onContinueWithoutAccount != null
+                              ? 'Hesap isteğe bağlıdır. E-posta ile bağlanabilir veya cihazdaki öğrenmene hesapsız devam edebilirsin.'
                               : 'E-posta adresinle giriş yap veya yeni hesabını oluştur. Şifre gerekmiyor.',
                           style: theme.textTheme.bodyMedium?.copyWith(color: AtelierStyle.muted, height: 1.45),
                         ),
@@ -376,6 +384,32 @@ class _AccountEntryScreenState extends State<AccountEntryScreen> {
                           const SizedBox(height: 8),
                           TextButton(onPressed: _busy ? null : _requestCode, child: const Text('Yeni kod gönder')),
                           TextButton(onPressed: _busy ? null : _changeEmail, child: const Text('E-postayı değiştir')),
+                        ],
+                        if (widget.onContinueWithoutAccount != null) ...[
+                          const SizedBox(height: 10),
+                          const Row(
+                            children: [
+                              Expanded(child: Divider()),
+                              Padding(
+                                padding: EdgeInsets.symmetric(horizontal: 10),
+                                child: Text('veya', style: TextStyle(color: AtelierStyle.muted, fontSize: 12)),
+                              ),
+                              Expanded(child: Divider()),
+                            ],
+                          ),
+                          const SizedBox(height: 6),
+                          OutlinedButton.icon(
+                            key: const ValueKey('account-continue-local'),
+                            onPressed: _busy ? null : widget.onContinueWithoutAccount,
+                            icon: const Icon(Icons.phone_iphone_rounded),
+                            label: const Text('Hesapsız devam et'),
+                          ),
+                          const SizedBox(height: 6),
+                          const Text(
+                            'Hesap isteğe bağlıdır. Hesapsız çalışmalar bu cihazdaki yerel öğrenme alanında kalır.',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(color: AtelierStyle.muted, fontSize: 11.5, height: 1.35),
+                          ),
                         ],
                       ],
                     ),

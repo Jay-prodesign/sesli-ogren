@@ -14,11 +14,13 @@ import 'product_shell_screen.dart';
 import 'living_study_desk_home.dart';
 
 class SesliOgrenApp extends StatefulWidget {
-  const SesliOgrenApp({this.restoreSession, this.openRuntime, this.signOutSession, super.key});
+  const SesliOgrenApp({this.restoreSession, this.openRuntime, this.openLocalRuntime, this.signOutSession, super.key});
 
-  /// Test/review seams only. Production uses real Supabase restore, sign-out and AppRuntime.open.
+  /// Test/review seams only. Production restores Supabase when available and
+  /// otherwise opens the truthful device-local learning runtime.
   final Future<AuthenticatedLearner?> Function()? restoreSession;
   final Future<AppRuntime> Function(AuthenticatedLearner learner)? openRuntime;
+  final Future<AppRuntime> Function()? openLocalRuntime;
   final Future<void> Function()? signOutSession;
 
   @override
@@ -30,6 +32,7 @@ class _SesliOgrenAppState extends State<SesliOgrenApp> {
   AppRuntime? _runtime;
   bool _accountDeleted = false;
   bool _showAccountEntry = false;
+  bool _openingAuthenticated = false;
 
   @override
   void initState() {
@@ -39,15 +42,43 @@ class _SesliOgrenAppState extends State<SesliOgrenApp> {
 
   void _openRuntime() {
     _showAccountEntry = false;
+    _openingAuthenticated = false;
+    _runtimeFuture = _restoreOrOpenLocal();
+  }
+
+  Future<AppRuntime> _restoreOrOpenLocal() async {
     final restoreSession = widget.restoreSession ?? SupabaseLearnerAuth.restoreSession;
-    _runtimeFuture = restoreSession().then((learner) async {
-      if (learner == null) return null;
-      return _openRuntimeForLearner(learner);
-    });
+    AuthenticatedLearner? learner;
+    try {
+      learner = await restoreSession();
+    } catch (_) {
+      // Optional account restore must never gate device-local learning.
+      return _openLocalRuntime();
+    }
+    if (learner == null) return _openLocalRuntime();
+    _openingAuthenticated = true;
+    return _openRuntimeForLearner(learner);
+  }
+
+  Future<AppRuntime> _openLocalRuntime() async {
+    _openingAuthenticated = false;
+    final current = _runtime;
+    final runtime = widget.openLocalRuntime != null
+        ? await widget.openLocalRuntime!.call()
+        : current != null
+        ? current.asLocal()
+        : await AppRuntime.openLocal();
+    _runtime = runtime;
+    return runtime;
   }
 
   Future<AppRuntime> _openRuntimeForLearner(AuthenticatedLearner learner) async {
-    final runtime = await (widget.openRuntime?.call(learner) ?? AppRuntime.open(learner: learner));
+    final current = _runtime;
+    final runtime = widget.openRuntime != null
+        ? await widget.openRuntime!.call(learner)
+        : current != null
+        ? current.asAuthenticated(learner)
+        : await AppRuntime.open(learner: learner);
     _runtime = runtime;
     return runtime;
   }
@@ -55,9 +86,12 @@ class _SesliOgrenAppState extends State<SesliOgrenApp> {
   Future<void> _handleAuthenticated(AuthenticatedLearner learner) async {
     if (!mounted) return;
     setState(() {
-      // Authentication has succeeded. Runtime opening is a separate product phase:
-      // its loading/error state belongs to the app shell, not to OTP validation.
+      // Authentication is optional. Production rebinds the already-open local
+      // data plane to the authenticated learner namespace, so local work stays
+      // intact and the SQLite handle is never closed out from under the next
+      // runtime.
       _showAccountEntry = false;
+      _openingAuthenticated = true;
       _runtimeFuture = _openRuntimeForLearner(learner);
     });
   }
@@ -83,13 +117,11 @@ class _SesliOgrenAppState extends State<SesliOgrenApp> {
   }
 
   void _handleAccountDeleted() {
-    final runtime = _runtime;
-    _runtime = null;
-    if (runtime != null) {
-      unawaited(runtime.close());
-    }
+    // Remote/account-scoped data has been removed, but the device-local
+    // namespace is a separate learner_id and must remain intact.
     setState(() {
       _showAccountEntry = false;
+      _openingAuthenticated = false;
       _accountDeleted = true;
     });
   }
@@ -99,50 +131,52 @@ class _SesliOgrenAppState extends State<SesliOgrenApp> {
   Future<void> _handleSignOut() async {
     await _signOutSession();
 
-    // Session sign-out is the authority boundary. Once it succeeds, never keep
-    // rendering an authenticated product merely because local runtime cleanup
-    // failed afterward.
-    final runtime = _runtime;
-    _runtime = null;
+    // Session sign-out is the authority boundary. The existing local data
+    // plane is rebound to the device-local namespace; no account gate and no
+    // database close/reopen race sits between the learner and local study.
     if (mounted) {
       setState(() {
         _accountDeleted = false;
-        _showAccountEntry = true;
+        _showAccountEntry = false;
+        _openingAuthenticated = false;
+        _runtimeFuture = _openLocalRuntime();
       });
-    }
-    if (runtime != null) {
-      try {
-        await runtime.close();
-      } catch (_) {
-        // Local handle cleanup is best-effort after the session is already gone.
-      }
     }
   }
 
   Future<void> _returnToAccountEntryAfterRuntimeFailure() async {
     await _signOutSession();
 
-    final runtime = _runtime;
-    _runtime = null;
+    // If an optional account runtime cannot open, preserve any already-open
+    // device-local runtime so "Hesapsız devam et" remains a truthful recovery.
     if (mounted) {
       setState(() {
         _accountDeleted = false;
         _showAccountEntry = true;
+        _openingAuthenticated = false;
       });
-    }
-    if (runtime != null) {
-      try {
-        await runtime.close();
-      } catch (_) {
-        // Do not resurrect a signed-out session because cleanup failed.
-      }
     }
   }
 
   void _startFresh() {
     setState(() {
       _accountDeleted = false;
-      _showAccountEntry = true;
+      _showAccountEntry = false;
+      _openingAuthenticated = false;
+      _runtimeFuture = _openLocalRuntime();
+    });
+  }
+
+  void _openAccountEntry() {
+    setState(() => _showAccountEntry = true);
+  }
+
+  void _continueWithoutAccount() {
+    setState(() {
+      _showAccountEntry = false;
+      if (_runtime == null) {
+        _runtimeFuture = _openLocalRuntime();
+      }
     });
   }
 
@@ -155,21 +189,19 @@ class _SesliOgrenAppState extends State<SesliOgrenApp> {
       home: _accountDeleted
           ? _AccountDeletedScreen(onStartFresh: _startFresh)
           : _showAccountEntry
-          ? AccountEntryScreen(onAuthenticated: _handleAuthenticated)
+          ? AccountEntryScreen(onAuthenticated: _handleAuthenticated, onContinueWithoutAccount: _continueWithoutAccount)
           : FutureBuilder<AppRuntime?>(
               future: _runtimeFuture,
               builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.done && !snapshot.hasError && snapshot.data == null) {
-                  return AccountEntryScreen(onAuthenticated: _handleAuthenticated);
-                }
                 if (snapshot.hasData) {
                   final runtime = snapshot.data!;
                   return FirstRunOnboardingGate(
                     child: LivingDeskReviewScope(
                       child: ProductShellScreen(
                         runtime: runtime,
-                        onAccountDeleted: _handleAccountDeleted,
-                        onSignOut: _handleSignOut,
+                        onAccountDeleted: runtime.learner.isAuthenticated ? _handleAccountDeleted : null,
+                        onSignOut: runtime.learner.isAuthenticated ? _handleSignOut : null,
+                        onConnectAccount: runtime.learner.isLocal ? _openAccountEntry : null,
                       ),
                     ),
                   );
@@ -178,9 +210,7 @@ class _SesliOgrenAppState extends State<SesliOgrenApp> {
                   return _RuntimeErrorScreen(
                     error: snapshot.error!,
                     onRetry: _retryRuntime,
-                    onUseAnotherAccount: snapshot.error is LearnerAuthConfigurationException
-                        ? null
-                        : _returnToAccountEntryAfterRuntimeFailure,
+                    onUseAnotherAccount: _openingAuthenticated ? _returnToAccountEntryAfterRuntimeFailure : null,
                   );
                 }
                 return const _RuntimeLoadingScreen();
@@ -224,7 +254,7 @@ class _AccountDeletedScreen extends StatelessWidget {
                             const CompanionView(state: CompanionVisualState.success, size: 96),
                             const SizedBox(height: 18),
                             const Text(
-                              'YENİDEN BAŞLAMAYA HAZIR',
+                              'HESAP SİLİNDİ',
                               style: TextStyle(
                                 color: AtelierStyle.mark,
                                 fontSize: 10,
@@ -235,14 +265,14 @@ class _AccountDeletedScreen extends StatelessWidget {
                             ),
                             const SizedBox(height: 8),
                             Text(
-                              'Hesabın ve verilerin silindi.',
+                              'Hesabın ve hesaba bağlı verilerin silindi.',
                               style: Theme.of(context).textTheme.headlineSmall
                                   ?.copyWith(color: Colors.white, fontWeight: FontWeight.w900),
                               textAlign: TextAlign.center,
                             ),
                             const SizedBox(height: 10),
                             Text(
-                              'Yeni bir öğrenme alanı oluşturmak istersen sıfırdan başlayabilirsin.',
+                              'Bu cihazdaki hesapsız öğrenme alanın ayrı tutulduğu için korunur. İstersen doğrudan yerel çalışmalarına dönebilirsin.',
                               style: TextStyle(color: Colors.white.withValues(alpha: 0.76), height: 1.45),
                               textAlign: TextAlign.center,
                             ),
@@ -257,7 +287,7 @@ class _AccountDeletedScreen extends StatelessWidget {
                                 ),
                                 onPressed: onStartFresh,
                                 icon: const Icon(Icons.add_rounded),
-                                label: const Text('Yeni öğrenme alanı oluştur'),
+                                label: const Text('Cihazdaki öğrenmeye dön'),
                               ),
                             ),
                           ],

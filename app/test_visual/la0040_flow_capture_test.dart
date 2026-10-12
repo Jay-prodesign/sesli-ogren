@@ -401,11 +401,14 @@ void main() {
             verifyOtp: ({required email, required token}) async =>
                 const AuthenticatedLearner(id: LearnerId('visual-account-user')),
             onAuthenticated: (_) async {},
+            onContinueWithoutAccount: () {},
           ),
         ),
       ),
     );
     await tester.pump(const Duration(milliseconds: 300));
+    expect(find.text('Hesabını bağla'), findsOneWidget);
+    expect(find.byKey(const ValueKey('account-continue-local')), findsOneWidget);
     expect(tester.takeException(), isNull);
     await expectLater(find.byType(Scaffold), matchesGoldenFile('goldens/la0040_account_entry_390x844.png'));
   });
