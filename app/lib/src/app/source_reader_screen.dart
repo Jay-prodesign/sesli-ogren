@@ -493,7 +493,7 @@ class _SourceReaderScreenState extends State<SourceReaderScreen> {
                                       )
                                     : OutlinedButton.styleFrom(minimumSize: const Size(0, 48)),
                                 icon: const Icon(Icons.headphones_rounded, size: 19),
-                                label: const Text('Dinle'),
+                                label: const Text('Dinleyerek hazırlan'),
                               );
                         final primaryAction = widget.onRecall != null
                             ? FilledButton.icon(
