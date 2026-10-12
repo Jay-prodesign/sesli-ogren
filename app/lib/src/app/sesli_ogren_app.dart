@@ -62,36 +62,38 @@ class _SesliOgrenAppState extends State<SesliOgrenApp> {
 
   Future<AppRuntime> _openLocalRuntime() async {
     _openingAuthenticated = false;
-    final runtime = await (widget.openLocalRuntime?.call() ?? AppRuntime.openLocal());
+    final current = _runtime;
+    final runtime = widget.openLocalRuntime != null
+        ? await widget.openLocalRuntime!.call()
+        : current != null
+        ? current.asLocal()
+        : await AppRuntime.openLocal();
     _runtime = runtime;
     return runtime;
   }
 
   Future<AppRuntime> _openRuntimeForLearner(AuthenticatedLearner learner) async {
-    final runtime = await (widget.openRuntime?.call(learner) ?? AppRuntime.open(learner: learner));
+    final current = _runtime;
+    final runtime = widget.openRuntime != null
+        ? await widget.openRuntime!.call(learner)
+        : current != null
+        ? current.asAuthenticated(learner)
+        : await AppRuntime.open(learner: learner);
     _runtime = runtime;
     return runtime;
   }
 
   Future<void> _handleAuthenticated(AuthenticatedLearner learner) async {
     if (!mounted) return;
-    final previousRuntime = _runtime;
-    _runtime = null;
     setState(() {
-      // Authentication is optional. Once chosen, the account runtime becomes a
-      // separate namespace; device-local work remains intact for local mode.
+      // Authentication is optional. Production rebinds the already-open local
+      // data plane to the authenticated learner namespace, so local work stays
+      // intact and the SQLite handle is never closed out from under the next
+      // runtime.
       _showAccountEntry = false;
       _openingAuthenticated = true;
       _runtimeFuture = _openRuntimeForLearner(learner);
     });
-    if (previousRuntime != null) {
-      try {
-        await previousRuntime.close();
-      } catch (_) {
-        // Switching namespaces must not fail because an old local handle could
-        // not be closed cleanly.
-      }
-    }
   }
 
   @override
@@ -131,10 +133,9 @@ class _SesliOgrenAppState extends State<SesliOgrenApp> {
   Future<void> _handleSignOut() async {
     await _signOutSession();
 
-    // Session sign-out is the authority boundary. Successful sign-out returns
-    // to device-local learning instead of imposing another account gate.
-    final runtime = _runtime;
-    _runtime = null;
+    // Session sign-out is the authority boundary. The existing local data
+    // plane is rebound to the device-local namespace; no account gate and no
+    // database close/reopen race sits between the learner and local study.
     if (mounted) {
       setState(() {
         _accountDeleted = false;
@@ -143,33 +144,19 @@ class _SesliOgrenAppState extends State<SesliOgrenApp> {
         _runtimeFuture = _openLocalRuntime();
       });
     }
-    if (runtime != null) {
-      unawaited(
-        runtime.close().catchError((_) {
-          // Session sign-out is already authoritative. Old local handles are
-          // best-effort cleanup and must never block device-local learning.
-        }),
-      );
-    }
   }
 
   Future<void> _returnToAccountEntryAfterRuntimeFailure() async {
     await _signOutSession();
 
-    final runtime = _runtime;
-    _runtime = null;
+    // If an optional account runtime cannot open, preserve any already-open
+    // device-local runtime so "Hesapsız devam et" remains a truthful recovery.
     if (mounted) {
       setState(() {
         _accountDeleted = false;
         _showAccountEntry = true;
+        _openingAuthenticated = false;
       });
-    }
-    if (runtime != null) {
-      try {
-        await runtime.close();
-      } catch (_) {
-        // Do not resurrect a signed-out session because cleanup failed.
-      }
     }
   }
 
