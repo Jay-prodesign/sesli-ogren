@@ -650,7 +650,8 @@ void main() {
     await pumpUntilFound(tester, find.byType(AccountEntryScreen));
 
     expect(signOutCalls, 1);
-    expect(find.text('Öğrenme alanına gir'), findsOneWidget);
+    expect(find.text('Hesabını bağla'), findsOneWidget);
+    expect(find.byKey(const ValueKey('account-continue-local')), findsOneWidget);
     expect(find.text('Kod gönder'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
