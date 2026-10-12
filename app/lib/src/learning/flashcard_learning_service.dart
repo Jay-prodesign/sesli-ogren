@@ -94,14 +94,18 @@ class FlashcardLearningService {
     if (current == null || current.id != cardId) {
       throw const FlashcardLearningException('Kart yanıtı aktif kartla eşleşmiyor.');
     }
-    await store.recordFlashcardResponse(
+    final committed = await store.recordFlashcardResponse(
       learner: learner,
       set: state.set,
       card: current,
       response: response,
       reviewedAt: _now().toUtc(),
     );
-    return openCurrentSet(learner: learner, materialId: materialId);
+    return FlashcardStudyState(
+      set: state.set,
+      reviews: {...state.reviews, committed.review.cardId: committed.review},
+      session: committed.session,
+    );
   }
 
   Future<FlashcardStudyState> restartSession({
@@ -109,8 +113,12 @@ class FlashcardLearningService {
     required MaterialId materialId,
   }) async {
     final state = await openCurrentSet(learner: learner, materialId: materialId);
-    await store.resetFlashcardSession(learner: learner, setId: state.set.id, updatedAt: _now().toUtc());
-    return openCurrentSet(learner: learner, materialId: materialId);
+    final session = await store.resetFlashcardSession(
+      learner: learner,
+      set: state.set,
+      updatedAt: _now().toUtc(),
+    );
+    return FlashcardStudyState(set: state.set, reviews: state.reviews, session: session);
   }
 
   FlashcardSetRecord _buildSet({

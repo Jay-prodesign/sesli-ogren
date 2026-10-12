@@ -1516,7 +1516,7 @@ ORDER BY c.ordinal ASC
     );
   }
 
-  Future<void> recordFlashcardResponse({
+  Future<FlashcardResponseCommit> recordFlashcardResponse({
     required AuthenticatedLearner learner,
     required FlashcardSetRecord set,
     required FlashcardRecord card,
@@ -1606,23 +1606,74 @@ ON CONFLICT(learner_id, flashcard_set_id) DO UPDATE SET
           timestamp,
         ],
       );
+
+      final reviewRows = await transaction.query(
+        'flashcard_reviews',
+        where: 'learner_id = ? AND card_id = ?',
+        whereArgs: [learner.id.value, card.id.value],
+        limit: 1,
+      );
+      final reviewRow = reviewRows.single;
+      return FlashcardResponseCommit(
+        review: FlashcardReviewState(
+          cardId: card.id,
+          reviewCount: reviewRow['review_count']! as int,
+          rememberedCount: reviewRow['remembered_count']! as int,
+          againCount: reviewRow['again_count']! as int,
+          lastResponse: FlashcardResponse.values.byName(reviewRow['last_response']! as String),
+          lastReviewedAt: DateTime.parse(reviewRow['last_reviewed_at_utc']! as String).toUtc(),
+        ),
+        session: FlashcardSessionState(
+          setId: set.id,
+          cursorIndex: nextCursor,
+          rememberedCount: remembered,
+          againCount: again,
+          isCompleted: nextCursor >= set.cards.length,
+          updatedAt: reviewedAt.toUtc(),
+        ),
+      );
     });
   }
 
-  Future<void> resetFlashcardSession({
+  Future<FlashcardSessionState> resetFlashcardSession({
     required AuthenticatedLearner learner,
-    required FlashcardSetId setId,
+    required FlashcardSetRecord set,
     required DateTime updatedAt,
-  }) async {
-    await _database.insert('flashcard_sessions', {
-      'learner_id': learner.id.value,
-      'flashcard_set_id': setId.value,
-      'cursor_index': 0,
-      'remembered_count': 0,
-      'again_count': 0,
-      'is_completed': 0,
-      'updated_at_utc': updatedAt.toUtc().toIso8601String(),
-    }, conflictAlgorithm: ConflictAlgorithm.replace);
+  }) {
+    return _database.transaction((transaction) async {
+      final materialRows = await transaction.query(
+        'materials',
+        columns: ['current_source_version_id', 'lifecycle_status', 'deleted_at_utc'],
+        where: 'learner_id = ? AND material_id = ?',
+        whereArgs: [learner.id.value, set.materialId.value],
+        limit: 1,
+      );
+      if (materialRows.isEmpty ||
+          materialRows.single['lifecycle_status'] != MaterialLifecycleStatus.active.name ||
+          materialRows.single['deleted_at_utc'] != null ||
+          materialRows.single['current_source_version_id'] != set.sourceVersionId.value) {
+        throw const SourceStoreConflict('Flashcard session reset is stale for the current source version.');
+      }
+
+      final resetAt = updatedAt.toUtc();
+      await transaction.insert('flashcard_sessions', {
+        'learner_id': learner.id.value,
+        'flashcard_set_id': set.id.value,
+        'cursor_index': 0,
+        'remembered_count': 0,
+        'again_count': 0,
+        'is_completed': 0,
+        'updated_at_utc': resetAt.toIso8601String(),
+      }, conflictAlgorithm: ConflictAlgorithm.replace);
+      return FlashcardSessionState(
+        setId: set.id,
+        cursorIndex: 0,
+        rememberedCount: 0,
+        againCount: 0,
+        isCompleted: false,
+        updatedAt: resetAt,
+      );
+    });
   }
 
   @override

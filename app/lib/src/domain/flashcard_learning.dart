@@ -82,6 +82,13 @@ class FlashcardReviewState {
   final DateTime lastReviewedAt;
 }
 
+class FlashcardResponseCommit {
+  const FlashcardResponseCommit({required this.review, required this.session});
+
+  final FlashcardReviewState review;
+  final FlashcardSessionState session;
+}
+
 class FlashcardSessionState {
   const FlashcardSessionState({
     required this.setId,
