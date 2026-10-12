@@ -1329,7 +1329,9 @@ LIMIT 1
       if (previousSourceId != null) {
         // Passive resume positions describe the superseded source, not the material
         // abstractly. Remove them when the authoritative source changes so a new
-        // source can never inherit an old Reader/Listen position.
+        // source can never inherit an old Reader/Listen position. Flashcard sets
+        // are intentionally retained: each set is source-version bound history,
+        // while openCurrentSet() only selects the current source version.
         await transaction.delete(
           'listen_progress',
           where: 'learner_id = ? AND material_id = ?',
@@ -1337,11 +1339,6 @@ LIMIT 1
         );
         await transaction.delete(
           'reader_progress',
-          where: 'learner_id = ? AND material_id = ?',
-          whereArgs: [learner.id.value, material.id.value],
-        );
-        await transaction.delete(
-          'flashcard_sets',
           where: 'learner_id = ? AND material_id = ?',
           whereArgs: [learner.id.value, material.id.value],
         );

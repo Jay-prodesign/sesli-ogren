@@ -189,5 +189,17 @@ void main() {
     expect(second.set.sourceVersionId, isNot(first.set.sourceVersionId));
     expect(second.session.cursorIndex, 0);
     expect(second.reviews, isEmpty);
+
+    final historicalSet = await store.flashcardSet(
+      learner: learner,
+      materialId: materialId,
+      sourceVersionId: first.set.sourceVersionId,
+      generationVersion: FlashcardLearningService.generationVersion,
+    );
+    expect(historicalSet?.id, first.set.id);
+    final historicalReviews = await store.flashcardReviews(learner: learner, setId: first.set.id);
+    expect(historicalReviews, hasLength(1));
+    expect(historicalReviews.single.lastResponse, FlashcardResponse.again);
+    expect(historicalReviews.single.againCount, 1);
   });
 }
