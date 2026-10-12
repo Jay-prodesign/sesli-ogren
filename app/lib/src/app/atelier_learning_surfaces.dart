@@ -345,6 +345,7 @@ class AtelierWorkspace extends StatelessWidget {
                 },
               ),
               ListTile(
+                key: const ValueKey('workspace-other-grounded-explain'),
                 leading: const Icon(Icons.auto_awesome_outlined),
                 title: const Text('Zor kısmı kaynaktan açıkla'),
                 subtitle: const Text('Kaynağa bağlı açıklamayı oku; cevap kaynakta yoksa sistem bunu söylemelidir.'),
@@ -377,6 +378,7 @@ class AtelierWorkspace extends StatelessWidget {
                 ),
               ),
               ListTile(
+                key: const ValueKey('workspace-other-explain-back'),
                 leading: const Icon(Icons.record_voice_over_outlined),
                 title: const Text('Kendi cümlelerimle anlat'),
                 subtitle: const Text(
