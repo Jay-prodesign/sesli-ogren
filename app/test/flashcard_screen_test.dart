@@ -70,7 +70,6 @@ void main() {
     );
     await _pumpUntilFound(tester, find.byKey(const ValueKey('flashcards-reveal')));
     final semantics = tester.ensureSemantics();
-    addTearDown(semantics.dispose);
 
     expect(find.bySemanticsLabel(RegExp(r'Kart sorusu: .*boşluk')), findsOneWidget);
     expect(find.byKey(const ValueKey('flashcards-answer')), findsNothing);
@@ -126,6 +125,7 @@ void main() {
     await _pumpUntilFound(tester, find.text('KART 1 / 3'));
     expect(find.text('KART 1 / 3'), findsOneWidget);
     expect(tester.takeException(), isNull);
+    semantics.dispose();
   });
 
   testWidgets('source change while studying fails closed and reloads current cards', (tester) async {
