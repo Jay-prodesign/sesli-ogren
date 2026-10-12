@@ -444,7 +444,7 @@ class _MaterialWorkspaceScreenState extends State<MaterialWorkspaceScreen> {
               onUpdateSource: _openSourceEditor,
               onReadSource: () {
                 _consumeFirstValueIntent();
-                _openSourceReader(snapshot.data!);
+                _readCurrentSource();
               },
               onListen: () {
                 _consumeFirstValueIntent();
