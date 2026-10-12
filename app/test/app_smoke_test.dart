@@ -1592,30 +1592,29 @@ void main() {
     expect(find.text('Destek e-postasını kopyala'), findsNothing);
   });
 
-  testWidgets('app sign out returns to device-local learning without an account gate', (tester) async {
-    final accountStore = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: 'account-signout.db');
-    final localStore = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: 'local-signout.db');
+  testWidgets('app sign out returns to preserved device-local learning without an account gate', (tester) async {
+    final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
     addTearDown(() async {
-      for (final store in [accountStore, localStore]) {
-        try {
-          await store.close();
-        } catch (_) {}
-      }
+      try {
+        await store.close();
+      } catch (_) {}
     });
+    final ingest = SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor());
+    final recall = RecallLearningService(sourceStore: store, learningStore: store.learningTruthStore());
     final accountRuntime = AppRuntime(
       learner: AppRuntime.localM5LearnerFixture,
-      store: accountStore,
-      ingest: SourceIngestService(store: accountStore, pdfTextExtractor: const _UnusedPdfExtractor()),
-      recall: RecallLearningService(sourceStore: accountStore, learningStore: accountStore.learningTruthStore()),
-      telemetry: accountStore.operationalTelemetry(),
+      store: store,
+      ingest: ingest,
+      recall: recall,
+      telemetry: store.operationalTelemetry(),
       accountOverview: const _ReadyAccountOverviewGateway(),
     );
-    final localRuntime = AppRuntime(
+    const localMaterialId = MaterialId('signout-preserved-local-material');
+    await ingest.ingestPastedText(
       learner: AppRuntime.localLearner,
-      store: localStore,
-      ingest: SourceIngestService(store: localStore, pdfTextExtractor: const _UnusedPdfExtractor()),
-      recall: RecallLearningService(sourceStore: localStore, learningStore: localStore.learningTruthStore()),
-      telemetry: localStore.operationalTelemetry(),
+      materialId: localMaterialId,
+      text: 'Hesaptan çıkınca cihazdaki bu kaynak yeniden görünmelidir.',
+      sourceName: 'Yerel çıkış notu',
     );
     var signOutCalls = 0;
 
@@ -1623,7 +1622,6 @@ void main() {
       SesliOgrenApp(
         restoreSession: () async => accountRuntime.learner,
         openRuntime: (_) async => accountRuntime,
-        openLocalRuntime: () async => localRuntime,
         signOutSession: () async {
           signOutCalls += 1;
         },
@@ -1641,10 +1639,15 @@ void main() {
     await tapVisible(tester, signOut);
     await pumpUntilFound(tester, find.text('Bu cihazda çıkış yap?'));
     await tapVisible(tester, find.widgetWithText(FilledButton, 'Çıkış yap'));
-    await pumpUntilFound(tester, find.byType(NavigationBar));
 
+    await pumpUntilFound(tester, find.text('Yerel çıkış notu'));
     expect(signOutCalls, 1);
     expect(find.byType(AccountEntryScreen), findsNothing);
+    expect(
+      await store.material(learner: AppRuntime.localLearner, materialId: localMaterialId),
+      isNotNull,
+    );
+
     await tapBottomNavIcon(tester, Icons.person_outline_rounded);
     await pumpUntilFound(tester, find.text('Hesapsız kullanım'));
     expect(find.text('Hesap bağla · isteğe bağlı'), findsOneWidget);
