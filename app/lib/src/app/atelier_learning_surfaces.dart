@@ -221,16 +221,6 @@ class AtelierWorkspace extends StatelessWidget {
     };
   }
 
-  String get _evidenceCompactDetail {
-    return switch (continuation?.state.kind) {
-      RecallStateKind.needsReview => 'Sıradaki adım: kaynaktan kısa onarım.',
-      RecallStateKind.developing => 'Sıradaki hedef: ipucusuz hatırlama.',
-      RecallStateKind.retrievedOnce => 'Kalıcılık sonraki bağımsız denemede ölçülür.',
-      RecallStateKind.notAssessed => 'Bağımsız hatırlama henüz yok.',
-      null => 'Bağımsız hatırlama henüz yok.',
-    };
-  }
-
   IconData get _evidenceIcon {
     return switch (continuation?.state.kind) {
       RecallStateKind.needsReview => Icons.build_circle_outlined,
