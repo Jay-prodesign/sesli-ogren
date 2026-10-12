@@ -216,6 +216,8 @@ void main() {
         .hitTestable();
     await _tapVisible(tester, libraryMaterialCard.first);
     await _pumpUntilFound(tester, find.byType(MaterialWorkspaceScreen));
+    await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 180)));
+    await tester.pump();
     await _pumpUntilFound(tester, find.byKey(const ValueKey('la0040-atelier-workspace-reader')));
     await _tapVisible(tester, find.byKey(const ValueKey('la0040-atelier-workspace-reader')));
     await _pumpUntilFound(tester, find.byType(SourceReaderScreen));
@@ -261,6 +263,8 @@ void main() {
         .hitTestable();
     await _tapVisible(tester, libraryMaterialCard.first);
     await _pumpUntilFound(tester, find.byType(MaterialWorkspaceScreen));
+    await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 180)));
+    await tester.pump();
     await _pumpUntilFound(tester, find.byKey(const ValueKey('la0040-atelier-workspace-reader')));
     await _tapVisible(tester, find.byKey(const ValueKey('la0040-atelier-workspace-reader')));
     await _pumpUntilFound(tester, find.byType(SourceReaderScreen));
