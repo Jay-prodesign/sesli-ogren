@@ -928,48 +928,60 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> with WidgetsBinding
                   label: const Text('Özeti dinle'),
                 ),
                 const SizedBox(height: 8),
-                PopupMenuButton<String>(
-                  tooltip: 'Diğer özet araçları',
-                  onSelected: (action) {
-                    switch (action) {
-                      case 'share':
-                        unawaited(_shareSummary(status));
-                        break;
-                      case 'copy':
-                        unawaited(_copySummary(status));
-                        break;
-                      case 'explain':
-                        unawaited(_openExplain());
-                        break;
-                    }
-                  },
-                  itemBuilder: (_) => const [
-                    PopupMenuItem(
-                      value: 'share',
-                      child: ListTile(leading: Icon(Icons.share_outlined), title: Text('Paylaş')),
-                    ),
-                    PopupMenuItem(
-                      value: 'copy',
-                      child: ListTile(leading: Icon(Icons.copy_outlined), title: Text('Özeti kopyala')),
-                    ),
-                    PopupMenuItem(
-                      value: 'explain',
-                      child: ListTile(
-                        leading: Icon(Icons.record_voice_over_outlined),
-                        title: Text('Kendi cümlelerinle açıkla'),
+                LayoutBuilder(
+                  builder: (context, constraints) => PopupMenuButton<String>(
+                    tooltip: 'Diğer özet araçları',
+                    onSelected: (action) {
+                      switch (action) {
+                        case 'share':
+                          unawaited(_shareSummary(status));
+                          break;
+                        case 'copy':
+                          unawaited(_copySummary(status));
+                          break;
+                        case 'explain':
+                          unawaited(_openExplain());
+                          break;
+                      }
+                    },
+                    itemBuilder: (_) => const [
+                      PopupMenuItem(
+                        value: 'share',
+                        child: ListTile(leading: Icon(Icons.share_outlined), title: Text('Paylaş')),
                       ),
-                    ),
-                  ],
-                  child: DecoratedBox(
-                    decoration: BoxDecoration(
-                      border: Border.all(color: living ? AtelierStyle.line : Theme.of(context).colorScheme.outline),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: const Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [Icon(Icons.more_horiz_rounded), SizedBox(width: 7), Text('Diğer araçlar')],
+                      PopupMenuItem(
+                        value: 'copy',
+                        child: ListTile(leading: Icon(Icons.copy_outlined), title: Text('Özeti kopyala')),
+                      ),
+                      PopupMenuItem(
+                        value: 'explain',
+                        child: ListTile(
+                          leading: Icon(Icons.record_voice_over_outlined),
+                          title: Text('Kendi cümlelerinle açıkla'),
+                        ),
+                      ),
+                    ],
+                    child: SizedBox(
+                      width: compactLayout ? constraints.maxWidth : null,
+                      child: DecoratedBox(
+                        decoration: BoxDecoration(
+                          border: Border.all(color: living ? AtelierStyle.line : Theme.of(context).colorScheme.outline),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                          child: Row(
+                            mainAxisSize: compactLayout ? MainAxisSize.max : MainAxisSize.min,
+                            children: [
+                              const Icon(Icons.more_horiz_rounded),
+                              const SizedBox(width: 7),
+                              if (compactLayout)
+                                const Expanded(child: Text('Diğer araçlar'))
+                              else
+                                const Text('Diğer araçlar'),
+                            ],
+                          ),
+                        ),
                       ),
                     ),
                   ),

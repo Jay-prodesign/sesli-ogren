@@ -701,7 +701,7 @@ void main() {
     );
     final learningScroll = find.byKey(const ValueKey('learning-slice-scroll'));
     await pumpUntilGone(tester, find.byKey(const ValueKey('loading')));
-    await scrollUntilFound(tester, find.byKey(const ValueKey('recall')), scrollable: learningScroll);
+    await scrollUntilFound(tester, find.byKey(const ValueKey('la0040-atelier-recall')), scrollable: learningScroll);
     await scrollUntilFound(tester, find.text('Bilmiyorum'), scrollable: learningScroll);
     await tapVisible(tester, find.text('Bilmiyorum'));
     await pumpUntilFound(tester, find.byKey(const ValueKey('la0040-result-next-reason')));
@@ -857,10 +857,7 @@ void main() {
     final otherPaths = find.widgetWithText(TextButton, 'Diğer yollar').hitTestable();
     await pumpUntilFound(tester, otherPaths);
     await tester.tap(otherPaths);
-    final studyPathsScroll = find.descendant(
-      of: find.byKey(const ValueKey('workspace-other-study-paths-scroll')),
-      matching: find.byType(Scrollable),
-    );
+    final studyPathsScroll = find.byKey(const ValueKey('workspace-other-study-paths-scroll'));
     await pumpUntilFound(tester, studyPathsScroll);
     await scrollUntilFound(tester, find.text('Odaklan'), scrollable: studyPathsScroll);
     await tapVisible(tester, find.text('Odaklan'));
@@ -872,7 +869,7 @@ void main() {
     await scrollUntilFound(tester, find.byType(TextField), scrollable: focusScroll);
     await tester.enterText(find.byType(TextField), 'Fotosentezde karbondioksit nasıl kullanılır?');
     await tapVisible(tester, find.text('İpucu ver'));
-    await pumpUntilFound(tester, find.textContaining('Kaynak ipucu:'));
+    await scrollUntilFound(tester, find.textContaining('Kaynak ipucu:'), scrollable: focusScroll);
     expect(find.textContaining('karbondioksit'), findsWidgets);
     await pumpUntilFound(tester, find.textContaining('öğrenme kanıtı oluşturmaz'));
     Navigator.of(tester.element(find.textContaining('öğrenme kanıtı oluşturmaz'))).pop();
@@ -881,10 +878,7 @@ void main() {
     final otherPathsAfterFocus = find.widgetWithText(TextButton, 'Diğer yollar').hitTestable();
     await pumpUntilFound(tester, otherPathsAfterFocus);
     await tester.tap(otherPathsAfterFocus);
-    final explainPathsScroll = find.descendant(
-      of: find.byKey(const ValueKey('workspace-other-study-paths-scroll')),
-      matching: find.byType(Scrollable),
-    );
+    final explainPathsScroll = find.byKey(const ValueKey('workspace-other-study-paths-scroll'));
     await pumpUntilFound(tester, explainPathsScroll);
     await scrollUntilFound(tester, find.text('Kendi cümlelerimle anlat'), scrollable: explainPathsScroll);
     await tapVisible(tester, find.text('Kendi cümlelerimle anlat'));
@@ -2085,8 +2079,8 @@ void main() {
     );
     await pumpUntilFound(tester, find.text('Materyali güncelle'));
     await tapVisible(tester, find.text('Materyali güncelle'));
-    final editorScroll = find.byKey(const ValueKey('learning-slice-scroll'));
-    await scrollUntilFound(tester, find.text('Metin yapıştır'), scrollable: editorScroll, delta: 180);
+    await tester.pump();
+    await pumpUntilFound(tester, find.text('Metin yapıştır'));
     await tapVisible(tester, find.text('Metin yapıştır'));
     await tester.enterText(
       find.byKey(const ValueKey('pasted-material-text')),
@@ -2163,7 +2157,7 @@ void main() {
     await tapVisible(tester, find.text('Metni ekle · çalışma alanını aç'));
     final sourceFlowScroll = find.byKey(const ValueKey('learning-slice-scroll'));
     await pumpUntilGone(tester, find.byKey(const ValueKey('source')));
-    await scrollUntilFound(tester, find.byKey(const ValueKey('recall')), scrollable: sourceFlowScroll, delta: 180);
+    await scrollUntilFound(tester, find.byKey(const ValueKey('la0040-atelier-recall')), scrollable: sourceFlowScroll, delta: 180);
 
     final material = await store.material(learner: runtime.learner, materialId: AppRuntime.primaryMaterialId);
     expect(material, isNotNull);

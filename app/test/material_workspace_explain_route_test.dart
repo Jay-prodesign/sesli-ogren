@@ -179,10 +179,7 @@ void main() {
     await _tapVisible(tester, otherPaths);
     await _pumpUntilFound(tester, find.byKey(const ValueKey('workspace-other-study-paths-scroll')));
 
-    final otherPathsScroll = find.descendant(
-      of: find.byKey(const ValueKey('workspace-other-study-paths-scroll')),
-      matching: find.byType(Scrollable),
-    );
+    final otherPathsScroll = find.byKey(const ValueKey('workspace-other-study-paths-scroll'));
     await _scrollUntilFound(tester, find.text('Odaklan'), scrollable: otherPathsScroll);
 
     expect(find.byKey(const ValueKey('workspace-other-study-paths-scroll')), findsOneWidget);

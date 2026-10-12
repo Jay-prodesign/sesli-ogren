@@ -29,6 +29,7 @@ class _SesliOgrenAppState extends State<SesliOgrenApp> {
   late Future<AppRuntime?> _runtimeFuture;
   AppRuntime? _runtime;
   bool _accountDeleted = false;
+  bool _showAccountEntry = false;
 
   @override
   void initState() {
@@ -37,6 +38,7 @@ class _SesliOgrenAppState extends State<SesliOgrenApp> {
   }
 
   void _openRuntime() {
+    _showAccountEntry = false;
     final restoreSession = widget.restoreSession ?? SupabaseLearnerAuth.restoreSession;
     _runtimeFuture = restoreSession().then((learner) async {
       if (learner == null) return null;
@@ -55,6 +57,7 @@ class _SesliOgrenAppState extends State<SesliOgrenApp> {
     setState(() {
       // Authentication has succeeded. Runtime opening is a separate product phase:
       // its loading/error state belongs to the app shell, not to OTP validation.
+      _showAccountEntry = false;
       _runtimeFuture = _openRuntimeForLearner(learner);
     });
   }
@@ -99,7 +102,10 @@ class _SesliOgrenAppState extends State<SesliOgrenApp> {
     _runtime = null;
     _accountDeleted = false;
     if (mounted) {
-      setState(() => _runtimeFuture = Future.value(null));
+      setState(() {
+        _showAccountEntry = true;
+        _runtimeFuture = Future.value(null);
+      });
     }
     if (runtime != null) {
       try {
@@ -117,7 +123,10 @@ class _SesliOgrenAppState extends State<SesliOgrenApp> {
     _runtime = null;
     _accountDeleted = false;
     if (mounted) {
-      setState(() => _runtimeFuture = Future.value(null));
+      setState(() {
+        _showAccountEntry = true;
+        _runtimeFuture = Future.value(null);
+      });
     }
     if (runtime != null) {
       try {
@@ -141,6 +150,8 @@ class _SesliOgrenAppState extends State<SesliOgrenApp> {
       theme: SesliOgrenTheme.light(),
       home: _accountDeleted
           ? _AccountDeletedScreen(onStartFresh: _startFresh)
+          : _showAccountEntry
+          ? AccountEntryScreen(onAuthenticated: _handleAuthenticated)
           : FutureBuilder<AppRuntime?>(
               future: _runtimeFuture,
               builder: (context, snapshot) {

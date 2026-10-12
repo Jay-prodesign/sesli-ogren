@@ -207,7 +207,9 @@ class _ProfileSurfaceState extends State<ProfileSurface> {
       }
     } catch (_) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
+      final messenger = ScaffoldMessenger.of(context);
+      messenger.hideCurrentSnackBar();
+      messenger.showSnackBar(
         const SnackBar(
           content: Text(
             'Yerel veriler henüz temizlenemedi. Sunucuya yeni silme isteği gönderilmedi; yalnız cihaz temizliği tekrar denenebilir.',
