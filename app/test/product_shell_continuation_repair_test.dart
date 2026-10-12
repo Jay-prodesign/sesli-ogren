@@ -72,6 +72,14 @@ Future<void> _tapVisible(WidgetTester tester, Finder finder) async {
   await tester.pump();
 }
 
+Future<void> _openLibraryTab(WidgetTester tester) async {
+  final libraryTab = find.byIcon(Icons.library_books_outlined).hitTestable();
+  await _pumpUntilFound(tester, libraryTab);
+  expect(libraryTab, findsOneWidget);
+  await tester.tap(libraryTab);
+  await _pumpUntilFound(tester, find.byKey(const ValueKey('library-material-list')));
+}
+
 void main() {
   sqfliteFfiInit();
 
@@ -204,12 +212,14 @@ void main() {
       ),
     );
     await _pumpUntilFound(tester, find.text('Biyoloji · Fotosentez'));
-    await tester.tap(find.text('Kütüphane'));
-    await tester.pump(const Duration(milliseconds: 120));
+    await _openLibraryTab(tester);
     final libraryMaterialCard = find
         .ancestor(of: find.text('Biyoloji · Fotosentez'), matching: find.byType(InkWell))
         .hitTestable();
-    await _tapVisible(tester, libraryMaterialCard.first);
+    await _pumpUntilFound(tester, libraryMaterialCard);
+    expect(libraryMaterialCard, findsOneWidget);
+    await tester.tap(libraryMaterialCard);
+    await tester.pump();
     await _pumpUntilFound(tester, find.byKey(const ValueKey('la0040-atelier-workspace-reader')));
     await _tapVisible(tester, find.byKey(const ValueKey('la0040-atelier-workspace-reader')));
     await _pumpUntilFound(tester, find.byType(SourceReaderScreen));
@@ -248,12 +258,14 @@ void main() {
       ),
     );
     await _pumpUntilFound(tester, find.text('Biyoloji · Fotosentez'));
-    await tester.tap(find.text('Kütüphane').last);
-    await tester.pump(const Duration(milliseconds: 120));
+    await _openLibraryTab(tester);
     final libraryMaterialCard = find
         .ancestor(of: find.text('Biyoloji · Fotosentez'), matching: find.byType(InkWell))
         .hitTestable();
-    await _tapVisible(tester, libraryMaterialCard.first);
+    await _pumpUntilFound(tester, libraryMaterialCard);
+    expect(libraryMaterialCard, findsOneWidget);
+    await tester.tap(libraryMaterialCard);
+    await tester.pump();
     await _pumpUntilFound(tester, find.byKey(const ValueKey('la0040-atelier-workspace-reader')));
     await _tapVisible(tester, find.byKey(const ValueKey('la0040-atelier-workspace-reader')));
     await _pumpUntilFound(tester, find.byType(SourceReaderScreen));
