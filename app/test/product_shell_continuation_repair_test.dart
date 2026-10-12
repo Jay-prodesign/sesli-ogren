@@ -112,8 +112,8 @@ void main() {
 
     expect(find.byType(MaterialWorkspaceScreen), findsOneWidget);
     expect(find.text('Biyoloji · Fotosentez'), findsWidgets);
-    expect(find.text('Önce kaynağın tamamını bir kez gör.'), findsOneWidget);
-    await _tapVisible(tester, find.text('Kaynağı aç'));
+    expect(find.byKey(const ValueKey('first-value-recommendation-card')), findsOneWidget);
+    await _tapVisible(tester, find.byKey(const ValueKey('first-intent-recommend')));
     await _pumpUntilFound(tester, find.byType(SourceReaderScreen));
     Navigator.of(tester.element(find.byType(SourceReaderScreen))).pop();
     await _pumpUntilFound(tester, find.byKey(const ValueKey('la0040-atelier-workspace')));
@@ -210,7 +210,7 @@ void main() {
       of: find.text('Biyoloji · Fotosentez').last,
       matching: find.byType(InkWell),
     );
-    await tester.tap(libraryMaterialCard.last);
+    await _tapVisible(tester, libraryMaterialCard.last);
     await _pumpUntilFound(tester, find.byKey(const ValueKey('la0040-atelier-workspace-reader')));
     await _tapVisible(tester, find.byKey(const ValueKey('la0040-atelier-workspace-reader')));
     await _pumpUntilFound(tester, find.byType(SourceReaderScreen));
@@ -255,7 +255,7 @@ void main() {
       of: find.text('Biyoloji · Fotosentez').last,
       matching: find.byType(InkWell),
     );
-    await tester.tap(libraryMaterialCard.last);
+    await _tapVisible(tester, libraryMaterialCard.last);
     await _pumpUntilFound(tester, find.byKey(const ValueKey('la0040-atelier-workspace-reader')));
     await _tapVisible(tester, find.byKey(const ValueKey('la0040-atelier-workspace-reader')));
     await _pumpUntilFound(tester, find.byType(SourceReaderScreen));
