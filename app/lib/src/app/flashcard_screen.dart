@@ -315,7 +315,6 @@ class _FlashcardStudyView extends StatelessWidget {
   Widget build(BuildContext context) {
     final media = MediaQuery.of(context);
     final compact = media.size.width < 360 || media.textScaler.scale(1) > 1.2;
-    final reducedMotion = media.disableAnimations || media.accessibleNavigation;
     final study = data.study;
     final card = study.currentCard;
     final completed = study.session.isCompleted || card == null;
