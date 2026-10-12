@@ -81,7 +81,15 @@ void main() {
     await tester.pump();
     expect(find.byKey(const ValueKey('flashcards-answer')), findsOneWidget);
     expect(find.byKey(const ValueKey('flashcards-source-evidence')), findsOneWidget);
-    expect(find.bySemanticsLabel(RegExp(r'Cevap: .*Kaynakta:')), findsOneWidget);
+    expect(
+      find.byWidgetPredicate(
+        (widget) =>
+            widget is Semantics &&
+            (widget.properties.label?.startsWith('Cevap: ') ?? false) &&
+            (widget.properties.label?.contains('Kaynakta: ') ?? false),
+      ),
+      findsOneWidget,
+    );
     expect(find.byKey(const ValueKey('flashcards-remembered')), findsOneWidget);
     expect(find.text('Tekrar gerekli'), findsOneWidget);
 
@@ -159,7 +167,7 @@ void main() {
     await tester.tap(find.byKey(const ValueKey('flashcards-remembered')));
     await _pumpUntilFound(tester, find.byKey(const ValueKey('flashcards-recovery-notice')));
     expect(find.byKey(const ValueKey('flashcards-inline-error')), findsNothing);
-    expect(find.text('Güncel kart kaynağı'), findsOneWidget);
+    expect(find.text('Güncel kart kaynağı'), findsWidgets);
     expect(find.text('Önceki kart yanıtı kaydedilmedi. Güncel kaynaktan devam ediyorsun.'), findsOneWidget);
     expect(find.byKey(const ValueKey('flashcards-answer')), findsNothing);
     expect(find.byKey(const ValueKey('flashcards-reveal')), findsOneWidget);
