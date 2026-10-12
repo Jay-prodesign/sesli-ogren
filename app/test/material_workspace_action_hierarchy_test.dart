@@ -19,10 +19,18 @@ Future<void> _scrollUntilFound(
   required Finder scrollable,
   int maxDrags = 20,
 }) async {
+  for (var i = 0; i < 40 && scrollable.hitTestable().evaluate().isEmpty; i++) {
+    await tester.pump(const Duration(milliseconds: 20));
+  }
+
   for (var i = 0; i < maxDrags && target.evaluate().isEmpty; i++) {
-    final active = scrollable.hitTestable();
+    var active = scrollable.hitTestable();
+    for (var j = 0; j < 20 && active.evaluate().isEmpty; j++) {
+      await tester.pump(const Duration(milliseconds: 20));
+      active = scrollable.hitTestable();
+    }
     expect(active, findsWidgets);
-    await tester.drag(active.first, const Offset(0, -140));
+    await tester.drag(active.first, const Offset(0, -140), warnIfMissed: false);
     await tester.pump();
   }
   expect(target, findsOneWidget);
