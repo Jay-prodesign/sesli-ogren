@@ -13,6 +13,21 @@ Future<void> _pumpUntilGone(WidgetTester tester, Finder finder, {int maxPumps = 
   fail('Expected modal route to close within bounded pumps.');
 }
 
+Future<void> _scrollUntilFound(
+  WidgetTester tester,
+  Finder target, {
+  required Finder scrollable,
+  int maxDrags = 20,
+}) async {
+  for (var i = 0; i < maxDrags && target.evaluate().isEmpty; i++) {
+    final active = scrollable.hitTestable();
+    expect(active, findsWidgets);
+    await tester.drag(active.first, const Offset(0, -140));
+    await tester.pump();
+  }
+  expect(target, findsOneWidget);
+}
+
 void main() {
   final now = DateTime.utc(2026, 10, 12, 8);
   const materialId = MaterialId('workspace-action-material');
@@ -149,15 +164,8 @@ void main() {
     await tester.tap(reopenPaths);
     await tester.pump(const Duration(milliseconds: 400));
     final quizAction = find.byKey(const ValueKey('workspace-other-quiz'));
-    expect(quizAction, findsOneWidget);
-    await tester.scrollUntilVisible(
-      quizAction,
-      120,
-      scrollable: find.descendant(
-        of: find.byKey(const ValueKey('workspace-other-study-paths-scroll')),
-        matching: find.byType(Scrollable),
-      ),
-    );
+    final reopenedScroll = find.byKey(const ValueKey('workspace-other-study-paths-scroll'));
+    await _scrollUntilFound(tester, quizAction, scrollable: reopenedScroll);
     await tester.ensureVisible(quizAction);
     await tester.pump(const Duration(milliseconds: 200));
     expect(quizAction.hitTestable(), findsOneWidget);
