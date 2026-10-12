@@ -53,9 +53,6 @@ Future<void> _pumpUntilFound(WidgetTester tester, Finder finder, {int maxPumps =
   for (var i = 0; i < maxPumps; i++) {
     await tester.pump(const Duration(milliseconds: 20));
     if (finder.evaluate().isNotEmpty) return;
-    if (i % 10 == 9) {
-      await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 5)));
-    }
   }
   fail('Expected repaired product shell was not reached within bounded pumps.');
 }
@@ -69,27 +66,10 @@ Future<void> _pumpUntilGone(WidgetTester tester, Finder finder, {int maxPumps = 
 }
 
 Future<void> _tapVisible(WidgetTester tester, Finder finder) async {
-  await tester.ensureVisible(finder);
+  await tester.scrollUntilVisible(finder, 220, scrollable: find.byType(Scrollable).last);
   await tester.pump();
-  final target = finder.hitTestable();
-  expect(target, findsOneWidget);
-  await tester.tap(target);
+  await tester.tap(finder);
   await tester.pump();
-}
-
-Future<void> _revealWorkspaceReader(WidgetTester tester) async {
-  final workspace = find.byKey(const ValueKey('la0040-atelier-workspace'));
-  await _pumpUntilFound(tester, workspace);
-
-  final reader = find.byKey(const ValueKey('la0040-atelier-workspace-reader'));
-  for (var i = 0; i < 8 && reader.evaluate().isEmpty; i++) {
-    final scrollable = find.descendant(of: workspace, matching: find.byType(Scrollable)).hitTestable();
-    if (scrollable.evaluate().isNotEmpty) {
-      await tester.drag(scrollable.first, const Offset(0, -120), warnIfMissed: false);
-    }
-    await tester.pump(const Duration(milliseconds: 30));
-  }
-  expect(reader, findsOneWidget);
 }
 
 void main() {
@@ -230,10 +210,7 @@ void main() {
         .ancestor(of: find.text('Biyoloji · Fotosentez'), matching: find.byType(InkWell))
         .hitTestable();
     await _tapVisible(tester, libraryMaterialCard.first);
-    await _pumpUntilFound(tester, find.byType(MaterialWorkspaceScreen));
-    await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 180)));
-    await tester.pump();
-    await _revealWorkspaceReader(tester);
+    await _pumpUntilFound(tester, find.byKey(const ValueKey('la0040-atelier-workspace-reader')));
     await _tapVisible(tester, find.byKey(const ValueKey('la0040-atelier-workspace-reader')));
     await _pumpUntilFound(tester, find.byType(SourceReaderScreen));
     expect(find.byType(SourceReaderScreen), findsOneWidget);
@@ -277,10 +254,7 @@ void main() {
         .ancestor(of: find.text('Biyoloji · Fotosentez'), matching: find.byType(InkWell))
         .hitTestable();
     await _tapVisible(tester, libraryMaterialCard.first);
-    await _pumpUntilFound(tester, find.byType(MaterialWorkspaceScreen));
-    await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 180)));
-    await tester.pump();
-    await _revealWorkspaceReader(tester);
+    await _pumpUntilFound(tester, find.byKey(const ValueKey('la0040-atelier-workspace-reader')));
     await _tapVisible(tester, find.byKey(const ValueKey('la0040-atelier-workspace-reader')));
     await _pumpUntilFound(tester, find.byType(SourceReaderScreen));
     expect(find.byType(SourceReaderScreen), findsOneWidget);
