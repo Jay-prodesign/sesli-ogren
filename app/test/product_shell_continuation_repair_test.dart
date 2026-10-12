@@ -83,9 +83,7 @@ Future<void> _revealWorkspaceReader(WidgetTester tester) async {
 
   final reader = find.byKey(const ValueKey('la0040-atelier-workspace-reader'));
   for (var i = 0; i < 8 && reader.evaluate().isEmpty; i++) {
-    final scrollable = find
-        .descendant(of: workspace, matching: find.byType(Scrollable))
-        .hitTestable();
+    final scrollable = find.descendant(of: workspace, matching: find.byType(Scrollable)).hitTestable();
     if (scrollable.evaluate().isNotEmpty) {
       await tester.drag(scrollable.first, const Offset(0, -120), warnIfMissed: false);
     }
