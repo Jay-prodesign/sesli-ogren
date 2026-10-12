@@ -5,6 +5,7 @@ import 'package:crypto/crypto.dart';
 import 'package:sqflite/sqflite.dart';
 
 import '../domain/authenticated_learner.dart';
+import '../domain/flashcard_learning.dart';
 import '../domain/learning_contracts.dart';
 import '../domain/learning_truth.dart';
 import '../domain/operational_event.dart';
@@ -36,7 +37,7 @@ class SqliteSourceStore implements SourceStore {
     final database = await selectedFactory.openDatabase(
       databasePath,
       options: OpenDatabaseOptions(
-        version: 13,
+        version: 14,
         onConfigure: (db) => db.execute('PRAGMA foreign_keys = ON'),
         onUpgrade: (db, oldVersion, newVersion) async {
           if (oldVersion < 2) {
@@ -74,6 +75,9 @@ class SqliteSourceStore implements SourceStore {
           }
           if (oldVersion < 13) {
             await _upgradeReaderProgressSchema(db);
+          }
+          if (oldVersion < 14) {
+            await _upgradeFlashcardSchema(db);
           }
         },
         onCreate: (db, version) async {
@@ -294,6 +298,7 @@ CREATE TABLE learner_preferences (
           await _upgradeSummaryJobsSchema(db);
           await _upgradeSummaryCacheSchema(db);
           await _upgradeServerMaterialBindingSchema(db);
+          await _upgradeFlashcardSchema(db);
           await db.execute('''
 CREATE TABLE operational_events (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -352,6 +357,83 @@ ON extracted_contents (learner_id, source_version_id, invalidated_at_utc)
       ),
     );
     return SqliteSourceStore._(database);
+  }
+
+  static Future<void> _upgradeFlashcardSchema(Database db) async {
+    await db.execute('''
+CREATE TABLE IF NOT EXISTS flashcard_sets (
+  learner_id TEXT NOT NULL,
+  flashcard_set_id TEXT NOT NULL,
+  material_id TEXT NOT NULL,
+  source_version_id TEXT NOT NULL,
+  generation_version TEXT NOT NULL,
+  created_at_utc TEXT NOT NULL,
+  PRIMARY KEY (learner_id, flashcard_set_id),
+  UNIQUE (learner_id, material_id, source_version_id, generation_version),
+  FOREIGN KEY (learner_id, material_id)
+    REFERENCES materials (learner_id, material_id) ON DELETE CASCADE,
+  FOREIGN KEY (learner_id, source_version_id)
+    REFERENCES source_versions (learner_id, source_version_id) ON DELETE CASCADE
+)
+''');
+    await db.execute('''
+CREATE TABLE IF NOT EXISTS flashcards (
+  learner_id TEXT NOT NULL,
+  card_id TEXT NOT NULL,
+  flashcard_set_id TEXT NOT NULL,
+  ordinal INTEGER NOT NULL,
+  front_text TEXT NOT NULL,
+  back_text TEXT NOT NULL,
+  source_start INTEGER NOT NULL,
+  source_end INTEGER NOT NULL,
+  page_number INTEGER,
+  source_excerpt TEXT NOT NULL,
+  PRIMARY KEY (learner_id, card_id),
+  UNIQUE (learner_id, flashcard_set_id, ordinal),
+  FOREIGN KEY (learner_id, flashcard_set_id)
+    REFERENCES flashcard_sets (learner_id, flashcard_set_id) ON DELETE CASCADE,
+  CHECK (ordinal >= 0),
+  CHECK (source_start >= 0 AND source_end > source_start)
+)
+''');
+    await db.execute('''
+CREATE TABLE IF NOT EXISTS flashcard_reviews (
+  learner_id TEXT NOT NULL,
+  card_id TEXT NOT NULL,
+  review_count INTEGER NOT NULL,
+  remembered_count INTEGER NOT NULL,
+  again_count INTEGER NOT NULL,
+  last_response TEXT NOT NULL,
+  last_reviewed_at_utc TEXT NOT NULL,
+  PRIMARY KEY (learner_id, card_id),
+  FOREIGN KEY (learner_id, card_id)
+    REFERENCES flashcards (learner_id, card_id) ON DELETE CASCADE,
+  CHECK (review_count >= 1),
+  CHECK (remembered_count >= 0 AND again_count >= 0),
+  CHECK (last_response IN ('again', 'remembered'))
+)
+''');
+    await db.execute('''
+CREATE TABLE IF NOT EXISTS flashcard_sessions (
+  learner_id TEXT NOT NULL,
+  flashcard_set_id TEXT NOT NULL,
+  cursor_index INTEGER NOT NULL,
+  remembered_count INTEGER NOT NULL,
+  again_count INTEGER NOT NULL,
+  is_completed INTEGER NOT NULL,
+  updated_at_utc TEXT NOT NULL,
+  PRIMARY KEY (learner_id, flashcard_set_id),
+  FOREIGN KEY (learner_id, flashcard_set_id)
+    REFERENCES flashcard_sets (learner_id, flashcard_set_id) ON DELETE CASCADE,
+  CHECK (cursor_index >= 0),
+  CHECK (remembered_count >= 0 AND again_count >= 0),
+  CHECK (is_completed IN (0, 1))
+)
+''');
+    await db.execute('''
+CREATE INDEX IF NOT EXISTS idx_flashcard_sets_material
+ON flashcard_sets (learner_id, material_id, source_version_id)
+''');
   }
 
   static Future<void> _upgradeSummaryJobsSchema(Database db) async {
@@ -1258,6 +1340,11 @@ LIMIT 1
           where: 'learner_id = ? AND material_id = ?',
           whereArgs: [learner.id.value, material.id.value],
         );
+        await transaction.delete(
+          'flashcard_sets',
+          where: 'learner_id = ? AND material_id = ?',
+          whereArgs: [learner.id.value, material.id.value],
+        );
       }
 
       await transaction.delete(
@@ -1304,6 +1391,241 @@ LIMIT 1
     });
   }
 
+  Future<FlashcardSetRecord?> flashcardSet({
+    required AuthenticatedLearner learner,
+    required MaterialId materialId,
+    required SourceVersionId sourceVersionId,
+    required String generationVersion,
+  }) async {
+    final setRows = await _database.query(
+      'flashcard_sets',
+      where:
+          'learner_id = ? AND material_id = ? AND source_version_id = ? '
+          'AND generation_version = ?',
+      whereArgs: [learner.id.value, materialId.value, sourceVersionId.value, generationVersion],
+      limit: 1,
+    );
+    if (setRows.isEmpty) return null;
+    final row = setRows.single;
+    final setId = FlashcardSetId(row['flashcard_set_id']! as String);
+    final cardRows = await _database.query(
+      'flashcards',
+      where: 'learner_id = ? AND flashcard_set_id = ?',
+      whereArgs: [learner.id.value, setId.value],
+      orderBy: 'ordinal ASC',
+    );
+    return FlashcardSetRecord(
+      id: setId,
+      materialId: MaterialId(row['material_id']! as String),
+      sourceVersionId: SourceVersionId(row['source_version_id']! as String),
+      generationVersion: row['generation_version']! as String,
+      createdAt: DateTime.parse(row['created_at_utc']! as String).toUtc(),
+      cards: cardRows
+          .map(
+            (card) => FlashcardRecord(
+              id: FlashcardId(card['card_id']! as String),
+              setId: setId,
+              ordinal: card['ordinal']! as int,
+              front: card['front_text']! as String,
+              back: card['back_text']! as String,
+              sourceAnchor: SourceAnchor(
+                startOffset: card['source_start']! as int,
+                endOffset: card['source_end']! as int,
+                pageNumber: card['page_number'] as int?,
+              ),
+              sourceExcerpt: card['source_excerpt']! as String,
+            ),
+          )
+          .toList(growable: false),
+    );
+  }
+
+  Future<void> saveFlashcardSet({required AuthenticatedLearner learner, required FlashcardSetRecord set}) {
+    return _database.transaction((transaction) async {
+      await transaction.insert(
+        'flashcard_sets',
+        {
+          'learner_id': learner.id.value,
+          'flashcard_set_id': set.id.value,
+          'material_id': set.materialId.value,
+          'source_version_id': set.sourceVersionId.value,
+          'generation_version': set.generationVersion,
+          'created_at_utc': set.createdAt.toUtc().toIso8601String(),
+        },
+        conflictAlgorithm: ConflictAlgorithm.ignore,
+      );
+      for (final card in set.cards) {
+        await transaction.insert(
+          'flashcards',
+          {
+            'learner_id': learner.id.value,
+            'card_id': card.id.value,
+            'flashcard_set_id': set.id.value,
+            'ordinal': card.ordinal,
+            'front_text': card.front,
+            'back_text': card.back,
+            'source_start': card.sourceAnchor.startOffset,
+            'source_end': card.sourceAnchor.endOffset,
+            'page_number': card.sourceAnchor.pageNumber,
+            'source_excerpt': card.sourceExcerpt,
+          },
+          conflictAlgorithm: ConflictAlgorithm.ignore,
+        );
+      }
+    });
+  }
+
+  Future<List<FlashcardReviewState>> flashcardReviews({
+    required AuthenticatedLearner learner,
+    required FlashcardSetId setId,
+  }) async {
+    final rows = await _database.rawQuery(
+      '''
+SELECT r.card_id, r.review_count, r.remembered_count, r.again_count,
+       r.last_response, r.last_reviewed_at_utc
+FROM flashcard_reviews r
+JOIN flashcards c
+  ON c.learner_id = r.learner_id AND c.card_id = r.card_id
+WHERE r.learner_id = ? AND c.flashcard_set_id = ?
+ORDER BY c.ordinal ASC
+''',
+      [learner.id.value, setId.value],
+    );
+    return rows
+        .map(
+          (row) => FlashcardReviewState(
+            cardId: FlashcardId(row['card_id']! as String),
+            reviewCount: row['review_count']! as int,
+            rememberedCount: row['remembered_count']! as int,
+            againCount: row['again_count']! as int,
+            lastResponse: FlashcardResponse.values.byName(row['last_response']! as String),
+            lastReviewedAt: DateTime.parse(row['last_reviewed_at_utc']! as String).toUtc(),
+          ),
+        )
+        .toList(growable: false);
+  }
+
+  Future<FlashcardSessionState?> flashcardSession({
+    required AuthenticatedLearner learner,
+    required FlashcardSetId setId,
+  }) async {
+    final rows = await _database.query(
+      'flashcard_sessions',
+      where: 'learner_id = ? AND flashcard_set_id = ?',
+      whereArgs: [learner.id.value, setId.value],
+      limit: 1,
+    );
+    if (rows.isEmpty) return null;
+    final row = rows.single;
+    return FlashcardSessionState(
+      setId: setId,
+      cursorIndex: row['cursor_index']! as int,
+      rememberedCount: row['remembered_count']! as int,
+      againCount: row['again_count']! as int,
+      isCompleted: row['is_completed'] == 1,
+      updatedAt: DateTime.parse(row['updated_at_utc']! as String).toUtc(),
+    );
+  }
+
+  Future<void> recordFlashcardResponse({
+    required AuthenticatedLearner learner,
+    required FlashcardSetRecord set,
+    required FlashcardRecord card,
+    required FlashcardResponse response,
+    required DateTime reviewedAt,
+  }) {
+    return _database.transaction((transaction) async {
+      final sessionRows = await transaction.query(
+        'flashcard_sessions',
+        where: 'learner_id = ? AND flashcard_set_id = ?',
+        whereArgs: [learner.id.value, set.id.value],
+        limit: 1,
+      );
+      final cursor = sessionRows.isEmpty ? 0 : sessionRows.single['cursor_index']! as int;
+      final completed = sessionRows.isNotEmpty && sessionRows.single['is_completed'] == 1;
+      if (completed || cursor < 0 || cursor >= set.cards.length || set.cards[cursor].id != card.id) {
+        throw const SourceStoreConflict('Flashcard response does not match the active durable session.');
+      }
+
+      final timestamp = reviewedAt.toUtc().toIso8601String();
+      await transaction.rawInsert(
+        '''
+INSERT INTO flashcard_reviews (
+  learner_id, card_id, review_count, remembered_count, again_count,
+  last_response, last_reviewed_at_utc
+)
+VALUES (?, ?, 1, ?, ?, ?, ?)
+ON CONFLICT(learner_id, card_id) DO UPDATE SET
+  review_count = flashcard_reviews.review_count + 1,
+  remembered_count = flashcard_reviews.remembered_count + excluded.remembered_count,
+  again_count = flashcard_reviews.again_count + excluded.again_count,
+  last_response = excluded.last_response,
+  last_reviewed_at_utc = excluded.last_reviewed_at_utc
+''',
+        [
+          learner.id.value,
+          card.id.value,
+          response == FlashcardResponse.remembered ? 1 : 0,
+          response == FlashcardResponse.again ? 1 : 0,
+          response.name,
+          timestamp,
+        ],
+      );
+
+      final nextCursor = cursor + 1;
+      final remembered =
+          (sessionRows.isEmpty ? 0 : sessionRows.single['remembered_count']! as int) +
+          (response == FlashcardResponse.remembered ? 1 : 0);
+      final again =
+          (sessionRows.isEmpty ? 0 : sessionRows.single['again_count']! as int) +
+          (response == FlashcardResponse.again ? 1 : 0);
+      await transaction.rawInsert(
+        '''
+INSERT INTO flashcard_sessions (
+  learner_id, flashcard_set_id, cursor_index, remembered_count, again_count,
+  is_completed, updated_at_utc
+)
+VALUES (?, ?, ?, ?, ?, ?, ?)
+ON CONFLICT(learner_id, flashcard_set_id) DO UPDATE SET
+  cursor_index = excluded.cursor_index,
+  remembered_count = excluded.remembered_count,
+  again_count = excluded.again_count,
+  is_completed = excluded.is_completed,
+  updated_at_utc = excluded.updated_at_utc
+''',
+        [
+          learner.id.value,
+          set.id.value,
+          nextCursor,
+          remembered,
+          again,
+          nextCursor >= set.cards.length ? 1 : 0,
+          timestamp,
+        ],
+      );
+    });
+  }
+
+  Future<void> resetFlashcardSession({
+    required AuthenticatedLearner learner,
+    required FlashcardSetId setId,
+    required DateTime updatedAt,
+  }) async {
+    await _database.insert(
+      'flashcard_sessions',
+      {
+        'learner_id': learner.id.value,
+        'flashcard_set_id': setId.value,
+        'cursor_index': 0,
+        'remembered_count': 0,
+        'again_count': 0,
+        'is_completed': 0,
+        'updated_at_utc': updatedAt.toUtc().toIso8601String(),
+      },
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
   @override
   Future<void> deleteMaterial({
     required AuthenticatedLearner learner,
@@ -1333,6 +1655,11 @@ LIMIT 1
 
       await transaction.delete(
         'summary_jobs',
+        where: 'learner_id = ? AND material_id = ?',
+        whereArgs: [learner.id.value, materialId.value],
+      );
+      await transaction.delete(
+        'flashcard_sets',
         where: 'learner_id = ? AND material_id = ?',
         whereArgs: [learner.id.value, materialId.value],
       );
@@ -1459,6 +1786,7 @@ ON CONFLICT(learner_id) DO UPDATE SET
       await transaction.delete('learner_evidence', where: 'learner_id = ?', whereArgs: [id]);
       await transaction.delete('recall_actions', where: 'learner_id = ?', whereArgs: [id]);
       await transaction.delete('listen_progress', where: 'learner_id = ?', whereArgs: [id]);
+      await transaction.delete('flashcard_sets', where: 'learner_id = ?', whereArgs: [id]);
       await transaction.delete('extracted_contents', where: 'learner_id = ?', whereArgs: [id]);
       await transaction.delete('source_versions', where: 'learner_id = ?', whereArgs: [id]);
       await transaction.delete('materials', where: 'learner_id = ?', whereArgs: [id]);
