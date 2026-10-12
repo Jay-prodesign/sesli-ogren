@@ -180,10 +180,7 @@ void main() {
     await _pumpUntilFound(tester, find.byKey(const ValueKey('workspace-other-study-paths-scroll')));
 
     expect(find.byKey(const ValueKey('workspace-other-study-paths-scroll')), findsOneWidget);
-    final pathsScroll = find.descendant(
-      of: find.byKey(const ValueKey('workspace-other-study-paths-scroll')),
-      matching: find.byType(Scrollable),
-    );
+    final pathsScroll = find.byKey(const ValueKey('workspace-other-study-paths-scroll'));
     for (final actionKey in const [
       ValueKey('workspace-other-quick-recap'),
       ValueKey('workspace-other-grounded-explain'),
