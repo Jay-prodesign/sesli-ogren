@@ -2157,7 +2157,12 @@ void main() {
     await tapVisible(tester, find.text('Metni ekle · çalışma alanını aç'));
     final sourceFlowScroll = find.byKey(const ValueKey('learning-slice-scroll'));
     await pumpUntilGone(tester, find.byKey(const ValueKey('source')));
-    await scrollUntilFound(tester, find.byKey(const ValueKey('la0040-atelier-recall')), scrollable: sourceFlowScroll, delta: 180);
+    await scrollUntilFound(
+      tester,
+      find.byKey(const ValueKey('la0040-atelier-recall')),
+      scrollable: sourceFlowScroll,
+      delta: 180,
+    );
 
     final material = await store.material(learner: runtime.learner, materialId: AppRuntime.primaryMaterialId);
     expect(material, isNotNull);
