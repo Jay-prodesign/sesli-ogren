@@ -377,11 +377,7 @@ class LivingStudyDeskHome extends StatelessWidget {
                   children: [
                     Row(
                       children: [
-                        CompanionView(
-                          key: const ValueKey('home-next-companion'),
-                          state: companionState,
-                          size: 68,
-                        ),
+                        CompanionView(key: const ValueKey('home-next-companion'), state: companionState, size: 68),
                         const SizedBox(width: 8),
                         Expanded(
                           child: Text(
@@ -405,11 +401,7 @@ class LivingStudyDeskHome extends StatelessWidget {
                   children: [
                     SizedBox(
                       width: 98,
-                      child: CompanionView(
-                        key: const ValueKey('home-next-companion'),
-                        state: companionState,
-                        size: 90,
-                      ),
+                      child: CompanionView(key: const ValueKey('home-next-companion'), state: companionState, size: 90),
                     ),
                     const SizedBox(width: 9),
                     Expanded(
@@ -458,10 +450,8 @@ class LivingStudyDeskHome extends StatelessWidget {
           alignment: Alignment.center,
           child: TextButton.icon(
             key: const ValueKey('la0040-living-listen'),
-            onPressed: () => _runLearningAction(
-              context,
-              (_hasReaderResume || _hasListenResume) ? onOpenLearning : onOpenListen,
-            ),
+            onPressed: () =>
+                _runLearningAction(context, (_hasReaderResume || _hasListenResume) ? onOpenLearning : onOpenListen),
             icon: Icon(
               (_hasReaderResume || _hasListenResume) ? Icons.psychology_alt_outlined : Icons.headphones_rounded,
               size: 18,
@@ -600,10 +590,7 @@ class LivingStudyDeskHome extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 10),
-          const Text(
-            'Kaynağını ekle. Oku, dinle, hatırla.',
-            style: TextStyle(color: _sub, fontSize: 14, height: 1.45),
-          ),
+          const Text('Kaynağını ekle. Oku, dinle, hatırla.', style: TextStyle(color: _sub, fontSize: 14, height: 1.45)),
         ],
       );
 

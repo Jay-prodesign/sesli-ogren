@@ -119,13 +119,8 @@ class AppRuntime {
   /// Returns to the device-local namespace without reopening or closing the
   /// shared SQLite data plane. Local and authenticated rows remain separated by
   /// learner_id, so neither namespace fabricates or absorbs the other's truth.
-  AppRuntime asLocal() => AppRuntime(
-    learner: localLearner,
-    store: store,
-    ingest: ingest,
-    recall: recall,
-    telemetry: telemetry,
-  );
+  AppRuntime asLocal() =>
+      AppRuntime(learner: localLearner, store: store, ingest: ingest, recall: recall, telemetry: telemetry);
 
   Future<void> deleteAccount() async {
     await accountDeletion.deleteAccount(learner: learner);

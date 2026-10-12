@@ -339,7 +339,6 @@ class FirstValueIntentSurface extends StatelessWidget {
                 ],
               ),
             ),
-
           ],
         ),
       ),

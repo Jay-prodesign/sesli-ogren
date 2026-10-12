@@ -85,9 +85,7 @@ void main() {
     expect(reason.maxLines, isNull);
     expect(reason.overflow, isNull);
 
-    final evidenceFinder = find.text(
-      'Hatırla denemesi öğrenme kanıtını oluşturur.',
-    );
+    final evidenceFinder = find.text('Hatırla denemesi öğrenme kanıtını oluşturur.');
     await tester.scrollUntilVisible(evidenceFinder, 180, scrollable: find.byType(Scrollable).last);
     await tester.pump();
     final evidenceTruth = tester.widget<Text>(evidenceFinder);
