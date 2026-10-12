@@ -82,7 +82,6 @@ Future<void> _openLibraryTab(WidgetTester tester) async {
   expect(activeLibrary, findsOneWidget);
 }
 
-
 void main() {
   sqfliteFfiInit();
 
@@ -223,8 +222,7 @@ void main() {
     );
     await _pumpUntilFound(tester, find.text('Biyoloji · Fotosentez'));
     await _openLibraryTab(tester);
-    final continueReading =
-        find.byKey(const ValueKey('library-continue-reader-return-material')).hitTestable();
+    final continueReading = find.byKey(const ValueKey('library-continue-reader-return-material')).hitTestable();
     await _pumpUntilFound(tester, continueReading);
     expect(find.text('Okumaya devam et').hitTestable(), findsOneWidget);
     await tester.tap(continueReading);
@@ -273,8 +271,7 @@ void main() {
     );
     await _pumpUntilFound(tester, find.text('Biyoloji · Fotosentez'));
     await _openLibraryTab(tester);
-    final continueReading =
-        find.byKey(const ValueKey('library-continue-reader-listen-recall-material')).hitTestable();
+    final continueReading = find.byKey(const ValueKey('library-continue-reader-listen-recall-material')).hitTestable();
     await _pumpUntilFound(tester, continueReading);
     expect(find.text('Okumaya devam et').hitTestable(), findsOneWidget);
     await tester.tap(continueReading);
