@@ -236,15 +236,7 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
       await _openListenFor(materialId);
       return;
     }
-    if (continuation == null) {
-      // A material with a valid source but no learner evidence belongs in its
-      // source-centered Workspace. Recall is an explicit active-learning action;
-      // opening a Library/Home material must not silently skip the material
-      // context or bypass contextual tools such as Flashcards.
-      await _openWorkspace(materialId);
-      return;
-    }
-    await _openLearningFor(materialId, autoAdvanceContinuation: true);
+    await _openLearningFor(materialId, autoAdvanceContinuation: continuation != null);
   }
 
   Future<void> _openWorkspace([MaterialId? materialId, bool showFirstValueIntent = false]) async {
