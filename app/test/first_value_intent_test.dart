@@ -167,10 +167,10 @@ void main() {
     expect(find.text('İlk aktif denemeni yap'), findsOneWidget);
     expect(find.text('Diğer çalışma yolları'), findsOneWidget);
 
-    await _tapVisible(tester, find.text('Diğer çalışma yolları'));
+    await _tapVisible(tester, find.byKey(const ValueKey('workspace-other-study-paths')));
     await _pumpUntilFound(tester, find.byKey(const ValueKey('workspace-other-study-paths-scroll')));
-    expect(find.text('Hızlı özet'), findsOneWidget);
-    final focusAction = find.text('Odaklan');
+    expect(find.byKey(const ValueKey('workspace-other-quick-recap')), findsOneWidget);
+    final focusAction = find.byKey(const ValueKey('workspace-other-focus'));
     await tester.scrollUntilVisible(
       focusAction,
       140,
