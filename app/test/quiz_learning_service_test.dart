@@ -159,6 +159,15 @@ void main() {
     );
     final first = await service.openCurrentSet(learner: learner, materialId: materialId);
     final firstQuestion = first.currentQuestion!;
+    final afterFirst = await service.recordAnswer(
+      learner: learner,
+      materialId: materialId,
+      setId: first.set.id,
+      questionId: firstQuestion.id,
+      kind: QuizAnswerKind.selected,
+      selectedOptionIndex: firstQuestion.correctOptionIndex,
+    );
+    final staleQuestion = afterFirst.currentQuestion!;
 
     await ingest.ingestPastedText(
       learner: learner,
@@ -174,9 +183,9 @@ void main() {
       store.recordQuizAnswer(
         learner: learner,
         set: first.set,
-        question: firstQuestion,
+        question: staleQuestion,
         kind: QuizAnswerKind.selected,
-        selectedOptionIndex: firstQuestion.correctOptionIndex,
+        selectedOptionIndex: staleQuestion.correctOptionIndex,
         answeredAt: DateTime.utc(2026, 10, 12, 18),
       ),
       throwsA(isA<SourceStoreConflict>()),
@@ -195,6 +204,9 @@ void main() {
       generationVersion: QuizLearningService.generationVersion,
     );
     expect(historicalSet?.id, first.set.id);
-    expect(await store.quizAnswerHistory(learner: learner, setId: first.set.id), isEmpty);
+    final historicalAnswers = await store.quizAnswerHistory(learner: learner, setId: first.set.id);
+    expect(historicalAnswers, hasLength(1));
+    expect(historicalAnswers.single.questionId, firstQuestion.id);
+    expect(historicalAnswers.single.isCorrect, isTrue);
   });
 }

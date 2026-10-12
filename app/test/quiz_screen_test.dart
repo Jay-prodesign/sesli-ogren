@@ -111,6 +111,45 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  testWidgets('incorrect quiz answer is committed before exact source correction appears', (tester) async {
+    final runtime = await _runtime();
+    addTearDown(runtime.close);
+    const materialId = MaterialId('quiz-incorrect-answer');
+    await runtime.ingest.ingestPastedText(
+      learner: runtime.learner,
+      materialId: materialId,
+      sourceName: 'Fotosentez yanlış cevap testi',
+      text:
+          'Fotosentez sırasında bitkiler ışık enerjisini kimyasal enerjiye dönüştürür. '
+          'Klorofil ışığın soğurulmasında önemli görev alır. '
+          'Karbondioksit ve su kullanılarak glikoz üretimine katkı sağlanır.',
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: SesliOgrenTheme.light(),
+        home: LivingDeskReviewScope(
+          child: QuizScreen(runtime: runtime, materialId: materialId),
+        ),
+      ),
+    );
+    await _pumpUntilFound(tester, find.byKey(const ValueKey('quiz-submit')));
+    expect(find.byKey(const ValueKey('quiz-source-evidence')), findsNothing);
+
+    await tester.tap(find.byKey(const ValueKey('quiz-option-1')));
+    await tester.pump();
+    await tester.tap(find.byKey(const ValueKey('quiz-submit')));
+    await _pumpUntilFound(tester, find.byKey(const ValueKey('quiz-source-evidence')));
+    expect(find.text('Kaynakla eşleşmedi.'), findsOneWidget);
+    expect(find.text('Doğru yanıt: Fotosentez'), findsOneWidget);
+    expect(find.byKey(const ValueKey('quiz-source-evidence')), findsOneWidget);
+
+    final state = await runtime.quiz.openCurrentSet(learner: runtime.learner, materialId: materialId);
+    expect(state.session.incorrectCount, 1);
+    expect(state.session.cursorIndex, 1);
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('source change while answering fails closed and reloads current quiz', (tester) async {
     final runtime = await _runtime();
     addTearDown(runtime.close);
