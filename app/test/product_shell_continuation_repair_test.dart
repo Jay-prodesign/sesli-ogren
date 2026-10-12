@@ -257,8 +257,7 @@ void main() {
     );
     await _pumpUntilFound(tester, find.text('Biyoloji · Fotosentez'));
     await _openLibraryTab(tester);
-    final libraryMaterialCard =
-        find.byKey(const ValueKey('library-open-reader-listen-recall-material')).hitTestable();
+    final libraryMaterialCard = find.byKey(const ValueKey('library-open-reader-listen-recall-material')).hitTestable();
     await _pumpUntilFound(tester, libraryMaterialCard);
     expect(libraryMaterialCard, findsOneWidget);
     await tester.tap(libraryMaterialCard);
