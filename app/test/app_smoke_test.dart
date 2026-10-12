@@ -308,14 +308,46 @@ Future<void> tapBottomNavIcon(WidgetTester tester, IconData icon) async {
 void main() {
   sqfliteFfiInit();
 
-  testWidgets('production app routes a missing restored session to passwordless account entry', (tester) async {
-    await tester.pumpWidget(SesliOgrenApp(restoreSession: () async => null));
-    await pumpUntilFound(tester, find.text('Öğrenme alanına gir'));
+  testWidgets('production app opens local learning without mandatory account entry', (tester) async {
+    final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
+    addTearDown(() async {
+      try {
+        await store.close();
+      } catch (_) {}
+    });
+    final localRuntime = AppRuntime(
+      learner: AppRuntime.localLearner,
+      store: store,
+      ingest: SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor()),
+      recall: RecallLearningService(sourceStore: store, learningStore: store.learningTruthStore()),
+      telemetry: store.operationalTelemetry(),
+    );
 
-    expect(find.text('Öğrenme alanına gir'), findsOneWidget);
-    expect(find.text('Kod gönder'), findsOneWidget);
-    expect(find.textContaining('Şifre gerekmiyor'), findsOneWidget);
-    expect(find.text('Uygulama bağlantısı henüz yapılandırılmadı.'), findsNothing);
+    await tester.pumpWidget(
+      SesliOgrenApp(
+        restoreSession: () async => null,
+        openLocalRuntime: () async => localRuntime,
+      ),
+    );
+    await pumpUntilFound(tester, find.byType(NavigationBar));
+
+    expect(localRuntime.learner.isLocal, isTrue);
+    expect(find.byType(AccountEntryScreen), findsNothing);
+    expect(find.text('Kod gönder'), findsNothing);
+
+    await tapBottomNavIcon(tester, Icons.person_outline_rounded);
+    await pumpUntilFound(tester, find.text('Hesapsız kullanım'));
+    expect(find.text('Hesap bağla · isteğe bağlı'), findsOneWidget);
+    expect(find.byKey(const ValueKey('profile-sign-out')), findsNothing);
+    expect(find.byKey(const ValueKey('profile-delete-account')), findsNothing);
+
+    await tapVisible(tester, find.byKey(const ValueKey('profile-connect-account')));
+    await pumpUntilFound(tester, find.byType(AccountEntryScreen));
+    expect(find.byKey(const ValueKey('account-continue-local')), findsOneWidget);
+
+    await tapVisible(tester, find.byKey(const ValueKey('account-continue-local')));
+    await pumpUntilFound(tester, find.byType(NavigationBar));
+    expect(find.byType(AccountEntryScreen), findsNothing);
   });
 
   testWidgets('runtime opening failure is not mislabeled as an OTP failure', (tester) async {
@@ -1563,29 +1595,38 @@ void main() {
     expect(find.text('Destek e-postasını kopyala'), findsNothing);
   });
 
-  testWidgets('app sign out returns to account entry without deleting learner data', (tester) async {
-    final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
-    final ingest = SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor());
-    final runtime = AppRuntime(
+  testWidgets('app sign out returns to device-local learning without an account gate', (tester) async {
+    final accountStore = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: 'account-signout.db');
+    final localStore = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: 'local-signout.db');
+    addTearDown(() async {
+      for (final store in [accountStore, localStore]) {
+        try {
+          await store.close();
+        } catch (_) {}
+      }
+    });
+    final accountRuntime = AppRuntime(
       learner: AppRuntime.localM5LearnerFixture,
-      store: store,
-      ingest: ingest,
-      recall: RecallLearningService(sourceStore: store, learningStore: store.learningTruthStore()),
-      telemetry: store.operationalTelemetry(),
+      store: accountStore,
+      ingest: SourceIngestService(store: accountStore, pdfTextExtractor: const _UnusedPdfExtractor()),
+      recall: RecallLearningService(sourceStore: accountStore, learningStore: accountStore.learningTruthStore()),
+      telemetry: accountStore.operationalTelemetry(),
       accountOverview: const _ReadyAccountOverviewGateway(),
     );
-    await ingest.ingestPastedText(
-      learner: runtime.learner,
-      materialId: AppRuntime.primaryMaterialId,
-      text: 'Oturum kapansa da bu yerel materyal hesap silme olmadan silinmemelidir.',
-      sourceName: 'Oturum koruma notu',
+    final localRuntime = AppRuntime(
+      learner: AppRuntime.localLearner,
+      store: localStore,
+      ingest: SourceIngestService(store: localStore, pdfTextExtractor: const _UnusedPdfExtractor()),
+      recall: RecallLearningService(sourceStore: localStore, learningStore: localStore.learningTruthStore()),
+      telemetry: localStore.operationalTelemetry(),
     );
     var signOutCalls = 0;
 
     await tester.pumpWidget(
       SesliOgrenApp(
-        restoreSession: () async => runtime.learner,
-        openRuntime: (_) async => runtime,
+        restoreSession: () async => accountRuntime.learner,
+        openRuntime: (_) async => accountRuntime,
+        openLocalRuntime: () async => localRuntime,
         signOutSession: () async {
           signOutCalls += 1;
         },
@@ -1603,11 +1644,13 @@ void main() {
     await tapVisible(tester, signOut);
     await pumpUntilFound(tester, find.text('Bu cihazda çıkış yap?'));
     await tapVisible(tester, find.widgetWithText(FilledButton, 'Çıkış yap'));
-    await pumpUntilFound(tester, find.byType(AccountEntryScreen));
+    await pumpUntilFound(tester, find.byType(NavigationBar));
 
     expect(signOutCalls, 1);
-    expect(find.text('Öğrenme alanına gir'), findsOneWidget);
-    expect(find.text('Kod gönder'), findsOneWidget);
+    expect(find.byType(AccountEntryScreen), findsNothing);
+    await tapBottomNavIcon(tester, Icons.person_outline_rounded);
+    await pumpUntilFound(tester, find.text('Hesapsız kullanım'));
+    expect(find.text('Hesap bağla · isteğe bağlı'), findsOneWidget);
   });
 
   testWidgets('Profile sign out requires confirmation and preserves learner local data', (tester) async {
