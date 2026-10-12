@@ -82,13 +82,26 @@ Future<void> _openLibraryTab(WidgetTester tester) async {
   expect(activeLibrary, findsOneWidget);
 }
 
-Finder _workspaceReadSourceAction() => find
-    .byWidgetPredicate(
-      (widget) =>
-          widget is Text &&
-          (widget.data == 'Kaynağı aç' || widget.data == 'Tam kaynağı aç' || widget.data == 'Kaynağın tamamını oku'),
-    )
-    .hitTestable();
+Future<void> _openWorkspaceSource(WidgetTester tester) async {
+  await _pumpUntilFound(tester, find.byType(MaterialWorkspaceScreen));
+  final candidates = [
+    find.byKey(const ValueKey('first-intent-recommend')),
+    find.byKey(const ValueKey('la0040-atelier-workspace-reader')),
+    find.text('Kaynağın tamamını oku'),
+  ];
+  for (var i = 0; i < 200; i++) {
+    await tester.pump(const Duration(milliseconds: 20));
+    for (final candidate in candidates) {
+      if (candidate.evaluate().isEmpty) continue;
+      await tester.ensureVisible(candidate);
+      await tester.pump();
+      await tester.tap(candidate);
+      await tester.pump();
+      return;
+    }
+  }
+  fail('Expected a valid Workspace source-reading action.');
+}
 
 void main() {
   sqfliteFfiInit();
@@ -227,12 +240,7 @@ void main() {
     await _pumpUntilFound(tester, libraryMaterialTitle);
     expect(libraryMaterialTitle, findsOneWidget);
     await tester.tap(libraryMaterialTitle);
-    await _pumpUntilFound(tester, find.byType(MaterialWorkspaceScreen));
-    final readSource = _workspaceReadSourceAction();
-    await _pumpUntilFound(tester, readSource, maxPumps: 400);
-    expect(readSource, findsOneWidget);
-    await tester.tap(readSource);
-    await tester.pump();
+    await _openWorkspaceSource(tester);
     await _pumpUntilFound(tester, find.byType(SourceReaderScreen));
     expect(find.byType(SourceReaderScreen), findsOneWidget);
     Navigator.of(tester.element(find.byType(SourceReaderScreen))).pop();
@@ -274,12 +282,7 @@ void main() {
     await _pumpUntilFound(tester, libraryMaterialTitle);
     expect(libraryMaterialTitle, findsOneWidget);
     await tester.tap(libraryMaterialTitle);
-    await _pumpUntilFound(tester, find.byType(MaterialWorkspaceScreen));
-    final readSource = _workspaceReadSourceAction();
-    await _pumpUntilFound(tester, readSource, maxPumps: 400);
-    expect(readSource, findsOneWidget);
-    await tester.tap(readSource);
-    await tester.pump();
+    await _openWorkspaceSource(tester);
     await _pumpUntilFound(tester, find.byType(SourceReaderScreen));
     expect(find.byType(SourceReaderScreen), findsOneWidget);
 
