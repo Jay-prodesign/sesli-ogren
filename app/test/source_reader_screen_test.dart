@@ -86,14 +86,14 @@ void main() {
 
     expect(find.byKey(const ValueKey('reader-learning-actions-stacked')), findsOneWidget);
     expect(find.text('Kaynağı kapat ve hatırla'), findsOneWidget);
-    expect(find.text('Dinle'), findsOneWidget);
+    expect(find.text('Dinleyerek hazırlan'), findsOneWidget);
     expect(tester.takeException(), isNull);
 
     await tester.tap(find.text('Kaynağı kapat ve hatırla'));
     await tester.pump();
     expect(recalled, 1);
 
-    await tester.tap(find.text('Dinle'));
+    await tester.tap(find.text('Dinleyerek hazırlan'));
     await tester.pump();
     expect(listened, 1);
     expect(tester.takeException(), isNull);
@@ -121,7 +121,7 @@ void main() {
     await tester.pump();
 
     expect(find.byKey(const ValueKey('reader-learning-actions-stacked')), findsOneWidget);
-    final listenSize = tester.getSize(find.widgetWithText(OutlinedButton, 'Dinle'));
+    final listenSize = tester.getSize(find.widgetWithText(OutlinedButton, 'Dinleyerek hazırlan'));
     final recallSize = tester.getSize(find.widgetWithText(FilledButton, 'Kaynağı kapat ve hatırla'));
     expect(listenSize.width.isFinite, isTrue);
     expect(recallSize.width.isFinite, isTrue);
