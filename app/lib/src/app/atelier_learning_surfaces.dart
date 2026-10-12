@@ -293,11 +293,7 @@ class AtelierWorkspace extends StatelessWidget {
                     const SizedBox(height: 4),
                     Text(
                       _evidenceHeadline,
-                      style: const TextStyle(
-                        color: AtelierStyle.ink,
-                        fontSize: 14.5,
-                        fontWeight: FontWeight.w900,
-                      ),
+                      style: const TextStyle(color: AtelierStyle.ink, fontSize: 14.5, fontWeight: FontWeight.w900),
                     ),
                     const SizedBox(height: 3),
                     Text(
@@ -330,12 +326,7 @@ class AtelierWorkspace extends StatelessWidget {
             children: [
               const Text(
                 'Bu kaynakla başka bir yol seç',
-                style: TextStyle(
-                  color: AtelierStyle.ink,
-                  fontSize: 20,
-                  height: 1.15,
-                  fontWeight: FontWeight.w900,
-                ),
+                style: TextStyle(color: AtelierStyle.ink, fontSize: 20, height: 1.15, fontWeight: FontWeight.w900),
               ),
               const SizedBox(height: 6),
               const Text(
@@ -469,10 +460,7 @@ class AtelierWorkspace extends StatelessWidget {
                   const SizedBox(height: 14),
                   AtelierSourceTrustStrip(sourceVersion: sourceVersion!),
                 ],
-                if (continuation != null) ...[
-                  const SizedBox(height: 10),
-                  _evidenceState(compact: compactSurface),
-                ],
+                if (continuation != null) ...[const SizedBox(height: 10), _evidenceState(compact: compactSurface)],
                 const SizedBox(height: 17),
                 if (sourceText.trim().isNotEmpty) ...[
                   const AtelierLearningRail(phase: AtelierLearningPhase.source),
