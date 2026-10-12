@@ -497,6 +497,73 @@ void main() {
     await expectLater(find.byType(Scaffold), matchesGoldenFile('goldens/la0040_flashcards_complete_390x844.png'));
   });
 
+  testWidgets('LA-0040 Flashcards source-change recovery', (tester) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
+    addTearDown(store.close);
+    final ingest = SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor());
+    final runtime = AppRuntime(
+      learner: AppRuntime.localM5LearnerFixture,
+      store: store,
+      ingest: ingest,
+      recall: RecallLearningService(sourceStore: store, learningStore: store.learningTruthStore()),
+      telemetry: store.operationalTelemetry(),
+    );
+    const flashcardMaterialId = MaterialId('visual-flashcards-source-change');
+    await ingest.ingestPastedText(
+      learner: runtime.learner,
+      materialId: flashcardMaterialId,
+      sourceName: 'İlk kart kaynağı',
+      text:
+          'Fotosentez ışık enerjisini kimyasal enerjiye dönüştürür. '
+          'Klorofil ışığın soğurulmasına yardım eder. '
+          'Karbondioksit süreçte önemli bir girdidir.',
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        debugShowCheckedModeBanner: false,
+        theme: SesliOgrenTheme.light(),
+        home: MediaQuery(
+          data: const MediaQueryData(disableAnimations: true),
+          child: LivingDeskReviewScope(
+            child: FlashcardScreen(runtime: runtime, materialId: flashcardMaterialId),
+          ),
+        ),
+      ),
+    );
+    for (var i = 0; i < 50 && find.byKey(const ValueKey('flashcards-reveal')).evaluate().isEmpty; i++) {
+      await tester.pump(const Duration(milliseconds: 30));
+    }
+    await tester.tap(find.byKey(const ValueKey('flashcards-reveal')));
+    await tester.pump(const Duration(milliseconds: 180));
+
+    await ingest.ingestPastedText(
+      learner: runtime.learner,
+      materialId: flashcardMaterialId,
+      sourceName: 'Güncel kart kaynağı',
+      text:
+          'Hücresel solunum glikozdaki enerjiyi kullanılabilir enerjiye dönüştürür. '
+          'Mitokondri hücresel enerji dönüşümünde önemli görev alır. '
+          'Oksijenli solunumda oksijen temel girdilerden biridir.',
+    );
+    await tester.tap(find.byKey(const ValueKey('flashcards-remembered')));
+    for (var i = 0; i < 50 && find.byKey(const ValueKey('flashcards-inline-reload')).evaluate().isEmpty; i++) {
+      await tester.pump(const Duration(milliseconds: 30));
+    }
+    expect(find.byKey(const ValueKey('flashcards-inline-error')), findsOneWidget);
+    expect(find.text('Güncel kartları yükle'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+    await expectLater(
+      find.byType(Scaffold),
+      matchesGoldenFile('goldens/la0040_flashcards_source_changed_390x844.png'),
+    );
+  });
+
   testWidgets('LA-0040 Flashcards survives 320px + large type', (tester) async {
     tester.view.physicalSize = const Size(320, 700);
     tester.view.devicePixelRatio = 1;
