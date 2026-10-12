@@ -90,6 +90,7 @@ void main() {
     expect(find.text('Tam kaynağı aç'), findsOneWidget);
     expect(find.text('Dinleyerek hazırlan'), findsOneWidget);
     expect(find.text('Diğer çalışma yolları'), findsOneWidget);
+    expect(find.byKey(const ValueKey('workspace-evidence-state')), findsNothing);
 
     final filledButtons = tester.widgetList<FilledButton>(find.byType(FilledButton));
     expect(filledButtons.length, 1);
@@ -102,6 +103,13 @@ void main() {
 
     final switcher = tester.widget<AnimatedSwitcher>(find.byKey(const ValueKey('workspace-active-step-motion')));
     expect(switcher.duration, const Duration(milliseconds: 220));
+
+    await tester.tap(find.byKey(const ValueKey('workspace-other-study-paths')));
+    await tester.pumpAndSettle();
+    expect(find.text('Bu kaynakla başka bir yol seç'), findsOneWidget);
+    expect(find.text('HAZIRLIK'), findsOneWidget);
+    expect(find.text('AKTİF ÇALIŞMA'), findsOneWidget);
+    expect(find.text('Kaynağı hızlıca toparla'), findsOneWidget);
   });
 
   testWidgets('Workspace review recommendation makes source repair the primary action and honors Reduced Motion', (
@@ -144,6 +152,14 @@ void main() {
 
     expect(find.text('Kaynağı gözden geçir'), findsOneWidget);
     expect(find.text('Eksik kısmı kaynaktan yeniden gör.'), findsOneWidget);
+    expect(find.byKey(const ValueKey('workspace-evidence-state')), findsOneWidget);
+    expect(find.text('Kaynak onarımı gerekiyor'), findsOneWidget);
+    expect(
+      find.text(
+        '1 Hatırla denemesi kaydedildi. Son deneme eksik ya da yanlış geri çağırma gösterdi; sıradaki adım kaynaktan onarım.',
+      ),
+      findsOneWidget,
+    );
 
     final switcher = tester.widget<AnimatedSwitcher>(
       find.byKey(const ValueKey('workspace-active-step-motion')),
