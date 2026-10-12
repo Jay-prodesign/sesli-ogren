@@ -846,11 +846,11 @@ void main() {
     Finder workspaceScroll() =>
         find.descendant(of: find.byType(MaterialWorkspaceScreen), matching: find.byType(Scrollable));
 
-    final otherPaths = find.widgetWithText(TextButton, 'Diğer yollar').hitTestable();
+    final otherPaths = find.byKey(const ValueKey('workspace-other-study-paths')).hitTestable();
     await pumpUntilFound(tester, otherPaths);
     await tester.tap(otherPaths);
     await pumpUntilFound(tester, find.byKey(const ValueKey('workspace-other-study-paths-scroll')));
-    await tapVisible(tester, find.text('Odaklan'));
+    await tapVisible(tester, find.byKey(const ValueKey('workspace-other-focus')));
     await pumpUntilFound(tester, find.text('KISA ODAK · 3 ADIM'));
     expect(find.byKey(const ValueKey('focus-source-trust')), findsOneWidget);
     expect(find.text('Fotosentez çalışma notu'), findsWidgets);
@@ -865,11 +865,11 @@ void main() {
     Navigator.of(tester.element(find.textContaining('öğrenme kanıtı oluşturmaz'))).pop();
     await pumpUntilFound(tester, find.byType(MaterialWorkspaceScreen));
 
-    final otherPathsAfterFocus = find.widgetWithText(TextButton, 'Diğer yollar').hitTestable();
+    final otherPathsAfterFocus = find.byKey(const ValueKey('workspace-other-study-paths')).hitTestable();
     await pumpUntilFound(tester, otherPathsAfterFocus);
     await tester.tap(otherPathsAfterFocus);
     await pumpUntilFound(tester, find.byKey(const ValueKey('workspace-other-study-paths-scroll')));
-    await tapVisible(tester, find.text('Kendi cümlelerimle anlat'));
+    await tapVisible(tester, find.byKey(const ValueKey('workspace-other-explain-back')));
     await pumpUntilFound(tester, find.text('Anlatımımı değerlendir'));
 
     expect(find.text('Kendi cümlelerinle anlat'), findsOneWidget);
@@ -1782,11 +1782,11 @@ void main() {
     await tapVisible(tester, find.byKey(const ValueKey('la0040-living-material-open')));
     await pumpUntilFound(tester, find.byType(MaterialWorkspaceScreen));
 
-    final otherPaths = find.widgetWithText(TextButton, 'Diğer yollar').hitTestable();
+    final otherPaths = find.byKey(const ValueKey('workspace-other-study-paths')).hitTestable();
     await pumpUntilFound(tester, otherPaths);
     await tester.tap(otherPaths);
     await pumpUntilFound(tester, find.byKey(const ValueKey('workspace-other-study-paths-scroll')));
-    await tapVisible(tester, find.text('Kendi cümlelerimle anlat'));
+    await tapVisible(tester, find.byKey(const ValueKey('workspace-other-explain-back')));
     await pumpUntilFound(tester, find.text('Anlatımımı değerlendir'));
 
     expect(find.text('Kendi cümlelerinle anlat'), findsOneWidget);
