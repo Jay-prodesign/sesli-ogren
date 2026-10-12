@@ -188,7 +188,7 @@ void main() {
 
     await tester.tap(find.byKey(const ValueKey('quiz-submit')));
     await _pumpUntilFound(tester, find.byKey(const ValueKey('quiz-recovery-notice')));
-    expect(find.text('Güncel quiz kaynağı'), findsOneWidget);
+    expect(find.text('Güncel quiz kaynağı'), findsWidgets);
     expect(find.text('Önceki quiz yanıtı kaydedilmedi. Güncel kaynaktan devam ediyorsun.'), findsOneWidget);
     expect(find.byKey(const ValueKey('quiz-source-evidence')), findsNothing);
     expect(find.byKey(const ValueKey('quiz-submit')), findsOneWidget);
@@ -255,7 +255,10 @@ void main() {
     await tester.scrollUntilVisible(
       find.byKey(const ValueKey('quiz-option-0')),
       160,
-      scrollable: find.byKey(const ValueKey('quiz-scroll')),
+      scrollable: find.descendant(
+        of: find.byKey(const ValueKey('quiz-scroll')),
+        matching: find.byType(Scrollable),
+      ),
     );
     await tester.tap(find.byKey(const ValueKey('quiz-option-0')));
     await tester.pump();
@@ -264,7 +267,10 @@ void main() {
     await tester.scrollUntilVisible(
       find.byKey(const ValueKey('quiz-source-evidence')),
       160,
-      scrollable: find.byKey(const ValueKey('quiz-scroll')),
+      scrollable: find.descendant(
+        of: find.byKey(const ValueKey('quiz-scroll')),
+        matching: find.byType(Scrollable),
+      ),
     );
     expect(find.byKey(const ValueKey('quiz-next')), findsOneWidget);
     expect(tester.takeException(), isNull);

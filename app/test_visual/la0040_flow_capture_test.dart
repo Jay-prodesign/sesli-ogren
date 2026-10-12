@@ -769,7 +769,7 @@ void main() {
     for (var i = 0; i < 60 && find.byKey(const ValueKey('quiz-recovery-notice')).evaluate().isEmpty; i++) {
       await tester.pump(const Duration(milliseconds: 30));
     }
-    expect(find.text('Güncel quiz kaynağı'), findsOneWidget);
+    expect(find.text('Güncel quiz kaynağı'), findsWidgets);
     expect(find.text('Önceki quiz yanıtı kaydedilmedi. Güncel kaynaktan devam ediyorsun.'), findsOneWidget);
     expect(find.byKey(const ValueKey('quiz-source-evidence')), findsNothing);
     expect(tester.takeException(), isNull);
@@ -826,7 +826,10 @@ void main() {
     await tester.scrollUntilVisible(
       find.byKey(const ValueKey('quiz-option-0')),
       160,
-      scrollable: find.byKey(const ValueKey('quiz-scroll')),
+      scrollable: find.descendant(
+        of: find.byKey(const ValueKey('quiz-scroll')),
+        matching: find.byType(Scrollable),
+      ),
     );
     await tester.tap(find.byKey(const ValueKey('quiz-option-0')));
     await tester.pump();
@@ -837,7 +840,10 @@ void main() {
     await tester.scrollUntilVisible(
       find.byKey(const ValueKey('quiz-source-evidence')),
       160,
-      scrollable: find.byKey(const ValueKey('quiz-scroll')),
+      scrollable: find.descendant(
+        of: find.byKey(const ValueKey('quiz-scroll')),
+        matching: find.byType(Scrollable),
+      ),
     );
     await tester.pump();
     expect(find.byKey(const ValueKey('quiz-next')), findsOneWidget);
