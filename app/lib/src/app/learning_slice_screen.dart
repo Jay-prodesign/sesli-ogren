@@ -1350,30 +1350,36 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
     }
     final candidate = LearningVisualTreatmentScope.maybeOf(context);
     if (LivingDeskReviewScope.active(context)) {
-      return AtelierRecall(
-        prompt: prompt,
-        controller: _answerController,
-        busy: _busy,
-        onSubmit: _submit,
-        onHint: _requestHint,
-        onReveal: _revealAnswer,
-        onUnknown: () => _submit(unknown: true),
-        support: _supportText,
-        error: _inlineError,
+      return KeyedSubtree(
+        key: const ValueKey('recall'),
+        child: AtelierRecall(
+          prompt: prompt,
+          controller: _answerController,
+          busy: _busy,
+          onSubmit: _submit,
+          onHint: _requestHint,
+          onReveal: _revealAnswer,
+          onUnknown: () => _submit(unknown: true),
+          support: _supportText,
+          error: _inlineError,
+        ),
       );
     }
     if (candidate != null) {
-      return LearningTreatmentRecallPrompt(
-        lane: candidate,
-        prompt: prompt,
-        controller: _answerController,
-        busy: _busy,
-        onSubmit: _submit,
-        onHint: _requestHint,
-        onReveal: _revealAnswer,
-        onUnknown: () => _submit(unknown: true),
-        supportText: _supportText,
-        errorText: _inlineError,
+      return KeyedSubtree(
+        key: const ValueKey('recall'),
+        child: LearningTreatmentRecallPrompt(
+          lane: candidate,
+          prompt: prompt,
+          controller: _answerController,
+          busy: _busy,
+          onSubmit: _submit,
+          onHint: _requestHint,
+          onReveal: _revealAnswer,
+          onUnknown: () => _submit(unknown: true),
+          supportText: _supportText,
+          errorText: _inlineError,
+        ),
       );
     }
     return _SurfaceCard(
