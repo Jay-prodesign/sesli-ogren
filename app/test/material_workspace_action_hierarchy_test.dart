@@ -147,6 +147,7 @@ void main() {
     expect(find.byKey(const ValueKey('la0040-atelier-workspace-reader')), findsOneWidget);
     expect(find.byKey(const ValueKey('la0040-atelier-workspace-update-source')), findsOneWidget);
     expect(find.text('Bu kaynağın metni henüz okunamıyor.'), findsOneWidget);
+    expect(find.byType(AtelierLearningRail), findsNothing);
 
     await tester.tap(find.byKey(const ValueKey('la0040-atelier-workspace-reader')));
     await tester.pump();
