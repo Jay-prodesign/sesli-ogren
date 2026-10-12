@@ -10,6 +10,7 @@ import 'explain_back_screen.dart';
 import 'explain_screen.dart';
 import 'first_value_intent_surface.dart';
 import 'focus_screen.dart';
+import 'flashcard_screen.dart';
 import 'learning_slice_screen.dart';
 import 'la0040_visual_treatments.dart';
 import 'living_study_desk_home.dart';
@@ -292,6 +293,20 @@ class _MaterialWorkspaceScreenState extends State<MaterialWorkspaceScreen> {
     });
   }
 
+  Future<void> _openFlashcards() async {
+    await Navigator.of(context).push<void>(
+      MaterialPageRoute(
+        builder: (_) => _preserveProductExperience(
+          FlashcardScreen(runtime: widget.runtime, materialId: widget.materialId),
+        ),
+      ),
+    );
+    if (!mounted) return;
+    setState(() {
+      _snapshot = _load();
+    });
+  }
+
   Future<void> _openFocus(_WorkspaceSnapshot data) async {
     await Navigator.of(context).push<void>(
       MaterialPageRoute(
@@ -438,6 +453,10 @@ class _MaterialWorkspaceScreenState extends State<MaterialWorkspaceScreen> {
               },
               onGroundedExplain: () => _openGroundedExplain(snapshot.data!.source),
               onExplain: () => _openExplainBack(snapshot.data!.source),
+              onFlashcards: () {
+                _consumeFirstValueIntent();
+                _openFlashcards();
+              },
               onFocus: () {
                 _consumeFirstValueIntent();
                 _openFocus(snapshot.data!);
@@ -461,6 +480,7 @@ class _WorkspaceBody extends StatelessWidget {
     required this.onListen,
     required this.onGroundedExplain,
     required this.onExplain,
+    required this.onFlashcards,
     required this.onFocus,
   });
 
@@ -473,6 +493,7 @@ class _WorkspaceBody extends StatelessWidget {
   final VoidCallback onListen;
   final VoidCallback onGroundedExplain;
   final VoidCallback onExplain;
+  final VoidCallback onFlashcards;
   final VoidCallback onFocus;
 
   @override
@@ -506,6 +527,7 @@ class _WorkspaceBody extends StatelessWidget {
         onListen: onListen,
         onGroundedExplain: onGroundedExplain,
         onExplain: onExplain,
+        onFlashcards: onFlashcards,
         onFocus: onFocus,
       );
     }

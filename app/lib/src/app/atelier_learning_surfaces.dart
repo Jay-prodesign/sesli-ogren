@@ -126,6 +126,7 @@ class AtelierWorkspace extends StatelessWidget {
     required this.onListen,
     required this.onGroundedExplain,
     required this.onExplain,
+    this.onFlashcards,
     required this.onFocus,
     super.key,
   });
@@ -141,6 +142,7 @@ class AtelierWorkspace extends StatelessWidget {
   final VoidCallback onListen;
   final VoidCallback onGroundedExplain;
   final VoidCallback onExplain;
+  final VoidCallback? onFlashcards;
   final VoidCallback onFocus;
 
   String get _activeStepTitle {
@@ -383,6 +385,19 @@ class AtelierWorkspace extends StatelessWidget {
                   letterSpacing: 0.9,
                 ),
               ),
+              if (onFlashcards != null)
+                ListTile(
+                  key: const ValueKey('workspace-other-flashcards'),
+                  leading: const Icon(Icons.style_outlined),
+                  title: const Text('Kartlarla çalış'),
+                  subtitle: const Text(
+                    'Kaynağa bağlı kartları aç, cevabı gör ve kendi kart çalışma yanıtını kaydet.',
+                  ),
+                  onTap: () {
+                    Navigator.of(sheetContext).pop();
+                    onFlashcards!();
+                  },
+                ),
               ListTile(
                 key: const ValueKey('workspace-other-explain-back'),
                 leading: const Icon(Icons.record_voice_over_outlined),

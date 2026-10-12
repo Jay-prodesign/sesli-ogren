@@ -87,6 +87,8 @@ jobs:
             test/durable_reopen_continuity_test.dart
             test/living_study_desk_home_test.dart
             test/recall_learning_service_test.dart
+            test/flashcard_learning_service_test.dart
+            test/flashcard_screen_test.dart
           )
           for test_file in "${tests[@]}"; do
             echo "::group::core:${test_file}"

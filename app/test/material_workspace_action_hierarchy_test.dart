@@ -44,6 +44,7 @@ void main() {
     required VoidCallback onReadSource,
     required VoidCallback onRecall,
     required VoidCallback onListen,
+    VoidCallback? onFlashcards,
   }) {
     return MaterialApp(
       theme: SesliOgrenTheme.light(),
@@ -64,6 +65,7 @@ void main() {
             onListen: onListen,
             onGroundedExplain: () {},
             onExplain: () {},
+            onFlashcards: onFlashcards,
             onFocus: () {},
           ),
         ),
@@ -75,6 +77,7 @@ void main() {
     var readSource = 0;
     var recall = 0;
     var listen = 0;
+    var flashcards = 0;
 
     await tester.pumpWidget(
       frame(
@@ -82,6 +85,7 @@ void main() {
         onReadSource: () => readSource += 1,
         onRecall: () => recall += 1,
         onListen: () => listen += 1,
+        onFlashcards: () => flashcards += 1,
       ),
     );
 
@@ -110,6 +114,10 @@ void main() {
     expect(find.text('HAZIRLIK'), findsOneWidget);
     expect(find.text('AKTİF ÇALIŞMA'), findsOneWidget);
     expect(find.text('Kaynağı hızlıca toparla'), findsOneWidget);
+    expect(find.byKey(const ValueKey('workspace-other-flashcards')), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('workspace-other-flashcards')));
+    await tester.pump();
+    expect(flashcards, 1);
   });
 
   testWidgets('Workspace review recommendation makes source repair the primary action and honors Reduced Motion', (
