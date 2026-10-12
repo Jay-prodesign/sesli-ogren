@@ -308,6 +308,49 @@ Future<void> tapBottomNavIcon(WidgetTester tester, IconData icon) async {
 void main() {
   sqfliteFfiInit();
 
+  test('local and authenticated identities share one data plane without sharing learner truth', () async {
+    final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
+    addTearDown(store.close);
+    final ingest = SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor());
+    final localRuntime = AppRuntime(
+      learner: AppRuntime.localLearner,
+      store: store,
+      ingest: ingest,
+      recall: RecallLearningService(sourceStore: store, learningStore: store.learningTruthStore()),
+      telemetry: store.operationalTelemetry(),
+    );
+    const localMaterialId = MaterialId('local-namespace-material');
+    await ingest.ingestPastedText(
+      learner: localRuntime.learner,
+      materialId: localMaterialId,
+      text: 'Bu kaynak yalnız cihazdaki yerel öğrenme alanına aittir.',
+      sourceName: 'Yerel namespace notu',
+    );
+
+    const accountLearner = LearnerIdentity.authenticated(id: LearnerId('optional-account-user'));
+    final accountRuntime = localRuntime.asAuthenticated(accountLearner);
+
+    expect(identical(accountRuntime.store, localRuntime.store), isTrue);
+    expect(accountRuntime.learner.isAuthenticated, isTrue);
+    expect(await store.activeMaterials(learner: accountLearner), isEmpty);
+    expect(await store.activeMaterials(learner: AppRuntime.localLearner), hasLength(1));
+
+    const accountMaterialId = MaterialId('account-namespace-material');
+    await ingest.ingestPastedText(
+      learner: accountLearner,
+      materialId: accountMaterialId,
+      text: 'Bu kaynak yalnız doğrulanmış hesap namespace alanına aittir.',
+      sourceName: 'Hesap namespace notu',
+    );
+
+    final localAgain = accountRuntime.asLocal();
+    expect(identical(localAgain.store, accountRuntime.store), isTrue);
+    expect(localAgain.learner.isLocal, isTrue);
+    expect(await store.material(learner: localAgain.learner, materialId: localMaterialId), isNotNull);
+    expect(await store.material(learner: localAgain.learner, materialId: accountMaterialId), isNull);
+    expect(await store.material(learner: accountLearner, materialId: accountMaterialId), isNotNull);
+  });
+
   testWidgets('production app opens local learning without mandatory account entry', (tester) async {
     final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
     addTearDown(() async {
