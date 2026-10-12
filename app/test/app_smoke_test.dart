@@ -324,10 +324,7 @@ void main() {
     );
 
     await tester.pumpWidget(
-      SesliOgrenApp(
-        restoreSession: () async => null,
-        openLocalRuntime: () async => localRuntime,
-      ),
+      SesliOgrenApp(restoreSession: () async => null, openLocalRuntime: () async => localRuntime),
     );
     await pumpUntilFound(tester, find.byType(NavigationBar));
 
