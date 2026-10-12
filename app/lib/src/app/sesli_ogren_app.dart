@@ -144,11 +144,12 @@ class _SesliOgrenAppState extends State<SesliOgrenApp> {
       });
     }
     if (runtime != null) {
-      try {
-        await runtime.close();
-      } catch (_) {
-        // The signed-out session stays closed even if handle cleanup fails.
-      }
+      unawaited(
+        runtime.close().catchError((_) {
+          // Session sign-out is already authoritative. Old local handles are
+          // best-effort cleanup and must never block device-local learning.
+        }),
+      );
     }
   }
 
