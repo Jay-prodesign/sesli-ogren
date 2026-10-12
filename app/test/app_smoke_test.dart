@@ -948,19 +948,10 @@ void main() {
     await tapVisible(tester, materialCard);
 
     await pumpUntilFound(tester, find.byType(MaterialWorkspaceScreen));
+    await pumpUntilFound(tester, find.byKey(const ValueKey('la0040-atelier-workspace')));
     expect(LivingDeskReviewScope.active(tester.element(find.byType(MaterialWorkspaceScreen))), isTrue);
     expect(find.text('Fotosentez çalışma notu'), findsWidgets);
-
-    // A brand-new source enters the canonical First Value step before the
-    // ordinary Workspace. Consume that intent through the real Reader, then
-    // verify the persistent Workspace that follows.
-    await pumpUntilFound(tester, find.byKey(const ValueKey('first-value-intent')));
-    await tapVisible(tester, find.byKey(const ValueKey('first-intent-recommend')));
-    await pumpUntilFound(tester, find.byType(SourceReaderScreen));
-    expect(find.textContaining('Fotosentez'), findsWidgets);
-    Navigator.of(tester.element(find.byType(SourceReaderScreen))).pop();
-    await pumpUntilFound(tester, find.byType(MaterialWorkspaceScreen));
-    await pumpUntilFound(tester, find.byKey(const ValueKey('la0040-atelier-workspace')));
+    await pumpUntilFound(tester, find.byKey(const ValueKey('la0040-atelier-workspace-reader')));
     expect(find.byKey(const ValueKey('la0040-atelier-workspace-reader')), findsOneWidget);
 
     Finder workspaceScroll() =>

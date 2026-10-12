@@ -129,7 +129,9 @@ void main() {
         matching: find.byType(Scrollable),
       ),
     );
-    await tester.pump();
+    await tester.ensureVisible(flashcardAction);
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(flashcardAction.hitTestable(), findsOneWidget);
     await tester.tap(flashcardAction.hitTestable());
     await tester.pump();
     expect(flashcards, 1);
@@ -146,7 +148,9 @@ void main() {
         matching: find.byType(Scrollable),
       ),
     );
-    await tester.pump();
+    await tester.ensureVisible(quizAction);
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(quizAction.hitTestable(), findsOneWidget);
     await tester.tap(quizAction.hitTestable());
     await tester.pump();
     expect(quiz, 1);
