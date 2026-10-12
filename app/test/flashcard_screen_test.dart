@@ -81,7 +81,15 @@ void main() {
     await tester.pump(const Duration(milliseconds: 250));
     expect(find.byKey(const ValueKey('flashcards-answer')), findsOneWidget);
     expect(find.byKey(const ValueKey('flashcards-source-evidence')), findsOneWidget);
-    expect(find.bySemanticsLabel(RegExp(r'Cevap: .*Kaynakta:')), findsOneWidget);
+    expect(
+      find.byWidgetPredicate(
+        (widget) =>
+            widget is Semantics &&
+            (widget.properties.label?.startsWith('Cevap: ') ?? false) &&
+            (widget.properties.label?.contains('Kaynakta: ') ?? false),
+      ),
+      findsOneWidget,
+    );
     expect(find.byKey(const ValueKey('flashcards-remembered')), findsOneWidget);
     expect(find.text('Tekrar gerekli'), findsOneWidget);
 
