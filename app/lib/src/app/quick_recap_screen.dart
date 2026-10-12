@@ -569,6 +569,8 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> with WidgetsBinding
     final paper = living ? AtelierStyle.paper : Theme.of(context).colorScheme.surfaceContainerLow;
     final line = living ? AtelierStyle.line : Theme.of(context).colorScheme.outlineVariant;
     final ink = living ? AtelierStyle.ink : Theme.of(context).colorScheme.onSurface;
+    final compactLayout =
+        MediaQuery.sizeOf(context).width < 360 || MediaQuery.textScalerOf(context).scale(1) > 1.2;
     return Scaffold(
       backgroundColor: living ? AtelierStyle.canvas : null,
       appBar: AppBar(
@@ -577,7 +579,7 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> with WidgetsBinding
         foregroundColor: living ? AtelierStyle.ink : null,
       ),
       body: ListView(
-        padding: const EdgeInsets.all(24),
+        padding: EdgeInsets.all(compactLayout ? 16 : 24),
         children: [
           if (living) ...[
             Text(
@@ -731,19 +733,32 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> with WidgetsBinding
                           ),
                         )
                       else
-                        FilledButton.icon(
-                          key: const ValueKey('quick-recap-create'),
-                          style: living
-                              ? FilledButton.styleFrom(
-                                  backgroundColor: AtelierStyle.pulse,
-                                  foregroundColor: Colors.white,
-                                  minimumSize: const Size.fromHeight(52),
-                                )
-                              : primaryStyle,
-                          onPressed: _busy ? null : _submit,
-                          icon: const Icon(Icons.auto_awesome_outlined),
-                          label: const Text('Kaynağa bağlı özet oluştur'),
-                        ),
+                        compactLayout
+                            ? FilledButton(
+                                key: const ValueKey('quick-recap-create'),
+                                style: living
+                                    ? FilledButton.styleFrom(
+                                        backgroundColor: AtelierStyle.pulse,
+                                        foregroundColor: Colors.white,
+                                        minimumSize: const Size.fromHeight(52),
+                                      )
+                                    : primaryStyle,
+                                onPressed: _busy ? null : _submit,
+                                child: const Text('Kaynağa bağlı özet oluştur', textAlign: TextAlign.center),
+                              )
+                            : FilledButton.icon(
+                                key: const ValueKey('quick-recap-create'),
+                                style: living
+                                    ? FilledButton.styleFrom(
+                                        backgroundColor: AtelierStyle.pulse,
+                                        foregroundColor: Colors.white,
+                                        minimumSize: const Size.fromHeight(52),
+                                      )
+                                    : primaryStyle,
+                                onPressed: _busy ? null : _submit,
+                                icon: const Icon(Icons.auto_awesome_outlined),
+                                label: const Text('Kaynağa bağlı özet oluştur'),
+                              ),
                     ],
                   );
                 },

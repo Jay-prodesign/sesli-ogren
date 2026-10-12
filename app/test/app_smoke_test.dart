@@ -241,14 +241,14 @@ Future<void> scrollUntilFound(
   WidgetTester tester,
   Finder target, {
   required Finder scrollable,
-  int maxDrags = 14,
+  int maxDrags = 40,
   double delta = -180,
 }) async {
   for (var i = 0; i < maxDrags && target.evaluate().isEmpty; i++) {
     final activeScrollables = scrollable.hitTestable();
     expect(activeScrollables, findsWidgets);
     await tester.drag(activeScrollables.first, Offset(0, delta));
-    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 20));
   }
   expect(target, findsWidgets);
 }

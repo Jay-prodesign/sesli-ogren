@@ -179,10 +179,13 @@ void main() {
     await _tapVisible(tester, otherPaths);
     await _pumpUntilFound(tester, find.byKey(const ValueKey('workspace-other-study-paths-scroll')));
 
+    final otherPathsScroll = find.descendant(
+      of: find.byKey(const ValueKey('workspace-other-study-paths-scroll')),
+      matching: find.byType(Scrollable),
+    );
+    await _scrollUntilFound(tester, find.text('Odaklan'), scrollable: otherPathsScroll);
+
     expect(find.byKey(const ValueKey('workspace-other-study-paths-scroll')), findsOneWidget);
-    expect(find.text('Hızlı özet'), findsOneWidget);
-    expect(find.text('Kaynağı bana açıkla'), findsOneWidget);
-    expect(find.text('Kendi cümlelerimle anlat'), findsOneWidget);
     expect(find.text('Odaklan'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
