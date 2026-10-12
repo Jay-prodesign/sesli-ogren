@@ -623,10 +623,7 @@ void main() {
 
     await tapVisible(tester, find.text('Cihazdaki öğrenmeye dön'));
     await pumpUntilFound(tester, find.text('Korunan yerel not'));
-    expect(
-      await store.material(learner: AppRuntime.localLearner, materialId: localMaterialId),
-      isNotNull,
-    );
+    expect(await store.material(learner: AppRuntime.localLearner, materialId: localMaterialId), isNotNull);
     expect(tester.takeException(), isNull);
   });
 
@@ -1704,10 +1701,7 @@ void main() {
     await pumpUntilFound(tester, find.text('Yerel çıkış notu'));
     expect(signOutCalls, 1);
     expect(find.byType(AccountEntryScreen), findsNothing);
-    expect(
-      await store.material(learner: AppRuntime.localLearner, materialId: localMaterialId),
-      isNotNull,
-    );
+    expect(await store.material(learner: AppRuntime.localLearner, materialId: localMaterialId), isNotNull);
 
     await tapBottomNavIcon(tester, Icons.person_outline_rounded);
     await pumpUntilFound(tester, find.text('Hesapsız kullanım'));

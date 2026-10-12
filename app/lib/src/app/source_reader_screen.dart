@@ -185,6 +185,8 @@ class _SourceReaderScreenState extends State<SourceReaderScreen> {
     final paper = living ? AtelierStyle.paper : theme.colorScheme.surface;
     final canvas = living ? AtelierStyle.canvas : theme.colorScheme.surface;
     final restoredFromSavedPosition = widget.initialProgress > 0.02 && widget.initialProgress < 0.95;
+    final compactReadingSurface =
+        MediaQuery.sizeOf(context).width < 360 || MediaQuery.textScalerOf(context).scale(1) > 1.2;
 
     final spans = <TextSpan>[];
     if (matches.isEmpty) {
@@ -226,7 +228,10 @@ class _SourceReaderScreenState extends State<SourceReaderScreen> {
           const SizedBox(height: 12),
           AtelierSourceTrustStrip(sourceVersion: widget.sourceVersion!),
         ],
-        if (living) ...[const SizedBox(height: 14), const AtelierLearningRail(phase: AtelierLearningPhase.source)],
+        if (living && !compactReadingSurface) ...[
+          const SizedBox(height: 14),
+          const AtelierLearningRail(phase: AtelierLearningPhase.source),
+        ],
         const SizedBox(height: 16),
         RichText(
           text: TextSpan(

@@ -89,9 +89,10 @@ void main() {
 
     await _pumpUntilFound(tester, find.byKey(const ValueKey('first-value-intent')));
     expect(find.byType(MaterialWorkspaceScreen), findsOneWidget);
-    expect(find.text('Önce kaynağın tamamını bir kez gör.'), findsOneWidget);
+    expect(find.byKey(const ValueKey('first-value-recommendation-card')), findsOneWidget);
+    expect(find.byKey(const ValueKey('first-intent-recommend')), findsOneWidget);
 
-    await _tapVisible(tester, find.text('Kaynağı aç'));
+    await _tapVisible(tester, find.byKey(const ValueKey('first-intent-recommend')));
     await _pumpUntilFound(tester, find.byType(SourceReaderScreen));
     expect(find.textContaining('Fotosentez sırasında klorofil'), findsWidgets);
 

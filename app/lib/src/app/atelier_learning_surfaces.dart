@@ -99,7 +99,7 @@ class AtelierSourceTrustStrip extends StatelessWidget {
                     ],
                     const SizedBox(height: 3),
                     const Text(
-                      'Hatırlama ve kaynak kanıtı bu sürümle ilişkilendirilir.',
+                      'Kanıt bu kaynak sürümüne bağlıdır.',
                       style: TextStyle(color: AtelierStyle.muted, fontSize: 12, height: 1.35),
                     ),
                   ],
@@ -230,6 +230,12 @@ class AtelierWorkspace extends StatelessWidget {
       RecallStateKind.notAssessed || null => Icons.radio_button_unchecked_rounded,
     };
   }
+
+  CompanionVisualState get _workspaceCompanionState => switch (continuation?.state.kind) {
+    RecallStateKind.needsReview || RecallStateKind.developing => CompanionVisualState.think,
+    RecallStateKind.retrievedOnce => CompanionVisualState.success,
+    RecallStateKind.notAssessed || null => CompanionVisualState.idle,
+  };
 
   Widget _evidenceState({required bool compact}) {
     final state = continuation?.state;
@@ -457,8 +463,10 @@ class AtelierWorkspace extends StatelessWidget {
                 if (continuation != null) ...[const SizedBox(height: 10), _evidenceState(compact: compactSurface)],
                 const SizedBox(height: 17),
                 if (sourceText.trim().isNotEmpty) ...[
-                  const AtelierLearningRail(phase: AtelierLearningPhase.source),
-                  const SizedBox(height: 12),
+                  if (!compactSurface) ...[
+                    const AtelierLearningRail(phase: AtelierLearningPhase.source),
+                    const SizedBox(height: 12),
+                  ],
                   Wrap(
                     spacing: 8,
                     runSpacing: 8,
@@ -630,16 +638,28 @@ class AtelierWorkspace extends StatelessWidget {
               boxShadow: [BoxShadow(color: Color(0x1214224A), blurRadius: 18, offset: Offset(0, -6))],
             ),
             child: compactSurface
-                ? FilledButton.icon(
-                    key: const ValueKey('la0040-atelier-workspace-recall'),
-                    onPressed: runPrimaryAction,
-                    style: FilledButton.styleFrom(
-                      backgroundColor: AtelierStyle.pulse,
-                      foregroundColor: Colors.white,
-                      minimumSize: const Size.fromHeight(50),
-                    ),
-                    icon: Icon(_activeStepIcon),
-                    label: Text(_activeStepLabel),
+                ? Row(
+                    children: [
+                      CompanionView(
+                        key: const ValueKey('workspace-compact-companion'),
+                        state: _workspaceCompanionState,
+                        size: 48,
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: FilledButton.icon(
+                          key: const ValueKey('la0040-atelier-workspace-recall'),
+                          onPressed: runPrimaryAction,
+                          style: FilledButton.styleFrom(
+                            backgroundColor: AtelierStyle.pulse,
+                            foregroundColor: Colors.white,
+                            minimumSize: const Size.fromHeight(50),
+                          ),
+                          icon: Icon(_activeStepIcon),
+                          label: Text(_activeStepLabel),
+                        ),
+                      ),
+                    ],
                   )
                 : Column(
                     mainAxisSize: MainAxisSize.min,
@@ -647,8 +667,12 @@ class AtelierWorkspace extends StatelessWidget {
                     children: [
                       Row(
                         children: [
-                          Icon(_activeStepIcon, color: AtelierStyle.pulse, size: 18),
-                          const SizedBox(width: 7),
+                          CompanionView(
+                            key: const ValueKey('workspace-footer-companion'),
+                            state: _workspaceCompanionState,
+                            size: 48,
+                          ),
+                          const SizedBox(width: 8),
                           const Text(
                             'ŞİMDİ',
                             style: TextStyle(

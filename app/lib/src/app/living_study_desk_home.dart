@@ -1,4 +1,7 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../domain/learning_contracts.dart';
 import '../domain/learning_truth.dart';
@@ -168,6 +171,19 @@ class LivingStudyDeskHome extends StatelessWidget {
 
   String _type(MaterialRecord m) => m.mediaType == SourceMediaType.pdf ? 'PDF KAYNAĞI' : 'METİN NOTU';
 
+  void _runLearningAction(BuildContext context, VoidCallback action) {
+    final media = MediaQuery.maybeOf(context);
+    final quietFeedback = (media?.disableAnimations ?? false) || (media?.accessibleNavigation ?? false);
+    if (!quietFeedback) {
+      try {
+        unawaited(HapticFeedback.selectionClick().catchError((_) {}));
+      } catch (_) {
+        // Feedback is acknowledgement only and must never block navigation.
+      }
+    }
+    action();
+  }
+
   @override
   Widget build(BuildContext context) {
     final hasMaterial = material != null;
@@ -282,9 +298,7 @@ class LivingStudyDeskHome extends StatelessWidget {
         ),
         SizedBox(height: compactFirstViewport ? 5 : 9),
         Text(
-          compactFirstViewport
-              ? 'Kaynağın ve sıradaki adımın hazır.'
-              : 'Kaynağın, son denemen ve sıradaki adım tek yerde.',
+          compactFirstViewport ? 'Kaynağın ve sıradaki adımın hazır.' : 'Kaynağın hazır. Sıradaki adımın belli.',
           style: TextStyle(color: _sub, fontSize: compactFirstViewport ? 13 : 15, height: 1.4),
         ),
         SizedBox(height: compactFirstViewport ? 10 : 17),
@@ -296,7 +310,7 @@ class LivingStudyDeskHome extends StatelessWidget {
           clipBehavior: Clip.antiAlias,
           child: InkWell(
             key: const ValueKey('la0040-living-material-open'),
-            onTap: onOpenWorkspace,
+            onTap: () => _runLearningAction(context, onOpenWorkspace),
             child: Container(
               width: double.infinity,
               padding: compactFirstViewport
@@ -339,7 +353,7 @@ class LivingStudyDeskHome extends StatelessWidget {
                         const SizedBox(height: 5),
                         Text(
                           _preview,
-                          maxLines: compactFirstViewport ? 1 : 2,
+                          maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(fontSize: compactFirstViewport ? 11.5 : 13, color: _sub, height: 1.4),
                         ),
@@ -363,7 +377,7 @@ class LivingStudyDeskHome extends StatelessWidget {
                   children: [
                     Row(
                       children: [
-                        CompanionView(state: companionState, size: 42),
+                        CompanionView(key: const ValueKey('home-next-companion'), state: companionState, size: 68),
                         const SizedBox(width: 8),
                         Expanded(
                           child: Text(
@@ -385,7 +399,10 @@ class LivingStudyDeskHome extends StatelessWidget {
               : Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    SizedBox(width: 62, child: CompanionView(state: companionState, size: 60)),
+                    SizedBox(
+                      width: 98,
+                      child: CompanionView(key: const ValueKey('home-next-companion'), state: companionState, size: 90),
+                    ),
                     const SizedBox(width: 9),
                     Expanded(
                       child: Column(
@@ -415,7 +432,7 @@ class LivingStudyDeskHome extends StatelessWidget {
             width: double.infinity,
             child: FilledButton.icon(
               key: const ValueKey('la0040-living-continue'),
-              onPressed: _nextActionHandler,
+              onPressed: () => _runLearningAction(context, _nextActionHandler),
               icon: Icon(_nextActionIcon, size: 20),
               label: Text(_nextActionCta),
               style: FilledButton.styleFrom(
@@ -433,7 +450,8 @@ class LivingStudyDeskHome extends StatelessWidget {
           alignment: Alignment.center,
           child: TextButton.icon(
             key: const ValueKey('la0040-living-listen'),
-            onPressed: (_hasReaderResume || _hasListenResume) ? onOpenLearning : onOpenListen,
+            onPressed: () =>
+                _runLearningAction(context, (_hasReaderResume || _hasListenResume) ? onOpenLearning : onOpenListen),
             icon: Icon(
               (_hasReaderResume || _hasListenResume) ? Icons.psychology_alt_outlined : Icons.headphones_rounded,
               size: 18,
@@ -526,7 +544,7 @@ class LivingStudyDeskHome extends StatelessWidget {
                   title: Text(item.title, maxLines: 2, overflow: TextOverflow.ellipsis),
                   subtitle: const Text('Sıradaki öğrenme adımını aç'),
                   trailing: const Icon(Icons.chevron_right_rounded, color: _sub),
-                  onTap: () => onOpenMaterial(item.id),
+                  onTap: () => _runLearningAction(context, () => onOpenMaterial(item.id)),
                 ),
               ),
             ),
@@ -539,14 +557,18 @@ class LivingStudyDeskHome extends StatelessWidget {
     builder: (context, constraints) {
       final compact = constraints.maxWidth < 340 || MediaQuery.textScalerOf(context).scale(1) > 1.25;
       final companion = Container(
-        width: compact ? 58 : 84,
-        height: compact ? 58 : 84,
+        width: compact ? 96 : 112,
+        height: compact ? 96 : 112,
         decoration: BoxDecoration(
           color: AppPalette.primarySoft,
           borderRadius: BorderRadius.circular(compact ? 16 : 20),
         ),
         child: Center(
-          child: CompanionView(state: CompanionVisualState.idle, size: compact ? 52 : 74),
+          child: CompanionView(
+            key: const ValueKey('home-empty-companion'),
+            state: CompanionVisualState.idle,
+            size: compact ? 88 : 104,
+          ),
         ),
       );
       final promise = Column(
@@ -558,7 +580,7 @@ class LivingStudyDeskHome extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            'Bir sayfa getir.\nBirlikte çalışalım.',
+            'Birlikte\nöğrenelim.',
             style: TextStyle(
               color: _ink,
               fontSize: compact ? 25 : 32,
@@ -568,10 +590,7 @@ class LivingStudyDeskHome extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 10),
-          const Text(
-            'PDF ya da metin. Sonra kaynağı kapatıp neyi gerçekten hatırladığını gör.',
-            style: TextStyle(color: _sub, fontSize: 14, height: 1.45),
-          ),
+          const Text('Kaynağını ekle. Oku, dinle, hatırla.', style: TextStyle(color: _sub, fontSize: 14, height: 1.45)),
         ],
       );
 
@@ -599,14 +618,14 @@ class LivingStudyDeskHome extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Expanded(child: promise),
-                      const SizedBox(width: 14),
+                      const SizedBox(width: 10),
                       companion,
                     ],
                   ),
                 const SizedBox(height: 18),
                 FilledButton.icon(
                   key: const ValueKey('la0040-living-add'),
-                  onPressed: onOpenLearning,
+                  onPressed: () => _runLearningAction(context, onOpenLearning),
                   icon: const Icon(Icons.add_rounded),
                   label: const Text('İlk kaynağımı ekle'),
                   style: FilledButton.styleFrom(
@@ -619,32 +638,7 @@ class LivingStudyDeskHome extends StatelessWidget {
               ],
             ),
           ),
-          const SizedBox(height: 20),
-          const Text(
-            'NASIL ÇALIŞIR',
-            style: TextStyle(color: _accent, fontSize: 10, fontWeight: FontWeight.w900, letterSpacing: 0.9),
-          ),
-          const SizedBox(height: 10),
-          const AtelierLearningRail(phase: AtelierLearningPhase.source),
-          const SizedBox(height: 18),
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.fromLTRB(13, 11, 13, 11),
-            decoration: BoxDecoration(color: AppPalette.primarySoft, borderRadius: BorderRadius.circular(16)),
-            child: const Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Icon(Icons.verified_outlined, color: _accent, size: 19),
-                SizedBox(width: 9),
-                Expanded(
-                  child: Text(
-                    'Öğrenme durumun yalnız Hatırla denemesinde değişir. Okumak ve dinlemek hazırlıktır.',
-                    style: TextStyle(color: _sub, fontSize: 12.5, height: 1.4),
-                  ),
-                ),
-              ],
-            ),
-          ),
+
         ],
       );
     },

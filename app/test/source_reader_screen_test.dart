@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:sesli_ogren/src/app/atelier_learning_surfaces.dart';
 import 'package:sesli_ogren/src/app/source_reader_screen.dart';
 import 'package:sesli_ogren/src/app/living_study_desk_home.dart';
 import 'package:sesli_ogren/src/domain/learning_contracts.dart';
@@ -71,13 +72,15 @@ void main() {
       MaterialApp(
         home: MediaQuery(
           data: const MediaQueryData(textScaler: TextScaler.linear(1.6)),
-          child: SourceReaderScreen(
-            title: 'Dar ekran biyoloji notu',
-            sourceText:
-                'Fotosentez ışık enerjisini kimyasal enerjiye dönüştürmeye yardım eder. '
-                'Kaynak açıkken kanıt görülebilir.',
-            onListen: () => listened++,
-            onRecall: () => recalled++,
+          child: LivingDeskReviewScope(
+            child: SourceReaderScreen(
+              title: 'Dar ekran biyoloji notu',
+              sourceText:
+                  'Fotosentez ışık enerjisini kimyasal enerjiye dönüştürmeye yardım eder. '
+                  'Kaynak açıkken kanıt görülebilir.',
+              onListen: () => listened++,
+              onRecall: () => recalled++,
+            ),
           ),
         ),
       ),
@@ -85,6 +88,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byKey(const ValueKey('reader-learning-actions-stacked')), findsOneWidget);
+    expect(find.byType(AtelierLearningRail), findsNothing);
     expect(find.text('Kaynağı kapat ve hatırla'), findsOneWidget);
     expect(find.text('Dinleyerek hazırlan'), findsOneWidget);
     expect(tester.takeException(), isNull);
