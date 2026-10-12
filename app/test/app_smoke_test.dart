@@ -99,6 +99,29 @@ class _FailingAccountDeletionGateway implements AccountDeletionGateway {
   }
 }
 
+class _LocalCleanupFailingRuntime extends AppRuntime {
+  _LocalCleanupFailingRuntime({
+    required super.learner,
+    required super.store,
+    required super.ingest,
+    required super.recall,
+    required super.telemetry,
+    required super.accountOverview,
+    required super.accountDeletion,
+  });
+
+  @override
+  Future<void> deleteAccount() async {
+    await accountDeletion.deleteAccount(learner: learner);
+    throw AccountDeletionLocalCleanupException(StateError('simulated local cleanup failure'));
+  }
+
+  @override
+  Future<void> retryDeletedAccountLocalCleanup() async {
+    throw StateError('simulated retry cleanup failure');
+  }
+}
+
 class _ReadyAccountOverviewGateway implements AccountOverviewGateway {
   const _ReadyAccountOverviewGateway();
 
@@ -850,6 +873,7 @@ void main() {
     await pumpUntilFound(tester, otherPaths);
     await tester.tap(otherPaths);
     await pumpUntilFound(tester, find.byKey(const ValueKey('workspace-other-study-paths-scroll')));
+    await tester.pumpAndSettle();
     final otherPathsScroll = find.byKey(const ValueKey('workspace-other-study-paths-scroll'));
     await scrollUntilFound(tester, find.byKey(const ValueKey('workspace-other-focus')), scrollable: otherPathsScroll);
     await tapVisible(tester, find.byKey(const ValueKey('workspace-other-focus')));
@@ -871,6 +895,7 @@ void main() {
     await pumpUntilFound(tester, otherPathsAfterFocus);
     await tester.tap(otherPathsAfterFocus);
     await pumpUntilFound(tester, find.byKey(const ValueKey('workspace-other-study-paths-scroll')));
+    await tester.pumpAndSettle();
     final explainPathsScroll = find.byKey(const ValueKey('workspace-other-study-paths-scroll'));
     await scrollUntilFound(
       tester,
@@ -1692,11 +1717,10 @@ void main() {
     final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
     addTearDown(() async {
       try {
-        await store.close();
-      } catch (_) {}
+          } catch (_) {}
     });
     final deletion = _RecordingAccountDeletionGateway();
-    final runtime = AppRuntime(
+    final runtime = _LocalCleanupFailingRuntime(
       learner: AppRuntime.localM5LearnerFixture,
       store: store,
       ingest: SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor()),
@@ -1794,6 +1818,7 @@ void main() {
     await pumpUntilFound(tester, otherPaths);
     await tester.tap(otherPaths);
     await pumpUntilFound(tester, find.byKey(const ValueKey('workspace-other-study-paths-scroll')));
+    await tester.pumpAndSettle();
     final explainPathsScroll = find.byKey(const ValueKey('workspace-other-study-paths-scroll'));
     await scrollUntilFound(
       tester,
