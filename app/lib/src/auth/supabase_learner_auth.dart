@@ -73,14 +73,40 @@ class SupabaseLearnerAuth {
   }) async {
     final normalized = _normalizedEmail(email);
     final normalizedToken = token.trim();
-    if (!RegExp(r'^\d{6}
+    if (normalizedToken.length != 6 || int.tryParse(normalizedToken) == null) {
+      throw const LearnerAuthenticationException('Doğrulama kodu 6 haneli olmalı.');
+    }
+    final client = await _clientForConfiguredProject();
+    final before = client.auth.currentUser;
+    if (before == null || !before.isAnonymous) {
+      throw const LearnerAuthenticationException('Misafir oturumu artık aktif değil.');
+    }
+    try {
+      await client.auth.verifyOTP(
+        email: normalized,
+        token: normalizedToken,
+        type: OtpType.emailChange,
+      );
+      final after = client.auth.currentUser;
+      if (after == null || after.id != before.id || after.isAnonymous) {
+        throw const LearnerAuthenticationException(
+          'Hesap kimliği korunarak bağlanamadı. Çıkış yapma veya verileri silme.',
+        );
+      }
+      return AuthenticatedLearner(id: LearnerId(after.id));
+    } on LearnerAuthenticationException {
+      rethrow;
+    } catch (_) {
+      throw const LearnerAuthenticationException('E-posta doğrulanamadı. Kodu kontrol et.');
+    }
+  }
+
+  static Future<void> requestEmailOtp(String email) async {
     final normalized = _normalizedEmail(email);
     final client = await _clientForConfiguredProject();
-    // Signing in with OTP creates/switches identity; it is NOT an upgrade of an
-    // anonymous learner. Never silently strand that learner's source/evidence.
     if (client.auth.currentUser?.isAnonymous == true) {
       throw const LearnerAuthenticationException(
-        'Misafir ilerlemeni korumak için hesap bağlama henüz hazır değil. Bu oturumda öğrenmeye devam edebilirsin.',
+        'Misafir verilerini korumak için önce hesap bağlama akışını kullan.',
       );
     }
     try {
