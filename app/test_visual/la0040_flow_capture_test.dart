@@ -560,10 +560,7 @@ void main() {
     expect(find.text('Önceki kart yanıtı kaydedilmedi. Güncel kaynaktan devam ediyorsun.'), findsOneWidget);
     expect(find.byKey(const ValueKey('flashcards-answer')), findsNothing);
     expect(tester.takeException(), isNull);
-    await expectLater(
-      find.byType(Scaffold),
-      matchesGoldenFile('goldens/la0040_flashcards_source_changed_390x844.png'),
-    );
+    await expectLater(find.byType(Scaffold), matchesGoldenFile('goldens/la0040_flashcards_source_changed_390x844.png'));
   });
 
   testWidgets('LA-0040 Flashcards survives 320px + large type', (tester) async {
@@ -623,10 +620,7 @@ void main() {
     expect(find.byKey(const ValueKey('flashcards-source-evidence')), findsOneWidget);
     expect(find.text('Tekrar gerekli'), findsOneWidget);
     expect(tester.takeException(), isNull);
-    await expectLater(
-      find.byType(Scaffold),
-      matchesGoldenFile('goldens/la0040_flashcards_revealed_320_text150.png'),
-    );
+    await expectLater(find.byType(Scaffold), matchesGoldenFile('goldens/la0040_flashcards_revealed_320_text150.png'));
   });
 
   testWidgets('LA-0040 source-first Listen', (tester) async {

@@ -48,6 +48,10 @@ void main() {
     expect(first.currentCard, isNotNull);
     expect(first.currentCard!.sourceExcerpt, contains(first.currentCard!.back));
     expect(first.currentCard!.front, contains('_____'));
+    expect(
+      first.set.cards.map((card) => card.back).toList(),
+      equals(['Fotosentez', 'Klorofil', 'Karbondioksit', 'Oksijen']),
+    );
 
     final reopened = await service.openCurrentSet(learner: learner, materialId: materialId);
     expect(reopened.set.id, first.set.id);

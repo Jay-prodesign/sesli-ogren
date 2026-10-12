@@ -19,7 +19,7 @@ class FlashcardLearningException implements Exception {
 class FlashcardLearningService {
   const FlashcardLearningService({required this.store, DateTime Function()? now}) : _now = now ?? DateTime.now;
 
-  static const generationVersion = 'flashcards-cloze-v1-source-grounded';
+  static const generationVersion = 'flashcards-cloze-v2-source-lead';
   static const maxCards = 6;
 
   final SqliteSourceStore store;
@@ -113,11 +113,7 @@ class FlashcardLearningService {
     required MaterialId materialId,
   }) async {
     final state = await openCurrentSet(learner: learner, materialId: materialId);
-    final session = await store.resetFlashcardSession(
-      learner: learner,
-      set: state.set,
-      updatedAt: _now().toUtc(),
-    );
+    final session = await store.resetFlashcardSession(learner: learner, set: state.set, updatedAt: _now().toUtc());
     return FlashcardStudyState(set: state.set, reviews: state.reviews, session: session);
   }
 
@@ -191,11 +187,9 @@ class FlashcardLearningService {
       }).toList();
       if (words.isEmpty) continue;
 
-      words.sort((a, b) {
-        final lengthOrder = b.group(0)!.length.compareTo(a.group(0)!.length);
-        if (lengthOrder != 0) return lengthOrder;
-        return a.start.compareTo(b.start);
-      });
+      // Prefer the first meaningful source term in the sentence instead of
+      // an arbitrary longest inflected word. This keeps deterministic local
+      // cloze cards closer to the sentence's subject or leading concept.
       final selected = words.first;
       final answer = selected.group(0)!;
       final normalizedAnswer = answer.toLowerCase().replaceAll('İ', 'i').replaceAll('I', 'ı');

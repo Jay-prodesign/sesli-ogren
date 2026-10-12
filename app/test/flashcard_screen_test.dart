@@ -69,7 +69,10 @@ void main() {
       ),
     );
     await _pumpUntilFound(tester, find.byKey(const ValueKey('flashcards-reveal')));
+    final semantics = tester.ensureSemantics();
+    addTearDown(semantics.dispose);
 
+    expect(find.bySemanticsLabel(RegExp(r'Kart sorusu: .*boşluk')), findsOneWidget);
     expect(find.byKey(const ValueKey('flashcards-answer')), findsNothing);
     expect(find.byKey(const ValueKey('flashcards-remembered')), findsNothing);
     expect(find.byKey(const ValueKey('flashcards-again')), findsNothing);
@@ -78,6 +81,7 @@ void main() {
     await tester.pump();
     expect(find.byKey(const ValueKey('flashcards-answer')), findsOneWidget);
     expect(find.byKey(const ValueKey('flashcards-source-evidence')), findsOneWidget);
+    expect(find.bySemanticsLabel(RegExp(r'Cevap: .*Kaynakta:')), findsOneWidget);
     expect(find.byKey(const ValueKey('flashcards-remembered')), findsOneWidget);
     expect(find.text('Tekrar gerekli'), findsOneWidget);
 

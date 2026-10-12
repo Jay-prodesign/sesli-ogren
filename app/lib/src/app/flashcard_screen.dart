@@ -409,10 +409,7 @@ class _FlashcardStudyView extends StatelessWidget {
               Container(
                 key: const ValueKey('flashcards-recovery-notice'),
                 padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
-                decoration: BoxDecoration(
-                  color: AtelierStyle.attentionSoft,
-                  borderRadius: BorderRadius.circular(14),
-                ),
+                decoration: BoxDecoration(color: AtelierStyle.attentionSoft, borderRadius: BorderRadius.circular(14)),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -474,6 +471,8 @@ class _FlashcardStudyView extends StatelessWidget {
                 minHeight: 4,
                 color: AtelierStyle.pulse,
                 backgroundColor: AtelierStyle.line,
+                semanticsLabel: 'Kart ilerlemesi',
+                semanticsValue: '${completedCount + 1} / $total',
               ),
               const SizedBox(height: 18),
               Container(
@@ -499,23 +498,34 @@ class _FlashcardStudyView extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 10),
-                    Text(
-                      card.front,
-                      style: TextStyle(
-                        color: AtelierStyle.ink,
-                        fontSize: compact ? 20 : 23,
-                        height: 1.38,
-                        fontWeight: FontWeight.w800,
+                    Semantics(
+                      label: 'Kart sorusu: ${card.front.replaceAll('_____', 'boşluk')}',
+                      child: ExcludeSemantics(
+                        child: Text(
+                          card.front,
+                          style: TextStyle(
+                            color: AtelierStyle.ink,
+                            fontSize: compact ? 20 : 23,
+                            height: 1.38,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
                       ),
                     ),
                     const SizedBox(height: 16),
                     AnimatedSwitcher(
                       duration: reducedMotion ? Duration.zero : const Duration(milliseconds: 200),
                       child: revealed
-                          ? Column(
-                              key: ValueKey('flashcards-answer-${card.id.value}'),
-                              crossAxisAlignment: CrossAxisAlignment.stretch,
-                              children: [
+                          ? Semantics(
+                              liveRegion: true,
+                              label:
+                                  'Cevap: ${card.back}. Kaynakta: ${card.sourceExcerpt}'
+                                  '${card.sourceAnchor.pageNumber == null ? '' : '. Sayfa ${card.sourceAnchor.pageNumber}'}',
+                              child: ExcludeSemantics(
+                                child: Column(
+                                  key: ValueKey('flashcards-answer-${card.id.value}'),
+                                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                                  children: [
                                 const Divider(color: AtelierStyle.line),
                                 const SizedBox(height: 10),
                                 const Text(
@@ -572,7 +582,9 @@ class _FlashcardStudyView extends StatelessWidget {
                                     ],
                                   ),
                                 ),
-                              ],
+                                  ],
+                                ),
+                              ),
                             )
                           : const Text(
                               'Cevabı görmeden önce boşluğu zihninden tamamla.',
@@ -592,10 +604,7 @@ class _FlashcardStudyView extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      Text(
-                        inlineError!,
-                        style: const TextStyle(color: AtelierStyle.ink, fontSize: 12.5, height: 1.4),
-                      ),
+                      Text(inlineError!, style: const TextStyle(color: AtelierStyle.ink, fontSize: 12.5, height: 1.4)),
                       const SizedBox(height: 6),
                       Align(
                         alignment: Alignment.centerLeft,
