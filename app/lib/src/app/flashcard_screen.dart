@@ -341,7 +341,7 @@ class _FlashcardStudyView extends StatelessWidget {
                                   key: const ValueKey('flashcards-again'),
                                   onPressed: busy ? null : onAgain,
                                   icon: const Icon(Icons.refresh_rounded),
-                                  label: const Text('Tekrar çalış'),
+                                  label: const Text('Tekrar gerekli'),
                                 ),
                               ],
                             )
@@ -352,7 +352,7 @@ class _FlashcardStudyView extends StatelessWidget {
                                     key: const ValueKey('flashcards-again'),
                                     onPressed: busy ? null : onAgain,
                                     icon: const Icon(Icons.refresh_rounded),
-                                    label: const Text('Tekrar çalış'),
+                                    label: const Text('Tekrar gerekli'),
                                   ),
                                 ),
                                 const SizedBox(width: 10),

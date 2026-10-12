@@ -79,6 +79,7 @@ void main() {
     expect(find.byKey(const ValueKey('flashcards-answer')), findsOneWidget);
     expect(find.byKey(const ValueKey('flashcards-source-evidence')), findsOneWidget);
     expect(find.byKey(const ValueKey('flashcards-remembered')), findsOneWidget);
+    expect(find.text('Tekrar gerekli'), findsOneWidget);
 
     await tester.tap(find.byKey(const ValueKey('flashcards-remembered')));
     await _pumpUntilFound(tester, find.text('KART 2 / 3'));
