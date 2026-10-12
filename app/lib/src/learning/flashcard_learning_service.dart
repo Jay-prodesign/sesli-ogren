@@ -2,7 +2,7 @@ import 'dart:convert';
 
 import 'package:crypto/crypto.dart';
 
-import '../data/sqlite_source_store.dart';
+import '../data/sqlite_sourcestore.dart';
 import '../domain/authenticated_learner.dart';
 import '../domain/flashcard_learning.dart';
 import '../domain/learning_contracts.dart';
@@ -17,25 +17,23 @@ class FlashcardLearningException implements Exception {
 }
 
 class FlashcardLearningService {
-  const FlashcardLearningService({required SqliteSourceStore store, DateTime Function()? now})
-    : _store = store,
-      _now = now ?? DateTime.now;
+  const FlashcardLearningService({required this.store, DateTime Function()? now}) : _now = now ?? DateTime.now;
 
   static const generationVersion = 'flashcards-cloze-v1-source-grounded';
   static const maxCards = 6;
 
-  final SqliteSourceStore _store;
+  final SqliteSourceStore store;
   final DateTime Function() _now;
 
   Future<FlashcardStudyState> openCurrentSet({
     required AuthenticatedLearner learner,
     required MaterialId materialId,
   }) async {
-    final source = await _store.currentSourceVersion(learner: learner, materialId: materialId);
+    final source = await store.currentSourceVersion(learner: learner, materialId: materialId);
     if (source == null) {
       throw const FlashcardLearningException('Kartlar için güncel bir kaynak bulunamadı.');
     }
-    final extracted = await _store.extractedContentForSource(
+    final extracted = await store.extractedContentForSource(
       learner: learner,
       sourceVersionId: source.identity.sourceVersionId,
     );
@@ -43,7 +41,7 @@ class FlashcardLearningService {
       throw const FlashcardLearningException('Güncel kaynak kart üretmek için okunabilir metin içermiyor.');
     }
 
-    var set = await _store.flashcardSet(
+    var set = await store.flashcardSet(
       learner: learner,
       materialId: materialId,
       sourceVersionId: source.identity.sourceVersionId,
@@ -56,8 +54,8 @@ class FlashcardLearningService {
         extracted: extracted,
         createdAt: _now().toUtc(),
       );
-      await _store.saveFlashcardSet(learner: learner, set: candidate);
-      set = await _store.flashcardSet(
+      await store.saveFlashcardSet(learner: learner, set: candidate);
+      set = await store.flashcardSet(
         learner: learner,
         materialId: materialId,
         sourceVersionId: source.identity.sourceVersionId,
@@ -68,8 +66,8 @@ class FlashcardLearningService {
       throw const FlashcardLearningException('Bu kaynak için güvenilir kartlar oluşturulamadı.');
     }
 
-    final reviews = await _store.flashcardReviews(learner: learner, setId: set.id);
-    final session = await _store.flashcardSession(learner: learner, setId: set.id);
+    final reviews = await store.flashcardReviews(learner: learner, setId: set.id);
+    final session = await store.flashcardSession(learner: learner, setId: set.id);
     return FlashcardStudyState(
       set: set,
       reviews: {for (final review in reviews) review.cardId: review},
@@ -96,7 +94,7 @@ class FlashcardLearningService {
     if (current == null || current.id != cardId) {
       throw const FlashcardLearningException('Kart yanıtı aktif kartla eşleşmiyor.');
     }
-    await _store.recordFlashcardResponse(
+    await store.recordFlashcardResponse(
       learner: learner,
       set: state.set,
       card: current,
@@ -111,7 +109,7 @@ class FlashcardLearningService {
     required MaterialId materialId,
   }) async {
     final state = await openCurrentSet(learner: learner, materialId: materialId);
-    await _store.resetFlashcardSession(learner: learner, setId: state.set.id, updatedAt: _now().toUtc());
+    await store.resetFlashcardSession(learner: learner, setId: state.set.id, updatedAt: _now().toUtc());
     return openCurrentSet(learner: learner, materialId: materialId);
   }
 

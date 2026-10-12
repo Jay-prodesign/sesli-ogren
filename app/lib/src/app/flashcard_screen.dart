@@ -462,7 +462,7 @@ class _FlashcardStudyView extends StatelessWidget {
                     ),
                     const SizedBox(height: 10),
                     Text(
-                      card!.front,
+                      card.front,
                       style: TextStyle(
                         color: AtelierStyle.ink,
                         fontSize: compact ? 20 : 23,
@@ -475,7 +475,7 @@ class _FlashcardStudyView extends StatelessWidget {
                       duration: reducedMotion ? Duration.zero : const Duration(milliseconds: 200),
                       child: revealed
                           ? Column(
-                              key: ValueKey('flashcards-answer-${card!.id.value}'),
+                              key: ValueKey('flashcards-answer-${card.id.value}'),
                               crossAxisAlignment: CrossAxisAlignment.stretch,
                               children: [
                                 const Divider(color: AtelierStyle.line),
@@ -491,7 +491,7 @@ class _FlashcardStudyView extends StatelessWidget {
                                 ),
                                 const SizedBox(height: 7),
                                 Text(
-                                  card!.back,
+                                  card.back,
                                   key: const ValueKey('flashcards-answer'),
                                   style: TextStyle(
                                     color: AtelierStyle.ink,
@@ -521,13 +521,13 @@ class _FlashcardStudyView extends StatelessWidget {
                                       ),
                                       const SizedBox(height: 5),
                                       Text(
-                                        card!.sourceExcerpt,
+                                        card.sourceExcerpt,
                                         style: const TextStyle(color: AtelierStyle.ink, fontSize: 13, height: 1.4),
                                       ),
-                                      if (card!.sourceAnchor.pageNumber != null) ...[
+                                      if (card.sourceAnchor.pageNumber != null) ...[
                                         const SizedBox(height: 6),
                                         Text(
-                                          'Sayfa ${card!.sourceAnchor.pageNumber}',
+                                          'Sayfa ${card.sourceAnchor.pageNumber}',
                                           style: const TextStyle(color: AtelierStyle.muted, fontSize: 11.5),
                                         ),
                                       ],
