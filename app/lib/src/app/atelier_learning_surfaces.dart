@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../domain/learning_contracts.dart';
 import '../domain/learning_truth.dart';
@@ -245,11 +246,29 @@ class AtelierWorkspace extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final compactSurface = MediaQuery.sizeOf(context).width < 340 || MediaQuery.textScalerOf(context).scale(1) > 1.25;
+    final media = MediaQuery.of(context);
+    final compactSurface = media.size.width < 340 || media.textScaler.scale(1) > 1.25;
+    final motionDuration = media.disableAnimations ? Duration.zero : const Duration(milliseconds: 220);
+    final activeStepKey = continuation?.nextAction.kind.name ?? 'first-recall';
     final primaryAction = switch (continuation?.nextAction.kind) {
       NextLearningActionKind.reviewSourceThenRecall || NextLearningActionKind.repeatRecallLater => onReadSource,
       NextLearningActionKind.retryRecallWithoutHint || null => onRecall,
     };
+
+    void runPrimaryAction() {
+      if (!media.disableAnimations) {
+        HapticFeedback.selectionClick();
+      }
+      primaryAction();
+    }
+
+    void runListenAction() {
+      if (!media.disableAnimations) {
+        HapticFeedback.selectionClick();
+      }
+      onListen();
+    }
+
     return ColoredBox(
       key: const ValueKey('la0040-atelier-workspace'),
       color: AtelierStyle.canvas,
@@ -290,16 +309,12 @@ class AtelierWorkspace extends StatelessWidget {
                     spacing: 8,
                     runSpacing: 8,
                     children: [
-                      OutlinedButton.icon(
+                      TextButton.icon(
                         key: const ValueKey('la0040-atelier-workspace-reader'),
                         onPressed: onReadSource,
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: AtelierStyle.teal,
-                          backgroundColor: AtelierStyle.paper,
-                          side: const BorderSide(color: AtelierStyle.line),
-                        ),
+                        style: TextButton.styleFrom(foregroundColor: AtelierStyle.teal),
                         icon: const Icon(Icons.menu_book_outlined),
-                        label: const Text('Tam metni oku'),
+                        label: const Text('Tam kaynağı aç'),
                       ),
                       TextButton.icon(
                         key: const ValueKey('la0040-atelier-workspace-update-source'),
@@ -340,14 +355,40 @@ class AtelierWorkspace extends StatelessWidget {
                           ],
                         ),
                         const SizedBox(height: 6),
-                        Text(
-                          _activeStepTitle,
-                          style: const TextStyle(color: AtelierStyle.ink, fontWeight: FontWeight.w900, fontSize: 16),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          _activeStepReason,
-                          style: const TextStyle(color: AtelierStyle.muted, fontSize: 12.5, height: 1.4),
+                        AnimatedSwitcher(
+                          key: const ValueKey('workspace-active-step-motion-compact'),
+                          duration: motionDuration,
+                          switchInCurve: Curves.easeOutCubic,
+                          switchOutCurve: Curves.easeInCubic,
+                          transitionBuilder: (child, animation) => FadeTransition(
+                            opacity: animation,
+                            child: SlideTransition(
+                              position: Tween<Offset>(
+                                begin: const Offset(0, 0.04),
+                                end: Offset.zero,
+                              ).animate(animation),
+                              child: child,
+                            ),
+                          ),
+                          child: Column(
+                            key: ValueKey('workspace-active-step-$activeStepKey'),
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                _activeStepTitle,
+                                style: const TextStyle(
+                                  color: AtelierStyle.ink,
+                                  fontWeight: FontWeight.w900,
+                                  fontSize: 16,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                _activeStepReason,
+                                style: const TextStyle(color: AtelierStyle.muted, fontSize: 12.5, height: 1.4),
+                              ),
+                            ],
+                          ),
                         ),
                         const SizedBox(height: 9),
                         Wrap(
@@ -356,14 +397,14 @@ class AtelierWorkspace extends StatelessWidget {
                           children: [
                             OutlinedButton.icon(
                               key: const ValueKey('la0040-atelier-workspace-listen'),
-                              onPressed: onListen,
+                              onPressed: runListenAction,
                               icon: const Icon(Icons.headphones_rounded),
-                              label: const Text('Dinle'),
+                              label: const Text('Dinleyerek hazırlan'),
                             ),
                             TextButton.icon(
                               onPressed: () => _showOtherStudyPaths(context),
                               icon: const Icon(Icons.more_horiz_rounded),
-                              label: const Text('Diğer yollar'),
+                              label: const Text('Diğer çalışma yolları'),
                             ),
                           ],
                         ),
@@ -436,7 +477,7 @@ class AtelierWorkspace extends StatelessWidget {
             child: compactSurface
                 ? FilledButton.icon(
                     key: const ValueKey('la0040-atelier-workspace-recall'),
-                    onPressed: primaryAction,
+                    onPressed: runPrimaryAction,
                     style: FilledButton.styleFrom(
                       backgroundColor: AtelierStyle.pulse,
                       foregroundColor: Colors.white,
@@ -465,19 +506,45 @@ class AtelierWorkspace extends StatelessWidget {
                         ],
                       ),
                       const SizedBox(height: 6),
-                      Text(
-                        _activeStepTitle,
-                        style: const TextStyle(color: AtelierStyle.ink, fontWeight: FontWeight.w900, fontSize: 17),
-                      ),
-                      const SizedBox(height: 3),
-                      Text(
-                        _activeStepReason,
-                        style: const TextStyle(color: AtelierStyle.muted, fontSize: 12, height: 1.3),
+                      AnimatedSwitcher(
+                        key: const ValueKey('workspace-active-step-motion'),
+                        duration: motionDuration,
+                        switchInCurve: Curves.easeOutCubic,
+                        switchOutCurve: Curves.easeInCubic,
+                        transitionBuilder: (child, animation) => FadeTransition(
+                          opacity: animation,
+                          child: SlideTransition(
+                            position: Tween<Offset>(
+                              begin: const Offset(0, 0.035),
+                              end: Offset.zero,
+                            ).animate(animation),
+                            child: child,
+                          ),
+                        ),
+                        child: Column(
+                          key: ValueKey('workspace-active-step-footer-$activeStepKey'),
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              _activeStepTitle,
+                              style: const TextStyle(
+                                color: AtelierStyle.ink,
+                                fontWeight: FontWeight.w900,
+                                fontSize: 17,
+                              ),
+                            ),
+                            const SizedBox(height: 3),
+                            Text(
+                              _activeStepReason,
+                              style: const TextStyle(color: AtelierStyle.muted, fontSize: 12, height: 1.3),
+                            ),
+                          ],
+                        ),
                       ),
                       const SizedBox(height: 10),
                       FilledButton.icon(
                         key: const ValueKey('la0040-atelier-workspace-recall'),
-                        onPressed: primaryAction,
+                        onPressed: runPrimaryAction,
                         style: FilledButton.styleFrom(
                           backgroundColor: AtelierStyle.pulse,
                           foregroundColor: Colors.white,
@@ -493,9 +560,9 @@ class AtelierWorkspace extends StatelessWidget {
                               constraints.maxWidth < 340 || MediaQuery.textScalerOf(context).scale(1) > 1.2;
                           final listen = OutlinedButton.icon(
                             key: const ValueKey('la0040-atelier-workspace-listen'),
-                            onPressed: onListen,
+                            onPressed: runListenAction,
                             icon: const Icon(Icons.headphones_rounded),
-                            label: const Text('Dinle'),
+                            label: const Text('Dinleyerek hazırlan'),
                             style: OutlinedButton.styleFrom(
                               foregroundColor: AtelierStyle.aqua,
                               side: const BorderSide(color: AtelierStyle.aqua),
@@ -505,7 +572,7 @@ class AtelierWorkspace extends StatelessWidget {
                             onPressed: () => _showOtherStudyPaths(context),
                             style: TextButton.styleFrom(foregroundColor: AtelierStyle.pulse),
                             icon: const Icon(Icons.more_horiz_rounded),
-                            label: const Text('Diğer yollar'),
+                            label: const Text('Diğer çalışma yolları'),
                           );
                           if (compactActions) {
                             return Column(
