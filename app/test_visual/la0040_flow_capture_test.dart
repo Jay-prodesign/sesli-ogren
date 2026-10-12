@@ -476,7 +476,25 @@ void main() {
     await tester.tap(find.byKey(const ValueKey('flashcards-reveal')));
     await tester.pump(const Duration(milliseconds: 250));
     expect(find.byKey(const ValueKey('flashcards-source-evidence')), findsOneWidget);
+    expect(find.text('Tekrar gerekli'), findsOneWidget);
     await expectLater(find.byType(Scaffold), matchesGoldenFile('goldens/la0040_flashcards_revealed_390x844.png'));
+
+    for (final expected in ['KART 2 / 3', 'KART 3 / 3']) {
+      await tester.tap(find.byKey(const ValueKey('flashcards-remembered')));
+      for (var i = 0; i < 50 && find.text(expected).evaluate().isEmpty; i++) {
+        await tester.pump(const Duration(milliseconds: 30));
+      }
+      expect(find.text(expected), findsOneWidget);
+      await tester.tap(find.byKey(const ValueKey('flashcards-reveal')));
+      await tester.pump(const Duration(milliseconds: 180));
+    }
+    await tester.tap(find.byKey(const ValueKey('flashcards-remembered')));
+    for (var i = 0; i < 50 && find.byKey(const ValueKey('flashcards-complete')).evaluate().isEmpty; i++) {
+      await tester.pump(const Duration(milliseconds: 30));
+    }
+    expect(find.byKey(const ValueKey('flashcards-complete')), findsOneWidget);
+    expect(find.textContaining('ustalık veya kalıcı öğrenme iddiası değildir'), findsOneWidget);
+    await expectLater(find.byType(Scaffold), matchesGoldenFile('goldens/la0040_flashcards_complete_390x844.png'));
   });
 
   testWidgets('LA-0040 Flashcards survives 320px + large type', (tester) async {
@@ -524,6 +542,22 @@ void main() {
     expect(find.byKey(const ValueKey('flashcards-reveal')), findsOneWidget);
     expect(tester.takeException(), isNull);
     await expectLater(find.byType(Scaffold), matchesGoldenFile('goldens/la0040_flashcards_320_text150.png'));
+
+    await tester.tap(find.byKey(const ValueKey('flashcards-reveal')));
+    await tester.pump(const Duration(milliseconds: 220));
+    await tester.scrollUntilVisible(
+      find.byKey(const ValueKey('flashcards-source-evidence')),
+      160,
+      scrollable: find.byType(Scrollable).last,
+    );
+    await tester.pump();
+    expect(find.byKey(const ValueKey('flashcards-source-evidence')), findsOneWidget);
+    expect(find.text('Tekrar gerekli'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+    await expectLater(
+      find.byType(Scaffold),
+      matchesGoldenFile('goldens/la0040_flashcards_revealed_320_text150.png'),
+    );
   });
 
   testWidgets('LA-0040 source-first Listen', (tester) async {
