@@ -14,11 +14,19 @@ import 'product_shell_screen.dart';
 import 'living_study_desk_home.dart';
 
 class SesliOgrenApp extends StatefulWidget {
-  const SesliOgrenApp({this.restoreSession, this.openRuntime, this.signOutSession, super.key});
+  const SesliOgrenApp({
+    this.restoreSession,
+    this.openRuntime,
+    this.openLocalRuntime,
+    this.signOutSession,
+    super.key,
+  });
 
-  /// Test/review seams only. Production uses real Supabase restore, sign-out and AppRuntime.open.
+  /// Test/review seams only. Production restores Supabase when available and
+  /// otherwise opens the truthful device-local learning runtime.
   final Future<AuthenticatedLearner?> Function()? restoreSession;
   final Future<AppRuntime> Function(AuthenticatedLearner learner)? openRuntime;
+  final Future<AppRuntime> Function()? openLocalRuntime;
   final Future<void> Function()? signOutSession;
 
   @override
@@ -30,6 +38,7 @@ class _SesliOgrenAppState extends State<SesliOgrenApp> {
   AppRuntime? _runtime;
   bool _accountDeleted = false;
   bool _showAccountEntry = false;
+  bool _openingAuthenticated = false;
 
   @override
   void initState() {
@@ -39,11 +48,29 @@ class _SesliOgrenAppState extends State<SesliOgrenApp> {
 
   void _openRuntime() {
     _showAccountEntry = false;
+    _openingAuthenticated = false;
+    _runtimeFuture = _restoreOrOpenLocal();
+  }
+
+  Future<AppRuntime> _restoreOrOpenLocal() async {
     final restoreSession = widget.restoreSession ?? SupabaseLearnerAuth.restoreSession;
-    _runtimeFuture = restoreSession().then((learner) async {
-      if (learner == null) return null;
-      return _openRuntimeForLearner(learner);
-    });
+    AuthenticatedLearner? learner;
+    try {
+      learner = await restoreSession();
+    } catch (_) {
+      // Optional account restore must never gate device-local learning.
+      return _openLocalRuntime();
+    }
+    if (learner == null) return _openLocalRuntime();
+    _openingAuthenticated = true;
+    return _openRuntimeForLearner(learner);
+  }
+
+  Future<AppRuntime> _openLocalRuntime() async {
+    _openingAuthenticated = false;
+    final runtime = await (widget.openLocalRuntime?.call() ?? AppRuntime.openLocal());
+    _runtime = runtime;
+    return runtime;
   }
 
   Future<AppRuntime> _openRuntimeForLearner(AuthenticatedLearner learner) async {
@@ -54,12 +81,23 @@ class _SesliOgrenAppState extends State<SesliOgrenApp> {
 
   Future<void> _handleAuthenticated(AuthenticatedLearner learner) async {
     if (!mounted) return;
+    final previousRuntime = _runtime;
+    _runtime = null;
     setState(() {
-      // Authentication has succeeded. Runtime opening is a separate product phase:
-      // its loading/error state belongs to the app shell, not to OTP validation.
+      // Authentication is optional. Once chosen, the account runtime becomes a
+      // separate namespace; device-local work remains intact for local mode.
       _showAccountEntry = false;
+      _openingAuthenticated = true;
       _runtimeFuture = _openRuntimeForLearner(learner);
     });
+    if (previousRuntime != null) {
+      try {
+        await previousRuntime.close();
+      } catch (_) {
+        // Switching namespaces must not fail because an old local handle could
+        // not be closed cleanly.
+      }
+    }
   }
 
   @override
@@ -99,22 +137,23 @@ class _SesliOgrenAppState extends State<SesliOgrenApp> {
   Future<void> _handleSignOut() async {
     await _signOutSession();
 
-    // Session sign-out is the authority boundary. Once it succeeds, never keep
-    // rendering an authenticated product merely because local runtime cleanup
-    // failed afterward.
+    // Session sign-out is the authority boundary. Successful sign-out returns
+    // to device-local learning instead of imposing another account gate.
     final runtime = _runtime;
     _runtime = null;
     if (mounted) {
       setState(() {
         _accountDeleted = false;
-        _showAccountEntry = true;
+        _showAccountEntry = false;
+        _openingAuthenticated = false;
+        _runtimeFuture = _openLocalRuntime();
       });
     }
     if (runtime != null) {
       try {
         await runtime.close();
       } catch (_) {
-        // Local handle cleanup is best-effort after the session is already gone.
+        // The signed-out session stays closed even if handle cleanup fails.
       }
     }
   }
@@ -140,9 +179,25 @@ class _SesliOgrenAppState extends State<SesliOgrenApp> {
   }
 
   void _startFresh() {
+    _runtime = null;
     setState(() {
       _accountDeleted = false;
-      _showAccountEntry = true;
+      _showAccountEntry = false;
+      _openingAuthenticated = false;
+      _runtimeFuture = _openLocalRuntime();
+    });
+  }
+
+  void _openAccountEntry() {
+    setState(() => _showAccountEntry = true);
+  }
+
+  void _continueWithoutAccount() {
+    setState(() {
+      _showAccountEntry = false;
+      if (_runtime == null) {
+        _runtimeFuture = _openLocalRuntime();
+      }
     });
   }
 
@@ -155,21 +210,22 @@ class _SesliOgrenAppState extends State<SesliOgrenApp> {
       home: _accountDeleted
           ? _AccountDeletedScreen(onStartFresh: _startFresh)
           : _showAccountEntry
-          ? AccountEntryScreen(onAuthenticated: _handleAuthenticated)
+          ? AccountEntryScreen(
+              onAuthenticated: _handleAuthenticated,
+              onContinueWithoutAccount: _continueWithoutAccount,
+            )
           : FutureBuilder<AppRuntime?>(
               future: _runtimeFuture,
               builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.done && !snapshot.hasError && snapshot.data == null) {
-                  return AccountEntryScreen(onAuthenticated: _handleAuthenticated);
-                }
                 if (snapshot.hasData) {
                   final runtime = snapshot.data!;
                   return FirstRunOnboardingGate(
                     child: LivingDeskReviewScope(
                       child: ProductShellScreen(
                         runtime: runtime,
-                        onAccountDeleted: _handleAccountDeleted,
-                        onSignOut: _handleSignOut,
+                        onAccountDeleted: runtime.learner.isAuthenticated ? _handleAccountDeleted : null,
+                        onSignOut: runtime.learner.isAuthenticated ? _handleSignOut : null,
+                        onConnectAccount: runtime.learner.isLocal ? _openAccountEntry : null,
                       ),
                     ),
                   );
@@ -178,9 +234,7 @@ class _SesliOgrenAppState extends State<SesliOgrenApp> {
                   return _RuntimeErrorScreen(
                     error: snapshot.error!,
                     onRetry: _retryRuntime,
-                    onUseAnotherAccount: snapshot.error is LearnerAuthConfigurationException
-                        ? null
-                        : _returnToAccountEntryAfterRuntimeFailure,
+                    onUseAnotherAccount: _openingAuthenticated ? _returnToAccountEntryAfterRuntimeFailure : null,
                   );
                 }
                 return const _RuntimeLoadingScreen();
