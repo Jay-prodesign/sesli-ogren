@@ -533,7 +533,15 @@ void main() {
 
     final switchAccount = find.widgetWithText(TextButton, 'Başka hesapla giriş yap');
     expect(switchAccount, findsOneWidget);
-    await pumpUntilFound(tester, switchAccount.hitTestable());
+    await tester.scrollUntilVisible(
+      switchAccount,
+      160,
+      scrollable: find.descendant(
+        of: find.byKey(const ValueKey('runtime-error-scroll')),
+        matching: find.byType(Scrollable),
+      ),
+    );
+    await tester.pump();
     await tester.tap(switchAccount.hitTestable());
     await pumpUntilFound(tester, find.byType(AccountEntryScreen));
 
@@ -691,7 +699,7 @@ void main() {
         home: LivingDeskReviewScope(child: LearningSliceScreen(runtime: runtime)),
       ),
     );
-    final learningScroll = find.descendant(of: find.byType(LearningSliceScreen), matching: find.byType(Scrollable));
+    final learningScroll = find.byKey(const ValueKey('learning-slice-scroll'));
     await pumpUntilGone(tester, find.byKey(const ValueKey('loading')));
     await scrollUntilFound(tester, find.byKey(const ValueKey('recall')), scrollable: learningScroll);
     await scrollUntilFound(tester, find.text('Bilmiyorum'), scrollable: learningScroll);
@@ -849,7 +857,12 @@ void main() {
     final otherPaths = find.widgetWithText(TextButton, 'Diğer yollar').hitTestable();
     await pumpUntilFound(tester, otherPaths);
     await tester.tap(otherPaths);
-    await pumpUntilFound(tester, find.byKey(const ValueKey('workspace-other-study-paths-scroll')));
+    final studyPathsScroll = find.descendant(
+      of: find.byKey(const ValueKey('workspace-other-study-paths-scroll')),
+      matching: find.byType(Scrollable),
+    );
+    await pumpUntilFound(tester, studyPathsScroll);
+    await scrollUntilFound(tester, find.text('Odaklan'), scrollable: studyPathsScroll);
     await tapVisible(tester, find.text('Odaklan'));
     await pumpUntilFound(tester, find.text('KISA ODAK · 3 ADIM'));
     expect(find.byKey(const ValueKey('focus-source-trust')), findsOneWidget);
@@ -868,7 +881,12 @@ void main() {
     final otherPathsAfterFocus = find.widgetWithText(TextButton, 'Diğer yollar').hitTestable();
     await pumpUntilFound(tester, otherPathsAfterFocus);
     await tester.tap(otherPathsAfterFocus);
-    await pumpUntilFound(tester, find.byKey(const ValueKey('workspace-other-study-paths-scroll')));
+    final explainPathsScroll = find.descendant(
+      of: find.byKey(const ValueKey('workspace-other-study-paths-scroll')),
+      matching: find.byType(Scrollable),
+    );
+    await pumpUntilFound(tester, explainPathsScroll);
+    await scrollUntilFound(tester, find.text('Kendi cümlelerimle anlat'), scrollable: explainPathsScroll);
     await tapVisible(tester, find.text('Kendi cümlelerimle anlat'));
     await pumpUntilFound(tester, find.text('Anlatımımı değerlendir'));
 
@@ -1357,7 +1375,11 @@ void main() {
       of: find.byKey(const ValueKey('profile-surface')),
       matching: find.byType(Scrollable),
     );
-    await scrollUntilFound(tester, find.text('Cihazın Türkçe sesi'), scrollable: profileScroll);
+    await scrollUntilFound(
+      tester,
+      find.text('Türkçe ses · cihaz desteği dinlerken doğrulanır'),
+      scrollable: profileScroll,
+    );
     await scrollUntilFound(
       tester,
       find.textContaining('Hesap silme tüm hesap ve öğrenme verilerini kapsar'),
@@ -2063,7 +2085,7 @@ void main() {
     );
     await pumpUntilFound(tester, find.text('Materyali güncelle'));
     await tapVisible(tester, find.text('Materyali güncelle'));
-    final editorScroll = find.descendant(of: find.byType(LearningSliceScreen), matching: find.byType(Scrollable));
+    final editorScroll = find.byKey(const ValueKey('learning-slice-scroll'));
     await scrollUntilFound(tester, find.text('Metin yapıştır'), scrollable: editorScroll, delta: 180);
     await tapVisible(tester, find.text('Metin yapıştır'));
     await tester.enterText(
@@ -2139,7 +2161,7 @@ void main() {
       'Fotosentez ve ışık. Klorofil, ışık enerjisinin yakalanmasına yardım eder.',
     );
     await tapVisible(tester, find.text('Metni ekle · çalışma alanını aç'));
-    final sourceFlowScroll = find.descendant(of: find.byType(LearningSliceScreen), matching: find.byType(Scrollable));
+    final sourceFlowScroll = find.byKey(const ValueKey('learning-slice-scroll'));
     await pumpUntilGone(tester, find.byKey(const ValueKey('source')));
     await scrollUntilFound(tester, find.byKey(const ValueKey('recall')), scrollable: sourceFlowScroll, delta: 180);
 

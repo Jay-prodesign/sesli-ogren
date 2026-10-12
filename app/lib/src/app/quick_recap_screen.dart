@@ -889,11 +889,9 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> with WidgetsBinding
               ),
             ),
             const SizedBox(height: 8),
-            Wrap(
+            Column(
               key: const ValueKey('quick-recap-utility-actions'),
-              spacing: 8,
-              runSpacing: 8,
-              crossAxisAlignment: WrapCrossAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 OutlinedButton.icon(
                   style: outlineStyle,
@@ -929,6 +927,7 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> with WidgetsBinding
                   icon: const Icon(Icons.headphones_rounded),
                   label: const Text('Özeti dinle'),
                 ),
+                const SizedBox(height: 8),
                 PopupMenuButton<String>(
                   tooltip: 'Diğer özet araçları',
                   onSelected: (action) {

@@ -826,6 +826,7 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 620),
               child: ListView(
+                key: const ValueKey('learning-slice-scroll'),
                 padding: EdgeInsets.fromLTRB(24, reviewFocus ? 16 : 28, 24, showStickyResultAction ? 24 : 40),
                 children: [
                   if (reviewFocus) ...[
