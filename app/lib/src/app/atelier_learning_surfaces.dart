@@ -355,7 +355,7 @@ class AtelierWorkspace extends StatelessWidget {
               ListTile(
                 leading: const Icon(Icons.center_focus_strong),
                 title: const Text('Takıldığım noktayı netleştir'),
-                subtitle: const Text('Bu kaynağın belirli bir bölümüne odaklan; bu da tek başına mastery kanıtı değildir.'),
+                subtitle: const Text('Bu kaynağın belirli bir bölümüne odaklan; bu da tek başına öğrenme kanıtı değildir.'),
                 onTap: () {
                   Navigator.of(sheetContext).pop();
                   onFocus();
