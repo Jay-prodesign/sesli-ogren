@@ -284,7 +284,7 @@ class LivingStudyDeskHome extends StatelessWidget {
         Text(
           compactFirstViewport
               ? 'Kaynağın ve sıradaki adımın hazır.'
-              : 'Kaynağın, son denemen ve sıradaki adım tek yerde.',
+              : 'Kaynağın hazır. Sıradaki adımın belli.',
           style: TextStyle(color: _sub, fontSize: compactFirstViewport ? 13 : 15, height: 1.4),
         ),
         SizedBox(height: compactFirstViewport ? 10 : 17),
@@ -339,7 +339,7 @@ class LivingStudyDeskHome extends StatelessWidget {
                         const SizedBox(height: 5),
                         Text(
                           _preview,
-                          maxLines: compactFirstViewport ? 1 : 2,
+                          maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(fontSize: compactFirstViewport ? 11.5 : 13, color: _sub, height: 1.4),
                         ),
@@ -363,7 +363,7 @@ class LivingStudyDeskHome extends StatelessWidget {
                   children: [
                     Row(
                       children: [
-                        CompanionView(state: companionState, size: 42),
+                        CompanionView(state: companionState, size: 80),
                         const SizedBox(width: 8),
                         Expanded(
                           child: Text(
@@ -385,7 +385,7 @@ class LivingStudyDeskHome extends StatelessWidget {
               : Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    SizedBox(width: 62, child: CompanionView(state: companionState, size: 60)),
+                    SizedBox(width: 126, child: CompanionView(state: companionState, size: 120)),
                     const SizedBox(width: 9),
                     Expanded(
                       child: Column(
@@ -539,14 +539,14 @@ class LivingStudyDeskHome extends StatelessWidget {
     builder: (context, constraints) {
       final compact = constraints.maxWidth < 340 || MediaQuery.textScalerOf(context).scale(1) > 1.25;
       final companion = Container(
-        width: compact ? 58 : 84,
-        height: compact ? 58 : 84,
+        width: compact ? 116 : 150,
+        height: compact ? 116 : 150,
         decoration: BoxDecoration(
           color: AppPalette.primarySoft,
           borderRadius: BorderRadius.circular(compact ? 16 : 20),
         ),
         child: Center(
-          child: CompanionView(state: CompanionVisualState.idle, size: compact ? 52 : 74),
+          child: CompanionView(state: CompanionVisualState.idle, size: compact ? 108 : 142),
         ),
       );
       final promise = Column(
@@ -558,7 +558,7 @@ class LivingStudyDeskHome extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            'Bir sayfa getir.\nBirlikte çalışalım.',
+            'Birlikte\nöğrenelim.',
             style: TextStyle(
               color: _ink,
               fontSize: compact ? 25 : 32,
@@ -569,7 +569,7 @@ class LivingStudyDeskHome extends StatelessWidget {
           ),
           const SizedBox(height: 10),
           const Text(
-            'PDF ya da metin. Sonra kaynağı kapatıp neyi gerçekten hatırladığını gör.',
+            'Kaynağını ekle. Oku, dinle, hatırla.',
             style: TextStyle(color: _sub, fontSize: 14, height: 1.45),
           ),
         ],
