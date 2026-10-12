@@ -5,6 +5,14 @@ import 'package:sesli_ogren/src/app/atelier_learning_surfaces.dart';
 import 'package:sesli_ogren/src/domain/learning_contracts.dart';
 import 'package:sesli_ogren/src/domain/learning_truth.dart';
 
+Future<void> _pumpUntilGone(WidgetTester tester, Finder finder, {int maxPumps = 80}) async {
+  for (var i = 0; i < maxPumps; i++) {
+    await tester.pump(const Duration(milliseconds: 20));
+    if (finder.evaluate().isEmpty) return;
+  }
+  fail('Expected modal route to close within bounded pumps.');
+}
+
 void main() {
   final now = DateTime.utc(2026, 10, 12, 8);
   const materialId = MaterialId('workspace-action-material');
@@ -133,9 +141,8 @@ void main() {
     await tester.pump(const Duration(milliseconds: 200));
     expect(flashcardAction.hitTestable(), findsOneWidget);
     await tester.tap(flashcardAction.hitTestable());
-    await tester.pump(const Duration(milliseconds: 400));
     expect(flashcards, 1);
-    expect(find.byKey(const ValueKey('workspace-other-study-paths-scroll')), findsNothing);
+    await _pumpUntilGone(tester, find.byKey(const ValueKey('workspace-other-study-paths-scroll')));
 
     final reopenPaths = find.byKey(const ValueKey('workspace-other-study-paths')).hitTestable();
     expect(reopenPaths, findsOneWidget);
