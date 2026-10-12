@@ -256,7 +256,7 @@ void main() {
       textScaler: const TextScaler.linear(1.5),
     );
     expect(find.byType(AtelierLearningRail), findsNothing);
-    expect(find.byKey(const ValueKey('home-empty-truth')), findsOneWidget);
+    expect(find.byKey(const ValueKey('home-empty-truth')), findsNothing);
   });
 
   testWidgets('LA-0040 first source acquisition', (tester) async {

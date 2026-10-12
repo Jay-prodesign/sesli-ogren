@@ -31,7 +31,7 @@ class FirstValueIntentSurface extends StatelessWidget {
 
   String get _recommendationTitle => 'Önce kaynağı bir kez gör.';
 
-  String get _recommendationReason => 'Önce bütünü gör. Sonra kaynağı kapatıp ne kaldığını sınarsın.';
+  String get _recommendationReason => 'Sonra kaynağı kapatıp ne kaldığını sınarsın.';
 
   VoidCallback get _recommendedAction => onReadSource;
 
