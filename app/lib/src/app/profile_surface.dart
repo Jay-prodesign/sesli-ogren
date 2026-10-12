@@ -141,7 +141,8 @@ class _ProfileSurfaceState extends State<ProfileSurface> {
       builder: (dialogContext) => AlertDialog(
         title: const Text('Hesabı ve verileri sil?'),
         content: const Text(
-          'Sunucudaki hesabın, öğrenme verilerin ve yüklediğin kaynak dosyaları kalıcı olarak silinecek.',
+          'Sunucudaki hesabın ve hesaba bağlı öğrenme verilerin kalıcı olarak silinecek. '
+          'Bu cihazdaki ayrı hesapsız öğrenme alanın silinmez.',
         ),
         actions: [
           TextButton(onPressed: () => Navigator.of(dialogContext).pop(false), child: const Text('Vazgeç')),
@@ -155,7 +156,9 @@ class _ProfileSurfaceState extends State<ProfileSurface> {
       context: context,
       builder: (dialogContext) => AlertDialog(
         title: const Text('Son onay'),
-        content: const Text('Bu işlem geri alınamaz. Hesabını ve verilerini kalıcı olarak silmek istiyor musun?'),
+        content: const Text(
+          'Bu işlem hesap alanı için geri alınamaz. Hesabını ve hesaba bağlı verilerini kalıcı olarak silmek istiyor musun?',
+        ),
         actions: [
           TextButton(onPressed: () => Navigator.of(dialogContext).pop(false), child: const Text('Vazgeç')),
           FilledButton(onPressed: () => Navigator.of(dialogContext).pop(true), child: const Text('Kalıcı olarak sil')),
