@@ -173,7 +173,7 @@ void main() {
     await tapVisible(tester, find.text('Metni ekle · çalışma alanını aç'));
     await pumpUntilFound(tester, find.byKey(const ValueKey('first-value-intent')));
 
-    expect(find.text('Önce kaynağın tamamını bir kez gör.'), findsOneWidget);
+    expect(find.text('Önce kaynağı bir kez gör.'), findsOneWidget);
     expect(find.text('Kaynağı aç'), findsOneWidget);
 
     await tapVisible(tester, find.text('Kaynağı aç'));
