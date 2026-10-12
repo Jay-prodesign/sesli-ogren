@@ -126,6 +126,7 @@ class AtelierWorkspace extends StatelessWidget {
     required this.onListen,
     required this.onGroundedExplain,
     required this.onExplain,
+    this.onFlashcards,
     required this.onFocus,
     super.key,
   });
@@ -141,6 +142,7 @@ class AtelierWorkspace extends StatelessWidget {
   final VoidCallback onListen;
   final VoidCallback onGroundedExplain;
   final VoidCallback onExplain;
+  final VoidCallback? onFlashcards;
   final VoidCallback onFocus;
 
   String get _activeStepTitle {
@@ -383,6 +385,17 @@ class AtelierWorkspace extends StatelessWidget {
                   letterSpacing: 0.9,
                 ),
               ),
+              if (onFlashcards != null)
+                ListTile(
+                  key: const ValueKey('workspace-other-flashcards'),
+                  leading: const Icon(Icons.style_outlined),
+                  title: const Text('Kartlarla çalış'),
+                  subtitle: const Text('Kaynağa bağlı kartları aç, cevabı gör ve kendi kart çalışma yanıtını kaydet.'),
+                  onTap: () {
+                    Navigator.of(sheetContext).pop();
+                    onFlashcards!();
+                  },
+                ),
               ListTile(
                 key: const ValueKey('workspace-other-explain-back'),
                 leading: const Icon(Icons.record_voice_over_outlined),
@@ -462,33 +475,31 @@ class AtelierWorkspace extends StatelessWidget {
                 ],
                 if (continuation != null) ...[const SizedBox(height: 10), _evidenceState(compact: compactSurface)],
                 const SizedBox(height: 17),
-                if (sourceText.trim().isNotEmpty) ...[
-                  if (!compactSurface) ...[
-                    const AtelierLearningRail(phase: AtelierLearningPhase.source),
-                    const SizedBox(height: 12),
-                  ],
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: [
-                      TextButton.icon(
-                        key: const ValueKey('la0040-atelier-workspace-reader'),
-                        onPressed: onReadSource,
-                        style: TextButton.styleFrom(foregroundColor: AtelierStyle.teal),
-                        icon: const Icon(Icons.menu_book_outlined),
-                        label: const Text('Tam kaynağı aç'),
-                      ),
-                      TextButton.icon(
-                        key: const ValueKey('la0040-atelier-workspace-update-source'),
-                        onPressed: onUpdateSource,
-                        style: TextButton.styleFrom(foregroundColor: AtelierStyle.teal),
-                        icon: const Icon(Icons.sync_rounded),
-                        label: const Text('Kaynağı güncelle'),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 4),
+                if (sourceText.trim().isNotEmpty && !compactSurface) ...[
+                  const AtelierLearningRail(phase: AtelierLearningPhase.source),
+                  const SizedBox(height: 12),
                 ],
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    TextButton.icon(
+                      key: const ValueKey('la0040-atelier-workspace-reader'),
+                      onPressed: onReadSource,
+                      style: TextButton.styleFrom(foregroundColor: AtelierStyle.teal),
+                      icon: const Icon(Icons.menu_book_outlined),
+                      label: const Text('Tam kaynağı aç'),
+                    ),
+                    TextButton.icon(
+                      key: const ValueKey('la0040-atelier-workspace-update-source'),
+                      onPressed: onUpdateSource,
+                      style: TextButton.styleFrom(foregroundColor: AtelierStyle.teal),
+                      icon: const Icon(Icons.sync_rounded),
+                      label: const Text('Kaynağı güncelle'),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 4),
                 if (compactSurface) ...[
                   const SizedBox(height: 10),
                   Container(

@@ -41,9 +41,13 @@ void main() {
   Widget frame({
     required bool disableAnimations,
     LearningContinuation? continuation,
+    String sourceText =
+        'Klorofil ışık enerjisinin kimyasal enerjiye dönüşümünde rol alır. '
+        'Bitkiler karbondioksit ve suyu kullanır.',
     required VoidCallback onReadSource,
     required VoidCallback onRecall,
     required VoidCallback onListen,
+    VoidCallback? onFlashcards,
   }) {
     return MaterialApp(
       theme: SesliOgrenTheme.light(),
@@ -52,9 +56,7 @@ void main() {
         child: Scaffold(
           body: AtelierWorkspace(
             material: material(),
-            sourceText:
-                'Klorofil ışık enerjisinin kimyasal enerjiye dönüşümünde rol alır. '
-                'Bitkiler karbondioksit ve suyu kullanır.',
+            sourceText: sourceText,
             sourceVersion: source(),
             continuation: continuation,
             onReadSource: onReadSource,
@@ -64,6 +66,7 @@ void main() {
             onListen: onListen,
             onGroundedExplain: () {},
             onExplain: () {},
+            onFlashcards: onFlashcards,
             onFocus: () {},
           ),
         ),
@@ -75,6 +78,7 @@ void main() {
     var readSource = 0;
     var recall = 0;
     var listen = 0;
+    var flashcards = 0;
 
     await tester.pumpWidget(
       frame(
@@ -82,6 +86,7 @@ void main() {
         onReadSource: () => readSource += 1,
         onRecall: () => recall += 1,
         onListen: () => listen += 1,
+        onFlashcards: () => flashcards += 1,
       ),
     );
 
@@ -110,6 +115,44 @@ void main() {
     expect(find.text('HAZIRLIK'), findsOneWidget);
     expect(find.text('AKTİF ÇALIŞMA'), findsOneWidget);
     expect(find.text('Kaynağı hızlıca toparla'), findsOneWidget);
+    final flashcardAction = find.byKey(const ValueKey('workspace-other-flashcards'));
+    expect(flashcardAction, findsOneWidget);
+    await tester.scrollUntilVisible(
+      flashcardAction,
+      120,
+      scrollable: find.descendant(
+        of: find.byKey(const ValueKey('workspace-other-study-paths-scroll')),
+        matching: find.byType(Scrollable),
+      ),
+    );
+    await tester.pump();
+    await tester.tap(flashcardAction.hitTestable());
+    await tester.pump();
+    expect(flashcards, 1);
+  });
+
+  testWidgets('Workspace keeps source recovery actions reachable when extracted text is unavailable', (tester) async {
+    var readSource = 0;
+
+    await tester.pumpWidget(
+      frame(
+        disableAnimations: false,
+        sourceText: '',
+        onReadSource: () => readSource += 1,
+        onRecall: () {},
+        onListen: () {},
+      ),
+    );
+
+    expect(find.byKey(const ValueKey('la0040-atelier-workspace-reader')), findsOneWidget);
+    expect(find.byKey(const ValueKey('la0040-atelier-workspace-update-source')), findsOneWidget);
+    expect(find.text('Bu kaynağın metni henüz okunamıyor.'), findsOneWidget);
+    expect(find.byType(AtelierLearningRail), findsNothing);
+
+    await tester.tap(find.byKey(const ValueKey('la0040-atelier-workspace-reader')));
+    await tester.pump();
+    expect(readSource, 1);
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('Workspace review recommendation makes source repair the primary action and honors Reduced Motion', (

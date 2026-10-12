@@ -6,7 +6,6 @@ import 'package:flutter/services.dart';
 import '../domain/learning_contracts.dart';
 import '../domain/learning_truth.dart';
 import 'app_theme.dart';
-import 'atelier_learning_surfaces.dart';
 import 'companion_view.dart';
 
 /// Current source-first product experience scope.
@@ -638,7 +637,6 @@ class LivingStudyDeskHome extends StatelessWidget {
               ],
             ),
           ),
-
         ],
       );
     },
