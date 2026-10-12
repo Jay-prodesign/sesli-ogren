@@ -514,10 +514,7 @@ class AtelierWorkspace extends StatelessWidget {
                         transitionBuilder: (child, animation) => FadeTransition(
                           opacity: animation,
                           child: SlideTransition(
-                            position: Tween<Offset>(
-                              begin: const Offset(0, 0.035),
-                              end: Offset.zero,
-                            ).animate(animation),
+                            position: Tween<Offset>(begin: const Offset(0, 0.035), end: Offset.zero).animate(animation),
                             child: child,
                           ),
                         ),
