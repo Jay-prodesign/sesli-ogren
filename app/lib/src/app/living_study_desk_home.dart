@@ -537,14 +537,14 @@ class LivingStudyDeskHome extends StatelessWidget {
     builder: (context, constraints) {
       final compact = constraints.maxWidth < 340 || MediaQuery.textScalerOf(context).scale(1) > 1.25;
       final companion = Container(
-        width: compact ? 116 : 150,
-        height: compact ? 116 : 150,
+        width: compact ? 116 : 128,
+        height: compact ? 116 : 128,
         decoration: BoxDecoration(
           color: AppPalette.primarySoft,
           borderRadius: BorderRadius.circular(compact ? 16 : 20),
         ),
         child: Center(
-          child: CompanionView(state: CompanionVisualState.idle, size: compact ? 108 : 142),
+          child: CompanionView(state: CompanionVisualState.idle, size: compact ? 108 : 120),
         ),
       );
       final promise = Column(
@@ -594,7 +594,7 @@ class LivingStudyDeskHome extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Expanded(child: promise),
-                      const SizedBox(width: 14),
+                      const SizedBox(width: 8),
                       companion,
                     ],
                   ),
