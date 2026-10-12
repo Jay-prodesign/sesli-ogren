@@ -285,6 +285,7 @@ class _ProfileSurfaceState extends State<ProfileSurface> {
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
               child: OutlinedButton.icon(
+                key: const ValueKey('profile-sign-out'),
                 onPressed: widget.onSignOut == null || _signingOut || _deleting ? null : _signOut,
                 icon: _signingOut
                     ? const SizedBox.square(dimension: 18, child: CircularProgressIndicator(strokeWidth: 2))
@@ -372,6 +373,7 @@ class _ProfileSurfaceState extends State<ProfileSurface> {
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
               child: OutlinedButton.icon(
+                key: const ValueKey('profile-delete-account'),
                 style: OutlinedButton.styleFrom(
                   foregroundColor: AppPalette.destructive,
                   side: const BorderSide(color: Color(0xFFE7B8B4)),

@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../domain/learning_contracts.dart';
 
@@ -155,6 +156,16 @@ class _SourceReaderScreenState extends State<SourceReaderScreen> {
           ScaffoldMessenger.maybeOf(context)
               ?.showSnackBar(const SnackBar(content: Text('Okuma konumu kaydedilemedi. Kaynağın kendisi korunuyor.')));
         }
+      }
+    }
+    if (!mounted) return;
+    final media = MediaQuery.maybeOf(context);
+    final quietFeedback = (media?.disableAnimations ?? false) || (media?.accessibleNavigation ?? false);
+    if (!quietFeedback) {
+      try {
+        unawaited(HapticFeedback.selectionClick().catchError((_) {}));
+      } catch (_) {
+        // Haptics are acknowledgement only; they must never block navigation.
       }
     }
     if (!mounted) return;
@@ -493,7 +504,7 @@ class _SourceReaderScreenState extends State<SourceReaderScreen> {
                                       )
                                     : OutlinedButton.styleFrom(minimumSize: const Size(0, 48)),
                                 icon: const Icon(Icons.headphones_rounded, size: 19),
-                                label: const Text('Dinle'),
+                                label: const Text('Dinleyerek hazırlan'),
                               );
                         final primaryAction = widget.onRecall != null
                             ? FilledButton.icon(

@@ -530,7 +530,7 @@ void main() {
     expect(find.byType(MaterialWorkspaceScreen), findsOneWidget);
     expect(LivingDeskReviewScope.active(tester.element(find.byType(MaterialWorkspaceScreen))), isTrue);
 
-    await tapVisible(tester, find.text('Diğer yollar'));
+    await tapVisible(tester, find.text('Diğer çalışma yolları'));
     await pumpUntilFound(tester, find.byKey(const ValueKey('workspace-other-study-paths-scroll')));
     final quickRecapButton = find.byKey(const ValueKey('workspace-other-quick-recap')).hitTestable();
     await pumpUntilFound(tester, quickRecapButton);

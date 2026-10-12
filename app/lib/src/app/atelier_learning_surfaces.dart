@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../domain/learning_contracts.dart';
 import '../domain/learning_truth.dart';
@@ -52,6 +53,7 @@ class AtelierSourceTrustStrip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final versionLabel = sourceVersion.isCurrent ? 'GÜNCEL SÜRÜM' : 'ÖNCEKİ SÜRÜM';
+    final compactEvidence = MediaQuery.sizeOf(context).width < 340 || MediaQuery.textScalerOf(context).scale(1) > 1.25;
     return Semantics(
       container: true,
       label:
@@ -60,7 +62,7 @@ class AtelierSourceTrustStrip extends StatelessWidget {
         child: Container(
           key: const ValueKey('atelier-source-trust'),
           width: double.infinity,
-          padding: const EdgeInsets.fromLTRB(13, 11, 13, 12),
+          padding: EdgeInsets.fromLTRB(13, compactEvidence ? 9 : 11, 13, compactEvidence ? 10 : 12),
           decoration: BoxDecoration(color: AtelierStyle.pulseSoft, borderRadius: BorderRadius.circular(12)),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -183,6 +185,122 @@ class AtelierWorkspace extends StatelessWidget {
 
   bool get _sourcePreviewIsTrimmed => sourceText.trim().replaceAll(RegExp(r'\s+'), ' ').length > 640;
 
+  String get _evidenceHeadline {
+    return switch (continuation?.state.kind) {
+      RecallStateKind.needsReview => 'Kaynak onarımı gerekiyor',
+      RecallStateKind.developing => 'Hatırlama gelişiyor',
+      RecallStateKind.retrievedOnce => 'Bağımsız hatırlama görüldü',
+      RecallStateKind.notAssessed => 'Henüz bağımsız kanıt yok',
+      null => 'Henüz öğrenme kanıtı yok',
+    };
+  }
+
+  String get _evidenceDetail {
+    final state = continuation?.state;
+    if (state == null) return 'İlk aktif Hatırla denemesi henüz yapılmadı.';
+    final count = state.evidenceCount;
+    final countLead = '$count Hatırla denemesi kaydedildi. ';
+    return countLead +
+        switch (state.kind) {
+          RecallStateKind.needsReview =>
+            'Son deneme eksik ya da yanlış geri çağırma gösterdi; sıradaki adım kaynaktan onarım.',
+          RecallStateKind.developing => 'Son deneme kısmi ya da destekliydi; bu sonuç ustalık olarak yorumlanmıyor.',
+          RecallStateKind.retrievedOnce =>
+            'Son deneme ipucusuz doğruydu; kalıcılık sonraki bağımsız denemede yeniden değerlendirilecek.',
+          RecallStateKind.notAssessed => 'Bu sürüm için bağımsız doğru geri çağırma henüz kaydedilmedi.',
+        };
+  }
+
+  String get _evidenceCompactDetail {
+    final state = continuation?.state;
+    if (state == null) return 'İlk Hatırla denemesi henüz yapılmadı.';
+    return switch (state.kind) {
+      RecallStateKind.needsReview => 'Son deneme kaynak onarımı gerektiriyor.',
+      RecallStateKind.developing => 'Son deneme kısmi ya da destekliydi; bu henüz ustalık değil.',
+      RecallStateKind.retrievedOnce => 'İpucusuz doğru hatırladın; kalıcılık henüz doğrulanmadı.',
+      RecallStateKind.notAssessed => 'Bağımsız doğru geri çağırma henüz kaydedilmedi.',
+    };
+  }
+
+  IconData get _evidenceIcon {
+    return switch (continuation?.state.kind) {
+      RecallStateKind.needsReview => Icons.build_circle_outlined,
+      RecallStateKind.developing => Icons.trending_up_rounded,
+      RecallStateKind.retrievedOnce => Icons.check_circle_outline_rounded,
+      RecallStateKind.notAssessed || null => Icons.radio_button_unchecked_rounded,
+    };
+  }
+
+  Widget _evidenceState({required bool compact}) {
+    final state = continuation?.state;
+    if (state == null) return const SizedBox.shrink();
+    return Semantics(
+      container: true,
+      label: 'Öğrenme kanıtı. $_evidenceHeadline. $_evidenceDetail',
+      child: ExcludeSemantics(
+        child: Container(
+          key: const ValueKey('workspace-evidence-state'),
+          width: double.infinity,
+          padding: const EdgeInsets.fromLTRB(13, 11, 13, 12),
+          decoration: BoxDecoration(
+            color: AtelierStyle.pulseSoft,
+            borderRadius: BorderRadius.circular(15),
+            border: const Border(left: BorderSide(color: AtelierStyle.pulse, width: 3)),
+          ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Icon(_evidenceIcon, color: AtelierStyle.pulse, size: 19),
+              const SizedBox(width: 9),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Expanded(
+                          child: Text(
+                            'ÖĞRENME KANITI',
+                            style: TextStyle(
+                              color: AtelierStyle.pulse,
+                              fontSize: 9.5,
+                              fontWeight: FontWeight.w900,
+                              letterSpacing: 0.9,
+                            ),
+                          ),
+                        ),
+                        Text(
+                          '${state.evidenceCount} DENEME',
+                          style: const TextStyle(
+                            color: AtelierStyle.muted,
+                            fontSize: 9,
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      _evidenceHeadline,
+                      style: const TextStyle(color: AtelierStyle.ink, fontSize: 14.5, fontWeight: FontWeight.w900),
+                    ),
+                    const SizedBox(height: 3),
+                    Text(
+                      compact ? _evidenceCompactDetail : _evidenceDetail,
+                      style: const TextStyle(color: AtelierStyle.muted, fontSize: 12, height: 1.35),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   void _showOtherStudyPaths(BuildContext context) {
     showModalBottomSheet<void>(
       context: context,
@@ -197,43 +315,78 @@ class AtelierWorkspace extends StatelessWidget {
             shrinkWrap: true,
             padding: const EdgeInsets.fromLTRB(16, 4, 16, 18),
             children: [
+              const Text(
+                'Bu kaynakla başka bir yol seç',
+                style: TextStyle(color: AtelierStyle.ink, fontSize: 20, height: 1.15, fontWeight: FontWeight.w900),
+              ),
+              const SizedBox(height: 6),
+              const Text(
+                'Sıradaki öneri öğrenme kanıtına dayanır. Aşağıdaki yollar bağlamsal alternatiflerdir; pasif hazırlık tek başına öğrenme kanıtı oluşturmaz.',
+                style: TextStyle(color: AtelierStyle.muted, fontSize: 12.5, height: 1.4),
+              ),
+              const SizedBox(height: 16),
+              const Text(
+                'HAZIRLIK',
+                style: TextStyle(
+                  color: AtelierStyle.teal,
+                  fontSize: 9.5,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: 0.9,
+                ),
+              ),
               ListTile(
                 key: const ValueKey('workspace-other-quick-recap'),
                 leading: const Icon(Icons.auto_awesome_outlined),
-                title: const Text('Hızlı özet'),
-                subtitle: const Text(
-                  'Kaynağa bağlı kısa bir genel bakış al. Bu hazırlıktır; öğrenme kanıtı oluşturmaz.',
-                ),
+                title: const Text('Kaynağı hızlıca toparla'),
+                subtitle: const Text('Kaynağa bağlı kısa bir genel bakış al; bu hazırlıktır, kanıt değildir.'),
                 onTap: () {
                   Navigator.of(sheetContext).pop();
                   onQuickRecap();
                 },
               ),
               ListTile(
+                key: const ValueKey('workspace-other-grounded-explain'),
                 leading: const Icon(Icons.auto_awesome_outlined),
-                title: const Text('Kaynağı bana açıkla'),
-                subtitle: const Text('Kaynağa bağlı açıklamayı oku. Bu hazırlıktır; öğrenme kanıtı oluşturmaz.'),
+                title: const Text('Zor kısmı kaynaktan açıkla'),
+                subtitle: const Text('Kaynağa bağlı açıklamayı oku; cevap kaynakta yoksa sistem bunu söylemelidir.'),
                 onTap: () {
                   Navigator.of(sheetContext).pop();
                   onGroundedExplain();
                 },
               ),
               ListTile(
-                leading: const Icon(Icons.record_voice_over_outlined),
-                title: const Text('Kendi cümlelerimle anlat'),
-                subtitle: const Text('Aktif açıklama denemesi yap ve kaynağa bağlı geri bildirim al.'),
-                onTap: () {
-                  Navigator.of(sheetContext).pop();
-                  onExplain();
-                },
-              ),
-              ListTile(
+                key: const ValueKey('workspace-other-focus'),
                 leading: const Icon(Icons.center_focus_strong),
-                title: const Text('Odaklan'),
-                subtitle: const Text('Kaynağın bir bölümünü daha yakından çalış.'),
+                title: const Text('Takıldığım noktayı netleştir'),
+                subtitle: const Text(
+                  'Bu kaynağın belirli bir bölümüne odaklan; bu da tek başına öğrenme kanıtı değildir.',
+                ),
                 onTap: () {
                   Navigator.of(sheetContext).pop();
                   onFocus();
+                },
+              ),
+              const Divider(color: AtelierStyle.line),
+              const SizedBox(height: 8),
+              const Text(
+                'AKTİF ÇALIŞMA',
+                style: TextStyle(
+                  color: AtelierStyle.pulse,
+                  fontSize: 9.5,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: 0.9,
+                ),
+              ),
+              ListTile(
+                key: const ValueKey('workspace-other-explain-back'),
+                leading: const Icon(Icons.record_voice_over_outlined),
+                title: const Text('Kendi cümlelerimle anlat'),
+                subtitle: const Text(
+                  'Kaynağı kapatıp kendi açıklamanı kur ve kaynakla karşılaştırılmış geri bildirim al.',
+                ),
+                onTap: () {
+                  Navigator.of(sheetContext).pop();
+                  onExplain();
                 },
               ),
             ],
@@ -245,11 +398,30 @@ class AtelierWorkspace extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final compactSurface = MediaQuery.sizeOf(context).width < 340 || MediaQuery.textScalerOf(context).scale(1) > 1.25;
+    final media = MediaQuery.of(context);
+    final compactSurface = media.size.width < 340 || media.textScaler.scale(1) > 1.25;
+    final reducedMotion = media.disableAnimations || media.accessibleNavigation;
+    final motionDuration = reducedMotion ? Duration.zero : const Duration(milliseconds: 220);
+    final activeStepKey = continuation?.nextAction.kind.name ?? 'first-recall';
     final primaryAction = switch (continuation?.nextAction.kind) {
       NextLearningActionKind.reviewSourceThenRecall || NextLearningActionKind.repeatRecallLater => onReadSource,
       NextLearningActionKind.retryRecallWithoutHint || null => onRecall,
     };
+
+    void runPrimaryAction() {
+      if (!reducedMotion) {
+        HapticFeedback.selectionClick();
+      }
+      primaryAction();
+    }
+
+    void runListenAction() {
+      if (!reducedMotion) {
+        HapticFeedback.selectionClick();
+      }
+      onListen();
+    }
+
     return ColoredBox(
       key: const ValueKey('la0040-atelier-workspace'),
       color: AtelierStyle.canvas,
@@ -282,6 +454,7 @@ class AtelierWorkspace extends StatelessWidget {
                   const SizedBox(height: 14),
                   AtelierSourceTrustStrip(sourceVersion: sourceVersion!),
                 ],
+                if (continuation != null) ...[const SizedBox(height: 10), _evidenceState(compact: compactSurface)],
                 const SizedBox(height: 17),
                 if (sourceText.trim().isNotEmpty) ...[
                   const AtelierLearningRail(phase: AtelierLearningPhase.source),
@@ -290,16 +463,12 @@ class AtelierWorkspace extends StatelessWidget {
                     spacing: 8,
                     runSpacing: 8,
                     children: [
-                      OutlinedButton.icon(
+                      TextButton.icon(
                         key: const ValueKey('la0040-atelier-workspace-reader'),
                         onPressed: onReadSource,
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: AtelierStyle.teal,
-                          backgroundColor: AtelierStyle.paper,
-                          side: const BorderSide(color: AtelierStyle.line),
-                        ),
+                        style: TextButton.styleFrom(foregroundColor: AtelierStyle.teal),
                         icon: const Icon(Icons.menu_book_outlined),
-                        label: const Text('Tam metni oku'),
+                        label: const Text('Tam kaynağı aç'),
                       ),
                       TextButton.icon(
                         key: const ValueKey('la0040-atelier-workspace-update-source'),
@@ -340,14 +509,40 @@ class AtelierWorkspace extends StatelessWidget {
                           ],
                         ),
                         const SizedBox(height: 6),
-                        Text(
-                          _activeStepTitle,
-                          style: const TextStyle(color: AtelierStyle.ink, fontWeight: FontWeight.w900, fontSize: 16),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          _activeStepReason,
-                          style: const TextStyle(color: AtelierStyle.muted, fontSize: 12.5, height: 1.4),
+                        AnimatedSwitcher(
+                          key: const ValueKey('workspace-active-step-motion-compact'),
+                          duration: motionDuration,
+                          switchInCurve: Curves.easeOutCubic,
+                          switchOutCurve: Curves.easeInCubic,
+                          transitionBuilder: (child, animation) => FadeTransition(
+                            opacity: animation,
+                            child: SlideTransition(
+                              position: Tween<Offset>(
+                                begin: const Offset(0, 0.04),
+                                end: Offset.zero,
+                              ).animate(animation),
+                              child: child,
+                            ),
+                          ),
+                          child: Column(
+                            key: ValueKey('workspace-active-step-$activeStepKey'),
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                _activeStepTitle,
+                                style: const TextStyle(
+                                  color: AtelierStyle.ink,
+                                  fontWeight: FontWeight.w900,
+                                  fontSize: 16,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                _activeStepReason,
+                                style: const TextStyle(color: AtelierStyle.muted, fontSize: 12.5, height: 1.4),
+                              ),
+                            ],
+                          ),
                         ),
                         const SizedBox(height: 9),
                         Wrap(
@@ -356,14 +551,15 @@ class AtelierWorkspace extends StatelessWidget {
                           children: [
                             OutlinedButton.icon(
                               key: const ValueKey('la0040-atelier-workspace-listen'),
-                              onPressed: onListen,
+                              onPressed: runListenAction,
                               icon: const Icon(Icons.headphones_rounded),
-                              label: const Text('Dinle'),
+                              label: const Text('Dinleyerek hazırlan'),
                             ),
                             TextButton.icon(
+                              key: const ValueKey('workspace-other-study-paths'),
                               onPressed: () => _showOtherStudyPaths(context),
                               icon: const Icon(Icons.more_horiz_rounded),
-                              label: const Text('Diğer yollar'),
+                              label: const Text('Diğer çalışma yolları'),
                             ),
                           ],
                         ),
@@ -436,7 +632,7 @@ class AtelierWorkspace extends StatelessWidget {
             child: compactSurface
                 ? FilledButton.icon(
                     key: const ValueKey('la0040-atelier-workspace-recall'),
-                    onPressed: primaryAction,
+                    onPressed: runPrimaryAction,
                     style: FilledButton.styleFrom(
                       backgroundColor: AtelierStyle.pulse,
                       foregroundColor: Colors.white,
@@ -465,19 +661,42 @@ class AtelierWorkspace extends StatelessWidget {
                         ],
                       ),
                       const SizedBox(height: 6),
-                      Text(
-                        _activeStepTitle,
-                        style: const TextStyle(color: AtelierStyle.ink, fontWeight: FontWeight.w900, fontSize: 17),
-                      ),
-                      const SizedBox(height: 3),
-                      Text(
-                        _activeStepReason,
-                        style: const TextStyle(color: AtelierStyle.muted, fontSize: 12, height: 1.3),
+                      AnimatedSwitcher(
+                        key: const ValueKey('workspace-active-step-motion'),
+                        duration: motionDuration,
+                        switchInCurve: Curves.easeOutCubic,
+                        switchOutCurve: Curves.easeInCubic,
+                        transitionBuilder: (child, animation) => FadeTransition(
+                          opacity: animation,
+                          child: SlideTransition(
+                            position: Tween<Offset>(begin: const Offset(0, 0.035), end: Offset.zero).animate(animation),
+                            child: child,
+                          ),
+                        ),
+                        child: Column(
+                          key: ValueKey('workspace-active-step-footer-$activeStepKey'),
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              _activeStepTitle,
+                              style: const TextStyle(
+                                color: AtelierStyle.ink,
+                                fontWeight: FontWeight.w900,
+                                fontSize: 17,
+                              ),
+                            ),
+                            const SizedBox(height: 3),
+                            Text(
+                              _activeStepReason,
+                              style: const TextStyle(color: AtelierStyle.muted, fontSize: 12, height: 1.3),
+                            ),
+                          ],
+                        ),
                       ),
                       const SizedBox(height: 10),
                       FilledButton.icon(
                         key: const ValueKey('la0040-atelier-workspace-recall'),
-                        onPressed: primaryAction,
+                        onPressed: runPrimaryAction,
                         style: FilledButton.styleFrom(
                           backgroundColor: AtelierStyle.pulse,
                           foregroundColor: Colors.white,
@@ -487,44 +706,28 @@ class AtelierWorkspace extends StatelessWidget {
                         label: Text(_activeStepLabel),
                       ),
                       const SizedBox(height: 7),
-                      LayoutBuilder(
-                        builder: (context, constraints) {
-                          final compactActions =
-                              constraints.maxWidth < 340 || MediaQuery.textScalerOf(context).scale(1) > 1.2;
-                          final listen = OutlinedButton.icon(
-                            key: const ValueKey('la0040-atelier-workspace-listen'),
-                            onPressed: onListen,
-                            icon: const Icon(Icons.headphones_rounded),
-                            label: const Text('Dinle'),
-                            style: OutlinedButton.styleFrom(
-                              foregroundColor: AtelierStyle.aqua,
-                              side: const BorderSide(color: AtelierStyle.aqua),
-                            ),
-                          );
-                          final more = TextButton.icon(
-                            onPressed: () => _showOtherStudyPaths(context),
-                            style: TextButton.styleFrom(foregroundColor: AtelierStyle.pulse),
-                            icon: const Icon(Icons.more_horiz_rounded),
-                            label: const Text('Diğer yollar'),
-                          );
-                          if (compactActions) {
-                            return Column(
-                              crossAxisAlignment: CrossAxisAlignment.stretch,
-                              children: [
-                                listen,
-                                const SizedBox(height: 4),
-                                Center(child: more),
-                              ],
-                            );
-                          }
-                          return Row(
-                            children: [
-                              Expanded(child: listen),
-                              const SizedBox(width: 7),
-                              more,
-                            ],
-                          );
-                        },
+                      SizedBox(
+                        width: double.infinity,
+                        child: OutlinedButton.icon(
+                          key: const ValueKey('la0040-atelier-workspace-listen'),
+                          onPressed: runListenAction,
+                          icon: const Icon(Icons.headphones_rounded),
+                          label: const Text('Dinleyerek hazırlan'),
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: AtelierStyle.aqua,
+                            side: const BorderSide(color: AtelierStyle.aqua),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Center(
+                        child: TextButton.icon(
+                          key: const ValueKey('workspace-other-study-paths'),
+                          onPressed: () => _showOtherStudyPaths(context),
+                          style: TextButton.styleFrom(foregroundColor: AtelierStyle.pulse),
+                          icon: const Icon(Icons.more_horiz_rounded),
+                          label: const Text('Diğer çalışma yolları'),
+                        ),
                       ),
                       const SizedBox(height: 4),
                       const Text(

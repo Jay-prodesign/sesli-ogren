@@ -174,16 +174,24 @@ void main() {
       of: find.byType(MaterialWorkspaceScreen),
       matching: find.byType(Scrollable),
     );
-    final otherPaths = find.text('Diğer yollar');
+    final otherPaths = find.byKey(const ValueKey('workspace-other-study-paths'));
     await _scrollUntilFound(tester, otherPaths, scrollable: workspaceScroll);
     await _tapVisible(tester, otherPaths);
     await _pumpUntilFound(tester, find.byKey(const ValueKey('workspace-other-study-paths-scroll')));
+    await tester.pumpAndSettle();
 
     expect(find.byKey(const ValueKey('workspace-other-study-paths-scroll')), findsOneWidget);
-    expect(find.text('Hızlı özet'), findsOneWidget);
-    expect(find.text('Kaynağı bana açıkla'), findsOneWidget);
-    expect(find.text('Kendi cümlelerimle anlat'), findsOneWidget);
-    expect(find.text('Odaklan'), findsOneWidget);
+    final pathsScroll = find.byKey(const ValueKey('workspace-other-study-paths-scroll'));
+    for (final actionKey in const [
+      ValueKey('workspace-other-quick-recap'),
+      ValueKey('workspace-other-grounded-explain'),
+      ValueKey('workspace-other-focus'),
+      ValueKey('workspace-other-explain-back'),
+    ]) {
+      final action = find.byKey(actionKey);
+      await _scrollUntilFound(tester, action, scrollable: pathsScroll);
+      expect(action, findsOneWidget);
+    }
     expect(tester.takeException(), isNull);
   });
 

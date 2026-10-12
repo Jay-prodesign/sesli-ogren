@@ -1,5 +1,8 @@
+import 'dart:async';
+
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../domain/learning_contracts.dart';
 import '../domain/learning_truth.dart';
@@ -674,6 +677,26 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
         ),
       );
       if (!mounted) return;
+      final media = MediaQuery.maybeOf(context);
+      final quietFeedback = (media?.disableAnimations ?? false) || (media?.accessibleNavigation ?? false);
+      if (!quietFeedback) {
+        try {
+          final independentSuccess =
+              result.evidence.outcome == RecallOutcome.correct && result.evidence.assistance == RecallAssistance.none;
+          final developing =
+              result.evidence.outcome == RecallOutcome.partial ||
+              result.evidence.outcome == RecallOutcome.helpedCorrect;
+          final feedback = independentSuccess
+              ? HapticFeedback.mediumImpact()
+              : developing
+              ? HapticFeedback.lightImpact()
+              : HapticFeedback.selectionClick();
+          unawaited(feedback.catchError((_) {}));
+        } catch (_) {
+          // Feedback must never become learning-state authority or block the result.
+        }
+      }
+      if (!mounted) return;
       setState(() {
         _result = result;
         _submittedUnknown = unknown;
@@ -1327,30 +1350,36 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
     }
     final candidate = LearningVisualTreatmentScope.maybeOf(context);
     if (LivingDeskReviewScope.active(context)) {
-      return AtelierRecall(
-        prompt: prompt,
-        controller: _answerController,
-        busy: _busy,
-        onSubmit: _submit,
-        onHint: _requestHint,
-        onReveal: _revealAnswer,
-        onUnknown: () => _submit(unknown: true),
-        support: _supportText,
-        error: _inlineError,
+      return KeyedSubtree(
+        key: const ValueKey('recall'),
+        child: AtelierRecall(
+          prompt: prompt,
+          controller: _answerController,
+          busy: _busy,
+          onSubmit: _submit,
+          onHint: _requestHint,
+          onReveal: _revealAnswer,
+          onUnknown: () => _submit(unknown: true),
+          support: _supportText,
+          error: _inlineError,
+        ),
       );
     }
     if (candidate != null) {
-      return LearningTreatmentRecallPrompt(
-        lane: candidate,
-        prompt: prompt,
-        controller: _answerController,
-        busy: _busy,
-        onSubmit: _submit,
-        onHint: _requestHint,
-        onReveal: _revealAnswer,
-        onUnknown: () => _submit(unknown: true),
-        supportText: _supportText,
-        errorText: _inlineError,
+      return KeyedSubtree(
+        key: const ValueKey('recall'),
+        child: LearningTreatmentRecallPrompt(
+          lane: candidate,
+          prompt: prompt,
+          controller: _answerController,
+          busy: _busy,
+          onSubmit: _submit,
+          onHint: _requestHint,
+          onReveal: _revealAnswer,
+          onUnknown: () => _submit(unknown: true),
+          supportText: _supportText,
+          errorText: _inlineError,
+        ),
       );
     }
     return _SurfaceCard(

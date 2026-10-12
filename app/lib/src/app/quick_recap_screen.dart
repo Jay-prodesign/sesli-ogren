@@ -875,13 +875,11 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> with WidgetsBinding
               ),
             ),
             const SizedBox(height: 8),
-            Wrap(
+            LayoutBuilder(
               key: const ValueKey('quick-recap-utility-actions'),
-              spacing: 8,
-              runSpacing: 8,
-              crossAxisAlignment: WrapCrossAlignment.center,
-              children: [
-                OutlinedButton.icon(
+              builder: (context, constraints) {
+                final compactUtilities = constraints.maxWidth < 360 || MediaQuery.textScalerOf(context).scale(1) > 1.2;
+                final listen = OutlinedButton.icon(
                   style: outlineStyle,
                   onPressed: () {
                     final recapText = <String>[
@@ -914,8 +912,8 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> with WidgetsBinding
                   },
                   icon: const Icon(Icons.headphones_rounded),
                   label: const Text('Özeti dinle'),
-                ),
-                PopupMenuButton<String>(
+                );
+                final more = PopupMenuButton<String>(
                   tooltip: 'Diğer özet araçları',
                   onSelected: (action) {
                     switch (action) {
@@ -952,16 +950,40 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> with WidgetsBinding
                       border: Border.all(color: living ? AtelierStyle.line : Theme.of(context).colorScheme.outline),
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: const Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                       child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [Icon(Icons.more_horiz_rounded), SizedBox(width: 7), Text('Diğer araçlar')],
+                        mainAxisSize: compactUtilities ? MainAxisSize.max : MainAxisSize.min,
+                        children: [
+                          const Icon(Icons.more_horiz_rounded),
+                          const SizedBox(width: 7),
+                          if (compactUtilities)
+                            const Expanded(child: Text('Diğer araçlar'))
+                          else
+                            const Text('Diğer araçlar'),
+                        ],
                       ),
                     ),
                   ),
-                ),
-              ],
+                );
+
+                if (compactUtilities) {
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      SizedBox(width: double.infinity, child: listen),
+                      const SizedBox(height: 8),
+                      SizedBox(width: double.infinity, child: more),
+                    ],
+                  );
+                }
+                return Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  children: [listen, more],
+                );
+              },
             ),
           ],
           if (status?.failureClass == 'reconciliation_required')

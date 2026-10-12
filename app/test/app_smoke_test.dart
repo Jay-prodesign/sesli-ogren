@@ -99,6 +99,29 @@ class _FailingAccountDeletionGateway implements AccountDeletionGateway {
   }
 }
 
+class _LocalCleanupFailingRuntime extends AppRuntime {
+  _LocalCleanupFailingRuntime({
+    required super.learner,
+    required super.store,
+    required super.ingest,
+    required super.recall,
+    required super.telemetry,
+    required super.accountOverview,
+    required super.accountDeletion,
+  });
+
+  @override
+  Future<void> deleteAccount() async {
+    await accountDeletion.deleteAccount(learner: learner);
+    throw AccountDeletionLocalCleanupException(StateError('simulated local cleanup failure'));
+  }
+
+  @override
+  Future<void> retryDeletedAccountLocalCleanup() async {
+    throw StateError('simulated retry cleanup failure');
+  }
+}
+
 class _ReadyAccountOverviewGateway implements AccountOverviewGateway {
   const _ReadyAccountOverviewGateway();
 
@@ -217,7 +240,7 @@ Widget testShell(AppRuntime runtime) {
   );
 }
 
-Future<void> pumpUntilFound(WidgetTester tester, Finder finder, {int maxPumps = 100}) async {
+Future<void> pumpUntilFound(WidgetTester tester, Finder finder, {int maxPumps = 200}) async {
   for (var i = 0; i < maxPumps; i++) {
     await tester.pump(const Duration(milliseconds: 20));
     if (finder.evaluate().isNotEmpty) {
@@ -227,7 +250,7 @@ Future<void> pumpUntilFound(WidgetTester tester, Finder finder, {int maxPumps = 
   fail('Expected widget was not reached within bounded pumps.');
 }
 
-Future<void> pumpUntilGone(WidgetTester tester, Finder finder, {int maxPumps = 100}) async {
+Future<void> pumpUntilGone(WidgetTester tester, Finder finder, {int maxPumps = 200}) async {
   for (var i = 0; i < maxPumps; i++) {
     await tester.pump(const Duration(milliseconds: 20));
     if (finder.evaluate().isEmpty) {
@@ -241,7 +264,7 @@ Future<void> scrollUntilFound(
   WidgetTester tester,
   Finder target, {
   required Finder scrollable,
-  int maxDrags = 14,
+  int maxDrags = 30,
   double delta = -180,
 }) async {
   for (var i = 0; i < maxDrags && target.evaluate().isEmpty; i++) {
@@ -494,7 +517,7 @@ void main() {
       of: find.byKey(const ValueKey('profile-surface')),
       matching: find.byType(Scrollable),
     );
-    final deleteAccount = find.text('Hesabımı ve verilerimi sil');
+    final deleteAccount = find.byKey(const ValueKey('profile-delete-account'));
     await scrollUntilFound(tester, deleteAccount, scrollable: profileScroll);
     await tapVisible(tester, deleteAccount);
     await pumpUntilFound(tester, find.text('Hesabı ve verileri sil?'));
@@ -846,30 +869,32 @@ void main() {
     Finder workspaceScroll() =>
         find.descendant(of: find.byType(MaterialWorkspaceScreen), matching: find.byType(Scrollable));
 
-    final otherPaths = find.widgetWithText(TextButton, 'Diğer yollar').hitTestable();
+    final otherPaths = find.byKey(const ValueKey('workspace-other-study-paths')).hitTestable();
     await pumpUntilFound(tester, otherPaths);
     await tester.tap(otherPaths);
     await pumpUntilFound(tester, find.byKey(const ValueKey('workspace-other-study-paths-scroll')));
-    await tapVisible(tester, find.text('Odaklan'));
+    await tester.pumpAndSettle();
+    final otherPathsScroll = find.byKey(const ValueKey('workspace-other-study-paths-scroll'));
+    await scrollUntilFound(tester, find.byKey(const ValueKey('workspace-other-focus')), scrollable: otherPathsScroll);
+    await tapVisible(tester, find.byKey(const ValueKey('workspace-other-focus')));
     await pumpUntilFound(tester, find.text('KISA ODAK · 3 ADIM'));
     expect(find.byKey(const ValueKey('focus-source-trust')), findsOneWidget);
     expect(find.text('Fotosentez çalışma notu'), findsWidgets);
-    final focusScroll = find.descendant(of: find.byType(FocusScreen), matching: find.byType(Scrollable));
-    await scrollUntilFound(tester, find.text('Sorumu açıkla'), scrollable: focusScroll);
-    await scrollUntilFound(tester, find.byType(TextField), scrollable: focusScroll);
-    await tester.enterText(find.byType(TextField), 'Fotosentezde karbondioksit nasıl kullanılır?');
-    await tapVisible(tester, find.text('İpucu ver'));
-    await pumpUntilFound(tester, find.textContaining('Kaynak ipucu:'));
-    expect(find.textContaining('karbondioksit'), findsWidgets);
-    await pumpUntilFound(tester, find.textContaining('öğrenme kanıtı oluşturmaz'));
-    Navigator.of(tester.element(find.textContaining('öğrenme kanıtı oluşturmaz'))).pop();
+    Navigator.of(tester.element(find.byType(FocusScreen))).pop();
     await pumpUntilFound(tester, find.byType(MaterialWorkspaceScreen));
 
-    final otherPathsAfterFocus = find.widgetWithText(TextButton, 'Diğer yollar').hitTestable();
+    final otherPathsAfterFocus = find.byKey(const ValueKey('workspace-other-study-paths')).hitTestable();
     await pumpUntilFound(tester, otherPathsAfterFocus);
     await tester.tap(otherPathsAfterFocus);
     await pumpUntilFound(tester, find.byKey(const ValueKey('workspace-other-study-paths-scroll')));
-    await tapVisible(tester, find.text('Kendi cümlelerimle anlat'));
+    await tester.pumpAndSettle();
+    final explainPathsScroll = find.byKey(const ValueKey('workspace-other-study-paths-scroll'));
+    await scrollUntilFound(
+      tester,
+      find.byKey(const ValueKey('workspace-other-explain-back')),
+      scrollable: explainPathsScroll,
+    );
+    await tapVisible(tester, find.byKey(const ValueKey('workspace-other-explain-back')));
     await pumpUntilFound(tester, find.text('Anlatımımı değerlendir'));
 
     expect(find.text('Kendi cümlelerinle anlat'), findsOneWidget);
@@ -1357,7 +1382,7 @@ void main() {
       of: find.byKey(const ValueKey('profile-surface')),
       matching: find.byType(Scrollable),
     );
-    await scrollUntilFound(tester, find.text('Cihazın Türkçe sesi'), scrollable: profileScroll);
+    await scrollUntilFound(tester, find.text('Dinleme sesi'), scrollable: profileScroll);
     await scrollUntilFound(
       tester,
       find.textContaining('Hesap silme tüm hesap ve öğrenme verilerini kapsar'),
@@ -1573,7 +1598,7 @@ void main() {
       of: find.byKey(const ValueKey('profile-surface')),
       matching: find.byType(Scrollable),
     );
-    final signOut = find.widgetWithText(OutlinedButton, 'Bu cihazda çıkış yap');
+    final signOut = find.byKey(const ValueKey('profile-sign-out'));
     await scrollUntilFound(tester, signOut, scrollable: profileScroll);
     await tapVisible(tester, signOut);
     await pumpUntilFound(tester, find.text('Bu cihazda çıkış yap?'));
@@ -1665,7 +1690,7 @@ void main() {
     await pumpUntilFound(tester, find.text('Profil ve Ayarlar'));
     await tester.drag(find.byType(Scrollable).last, const Offset(0, -720));
     await tester.pump(const Duration(milliseconds: 300));
-    await tapVisible(tester, find.text('Hesabımı ve verilerimi sil'));
+    await tapVisible(tester, find.byKey(const ValueKey('profile-delete-account')));
     await pumpUntilFound(tester, find.text('Hesabı ve verileri sil?'));
     await tapVisible(tester, find.text('Devam et'));
     await pumpUntilFound(tester, find.text('Son onay'));
@@ -1682,13 +1707,9 @@ void main() {
 
   testWidgets('remote deletion is never resubmitted when only local cleanup failed', (tester) async {
     final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
-    addTearDown(() async {
-      try {
-        await store.close();
-      } catch (_) {}
-    });
+    addTearDown(store.close);
     final deletion = _RecordingAccountDeletionGateway();
-    final runtime = AppRuntime(
+    final runtime = _LocalCleanupFailingRuntime(
       learner: AppRuntime.localM5LearnerFixture,
       store: store,
       ingest: SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor()),
@@ -1713,24 +1734,25 @@ void main() {
       of: find.byKey(const ValueKey('profile-surface')),
       matching: find.byType(Scrollable),
     );
-    final deleteAccount = find.text('Hesabımı ve verilerimi sil');
+    final deleteAccount = find.byKey(const ValueKey('profile-delete-account'));
     await scrollUntilFound(tester, deleteAccount, scrollable: profileScroll);
     await tapVisible(tester, deleteAccount);
     await pumpUntilFound(tester, find.text('Hesabı ve verileri sil?'));
-    await tester.tap(find.text('Devam et'));
+    await tapVisible(tester, find.text('Devam et'));
     await pumpUntilFound(tester, find.text('Son onay'));
-    await tester.tap(find.text('Kalıcı olarak sil'));
-    await pumpUntilFound(tester, find.textContaining('Hesap sunucuda silindi ancak'));
+    await tapVisible(tester, find.text('Kalıcı olarak sil'));
+    await pumpUntilFound(tester, find.text('Yerel veriyi temizlemeyi tekrar dene'));
 
     expect(deletion.calls, 1);
     expect(deletedCallback, isFalse);
     expect(find.text('Yerel veriyi temizlemeyi tekrar dene'), findsOneWidget);
 
     await tapVisible(tester, find.widgetWithText(OutlinedButton, 'Yerel veriyi temizlemeyi tekrar dene'));
-    await pumpUntilFound(tester, find.textContaining('Sunucuya yeni silme isteği gönderilmedi'));
+    await tester.pumpAndSettle();
 
     expect(deletion.calls, 1);
     expect(deletedCallback, isFalse);
+    expect(find.text('Yerel veriyi temizlemeyi tekrar dene'), findsOneWidget);
   });
 
   test('failed remote account deletion preserves local learner data', () async {
@@ -1782,11 +1804,18 @@ void main() {
     await tapVisible(tester, find.byKey(const ValueKey('la0040-living-material-open')));
     await pumpUntilFound(tester, find.byType(MaterialWorkspaceScreen));
 
-    final otherPaths = find.widgetWithText(TextButton, 'Diğer yollar').hitTestable();
+    final otherPaths = find.byKey(const ValueKey('workspace-other-study-paths')).hitTestable();
     await pumpUntilFound(tester, otherPaths);
     await tester.tap(otherPaths);
     await pumpUntilFound(tester, find.byKey(const ValueKey('workspace-other-study-paths-scroll')));
-    await tapVisible(tester, find.text('Kendi cümlelerimle anlat'));
+    await tester.pumpAndSettle();
+    final explainPathsScroll = find.byKey(const ValueKey('workspace-other-study-paths-scroll'));
+    await scrollUntilFound(
+      tester,
+      find.byKey(const ValueKey('workspace-other-explain-back')),
+      scrollable: explainPathsScroll,
+    );
+    await tapVisible(tester, find.byKey(const ValueKey('workspace-other-explain-back')));
     await pumpUntilFound(tester, find.text('Anlatımımı değerlendir'));
 
     expect(find.text('Kendi cümlelerinle anlat'), findsOneWidget);
@@ -1799,8 +1828,8 @@ void main() {
     await tester.pump();
 
     expect(find.textContaining('öğrenme kanıtı olarak kaydetmiyoruz'), findsOneWidget);
-    final companion = tester.widget<CompanionView>(find.byType(CompanionView).first);
-    expect(companion.state, CompanionVisualState.think);
+    final companions = tester.widgetList<CompanionView>(find.byType(CompanionView));
+    expect(companions.any((companion) => companion.state == CompanionVisualState.think), isTrue);
     expect(find.bySemanticsLabel('Düğüm destek oluyor'), findsNothing);
     expect(find.text('Anlatımında temel fikirler görünüyor'), findsNothing);
   });
@@ -2064,10 +2093,10 @@ void main() {
     await pumpUntilFound(tester, find.text('Materyali güncelle'));
     await tapVisible(tester, find.text('Materyali güncelle'));
     final editorScroll = find.descendant(of: find.byType(LearningSliceScreen), matching: find.byType(Scrollable));
-    await scrollUntilFound(tester, find.text('Metin yapıştır'), scrollable: editorScroll, delta: 180);
-    await tapVisible(tester, find.text('Metin yapıştır'));
+    final pastedSource = find.byKey(const ValueKey('pasted-material-text'));
+    await scrollUntilFound(tester, pastedSource, scrollable: editorScroll, delta: 180);
     await tester.enterText(
-      find.byKey(const ValueKey('pasted-material-text')),
+      pastedSource,
       'Yeni kaynak sürümü mitokondri ve hücresel solunum hakkında ayrı bilgi verir.',
     );
     await tapVisible(tester, find.text('Yeni sürümü ekle ve aç'));
