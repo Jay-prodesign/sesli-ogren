@@ -50,6 +50,11 @@ class SupabaseLearnerAuth {
 
   /// Starts linking an email to the *current* anonymous identity.
   /// Unlike signInWithOtp, this does not intentionally switch learner IDs.
+  static Future<bool> isCurrentSessionGuest() async {
+    final client = await _clientForConfiguredProject();
+    return client.auth.currentUser?.isAnonymous == true;
+  }
+
   static Future<void> requestGuestEmailLink(String email) async {
     final normalized = _normalizedEmail(email);
     final client = await _clientForConfiguredProject();
