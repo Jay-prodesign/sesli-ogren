@@ -162,10 +162,13 @@ class _FlashcardScreenState extends State<FlashcardScreen> {
     return FutureBuilder<_FlashcardViewData>(
       future: _future,
       builder: (context, snapshot) {
-        if (_data == null && snapshot.hasData) {
+        // FutureBuilder retains the previous future's data while a replacement
+        // future is waiting. Accept data/error only after the current load has
+        // completed so source-change recovery can never re-bind stale cards.
+        if (_data == null && snapshot.connectionState == ConnectionState.done && snapshot.hasData) {
           _data = snapshot.data;
         }
-        if (_data == null && snapshot.hasError) {
+        if (_data == null && snapshot.connectionState == ConnectionState.done && snapshot.hasError) {
           return _FlashcardError(onRetry: _reload);
         }
         final data = _data;
