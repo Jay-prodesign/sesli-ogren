@@ -105,7 +105,7 @@ void main() {
     expect(find.text('Dinle'), findsOneWidget);
     expect(find.text('Hızlı özet'), findsOneWidget);
     expect(find.text('Bildiğimi kontrol et'), findsOneWidget);
-    final focusPath = find.text('Birlikte odaklanalım');
+    final focusPath = find.byKey(const ValueKey('first-intent-focus'));
     await tester.scrollUntilVisible(
       focusPath,
       140,
@@ -114,6 +114,7 @@ void main() {
         matching: find.byType(Scrollable),
       ),
     );
+    await tester.ensureVisible(focusPath);
     await tester.pump();
     expect(focusPath.hitTestable(), findsOneWidget);
     expect(tester.takeException(), isNull);
