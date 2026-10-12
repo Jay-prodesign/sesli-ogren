@@ -354,6 +354,7 @@ class AtelierWorkspace extends StatelessWidget {
                 },
               ),
               ListTile(
+                key: const ValueKey('workspace-other-focus'),
                 leading: const Icon(Icons.center_focus_strong),
                 title: const Text('Takıldığım noktayı netleştir'),
                 subtitle: const Text(
