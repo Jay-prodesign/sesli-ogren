@@ -516,7 +516,7 @@ class _FlashcardStudyView extends StatelessWidget {
                     ),
                     const SizedBox(height: 16),
                     AnimatedSwitcher(
-                      duration: reducedMotion ? Duration.zero : const Duration(milliseconds: 200),
+                      duration: reducedMotion || busy ? Duration.zero : const Duration(milliseconds: 200),
                       child: revealed
                           ? Semantics(
                               liveRegion: true,
