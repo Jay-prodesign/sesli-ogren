@@ -63,7 +63,9 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: SesliOgrenTheme.light(),
-        home: LivingDeskReviewScope(child: QuizScreen(runtime: runtime, materialId: materialId)),
+        home: LivingDeskReviewScope(
+          child: QuizScreen(runtime: runtime, materialId: materialId),
+        ),
       ),
     );
     await _pumpUntilFound(tester, find.byKey(const ValueKey('quiz-submit')));
@@ -85,7 +87,9 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: SesliOgrenTheme.light(),
-        home: LivingDeskReviewScope(child: QuizScreen(runtime: runtime, materialId: materialId)),
+        home: LivingDeskReviewScope(
+          child: QuizScreen(runtime: runtime, materialId: materialId),
+        ),
       ),
     );
     await _pumpUntilFound(tester, find.text('SORU 2 / 3'));
@@ -114,7 +118,9 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: SesliOgrenTheme.light(),
-        home: LivingDeskReviewScope(child: QuizScreen(runtime: runtime, materialId: materialId)),
+        home: LivingDeskReviewScope(
+          child: QuizScreen(runtime: runtime, materialId: materialId),
+        ),
       ),
     );
     await _pumpUntilFound(tester, find.byKey(const ValueKey('quiz-submit')));
@@ -154,7 +160,9 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: SesliOgrenTheme.light(),
-        home: LivingDeskReviewScope(child: QuizScreen(runtime: runtime, materialId: materialId)),
+        home: LivingDeskReviewScope(
+          child: QuizScreen(runtime: runtime, materialId: materialId),
+        ),
       ),
     );
     await _pumpUntilFound(tester, find.byKey(const ValueKey('quiz-retry')));
@@ -187,7 +195,9 @@ void main() {
         theme: SesliOgrenTheme.light(),
         home: MediaQuery(
           data: const MediaQueryData(textScaler: TextScaler.linear(1.5), disableAnimations: true),
-          child: LivingDeskReviewScope(child: QuizScreen(runtime: runtime, materialId: materialId)),
+          child: LivingDeskReviewScope(
+            child: QuizScreen(runtime: runtime, materialId: materialId),
+          ),
         ),
       ),
     );

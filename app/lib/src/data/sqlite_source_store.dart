@@ -441,7 +441,6 @@ ON flashcard_sets (learner_id, material_id, source_version_id)
 ''');
   }
 
-
   static Future<void> _upgradeQuizSchema(Database db) async {
     await db.execute('''
 CREATE TABLE IF NOT EXISTS quiz_sets (
@@ -1766,7 +1765,6 @@ ON CONFLICT(learner_id, flashcard_set_id) DO UPDATE SET
     });
   }
 
-
   Future<QuizSetRecord?> quizSet({
     required AuthenticatedLearner learner,
     required MaterialId materialId,
@@ -1798,9 +1796,9 @@ ON CONFLICT(learner_id, flashcard_set_id) DO UPDATE SET
       createdAt: DateTime.parse(row['created_at_utc']! as String).toUtc(),
       questions: questionRows
           .map((question) {
-            final options = (jsonDecode(question['options_json']! as String) as List<dynamic>)
-                .cast<String>()
-                .toList(growable: false);
+            final options = (jsonDecode(question['options_json']! as String) as List<dynamic>).cast<String>().toList(
+              growable: false,
+            );
             return QuizQuestionRecord(
               id: QuizQuestionId(question['question_id']! as String),
               setId: setId,
@@ -1882,10 +1880,7 @@ ORDER BY q.ordinal ASC
         .toList(growable: false);
   }
 
-  Future<QuizSessionState?> quizSession({
-    required AuthenticatedLearner learner,
-    required QuizSetId setId,
-  }) async {
+  Future<QuizSessionState?> quizSession({required AuthenticatedLearner learner, required QuizSetId setId}) async {
     final rows = await _database.query(
       'quiz_sessions',
       where: 'learner_id = ? AND quiz_set_id = ?',
@@ -1936,25 +1931,18 @@ ORDER BY q.ordinal ASC
       );
       final cursor = sessionRows.isEmpty ? 0 : sessionRows.single['cursor_index']! as int;
       final completed = sessionRows.isNotEmpty && sessionRows.single['is_completed'] == 1;
-      if (completed ||
-          cursor < 0 ||
-          cursor >= set.questions.length ||
-          set.questions[cursor].id != question.id) {
+      if (completed || cursor < 0 || cursor >= set.questions.length || set.questions[cursor].id != question.id) {
         throw const SourceStoreConflict('Quiz answer does not match the active durable session.');
       }
       if (kind == QuizAnswerKind.selected &&
-          (selectedOptionIndex == null ||
-              selectedOptionIndex < 0 ||
-              selectedOptionIndex >= question.options.length)) {
+          (selectedOptionIndex == null || selectedOptionIndex < 0 || selectedOptionIndex >= question.options.length)) {
         throw const SourceStoreConflict('Quiz answer option is outside the active question.');
       }
       if (kind == QuizAnswerKind.unknown && selectedOptionIndex != null) {
         throw const SourceStoreConflict('Unknown quiz answer cannot carry a selected option.');
       }
 
-      final isCorrect = kind == QuizAnswerKind.selected
-          ? selectedOptionIndex == question.correctOptionIndex
-          : null;
+      final isCorrect = kind == QuizAnswerKind.selected ? selectedOptionIndex == question.correctOptionIndex : null;
       final correctIncrement = isCorrect == true ? 1 : 0;
       final incorrectIncrement = isCorrect == false ? 1 : 0;
       final unknownIncrement = kind == QuizAnswerKind.unknown ? 1 : 0;
@@ -1992,12 +1980,9 @@ ON CONFLICT(learner_id, question_id) DO UPDATE SET
       );
 
       final nextCursor = cursor + 1;
-      final correct =
-          (sessionRows.isEmpty ? 0 : sessionRows.single['correct_count']! as int) + correctIncrement;
-      final incorrect =
-          (sessionRows.isEmpty ? 0 : sessionRows.single['incorrect_count']! as int) + incorrectIncrement;
-      final unknown =
-          (sessionRows.isEmpty ? 0 : sessionRows.single['unknown_count']! as int) + unknownIncrement;
+      final correct = (sessionRows.isEmpty ? 0 : sessionRows.single['correct_count']! as int) + correctIncrement;
+      final incorrect = (sessionRows.isEmpty ? 0 : sessionRows.single['incorrect_count']! as int) + incorrectIncrement;
+      final unknown = (sessionRows.isEmpty ? 0 : sessionRows.single['unknown_count']! as int) + unknownIncrement;
       await transaction.rawInsert(
         '''
 INSERT INTO quiz_sessions (

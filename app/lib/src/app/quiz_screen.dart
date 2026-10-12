@@ -158,9 +158,8 @@ class _QuizScreenState extends State<QuizScreen> {
     } catch (_) {
       if (!mounted) return;
       setState(() => _busy = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Quiz turu yeniden başlatılamadı. Tekrar deneyebilirsin.')),
-      );
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text('Quiz turu yeniden başlatılamadı. Tekrar deneyebilirsin.')));
     }
   }
 
@@ -519,12 +518,7 @@ class _QuestionCard extends StatelessWidget {
         children: [
           const Text(
             'SORU',
-            style: TextStyle(
-              color: AtelierStyle.pulse,
-              fontSize: 10,
-              fontWeight: FontWeight.w900,
-              letterSpacing: 0.8,
-            ),
+            style: TextStyle(color: AtelierStyle.pulse, fontSize: 10, fontWeight: FontWeight.w900, letterSpacing: 0.8),
           ),
           const SizedBox(height: 9),
           Semantics(
@@ -624,10 +618,10 @@ class _OptionTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final icon = committed
         ? isCorrect
-            ? Icons.check_circle_rounded
-            : wasChosen
-            ? Icons.cancel_outlined
-            : Icons.radio_button_unchecked_rounded
+              ? Icons.check_circle_rounded
+              : wasChosen
+              ? Icons.cancel_outlined
+              : Icons.radio_button_unchecked_rounded
         : selected
         ? Icons.radio_button_checked_rounded
         : Icons.radio_button_unchecked_rounded;
@@ -652,7 +646,12 @@ class _OptionTile extends StatelessWidget {
                 Expanded(
                   child: Text(
                     label,
-                    style: const TextStyle(color: AtelierStyle.ink, fontSize: 15, height: 1.3, fontWeight: FontWeight.w700),
+                    style: const TextStyle(
+                      color: AtelierStyle.ink,
+                      fontSize: 15,
+                      height: 1.3,
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                 ),
               ],
@@ -665,12 +664,7 @@ class _OptionTile extends StatelessWidget {
 }
 
 class _QuizComplete extends StatelessWidget {
-  const _QuizComplete({
-    required this.data,
-    required this.compact,
-    required this.busy,
-    required this.onRestart,
-  });
+  const _QuizComplete({required this.data, required this.compact, required this.busy, required this.onRestart});
 
   final _QuizViewData data;
   final bool compact;

@@ -26,10 +26,7 @@ class QuizLearningService {
   final SqliteSourceStore store;
   final DateTime Function() _now;
 
-  Future<QuizStudyState> openCurrentSet({
-    required AuthenticatedLearner learner,
-    required MaterialId materialId,
-  }) async {
+  Future<QuizStudyState> openCurrentSet({required AuthenticatedLearner learner, required MaterialId materialId}) async {
     final source = await store.currentSourceVersion(learner: learner, materialId: materialId);
     if (source == null) {
       throw const QuizLearningException('Quiz için güncel bir kaynak bulunamadı.');
@@ -93,9 +90,7 @@ class QuizLearningService {
       throw const QuizLearningException('Quiz yanıtı aktif soruyla eşleşmiyor.');
     }
     if (kind == QuizAnswerKind.selected) {
-      if (selectedOptionIndex == null ||
-          selectedOptionIndex < 0 ||
-          selectedOptionIndex >= question.options.length) {
+      if (selectedOptionIndex == null || selectedOptionIndex < 0 || selectedOptionIndex >= question.options.length) {
         throw const QuizLearningException('Seçilen quiz yanıtı geçerli değil.');
       }
     } else if (selectedOptionIndex != null) {
@@ -117,16 +112,9 @@ class QuizLearningService {
     );
   }
 
-  Future<QuizStudyState> restartSession({
-    required AuthenticatedLearner learner,
-    required MaterialId materialId,
-  }) async {
+  Future<QuizStudyState> restartSession({required AuthenticatedLearner learner, required MaterialId materialId}) async {
     final state = await openCurrentSet(learner: learner, materialId: materialId);
-    final session = await store.resetQuizSession(
-      learner: learner,
-      set: state.set,
-      updatedAt: _now().toUtc(),
-    );
+    final session = await store.resetQuizSession(learner: learner, set: state.set, updatedAt: _now().toUtc());
     return QuizStudyState(set: state.set, reviews: state.reviews, session: session);
   }
 
@@ -155,10 +143,7 @@ class QuizLearningService {
         if (!baseOptions.contains(answer)) baseOptions.add(answer);
       }
       final shift = index % baseOptions.length;
-      final options = <String>[
-        ...baseOptions.skip(shift),
-        ...baseOptions.take(shift),
-      ];
+      final options = <String>[...baseOptions.skip(shift), ...baseOptions.take(shift)];
       final correctOptionIndex = options.indexOf(candidate.answer);
       final questionDigest = sha256
           .convert(
@@ -173,11 +158,7 @@ class QuizLearningService {
           id: QuizQuestionId('qzq_${questionDigest.substring(0, 32)}'),
           setId: setId,
           ordinal: questions.length,
-          prompt: candidate.sentence.replaceRange(
-            candidate.wordStartInSentence,
-            candidate.wordEndInSentence,
-            '_____',
-          ),
+          prompt: candidate.sentence.replaceRange(candidate.wordStartInSentence, candidate.wordEndInSentence, '_____'),
           options: options,
           correctOptionIndex: correctOptionIndex,
           sourceAnchor: SourceAnchor(
@@ -247,8 +228,7 @@ class QuizLearningService {
     return candidates;
   }
 
-  static String _normalize(String value) =>
-      value.toLowerCase().replaceAll('İ', 'i').replaceAll('I', 'ı');
+  static String _normalize(String value) => value.toLowerCase().replaceAll('İ', 'i').replaceAll('I', 'ı');
 
   static const _stopWords = <String>{
     'ancak',
