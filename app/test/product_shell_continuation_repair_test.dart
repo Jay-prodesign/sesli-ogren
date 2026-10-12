@@ -82,24 +82,6 @@ Future<void> _openLibraryTab(WidgetTester tester) async {
   expect(activeLibrary, findsOneWidget);
 }
 
-Future<void> _openWorkspaceSource(WidgetTester tester) async {
-  final workspace = find.byType(MaterialWorkspaceScreen);
-  await _pumpUntilFound(tester, workspace);
-  final readSource = find.descendant(of: workspace, matching: find.byIcon(Icons.menu_book_outlined));
-  for (var i = 0; i < 200; i++) {
-    await tester.pump(const Duration(milliseconds: 20));
-    if (find.text('Materyal açılamadı.').evaluate().isNotEmpty) {
-      fail('Workspace entered its recovery state instead of exposing the current source.');
-    }
-    if (readSource.evaluate().isEmpty) continue;
-    await tester.ensureVisible(readSource.first);
-    await tester.pump();
-    await tester.tap(readSource.first);
-    await tester.pump();
-    return;
-  }
-  fail('Expected the Workspace source-reading action.');
-}
 
 void main() {
   sqfliteFfiInit();
@@ -213,11 +195,18 @@ void main() {
     addTearDown(store.close);
     final ingest = SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor());
     const learner = AppRuntime.localM5LearnerFixture;
-    await ingest.ingestPastedText(
+    final ingested = await ingest.ingestPastedText(
       learner: learner,
       materialId: const MaterialId('reader-return-material'),
       text: 'Fotosentez bitkilerde gerçekleşir ve ışık enerjisi kullanır.',
       sourceName: 'Biyoloji · Fotosentez',
+    );
+    await store.saveReaderResumeProgress(
+      learner: learner,
+      materialId: const MaterialId('reader-return-material'),
+      sourceVersionId: ingested.sourceVersion.identity.sourceVersionId,
+      progress: 0.35,
+      updatedAt: DateTime.utc(2026, 10, 12, 12),
     );
     final runtime = AppRuntime(
       learner: learner,
@@ -234,18 +223,19 @@ void main() {
     );
     await _pumpUntilFound(tester, find.text('Biyoloji · Fotosentez'));
     await _openLibraryTab(tester);
-    final libraryMaterialTitle = find.text('Biyoloji · Fotosentez').hitTestable();
-    await _pumpUntilFound(tester, libraryMaterialTitle);
-    expect(libraryMaterialTitle, findsOneWidget);
-    await tester.tap(libraryMaterialTitle);
-    await _openWorkspaceSource(tester);
+    final continueReading =
+        find.byKey(const ValueKey('library-continue-reader-return-material')).hitTestable();
+    await _pumpUntilFound(tester, continueReading);
+    expect(find.text('Okumaya devam et').hitTestable(), findsOneWidget);
+    await tester.tap(continueReading);
     await _pumpUntilFound(tester, find.byType(SourceReaderScreen));
     expect(find.byType(SourceReaderScreen), findsOneWidget);
     Navigator.of(tester.element(find.byType(SourceReaderScreen))).pop();
-    await _pumpUntilFound(tester, find.byType(MaterialWorkspaceScreen));
-    expect(find.byType(MaterialWorkspaceScreen), findsOneWidget);
-    Navigator.of(tester.element(find.byType(MaterialWorkspaceScreen))).pop();
-    await _pumpUntilFound(tester, find.byType(ProductShellScreen));
+    await _pumpUntilFound(tester, find.byKey(const ValueKey('library-material-list')).hitTestable());
+    final homeTab = find.byIcon(Icons.home_outlined).hitTestable();
+    await _pumpUntilFound(tester, homeTab);
+    await tester.tap(homeTab);
+    await _pumpUntilFound(tester, find.byKey(const ValueKey('la0040-living-home-populated')).hitTestable());
     expect(find.byType(ProductShellScreen), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
@@ -255,11 +245,18 @@ void main() {
     addTearDown(store.close);
     final ingest = SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor());
     const learner = AppRuntime.localM5LearnerFixture;
-    await ingest.ingestPastedText(
+    final ingested = await ingest.ingestPastedText(
       learner: learner,
       materialId: const MaterialId('reader-listen-recall-material'),
       text: 'Fotosentez bitkilerde gerçekleşir ve ışık enerjisi kullanır.',
       sourceName: 'Biyoloji · Fotosentez',
+    );
+    await store.saveReaderResumeProgress(
+      learner: learner,
+      materialId: const MaterialId('reader-listen-recall-material'),
+      sourceVersionId: ingested.sourceVersion.identity.sourceVersionId,
+      progress: 0.35,
+      updatedAt: DateTime.utc(2026, 10, 12, 12),
     );
     final runtime = AppRuntime(
       learner: learner,
@@ -276,11 +273,11 @@ void main() {
     );
     await _pumpUntilFound(tester, find.text('Biyoloji · Fotosentez'));
     await _openLibraryTab(tester);
-    final libraryMaterialTitle = find.text('Biyoloji · Fotosentez').hitTestable();
-    await _pumpUntilFound(tester, libraryMaterialTitle);
-    expect(libraryMaterialTitle, findsOneWidget);
-    await tester.tap(libraryMaterialTitle);
-    await _openWorkspaceSource(tester);
+    final continueReading =
+        find.byKey(const ValueKey('library-continue-reader-listen-recall-material')).hitTestable();
+    await _pumpUntilFound(tester, continueReading);
+    expect(find.text('Okumaya devam et').hitTestable(), findsOneWidget);
+    await tester.tap(continueReading);
     await _pumpUntilFound(tester, find.byType(SourceReaderScreen));
     expect(find.byType(SourceReaderScreen), findsOneWidget);
 
@@ -310,14 +307,10 @@ void main() {
     expect(find.byType(LearningSliceScreen), findsOneWidget);
     Navigator.of(tester.element(find.byType(LearningSliceScreen))).pop();
     await _pumpUntilGone(tester, find.byType(LearningSliceScreen));
-    final activeWorkspace = find.byType(MaterialWorkspaceScreen).hitTestable();
-    await _pumpUntilFound(tester, activeWorkspace);
-    expect(activeWorkspace, findsOneWidget);
-    Navigator.of(tester.element(activeWorkspace)).pop();
-    await _pumpUntilGone(tester, find.byType(MaterialWorkspaceScreen));
     final activeShell = find.byType(ProductShellScreen).hitTestable();
     await _pumpUntilFound(tester, activeShell);
     expect(activeShell, findsOneWidget);
+    await _pumpUntilFound(tester, find.byKey(const ValueKey('library-material-list')).hitTestable());
     expect(tester.takeException(), isNull);
   });
 
