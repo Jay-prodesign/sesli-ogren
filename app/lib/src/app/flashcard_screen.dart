@@ -526,62 +526,62 @@ class _FlashcardStudyView extends StatelessWidget {
                                   key: ValueKey('flashcards-answer-${card.id.value}'),
                                   crossAxisAlignment: CrossAxisAlignment.stretch,
                                   children: [
-                                const Divider(color: AtelierStyle.line),
-                                const SizedBox(height: 10),
-                                const Text(
-                                  'CEVAP',
-                                  style: TextStyle(
-                                    color: AtelierStyle.aqua,
-                                    fontSize: 10,
-                                    fontWeight: FontWeight.w900,
-                                    letterSpacing: 0.9,
-                                  ),
-                                ),
-                                const SizedBox(height: 7),
-                                Text(
-                                  card.back,
-                                  key: const ValueKey('flashcards-answer'),
-                                  style: TextStyle(
-                                    color: AtelierStyle.ink,
-                                    fontSize: compact ? 22 : 25,
-                                    fontWeight: FontWeight.w900,
-                                  ),
-                                ),
-                                const SizedBox(height: 16),
-                                Container(
-                                  key: const ValueKey('flashcards-source-evidence'),
-                                  padding: const EdgeInsets.all(13),
-                                  decoration: BoxDecoration(
-                                    color: AtelierStyle.pulseSoft,
-                                    borderRadius: BorderRadius.circular(14),
-                                  ),
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      const Text(
-                                        'KAYNAKTA',
-                                        style: TextStyle(
-                                          color: AtelierStyle.pulse,
-                                          fontSize: 9.5,
-                                          fontWeight: FontWeight.w900,
-                                          letterSpacing: 0.8,
-                                        ),
+                                    const Divider(color: AtelierStyle.line),
+                                    const SizedBox(height: 10),
+                                    const Text(
+                                      'CEVAP',
+                                      style: TextStyle(
+                                        color: AtelierStyle.aqua,
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.w900,
+                                        letterSpacing: 0.9,
                                       ),
-                                      const SizedBox(height: 5),
-                                      Text(
-                                        card.sourceExcerpt,
-                                        style: const TextStyle(color: AtelierStyle.ink, fontSize: 13, height: 1.4),
+                                    ),
+                                    const SizedBox(height: 7),
+                                    Text(
+                                      card.back,
+                                      key: const ValueKey('flashcards-answer'),
+                                      style: TextStyle(
+                                        color: AtelierStyle.ink,
+                                        fontSize: compact ? 22 : 25,
+                                        fontWeight: FontWeight.w900,
                                       ),
-                                      if (card.sourceAnchor.pageNumber != null) ...[
-                                        const SizedBox(height: 6),
-                                        Text(
-                                          'Sayfa ${card.sourceAnchor.pageNumber}',
-                                          style: const TextStyle(color: AtelierStyle.muted, fontSize: 11.5),
-                                        ),
-                                      ],
-                                    ],
-                                  ),
-                                ),
+                                    ),
+                                    const SizedBox(height: 16),
+                                    Container(
+                                      key: const ValueKey('flashcards-source-evidence'),
+                                      padding: const EdgeInsets.all(13),
+                                      decoration: BoxDecoration(
+                                        color: AtelierStyle.pulseSoft,
+                                        borderRadius: BorderRadius.circular(14),
+                                      ),
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          const Text(
+                                            'KAYNAKTA',
+                                            style: TextStyle(
+                                              color: AtelierStyle.pulse,
+                                              fontSize: 9.5,
+                                              fontWeight: FontWeight.w900,
+                                              letterSpacing: 0.8,
+                                            ),
+                                          ),
+                                          const SizedBox(height: 5),
+                                          Text(
+                                            card.sourceExcerpt,
+                                            style: const TextStyle(color: AtelierStyle.ink, fontSize: 13, height: 1.4),
+                                          ),
+                                          if (card.sourceAnchor.pageNumber != null) ...[
+                                            const SizedBox(height: 6),
+                                            Text(
+                                              'Sayfa ${card.sourceAnchor.pageNumber}',
+                                              style: const TextStyle(color: AtelierStyle.muted, fontSize: 11.5),
+                                            ),
+                                          ],
+                                        ],
+                                      ),
+                                    ),
                                   ],
                                 ),
                               ),
