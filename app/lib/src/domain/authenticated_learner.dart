@@ -7,9 +7,7 @@ class LearnerIdentity {
 
   const LearnerIdentity.authenticated({required this.id}) : kind = LearnerIdentityKind.authenticated;
 
-  const LearnerIdentity.local()
-    : id = const LearnerId('local-device-learner-v1'),
-      kind = LearnerIdentityKind.local;
+  const LearnerIdentity.local() : id = const LearnerId('local-device-learner-v1'), kind = LearnerIdentityKind.local;
 
   final LearnerId id;
   final LearnerIdentityKind kind;
