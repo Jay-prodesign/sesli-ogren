@@ -116,6 +116,54 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  testWidgets('source change while studying fails closed and reloads current cards', (tester) async {
+    final runtime = await _runtime();
+    addTearDown(runtime.close);
+    const materialId = MaterialId('flashcard-source-change-recovery');
+    await runtime.ingest.ingestPastedText(
+      learner: runtime.learner,
+      materialId: materialId,
+      sourceName: 'İlk kart kaynağı',
+      text:
+          'Fotosentez ışık enerjisini kimyasal enerjiye dönüştürür. '
+          'Klorofil ışığın soğurulmasına yardım eder. '
+          'Karbondioksit süreçte önemli bir girdidir.',
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: SesliOgrenTheme.light(),
+        home: LivingDeskReviewScope(
+          child: FlashcardScreen(runtime: runtime, materialId: materialId),
+        ),
+      ),
+    );
+    await _pumpUntilFound(tester, find.byKey(const ValueKey('flashcards-reveal')));
+    await tester.tap(find.byKey(const ValueKey('flashcards-reveal')));
+    await tester.pump();
+
+    await runtime.ingest.ingestPastedText(
+      learner: runtime.learner,
+      materialId: materialId,
+      sourceName: 'Güncel kart kaynağı',
+      text:
+          'Hücresel solunum glikozdaki enerjiyi kullanılabilir enerjiye dönüştürür. '
+          'Mitokondri hücresel enerji dönüşümünde önemli görev alır. '
+          'Oksijenli solunumda oksijen temel girdilerden biridir.',
+    );
+
+    await tester.tap(find.byKey(const ValueKey('flashcards-remembered')));
+    await _pumpUntilFound(tester, find.byKey(const ValueKey('flashcards-inline-reload')));
+    expect(find.byKey(const ValueKey('flashcards-inline-error')), findsOneWidget);
+    expect(find.text('Güncel kartları yükle'), findsOneWidget);
+
+    await tester.tap(find.byKey(const ValueKey('flashcards-inline-reload')));
+    await _pumpUntilFound(tester, find.byKey(const ValueKey('flashcards-reveal')));
+    expect(find.text('Güncel kart kaynağı'), findsOneWidget);
+    expect(find.byKey(const ValueKey('flashcards-answer')), findsNothing);
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('unusable source fails closed with a recoverable Flashcards state', (tester) async {
     final runtime = await _runtime();
     addTearDown(runtime.close);

@@ -170,6 +170,7 @@ class _FlashcardScreenState extends State<FlashcardScreen> {
           onReveal: _reveal,
           onAgain: () => _respond(FlashcardResponse.again),
           onRemembered: () => _respond(FlashcardResponse.remembered),
+          onReload: _reload,
           onRestart: _restart,
         );
       },
@@ -281,6 +282,7 @@ class _FlashcardStudyView extends StatelessWidget {
     required this.onReveal,
     required this.onAgain,
     required this.onRemembered,
+    required this.onReload,
     required this.onRestart,
   });
 
@@ -291,6 +293,7 @@ class _FlashcardStudyView extends StatelessWidget {
   final VoidCallback onReveal;
   final VoidCallback onAgain;
   final VoidCallback onRemembered;
+  final VoidCallback onReload;
   final VoidCallback onRestart;
 
   @override
@@ -551,9 +554,24 @@ class _FlashcardStudyView extends StatelessWidget {
                   key: const ValueKey('flashcards-inline-error'),
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(color: AtelierStyle.attentionSoft, borderRadius: BorderRadius.circular(14)),
-                  child: Text(
-                    inlineError!,
-                    style: const TextStyle(color: AtelierStyle.ink, fontSize: 12.5, height: 1.4),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Text(
+                        inlineError!,
+                        style: const TextStyle(color: AtelierStyle.ink, fontSize: 12.5, height: 1.4),
+                      ),
+                      const SizedBox(height: 6),
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: TextButton.icon(
+                          key: const ValueKey('flashcards-inline-reload'),
+                          onPressed: busy ? null : onReload,
+                          icon: const Icon(Icons.refresh_rounded),
+                          label: const Text('Güncel kartları yükle'),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],
