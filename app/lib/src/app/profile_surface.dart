@@ -14,6 +14,7 @@ class ProfileSurface extends StatefulWidget {
     required this.runtime,
     this.onAccountDeleted,
     this.onSignOut,
+    this.onConnectAccount,
     this.supportEmail = _configuredSupportEmail,
     this.clipboardWriter,
     super.key,
@@ -22,6 +23,7 @@ class ProfileSurface extends StatefulWidget {
   final AppRuntime runtime;
   final VoidCallback? onAccountDeleted;
   final Future<void> Function()? onSignOut;
+  final VoidCallback? onConnectAccount;
   final String supportEmail;
   final Future<void> Function(String value)? clipboardWriter;
 
@@ -43,6 +45,7 @@ class _ProfileSurfaceState extends State<ProfileSurface> {
   }
 
   Future<AccountOverview?> _loadOverview() async {
+    if (widget.runtime.learner.isLocal) return null;
     final overview = await widget.runtime.accountOverview.load(learner: widget.runtime.learner);
     if (mounted) setState(() => _resolvedOverview = overview);
     return overview;
@@ -226,12 +229,13 @@ class _ProfileSurfaceState extends State<ProfileSurface> {
     final accent = living ? AtelierStyle.teal : AppPalette.primary;
     final ink = living ? AtelierStyle.ink : theme.colorScheme.onSurface;
     final muted = living ? AtelierStyle.muted : theme.colorScheme.onSurfaceVariant;
+    final local = widget.runtime.learner.isLocal;
     return ListView(
       key: const ValueKey('profile-surface'),
       padding: const EdgeInsets.fromLTRB(20, 24, 20, 36),
       children: [
         Text(
-          'HESAP VE AYARLAR',
+          local ? 'CİHAZ VE AYARLAR' : 'HESAP VE AYARLAR',
           style: theme.textTheme.labelSmall?.copyWith(color: accent, fontWeight: FontWeight.w800, letterSpacing: 0.8),
         ),
         const SizedBox(height: 7),
@@ -241,60 +245,89 @@ class _ProfileSurfaceState extends State<ProfileSurface> {
         ),
         const SizedBox(height: 6),
         Text(
-          'Hesap, plan ve doğrulanabilir kullanım bilgilerin.',
+          local
+              ? 'Hesap zorunlu değil. Öğrenme alanın şu anda yalnız bu cihazda.'
+              : 'Hesap, plan ve doğrulanabilir kullanım bilgilerin.',
           style: theme.textTheme.bodyMedium?.copyWith(color: muted),
         ),
         const SizedBox(height: 22),
-        FutureBuilder<AccountOverview?>(
-          future: _overview,
-          builder: (context, snapshot) {
-            if (snapshot.connectionState != ConnectionState.done) {
-              return const _AccountOverviewLoadingCard();
-            }
-            final overview = snapshot.data;
-            if (overview == null) {
-              return _ProfilePanel(
-                children: [
-                  _ProfileTile(
-                    icon: Icons.cloud_off_rounded,
-                    title: 'Hesap bilgisi doğrulanamadı',
-                    subtitle: 'Plan veya kullanım bilgisini tahmin etmiyoruz. Bağlantı geri geldiğinde yeniden deneyebilirsin.',
-                    iconBackground: AppPalette.attentionSoft,
-                    iconForeground: AppPalette.attention,
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                    child: OutlinedButton(onPressed: _retry, child: const Text('Yeniden dene')),
-                  ),
-                ],
-              );
-            }
-            return _AccountOverviewCard(overview: overview);
-          },
-        ),
-        const SizedBox(height: 26),
-        const _ProfileSectionLabel('Hesap'),
-        const SizedBox(height: 10),
-        _ProfilePanel(
-          children: [
-            const _ProfileTile(
-              icon: Icons.account_circle_outlined,
-              title: 'Hesap oturumu',
-              subtitle: 'Çıkış yapmak hesabını veya öğrenme verilerini silmez.',
-            ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-              child: OutlinedButton.icon(
-                key: const ValueKey('profile-sign-out'),
-                onPressed: widget.onSignOut == null || _signingOut || _deleting ? null : _signOut,
-                icon: _signingOut
-                    ? const SizedBox.square(dimension: 18, child: CircularProgressIndicator(strokeWidth: 2))
-                    : const Icon(Icons.logout_rounded),
-                label: Text(_signingOut ? 'Çıkış yapılıyor…' : 'Bu cihazda çıkış yap'),
+        if (local)
+          _ProfilePanel(
+            children: [
+              const _ProfileTile(
+                icon: Icons.phone_iphone_rounded,
+                title: 'Hesapsız kullanım',
+                subtitle:
+                    'Materyallerin ve öğrenme geçmişin bu cihazdaki yerel alanda tutuluyor. Bulut hesabı bağlı değil.',
+                iconBackground: AppPalette.signalSoft,
+                iconForeground: AppPalette.signal,
               ),
-            ),
-          ],
-        ),
+              if (widget.onConnectAccount != null)
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                  child: FilledButton.icon(
+                    key: const ValueKey('profile-connect-account'),
+                    onPressed: widget.onConnectAccount,
+                    icon: const Icon(Icons.cloud_outlined),
+                    label: const Text('Hesap bağla · isteğe bağlı'),
+                  ),
+                ),
+            ],
+          )
+        else
+          FutureBuilder<AccountOverview?>(
+            future: _overview,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState != ConnectionState.done) {
+                return const _AccountOverviewLoadingCard();
+              }
+              final overview = snapshot.data;
+              if (overview == null) {
+                return _ProfilePanel(
+                  children: [
+                    _ProfileTile(
+                      icon: Icons.cloud_off_rounded,
+                      title: 'Hesap bilgisi doğrulanamadı',
+                      subtitle:
+                          'Plan veya kullanım bilgisini tahmin etmiyoruz. Bağlantı geri geldiğinde yeniden deneyebilirsin.',
+                      iconBackground: AppPalette.attentionSoft,
+                      iconForeground: AppPalette.attention,
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                      child: OutlinedButton(onPressed: _retry, child: const Text('Yeniden dene')),
+                    ),
+                  ],
+                );
+              }
+              return _AccountOverviewCard(overview: overview);
+            },
+          ),
+        if (!local) ...[
+          const SizedBox(height: 26),
+          const _ProfileSectionLabel('Hesap'),
+          const SizedBox(height: 10),
+          _ProfilePanel(
+            children: [
+              const _ProfileTile(
+                icon: Icons.account_circle_outlined,
+                title: 'Hesap oturumu',
+                subtitle: 'Çıkış yapmak hesabını veya öğrenme verilerini silmez.',
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                child: OutlinedButton.icon(
+                  key: const ValueKey('profile-sign-out'),
+                  onPressed: widget.onSignOut == null || _signingOut || _deleting ? null : _signOut,
+                  icon: _signingOut
+                      ? const SizedBox.square(dimension: 18, child: CircularProgressIndicator(strokeWidth: 2))
+                      : const Icon(Icons.logout_rounded),
+                  label: Text(_signingOut ? 'Çıkış yapılıyor…' : 'Bu cihazda çıkış yap'),
+                ),
+              ),
+            ],
+          ),
+        ],
         const SizedBox(height: 24),
         const _ProfileSectionLabel('Tercihler'),
         const SizedBox(height: 10),
@@ -359,40 +392,45 @@ class _ProfileSurfaceState extends State<ProfileSurface> {
             _ProfileTile(
               icon: Icons.privacy_tip_outlined,
               title: 'Gizlilik ve veriler',
-              subtitle: _remoteDeletionConfirmed
+              subtitle: local
+                  ? 'Hesapsız öğrenme alanın bu cihazdadır. Materyalleri Kütüphane’den tek tek silebilirsin; bulut hesabı veya plan durumu varsaymıyoruz.'
+                  : _remoteDeletionConfirmed
                   ? 'Sunucu hesabı silindi. Bu cihazdaki yerel öğrenme verilerinin temizliği tamamlanmayı bekliyor.'
                   : switch (_resolvedOverview?.accountStatus) {
-                      'deletion_requested' => 'Hesap silme isteği sunucuda bekliyor. Aynı silme isteğini tekrar göndermiyoruz; süreç tamamlanana kadar bu durum korunur.',
+                      'deletion_requested' =>
+                        'Hesap silme isteği sunucuda bekliyor. Aynı silme isteğini tekrar göndermiyoruz; süreç tamamlanana kadar bu durum korunur.',
                       'deleted' =>
                         'Sunucu hesabı silinmiş olarak bildiriyor. Bu ekrandan yeni bir silme isteği gönderilmiyor.',
-                      _ => 'Tek tek materyalleri Kütüphane’den silebilirsin. Hesap silme tüm hesap ve öğrenme verilerini kapsar.',
+                      _ =>
+                        'Tek tek materyalleri Kütüphane’den silebilirsin. Hesap silme tüm hesap ve öğrenme verilerini kapsar.',
                     },
-              iconBackground: const Color(0xFFFDE7E5),
-              iconForeground: AppPalette.destructive,
+              iconBackground: local ? AppPalette.signalSoft : const Color(0xFFFDE7E5),
+              iconForeground: local ? AppPalette.signal : AppPalette.destructive,
             ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-              child: OutlinedButton.icon(
-                key: const ValueKey('profile-delete-account'),
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: AppPalette.destructive,
-                  side: const BorderSide(color: Color(0xFFE7B8B4)),
+            if (!local)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                child: OutlinedButton.icon(
+                  key: const ValueKey('profile-delete-account'),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: AppPalette.destructive,
+                    side: const BorderSide(color: Color(0xFFE7B8B4)),
+                  ),
+                  onPressed: _deleting || (_deletionAlreadyRequested && !_remoteDeletionConfirmed)
+                      ? null
+                      : (_remoteDeletionConfirmed ? _retryLocalCleanup : _deleteAccount),
+                  icon: _deleting
+                      ? const SizedBox.square(dimension: 18, child: CircularProgressIndicator(strokeWidth: 2))
+                      : Icon(
+                          _remoteDeletionConfirmed
+                              ? Icons.delete_sweep_outlined
+                              : _deletionAlreadyRequested
+                              ? Icons.hourglass_top_rounded
+                              : Icons.delete_forever_outlined,
+                        ),
+                  label: Text(_deletionActionLabel),
                 ),
-                onPressed: _deleting || (_deletionAlreadyRequested && !_remoteDeletionConfirmed)
-                    ? null
-                    : (_remoteDeletionConfirmed ? _retryLocalCleanup : _deleteAccount),
-                icon: _deleting
-                    ? const SizedBox.square(dimension: 18, child: CircularProgressIndicator(strokeWidth: 2))
-                    : Icon(
-                        _remoteDeletionConfirmed
-                            ? Icons.delete_sweep_outlined
-                            : _deletionAlreadyRequested
-                            ? Icons.hourglass_top_rounded
-                            : Icons.delete_forever_outlined,
-                      ),
-                label: Text(_deletionActionLabel),
               ),
-            ),
           ],
         ),
       ],
