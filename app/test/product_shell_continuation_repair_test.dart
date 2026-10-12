@@ -211,15 +211,21 @@ void main() {
       matching: find.byType(InkWell),
     );
     await _tapVisible(tester, libraryMaterialCard.last);
+    await _pumpUntilFound(tester, find.byType(MaterialWorkspaceScreen));
+    await _pumpUntilFound(tester, find.byKey(const ValueKey('la0040-atelier-workspace')));
     await _pumpUntilFound(tester, find.byKey(const ValueKey('la0040-atelier-workspace-reader')));
     await _tapVisible(tester, find.byKey(const ValueKey('la0040-atelier-workspace-reader')));
     await _pumpUntilFound(tester, find.byType(SourceReaderScreen));
     expect(find.byType(SourceReaderScreen), findsOneWidget);
     Navigator.of(tester.element(find.byType(SourceReaderScreen))).pop();
-    await _pumpUntilFound(tester, find.byType(MaterialWorkspaceScreen));
-    expect(find.byType(MaterialWorkspaceScreen), findsOneWidget);
-    Navigator.of(tester.element(find.byType(MaterialWorkspaceScreen))).pop();
-    await _pumpUntilFound(tester, find.byType(ProductShellScreen));
+    await _pumpUntilGone(tester, find.byType(SourceReaderScreen));
+    final activeWorkspace = find.byType(MaterialWorkspaceScreen).hitTestable();
+    await _pumpUntilFound(tester, activeWorkspace);
+    expect(activeWorkspace, findsOneWidget);
+    Navigator.of(tester.element(activeWorkspace)).pop();
+    await _pumpUntilGone(tester, find.byType(MaterialWorkspaceScreen));
+    final activeShell = find.byType(ProductShellScreen).hitTestable();
+    await _pumpUntilFound(tester, activeShell);
     expect(find.byType(ProductShellScreen), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
@@ -256,6 +262,8 @@ void main() {
       matching: find.byType(InkWell),
     );
     await _tapVisible(tester, libraryMaterialCard.last);
+    await _pumpUntilFound(tester, find.byType(MaterialWorkspaceScreen));
+    await _pumpUntilFound(tester, find.byKey(const ValueKey('la0040-atelier-workspace')));
     await _pumpUntilFound(tester, find.byKey(const ValueKey('la0040-atelier-workspace-reader')));
     await _tapVisible(tester, find.byKey(const ValueKey('la0040-atelier-workspace-reader')));
     await _pumpUntilFound(tester, find.byType(SourceReaderScreen));
