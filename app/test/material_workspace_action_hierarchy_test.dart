@@ -48,10 +48,7 @@ void main() {
     return MaterialApp(
       theme: SesliOgrenTheme.light(),
       home: MediaQuery(
-        data: MediaQueryData(
-          size: const Size(390, 844),
-          disableAnimations: disableAnimations,
-        ),
+        data: MediaQueryData(size: const Size(390, 844), disableAnimations: disableAnimations),
         child: Scaffold(
           body: AtelierWorkspace(
             material: material(),
@@ -103,9 +100,7 @@ void main() {
     expect(readSource, 0);
     expect(listen, 0);
 
-    final switcher = tester.widget<AnimatedSwitcher>(
-      find.byKey(const ValueKey('workspace-active-step-motion')),
-    );
+    final switcher = tester.widget<AnimatedSwitcher>(find.byKey(const ValueKey('workspace-active-step-motion')));
     expect(switcher.duration, const Duration(milliseconds: 220));
   });
 
