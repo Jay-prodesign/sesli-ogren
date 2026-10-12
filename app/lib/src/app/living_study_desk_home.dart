@@ -632,27 +632,32 @@ class LivingStudyDeskHome extends StatelessWidget {
               ],
             ),
           ),
-          const SizedBox(height: 20),
-          const Text(
-            'NASIL ÇALIŞIR',
-            style: TextStyle(color: _accent, fontSize: 10, fontWeight: FontWeight.w900, letterSpacing: 0.9),
-          ),
-          const SizedBox(height: 10),
-          const AtelierLearningRail(phase: AtelierLearningPhase.source),
-          const SizedBox(height: 18),
+          SizedBox(height: compact ? 12 : 20),
+          if (!compact) ...[
+            const Text(
+              'NASIL ÇALIŞIR',
+              style: TextStyle(color: _accent, fontSize: 10, fontWeight: FontWeight.w900, letterSpacing: 0.9),
+            ),
+            const SizedBox(height: 10),
+            const AtelierLearningRail(phase: AtelierLearningPhase.source),
+            const SizedBox(height: 18),
+          ],
           Container(
+            key: const ValueKey('home-empty-truth'),
             width: double.infinity,
             padding: const EdgeInsets.fromLTRB(13, 11, 13, 11),
             decoration: BoxDecoration(color: AppPalette.primarySoft, borderRadius: BorderRadius.circular(16)),
-            child: const Row(
+            child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Icon(Icons.verified_outlined, color: _accent, size: 19),
-                SizedBox(width: 9),
+                const Icon(Icons.verified_outlined, color: _accent, size: 19),
+                const SizedBox(width: 9),
                 Expanded(
                   child: Text(
-                    'Öğrenme durumun yalnız Hatırla denemesinde değişir. Okumak ve dinlemek hazırlıktır.',
-                    style: TextStyle(color: _sub, fontSize: 12.5, height: 1.4),
+                    compact
+                        ? 'Hatırla denemesi öğrenme durumunu değiştirir.'
+                        : 'Öğrenme durumun yalnız Hatırla denemesinde değişir. Okumak ve dinlemek hazırlıktır.',
+                    style: const TextStyle(color: _sub, fontSize: 12.5, height: 1.4),
                   ),
                 ),
               ],

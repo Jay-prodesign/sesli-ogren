@@ -255,6 +255,8 @@ void main() {
       size: const Size(320, 700),
       textScaler: const TextScaler.linear(1.5),
     );
+    expect(find.byType(AtelierLearningRail), findsNothing);
+    expect(find.byKey(const ValueKey('home-empty-truth')), findsOneWidget);
   });
 
   testWidgets('LA-0040 first source acquisition', (tester) async {

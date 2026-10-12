@@ -500,14 +500,9 @@ class AtelierWorkspace extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Row(
-                          crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
-                            CompanionView(
-                              key: const ValueKey('workspace-compact-companion'),
-                              state: _workspaceCompanionState,
-                              size: 64,
-                            ),
-                            const SizedBox(width: 10),
+                            Icon(_activeStepIcon, color: AtelierStyle.teal, size: 18),
+                            const SizedBox(width: 7),
                             const Expanded(
                               child: Text(
                                 'ŞİMDİ',
@@ -643,16 +638,28 @@ class AtelierWorkspace extends StatelessWidget {
               boxShadow: [BoxShadow(color: Color(0x1214224A), blurRadius: 18, offset: Offset(0, -6))],
             ),
             child: compactSurface
-                ? FilledButton.icon(
-                    key: const ValueKey('la0040-atelier-workspace-recall'),
-                    onPressed: runPrimaryAction,
-                    style: FilledButton.styleFrom(
-                      backgroundColor: AtelierStyle.pulse,
-                      foregroundColor: Colors.white,
-                      minimumSize: const Size.fromHeight(50),
-                    ),
-                    icon: Icon(_activeStepIcon),
-                    label: Text(_activeStepLabel),
+                ? Row(
+                    children: [
+                      CompanionView(
+                        key: const ValueKey('workspace-compact-companion'),
+                        state: _workspaceCompanionState,
+                        size: 48,
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: FilledButton.icon(
+                          key: const ValueKey('la0040-atelier-workspace-recall'),
+                          onPressed: runPrimaryAction,
+                          style: FilledButton.styleFrom(
+                            backgroundColor: AtelierStyle.pulse,
+                            foregroundColor: Colors.white,
+                            minimumSize: const Size.fromHeight(50),
+                          ),
+                          icon: Icon(_activeStepIcon),
+                          label: Text(_activeStepLabel),
+                        ),
+                      ),
+                    ],
                   )
                 : Column(
                     mainAxisSize: MainAxisSize.min,
