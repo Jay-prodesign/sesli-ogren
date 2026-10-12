@@ -78,7 +78,7 @@ class _ProfileSurfaceState extends State<ProfileSurface> {
       context: context,
       builder: (dialogContext) => AlertDialog(
         title: const Text('Bu cihazda çıkış yap?'),
-        content: const Text('Bu cihazdaki oturum kapanacak. Hesabın, materyallerin ve öğrenme verilerin silinmez.'),
+        content: const Text('Bu cihazdaki oturum kapanacak. Misafir olarak devam ediyorsan, hesabına bağlanmamış materyal ve ilerlemene yeniden erişemeyebilirsin. Çıkış yapmadan önce bunu dikkate al.'),
         actions: [
           TextButton(onPressed: () => Navigator.of(dialogContext).pop(false), child: const Text('Vazgeç')),
           FilledButton(onPressed: () => Navigator.of(dialogContext).pop(true), child: const Text('Çıkış yap')),
