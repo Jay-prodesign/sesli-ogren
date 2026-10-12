@@ -534,6 +534,7 @@ void main() {
       ),
     );
     await tester.pump(const Duration(milliseconds: 300));
+    expect(find.byType(AtelierLearningRail), findsOneWidget);
     expect(tester.takeException(), isNull);
     await expectLater(find.byType(Scaffold), matchesGoldenFile('goldens/la0040_source_reader_390x844.png'));
   });
@@ -564,6 +565,7 @@ void main() {
     );
     await tester.pump(const Duration(milliseconds: 300));
     expect(find.text('Kaynağı kapat ve hatırla'), findsOneWidget);
+    expect(find.byType(AtelierLearningRail), findsNothing);
     expect(tester.takeException(), isNull);
     await expectLater(find.byType(Scaffold), matchesGoldenFile('goldens/la0040_source_reader_320_text150.png'));
   });
