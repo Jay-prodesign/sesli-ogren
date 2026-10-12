@@ -180,10 +180,20 @@ void main() {
     await _pumpUntilFound(tester, find.byKey(const ValueKey('workspace-other-study-paths-scroll')));
 
     expect(find.byKey(const ValueKey('workspace-other-study-paths-scroll')), findsOneWidget);
-    expect(find.byKey(const ValueKey('workspace-other-quick-recap')), findsOneWidget);
-    expect(find.byKey(const ValueKey('workspace-other-grounded-explain')), findsOneWidget);
-    expect(find.byKey(const ValueKey('workspace-other-explain-back')), findsOneWidget);
-    expect(find.byKey(const ValueKey('workspace-other-focus')), findsOneWidget);
+    final pathsScroll = find.descendant(
+      of: find.byKey(const ValueKey('workspace-other-study-paths-scroll')),
+      matching: find.byType(Scrollable),
+    );
+    for (final actionKey in const [
+      ValueKey('workspace-other-quick-recap'),
+      ValueKey('workspace-other-grounded-explain'),
+      ValueKey('workspace-other-focus'),
+      ValueKey('workspace-other-explain-back'),
+    ]) {
+      final action = find.byKey(actionKey);
+      await _scrollUntilFound(tester, action, scrollable: pathsScroll);
+      expect(action, findsOneWidget);
+    }
     expect(tester.takeException(), isNull);
   });
 
