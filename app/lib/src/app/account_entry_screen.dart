@@ -386,10 +386,7 @@ class _AccountEntryScreenState extends State<AccountEntryScreen> {
                               Expanded(child: Divider()),
                               Padding(
                                 padding: EdgeInsets.symmetric(horizontal: 10),
-                                child: Text(
-                                  'veya',
-                                  style: TextStyle(color: AtelierStyle.muted, fontSize: 12),
-                                ),
+                                child: Text('veya', style: TextStyle(color: AtelierStyle.muted, fontSize: 12)),
                               ),
                               Expanded(child: Divider()),
                             ],
