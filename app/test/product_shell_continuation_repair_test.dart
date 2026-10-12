@@ -213,9 +213,7 @@ void main() {
     );
     await _pumpUntilFound(tester, find.text('Biyoloji · Fotosentez'));
     await _openLibraryTab(tester);
-    final libraryMaterialCard = find
-        .ancestor(of: find.text('Biyoloji · Fotosentez'), matching: find.byType(InkWell))
-        .hitTestable();
+    final libraryMaterialCard = find.byKey(const ValueKey('library-open-reader-return-material')).hitTestable();
     await _pumpUntilFound(tester, libraryMaterialCard);
     expect(libraryMaterialCard, findsOneWidget);
     await tester.tap(libraryMaterialCard);
@@ -259,9 +257,8 @@ void main() {
     );
     await _pumpUntilFound(tester, find.text('Biyoloji · Fotosentez'));
     await _openLibraryTab(tester);
-    final libraryMaterialCard = find
-        .ancestor(of: find.text('Biyoloji · Fotosentez'), matching: find.byType(InkWell))
-        .hitTestable();
+    final libraryMaterialCard =
+        find.byKey(const ValueKey('library-open-reader-listen-recall-material')).hitTestable();
     await _pumpUntilFound(tester, libraryMaterialCard);
     expect(libraryMaterialCard, findsOneWidget);
     await tester.tap(libraryMaterialCard);
