@@ -206,10 +206,7 @@ void main() {
     await _pumpUntilFound(tester, find.text('Biyoloji · Fotosentez'));
     await tester.tap(find.text('Kütüphane'));
     await tester.pump(const Duration(milliseconds: 120));
-    final libraryMaterialCard = find
-        .ancestor(of: find.text('Biyoloji · Fotosentez'), matching: find.byType(InkWell))
-        .hitTestable();
-    await _tapVisible(tester, libraryMaterialCard.first);
+    await _tapVisible(tester, find.byKey(const ValueKey('library-open-reader-return-material')));
     await _pumpUntilFound(tester, find.byKey(const ValueKey('la0040-atelier-workspace-reader')));
     await _tapVisible(tester, find.byKey(const ValueKey('la0040-atelier-workspace-reader')));
     await _pumpUntilFound(tester, find.byType(SourceReaderScreen));
@@ -250,10 +247,7 @@ void main() {
     await _pumpUntilFound(tester, find.text('Biyoloji · Fotosentez'));
     await tester.tap(find.text('Kütüphane').last);
     await tester.pump(const Duration(milliseconds: 120));
-    final libraryMaterialCard = find
-        .ancestor(of: find.text('Biyoloji · Fotosentez'), matching: find.byType(InkWell))
-        .hitTestable();
-    await _tapVisible(tester, libraryMaterialCard.first);
+    await _tapVisible(tester, find.byKey(const ValueKey('library-open-reader-listen-recall-material')));
     await _pumpUntilFound(tester, find.byKey(const ValueKey('la0040-atelier-workspace-reader')));
     await _tapVisible(tester, find.byKey(const ValueKey('la0040-atelier-workspace-reader')));
     await _pumpUntilFound(tester, find.byType(SourceReaderScreen));
