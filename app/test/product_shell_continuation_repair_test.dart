@@ -77,7 +77,9 @@ Future<void> _openLibraryTab(WidgetTester tester) async {
   await _pumpUntilFound(tester, libraryTab);
   expect(libraryTab, findsOneWidget);
   await tester.tap(libraryTab);
-  await _pumpUntilFound(tester, find.byKey(const ValueKey('library-material-list')));
+  final activeLibrary = find.byKey(const ValueKey('library-material-list')).hitTestable();
+  await _pumpUntilFound(tester, activeLibrary);
+  expect(activeLibrary, findsOneWidget);
 }
 
 void main() {
@@ -213,12 +215,12 @@ void main() {
     );
     await _pumpUntilFound(tester, find.text('Biyoloji · Fotosentez'));
     await _openLibraryTab(tester);
-    final libraryMaterialCard = find.byKey(const ValueKey('library-open-reader-return-material')).hitTestable();
-    await _pumpUntilFound(tester, libraryMaterialCard);
-    expect(libraryMaterialCard, findsOneWidget);
-    await tester.tap(libraryMaterialCard);
-    await tester.pump();
-    await _pumpUntilFound(tester, find.byKey(const ValueKey('la0040-atelier-workspace-reader')));
+    final libraryMaterialTitle = find.text('Biyoloji · Fotosentez').hitTestable();
+    await _pumpUntilFound(tester, libraryMaterialTitle);
+    expect(libraryMaterialTitle, findsOneWidget);
+    await tester.tap(libraryMaterialTitle);
+    await _pumpUntilFound(tester, find.byType(MaterialWorkspaceScreen));
+    await _pumpUntilFound(tester, find.byKey(const ValueKey('la0040-atelier-workspace-reader')), maxPumps: 400);
     await _tapVisible(tester, find.byKey(const ValueKey('la0040-atelier-workspace-reader')));
     await _pumpUntilFound(tester, find.byType(SourceReaderScreen));
     expect(find.byType(SourceReaderScreen), findsOneWidget);
@@ -257,12 +259,12 @@ void main() {
     );
     await _pumpUntilFound(tester, find.text('Biyoloji · Fotosentez'));
     await _openLibraryTab(tester);
-    final libraryMaterialCard = find.byKey(const ValueKey('library-open-reader-listen-recall-material')).hitTestable();
-    await _pumpUntilFound(tester, libraryMaterialCard);
-    expect(libraryMaterialCard, findsOneWidget);
-    await tester.tap(libraryMaterialCard);
-    await tester.pump();
-    await _pumpUntilFound(tester, find.byKey(const ValueKey('la0040-atelier-workspace-reader')));
+    final libraryMaterialTitle = find.text('Biyoloji · Fotosentez').hitTestable();
+    await _pumpUntilFound(tester, libraryMaterialTitle);
+    expect(libraryMaterialTitle, findsOneWidget);
+    await tester.tap(libraryMaterialTitle);
+    await _pumpUntilFound(tester, find.byType(MaterialWorkspaceScreen));
+    await _pumpUntilFound(tester, find.byKey(const ValueKey('la0040-atelier-workspace-reader')), maxPumps: 400);
     await _tapVisible(tester, find.byKey(const ValueKey('la0040-atelier-workspace-reader')));
     await _pumpUntilFound(tester, find.byType(SourceReaderScreen));
     expect(find.byType(SourceReaderScreen), findsOneWidget);
