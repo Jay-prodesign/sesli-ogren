@@ -28,6 +28,26 @@ class SupabaseLearnerAuth {
     return AuthenticatedLearner(id: LearnerId(currentUser.id));
   }
 
+  /// Opens a real, RLS-scoped anonymous session without requiring an email.
+  /// Anonymous access must be enabled in the configured Supabase project.
+  static Future<AuthenticatedLearner> signInAsGuest() async {
+    final client = await _clientForConfiguredProject();
+    try {
+      final response = await client.auth.signInAnonymously();
+      final user = response.user;
+      if (user == null || response.session == null) {
+        throw const LearnerAuthenticationException('Misafir oturumu açılamadı.');
+      }
+      return AuthenticatedLearner(id: LearnerId(user.id));
+    } on LearnerAuthenticationException {
+      rethrow;
+    } catch (_) {
+      throw const LearnerAuthenticationException(
+        'Misafir girişi şu anda kullanılamıyor. Yeniden dene veya e-posta ile giriş yap.',
+      );
+    }
+  }
+
   static Future<void> requestEmailOtp(String email) async {
     final normalized = _normalizedEmail(email);
     final client = await _clientForConfiguredProject();
