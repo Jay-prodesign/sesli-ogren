@@ -392,12 +392,7 @@ class _FlashcardStudyView extends StatelessWidget {
             AtelierSourceTrustStrip(sourceVersion: data.source, showSourceName: !compact),
             const SizedBox(height: 16),
             if (completed)
-              _FlashcardCompletion(
-                study: study,
-                busy: busy,
-                onRestart: onRestart,
-                compact: compact,
-              )
+              _FlashcardCompletion(study: study, busy: busy, onRestart: onRestart, compact: compact)
             else ...[
               Row(
                 children: [
@@ -437,7 +432,7 @@ class _FlashcardStudyView extends StatelessWidget {
               const SizedBox(height: 10),
               LinearProgressIndicator(
                 key: const ValueKey('flashcards-progress'),
-                value: total == 0 ? 0 : completedCount / total,
+                value: total == 0 ? 0.0 : completedCount / total,
                 minHeight: 4,
                 color: AtelierStyle.pulse,
                 backgroundColor: AtelierStyle.line,
@@ -467,7 +462,7 @@ class _FlashcardStudyView extends StatelessWidget {
                     ),
                     const SizedBox(height: 10),
                     Text(
-                      card.front,
+                      card!.front,
                       style: TextStyle(
                         color: AtelierStyle.ink,
                         fontSize: compact ? 20 : 23,
@@ -480,7 +475,7 @@ class _FlashcardStudyView extends StatelessWidget {
                       duration: reducedMotion ? Duration.zero : const Duration(milliseconds: 200),
                       child: revealed
                           ? Column(
-                              key: ValueKey('flashcards-answer-${card.id.value}'),
+                              key: ValueKey('flashcards-answer-${card!.id.value}'),
                               crossAxisAlignment: CrossAxisAlignment.stretch,
                               children: [
                                 const Divider(color: AtelierStyle.line),
@@ -496,7 +491,7 @@ class _FlashcardStudyView extends StatelessWidget {
                                 ),
                                 const SizedBox(height: 7),
                                 Text(
-                                  card.back,
+                                  card!.back,
                                   key: const ValueKey('flashcards-answer'),
                                   style: TextStyle(
                                     color: AtelierStyle.ink,
@@ -526,13 +521,13 @@ class _FlashcardStudyView extends StatelessWidget {
                                       ),
                                       const SizedBox(height: 5),
                                       Text(
-                                        card.sourceExcerpt,
+                                        card!.sourceExcerpt,
                                         style: const TextStyle(color: AtelierStyle.ink, fontSize: 13, height: 1.4),
                                       ),
-                                      if (card.sourceAnchor.pageNumber != null) ...[
+                                      if (card!.sourceAnchor.pageNumber != null) ...[
                                         const SizedBox(height: 6),
                                         Text(
-                                          'Sayfa ${card.sourceAnchor.pageNumber}',
+                                          'Sayfa ${card!.sourceAnchor.pageNumber}',
                                           style: const TextStyle(color: AtelierStyle.muted, fontSize: 11.5),
                                         ),
                                       ],
@@ -555,10 +550,7 @@ class _FlashcardStudyView extends StatelessWidget {
                 Container(
                   key: const ValueKey('flashcards-inline-error'),
                   padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: AtelierStyle.attentionSoft,
-                    borderRadius: BorderRadius.circular(14),
-                  ),
+                  decoration: BoxDecoration(color: AtelierStyle.attentionSoft, borderRadius: BorderRadius.circular(14)),
                   child: Text(
                     inlineError!,
                     style: const TextStyle(color: AtelierStyle.ink, fontSize: 12.5, height: 1.4),
@@ -581,12 +573,7 @@ class _FlashcardStudyView extends StatelessWidget {
 }
 
 class _FlashcardCompletion extends StatelessWidget {
-  const _FlashcardCompletion({
-    required this.study,
-    required this.busy,
-    required this.onRestart,
-    required this.compact,
-  });
+  const _FlashcardCompletion({required this.study, required this.busy, required this.onRestart, required this.compact});
 
   final FlashcardStudyState study;
   final bool busy;
@@ -631,6 +618,15 @@ class _FlashcardCompletion extends StatelessWidget {
           icon: const Icon(Icons.replay_rounded),
           label: const Text('Kartları yeniden çalış'),
         ),
+        if (Navigator.of(context).canPop()) ...[
+          const SizedBox(height: 6),
+          TextButton.icon(
+            key: const ValueKey('flashcards-return-workspace'),
+            onPressed: busy ? null : () => Navigator.of(context).maybePop(),
+            icon: const Icon(Icons.arrow_back_rounded),
+            label: const Text('Çalışma alanına dön'),
+          ),
+        ],
       ],
     ),
   );

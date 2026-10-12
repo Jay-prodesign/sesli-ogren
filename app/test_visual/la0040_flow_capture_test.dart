@@ -425,7 +425,6 @@ void main() {
     await expectLater(find.byType(Scaffold), matchesGoldenFile('goldens/la0040_account_entry_390x844.png'));
   });
 
-
   testWidgets('LA-0040 source-grounded Flashcards', (tester) async {
     tester.view.physicalSize = const Size(390, 844);
     tester.view.devicePixelRatio = 1;
@@ -477,10 +476,7 @@ void main() {
     await tester.tap(find.byKey(const ValueKey('flashcards-reveal')));
     await tester.pump(const Duration(milliseconds: 250));
     expect(find.byKey(const ValueKey('flashcards-source-evidence')), findsOneWidget);
-    await expectLater(
-      find.byType(Scaffold),
-      matchesGoldenFile('goldens/la0040_flashcards_revealed_390x844.png'),
-    );
+    await expectLater(find.byType(Scaffold), matchesGoldenFile('goldens/la0040_flashcards_revealed_390x844.png'));
   });
 
   testWidgets('LA-0040 Flashcards survives 320px + large type', (tester) async {
@@ -527,10 +523,7 @@ void main() {
     }
     expect(find.byKey(const ValueKey('flashcards-reveal')), findsOneWidget);
     expect(tester.takeException(), isNull);
-    await expectLater(
-      find.byType(Scaffold),
-      matchesGoldenFile('goldens/la0040_flashcards_320_text150.png'),
-    );
+    await expectLater(find.byType(Scaffold), matchesGoldenFile('goldens/la0040_flashcards_320_text150.png'));
   });
 
   testWidgets('LA-0040 source-first Listen', (tester) async {

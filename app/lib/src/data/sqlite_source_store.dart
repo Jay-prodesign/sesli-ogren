@@ -1442,35 +1442,27 @@ LIMIT 1
 
   Future<void> saveFlashcardSet({required AuthenticatedLearner learner, required FlashcardSetRecord set}) {
     return _database.transaction((transaction) async {
-      await transaction.insert(
-        'flashcard_sets',
-        {
-          'learner_id': learner.id.value,
-          'flashcard_set_id': set.id.value,
-          'material_id': set.materialId.value,
-          'source_version_id': set.sourceVersionId.value,
-          'generation_version': set.generationVersion,
-          'created_at_utc': set.createdAt.toUtc().toIso8601String(),
-        },
-        conflictAlgorithm: ConflictAlgorithm.ignore,
-      );
+      await transaction.insert('flashcard_sets', {
+        'learner_id': learner.id.value,
+        'flashcard_set_id': set.id.value,
+        'material_id': set.materialId.value,
+        'source_version_id': set.sourceVersionId.value,
+        'generation_version': set.generationVersion,
+        'created_at_utc': set.createdAt.toUtc().toIso8601String(),
+      }, conflictAlgorithm: ConflictAlgorithm.ignore);
       for (final card in set.cards) {
-        await transaction.insert(
-          'flashcards',
-          {
-            'learner_id': learner.id.value,
-            'card_id': card.id.value,
-            'flashcard_set_id': set.id.value,
-            'ordinal': card.ordinal,
-            'front_text': card.front,
-            'back_text': card.back,
-            'source_start': card.sourceAnchor.startOffset,
-            'source_end': card.sourceAnchor.endOffset,
-            'page_number': card.sourceAnchor.pageNumber,
-            'source_excerpt': card.sourceExcerpt,
-          },
-          conflictAlgorithm: ConflictAlgorithm.ignore,
-        );
+        await transaction.insert('flashcards', {
+          'learner_id': learner.id.value,
+          'card_id': card.id.value,
+          'flashcard_set_id': set.id.value,
+          'ordinal': card.ordinal,
+          'front_text': card.front,
+          'back_text': card.back,
+          'source_start': card.sourceAnchor.startOffset,
+          'source_end': card.sourceAnchor.endOffset,
+          'page_number': card.sourceAnchor.pageNumber,
+          'source_excerpt': card.sourceExcerpt,
+        }, conflictAlgorithm: ConflictAlgorithm.ignore);
       }
     });
   }
@@ -1611,19 +1603,15 @@ ON CONFLICT(learner_id, flashcard_set_id) DO UPDATE SET
     required FlashcardSetId setId,
     required DateTime updatedAt,
   }) async {
-    await _database.insert(
-      'flashcard_sessions',
-      {
-        'learner_id': learner.id.value,
-        'flashcard_set_id': setId.value,
-        'cursor_index': 0,
-        'remembered_count': 0,
-        'again_count': 0,
-        'is_completed': 0,
-        'updated_at_utc': updatedAt.toUtc().toIso8601String(),
-      },
-      conflictAlgorithm: ConflictAlgorithm.replace,
-    );
+    await _database.insert('flashcard_sessions', {
+      'learner_id': learner.id.value,
+      'flashcard_set_id': setId.value,
+      'cursor_index': 0,
+      'remembered_count': 0,
+      'again_count': 0,
+      'is_completed': 0,
+      'updated_at_utc': updatedAt.toUtc().toIso8601String(),
+    }, conflictAlgorithm: ConflictAlgorithm.replace);
   }
 
   @override

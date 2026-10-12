@@ -114,8 +114,18 @@ void main() {
     expect(find.text('HAZIRLIK'), findsOneWidget);
     expect(find.text('AKTİF ÇALIŞMA'), findsOneWidget);
     expect(find.text('Kaynağı hızlıca toparla'), findsOneWidget);
-    expect(find.byKey(const ValueKey('workspace-other-flashcards')), findsOneWidget);
-    await tester.tap(find.byKey(const ValueKey('workspace-other-flashcards')));
+    final flashcardAction = find.byKey(const ValueKey('workspace-other-flashcards'));
+    expect(flashcardAction, findsOneWidget);
+    await tester.scrollUntilVisible(
+      flashcardAction,
+      120,
+      scrollable: find.descendant(
+        of: find.byKey(const ValueKey('workspace-other-study-paths-scroll')),
+        matching: find.byType(Scrollable),
+      ),
+    );
+    await tester.pump();
+    await tester.tap(flashcardAction.hitTestable());
     await tester.pump();
     expect(flashcards, 1);
   });

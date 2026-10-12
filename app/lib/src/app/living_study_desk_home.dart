@@ -638,7 +638,6 @@ class LivingStudyDeskHome extends StatelessWidget {
               ],
             ),
           ),
-
         ],
       );
     },

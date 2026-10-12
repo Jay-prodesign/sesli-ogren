@@ -296,9 +296,8 @@ class _MaterialWorkspaceScreenState extends State<MaterialWorkspaceScreen> {
   Future<void> _openFlashcards() async {
     await Navigator.of(context).push<void>(
       MaterialPageRoute(
-        builder: (_) => _preserveProductExperience(
-          FlashcardScreen(runtime: widget.runtime, materialId: widget.materialId),
-        ),
+        builder: (_) =>
+            _preserveProductExperience(FlashcardScreen(runtime: widget.runtime, materialId: widget.materialId)),
       ),
     );
     if (!mounted) return;

@@ -26,10 +26,7 @@ void main() {
     final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
     addTearDown(store.close);
     final ingest = SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor());
-    final service = FlashcardLearningService(
-      store: store,
-      now: () => DateTime.utc(2026, 10, 12, 12),
-    );
+    final service = FlashcardLearningService(store: store, now: () => DateTime.utc(2026, 10, 12, 12));
     const learner = LearnerIdentity.local();
     const materialId = MaterialId('flashcard-material');
 
@@ -81,9 +78,77 @@ void main() {
     expect(afterOne.reviews[first.currentCard!.id]?.reviewCount, 1);
     expect(afterOne.reviews[first.currentCard!.id]?.lastResponse, FlashcardResponse.remembered);
 
-    final durable = await service.openCurrentSet(learner: learner, materialId: materialId);
+    var durable = await service.openCurrentSet(learner: learner, materialId: materialId);
     expect(durable.session.cursorIndex, 1);
     expect(durable.reviews[first.currentCard!.id]?.rememberedCount, 1);
+
+    while (!durable.session.isCompleted) {
+      final card = durable.currentCard!;
+      durable = await service.recordResponse(
+        learner: learner,
+        materialId: materialId,
+        setId: durable.set.id,
+        cardId: card.id,
+        response: FlashcardResponse.remembered,
+        answerWasRevealed: true,
+      );
+    }
+    expect(durable.session.cursorIndex, durable.set.cards.length);
+    expect(durable.session.rememberedCount, durable.set.cards.length);
+
+    final restarted = await service.restartSession(learner: learner, materialId: materialId);
+    expect(restarted.session.cursorIndex, 0);
+    expect(restarted.session.rememberedCount, 0);
+    expect(restarted.reviews[first.currentCard!.id]?.rememberedCount, 1);
+  });
+
+  test('learner namespaces never share flashcard review state', () async {
+    final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
+    addTearDown(store.close);
+    final ingest = SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor());
+    final service = FlashcardLearningService(store: store);
+    const local = LearnerIdentity.local();
+    const account = LearnerIdentity.authenticated(id: LearnerId('flashcard-account-user'));
+    const materialId = MaterialId('flashcard-identity-boundary');
+    const text =
+        'Fotosentez ışık enerjisini kimyasal enerjiye dönüştürür. '
+        'Klorofil ışığın soğurulmasına yardım eder. '
+        'Karbondioksit süreçte önemli bir girdidir.';
+
+    await ingest.ingestPastedText(
+      learner: local,
+      materialId: materialId,
+      sourceName: 'Yerel kart kaynağı',
+      text: text,
+    );
+    final localState = await service.openCurrentSet(learner: local, materialId: materialId);
+    await service.recordResponse(
+      learner: local,
+      materialId: materialId,
+      setId: localState.set.id,
+      cardId: localState.currentCard!.id,
+      response: FlashcardResponse.again,
+      answerWasRevealed: true,
+    );
+
+    await expectLater(
+      service.openCurrentSet(learner: account, materialId: materialId),
+      throwsA(isA<FlashcardLearningException>()),
+    );
+
+    await ingest.ingestPastedText(
+      learner: account,
+      materialId: materialId,
+      sourceName: 'Hesap kart kaynağı',
+      text: text,
+    );
+    final accountState = await service.openCurrentSet(learner: account, materialId: materialId);
+    expect(accountState.session.cursorIndex, 0);
+    expect(accountState.reviews, isEmpty);
+
+    final localReopened = await service.openCurrentSet(learner: local, materialId: materialId);
+    expect(localReopened.session.cursorIndex, 1);
+    expect(localReopened.reviews, isNotEmpty);
   });
 
   test('source update creates a new set and never inherits old review state', () async {

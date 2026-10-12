@@ -63,7 +63,9 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: SesliOgrenTheme.light(),
-        home: LivingDeskReviewScope(child: FlashcardScreen(runtime: runtime, materialId: materialId)),
+        home: LivingDeskReviewScope(
+          child: FlashcardScreen(runtime: runtime, materialId: materialId),
+        ),
       ),
     );
     await _pumpUntilFound(tester, find.byKey(const ValueKey('flashcards-reveal')));
@@ -86,11 +88,55 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: SesliOgrenTheme.light(),
-        home: LivingDeskReviewScope(child: FlashcardScreen(runtime: runtime, materialId: materialId)),
+        home: LivingDeskReviewScope(
+          child: FlashcardScreen(runtime: runtime, materialId: materialId),
+        ),
       ),
     );
     await _pumpUntilFound(tester, find.text('KART 2 / 3'));
     expect(find.text('KART 2 / 3'), findsOneWidget);
+
+    for (final expectedNext in ['KART 3 / 3', 'complete']) {
+      await tester.tap(find.byKey(const ValueKey('flashcards-reveal')));
+      await tester.pump();
+      await tester.tap(find.byKey(const ValueKey('flashcards-remembered')));
+      if (expectedNext == 'complete') {
+        await _pumpUntilFound(tester, find.byKey(const ValueKey('flashcards-complete')));
+      } else {
+        await _pumpUntilFound(tester, find.text(expectedNext));
+      }
+    }
+    expect(find.text('3 hatırlandı · 0 tekrar'), findsOneWidget);
+    expect(find.textContaining('ustalık veya kalıcı öğrenme iddiası değildir'), findsOneWidget);
+
+    await tester.tap(find.byKey(const ValueKey('flashcards-restart')));
+    await _pumpUntilFound(tester, find.text('KART 1 / 3'));
+    expect(find.text('KART 1 / 3'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('unusable source fails closed with a recoverable Flashcards state', (tester) async {
+    final runtime = await _runtime();
+    addTearDown(runtime.close);
+    const materialId = MaterialId('flashcard-unusable-source');
+    await runtime.ingest.ingestPastedText(
+      learner: runtime.learner,
+      materialId: materialId,
+      sourceName: 'Çok kısa not',
+      text: 'Kısa.',
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: SesliOgrenTheme.light(),
+        home: LivingDeskReviewScope(
+          child: FlashcardScreen(runtime: runtime, materialId: materialId),
+        ),
+      ),
+    );
+    await _pumpUntilFound(tester, find.byKey(const ValueKey('flashcards-retry')));
+    expect(find.text('Kartlar açılamadı.'), findsOneWidget);
+    expect(find.byKey(const ValueKey('flashcards-reveal')), findsNothing);
     expect(tester.takeException(), isNull);
   });
 
@@ -118,7 +164,9 @@ void main() {
         theme: SesliOgrenTheme.light(),
         home: MediaQuery(
           data: const MediaQueryData(textScaler: TextScaler.linear(1.5), disableAnimations: true),
-          child: LivingDeskReviewScope(child: FlashcardScreen(runtime: runtime, materialId: materialId)),
+          child: LivingDeskReviewScope(
+            child: FlashcardScreen(runtime: runtime, materialId: materialId),
+          ),
         ),
       ),
     );

@@ -390,9 +390,7 @@ class AtelierWorkspace extends StatelessWidget {
                   key: const ValueKey('workspace-other-flashcards'),
                   leading: const Icon(Icons.style_outlined),
                   title: const Text('Kartlarla çalış'),
-                  subtitle: const Text(
-                    'Kaynağa bağlı kartları aç, cevabı gör ve kendi kart çalışma yanıtını kaydet.',
-                  ),
+                  subtitle: const Text('Kaynağa bağlı kartları aç, cevabı gör ve kendi kart çalışma yanıtını kaydet.'),
                   onTap: () {
                     Navigator.of(sheetContext).pop();
                     onFlashcards!();

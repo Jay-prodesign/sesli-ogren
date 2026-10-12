@@ -111,11 +111,7 @@ class FlashcardLearningService {
     required MaterialId materialId,
   }) async {
     final state = await openCurrentSet(learner: learner, materialId: materialId);
-    await _store.resetFlashcardSession(
-      learner: learner,
-      setId: state.set.id,
-      updatedAt: _now().toUtc(),
-    );
+    await _store.resetFlashcardSession(learner: learner, setId: state.set.id, updatedAt: _now().toUtc());
     return openCurrentSet(learner: learner, materialId: materialId);
   }
 
@@ -129,9 +125,7 @@ class FlashcardLearningService {
     if (candidates.isEmpty) {
       throw const FlashcardLearningException('Kaynak, kart üretmek için yeterli kavram içermiyor.');
     }
-    final setDigest = sha256
-        .convert(utf8.encode('${sourceVersionId.value}\u0000$generationVersion'))
-        .toString();
+    final setDigest = sha256.convert(utf8.encode('${sourceVersionId.value}\u0000$generationVersion')).toString();
     final setId = FlashcardSetId('fcs_${setDigest.substring(0, 32)}');
 
     final cards = <FlashcardRecord>[];
@@ -150,11 +144,7 @@ class FlashcardLearningService {
           id: FlashcardId('fc_${cardDigest.substring(0, 32)}'),
           setId: setId,
           ordinal: cards.length,
-          front: candidate.sentence.replaceRange(
-            candidate.wordStartInSentence,
-            candidate.wordEndInSentence,
-            '_____',
-          ),
+          front: candidate.sentence.replaceRange(candidate.wordStartInSentence, candidate.wordEndInSentence, '_____'),
           back: candidate.answer,
           sourceAnchor: SourceAnchor(
             startOffset: candidate.sentenceStart,
