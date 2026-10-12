@@ -84,9 +84,7 @@ Future<void> _openLibraryTab(WidgetTester tester) async {
 
 Finder _workspaceReadSourceAction() => find
     .byWidgetPredicate(
-      (widget) =>
-          widget is Text &&
-          (widget.data == 'Tam kaynağı aç' || widget.data == 'Kaynağın tamamını oku'),
+      (widget) => widget is Text && (widget.data == 'Tam kaynağı aç' || widget.data == 'Kaynağın tamamını oku'),
     )
     .hitTestable();
 
