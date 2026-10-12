@@ -471,8 +471,7 @@ class _FlashcardStudyView extends StatelessWidget {
                 minHeight: 4,
                 color: AtelierStyle.pulse,
                 backgroundColor: AtelierStyle.line,
-                semanticsLabel: 'Kart ilerlemesi',
-                semanticsValue: '${completedCount + 1} / $total',
+                semanticsLabel: 'Kart ilerlemesi · Kart ${completedCount + 1} / $total',
               ),
               const SizedBox(height: 18),
               Container(
