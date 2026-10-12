@@ -77,6 +77,23 @@ Future<void> _tapVisible(WidgetTester tester, Finder finder) async {
   await tester.pump();
 }
 
+Future<void> _revealWorkspaceReader(WidgetTester tester) async {
+  final workspace = find.byKey(const ValueKey('la0040-atelier-workspace'));
+  await _pumpUntilFound(tester, workspace);
+
+  final reader = find.byKey(const ValueKey('la0040-atelier-workspace-reader'));
+  for (var i = 0; i < 8 && reader.evaluate().isEmpty; i++) {
+    final scrollable = find
+        .descendant(of: workspace, matching: find.byType(Scrollable))
+        .hitTestable();
+    if (scrollable.evaluate().isNotEmpty) {
+      await tester.drag(scrollable.first, const Offset(0, -120), warnIfMissed: false);
+    }
+    await tester.pump(const Duration(milliseconds: 30));
+  }
+  expect(reader, findsOneWidget);
+}
+
 void main() {
   sqfliteFfiInit();
 
@@ -218,7 +235,7 @@ void main() {
     await _pumpUntilFound(tester, find.byType(MaterialWorkspaceScreen));
     await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 180)));
     await tester.pump();
-    await _pumpUntilFound(tester, find.byKey(const ValueKey('la0040-atelier-workspace-reader')));
+    await _revealWorkspaceReader(tester);
     await _tapVisible(tester, find.byKey(const ValueKey('la0040-atelier-workspace-reader')));
     await _pumpUntilFound(tester, find.byType(SourceReaderScreen));
     expect(find.byType(SourceReaderScreen), findsOneWidget);
@@ -265,7 +282,7 @@ void main() {
     await _pumpUntilFound(tester, find.byType(MaterialWorkspaceScreen));
     await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 180)));
     await tester.pump();
-    await _pumpUntilFound(tester, find.byKey(const ValueKey('la0040-atelier-workspace-reader')));
+    await _revealWorkspaceReader(tester);
     await _tapVisible(tester, find.byKey(const ValueKey('la0040-atelier-workspace-reader')));
     await _pumpUntilFound(tester, find.byType(SourceReaderScreen));
     expect(find.byType(SourceReaderScreen), findsOneWidget);
