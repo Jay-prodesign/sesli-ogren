@@ -178,6 +178,7 @@ void main() {
     await _scrollUntilFound(tester, otherPaths, scrollable: workspaceScroll);
     await _tapVisible(tester, otherPaths);
     await _pumpUntilFound(tester, find.byKey(const ValueKey('workspace-other-study-paths-scroll')));
+    await tester.pumpAndSettle();
 
     expect(find.byKey(const ValueKey('workspace-other-study-paths-scroll')), findsOneWidget);
     final pathsScroll = find.byKey(const ValueKey('workspace-other-study-paths-scroll'));
