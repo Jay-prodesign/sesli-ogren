@@ -507,7 +507,9 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('account-deleted recovery remains reachable on a short large-text screen', (tester) async {
+  testWidgets('account-deleted recovery preserves the separate local namespace on a short large-text screen', (
+    tester,
+  ) async {
     tester.view.physicalSize = const Size(320, 460);
     tester.view.devicePixelRatio = 1;
     tester.platformDispatcher.textScaleFactorTestValue = 1.6;
@@ -522,14 +524,22 @@ void main() {
       } catch (_) {}
     });
     final deletion = _RecordingAccountDeletionGateway();
+    final ingest = SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor());
     final runtime = AppRuntime(
       learner: AppRuntime.localM5LearnerFixture,
       store: store,
-      ingest: SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor()),
+      ingest: ingest,
       recall: RecallLearningService(sourceStore: store, learningStore: store.learningTruthStore()),
       telemetry: store.operationalTelemetry(),
       accountOverview: const _ReadyAccountOverviewGateway(),
       accountDeletion: deletion,
+    );
+    const localMaterialId = MaterialId('account-delete-preserved-local');
+    await ingest.ingestPastedText(
+      learner: AppRuntime.localLearner,
+      materialId: localMaterialId,
+      text: 'Hesap silinse de cihazdaki bu yerel kaynak korunmalıdır.',
+      sourceName: 'Korunan yerel not',
     );
 
     await tester.pumpWidget(
@@ -556,9 +566,9 @@ void main() {
     await pumpUntilFound(tester, find.byKey(const ValueKey('account-deleted-scroll')));
 
     expect(deletion.calls, 1);
-    expect(find.text('Hesabın ve verilerin silindi.'), findsOneWidget);
+    expect(find.text('Hesabın ve hesaba bağlı verilerin silindi.'), findsOneWidget);
     await tester.scrollUntilVisible(
-      find.text('Yeni öğrenme alanı oluştur'),
+      find.text('Cihazdaki öğrenmeye dön'),
       160,
       scrollable: find.descendant(
         of: find.byKey(const ValueKey('account-deleted-scroll')),
@@ -566,7 +576,14 @@ void main() {
       ),
     );
     await tester.pump();
-    expect(find.text('Yeni öğrenme alanı oluştur').hitTestable(), findsOneWidget);
+    expect(find.text('Cihazdaki öğrenmeye dön').hitTestable(), findsOneWidget);
+
+    await tapVisible(tester, find.text('Cihazdaki öğrenmeye dön'));
+    await pumpUntilFound(tester, find.text('Korunan yerel not'));
+    expect(
+      await store.material(learner: AppRuntime.localLearner, materialId: localMaterialId),
+      isNotNull,
+    );
     expect(tester.takeException(), isNull);
   });
 
