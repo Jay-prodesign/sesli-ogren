@@ -90,6 +90,7 @@ jobs:
             test/flashcard_learning_service_test.dart
             test/flashcard_screen_test.dart
             test/quiz_learning_service_test.dart
+            test/quiz_screen_test.dart
           )
           for test_file in "${tests[@]}"; do
             echo "::group::core:${test_file}"

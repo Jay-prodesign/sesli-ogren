@@ -48,6 +48,7 @@ void main() {
     required VoidCallback onRecall,
     required VoidCallback onListen,
     VoidCallback? onFlashcards,
+    VoidCallback? onQuiz,
   }) {
     return MaterialApp(
       theme: SesliOgrenTheme.light(),
@@ -67,6 +68,7 @@ void main() {
             onGroundedExplain: () {},
             onExplain: () {},
             onFlashcards: onFlashcards,
+            onQuiz: onQuiz,
             onFocus: () {},
           ),
         ),
@@ -79,6 +81,7 @@ void main() {
     var recall = 0;
     var listen = 0;
     var flashcards = 0;
+    var quiz = 0;
 
     await tester.pumpWidget(
       frame(
@@ -87,6 +90,7 @@ void main() {
         onRecall: () => recall += 1,
         onListen: () => listen += 1,
         onFlashcards: () => flashcards += 1,
+        onQuiz: () => quiz += 1,
       ),
     );
 
@@ -129,6 +133,23 @@ void main() {
     await tester.tap(flashcardAction.hitTestable());
     await tester.pump();
     expect(flashcards, 1);
+
+    await tester.tap(find.byKey(const ValueKey('workspace-other-study-paths')));
+    await tester.pumpAndSettle();
+    final quizAction = find.byKey(const ValueKey('workspace-other-quiz'));
+    expect(quizAction, findsOneWidget);
+    await tester.scrollUntilVisible(
+      quizAction,
+      120,
+      scrollable: find.descendant(
+        of: find.byKey(const ValueKey('workspace-other-study-paths-scroll')),
+        matching: find.byType(Scrollable),
+      ),
+    );
+    await tester.pump();
+    await tester.tap(quizAction.hitTestable());
+    await tester.pump();
+    expect(quiz, 1);
   });
 
   testWidgets('Workspace keeps source recovery actions reachable when extracted text is unavailable', (tester) async {

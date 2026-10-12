@@ -17,6 +17,7 @@ import 'living_study_desk_home.dart';
 import 'atelier_learning_surfaces.dart';
 import 'listen_screen.dart';
 import 'quick_recap_screen.dart';
+import 'quiz_screen.dart';
 import 'source_reader_screen.dart';
 
 class MaterialWorkspaceScreen extends StatefulWidget {
@@ -306,6 +307,18 @@ class _MaterialWorkspaceScreenState extends State<MaterialWorkspaceScreen> {
     });
   }
 
+  Future<void> _openQuiz() async {
+    await Navigator.of(context).push<void>(
+      MaterialPageRoute(
+        builder: (_) => _preserveProductExperience(QuizScreen(runtime: widget.runtime, materialId: widget.materialId)),
+      ),
+    );
+    if (!mounted) return;
+    setState(() {
+      _snapshot = _load();
+    });
+  }
+
   Future<void> _openFocus(_WorkspaceSnapshot data) async {
     await Navigator.of(context).push<void>(
       MaterialPageRoute(
@@ -456,6 +469,10 @@ class _MaterialWorkspaceScreenState extends State<MaterialWorkspaceScreen> {
                 _consumeFirstValueIntent();
                 _openFlashcards();
               },
+              onQuiz: () {
+                _consumeFirstValueIntent();
+                _openQuiz();
+              },
               onFocus: () {
                 _consumeFirstValueIntent();
                 _openFocus(snapshot.data!);
@@ -480,6 +497,7 @@ class _WorkspaceBody extends StatelessWidget {
     required this.onGroundedExplain,
     required this.onExplain,
     required this.onFlashcards,
+    required this.onQuiz,
     required this.onFocus,
   });
 
@@ -493,6 +511,7 @@ class _WorkspaceBody extends StatelessWidget {
   final VoidCallback onGroundedExplain;
   final VoidCallback onExplain;
   final VoidCallback onFlashcards;
+  final VoidCallback onQuiz;
   final VoidCallback onFocus;
 
   @override
@@ -527,6 +546,7 @@ class _WorkspaceBody extends StatelessWidget {
         onGroundedExplain: onGroundedExplain,
         onExplain: onExplain,
         onFlashcards: onFlashcards,
+        onQuiz: onQuiz,
         onFocus: onFocus,
       );
     }
