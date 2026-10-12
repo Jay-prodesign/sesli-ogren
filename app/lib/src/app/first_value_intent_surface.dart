@@ -1,4 +1,7 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../domain/learning_contracts.dart';
 import 'atelier_learning_surfaces.dart';
@@ -36,6 +39,19 @@ class FirstValueIntentSurface extends StatelessWidget {
 
   IconData get _recommendedActionIcon => Icons.menu_book_outlined;
 
+  void _runLearningAction(BuildContext context, VoidCallback action) {
+    final media = MediaQuery.maybeOf(context);
+    final quietFeedback = (media?.disableAnimations ?? false) || (media?.accessibleNavigation ?? false);
+    if (!quietFeedback) {
+      try {
+        unawaited(HapticFeedback.selectionClick().catchError((_) {}));
+      } catch (_) {
+        // Feedback is acknowledgement only and must never block navigation.
+      }
+    }
+    action();
+  }
+
   void _showOtherPaths(BuildContext context) {
     showModalBottomSheet<void>(
       context: context,
@@ -61,7 +77,7 @@ class FirstValueIntentSurface extends StatelessWidget {
                 subtitle: const Text('Kaynağı sesli takip et.'),
                 onTap: () {
                   Navigator.of(sheetContext).pop();
-                  onListen();
+                  _runLearningAction(context, onListen);
                 },
               ),
               ListTile(
@@ -71,7 +87,7 @@ class FirstValueIntentSurface extends StatelessWidget {
                 subtitle: const Text('Kısa genel bakış al; bu kanıt değildir.'),
                 onTap: () {
                   Navigator.of(sheetContext).pop();
-                  onQuickRecap();
+                  _runLearningAction(context, onQuickRecap);
                 },
               ),
               ListTile(
@@ -81,7 +97,7 @@ class FirstValueIntentSurface extends StatelessWidget {
                 subtitle: const Text('Kaynak kapanır; kendi hatırladığınla denersin.'),
                 onTap: () {
                   Navigator.of(sheetContext).pop();
-                  onRecall();
+                  _runLearningAction(context, onRecall);
                 },
               ),
               ListTile(
@@ -91,7 +107,7 @@ class FirstValueIntentSurface extends StatelessWidget {
                 subtitle: const Text('Küçük bir bölümü adım adım çalış.'),
                 onTap: () {
                   Navigator.of(sheetContext).pop();
-                  onFocus();
+                  _runLearningAction(context, onFocus);
                 },
               ),
             ],
@@ -262,7 +278,7 @@ class FirstValueIntentSurface extends StatelessWidget {
                   ),
                   FilledButton.icon(
                     key: const ValueKey('first-intent-recommend'),
-                    onPressed: _recommendedAction,
+                    onPressed: () => _runLearningAction(context, _recommendedAction),
                     style: FilledButton.styleFrom(
                       backgroundColor: AtelierStyle.pulse,
                       foregroundColor: Colors.white,
@@ -304,7 +320,7 @@ class FirstValueIntentSurface extends StatelessWidget {
                   const SizedBox(height: 9),
                   OutlinedButton.icon(
                     key: const ValueKey('first-intent-listen-direct'),
-                    onPressed: onListen,
+                    onPressed: () => _runLearningAction(context, onListen),
                     style: OutlinedButton.styleFrom(
                       foregroundColor: AtelierStyle.teal,
                       minimumSize: const Size.fromHeight(48),

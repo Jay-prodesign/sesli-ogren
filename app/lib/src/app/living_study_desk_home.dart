@@ -1,4 +1,7 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../domain/learning_contracts.dart';
 import '../domain/learning_truth.dart';
@@ -168,6 +171,19 @@ class LivingStudyDeskHome extends StatelessWidget {
 
   String _type(MaterialRecord m) => m.mediaType == SourceMediaType.pdf ? 'PDF KAYNAĞI' : 'METİN NOTU';
 
+  void _runLearningAction(BuildContext context, VoidCallback action) {
+    final media = MediaQuery.maybeOf(context);
+    final quietFeedback = (media?.disableAnimations ?? false) || (media?.accessibleNavigation ?? false);
+    if (!quietFeedback) {
+      try {
+        unawaited(HapticFeedback.selectionClick().catchError((_) {}));
+      } catch (_) {
+        // Feedback is acknowledgement only and must never block navigation.
+      }
+    }
+    action();
+  }
+
   @override
   Widget build(BuildContext context) {
     final hasMaterial = material != null;
@@ -294,7 +310,7 @@ class LivingStudyDeskHome extends StatelessWidget {
           clipBehavior: Clip.antiAlias,
           child: InkWell(
             key: const ValueKey('la0040-living-material-open'),
-            onTap: onOpenWorkspace,
+            onTap: () => _runLearningAction(context, onOpenWorkspace),
             child: Container(
               width: double.infinity,
               padding: compactFirstViewport
@@ -424,7 +440,7 @@ class LivingStudyDeskHome extends StatelessWidget {
             width: double.infinity,
             child: FilledButton.icon(
               key: const ValueKey('la0040-living-continue'),
-              onPressed: _nextActionHandler,
+              onPressed: () => _runLearningAction(context, _nextActionHandler),
               icon: Icon(_nextActionIcon, size: 20),
               label: Text(_nextActionCta),
               style: FilledButton.styleFrom(
@@ -442,7 +458,10 @@ class LivingStudyDeskHome extends StatelessWidget {
           alignment: Alignment.center,
           child: TextButton.icon(
             key: const ValueKey('la0040-living-listen'),
-            onPressed: (_hasReaderResume || _hasListenResume) ? onOpenLearning : onOpenListen,
+            onPressed: () => _runLearningAction(
+              context,
+              (_hasReaderResume || _hasListenResume) ? onOpenLearning : onOpenListen,
+            ),
             icon: Icon(
               (_hasReaderResume || _hasListenResume) ? Icons.psychology_alt_outlined : Icons.headphones_rounded,
               size: 18,
@@ -535,7 +554,7 @@ class LivingStudyDeskHome extends StatelessWidget {
                   title: Text(item.title, maxLines: 2, overflow: TextOverflow.ellipsis),
                   subtitle: const Text('Sıradaki öğrenme adımını aç'),
                   trailing: const Icon(Icons.chevron_right_rounded, color: _sub),
-                  onTap: () => onOpenMaterial(item.id),
+                  onTap: () => _runLearningAction(context, () => onOpenMaterial(item.id)),
                 ),
               ),
             ),
@@ -619,7 +638,7 @@ class LivingStudyDeskHome extends StatelessWidget {
                 const SizedBox(height: 18),
                 FilledButton.icon(
                   key: const ValueKey('la0040-living-add'),
-                  onPressed: onOpenLearning,
+                  onPressed: () => _runLearningAction(context, onOpenLearning),
                   icon: const Icon(Icons.add_rounded),
                   label: const Text('İlk kaynağımı ekle'),
                   style: FilledButton.styleFrom(
