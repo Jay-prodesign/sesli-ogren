@@ -569,8 +569,7 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> with WidgetsBinding
     final paper = living ? AtelierStyle.paper : Theme.of(context).colorScheme.surfaceContainerLow;
     final line = living ? AtelierStyle.line : Theme.of(context).colorScheme.outlineVariant;
     final ink = living ? AtelierStyle.ink : Theme.of(context).colorScheme.onSurface;
-    final compactLayout =
-        MediaQuery.sizeOf(context).width < 360 || MediaQuery.textScalerOf(context).scale(1) > 1.2;
+    final compactLayout = MediaQuery.sizeOf(context).width < 360 || MediaQuery.textScalerOf(context).scale(1) > 1.2;
     return Scaffold(
       backgroundColor: living ? AtelierStyle.canvas : null,
       appBar: AppBar(
