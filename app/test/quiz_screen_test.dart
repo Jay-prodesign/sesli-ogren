@@ -136,9 +136,15 @@ void main() {
     await _pumpUntilFound(tester, find.byKey(const ValueKey('quiz-submit')));
     expect(find.byKey(const ValueKey('quiz-source-evidence')), findsNothing);
 
-    await tester.tap(find.byKey(const ValueKey('quiz-option-1')));
+    final wrongOption = find.byKey(const ValueKey('quiz-option-1'));
+    await tester.ensureVisible(wrongOption);
     await tester.pump();
-    await tester.tap(find.byKey(const ValueKey('quiz-submit')));
+    await tester.tap(wrongOption.hitTestable());
+    await tester.pump();
+    final submit = find.byKey(const ValueKey('quiz-submit'));
+    await tester.ensureVisible(submit);
+    await tester.pump();
+    await tester.tap(submit.hitTestable());
     await _pumpUntilFound(tester, find.byKey(const ValueKey('quiz-source-evidence')));
     expect(find.text('Kaynakla eşleşmedi.'), findsOneWidget);
     expect(find.text('Doğru yanıt: Fotosentez'), findsOneWidget);
