@@ -11,12 +11,10 @@ class AccountEntryScreen extends StatefulWidget {
     required this.onAuthenticated,
     this.requestOtp = SupabaseLearnerAuth.requestEmailOtp,
     this.verifyOtp = SupabaseLearnerAuth.verifyEmailOtp,
-    this.signInAsGuest = SupabaseLearnerAuth.signInAsGuest,
     super.key,
   });
 
   final Future<void> Function(AuthenticatedLearner learner) onAuthenticated;
-  final Future<AuthenticatedLearner> Function() signInAsGuest;
   final Future<void> Function(String email) requestOtp;
   final Future<AuthenticatedLearner> Function({required String email, required String token}) verifyOtp;
 
@@ -50,24 +48,6 @@ class _AccountEntryScreenState extends State<AccountEntryScreen> {
     final domain = value.substring(at + 1);
     final dot = domain.lastIndexOf('.');
     return dot > 0 && dot < domain.length - 1;
-  }
-
-  Future<void> _continueAsGuest() async {
-    if (_busy) return;
-    setState(() {
-      _busy = true;
-      _error = null;
-    });
-    try {
-      final learner = await widget.signInAsGuest();
-      await widget.onAuthenticated(learner);
-    } on LearnerAuthenticationException catch (error) {
-      if (mounted) setState(() => _error = error.message);
-    } catch (_) {
-      if (mounted) setState(() => _error = 'Misafir oturumu açılamadı. Tekrar dene.');
-    } finally {
-      if (mounted) setState(() => _busy = false);
-    }
   }
 
   Future<void> _requestCode() async {
@@ -329,31 +309,10 @@ class _AccountEntryScreenState extends State<AccountEntryScreen> {
                         Text(
                           _codeRequested
                               ? '${_emailController.text.trim()} adresine gönderilen 6 haneli kodu gir.'
-                              : 'Hesap zorunlu değil. İstersen e-posta ile giriş yap.',
+                              : 'E-posta adresinle giriş yap veya yeni hesabını oluştur. Şifre gerekmiyor.',
                           style: theme.textTheme.bodyMedium?.copyWith(color: AtelierStyle.muted, height: 1.45),
                         ),
-                        if (!_codeRequested) ...[
-                          const SizedBox(height: 16),
-                          FilledButton.icon(
-                            key: const ValueKey('guest-first-continue'),
-                            onPressed: _busy ? null : _continueAsGuest,
-                            icon: const Icon(Icons.arrow_forward_rounded),
-                            label: const Text('Üye olmadan başla'),
-                            style: FilledButton.styleFrom(
-                              backgroundColor: AtelierStyle.pulse,
-                              foregroundColor: Colors.white,
-                              minimumSize: const Size.fromHeight(54),
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          const Text(
-                            'Misafir ilerlemen bu oturuma bağlıdır. Cihaz değiştirirken otomatik taşınmaz.',
-                            style: TextStyle(color: AtelierStyle.muted, fontSize: 12),
-                          ),
-                          const SizedBox(height: 18),
-                          const Text('Veya e-posta ile devam et', style: TextStyle(fontWeight: FontWeight.w700)),
-                        ],
-                        const SizedBox(height: 14),
+                        const SizedBox(height: 20),
                         if (!_codeRequested)
                           TextField(
                             controller: _emailController,

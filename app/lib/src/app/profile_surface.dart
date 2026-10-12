@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../account/account_overview_gateway.dart';
-import '../auth/supabase_learner_auth.dart';
 import 'app_runtime.dart';
 import 'app_theme.dart';
 import 'atelier_learning_surfaces.dart';
@@ -71,76 +70,6 @@ class _ProfileSurfaceState extends State<ProfileSurface> {
     };
   }
 
-  Future<void> _linkGuestEmail() async {
-    final emailController = TextEditingController();
-    final codeController = TextEditingController();
-    try {
-      final email = await showDialog<String>(
-        context: context,
-        builder: (dialogContext) => AlertDialog(
-          title: const Text('İlerlemeni hesabına bağla'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Text('Mevcut misafir kimliğini koruyarak e-posta doğrulaması başlatılır.'),
-              TextField(
-                controller: emailController,
-                keyboardType: TextInputType.emailAddress,
-                decoration: const InputDecoration(labelText: 'E-posta adresi'),
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(onPressed: () => Navigator.pop(dialogContext), child: const Text('Vazgeç')),
-            FilledButton(onPressed: () => Navigator.pop(dialogContext, emailController.text.trim()), child: const Text('Kod gönder')),
-          ],
-        ),
-      );
-      if (email == null || !mounted) return;
-      await SupabaseLearnerAuth.requestGuestEmailLink(email);
-      if (!mounted) return;
-      final code = await showDialog<String>(
-        context: context,
-        builder: (dialogContext) => AlertDialog(
-          title: const Text('E-postanı doğrula'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Text('E-postana gelen 6 haneli kodu gir. Gelen mesaj bağlantı içeriyorsa önce bağlantıyı açabilirsin.'),
-              TextField(
-                controller: codeController,
-                keyboardType: TextInputType.number,
-                maxLength: 6,
-                decoration: const InputDecoration(labelText: 'Doğrulama kodu'),
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(onPressed: () => Navigator.pop(dialogContext), child: const Text('Daha sonra')),
-            FilledButton(onPressed: () => Navigator.pop(dialogContext, codeController.text.trim()), child: const Text('Doğrula')),
-          ],
-        ),
-      );
-      if (code == null || !mounted) return;
-      final linked = await SupabaseLearnerAuth.verifyGuestEmailLink(email: email, token: code);
-      if (linked.id != widget.runtime.learner.id) {
-        throw const LearnerAuthenticationException('Öğrenme kimliği değişti; işlem güvenle tamamlanamadı.');
-      }
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('E-posta doğrulandı. Öğrenme kimliğin korundu.')),
-      );
-    } catch (error) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(error is LearnerAuthenticationException ? error.toString() : 'Hesap bağlanamadı. Misafir oturumun açık kalıyor.')),
-      );
-    } finally {
-      emailController.dispose();
-      codeController.dispose();
-    }
-  }
-
   Future<void> _signOut() async {
     final callback = widget.onSignOut;
     if (callback == null || _signingOut || _deleting) return;
@@ -149,7 +78,7 @@ class _ProfileSurfaceState extends State<ProfileSurface> {
       context: context,
       builder: (dialogContext) => AlertDialog(
         title: const Text('Bu cihazda çıkış yap?'),
-        content: const Text('Bu cihazdaki oturum kapanacak. Misafir oturumunda çıkış yaparsan hesabına bağlanmamış materyallerine ve öğrenme ilerlemene yeniden erişemezsin. Hesap bağlama henüz sunulmuyor. Devam etmek istediğine emin misin?'),
+        content: const Text('Bu cihazdaki oturum kapanacak. Hesabın, materyallerin ve öğrenme verilerin silinmez.'),
         actions: [
           TextButton(onPressed: () => Navigator.of(dialogContext).pop(false), child: const Text('Vazgeç')),
           FilledButton(onPressed: () => Navigator.of(dialogContext).pop(true), child: const Text('Çıkış yap')),
@@ -348,33 +277,10 @@ class _ProfileSurfaceState extends State<ProfileSurface> {
         const SizedBox(height: 10),
         _ProfilePanel(
           children: [
-            FutureBuilder<bool>(
-              future: SupabaseLearnerAuth.isCurrentSessionGuest(),
-              builder: (context, snapshot) {
-                if (snapshot.data != true) return const SizedBox.shrink();
-                return Column(
-                  children: [
-                    const _ProfileTile(
-                      icon: Icons.mark_email_read_outlined,
-                      title: 'Misafir ilerlemeni koru',
-                      subtitle: 'E-posta bağlayarak aynı öğrenme kimliğiyle devam et.',
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                      child: FilledButton(
-                        onPressed: _linkGuestEmail,
-                        child: const Text('E-posta bağla'),
-                      ),
-                    ),
-                    const Divider(height: 1),
-                  ],
-                );
-              },
-            ),
             const _ProfileTile(
               icon: Icons.account_circle_outlined,
               title: 'Hesap oturumu',
-              subtitle: 'Misafir oturumundan çıkarsan bağlanmamış ilerlemene yeniden erişemezsin.',
+              subtitle: 'Çıkış yapmak hesabını veya öğrenme verilerini silmez.',
             ),
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
