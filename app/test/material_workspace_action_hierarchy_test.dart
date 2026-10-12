@@ -161,9 +161,7 @@ void main() {
       findsOneWidget,
     );
 
-    final switcher = tester.widget<AnimatedSwitcher>(
-      find.byKey(const ValueKey('workspace-active-step-motion')),
-    );
+    final switcher = tester.widget<AnimatedSwitcher>(find.byKey(const ValueKey('workspace-active-step-motion')));
     expect(switcher.duration, Duration.zero);
 
     await tester.tap(find.byKey(const ValueKey('la0040-atelier-workspace-recall')));
