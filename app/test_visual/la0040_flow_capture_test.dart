@@ -657,7 +657,9 @@ void main() {
         theme: SesliOgrenTheme.light(),
         home: MediaQuery(
           data: const MediaQueryData(disableAnimations: true),
-          child: LivingDeskReviewScope(child: QuizScreen(runtime: runtime, materialId: quizMaterialId)),
+          child: LivingDeskReviewScope(
+            child: QuizScreen(runtime: runtime, materialId: quizMaterialId),
+          ),
         ),
       ),
     );
@@ -702,7 +704,10 @@ void main() {
     }
     expect(find.byKey(const ValueKey('quiz-complete')), findsOneWidget);
     expect(find.text('1 doğru · 0 yanlış · 2 bilmiyorum'), findsOneWidget);
-    expect(find.textContaining('genel ustalık, sınav hazır oluşu veya kalıcı öğrenme iddiası değildir'), findsOneWidget);
+    expect(
+      find.textContaining('genel ustalık, sınav hazır oluşu veya kalıcı öğrenme iddiası değildir'),
+      findsOneWidget,
+    );
     await expectLater(find.byType(Scaffold), matchesGoldenFile('goldens/la0040_quiz_complete_390x844.png'));
   });
 
@@ -739,7 +744,9 @@ void main() {
         theme: SesliOgrenTheme.light(),
         home: MediaQuery(
           data: const MediaQueryData(disableAnimations: true),
-          child: LivingDeskReviewScope(child: QuizScreen(runtime: runtime, materialId: quizMaterialId)),
+          child: LivingDeskReviewScope(
+            child: QuizScreen(runtime: runtime, materialId: quizMaterialId),
+          ),
         ),
       ),
     );
@@ -802,7 +809,9 @@ void main() {
         theme: SesliOgrenTheme.light(),
         home: MediaQuery(
           data: const MediaQueryData(textScaler: TextScaler.linear(1.5), disableAnimations: true),
-          child: LivingDeskReviewScope(child: QuizScreen(runtime: runtime, materialId: quizMaterialId)),
+          child: LivingDeskReviewScope(
+            child: QuizScreen(runtime: runtime, materialId: quizMaterialId),
+          ),
         ),
       ),
     );
