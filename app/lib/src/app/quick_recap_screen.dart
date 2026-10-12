@@ -878,8 +878,7 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> with WidgetsBinding
             LayoutBuilder(
               key: const ValueKey('quick-recap-utility-actions'),
               builder: (context, constraints) {
-                final compactUtilities =
-                    constraints.maxWidth < 360 || MediaQuery.textScalerOf(context).scale(1) > 1.2;
+                final compactUtilities = constraints.maxWidth < 360 || MediaQuery.textScalerOf(context).scale(1) > 1.2;
                 final listen = OutlinedButton.icon(
                   style: outlineStyle,
                   onPressed: () {
