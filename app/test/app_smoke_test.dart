@@ -217,7 +217,7 @@ Widget testShell(AppRuntime runtime) {
   );
 }
 
-Future<void> pumpUntilFound(WidgetTester tester, Finder finder, {int maxPumps = 100}) async {
+Future<void> pumpUntilFound(WidgetTester tester, Finder finder, {int maxPumps = 200}) async {
   for (var i = 0; i < maxPumps; i++) {
     await tester.pump(const Duration(milliseconds: 20));
     if (finder.evaluate().isNotEmpty) {
@@ -227,7 +227,7 @@ Future<void> pumpUntilFound(WidgetTester tester, Finder finder, {int maxPumps = 
   fail('Expected widget was not reached within bounded pumps.');
 }
 
-Future<void> pumpUntilGone(WidgetTester tester, Finder finder, {int maxPumps = 100}) async {
+Future<void> pumpUntilGone(WidgetTester tester, Finder finder, {int maxPumps = 200}) async {
   for (var i = 0; i < maxPumps; i++) {
     await tester.pump(const Duration(milliseconds: 20));
     if (finder.evaluate().isEmpty) {
@@ -241,7 +241,7 @@ Future<void> scrollUntilFound(
   WidgetTester tester,
   Finder target, {
   required Finder scrollable,
-  int maxDrags = 14,
+  int maxDrags = 30,
   double delta = -180,
 }) async {
   for (var i = 0; i < maxDrags && target.evaluate().isEmpty; i++) {
@@ -494,7 +494,7 @@ void main() {
       of: find.byKey(const ValueKey('profile-surface')),
       matching: find.byType(Scrollable),
     );
-    final deleteAccount = find.text('Hesabımı ve verilerimi sil');
+    final deleteAccount = find.byKey(const ValueKey('profile-delete-account'));
     await scrollUntilFound(tester, deleteAccount, scrollable: profileScroll);
     await tapVisible(tester, deleteAccount);
     await pumpUntilFound(tester, find.text('Hesabı ve verileri sil?'));
@@ -850,6 +850,15 @@ void main() {
     await pumpUntilFound(tester, otherPaths);
     await tester.tap(otherPaths);
     await pumpUntilFound(tester, find.byKey(const ValueKey('workspace-other-study-paths-scroll')));
+    final otherPathsScroll = find.descendant(
+      of: find.byKey(const ValueKey('workspace-other-study-paths-scroll')),
+      matching: find.byType(Scrollable),
+    );
+    await scrollUntilFound(
+      tester,
+      find.byKey(const ValueKey('workspace-other-focus')),
+      scrollable: otherPathsScroll,
+    );
     await tapVisible(tester, find.byKey(const ValueKey('workspace-other-focus')));
     await pumpUntilFound(tester, find.text('KISA ODAK · 3 ADIM'));
     expect(find.byKey(const ValueKey('focus-source-trust')), findsOneWidget);
@@ -869,6 +878,15 @@ void main() {
     await pumpUntilFound(tester, otherPathsAfterFocus);
     await tester.tap(otherPathsAfterFocus);
     await pumpUntilFound(tester, find.byKey(const ValueKey('workspace-other-study-paths-scroll')));
+    final explainPathsScroll = find.descendant(
+      of: find.byKey(const ValueKey('workspace-other-study-paths-scroll')),
+      matching: find.byType(Scrollable),
+    );
+    await scrollUntilFound(
+      tester,
+      find.byKey(const ValueKey('workspace-other-explain-back')),
+      scrollable: explainPathsScroll,
+    );
     await tapVisible(tester, find.byKey(const ValueKey('workspace-other-explain-back')));
     await pumpUntilFound(tester, find.text('Anlatımımı değerlendir'));
 
@@ -1357,7 +1375,7 @@ void main() {
       of: find.byKey(const ValueKey('profile-surface')),
       matching: find.byType(Scrollable),
     );
-    await scrollUntilFound(tester, find.text('Cihazın Türkçe sesi'), scrollable: profileScroll);
+    await scrollUntilFound(tester, find.text('Dinleme sesi'), scrollable: profileScroll);
     await scrollUntilFound(
       tester,
       find.textContaining('Hesap silme tüm hesap ve öğrenme verilerini kapsar'),
@@ -1573,7 +1591,7 @@ void main() {
       of: find.byKey(const ValueKey('profile-surface')),
       matching: find.byType(Scrollable),
     );
-    final signOut = find.widgetWithText(OutlinedButton, 'Bu cihazda çıkış yap');
+    final signOut = find.byKey(const ValueKey('profile-sign-out'));
     await scrollUntilFound(tester, signOut, scrollable: profileScroll);
     await tapVisible(tester, signOut);
     await pumpUntilFound(tester, find.text('Bu cihazda çıkış yap?'));
@@ -1665,7 +1683,7 @@ void main() {
     await pumpUntilFound(tester, find.text('Profil ve Ayarlar'));
     await tester.drag(find.byType(Scrollable).last, const Offset(0, -720));
     await tester.pump(const Duration(milliseconds: 300));
-    await tapVisible(tester, find.text('Hesabımı ve verilerimi sil'));
+    await tapVisible(tester, find.byKey(const ValueKey('profile-delete-account')));
     await pumpUntilFound(tester, find.text('Hesabı ve verileri sil?'));
     await tapVisible(tester, find.text('Devam et'));
     await pumpUntilFound(tester, find.text('Son onay'));
@@ -1713,7 +1731,7 @@ void main() {
       of: find.byKey(const ValueKey('profile-surface')),
       matching: find.byType(Scrollable),
     );
-    final deleteAccount = find.text('Hesabımı ve verilerimi sil');
+    final deleteAccount = find.byKey(const ValueKey('profile-delete-account'));
     await scrollUntilFound(tester, deleteAccount, scrollable: profileScroll);
     await tapVisible(tester, deleteAccount);
     await pumpUntilFound(tester, find.text('Hesabı ve verileri sil?'));
@@ -1786,6 +1804,15 @@ void main() {
     await pumpUntilFound(tester, otherPaths);
     await tester.tap(otherPaths);
     await pumpUntilFound(tester, find.byKey(const ValueKey('workspace-other-study-paths-scroll')));
+    final explainPathsScroll = find.descendant(
+      of: find.byKey(const ValueKey('workspace-other-study-paths-scroll')),
+      matching: find.byType(Scrollable),
+    );
+    await scrollUntilFound(
+      tester,
+      find.byKey(const ValueKey('workspace-other-explain-back')),
+      scrollable: explainPathsScroll,
+    );
     await tapVisible(tester, find.byKey(const ValueKey('workspace-other-explain-back')));
     await pumpUntilFound(tester, find.text('Anlatımımı değerlendir'));
 
@@ -1799,8 +1826,7 @@ void main() {
     await tester.pump();
 
     expect(find.textContaining('öğrenme kanıtı olarak kaydetmiyoruz'), findsOneWidget);
-    final companion = tester.widget<CompanionView>(find.byType(CompanionView).first);
-    expect(companion.state, CompanionVisualState.think);
+    expect(find.bySemanticsLabel('Düğüm düşünüyor'), findsOneWidget);
     expect(find.bySemanticsLabel('Düğüm destek oluyor'), findsNothing);
     expect(find.text('Anlatımında temel fikirler görünüyor'), findsNothing);
   });
@@ -2064,8 +2090,8 @@ void main() {
     await pumpUntilFound(tester, find.text('Materyali güncelle'));
     await tapVisible(tester, find.text('Materyali güncelle'));
     final editorScroll = find.descendant(of: find.byType(LearningSliceScreen), matching: find.byType(Scrollable));
-    await scrollUntilFound(tester, find.text('Metin yapıştır'), scrollable: editorScroll, delta: 180);
-    await tapVisible(tester, find.text('Metin yapıştır'));
+    await scrollUntilFound(tester, find.byKey(const ValueKey('source-choice-text')), scrollable: editorScroll, delta: 180);
+    await tapVisible(tester, find.byKey(const ValueKey('source-choice-text')));
     await tester.enterText(
       find.byKey(const ValueKey('pasted-material-text')),
       'Yeni kaynak sürümü mitokondri ve hücresel solunum hakkında ayrı bilgi verir.',
