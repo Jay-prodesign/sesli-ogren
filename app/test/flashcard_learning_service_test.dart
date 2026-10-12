@@ -115,12 +115,7 @@ void main() {
         'Klorofil ışığın soğurulmasına yardım eder. '
         'Karbondioksit süreçte önemli bir girdidir.';
 
-    await ingest.ingestPastedText(
-      learner: local,
-      materialId: materialId,
-      sourceName: 'Yerel kart kaynağı',
-      text: text,
-    );
+    await ingest.ingestPastedText(learner: local, materialId: materialId, sourceName: 'Yerel kart kaynağı', text: text);
     final localState = await service.openCurrentSet(learner: local, materialId: materialId);
     await service.recordResponse(
       learner: local,
