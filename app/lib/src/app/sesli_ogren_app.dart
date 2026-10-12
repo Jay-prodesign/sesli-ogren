@@ -29,6 +29,7 @@ class _SesliOgrenAppState extends State<SesliOgrenApp> {
   late Future<AppRuntime?> _runtimeFuture;
   AppRuntime? _runtime;
   bool _accountDeleted = false;
+  bool _showAccountEntry = false;
 
   @override
   void initState() {
@@ -37,6 +38,7 @@ class _SesliOgrenAppState extends State<SesliOgrenApp> {
   }
 
   void _openRuntime() {
+    _showAccountEntry = false;
     final restoreSession = widget.restoreSession ?? SupabaseLearnerAuth.restoreSession;
     _runtimeFuture = restoreSession().then((learner) async {
       if (learner == null) return null;
@@ -55,6 +57,7 @@ class _SesliOgrenAppState extends State<SesliOgrenApp> {
     setState(() {
       // Authentication has succeeded. Runtime opening is a separate product phase:
       // its loading/error state belongs to the app shell, not to OTP validation.
+      _showAccountEntry = false;
       _runtimeFuture = _openRuntimeForLearner(learner);
     });
   }
@@ -75,6 +78,7 @@ class _SesliOgrenAppState extends State<SesliOgrenApp> {
     }
     _runtime = null;
     _accountDeleted = false;
+    _showAccountEntry = false;
     setState(_openRuntime);
   }
 
@@ -84,7 +88,10 @@ class _SesliOgrenAppState extends State<SesliOgrenApp> {
     if (runtime != null) {
       unawaited(runtime.close());
     }
-    setState(() => _accountDeleted = true);
+    setState(() {
+      _showAccountEntry = false;
+      _accountDeleted = true;
+    });
   }
 
   Future<void> _signOutSession() => (widget.signOutSession ?? SupabaseLearnerAuth.signOutCurrentSession)();
@@ -97,9 +104,11 @@ class _SesliOgrenAppState extends State<SesliOgrenApp> {
     // failed afterward.
     final runtime = _runtime;
     _runtime = null;
-    _accountDeleted = false;
     if (mounted) {
-      setState(() => _runtimeFuture = Future.value(null));
+      setState(() {
+        _accountDeleted = false;
+        _showAccountEntry = true;
+      });
     }
     if (runtime != null) {
       try {
@@ -115,9 +124,11 @@ class _SesliOgrenAppState extends State<SesliOgrenApp> {
 
     final runtime = _runtime;
     _runtime = null;
-    _accountDeleted = false;
     if (mounted) {
-      setState(() => _runtimeFuture = Future.value(null));
+      setState(() {
+        _accountDeleted = false;
+        _showAccountEntry = true;
+      });
     }
     if (runtime != null) {
       try {
@@ -129,8 +140,10 @@ class _SesliOgrenAppState extends State<SesliOgrenApp> {
   }
 
   void _startFresh() {
-    _accountDeleted = false;
-    setState(_openRuntime);
+    setState(() {
+      _accountDeleted = false;
+      _showAccountEntry = true;
+    });
   }
 
   @override
@@ -141,6 +154,8 @@ class _SesliOgrenAppState extends State<SesliOgrenApp> {
       theme: SesliOgrenTheme.light(),
       home: _accountDeleted
           ? _AccountDeletedScreen(onStartFresh: _startFresh)
+          : _showAccountEntry
+          ? AccountEntryScreen(onAuthenticated: _handleAuthenticated)
           : FutureBuilder<AppRuntime?>(
               future: _runtimeFuture,
               builder: (context, snapshot) {
