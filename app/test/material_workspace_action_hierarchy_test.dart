@@ -133,10 +133,13 @@ void main() {
     await tester.pump(const Duration(milliseconds: 200));
     expect(flashcardAction.hitTestable(), findsOneWidget);
     await tester.tap(flashcardAction.hitTestable());
-    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
     expect(flashcards, 1);
+    expect(find.byKey(const ValueKey('workspace-other-study-paths-scroll')), findsNothing);
 
-    await tester.tap(find.byKey(const ValueKey('workspace-other-study-paths')));
+    final reopenPaths = find.byKey(const ValueKey('workspace-other-study-paths')).hitTestable();
+    expect(reopenPaths, findsOneWidget);
+    await tester.tap(reopenPaths);
     await tester.pump(const Duration(milliseconds: 400));
     final quizAction = find.byKey(const ValueKey('workspace-other-quiz'));
     expect(quizAction, findsOneWidget);

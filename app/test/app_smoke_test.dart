@@ -951,11 +951,12 @@ void main() {
     await pumpUntilFound(tester, find.byKey(const ValueKey('la0040-atelier-workspace')));
     expect(LivingDeskReviewScope.active(tester.element(find.byType(MaterialWorkspaceScreen))), isTrue);
     expect(find.text('Fotosentez çalışma notu'), findsWidgets);
-    await pumpUntilFound(tester, find.byKey(const ValueKey('la0040-atelier-workspace-reader')));
-    expect(find.byKey(const ValueKey('la0040-atelier-workspace-reader')), findsOneWidget);
-
     Finder workspaceScroll() =>
         find.descendant(of: find.byType(MaterialWorkspaceScreen), matching: find.byType(Scrollable));
+
+    final readerAction = find.byKey(const ValueKey('la0040-atelier-workspace-reader'));
+    await scrollUntilFound(tester, readerAction, scrollable: workspaceScroll());
+    expect(readerAction, findsOneWidget);
 
     final otherPaths = find.byKey(const ValueKey('workspace-other-study-paths')).hitTestable();
     await pumpUntilFound(tester, otherPaths);
