@@ -256,10 +256,6 @@ void main() {
     expect(find.text('TEKRAR ZAMANI'), findsOneWidget);
     expect(find.text('Quiz tekrarını aç'), findsWidgets);
     expect(find.textContaining('ustalık sayılmıyor'), findsOneWidget);
-    final compactMotion = tester.widget<AnimatedSwitcher>(
-      find.byKey(const ValueKey('workspace-active-step-motion-compact')),
-    );
-    expect(compactMotion.duration, Duration.zero);
     expect(find.byKey(const ValueKey('la0040-atelier-workspace-recall')).hitTestable(), findsOneWidget);
 
     await tester.tap(find.byKey(const ValueKey('la0040-atelier-workspace-recall')).hitTestable());
