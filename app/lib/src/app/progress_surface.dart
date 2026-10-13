@@ -16,6 +16,7 @@ class ProgressItem {
     this.listenResumeChunk = 0,
     this.readerActivityAt,
     this.readerResumeProgress = 0,
+    this.sourceVersionId,
     this.retention,
   });
   final MaterialRecord material;
@@ -24,6 +25,7 @@ class ProgressItem {
   final int listenResumeChunk;
   final DateTime? readerActivityAt;
   final double readerResumeProgress;
+  final SourceVersionId? sourceVersionId;
   final RetentionMaterialStatus? retention;
 
   bool get hasReaderResume => continuation == null && readerResumeProgress > 0.02 && readerResumeProgress < 0.95;
@@ -163,8 +165,7 @@ class _ProgressCard extends StatelessWidget {
     final immediateRepair =
         action == NextLearningActionKind.reviewSourceThenRecall ||
         action == NextLearningActionKind.retryRecallWithoutHint;
-    final retentionDue =
-        item.retention?.hasDue == true && !immediateRepair && !item.prefersReaderResume && !item.hasListenResume;
+    final retentionDue = item.retention?.hasDue == true && !immediateRepair;
     final label = retentionDue
         ? 'Tekrar zamanı'
         : switch (state) {

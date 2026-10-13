@@ -7,6 +7,7 @@ import '../learning/recall_learning_service.dart';
 import '../generation/supabase_source_summary_gateway.dart';
 import 'app_runtime.dart';
 import 'app_theme.dart';
+import 'daily_study_plan.dart';
 import 'atelier_learning_surfaces.dart';
 import 'companion_view.dart';
 import 'learning_slice_screen.dart';
@@ -130,18 +131,17 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
           listenResumeChunk: listenResumeChunk,
           readerActivityAt: readerActivityAt,
           readerResumeProgress: readerResumeProgress,
+          sourceVersionId: source?.identity.sourceVersionId,
           retention: retention,
         );
       }),
     );
     final sortedProgress = [...progress]..sort((a, b) => _activityAt(b).compareTo(_activityAt(a)));
-    final recommendedProgress = [...sortedProgress]
-      ..sort((a, b) {
-        final priority = _homeRecommendationPriority(b).compareTo(_homeRecommendationPriority(a));
-        if (priority != 0) return priority;
-        return _activityAt(b).compareTo(_activityAt(a));
-      });
-    final active = recommendedProgress.first;
+    final dailyStudy = DailyStudyPlan.build(progress: sortedProgress, evaluatedAt: snapshotAt);
+    final primaryMaterialId = dailyStudy.primary?.materialId;
+    final active = primaryMaterialId == null
+        ? sortedProgress.first
+        : sortedProgress.firstWhere((item) => item.material.id == primaryMaterialId);
     final material = active.material;
     final continuation = active.continuation;
     final source = await widget.runtime.store.currentSourceVersion(
@@ -160,22 +160,13 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
       extracted: extracted,
       continuation: continuation,
       retention: active.retention,
+      dailyStudy: dailyStudy,
       listenResumeChunk: active.listenResumeChunk,
       readerResumeProgress: active.readerResumeProgress,
       readerResumePreferred: active.prefersReaderResume,
       materials: sortedProgress.map((item) => item.material).toList(growable: false),
       progress: sortedProgress,
     );
-  }
-
-  int _homeRecommendationPriority(ProgressItem item) {
-    final action = item.continuation?.nextAction.kind;
-    if (action == NextLearningActionKind.reviewSourceThenRecall) return 7;
-    if (action == NextLearningActionKind.retryRecallWithoutHint) return 6;
-    if (action == null && (item.prefersReaderResume || item.hasListenResume)) return 5;
-    if (item.retention?.hasDue == true) return 4;
-    if (action == null) return 3;
-    return 2;
   }
 
   DateTime _activityAt(ProgressItem item) {
@@ -254,6 +245,10 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
       await _openLearningFor(materialId, autoAdvanceContinuation: true);
       return;
     }
+    if (progressItem?.retention?.hasDue == true) {
+      await _openWorkspace(materialId);
+      return;
+    }
     if (continuation == null && progressItem?.prefersReaderResume == true) {
       await _openSourceReader(materialId);
       return;
@@ -262,8 +257,7 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
       await _openListenFor(materialId);
       return;
     }
-    if (progressItem?.retention?.hasDue == true ||
-        continuation?.nextAction.kind == NextLearningActionKind.repeatRecallLater) {
+    if (continuation?.nextAction.kind == NextLearningActionKind.repeatRecallLater) {
       await _openWorkspace(materialId);
       return;
     }
@@ -733,6 +727,7 @@ class _HomeSurface extends StatelessWidget {
         material: data.material,
         continuation: data.continuation,
         retention: data.retention,
+        dailyStudy: data.dailyStudy,
         listenResumeChunk: data.listenResumeChunk,
         readerResumeProgress: data.readerResumeProgress,
         readerResumePreferred: data.readerResumePreferred,
@@ -1787,6 +1782,7 @@ class _HomeSnapshot {
     this.extracted,
     this.continuation,
     this.retention,
+    this.dailyStudy,
     this.listenResumeChunk = 0,
     this.readerResumeProgress = 0,
     this.readerResumePreferred = false,
@@ -1799,6 +1795,7 @@ class _HomeSnapshot {
   final ExtractedContentRecord? extracted;
   final LearningContinuation? continuation;
   final RetentionMaterialStatus? retention;
+  final DailyStudyPlan? dailyStudy;
   final int listenResumeChunk;
   final double readerResumeProgress;
   final bool readerResumePreferred;

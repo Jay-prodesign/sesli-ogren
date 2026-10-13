@@ -7,6 +7,7 @@ import '../domain/learning_contracts.dart';
 import '../domain/learning_truth.dart';
 import '../domain/retention_schedule.dart';
 import 'app_theme.dart';
+import 'daily_study_plan.dart';
 import 'companion_view.dart';
 
 /// Current source-first product experience scope.
@@ -30,6 +31,7 @@ class LivingStudyDeskHome extends StatelessWidget {
     required this.material,
     required this.continuation,
     this.retention,
+    this.dailyStudy,
     this.listenResumeChunk = 0,
     this.readerResumeProgress = 0,
     this.readerResumePreferred = false,
@@ -46,6 +48,7 @@ class LivingStudyDeskHome extends StatelessWidget {
   final MaterialRecord? material;
   final LearningContinuation? continuation;
   final RetentionMaterialStatus? retention;
+  final DailyStudyPlan? dailyStudy;
   final int listenResumeChunk;
   final double readerResumeProgress;
   final bool readerResumePreferred;
@@ -63,6 +66,44 @@ class LivingStudyDeskHome extends StatelessWidget {
   static const _sub = AppPalette.inkMuted;
   static const _accent = AppPalette.primary;
   static const _line = AppPalette.outline;
+
+  DailyStudyItem? get _todayPrimary => dailyStudy?.primary;
+
+  bool get _todayQuiet => material != null && dailyStudy != null && dailyStudy!.items.isEmpty;
+
+  String get _todayNextTiming {
+    final at = dailyStudy?.nextScheduledAt;
+    final evaluatedAt = dailyStudy?.evaluatedAt;
+    if (at == null || evaluatedAt == null) return 'daha sonra';
+    final difference = at.difference(evaluatedAt);
+    if (difference.inMinutes < 60) return '${difference.inMinutes.clamp(1, 59)} dk sonra';
+    if (difference.inHours < 24) return '${difference.inHours} sa sonra';
+    final days = difference.inDays;
+    return '${days < 1 ? 1 : days} gün sonra';
+  }
+
+  String get _todayLabel {
+    return switch (_todayPrimary?.kind) {
+      DailyStudyActionKind.scheduledReview => 'BUGÜN · TEKRAR ZAMANI',
+      DailyStudyActionKind.sourceRepair => 'BUGÜN · KAYNAK ONARIMI',
+      DailyStudyActionKind.retryRecall => 'BUGÜN · YENİDEN DENE',
+      DailyStudyActionKind.resumeReader => 'BUGÜN · OKUMAYA DEVAM',
+      DailyStudyActionKind.resumeListen => 'BUGÜN · DİNLEMEYE DEVAM',
+      DailyStudyActionKind.beginRecall => 'BUGÜN · AKTİF HATIRLAMA',
+      DailyStudyActionKind.workspaceRecovery => 'BUGÜN · GÜVENLİ DEVAM',
+      null => 'BUGÜN',
+    };
+  }
+
+  IconData _dailyIcon(DailyStudyActionKind kind) => switch (kind) {
+    DailyStudyActionKind.scheduledReview => Icons.event_repeat_rounded,
+    DailyStudyActionKind.sourceRepair => Icons.auto_stories_outlined,
+    DailyStudyActionKind.retryRecall => Icons.refresh_rounded,
+    DailyStudyActionKind.resumeReader => Icons.menu_book_outlined,
+    DailyStudyActionKind.resumeListen => Icons.headphones_rounded,
+    DailyStudyActionKind.beginRecall => Icons.psychology_alt_outlined,
+    DailyStudyActionKind.workspaceRecovery => Icons.space_dashboard_outlined,
+  };
 
   bool get _hasReaderResume =>
       continuation == null && readerResumePreferred && readerResumeProgress > 0.02 && readerResumeProgress < 0.95;
@@ -103,6 +144,9 @@ class LivingStudyDeskHome extends StatelessWidget {
   }
 
   String get _nextStep {
+    final today = _todayPrimary;
+    if (today != null) return today.title;
+    if (_todayQuiet) return 'Şu an planlı bir tekrar yok';
     if (_hasReaderResume) return 'Okumaya kaldığın yerden devam et';
     if (_hasListenResume) return 'Dinlemeye kaldığın yerden devam et';
     final action = continuation?.nextAction.kind;
@@ -118,6 +162,13 @@ class LivingStudyDeskHome extends StatelessWidget {
   }
 
   String get _why {
+    final today = _todayPrimary;
+    if (today != null) return today.reasonText;
+    if (_todayQuiet) {
+      return dailyStudy?.nextScheduledAt == null
+          ? 'Güncel kaynakların şu an zorunlu bir öğrenme adımı üretmiyor. İstersen materyaline göz atabilirsin.'
+          : 'Yeni aktif kanıt gelene kadar sıradaki planlı dönüş $_todayNextTiming. Şu an ek bir ustalık iddiası üretmiyoruz.';
+    }
     if (_hasReaderResume) {
       return 'Okuma konumun kayıtlı. Devam et; hazır olduğunda kaynağı kapatıp hatırlamayı dene.';
     }
@@ -131,6 +182,7 @@ class LivingStudyDeskHome extends StatelessWidget {
   }
 
   String get _continuationLabel {
+    if (dailyStudy != null) return _todayLabel;
     if (_hasReaderResume) return 'OKUMA KONUMUN KAYITLI';
     if (_hasListenResume) return 'DİNLEME KONUMUN KAYITLI';
     if (_retentionIsPrimary) return 'TEKRAR ZAMANI';
@@ -141,6 +193,9 @@ class LivingStudyDeskHome extends StatelessWidget {
   }
 
   String get _nextActionCta {
+    final today = _todayPrimary;
+    if (today != null) return today.actionLabel;
+    if (_todayQuiet) return 'Materyali aç';
     if (_hasReaderResume) return 'Okumaya devam et';
     if (_hasListenResume) return 'Dinlemeye devam et';
     final action = continuation?.nextAction.kind;
@@ -154,6 +209,9 @@ class LivingStudyDeskHome extends StatelessWidget {
   }
 
   VoidCallback get _nextActionHandler {
+    final today = _todayPrimary;
+    if (today != null) return () => onOpenMaterial(today.materialId);
+    if (_todayQuiet) return onOpenWorkspace;
     if (_hasReaderResume) return onOpenReader ?? onOpenWorkspace;
     if (_hasListenResume) return onOpenListen;
     if (_retentionIsPrimary) return onOpenWorkspace;
@@ -166,6 +224,9 @@ class LivingStudyDeskHome extends StatelessWidget {
   }
 
   IconData get _nextActionIcon {
+    final today = _todayPrimary;
+    if (today != null) return _dailyIcon(today.kind);
+    if (_todayQuiet) return Icons.space_dashboard_outlined;
     if (_hasReaderResume) return Icons.menu_book_outlined;
     if (_hasListenResume) return Icons.headphones_rounded;
     if (_retentionIsPrimary) return Icons.event_repeat_rounded;
@@ -215,6 +276,66 @@ class LivingStudyDeskHome extends StatelessWidget {
   }
 
   String _type(MaterialRecord m) => m.mediaType == SourceMediaType.pdf ? 'PDF KAYNAĞI' : 'METİN NOTU';
+
+  Widget _todayQueueItem(BuildContext context, DailyStudyItem item) {
+    return Semantics(
+      button: true,
+      label: '${item.materialTitle}. ${item.title}. ${item.reasonText}',
+      child: Material(
+        color: _paper,
+        borderRadius: BorderRadius.circular(15),
+        child: InkWell(
+          key: ValueKey('today-item-${item.materialId.value}'),
+          borderRadius: BorderRadius.circular(15),
+          onTap: () => _runLearningAction(context, () => onOpenMaterial(item.materialId)),
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(13, 11, 11, 11),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(color: AppPalette.primarySoft, borderRadius: BorderRadius.circular(11)),
+                  child: Icon(_dailyIcon(item.kind), color: _accent, size: 18),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        item.materialTitle,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(color: _ink, fontSize: 13.5, fontWeight: FontWeight.w900),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        item.title,
+                        style: const TextStyle(color: _accent, fontSize: 11.5, fontWeight: FontWeight.w800),
+                      ),
+                      const SizedBox(height: 3),
+                      Text(
+                        item.reasonText,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(color: _sub, fontSize: 11.5, height: 1.35),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 6),
+                const Padding(
+                  padding: EdgeInsets.only(top: 9),
+                  child: Icon(Icons.chevron_right_rounded, color: _sub, size: 19),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 
   void _runLearningAction(BuildContext context, VoidCallback action) {
     final media = MediaQuery.maybeOf(context);
@@ -292,6 +413,8 @@ class LivingStudyDeskHome extends StatelessWidget {
         continuation != null || retention?.hasSchedule == true || _hasReaderResume || _hasListenResume;
     final textScale = MediaQuery.textScalerOf(context).scale(1);
     final compactFirstViewport = MediaQuery.sizeOf(context).width < 350 && textScale > 1.2;
+    final todayIds = dailyStudy?.items.map((item) => item.materialId).toSet() ?? <MaterialId>{};
+    final secondaryMaterials = otherMaterials.where((item) => !todayIds.contains(item.id)).toList(growable: false);
     final companionState = _hasListenResume
         ? CompanionVisualState.listen
         : _retentionIsPrimary
@@ -334,7 +457,11 @@ class LivingStudyDeskHome extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Kaldığın yer hazır.',
+          _todayPrimary != null
+              ? 'Bugün ne çalışman gerektiği belli.'
+              : _todayQuiet
+              ? 'Bugün için bekleyen bir tekrar yok.'
+              : 'Kaldığın yer hazır.',
           key: const ValueKey('la0040-atelier-home-promise'),
           style: TextStyle(
             color: _ink,
@@ -346,7 +473,13 @@ class LivingStudyDeskHome extends StatelessWidget {
         ),
         SizedBox(height: compactFirstViewport ? 5 : 9),
         Text(
-          compactFirstViewport ? 'Kaynağın ve sıradaki adımın hazır.' : 'Kaynağın hazır. Sıradaki adımın belli.',
+          _todayPrimary != null
+              ? (compactFirstViewport ? 'En yararlı adım hazır.' : 'Güncel öğrenme kanıtına göre en yararlı adım hazır.')
+              : _todayQuiet
+              ? 'Bir sonraki planlı dönüşü zamanı gelince öne çıkaracağız.'
+              : compactFirstViewport
+              ? 'Kaynağın ve sıradaki adımın hazır.'
+              : 'Kaynağın hazır. Sıradaki adımın belli.',
           style: TextStyle(color: _sub, fontSize: compactFirstViewport ? 13 : 15, height: 1.4),
         ),
         SizedBox(height: compactFirstViewport ? 10 : 17),
@@ -478,18 +611,31 @@ class LivingStudyDeskHome extends StatelessWidget {
           key: const ValueKey('la0040-living-next-step-open'),
           child: SizedBox(
             width: double.infinity,
-            child: FilledButton.icon(
-              key: const ValueKey('la0040-living-continue'),
-              onPressed: () => _runLearningAction(context, _nextActionHandler),
-              icon: Icon(_nextActionIcon, size: 20),
-              label: Text(_nextActionCta),
-              style: FilledButton.styleFrom(
-                backgroundColor: _accent,
-                foregroundColor: Colors.white,
-                minimumSize: Size.fromHeight(compactFirstViewport ? 48 : 54),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-              ),
-            ),
+            child: _todayQuiet
+                ? OutlinedButton.icon(
+                    key: const ValueKey('la0040-living-continue'),
+                    onPressed: () => _runLearningAction(context, _nextActionHandler),
+                    icon: Icon(_nextActionIcon, size: 20),
+                    label: Text(_nextActionCta),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: _accent,
+                      minimumSize: Size.fromHeight(compactFirstViewport ? 48 : 54),
+                      side: const BorderSide(color: _accent),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
+                  )
+                : FilledButton.icon(
+                    key: const ValueKey('la0040-living-continue'),
+                    onPressed: () => _runLearningAction(context, _nextActionHandler),
+                    icon: Icon(_nextActionIcon, size: 20),
+                    label: Text(_nextActionCta),
+                    style: FilledButton.styleFrom(
+                      backgroundColor: _accent,
+                      foregroundColor: Colors.white,
+                      minimumSize: Size.fromHeight(compactFirstViewport ? 48 : 54),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
+                  ),
           ),
         ),
         if (compactFirstViewport) ...[const SizedBox(height: 6), nextReasonCopy(reasonSize: 11.5)],
@@ -553,7 +699,23 @@ class LivingStudyDeskHome extends StatelessWidget {
             ),
           ),
         ],
-        if (otherMaterials.isNotEmpty) ...[
+        if ((dailyStudy?.items.length ?? 0) > 1) ...[
+          const SizedBox(height: 20),
+          const Divider(color: _line),
+          const SizedBox(height: 12),
+          const Text('Bugün sırada', style: TextStyle(color: _ink, fontSize: 17, fontWeight: FontWeight.w900)),
+          const SizedBox(height: 3),
+          const Text(
+            'Yalnız güncel kaynak ve kayıtlı öğrenme durumundan çıkan adımlar.',
+            style: TextStyle(color: _sub, fontSize: 12, height: 1.35),
+          ),
+          const SizedBox(height: 9),
+          for (final item in dailyStudy!.items.skip(1)) ...[
+            _todayQueueItem(context, item),
+            const SizedBox(height: 8),
+          ],
+        ],
+        if (secondaryMaterials.isNotEmpty) ...[
           const SizedBox(height: 22),
           const Divider(color: _line),
           const SizedBox(height: 13),
@@ -577,7 +739,7 @@ class LivingStudyDeskHome extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 5),
-          for (final item in otherMaterials.take(3))
+          for (final item in secondaryMaterials.take(3))
             Semantics(
               button: true,
               label: '${item.title} materyalinde kaldığın öğrenme adımına devam et',
