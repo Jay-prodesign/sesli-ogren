@@ -1162,9 +1162,21 @@ CREATE TABLE IF NOT EXISTS retention_schedules (
       'ON retention_schedules (learner_id, material_id, source_version_id, invalidated_at_utc)',
     );
 
-    // Recall has canonical event history, so it can be replayed exactly into
-    // the new scheduling projection. This migration never invents mastery.
-    final recallRows = await db.rawQuery('''
+    Future<bool> tableExists(String name) async {
+      final rows = await db.rawQuery(
+        "SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = ? LIMIT 1",
+        [name],
+      );
+      return rows.isNotEmpty;
+    }
+
+    // Sparse historical fixtures and real partial migrations can carry a
+    // database version without every unrelated feature table. Backfill only
+    // from canonical histories that are actually present; absence means there
+    // is no durable retention evidence to project.
+    final hasRecallHistory = await tableExists('learner_evidence') && await tableExists('recall_actions');
+    final recallRows = hasRecallHistory
+        ? await db.rawQuery('''
 SELECT e.learner_id, e.evidence_id, e.material_id, e.source_version_id,
        e.outcome, e.created_at_utc,
        a.anchor_start, a.anchor_end, a.page_number
@@ -1172,7 +1184,8 @@ FROM learner_evidence e
 JOIN recall_actions a
   ON a.learner_id = e.learner_id AND a.action_id = e.action_id
 ORDER BY e.created_at_utc ASC
-''');
+''')
+        : const <Map<String, Object?>>[];
     for (final row in recallRows) {
       final outcome = RecallOutcome.values.byName(row['outcome']! as String);
       await _upsertRetentionSchedule(
@@ -1200,7 +1213,10 @@ ORDER BY e.created_at_utc ASC
     // Flashcards historically store a cumulative review projection rather than
     // one row per response. Backfill only the latest durable signal and keep
     // the streak conservative instead of fabricating prior intervals.
-    final flashcardRows = await db.rawQuery('''
+    final hasFlashcardHistory =
+        await tableExists('flashcard_reviews') && await tableExists('flashcards') && await tableExists('flashcard_sets');
+    final flashcardRows = hasFlashcardHistory
+        ? await db.rawQuery('''
 SELECT r.learner_id, r.card_id, r.review_count, r.last_response,
        r.last_reviewed_at_utc, s.material_id, s.source_version_id,
        c.source_start, c.source_end, c.page_number
@@ -1210,7 +1226,8 @@ JOIN flashcards c
 JOIN flashcard_sets s
   ON s.learner_id = c.learner_id AND s.flashcard_set_id = c.flashcard_set_id
 ORDER BY r.last_reviewed_at_utc ASC
-''');
+''')
+        : const <Map<String, Object?>>[];
     for (final row in flashcardRows) {
       final response = FlashcardResponse.values.byName(row['last_response']! as String);
       await _upsertRetentionSchedule(
@@ -1233,7 +1250,10 @@ ORDER BY r.last_reviewed_at_utc ASC
     }
 
     // Quiz keeps every durable answer, allowing chronological replay.
-    final quizRows = await db.rawQuery('''
+    final hasQuizHistory =
+        await tableExists('quiz_answers') && await tableExists('quiz_questions') && await tableExists('quiz_sets');
+    final quizRows = hasQuizHistory
+        ? await db.rawQuery('''
 SELECT a.id, a.learner_id, a.answer_kind, a.is_correct, a.answered_at_utc,
        s.material_id, s.source_version_id,
        q.source_start, q.source_end, q.page_number
@@ -1243,7 +1263,8 @@ JOIN quiz_questions q
 JOIN quiz_sets s
   ON s.learner_id = q.learner_id AND s.quiz_set_id = q.quiz_set_id
 ORDER BY a.id ASC
-''');
+''')
+        : const <Map<String, Object?>>[];
     for (final row in quizRows) {
       final kind = QuizAnswerKind.values.byName(row['answer_kind']! as String);
       final isCorrect = row['is_correct'] == null ? null : row['is_correct'] == 1;
