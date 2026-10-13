@@ -407,7 +407,8 @@ void main() {
     expect(cta.hitTestable(), findsOneWidget);
     expect(tester.getBottomRight(cta).dy, lessThanOrEqualTo(844));
     expect(find.text('Şu an planlı bir tekrar yok'), findsOneWidget);
-    expect(find.textContaining('planlı dönüş'), findsOneWidget);
+    final reason = tester.widget<Text>(find.byKey(const ValueKey('la0040-home-next-reason')));
+    expect(reason.data, contains('planlı dönüş'));
     expect(tester.takeException(), isNull);
   });
 
