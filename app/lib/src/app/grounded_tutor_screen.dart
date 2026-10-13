@@ -44,12 +44,18 @@ class _GroundedTutorScreenState extends State<GroundedTutorScreen> {
     super.dispose();
   }
 
-  Future<GroundedTutorThreadState> _load() => widget.runtime.tutor.openThread(
-    learner: widget.runtime.learner,
-    materialId: widget.source.identity.materialId,
-    expectedSourceVersionId: widget.source.identity.sourceVersionId,
-    contextAnchor: widget.initialContextAnchor,
-  );
+  Future<GroundedTutorThreadState> _load() async {
+    final state = await widget.runtime.tutor.openThread(
+      learner: widget.runtime.learner,
+      materialId: widget.source.identity.materialId,
+      expectedSourceVersionId: widget.source.identity.sourceVersionId,
+      contextAnchor: widget.initialContextAnchor,
+    );
+    if (mounted) {
+      setState(() => _state = state);
+    }
+    return state;
+  }
 
   void _reload() {
     setState(() {
@@ -146,9 +152,6 @@ class _GroundedTutorScreenState extends State<GroundedTutorScreen> {
     final content = FutureBuilder<GroundedTutorThreadState>(
       future: _future,
       builder: (context, snapshot) {
-        if (_state == null && snapshot.connectionState == ConnectionState.done && snapshot.hasData) {
-          _state = snapshot.data;
-        }
         if (_state == null && snapshot.connectionState == ConnectionState.done && snapshot.hasError) {
           return _errorState();
         }
