@@ -132,16 +132,16 @@ void main() {
     final path = '${directory.path}/retention.db';
     SqliteSourceStore? activeStore;
     addTearDown(() async {
-      if (activeStore != null) await activeStore!.close();
+      if (activeStore != null) await activeStore.close();
       if (await directory.exists()) await directory.delete(recursive: true);
     });
 
     final at = DateTime.utc(2026, 10, 13, 8, 30);
     activeStore = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: path);
-    final ingest = SourceIngestService(store: activeStore!, pdfTextExtractor: const _UnusedPdfExtractor());
+    final ingest = SourceIngestService(store: activeStore, pdfTextExtractor: const _UnusedPdfExtractor());
     final recall = RecallLearningService(
-      sourceStore: activeStore!,
-      learningStore: activeStore!.learningTruthStore(),
+      sourceStore: activeStore,
+      learningStore: activeStore.learningTruthStore(),
       now: () => at,
     );
     const learner = LearnerIdentity.local();
@@ -156,7 +156,7 @@ void main() {
           'Kapalı bir sistemde toplam momentum korunur.',
     );
     final prompt = await recall.createCurrentPrompt(learner: learner, materialId: materialId);
-    final action = await activeStore!.learningTruthStore().recallAction(learner: learner, actionId: prompt.id);
+    final action = await activeStore.learningTruthStore().recallAction(learner: learner, actionId: prompt.id);
     expect(action, isNotNull);
 
     final result = await recall.submit(
@@ -168,24 +168,24 @@ void main() {
     );
     expect(result.evidence.outcome, RecallOutcome.correct);
 
-    var schedules = await activeStore!.retentionSchedulesForMaterial(learner: learner, materialId: materialId);
+    var schedules = await activeStore.retentionSchedulesForMaterial(learner: learner, materialId: materialId);
     expect(schedules, hasLength(1));
     expect(schedules.single.latestEvidenceKind, RetentionEvidenceKind.recall);
     expect(schedules.single.latestOutcomeBand, RetentionOutcomeBand.independentRetrieval);
     expect(schedules.single.sourceAnchor.startOffset, action.anchor.startOffset);
     expect(schedules.single.dueAt, at.add(const Duration(days: 1)));
 
-    await activeStore!.close();
+    await activeStore.close();
     activeStore = null;
     activeStore = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: path);
 
-    schedules = await activeStore!.retentionSchedulesForMaterial(learner: learner, materialId: materialId);
+    schedules = await activeStore.retentionSchedulesForMaterial(learner: learner, materialId: materialId);
     expect(schedules, hasLength(1));
     expect(schedules.single.latestEventId, 'recall:${result.evidence.id.value}');
     expect(schedules.single.policyVersion, RetentionPolicy.version);
-    expect(await activeStore!.dueRetentionSchedules(learner: learner, at: at), isEmpty);
+    expect(await activeStore.dueRetentionSchedules(learner: learner, at: at), isEmpty);
     expect(
-      await activeStore!.dueRetentionSchedules(learner: learner, at: at.add(const Duration(days: 1))),
+      await activeStore.dueRetentionSchedules(learner: learner, at: at.add(const Duration(days: 1))),
       hasLength(1),
     );
   });
