@@ -142,12 +142,12 @@ abstract final class GroundedTutorPolicy {
     SourceAnchor? contextAnchor,
   }) {
     if (contextAnchor != null) {
-      final excerpt = sourceText.substring(contextAnchor.startOffset, contextAnchor.endOffset).trim();
+      final excerpt = sourceText.substring(contextAnchor.startOffset, contextAnchor.endOffset);
       final questionTerms = _terms(question);
       final excerptTerms = _terms(excerpt);
       final refersToSelectedContext = _refersToSelectedContext(question);
       final overlapsSelectedContext = questionTerms.any(excerptTerms.contains);
-      if (excerpt.isNotEmpty && (refersToSelectedContext || overlapsSelectedContext)) {
+      if (excerpt.trim().isNotEmpty && (refersToSelectedContext || overlapsSelectedContext)) {
         return GroundedTutorAnswer(
           text:
               'Seçtiğin bölüm bu soruya doğrudan kaynak dayanağı sağlıyor. '
