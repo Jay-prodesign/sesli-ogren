@@ -242,18 +242,18 @@ class _SourceReaderScreenState extends State<SourceReaderScreen> {
     final anchor = _selectedAnchor;
     final selected = _selectedText;
     if (anchor == null || selected == null || _annotationBusy) return;
-    final controller = TextEditingController();
+    var draft = '';
     final note = await showDialog<String>(
       context: context,
       builder: (dialogContext) => AlertDialog(
         title: const Text('Bu bölüme not ekle'),
-        content: TextField(
+        content: TextFormField(
           key: const ValueKey('reader-note-input'),
-          controller: controller,
           autofocus: true,
           minLines: 2,
           maxLines: 6,
           maxLength: 4000,
+          onChanged: (value) => draft = value,
           decoration: const InputDecoration(
             hintText: 'Bu bölümde neyi hatırlamak istiyorsun?',
             helperText: 'Not, öğrenme kanıtı sayılmaz.',
@@ -264,7 +264,7 @@ class _SourceReaderScreenState extends State<SourceReaderScreen> {
           FilledButton(
             key: const ValueKey('reader-note-save'),
             onPressed: () {
-              final value = controller.text.trim();
+              final value = draft.trim();
               if (value.isEmpty) return;
               Navigator.of(dialogContext).pop(value);
             },
@@ -273,31 +273,31 @@ class _SourceReaderScreenState extends State<SourceReaderScreen> {
         ],
       ),
     );
-    controller.dispose();
     if (note == null || !mounted) return;
     await _saveAnnotation(ReaderAnnotationKind.note, noteText: note);
   }
 
   Future<void> _editNote(ReaderAnnotationRecord annotation) async {
     if (_annotationBusy || widget.onSaveAnnotation == null) return;
-    final controller = TextEditingController(text: annotation.noteText ?? '');
+    var draft = annotation.noteText ?? '';
     final note = await showDialog<String>(
       context: context,
       builder: (dialogContext) => AlertDialog(
         title: const Text('Notu düzenle'),
-        content: TextField(
+        content: TextFormField(
           key: const ValueKey('reader-note-edit-input'),
-          controller: controller,
+          initialValue: draft,
           autofocus: true,
           minLines: 2,
           maxLines: 6,
           maxLength: 4000,
+          onChanged: (value) => draft = value,
         ),
         actions: [
           TextButton(onPressed: () => Navigator.of(dialogContext).pop(), child: const Text('Vazgeç')),
           FilledButton(
             onPressed: () {
-              final value = controller.text.trim();
+              final value = draft.trim();
               if (value.isEmpty) return;
               Navigator.of(dialogContext).pop(value);
             },
@@ -306,7 +306,6 @@ class _SourceReaderScreenState extends State<SourceReaderScreen> {
         ],
       ),
     );
-    controller.dispose();
     if (note == null || !mounted) return;
     setState(() {
       _selectedAnchor = annotation.sourceAnchor;
