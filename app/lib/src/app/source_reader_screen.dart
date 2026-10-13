@@ -571,6 +571,7 @@ class _SourceReaderScreenState extends State<SourceReaderScreen> {
                           ],
                         ],
                       ),
+                    ),
                     if (annotation.kind == ReaderAnnotationKind.note)
                       IconButton(
                         tooltip: 'Notu düzenle',
@@ -826,7 +827,6 @@ class _SourceReaderScreenState extends State<SourceReaderScreen> {
                             article,
                         ],
                       ),
-                    ),
             ),
             if (_selectedAnchor != null && _selectedText != null)
               Container(
