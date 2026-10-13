@@ -141,6 +141,23 @@ class _GroundedTutorScreenState extends State<GroundedTutorScreen> {
   @override
   Widget build(BuildContext context) {
     final living = LivingDeskReviewScope.active(context);
+    final media = MediaQuery.of(context);
+    final compact = media.size.width < 340 || media.textScaler.scale(1) > 1.25;
+    final content = FutureBuilder<GroundedTutorThreadState>(
+      future: _future,
+      builder: (context, snapshot) {
+        if (_state == null && snapshot.connectionState == ConnectionState.done && snapshot.hasData) {
+          _state = snapshot.data;
+        }
+        if (_state == null && snapshot.connectionState == ConnectionState.done && snapshot.hasError) {
+          return _errorState();
+        }
+        final state = _state;
+        if (state == null) return _loadingState();
+        return _conversation(context, state);
+      },
+    );
+
     return Scaffold(
       key: const ValueKey('grounded-tutor-screen'),
       backgroundColor: living ? AtelierStyle.canvas : null,
@@ -149,22 +166,20 @@ class _GroundedTutorScreenState extends State<GroundedTutorScreen> {
         backgroundColor: living ? AtelierStyle.canvas : null,
         foregroundColor: living ? AtelierStyle.ink : null,
       ),
-      bottomNavigationBar: _composer(context),
+      // A large-text composer can consume the entire Scaffold body when it is
+      // measured as bottomNavigationBar. Keep the conventional pinned bar on
+      // regular layouts, but make compact accessibility layouts an explicit
+      // flex contract so the conversation always retains a real viewport.
+      bottomNavigationBar: compact ? null : _composer(context),
       body: SafeArea(
-        child: FutureBuilder<GroundedTutorThreadState>(
-          future: _future,
-          builder: (context, snapshot) {
-            if (_state == null && snapshot.connectionState == ConnectionState.done && snapshot.hasData) {
-              _state = snapshot.data;
-            }
-            if (_state == null && snapshot.connectionState == ConnectionState.done && snapshot.hasError) {
-              return _errorState();
-            }
-            final state = _state;
-            if (state == null) return _loadingState();
-            return _conversation(context, state);
-          },
-        ),
+        child: compact
+            ? Column(
+                children: [
+                  Expanded(child: content),
+                  _composer(context),
+                ],
+              )
+            : content,
       ),
     );
   }
