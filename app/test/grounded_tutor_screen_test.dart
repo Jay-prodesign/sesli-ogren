@@ -22,21 +22,26 @@ class _UnusedPdfExtractor implements PdfTextExtractor {
   }
 }
 
-Future<void> _pumpAndScrollTutorUntilFound(WidgetTester tester, Finder target, {int maxPumps = 120}) async {
-  final listFinder = find.byKey(const ValueKey('grounded-tutor-scroll'));
-  expect(listFinder, findsOneWidget);
-  final list = tester.widget<ListView>(listFinder);
-  final controller = list.controller;
-  expect(controller, isNotNull);
-
-  for (var i = 0; i < maxPumps && target.evaluate().isEmpty; i++) {
-    await tester.pump(const Duration(milliseconds: 20));
-    if (controller!.hasClients) {
-      controller.jumpTo(controller.position.maxScrollExtent);
-      await tester.pump();
+Future<void> _waitForDurableTutorAnswer({
+  required WidgetTester tester,
+  required AppRuntime runtime,
+  required MaterialId materialId,
+  required SourceVersionId sourceVersionId,
+}) async {
+  final completed = await tester.runAsync<bool>(() async {
+    for (var i = 0; i < 100; i++) {
+      final state = await runtime.tutor.openThread(
+        learner: runtime.learner,
+        materialId: materialId,
+        expectedSourceVersionId: sourceVersionId,
+      );
+      if (state.turns.length >= 2) return true;
+      await Future<void>.delayed(const Duration(milliseconds: 20));
     }
-  }
-  expect(target, findsWidgets);
+    return false;
+  });
+  expect(completed, isTrue, reason: 'Tutor answer should be durably persisted before UI assertions.');
+  await tester.pumpAndSettle();
 }
 
 Future<void> _scrollTutorUntilFound(WidgetTester tester, Finder target, {int maxDrags = 20}) async {
@@ -110,8 +115,13 @@ void main() {
     final send = find.byKey(const ValueKey('grounded-tutor-send')).hitTestable();
     expect(send, findsOneWidget);
     await tester.tap(send);
-    await _pumpAndScrollTutorUntilFound(tester, find.textContaining('TUTOR · KAYNAĞA BAĞLI'));
-
+    await _waitForDurableTutorAnswer(
+      tester: tester,
+      runtime: runtime,
+      materialId: materialId,
+      sourceVersionId: result.sourceVersion.identity.sourceVersionId,
+    );
+    await _scrollTutorUntilFound(tester, find.textContaining('TUTOR · KAYNAĞA BAĞLI'));
     await _scrollTutorUntilFound(tester, find.byKey(const ValueKey('grounded-tutor-next-actions')));
     expect(find.textContaining('KAYNAĞA BAĞLI'), findsWidgets);
     expect(find.textContaining('Klorofil'), findsWidgets);
