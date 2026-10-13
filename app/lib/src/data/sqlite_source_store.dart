@@ -2940,13 +2940,10 @@ LIMIT 1
       throw ArgumentError.value(text, 'text', 'Tutor turns must contain 1-8000 characters.');
     }
     if (role == GroundedTutorTurnRole.learner &&
-        (supportState != GroundedTutorSupportState.learnerQuestion ||
-            sourceAnchor != null ||
-            sourceExcerpt != null)) {
+        (supportState != GroundedTutorSupportState.learnerQuestion || sourceAnchor != null || sourceExcerpt != null)) {
       throw ArgumentError('Learner tutor turns cannot carry answer support.');
     }
-    if (role == GroundedTutorTurnRole.tutor &&
-        supportState == GroundedTutorSupportState.learnerQuestion) {
+    if (role == GroundedTutorTurnRole.tutor && supportState == GroundedTutorSupportState.learnerQuestion) {
       throw ArgumentError('Tutor answer requires a supported or unsupported state.');
     }
     if (supportState == GroundedTutorSupportState.sourceSupported &&
@@ -3015,23 +3012,19 @@ LIMIT 1
           )
           .toString();
       final turnId = GroundedTutorTurnId('gtr_${idDigest.substring(0, 32)}');
-      await transaction.insert(
-        'grounded_tutor_turns',
-        {
-          'learner_id': learner.id.value,
-          'tutor_turn_id': turnId.value,
-          'tutor_thread_id': threadId.value,
-          'role': role.name,
-          'text': normalizedText,
-          'support_state': supportState.name,
-          'source_start': sourceAnchor?.startOffset,
-          'source_end': sourceAnchor?.endOffset,
-          'page_number': sourceAnchor?.pageNumber,
-          'source_excerpt': sourceExcerpt,
-          'created_at_utc': timestamp.toIso8601String(),
-        },
-        conflictAlgorithm: ConflictAlgorithm.abort,
-      );
+      await transaction.insert('grounded_tutor_turns', {
+        'learner_id': learner.id.value,
+        'tutor_turn_id': turnId.value,
+        'tutor_thread_id': threadId.value,
+        'role': role.name,
+        'text': normalizedText,
+        'support_state': supportState.name,
+        'source_start': sourceAnchor?.startOffset,
+        'source_end': sourceAnchor?.endOffset,
+        'page_number': sourceAnchor?.pageNumber,
+        'source_excerpt': sourceExcerpt,
+        'created_at_utc': timestamp.toIso8601String(),
+      }, conflictAlgorithm: ConflictAlgorithm.abort);
       await transaction.update(
         'grounded_tutor_threads',
         {'updated_at_utc': timestamp.toIso8601String()},

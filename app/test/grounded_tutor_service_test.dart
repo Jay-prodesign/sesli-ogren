@@ -103,12 +103,7 @@ void main() {
     const text =
         'Fotosentez ışık enerjisini kimyasal enerjiye dönüştürür. '
         'Klorofil ışığın soğurulmasına yardım eder.';
-    await ingest.ingestPastedText(
-      learner: learner,
-      materialId: materialId,
-      sourceName: 'Bağlam notu',
-      text: text,
-    );
+    await ingest.ingestPastedText(learner: learner, materialId: materialId, sourceName: 'Bağlam notu', text: text);
     final start = text.indexOf('Klorofil');
     final anchor = SourceAnchor(startOffset: start, endOffset: text.length);
     final opened = await service.openThread(learner: learner, materialId: materialId, contextAnchor: anchor);

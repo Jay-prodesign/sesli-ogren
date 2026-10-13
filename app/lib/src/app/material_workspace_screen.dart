@@ -187,11 +187,7 @@ class _MaterialWorkspaceScreenState extends State<MaterialWorkspaceScreen> {
               Navigator.of(readerContext).push<void>(
                 MaterialPageRoute<void>(
                   builder: (_) => _preserveProductExperience(
-                    GroundedTutorScreen(
-                      runtime: widget.runtime,
-                      source: data.source,
-                      initialContextAnchor: anchor,
-                    ),
+                    GroundedTutorScreen(runtime: widget.runtime, source: data.source, initialContextAnchor: anchor),
                   ),
                 ),
               );
@@ -494,11 +490,7 @@ class _MaterialWorkspaceScreenState extends State<MaterialWorkspaceScreen> {
     final exit = await Navigator.of(context).push<GroundedTutorExit>(
       MaterialPageRoute<GroundedTutorExit>(
         builder: (_) => _preserveProductExperience(
-          GroundedTutorScreen(
-            runtime: widget.runtime,
-            source: data.source,
-            initialContextAnchor: contextAnchor,
-          ),
+          GroundedTutorScreen(runtime: widget.runtime, source: data.source, initialContextAnchor: contextAnchor),
         ),
       ),
     );

@@ -13,12 +13,7 @@ import 'living_study_desk_home.dart';
 enum GroundedTutorExit { reviewSource }
 
 class GroundedTutorScreen extends StatefulWidget {
-  const GroundedTutorScreen({
-    required this.runtime,
-    required this.source,
-    this.initialContextAnchor,
-    super.key,
-  });
+  const GroundedTutorScreen({required this.runtime, required this.source, this.initialContextAnchor, super.key});
 
   final AppRuntime runtime;
   final SourceVersionRecord source;
@@ -218,7 +213,11 @@ class _GroundedTutorScreenState extends State<GroundedTutorScreen> {
             style: TextStyle(color: AtelierStyle.muted, height: 1.4),
           ),
           const SizedBox(height: 16),
-          FilledButton.icon(onPressed: _reload, icon: const Icon(Icons.refresh_rounded), label: const Text('Tekrar dene')),
+          FilledButton.icon(
+            onPressed: _reload,
+            icon: const Icon(Icons.refresh_rounded),
+            label: const Text('Tekrar dene'),
+          ),
           const SizedBox(height: 6),
           TextButton(onPressed: () => Navigator.of(context).maybePop(), child: const Text('Materyale dön')),
         ],
@@ -236,7 +235,10 @@ class _GroundedTutorScreenState extends State<GroundedTutorScreen> {
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            CompanionView(state: _busy ? CompanionVisualState.think : CompanionVisualState.idle, size: compact ? 56 : 68),
+            CompanionView(
+              state: _busy ? CompanionVisualState.think : CompanionVisualState.idle,
+              size: compact ? 56 : 68,
+            ),
             const SizedBox(width: 12),
             const Expanded(
               child: Column(
@@ -295,10 +297,7 @@ class _GroundedTutorScreenState extends State<GroundedTutorScreen> {
         ],
         const SizedBox(height: 16),
         if (state.turns.isEmpty) _emptyConversation(),
-        for (final turn in state.turns) ...[
-          _turnCard(turn),
-          const SizedBox(height: 10),
-        ],
+        for (final turn in state.turns) ...[_turnCard(turn), const SizedBox(height: 10)],
         if (_inlineError != null) ...[
           Container(
             key: const ValueKey('grounded-tutor-inline-error'),
@@ -363,7 +362,11 @@ class _GroundedTutorScreenState extends State<GroundedTutorScreen> {
                     ? 'TUTOR · KAYNAKTA DAYANAK YOK'
                     : 'TUTOR · KAYNAĞA BAĞLI',
                 style: TextStyle(
-                  color: learner ? AtelierStyle.pulse : unsupported ? AtelierStyle.attention : AtelierStyle.aqua,
+                  color: learner
+                      ? AtelierStyle.pulse
+                      : unsupported
+                      ? AtelierStyle.attention
+                      : AtelierStyle.aqua,
                   fontSize: 9.5,
                   fontWeight: FontWeight.w900,
                   letterSpacing: 0.7,
@@ -415,7 +418,10 @@ class _GroundedTutorScreenState extends State<GroundedTutorScreen> {
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const Text('Buradan öğrenme döngüsüne dön', style: TextStyle(color: AtelierStyle.ink, fontWeight: FontWeight.w900)),
+        const Text(
+          'Buradan öğrenme döngüsüne dön',
+          style: TextStyle(color: AtelierStyle.ink, fontWeight: FontWeight.w900),
+        ),
         const SizedBox(height: 5),
         const Text(
           'Tutor hazırlıktır. Öğrenmeyi gerçekten ölçmek için aktif bir eylem seç.',
@@ -464,10 +470,7 @@ class _GroundedTutorScreenState extends State<GroundedTutorScreen> {
       key: const ValueKey('grounded-tutor-send'),
       onPressed: _busy || _state == null ? null : _ask,
       icon: _busy
-          ? const SizedBox.square(
-              dimension: 16,
-              child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
-            )
+          ? const SizedBox.square(dimension: 16, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
           : const Icon(Icons.arrow_upward_rounded),
       label: Text(_busy ? 'Kaynak kontrol ediliyor' : 'Sor'),
     );
@@ -483,7 +486,11 @@ class _GroundedTutorScreenState extends State<GroundedTutorScreen> {
             ? Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [field, const SizedBox(height: 8), send])
             : Row(
                 crossAxisAlignment: CrossAxisAlignment.end,
-                children: [Expanded(child: field), const SizedBox(width: 10), send],
+                children: [
+                  Expanded(child: field),
+                  const SizedBox(width: 10),
+                  send,
+                ],
               ),
       ),
     );

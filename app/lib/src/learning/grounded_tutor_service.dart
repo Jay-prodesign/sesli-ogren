@@ -68,10 +68,7 @@ class GroundedTutorService {
     if (source == null || source.identity.sourceVersionId != thread.sourceVersionId) {
       throw const GroundedTutorException('Kaynak değişti. Eski konuşma yeni kaynağa taşınmadı.');
     }
-    final extracted = await store.extractedContentForSource(
-      learner: learner,
-      sourceVersionId: thread.sourceVersionId,
-    );
+    final extracted = await store.extractedContentForSource(learner: learner, sourceVersionId: thread.sourceVersionId);
     if (extracted == null || !extracted.isValid || extracted.sourceContentDigest != source.identity.contentDigest) {
       throw const GroundedTutorException('Tutor güncel kaynak metnini doğrulayamadı.');
     }
