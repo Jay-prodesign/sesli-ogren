@@ -13,10 +13,7 @@ class SupabaseCloudContinuityGateway implements CloudContinuityGateway {
     try {
       final client = await _clientFor(learner);
       final rows = await client.rpc<List<dynamic>>('list_material_continuity');
-      return rows
-          .whereType<Map>()
-          .map((row) => _snapshot(Map<String, dynamic>.from(row)))
-          .toList(growable: false);
+      return rows.whereType<Map>().map((row) => _snapshot(Map<String, dynamic>.from(row))).toList(growable: false);
     } on PostgrestException catch (error) {
       throw _mapError(error);
     }

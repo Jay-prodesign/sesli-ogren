@@ -54,11 +54,7 @@ class AppRuntime {
        tutor = tutor ?? GroundedTutorService(store: store),
        continuity =
            continuity ??
-           CloudContinuityService(
-             store: store,
-             ingest: ingest,
-             gateway: const UnavailableCloudContinuityGateway(),
-           );
+           CloudContinuityService(store: store, ingest: ingest, gateway: const UnavailableCloudContinuityGateway());
 
   /// Device-local production namespace. It is explicitly not an account.
   static const localLearner = LearnerIdentity.local();
@@ -101,11 +97,7 @@ class AppRuntime {
       ingest: ingest,
       recall: recall,
       telemetry: store.operationalTelemetry(),
-      continuity: CloudContinuityService(
-        store: store,
-        ingest: ingest,
-        gateway: const SupabaseCloudContinuityGateway(),
-      ),
+      continuity: CloudContinuityService(store: store, ingest: ingest, gateway: const SupabaseCloudContinuityGateway()),
       explain: const SupabaseGroundedExplainGateway(),
       explainBack: const SupabaseExplainBackGateway(),
       focusHelp: const SupabaseFocusHelpGateway(),
@@ -148,11 +140,7 @@ class AppRuntime {
       ingest: ingest,
       recall: recall,
       telemetry: telemetry,
-      continuity: CloudContinuityService(
-        store: store,
-        ingest: ingest,
-        gateway: const SupabaseCloudContinuityGateway(),
-      ),
+      continuity: CloudContinuityService(store: store, ingest: ingest, gateway: const SupabaseCloudContinuityGateway()),
       explain: const SupabaseGroundedExplainGateway(),
       explainBack: const SupabaseExplainBackGateway(),
       focusHelp: const SupabaseFocusHelpGateway(),

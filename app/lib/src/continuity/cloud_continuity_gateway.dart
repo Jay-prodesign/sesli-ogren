@@ -61,10 +61,7 @@ class CloudMaterialSnapshot {
 abstract interface class CloudContinuityGateway {
   Future<List<CloudMaterialSnapshot>> listMaterials({required AuthenticatedLearner learner});
 
-  Future<CloudMaterialSnapshot?> readMaterial({
-    required AuthenticatedLearner learner,
-    required MaterialId materialId,
-  });
+  Future<CloudMaterialSnapshot?> readMaterial({required AuthenticatedLearner learner, required MaterialId materialId});
 
   Future<CloudMaterialSnapshot> ensureTextSource({
     required AuthenticatedLearner learner,

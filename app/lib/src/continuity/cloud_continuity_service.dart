@@ -20,11 +20,7 @@ enum CloudContinuityDisposition {
 }
 
 class CloudContinuityItemResult {
-  const CloudContinuityItemResult({
-    required this.materialId,
-    required this.disposition,
-    this.message,
-  });
+  const CloudContinuityItemResult({required this.materialId, required this.disposition, this.message});
 
   final MaterialId materialId;
   final CloudContinuityDisposition disposition;
@@ -32,11 +28,7 @@ class CloudContinuityItemResult {
 }
 
 class CloudContinuityService {
-  const CloudContinuityService({
-    required this.store,
-    required this.ingest,
-    required this.gateway,
-  });
+  const CloudContinuityService({required this.store, required this.ingest, required this.gateway});
 
   final SqliteSourceStore store;
   final SourceIngestService ingest;
@@ -55,13 +47,7 @@ class CloudContinuityService {
 
     final results = <CloudContinuityItemResult>[];
     for (final materialId in materialIds) {
-      results.add(
-        await _reconcile(
-          learner: learner,
-          materialId: materialId,
-          remote: remoteByMaterial[materialId],
-        ),
-      );
+      results.add(await _reconcile(learner: learner, materialId: materialId, remote: remoteByMaterial[materialId]));
     }
     return results;
   }
@@ -99,10 +85,7 @@ class CloudContinuityService {
       final binding = await store.serverMaterialBinding(learner: learner, materialId: materialId);
 
       if (localSource == null && remote == null) {
-        return CloudContinuityItemResult(
-          materialId: materialId,
-          disposition: CloudContinuityDisposition.noMaterial,
-        );
+        return CloudContinuityItemResult(materialId: materialId, disposition: CloudContinuityDisposition.noMaterial);
       }
 
       if (remote == null) {
@@ -133,10 +116,7 @@ class CloudContinuityService {
           sourceVersionId: localSource.identity.sourceVersionId,
           serverMaterialId: remote.serverMaterialId,
         );
-        return CloudContinuityItemResult(
-          materialId: materialId,
-          disposition: CloudContinuityDisposition.inSync,
-        );
+        return CloudContinuityItemResult(materialId: materialId, disposition: CloudContinuityDisposition.inSync);
       }
 
       if (binding == null || binding.serverMaterialId != remote.serverMaterialId) {
@@ -199,11 +179,7 @@ class CloudContinuityService {
 
     final snapshot = await gateway.ensureTextSource(
       learner: learner,
-      source: SourceIngestResult(
-        material: localMaterial,
-        sourceVersion: localSource,
-        extractedContent: extracted,
-      ),
+      source: SourceIngestResult(material: localMaterial, sourceVersion: localSource, extractedContent: extracted),
       expectedPreviousSourceVersionId: expectedPreviousSourceVersionId,
     );
     if (snapshot.materialId != materialId ||
@@ -221,10 +197,7 @@ class CloudContinuityService {
       sourceVersionId: localSource.identity.sourceVersionId,
       serverMaterialId: snapshot.serverMaterialId,
     );
-    return CloudContinuityItemResult(
-      materialId: materialId,
-      disposition: CloudContinuityDisposition.pushedLocal,
-    );
+    return CloudContinuityItemResult(materialId: materialId, disposition: CloudContinuityDisposition.pushedLocal);
   }
 
   Future<CloudContinuityItemResult> _pullRemote({
@@ -286,9 +259,10 @@ class CloudContinuityService {
     final disposition = switch (error.kind) {
       CloudContinuityFailureKind.authenticationRequired => CloudContinuityDisposition.accountRequired,
       CloudContinuityFailureKind.unsupportedSource => CloudContinuityDisposition.unsupportedSource,
-      CloudContinuityFailureKind.conflict || CloudContinuityFailureKind.staleSource => CloudContinuityDisposition.conflict,
-      CloudContinuityFailureKind.unavailable || CloudContinuityFailureKind.invalidPayload =>
-        CloudContinuityDisposition.unavailable,
+      CloudContinuityFailureKind.conflict ||
+      CloudContinuityFailureKind.staleSource => CloudContinuityDisposition.conflict,
+      CloudContinuityFailureKind.unavailable ||
+      CloudContinuityFailureKind.invalidPayload => CloudContinuityDisposition.unavailable,
     };
     return CloudContinuityItemResult(materialId: materialId, disposition: disposition, message: error.message);
   }

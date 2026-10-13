@@ -45,10 +45,7 @@ class _FakeCloudContinuityGateway implements CloudContinuityGateway {
     final current = remote[source.material.id];
     if (current != null && current.sourceVersionId != source.sourceVersion.identity.sourceVersionId) {
       if (expectedPreviousSourceVersionId == null || expectedPreviousSourceVersionId != current.sourceVersionId) {
-        throw const CloudContinuityException(
-          'source_conflict',
-          kind: CloudContinuityFailureKind.conflict,
-        );
+        throw const CloudContinuityException('source_conflict', kind: CloudContinuityFailureKind.conflict);
       }
     }
 
@@ -102,23 +99,16 @@ CloudMaterialSnapshot _snapshotFor({
 void main() {
   sqfliteFfiInit();
 
-  Future<(SqliteSourceStore, SourceIngestService, _FakeCloudContinuityGateway, CloudContinuityService)> harness() async {
-    final store = await SqliteSourceStore.open(
-      factory: databaseFactoryFfiNoIsolate,
-      path: inMemoryDatabasePath,
-    );
+  Future<(SqliteSourceStore, SourceIngestService, _FakeCloudContinuityGateway, CloudContinuityService)>
+  harness() async {
+    final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
     final ingest = SourceIngestService(
       store: store,
       pdfTextExtractor: const _UnusedPdfExtractor(),
       now: () => DateTime.utc(2026, 10, 14),
     );
     final gateway = _FakeCloudContinuityGateway();
-    return (
-      store,
-      ingest,
-      gateway,
-      CloudContinuityService(store: store, ingest: ingest, gateway: gateway),
-    );
+    return (store, ingest, gateway, CloudContinuityService(store: store, ingest: ingest, gateway: gateway));
   }
 
   test('new device hydrates the exact remote text source and records the sync ancestor', () async {
@@ -211,12 +201,7 @@ void main() {
     const learner = AuthenticatedLearner(id: LearnerId('continuity-learner'));
     const materialId = MaterialId('material_continuity_diverged');
 
-    await ingest.ingestPastedText(
-      learner: learner,
-      materialId: materialId,
-      text: 'Ortak sürüm.',
-      sourceName: 'Not',
-    );
+    await ingest.ingestPastedText(learner: learner, materialId: materialId, text: 'Ortak sürüm.', sourceName: 'Not');
     await service.reconcileMaterial(learner: learner, materialId: materialId);
 
     await ingest.ingestPastedText(
