@@ -496,15 +496,9 @@ class _GroundedTutorScreenState extends State<GroundedTutorScreen> {
       ),
       onPressed: canSubmit ? _ask : null,
       icon: _busy
-          ? SizedBox.square(
-              dimension: 16,
-              child: CircularProgressIndicator(strokeWidth: 2, color: sendForeground),
-            )
+          ? SizedBox.square(dimension: 16, child: CircularProgressIndicator(strokeWidth: 2, color: sendForeground))
           : Icon(Icons.arrow_upward_rounded, color: sendForeground),
-      label: Text(
-        _busy ? 'Kaynak kontrol ediliyor' : 'Sor',
-        style: TextStyle(color: sendForeground),
-      ),
+      label: Text(_busy ? 'Kaynak kontrol ediliyor' : 'Sor', style: TextStyle(color: sendForeground)),
     );
     return SafeArea(
       top: false,
