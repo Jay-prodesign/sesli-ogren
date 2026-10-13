@@ -811,7 +811,9 @@ class _CloudContinuityNotice {
             : '$conflicts kaynak iki cihazda değişti. Otomatik üzerine yazmadık; bu cihazdaki sürümler korundu.',
       );
     }
-    final unsupported = results.where((item) => item.disposition == CloudContinuityDisposition.unsupportedSource).length;
+    final unsupported = results
+        .where((item) => item.disposition == CloudContinuityDisposition.unsupportedSource)
+        .length;
     if (unsupported > 0) {
       return _CloudContinuityNotice(
         kind: _CloudContinuityNoticeKind.unsupported,

@@ -32,19 +32,13 @@ class _RecoveringContinuityGateway implements CloudContinuityGateway {
   Future<List<CloudMaterialSnapshot>> listMaterials({required AuthenticatedLearner learner}) async {
     listCalls += 1;
     if (unavailable) {
-      throw const CloudContinuityException(
-        'temporary cloud failure',
-        kind: CloudContinuityFailureKind.unavailable,
-      );
+      throw const CloudContinuityException('temporary cloud failure', kind: CloudContinuityFailureKind.unavailable);
     }
     return const [];
   }
 
   @override
-  Future<CloudMaterialSnapshot?> readMaterial({
-    required AuthenticatedLearner learner,
-    required MaterialId materialId,
-  }) {
+  Future<CloudMaterialSnapshot?> readMaterial({required AuthenticatedLearner learner, required MaterialId materialId}) {
     throw UnimplementedError();
   }
 
@@ -62,14 +56,8 @@ Future<AppRuntime> _runtime({
   required AuthenticatedLearner learner,
   required _RecoveringContinuityGateway gateway,
 }) async {
-  final store = await SqliteSourceStore.open(
-    factory: databaseFactoryFfiNoIsolate,
-    path: inMemoryDatabasePath,
-  );
-  final ingest = SourceIngestService(
-    store: store,
-    pdfTextExtractor: const _UnusedPdfExtractor(),
-  );
+  final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
+  final ingest = SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor());
   return AppRuntime(
     learner: learner,
     store: store,
@@ -93,9 +81,7 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
-        home: LivingDeskReviewScope(
-          child: ProductShellScreen(runtime: runtime),
-        ),
+        home: LivingDeskReviewScope(child: ProductShellScreen(runtime: runtime)),
       ),
     );
     await tester.pumpAndSettle();
@@ -121,9 +107,7 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
-        home: LivingDeskReviewScope(
-          child: ProductShellScreen(runtime: runtime),
-        ),
+        home: LivingDeskReviewScope(child: ProductShellScreen(runtime: runtime)),
       ),
     );
     await tester.pumpAndSettle();
