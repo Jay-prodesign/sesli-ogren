@@ -181,6 +181,58 @@ void main() {
     expect(tutor.sourceExcerpt, isNull);
   });
 
+  test('Reader deictic wording does not override unrelated substantive terms', () async {
+    final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
+    addTearDown(store.close);
+    final ingest = SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor());
+    final service = GroundedTutorService(store: store, now: () => DateTime.utc(2026, 10, 13, 13, 45));
+    const learner = LearnerIdentity.local();
+    const materialId = MaterialId('context-deictic-unrelated-tutor');
+    const text =
+        'Fotosentez ışık enerjisini kimyasal enerjiye dönüştürür. '
+        'Klorofil ışığın soğurulmasına yardım eder.';
+    await ingest.ingestPastedText(learner: learner, materialId: materialId, sourceName: 'Bağlam notu', text: text);
+    final start = text.indexOf('Klorofil');
+    final anchor = SourceAnchor(startOffset: start, endOffset: text.length);
+    final opened = await service.openThread(learner: learner, materialId: materialId, contextAnchor: anchor);
+    final answered = await service.ask(
+      learner: learner,
+      threadId: opened.thread.id,
+      question: 'Bu Roma İmparatorluğu neden yıkıldı?',
+    );
+    final tutor = answered.turns.last;
+    expect(tutor.supportState, GroundedTutorSupportState.sourceUnsupported);
+    expect(tutor.sourceAnchor, isNull);
+    expect(tutor.sourceExcerpt, isNull);
+  });
+
+  test('Tutor threads remain isolated between learner namespaces', () async {
+    final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
+    addTearDown(store.close);
+    final ingest = SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor());
+    final service = GroundedTutorService(store: store, now: () => DateTime.utc(2026, 10, 13, 13, 50));
+    const local = LearnerIdentity.local();
+    const account = LearnerIdentity.authenticated(id: LearnerId('tutor-account'));
+    const materialId = MaterialId('namespace-tutor');
+    const text = 'Klorofil ışığın soğurulmasına yardım eder.';
+
+    await ingest.ingestPastedText(learner: local, materialId: materialId, sourceName: 'Yerel', text: text);
+    await ingest.ingestPastedText(learner: account, materialId: materialId, sourceName: 'Hesap', text: text);
+
+    final localThread = await service.openThread(learner: local, materialId: materialId);
+    await service.ask(learner: local, threadId: localThread.thread.id, question: 'Klorofil ne yapar?');
+
+    expect(await store.groundedTutorThread(learner: account, threadId: localThread.thread.id), isNull);
+    await expectLater(
+      service.ask(learner: account, threadId: localThread.thread.id, question: 'Klorofil ne yapar?'),
+      throwsA(isA<GroundedTutorException>()),
+    );
+
+    final accountThread = await service.openThread(learner: account, materialId: materialId);
+    expect(accountThread.thread.id, isNot(localThread.thread.id));
+    expect(accountThread.turns, isEmpty);
+  });
+
   test('Source replacement invalidates old Tutor grounding without rebinding conversation', () async {
     final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
     addTearDown(store.close);

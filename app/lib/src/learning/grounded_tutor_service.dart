@@ -147,7 +147,8 @@ abstract final class GroundedTutorPolicy {
       final excerptTerms = _terms(excerpt);
       final refersToSelectedContext = _refersToSelectedContext(question);
       final overlapsSelectedContext = questionTerms.any(excerptTerms.contains);
-      if (excerpt.trim().isNotEmpty && (refersToSelectedContext || overlapsSelectedContext)) {
+      final contextOnlyQuestion = refersToSelectedContext && questionTerms.isEmpty;
+      if (excerpt.trim().isNotEmpty && (contextOnlyQuestion || overlapsSelectedContext)) {
         return GroundedTutorAnswer(
           text:
               'Seçtiğin bölüm bu soruya doğrudan kaynak dayanağı sağlıyor. '
@@ -228,6 +229,7 @@ abstract final class GroundedTutorPolicy {
     'bana',
     'ben',
     'bir',
+    'biraz',
     'bunu',
     'bu',
     'da',
@@ -245,6 +247,12 @@ abstract final class GroundedTutorPolicy {
     'ne',
     'neden',
     'nedir',
+    'açar',
+    'açıkla',
+    'anlat',
+    'demek',
+    'detaylandır',
+    'kısaca',
     'olan',
     'olarak',
     'şu',
