@@ -86,11 +86,7 @@ void main() {
       of: find.byKey(const ValueKey('grounded-tutor-scroll')),
       matching: find.byType(Scrollable),
     );
-    await _scrollUntilFound(
-      tester,
-      find.byKey(const ValueKey('grounded-tutor-empty')),
-      scrollable: tutorScrollable,
-    );
+    await _scrollUntilFound(tester, find.byKey(const ValueKey('grounded-tutor-empty')), scrollable: tutorScrollable);
     expect(find.textContaining('öğrenme kanıtı'), findsWidgets);
 
     await tester.enterText(find.byKey(const ValueKey('grounded-tutor-question')), 'Klorofil ne işe yarar?');
