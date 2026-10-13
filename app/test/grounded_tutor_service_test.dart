@@ -53,9 +53,16 @@ void main() {
     expect(tutor.supportState, GroundedTutorSupportState.sourceSupported);
     expect(tutor.sourceExcerpt, contains('Klorofil'));
     expect(tutor.sourceAnchor, isNotNull);
+    final learningStore = store.learningTruthStore();
+    expect(await learningStore.learnerState(learner: learner, materialId: materialId), isNull);
+    expect(await learningStore.nextLearningAction(learner: learner, materialId: materialId), isNull);
     expect(
-      await store.learningTruthStore().continuationForMaterial(learner: learner, materialId: materialId),
-      isNull,
+      await learningStore.evidenceForMaterial(
+        learner: learner,
+        materialId: materialId,
+        sourceVersionId: answered.thread.sourceVersionId,
+      ),
+      isEmpty,
     );
   });
 
