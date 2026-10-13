@@ -71,7 +71,7 @@ void main() {
     ],
   );
 
-  test('Daily Study orders urgent repair/retry before due review and excludes future repeat-later work', () {
+  test('Daily Study orders due review before other materials while preserving same-material repair prerequisites', () {
     final due = ProgressItem(
       material: material('due'),
       sourceVersionId: const SourceVersionId('source-due'),
@@ -117,10 +117,10 @@ void main() {
 
     final plan = DailyStudyPlan.build(progress: [reader, future, fresh, retry, repair, due], evaluatedAt: now);
 
-    expect(plan.items.map((item) => item.materialId.value), ['repair', 'retry', 'due', 'reader', 'fresh']);
-    expect(plan.primary?.kind, DailyStudyActionKind.sourceRepair);
-    expect(plan.items[1].kind, DailyStudyActionKind.retryRecall);
-    expect(plan.items[2].kind, DailyStudyActionKind.scheduledReview);
+    expect(plan.items.map((item) => item.materialId.value), ['due', 'repair', 'retry', 'reader', 'fresh']);
+    expect(plan.primary?.kind, DailyStudyActionKind.scheduledReview);
+    expect(plan.items[1].kind, DailyStudyActionKind.sourceRepair);
+    expect(plan.items[2].kind, DailyStudyActionKind.retryRecall);
     expect(plan.items[3].kind, DailyStudyActionKind.resumeReader);
     expect(plan.items[4].kind, DailyStudyActionKind.beginRecall);
     expect(plan.nextScheduledAt, now.add(const Duration(days: 2)));
