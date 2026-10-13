@@ -506,8 +506,7 @@ class RecallLearningService {
         wordEndInSentence: selected.end,
         expectedAnswer: selected.group(0)!,
       );
-      final containsSelection =
-          selectedAnchor.startOffset >= sentenceStart && selectedAnchor.endOffset <= sentenceEnd;
+      final containsSelection = selectedAnchor.startOffset >= sentenceStart && selectedAnchor.endOffset <= sentenceEnd;
       if (containsSelection) return candidate;
       if (overlap > bestOverlap) {
         bestOverlap = overlap;
