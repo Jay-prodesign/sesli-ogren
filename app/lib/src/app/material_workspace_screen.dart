@@ -390,9 +390,8 @@ class _MaterialWorkspaceScreenState extends State<MaterialWorkspaceScreen> {
     }
     if (due == null) {
       setState(() => _snapshot = _load());
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Bu tekrar artık güncel değil. Sıradaki plan yenilendi.')),
-      );
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text('Bu tekrar artık güncel değil. Sıradaki plan yenilendi.')));
       return;
     }
 

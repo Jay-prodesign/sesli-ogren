@@ -145,9 +145,7 @@ class QuizLearningService {
   }
 
   static bool _sameAnchor(SourceAnchor left, SourceAnchor right) =>
-      left.startOffset == right.startOffset &&
-      left.endOffset == right.endOffset &&
-      left.pageNumber == right.pageNumber;
+      left.startOffset == right.startOffset && left.endOffset == right.endOffset && left.pageNumber == right.pageNumber;
 
   QuizSetRecord _buildSet({
     required MaterialId materialId,

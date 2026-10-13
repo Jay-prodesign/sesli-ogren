@@ -62,10 +62,7 @@ class _QuizScreenState extends State<QuizScreen> {
             sourceVersionId: widget.scheduledReviewSourceVersionId!,
             sourceAnchor: widget.scheduledReviewSourceAnchor!,
           )
-        : await widget.runtime.quiz.openCurrentSet(
-            learner: widget.runtime.learner,
-            materialId: widget.materialId,
-          );
+        : await widget.runtime.quiz.openCurrentSet(learner: widget.runtime.learner, materialId: widget.materialId);
     final source = await widget.runtime.store.currentSourceVersion(
       learner: widget.runtime.learner,
       materialId: widget.materialId,
