@@ -118,6 +118,9 @@ void main() {
     expect(send, findsOneWidget);
     expect(tester.widget<TextField>(questionField).enabled, isTrue);
     expect(tester.widget<FilledButton>(sendKey).onPressed, isNotNull);
+    final sendLabel = find.descendant(of: sendKey, matching: find.text('Sor'));
+    expect(sendLabel, findsOneWidget);
+    expect(tester.widget<Text>(sendLabel).style?.color, Colors.white);
 
     await _scrollTutorUntilFound(tester, find.textContaining('TUTOR · KAYNAĞA BAĞLI'));
     expect(find.textContaining('TUTOR · KAYNAĞA BAĞLI'), findsOneWidget);

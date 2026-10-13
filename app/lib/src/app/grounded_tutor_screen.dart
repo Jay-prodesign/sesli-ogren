@@ -485,14 +485,26 @@ class _GroundedTutorScreenState extends State<GroundedTutorScreen> {
         counterText: compact ? '' : null,
       ),
     );
+    final canSubmit = !_busy && _state != null;
+    final sendForeground = canSubmit || _busy ? Colors.white : Theme.of(context).disabledColor;
     final send = FilledButton.icon(
       key: const ValueKey('grounded-tutor-send'),
-      style: FilledButton.styleFrom(foregroundColor: Colors.white),
-      onPressed: _busy || _state == null ? null : _ask,
+      style: FilledButton.styleFrom(
+        foregroundColor: Colors.white,
+        disabledForegroundColor: _busy ? Colors.white : Theme.of(context).disabledColor,
+        disabledBackgroundColor: _busy ? Theme.of(context).colorScheme.primary : null,
+      ),
+      onPressed: canSubmit ? _ask : null,
       icon: _busy
-          ? const SizedBox.square(dimension: 16, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-          : const Icon(Icons.arrow_upward_rounded),
-      label: Text(_busy ? 'Kaynak kontrol ediliyor' : 'Sor'),
+          ? SizedBox.square(
+              dimension: 16,
+              child: CircularProgressIndicator(strokeWidth: 2, color: sendForeground),
+            )
+          : Icon(Icons.arrow_upward_rounded, color: sendForeground),
+      label: Text(
+        _busy ? 'Kaynak kontrol ediliyor' : 'Sor',
+        style: TextStyle(color: sendForeground),
+      ),
     );
     return SafeArea(
       top: false,
