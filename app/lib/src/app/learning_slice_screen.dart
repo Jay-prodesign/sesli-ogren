@@ -434,7 +434,7 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
       SourceIngestFailureKind.pdfPageLimit =>
         'Bu PDF güvenli sayfa sınırını aşıyor. Çalışacağın bölümü daha küçük bir PDF veya metin olarak ekle.',
       SourceIngestFailureKind.pdfTextLimit => 'Bu PDF’deki seçilebilir metin güvenli işleme sınırını aşıyor. Çalışacağın bölümü daha küçük bir PDF veya metin olarak ekle.',
-      SourceIngestFailureKind.pdfNoExtractableText => 'Bu PDF’de seçilebilir metin bulunamadı. Görüntü taraması/OCR bu sürümde yok; çalışacağın bölümü metin olarak yapıştır.',
+      SourceIngestFailureKind.pdfNoExtractableText => 'Bu PDF’de seçilebilir metin bulunamadı. Çalışacağın sayfayı fotoğraf olarak ekleyip OCR kullanabilir veya metni doğrudan yapıştırabilirsin.',
       SourceIngestFailureKind.pdfParseFailure => 'PDF güvenli biçimde açılamadı. Dosya bozuk veya korumalı olabilir; başka bir PDF seç veya metni doğrudan yapıştır.',
       SourceIngestFailureKind.officeEmpty ||
       SourceIngestFailureKind.officeTooLarge ||
