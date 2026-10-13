@@ -111,6 +111,50 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  testWidgets('scheduled quiz review opens the exact due question and completes after truthful feedback', (tester) async {
+    final runtime = await _runtime();
+    addTearDown(runtime.close);
+    const materialId = MaterialId('quiz-scheduled-screen');
+    await runtime.ingest.ingestPastedText(
+      learner: runtime.learner,
+      materialId: materialId,
+      sourceName: 'Planlı quiz ekranı',
+      text:
+          'Fotosentez sırasında bitkiler ışık enerjisini kimyasal enerjiye dönüştürür. '
+          'Klorofil ışığın soğurulmasında önemli görev alır. '
+          'Karbondioksit ve su kullanılarak glikoz üretimine katkı sağlanır.',
+    );
+    final state = await runtime.quiz.openCurrentSet(learner: runtime.learner, materialId: materialId);
+    final target = state.set.questions[1];
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: SesliOgrenTheme.light(),
+        home: LivingDeskReviewScope(
+          child: QuizScreen(
+            runtime: runtime,
+            materialId: materialId,
+            scheduledReviewSourceVersionId: state.set.sourceVersionId,
+            scheduledReviewSourceAnchor: target.sourceAnchor,
+          ),
+        ),
+      ),
+    );
+    await _pumpUntilFound(tester, find.byKey(const ValueKey('quiz-submit')));
+    final persisted = await runtime.quiz.openCurrentSet(learner: runtime.learner, materialId: materialId);
+    expect(persisted.session.cursorIndex, target.ordinal);
+    expect(persisted.currentQuestion?.id, target.id);
+    expect(find.text('SORU 2 / 3'), findsOneWidget);
+
+    await tester.tap(find.byKey(ValueKey('quiz-option-${target.correctOptionIndex}')).hitTestable());
+    await tester.pump();
+    await tester.tap(find.byKey(const ValueKey('quiz-submit')));
+    await _pumpUntilFound(tester, find.byKey(const ValueKey('quiz-source-evidence')));
+    expect(find.text('Tekrarı tamamla'), findsOneWidget);
+    expect(find.byKey(const ValueKey('quiz-source-evidence')), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('incorrect quiz answer is committed before exact source correction appears', (tester) async {
     final runtime = await _runtime();
     addTearDown(runtime.close);

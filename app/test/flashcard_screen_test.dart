@@ -199,6 +199,43 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  testWidgets('scheduled flashcard review opens the exact due card instead of an unrelated cursor', (tester) async {
+    final runtime = await _runtime();
+    addTearDown(runtime.close);
+    const materialId = MaterialId('flashcards-scheduled-screen');
+    await runtime.ingest.ingestPastedText(
+      learner: runtime.learner,
+      materialId: materialId,
+      sourceName: 'Planlı kart ekranı',
+      text:
+          'Fotosentez ışık enerjisini kimyasal enerjiye dönüştürür. '
+          'Klorofil ışığın soğurulmasına yardım eder. '
+          'Karbondioksit süreçte önemli bir girdidir.',
+    );
+    final state = await runtime.flashcards.openCurrentSet(learner: runtime.learner, materialId: materialId);
+    final target = state.set.cards[1];
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: SesliOgrenTheme.light(),
+        home: LivingDeskReviewScope(
+          child: FlashcardScreen(
+            runtime: runtime,
+            materialId: materialId,
+            scheduledReviewSourceVersionId: state.set.sourceVersionId,
+            scheduledReviewSourceAnchor: target.sourceAnchor,
+          ),
+        ),
+      ),
+    );
+    await _pumpUntilFound(tester, find.byKey(const ValueKey('flashcards-reveal')));
+    final persisted = await runtime.flashcards.openCurrentSet(learner: runtime.learner, materialId: materialId);
+    expect(persisted.session.cursorIndex, target.ordinal);
+    expect(persisted.currentCard?.id, target.id);
+    expect(find.text(target.front), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('flashcards remain usable at 320px and 150% text scale', (tester) async {
     tester.view.physicalSize = const Size(320, 700);
     tester.view.devicePixelRatio = 1;
