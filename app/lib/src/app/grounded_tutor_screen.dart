@@ -487,6 +487,7 @@ class _GroundedTutorScreenState extends State<GroundedTutorScreen> {
     );
     final send = FilledButton.icon(
       key: const ValueKey('grounded-tutor-send'),
+      style: FilledButton.styleFrom(foregroundColor: Colors.white),
       onPressed: _busy || _state == null ? null : _ask,
       icon: _busy
           ? const SizedBox.square(dimension: 16, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
