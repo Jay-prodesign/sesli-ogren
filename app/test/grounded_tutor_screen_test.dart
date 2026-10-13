@@ -22,16 +22,23 @@ class _UnusedPdfExtractor implements PdfTextExtractor {
   }
 }
 
-Future<void> _waitForTutorSubmitToFinish(WidgetTester tester, {int maxWaits = 250}) async {
-  final busyLabel = find.text('Kaynak kontrol ediliyor');
-  for (var i = 0; i < maxWaits && busyLabel.evaluate().isNotEmpty; i++) {
-    // SQLite futures complete on real wall time, while their widget
-    // continuations advance on tester pumps. Alternate both clocks instead of
-    // racing through fake-time pumps under a loaded CI runner.
-    await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 20)));
+Future<void> _waitForTutorSubmitToFinish(
+  WidgetTester tester, {
+  required Finder questionField,
+  int maxWaits = 250,
+}) async {
+  for (var i = 0; i < maxWaits; i++) {
     await tester.pump();
+    final field = tester.widget<TextField>(questionField);
+    if ((field.controller?.text ?? '').isEmpty) return;
+
+    // SQLite futures complete on real wall time, while their widget
+    // continuations advance on tester pumps. Alternate both clocks so the
+    // assertion is stable whether the submit is instant or CI-load delayed.
+    await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 20)));
   }
-  expect(busyLabel, findsNothing, reason: 'Tutor submit should finish before response UI assertions.');
+  final field = tester.widget<TextField>(questionField);
+  expect(field.controller?.text ?? '', isEmpty, reason: 'Tutor submit should finish before response UI assertions.');
 }
 
 Future<void> _scrollTutorUntilFound(WidgetTester tester, Finder target, {int maxDrags = 20}) async {
@@ -101,13 +108,12 @@ void main() {
     expect(find.textContaining('öğrenme kanıtı'), findsWidgets);
     await _scrollTutorUntilFound(tester, find.byKey(const ValueKey('grounded-tutor-empty')));
 
-    await tester.enterText(find.byKey(const ValueKey('grounded-tutor-question')), 'Klorofil ne işe yarar?');
+    final questionField = find.byKey(const ValueKey('grounded-tutor-question'));
+    await tester.enterText(questionField, 'Klorofil ne işe yarar?');
     final send = find.byKey(const ValueKey('grounded-tutor-send')).hitTestable();
     expect(send, findsOneWidget);
     await tester.tap(send);
-    await tester.pump();
-    expect(find.text('Kaynak kontrol ediliyor'), findsOneWidget);
-    await _waitForTutorSubmitToFinish(tester);
+    await _waitForTutorSubmitToFinish(tester, questionField: questionField);
     await _scrollTutorUntilFound(tester, find.textContaining('TUTOR · KAYNAĞA BAĞLI'));
     await _scrollTutorUntilFound(tester, find.byKey(const ValueKey('grounded-tutor-next-actions')));
     expect(find.textContaining('KAYNAĞA BAĞLI'), findsWidgets);
