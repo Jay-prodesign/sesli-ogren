@@ -258,27 +258,27 @@ begin
            and s.revoked_at is null
        );
 
-    update public.recall_actions
-       set revoked_at = coalesce(revoked_at, now())
-     where account_id = v_user
-       and material_id = v_material
-       and revoked_at is null;
+    update public.recall_actions a
+       set revoked_at = coalesce(a.revoked_at, now())
+     where a.account_id = v_user
+       and a.material_id = v_material
+       and a.revoked_at is null;
 
-    update public.learner_evidence
-       set invalidated_at = coalesce(invalidated_at, now())
-     where account_id = v_user
-       and material_id = v_material
-       and invalidated_at is null;
+    update public.learner_evidence e
+       set invalidated_at = coalesce(e.invalidated_at, now())
+     where e.account_id = v_user
+       and e.material_id = v_material
+       and e.invalidated_at is null;
 
-    delete from public.learner_states
-     where account_id = v_user
-       and material_id = v_material;
+    delete from public.learner_states s
+     where s.account_id = v_user
+       and s.material_id = v_material;
 
-    update public.source_assets
-       set revoked_at = coalesce(revoked_at, now())
-     where account_id = v_user
-       and material_id = v_material
-       and revoked_at is null;
+    update public.source_assets s
+       set revoked_at = coalesce(s.revoked_at, now())
+     where s.account_id = v_user
+       and s.material_id = v_material
+       and s.revoked_at is null;
   elsif v_expected_key is not null then
     raise exception 'source_conflict' using errcode = 'P0001';
   end if;
