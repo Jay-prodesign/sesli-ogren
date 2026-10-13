@@ -45,7 +45,7 @@ class LivingStudyDeskHome extends StatelessWidget {
     required this.onOpenLearning,
     required this.onOpenListen,
     required this.onOpenMaterial,
-    required this.onOpenStudyPlan,
+    this.onOpenStudyPlan,
     super.key,
   });
 
@@ -64,7 +64,7 @@ class LivingStudyDeskHome extends StatelessWidget {
   final VoidCallback onOpenLearning;
   final VoidCallback onOpenListen;
   final ValueChanged<MaterialId> onOpenMaterial;
-  final VoidCallback onOpenStudyPlan;
+  final VoidCallback? onOpenStudyPlan;
 
   static const _canvas = AppPalette.canvas;
   static const _paper = AppPalette.surface;

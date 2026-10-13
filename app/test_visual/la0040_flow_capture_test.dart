@@ -20,12 +20,14 @@ import 'package:sesli_ogren/src/app/quick_recap_screen.dart';
 import 'package:sesli_ogren/src/app/quiz_screen.dart';
 import 'package:sesli_ogren/src/app/living_study_desk_home.dart';
 import 'package:sesli_ogren/src/app/source_reader_screen.dart';
+import 'package:sesli_ogren/src/app/study_plan_screen.dart';
 import 'package:sesli_ogren/src/data/pdf_text_extractor.dart';
 import 'package:sesli_ogren/src/data/source_ingest_service.dart';
 import 'package:sesli_ogren/src/data/sqlite_source_store.dart';
 import 'package:sesli_ogren/src/domain/authenticated_learner.dart';
 import 'package:sesli_ogren/src/domain/learning_contracts.dart';
 import 'package:sesli_ogren/src/domain/learning_truth.dart';
+import 'package:sesli_ogren/src/domain/study_plan.dart';
 import 'package:sesli_ogren/src/learning/recall_learning_service.dart';
 import 'package:sesli_ogren/src/speech/device_speech_output.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
@@ -928,6 +930,90 @@ void main() {
     expect(find.byKey(const ValueKey('quiz-next')), findsOneWidget);
     expect(tester.takeException(), isNull);
     await expectLater(find.byType(Scaffold), matchesGoldenFile('goldens/la0040_quiz_feedback_320_text150.png'));
+  });
+
+  testWidgets('LA-0040 Study Plan summary and source reconciliation', (tester) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
+    addTearDown(store.close);
+    final ingest = SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor());
+    final runtime = AppRuntime(
+      learner: AppRuntime.localM5LearnerFixture,
+      store: store,
+      ingest: ingest,
+      recall: RecallLearningService(sourceStore: store, learningStore: store.learningTruthStore()),
+      telemetry: store.operationalTelemetry(),
+    );
+    const planMaterialId = MaterialId('visual-study-plan');
+    final first = await ingest.ingestPastedText(
+      learner: runtime.learner,
+      materialId: planMaterialId,
+      sourceName: 'Fizik ara sınav notu',
+      text:
+          'Momentum bir cismin kütlesi ile hızının çarpımıdır. '
+          'İtme momentum değişimiyle ilişkilidir ve enerji korunumu ayrı bir fizik ilkesidir.',
+    );
+    await store.saveStudyTarget(
+      learner: runtime.learner,
+      target: StudyTargetRecord(
+        id: const StudyTargetId('visual-study-target'),
+        title: 'Fizik ara sınavı',
+        targetDate: DateTime.utc(2026, 10, 27),
+        materials: [
+          StudyTargetMaterialBinding(
+            materialId: planMaterialId,
+            sourceVersionId: first.sourceVersion.identity.sourceVersionId,
+            ordinal: 0,
+          ),
+        ],
+        createdAt: DateTime.utc(2026, 10, 13, 8),
+        updatedAt: DateTime.utc(2026, 10, 13, 8),
+      ),
+    );
+
+    Future<void> pumpPlan({TextScaler textScaler = TextScaler.noScaling}) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          debugShowCheckedModeBanner: false,
+          theme: SesliOgrenTheme.light(),
+          builder: (context, child) => MediaQuery(
+            data: MediaQuery.of(context).copyWith(disableAnimations: true, textScaler: textScaler),
+            child: child!,
+          ),
+          home: LivingDeskReviewScope(child: StudyPlanScreen(runtime: runtime)),
+        ),
+      );
+      for (var i = 0; i < 80 && find.text('Fizik ara sınavı').evaluate().isEmpty; i++) {
+        await tester.pump(const Duration(milliseconds: 30));
+      }
+      expect(find.text('Fizik ara sınavı'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    }
+
+    await pumpPlan();
+    await expectLater(find.byType(Scaffold), matchesGoldenFile('goldens/la0040_study_plan_390x844.png'));
+
+    await ingest.ingestPastedText(
+      learner: runtime.learner,
+      materialId: planMaterialId,
+      sourceName: 'Fizik ara sınav notu · güncel',
+      text:
+          'Enerjinin korunumu kapalı sistemde toplam enerjinin değişmediğini söyler. '
+          'Kinetik ve potansiyel enerji farklı biçimler arasında dönüşebilir.',
+    );
+    tester.view.physicalSize = const Size(320, 700);
+    await pumpPlan(textScaler: const TextScaler.linear(1.5));
+    for (var i = 0; i < 40 && find.text('Kaynak değişti').evaluate().isEmpty; i++) {
+      await tester.pump(const Duration(milliseconds: 30));
+    }
+    expect(find.text('Kaynak değişti'), findsOneWidget);
+    expect(find.textContaining('Eski sürümden yeni görev üretmiyoruz'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+    await expectLater(find.byType(Scaffold), matchesGoldenFile('goldens/la0040_study_plan_reconcile_320_text150.png'));
   });
 
   testWidgets('LA-0040 source-first Listen', (tester) async {
