@@ -38,7 +38,7 @@ enum SourceTrustClass { userProvided, authoritativeReference, aiInterpretation }
 
 enum SourceKnowledgeClass { learnerOwned, trustedPlatform }
 
-enum SourceMediaType { pastedText, pdf }
+enum SourceMediaType { pastedText, pdf, image, document, presentation }
 
 enum MaterialLifecycleStatus { active, deleted }
 

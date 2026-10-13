@@ -153,6 +153,7 @@ class _MaterialWorkspaceScreenState extends State<MaterialWorkspaceScreen> {
             title: data.material.title,
             sourceText: extracted.normalizedText,
             sourceVersion: data.source,
+            sourceWarnings: extracted.warnings,
             initialProgress: initialProgress,
             onProgressChanged: (progress) => widget.runtime.store.saveReaderResumeProgress(
               learner: widget.runtime.learner,

@@ -15,6 +15,7 @@ class SourceReaderScreen extends StatefulWidget {
     required this.title,
     required this.sourceText,
     this.sourceVersion,
+    this.sourceWarnings = const [],
     this.initialProgress = 0,
     this.onProgressChanged,
     this.onListen,
@@ -26,6 +27,7 @@ class SourceReaderScreen extends StatefulWidget {
   final String title;
   final String sourceText;
   final SourceVersionRecord? sourceVersion;
+  final List<String> sourceWarnings;
   final double initialProgress;
   final Future<void> Function(double progress)? onProgressChanged;
   final VoidCallback? onListen;
@@ -184,6 +186,17 @@ class _SourceReaderScreenState extends State<SourceReaderScreen> {
     final line = living ? AtelierStyle.line : theme.colorScheme.outlineVariant;
     final paper = living ? AtelierStyle.paper : theme.colorScheme.surface;
     final canvas = living ? AtelierStyle.canvas : theme.colorScheme.surface;
+    final sourceWarning = widget.sourceWarnings.contains('OCR_TEXT_REQUIRES_SOURCE_CHECK')
+        ? 'Bu metin fotoğraftan OCR ile okundu. Çalışmadan önce ifadeleri görsel kaynakla karşılaştır.'
+        : widget.sourceWarnings.contains('PPTX_SLIDE_TEXT_ONLY')
+        ? 'Bu sunuda yalnız okunabilir slayt metni çıkarıldı; görsel yerleşim ve grafikler kaynak metne dönüşmedi.'
+        : widget.sourceWarnings.contains('DOCX_LAYOUT_NOT_PRESERVED')
+        ? 'Bu Word belgesinde okunabilir metin çıkarıldı; sayfa yerleşimi kaynak metne dönüşmedi.'
+        : widget.sourceWarnings.contains('LEGACY_DOC_TEXT_ONLY')
+        ? 'Bu eski Word dosyasında yalnız doğrulanabilen metin çıkarıldı; sayfa düzeni ve gömülü nesneler kaynak metne dönüşmedi.'
+        : widget.sourceWarnings.contains('LEGACY_PPT_TEXT_ONLY')
+        ? 'Bu eski PowerPoint dosyasında yalnız doğrulanabilen slayt metni çıkarıldı; görsel yerleşim ve nesneler kaynak metne dönüşmedi.'
+        : null;
     final restoredFromSavedPosition = widget.initialProgress > 0.02 && widget.initialProgress < 0.95;
     final compactReadingSurface =
         MediaQuery.sizeOf(context).width < 360 || MediaQuery.textScalerOf(context).scale(1) > 1.2;
@@ -227,6 +240,35 @@ class _SourceReaderScreenState extends State<SourceReaderScreen> {
         if (living && widget.sourceVersion != null) ...[
           const SizedBox(height: 12),
           AtelierSourceTrustStrip(sourceVersion: widget.sourceVersion!),
+        ],
+        if (sourceWarning != null) ...[
+          const SizedBox(height: 10),
+          Semantics(
+            container: true,
+            liveRegion: true,
+            label: sourceWarning,
+            child: ExcludeSemantics(
+              child: Container(
+                key: const ValueKey('reader-source-warning'),
+                width: double.infinity,
+                padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
+                decoration: BoxDecoration(
+                  color: living ? AtelierStyle.pulseSoft : theme.colorScheme.secondaryContainer,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Icon(Icons.fact_check_outlined, size: 18, color: accent),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(sourceWarning, style: theme.textTheme.bodySmall?.copyWith(color: ink, height: 1.35)),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
         ],
         if (living && !compactReadingSurface) ...[
           const SizedBox(height: 14),

@@ -40,8 +40,18 @@ class SqliteSourceStore implements SourceStore {
     final database = await selectedFactory.openDatabase(
       databasePath,
       options: OpenDatabaseOptions(
-        version: 17,
-        onConfigure: (db) => db.execute('PRAGMA foreign_keys = ON'),
+        version: 18,
+        // Schema-rebuild migrations need foreign keys disabled before the
+        // upgrade transaction begins. Runtime enforcement is restored in
+        // onOpen before any product read/write can occur.
+        onConfigure: (db) => db.execute('PRAGMA foreign_keys = OFF'),
+        onOpen: (db) async {
+          await db.execute('PRAGMA foreign_keys = ON');
+          final violations = await db.rawQuery('PRAGMA foreign_key_check');
+          if (violations.isNotEmpty) {
+            throw StateError('source_store_foreign_key_check_failed');
+          }
+        },
         onUpgrade: (db, oldVersion, newVersion) async {
           if (oldVersion < 2) {
             await _upgradeLearningTruthSchema(db);
@@ -91,6 +101,9 @@ class SqliteSourceStore implements SourceStore {
           if (oldVersion < 17) {
             await _upgradeStudyPlanSchema(db);
           }
+          if (oldVersion < 18) {
+            await _upgradeSourceVersionMediaSchema(db);
+          }
         },
         onCreate: (db, version) async {
           await db.execute('''
@@ -135,7 +148,11 @@ CREATE TABLE source_versions (
       AND (
         (media_type = 'pastedText' AND inline_text IS NOT NULL AND source_blob IS NULL)
         OR
-        (media_type = 'pdf' AND inline_text IS NULL AND source_blob IS NOT NULL)
+        (
+          media_type IN ('pdf', 'image', 'document', 'presentation')
+          AND inline_text IS NULL
+          AND source_blob IS NOT NULL
+        )
       )
     )
     OR
@@ -1291,6 +1308,114 @@ ORDER BY a.id ASC
         eventId: 'quiz:${row['id']! as int}',
         occurredAt: DateTime.parse(row['answered_at_utc']! as String).toUtc(),
       );
+    }
+  }
+
+  static Future<void> _upgradeSourceVersionMediaSchema(Database db) async {
+    final tableRows = await db.rawQuery(
+      "SELECT sql FROM sqlite_master WHERE type = 'table' AND name = 'source_versions' LIMIT 1",
+    );
+    if (tableRows.isEmpty) return;
+
+    // Historical upgrade fixtures can intentionally contain only a bounded
+    // subset of an old schema. Never synthesize missing source metadata in
+    // those fixtures: there is no canonical row to migrate.
+    final columns = await db.rawQuery('PRAGMA table_info(source_versions)');
+    final columnNames = columns.map((row) => row['name']).whereType<String>().toSet();
+    const canonicalColumns = <String>{
+      'learner_id',
+      'material_id',
+      'source_version_id',
+      'content_digest',
+      'trust_class',
+      'knowledge_class',
+      'media_type',
+      'source_name',
+      'mime_type',
+      'byte_size',
+      'inline_text',
+      'source_blob',
+      'created_at_utc',
+      'superseded_by',
+      'revoked_at_utc',
+    };
+    if (!columnNames.containsAll(canonicalColumns)) return;
+
+    final createSql = tableRows.single['sql'] as String? ?? '';
+    if (createSql.contains("'image'") && createSql.contains("'document'") && createSql.contains("'presentation'")) {
+      return;
+    }
+
+    // foreign_keys is disabled in onConfigure before the upgrade transaction.
+    // legacy_alter_table prevents SQLite from retargeting child FK definitions
+    // to the temporary table name while the parent CHECK is rebuilt.
+    await db.execute('PRAGMA legacy_alter_table = ON');
+    try {
+      await db.execute('ALTER TABLE source_versions RENAME TO source_versions_v17');
+      await db.execute('''
+CREATE TABLE source_versions (
+  learner_id TEXT NOT NULL,
+  material_id TEXT NOT NULL,
+  source_version_id TEXT NOT NULL,
+  content_digest TEXT NOT NULL,
+  trust_class TEXT NOT NULL,
+  knowledge_class TEXT NOT NULL,
+  media_type TEXT NOT NULL,
+  source_name TEXT NOT NULL,
+  mime_type TEXT NOT NULL,
+  byte_size INTEGER NOT NULL,
+  inline_text TEXT,
+  source_blob BLOB,
+  created_at_utc TEXT NOT NULL,
+  superseded_by TEXT,
+  revoked_at_utc TEXT,
+  PRIMARY KEY (learner_id, source_version_id),
+  UNIQUE (learner_id, material_id, content_digest),
+  FOREIGN KEY (learner_id, material_id)
+    REFERENCES materials (learner_id, material_id) ON DELETE CASCADE,
+  CHECK (
+    (
+      revoked_at_utc IS NULL
+      AND (
+        (media_type = 'pastedText' AND inline_text IS NOT NULL AND source_blob IS NULL)
+        OR
+        (
+          media_type IN ('pdf', 'image', 'document', 'presentation')
+          AND inline_text IS NULL
+          AND source_blob IS NOT NULL
+        )
+      )
+    )
+    OR
+    (
+      revoked_at_utc IS NOT NULL
+      AND inline_text IS NULL
+      AND source_blob IS NULL
+    )
+  )
+)
+''');
+      await db.execute('''
+INSERT INTO source_versions (
+  learner_id, material_id, source_version_id, content_digest,
+  trust_class, knowledge_class, media_type, source_name, mime_type,
+  byte_size, inline_text, source_blob, created_at_utc, superseded_by,
+  revoked_at_utc
+)
+SELECT
+  learner_id, material_id, source_version_id, content_digest,
+  trust_class, knowledge_class, media_type, source_name, mime_type,
+  byte_size, inline_text, source_blob, created_at_utc, superseded_by,
+  revoked_at_utc
+FROM source_versions_v17
+''');
+      await db.execute('DROP TABLE source_versions_v17');
+      await db.execute('''
+CREATE INDEX IF NOT EXISTS idx_source_versions_material
+ON source_versions (learner_id, material_id, created_at_utc)
+''');
+    } finally {
+      await db.execute('PRAGMA legacy_alter_table = OFF');
     }
   }
 

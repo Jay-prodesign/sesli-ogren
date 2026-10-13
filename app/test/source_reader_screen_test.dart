@@ -62,6 +62,33 @@ void main() {
     expect(recap, 1);
   });
 
+  testWidgets('OCR provenance warning stays visible and is not presented as learner evidence', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(320, 650));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: MediaQuery(
+          data: const MediaQueryData(textScaler: TextScaler.linear(1.5)),
+          child: LivingDeskReviewScope(
+            child: SourceReaderScreen(
+              title: 'Tahta fotoğrafı',
+              sourceText: 'Fotosentez ışık enerjisini kimyasal enerjiye dönüştürür.',
+              sourceWarnings: const ['OCR_TEXT_REQUIRES_SOURCE_CHECK'],
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    expect(find.byKey(const ValueKey('reader-source-warning')), findsOneWidget);
+    expect(find.textContaining('OCR ile okundu'), findsOneWidget);
+    expect(find.textContaining('görsel kaynakla karşılaştır'), findsOneWidget);
+    expect(find.textContaining('ustalık'), findsNothing);
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('source reader stacks learning actions on narrow large-text layouts', (tester) async {
     await tester.binding.setSurfaceSize(const Size(320, 650));
     addTearDown(() => tester.binding.setSurfaceSize(null));

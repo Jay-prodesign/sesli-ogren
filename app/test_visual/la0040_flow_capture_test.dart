@@ -376,9 +376,81 @@ void main() {
       await tester.pump(const Duration(milliseconds: 30));
     }
     expect(find.text('PDF seç'), findsOneWidget);
+    expect(find.byKey(const ValueKey('source-choice-office')), findsOneWidget);
+    expect(find.byKey(const ValueKey('source-choice-image')), findsOneWidget);
+    expect(find.text('Belge veya sunu seç'), findsOneWidget);
+    expect(find.text('Fotoğraf seç'), findsOneWidget);
     expect(find.text('Metin yapıştır'), findsOneWidget);
     expect(tester.takeException(), isNull);
     await expectLater(find.byType(Scaffold), matchesGoldenFile('goldens/la0040_source_acquisition_390x844.png'));
+  });
+
+  testWidgets('LA-0040 richer source acquisition survives 320px + large type', (tester) async {
+    tester.view.physicalSize = const Size(320, 700);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
+    addTearDown(store.close);
+    final runtime = AppRuntime(
+      learner: AppRuntime.localM5LearnerFixture,
+      store: store,
+      ingest: SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor()),
+      recall: RecallLearningService(sourceStore: store, learningStore: store.learningTruthStore()),
+      telemetry: store.operationalTelemetry(),
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        debugShowCheckedModeBanner: false,
+        theme: SesliOgrenTheme.light(),
+        home: MediaQuery(
+          data: const MediaQueryData(textScaler: TextScaler.linear(1.5), disableAnimations: true),
+          child: LivingDeskReviewScope(child: LearningSliceScreen(runtime: runtime)),
+        ),
+      ),
+    );
+    for (var i = 0; i < 40 && find.byKey(const ValueKey('source-choice-office')).evaluate().isEmpty; i++) {
+      await tester.pump(const Duration(milliseconds: 30));
+    }
+    expect(find.byKey(const ValueKey('source-choice-pdf')), findsOneWidget);
+    expect(find.byKey(const ValueKey('source-choice-office')), findsOneWidget);
+    expect(find.byKey(const ValueKey('source-choice-image')), findsOneWidget);
+    expect(find.byKey(const ValueKey('source-choice-text')), findsOneWidget);
+    expect(find.textContaining('OCR sonucu kaynak uyarısıyla saklanır'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+    await expectLater(find.byType(Scaffold), matchesGoldenFile('goldens/la0040_source_acquisition_320_text150.png'));
+  });
+
+  testWidgets('LA-0040 OCR Reader keeps source warning visible', (tester) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        debugShowCheckedModeBanner: false,
+        theme: SesliOgrenTheme.light(),
+        home: LivingDeskReviewScope(
+          child: SourceReaderScreen(
+            title: 'Tahta fotoğrafı',
+            sourceText:
+                'Fotosentez ışık enerjisini kimyasal enerjiye dönüştürür. '
+                'Klorofil ışığın soğurulmasına yardım eder.',
+            sourceWarnings: const ['OCR_TEXT_REQUIRES_SOURCE_CHECK'],
+            onRecall: () {},
+          ),
+        ),
+      ),
+    );
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(find.byKey(const ValueKey('reader-source-warning')), findsOneWidget);
+    expect(find.textContaining('OCR ile okundu'), findsOneWidget);
+    expect(find.textContaining('görsel kaynakla karşılaştır'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+    await expectLater(find.byType(Scaffold), matchesGoldenFile('goldens/la0040_ocr_reader_warning_390x844.png'));
   });
 
   testWidgets('LA-0040 first-value intent', (tester) async {

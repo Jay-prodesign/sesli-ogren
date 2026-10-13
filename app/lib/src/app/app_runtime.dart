@@ -3,6 +3,8 @@ import '../account/account_overview_gateway.dart';
 import '../account/supabase_account_deletion_gateway.dart';
 import '../account/supabase_account_overview_gateway.dart';
 import '../data/operational_telemetry.dart';
+import '../data/image_text_extractor.dart';
+import '../data/office_text_extractor.dart';
 import '../data/pdf_text_extractor.dart';
 import '../data/source_ingest_service.dart';
 import '../data/sqlite_source_store.dart';
@@ -70,7 +72,12 @@ class AppRuntime {
 
   static Future<AppRuntime> open({required AuthenticatedLearner learner}) async {
     final store = await SqliteSourceStore.open();
-    final ingest = SourceIngestService(store: store, pdfTextExtractor: const PdfrxPdfTextExtractor());
+    final ingest = SourceIngestService(
+      store: store,
+      pdfTextExtractor: const PdfrxPdfTextExtractor(),
+      officeTextExtractor: const OpenXmlOfficeTextExtractor(),
+      imageTextExtractor: const MlKitImageTextExtractor(),
+    );
     final recall = RecallLearningService(sourceStore: store, learningStore: store.learningTruthStore());
     return AppRuntime(
       learner: learner,
@@ -88,7 +95,12 @@ class AppRuntime {
 
   static Future<AppRuntime> openLocal() async {
     final store = await SqliteSourceStore.open();
-    final ingest = SourceIngestService(store: store, pdfTextExtractor: const PdfrxPdfTextExtractor());
+    final ingest = SourceIngestService(
+      store: store,
+      pdfTextExtractor: const PdfrxPdfTextExtractor(),
+      officeTextExtractor: const OpenXmlOfficeTextExtractor(),
+      imageTextExtractor: const MlKitImageTextExtractor(),
+    );
     final recall = RecallLearningService(sourceStore: store, learningStore: store.learningTruthStore());
     return AppRuntime(
       learner: localLearner,

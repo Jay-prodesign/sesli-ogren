@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sesli_ogren/src/data/sqlite_source_store.dart';
@@ -377,6 +378,178 @@ CREATE TABLE sentinel (
       expect(tables.map((row) => row['name']), contains('reader_progress'));
       final sentinel = await inspected.query('sentinel');
       expect(sentinel.single['value'], 'preserved');
+    } finally {
+      await legacy?.close();
+      await upgraded?.close();
+      await inspected?.close();
+      await temp.delete(recursive: true);
+    }
+  });
+
+  test('v17 source media schema upgrades without reset and admits rich source blobs', () async {
+    final temp = await Directory.systemTemp.createTemp('sesli-ogren-v17-source-media-');
+    final path = '${temp.path}/source-media.db';
+    Database? legacy;
+    SqliteSourceStore? upgraded;
+    Database? inspected;
+
+    try {
+      legacy = await databaseFactoryFfi.openDatabase(
+        path,
+        options: OpenDatabaseOptions(
+          version: 17,
+          onCreate: (db, version) async {
+            await db.execute('''
+CREATE TABLE materials (
+  learner_id TEXT NOT NULL,
+  material_id TEXT NOT NULL,
+  title TEXT NOT NULL,
+  media_type TEXT NOT NULL,
+  lifecycle_status TEXT NOT NULL,
+  processing_state TEXT NOT NULL,
+  current_source_version_id TEXT,
+  created_at_utc TEXT NOT NULL,
+  updated_at_utc TEXT NOT NULL,
+  deleted_at_utc TEXT,
+  PRIMARY KEY (learner_id, material_id)
+)
+''');
+            await db.execute('''
+CREATE TABLE source_versions (
+  learner_id TEXT NOT NULL,
+  material_id TEXT NOT NULL,
+  source_version_id TEXT NOT NULL,
+  content_digest TEXT NOT NULL,
+  trust_class TEXT NOT NULL,
+  knowledge_class TEXT NOT NULL,
+  media_type TEXT NOT NULL,
+  source_name TEXT NOT NULL,
+  mime_type TEXT NOT NULL,
+  byte_size INTEGER NOT NULL,
+  inline_text TEXT,
+  source_blob BLOB,
+  created_at_utc TEXT NOT NULL,
+  superseded_by TEXT,
+  revoked_at_utc TEXT,
+  PRIMARY KEY (learner_id, source_version_id),
+  UNIQUE (learner_id, material_id, content_digest),
+  FOREIGN KEY (learner_id, material_id)
+    REFERENCES materials (learner_id, material_id) ON DELETE CASCADE,
+  CHECK (
+    (
+      revoked_at_utc IS NULL
+      AND (
+        (media_type = 'pastedText' AND inline_text IS NOT NULL AND source_blob IS NULL)
+        OR
+        (media_type = 'pdf' AND inline_text IS NULL AND source_blob IS NOT NULL)
+      )
+    )
+    OR
+    (
+      revoked_at_utc IS NOT NULL
+      AND inline_text IS NULL
+      AND source_blob IS NULL
+    )
+  )
+)
+''');
+            await db.execute('''
+CREATE TABLE extracted_contents (
+  learner_id TEXT NOT NULL,
+  extracted_content_id TEXT NOT NULL,
+  source_version_id TEXT NOT NULL,
+  normalized_text TEXT NOT NULL,
+  method TEXT NOT NULL,
+  method_version TEXT NOT NULL,
+  anchors_json TEXT NOT NULL,
+  warnings_json TEXT NOT NULL,
+  source_content_digest TEXT NOT NULL,
+  created_at_utc TEXT NOT NULL,
+  invalidated_at_utc TEXT,
+  PRIMARY KEY (learner_id, extracted_content_id),
+  FOREIGN KEY (learner_id, source_version_id)
+    REFERENCES source_versions (learner_id, source_version_id) ON DELETE CASCADE
+)
+''');
+            await db.insert('materials', {
+              'learner_id': 'owner',
+              'material_id': 'material-a',
+              'title': 'Existing PDF',
+              'media_type': 'pdf',
+              'lifecycle_status': 'active',
+              'processing_state': 'ready',
+              'current_source_version_id': 'source-a',
+              'created_at_utc': '2026-10-12T00:00:00Z',
+              'updated_at_utc': '2026-10-12T00:00:00Z',
+            });
+            await db.insert('source_versions', {
+              'learner_id': 'owner',
+              'material_id': 'material-a',
+              'source_version_id': 'source-a',
+              'content_digest': 'digest-a',
+              'trust_class': 'userProvided',
+              'knowledge_class': 'learnerOwned',
+              'media_type': 'pdf',
+              'source_name': 'existing.pdf',
+              'mime_type': 'application/pdf',
+              'byte_size': 2,
+              'source_blob': Uint8List.fromList([1, 2]),
+              'created_at_utc': '2026-10-12T00:00:00Z',
+            });
+            await db.insert('extracted_contents', {
+              'learner_id': 'owner',
+              'extracted_content_id': 'extract-a',
+              'source_version_id': 'source-a',
+              'normalized_text': 'Existing source text',
+              'method': 'fixture',
+              'method_version': 'v1',
+              'anchors_json': '[]',
+              'warnings_json': '[]',
+              'source_content_digest': 'digest-a',
+              'created_at_utc': '2026-10-12T00:00:00Z',
+            });
+          },
+        ),
+      );
+      await legacy.close();
+      legacy = null;
+
+      upgraded = await SqliteSourceStore.open(factory: databaseFactoryFfi, path: path);
+      await upgraded.close();
+      upgraded = null;
+
+      inspected = await databaseFactoryFfi.openDatabase(path);
+      final existing = await inspected.query(
+        'source_versions',
+        where: 'learner_id = ? AND source_version_id = ?',
+        whereArgs: ['owner', 'source-a'],
+      );
+      expect(existing, hasLength(1));
+
+      final foreignKeys = await inspected.rawQuery('PRAGMA foreign_key_list(extracted_contents)');
+      expect(foreignKeys.map((row) => row['table']).toSet(), contains('source_versions'));
+      expect(await inspected.rawQuery('PRAGMA foreign_key_check'), isEmpty);
+      final sourceIndexes = await inspected.rawQuery("PRAGMA index_list('source_versions')");
+      expect(sourceIndexes.map((row) => row['name']), contains('idx_source_versions_material'));
+
+      await inspected.insert('source_versions', {
+        'learner_id': 'owner',
+        'material_id': 'material-a',
+        'source_version_id': 'source-image',
+        'content_digest': 'digest-image',
+        'trust_class': 'userProvided',
+        'knowledge_class': 'learnerOwned',
+        'media_type': 'image',
+        'source_name': 'board.jpg',
+        'mime_type': 'image/jpeg',
+        'byte_size': 3,
+        'source_blob': Uint8List.fromList([3, 4, 5]),
+        'created_at_utc': '2026-10-13T00:00:00Z',
+      });
+      expect(
+        await inspected.query('source_versions', where: 'source_version_id = ?', whereArgs: ['source-image']),
+        hasLength(1),
+      );
     } finally {
       await legacy?.close();
       await upgraded?.close();

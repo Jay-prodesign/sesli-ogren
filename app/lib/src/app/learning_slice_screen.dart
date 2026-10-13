@@ -32,6 +32,8 @@ class LearningSliceScreen extends StatefulWidget {
     this.startInSourceEditor = false,
     this.sourceGateway = const SupabaseSourceSummaryGateway(),
     this.pickPdfFile,
+    this.pickOfficeFile,
+    this.pickImageFile,
     super.key,
   });
 
@@ -52,8 +54,10 @@ class LearningSliceScreen extends StatefulWidget {
   final bool startInSourceEditor;
   final SupabaseSourceSummaryGateway sourceGateway;
 
-  /// Test/review seam only. Production uses the platform FilePicker.
+  /// Test/review seams only. Production uses the platform FilePicker.
   final Future<PlatformFile?> Function()? pickPdfFile;
+  final Future<PlatformFile?> Function()? pickOfficeFile;
+  final Future<PlatformFile?> Function()? pickImageFile;
 
   @override
   State<LearningSliceScreen> createState() => _LearningSliceScreenState();
@@ -430,10 +434,194 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
       SourceIngestFailureKind.pdfPageLimit =>
         'Bu PDF güvenli sayfa sınırını aşıyor. Çalışacağın bölümü daha küçük bir PDF veya metin olarak ekle.',
       SourceIngestFailureKind.pdfTextLimit => 'Bu PDF’deki seçilebilir metin güvenli işleme sınırını aşıyor. Çalışacağın bölümü daha küçük bir PDF veya metin olarak ekle.',
-      SourceIngestFailureKind.pdfNoExtractableText => 'Bu PDF’de seçilebilir metin bulunamadı. Görüntü taraması/OCR bu sürümde yok; çalışacağın bölümü metin olarak yapıştır.',
+      SourceIngestFailureKind.pdfNoExtractableText => 'Bu PDF’de seçilebilir metin bulunamadı. Çalışacağın sayfayı fotoğraf olarak ekleyip OCR kullanabilir veya metni doğrudan yapıştırabilirsin.',
       SourceIngestFailureKind.pdfParseFailure => 'PDF güvenli biçimde açılamadı. Dosya bozuk veya korumalı olabilir; başka bir PDF seç veya metni doğrudan yapıştır.',
+      SourceIngestFailureKind.officeEmpty ||
+      SourceIngestFailureKind.officeTooLarge ||
+      SourceIngestFailureKind.officeUnsupported ||
+      SourceIngestFailureKind.officeNoExtractableText ||
+      SourceIngestFailureKind.officeParseFailure ||
+      SourceIngestFailureKind.imageEmpty ||
+      SourceIngestFailureKind.imageTooLarge ||
+      SourceIngestFailureKind.imageUnsupported ||
+      SourceIngestFailureKind.imageNoExtractableText ||
+      SourceIngestFailureKind.imageOcrFailure ||
       SourceIngestFailureKind.other =>
         'PDF işlenemedi. Başka bir PDF seçebilir veya aynı bölümü metin olarak yapıştırabilirsin.',
+    };
+  }
+
+  Future<void> _pickOffice() {
+    return _pickRichSource(
+      injectedPicker: widget.pickOfficeFile,
+      allowedExtensions: const ['doc', 'docx', 'ppt', 'pptx'],
+      dialogTitle: 'Çalışmak istediğin Word veya PowerPoint dosyasını seç',
+      pickerFailure: 'Belge seçici açılamadı. Tekrar deneyebilir veya notunu metin olarak yapıştırabilirsin.',
+      maxBytes: widget.runtime.ingest.maxOfficeBytes,
+      oversizedMessage: 'Bu belge güvenli dosya sınırını aşıyor. Daha küçük bir DOC/DOCX/PPT/PPTX seç veya çalışacağın bölümü metin olarak ekle.',
+      emptyMessage: 'Seçtiğin belge boş görünüyor. Başka bir dosya seç.',
+      ingestSource: (bytes, name) => widget.runtime.ingest.ingestOffice(
+        learner: widget.runtime.learner,
+        materialId: widget.materialId,
+        bytes: bytes,
+        originalName: name,
+      ),
+      failureMessage: _officeFailureMessage,
+    );
+  }
+
+  Future<void> _pickImage() {
+    return _pickRichSource(
+      injectedPicker: widget.pickImageFile,
+      allowedExtensions: const ['jpg', 'jpeg', 'png', 'heic', 'heif'],
+      dialogTitle: 'Metnini okumak istediğin fotoğrafı seç',
+      pickerFailure: 'Fotoğraf seçici açılamadı. Tekrar deneyebilir veya notunu metin olarak yapıştırabilirsin.',
+      maxBytes: widget.runtime.ingest.maxImageBytes,
+      oversizedMessage: 'Bu fotoğraf güvenli dosya sınırını aşıyor. Daha küçük bir görüntü seç.',
+      emptyMessage: 'Seçtiğin fotoğraf boş görünüyor. Başka bir fotoğraf seç.',
+      ingestSource: (bytes, name) => widget.runtime.ingest.ingestImage(
+        learner: widget.runtime.learner,
+        materialId: widget.materialId,
+        bytes: bytes,
+        originalName: name,
+      ),
+      failureMessage: _imageFailureMessage,
+    );
+  }
+
+  Future<void> _pickRichSource({
+    required Future<PlatformFile?> Function()? injectedPicker,
+    required List<String> allowedExtensions,
+    required String dialogTitle,
+    required String pickerFailure,
+    required int maxBytes,
+    required String oversizedMessage,
+    required String emptyMessage,
+    required Future<SourceIngestResult> Function(Uint8List bytes, String name) ingestSource,
+    required String Function(Object error) failureMessage,
+  }) async {
+    if (_busy) return;
+    PlatformFile? file;
+    try {
+      file = injectedPicker != null
+          ? await injectedPicker()
+          : await FilePicker.pickFile(
+              type: FileType.custom,
+              allowedExtensions: allowedExtensions,
+              dialogTitle: dialogTitle,
+            );
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _inlineError = pickerFailure);
+      return;
+    }
+    if (file == null || !mounted) return;
+
+    int? fileByteSize;
+    try {
+      fileByteSize = file.lengthSync() ?? await file.length();
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _inlineError = 'Dosya boyutu güvenli biçimde doğrulanamadı. Başka bir kaynak seç.');
+      return;
+    }
+    if (!mounted) return;
+    if (fileByteSize == null) {
+      setState(() => _inlineError = 'Dosya boyutu güvenli biçimde doğrulanamadı. Başka bir kaynak seç.');
+      return;
+    }
+    if (fileByteSize <= 0) {
+      setState(() => _inlineError = emptyMessage);
+      return;
+    }
+    if (fileByteSize > maxBytes) {
+      setState(() => _inlineError = oversizedMessage);
+      return;
+    }
+
+    final stopwatch = Stopwatch()..start();
+    await _recordEvent(
+      OperationalEvent(
+        type: OperationalEventType.sourceIngest,
+        phase: OperationalEventPhase.started,
+        materialId: widget.materialId,
+        createdAt: DateTime.now().toUtc(),
+      ),
+    );
+    setState(() {
+      _busy = true;
+      _inlineError = null;
+    });
+    try {
+      final previousBinding = await _currentRemoteSourceBinding();
+      final bytes = await file.readAsBytes();
+      final ingestResult = await ingestSource(bytes, file.name);
+      stopwatch.stop();
+      await _recordEvent(
+        OperationalEvent(
+          type: OperationalEventType.sourceIngest,
+          phase: OperationalEventPhase.completed,
+          materialId: widget.materialId,
+          sourceVersionId: ingestResult.sourceVersion.identity.sourceVersionId,
+          durationMs: stopwatch.elapsedMilliseconds,
+          createdAt: DateTime.now().toUtc(),
+        ),
+      );
+      await _cleanupSupersededRemoteBinding(previousBinding, ingestResult.sourceVersion.identity.sourceVersionId);
+      if (!mounted) return;
+      await _completeSourceIngest();
+    } catch (error) {
+      stopwatch.stop();
+      await _recordEvent(
+        OperationalEvent(
+          type: OperationalEventType.sourceIngest,
+          phase: OperationalEventPhase.failed,
+          materialId: widget.materialId,
+          durationMs: stopwatch.elapsedMilliseconds,
+          errorClass: error.runtimeType.toString(),
+          createdAt: DateTime.now().toUtc(),
+        ),
+      );
+      if (!mounted) return;
+      setState(() => _inlineError = failureMessage(error));
+    } finally {
+      _setBusy(false);
+    }
+  }
+
+  String _officeFailureMessage(Object error) {
+    if (error is! SourceIngestException) {
+      return 'Belge veya sunu işlenemedi. DOC/DOCX/PPT/PPTX biçimlerinden birini deneyebilir ya da çalışacağın bölümü metin olarak ekleyebilirsin.';
+    }
+    return switch (error.kind) {
+      SourceIngestFailureKind.officeEmpty => 'Seçtiğin belge boş görünüyor. Başka bir dosya seç.',
+      SourceIngestFailureKind.officeTooLarge =>
+        'Bu belge güvenli işleme sınırını aşıyor. Daha küçük bir dosya veya yalnız çalışacağın bölümü ekle.',
+      SourceIngestFailureKind.officeUnsupported =>
+        'Bu Office dosya türü bu girişte desteklenmiyor. DOC, DOCX, PPT veya PPTX seç ya da metni doğrudan ekle.',
+      SourceIngestFailureKind.officeNoExtractableText =>
+        'Bu belge veya sunuda güvenilir metin bulunamadı. Metin içeren başka bir sürüm seç veya metni doğrudan ekle.',
+      SourceIngestFailureKind.officeParseFailure =>
+        'Belge güvenli biçimde açılamadı. Dosya bozuk, şifreli veya desteklenmeyen bir yapıda olabilir.',
+      _ => 'Belge veya sunu işlenemedi. DOC/DOCX/PPT/PPTX biçimlerinden birini deneyebilir ya da çalışacağın bölümü metin olarak ekleyebilirsin.',
+    };
+  }
+
+  String _imageFailureMessage(Object error) {
+    if (error is! SourceIngestException) {
+      return 'Fotoğraftaki metin güvenli biçimde okunamadı. Daha net bir fotoğraf seç veya metni doğrudan ekle.';
+    }
+    return switch (error.kind) {
+      SourceIngestFailureKind.imageEmpty => 'Seçtiğin fotoğraf boş görünüyor. Başka bir fotoğraf seç.',
+      SourceIngestFailureKind.imageTooLarge =>
+        'Bu fotoğraf güvenli işleme sınırını aşıyor. Daha küçük bir görüntü seç.',
+      SourceIngestFailureKind.imageUnsupported =>
+        'Bu görüntü biçimi OCR için desteklenmiyor. JPG, PNG veya HEIC bir fotoğraf seç.',
+      SourceIngestFailureKind.imageNoExtractableText =>
+        'Fotoğrafta güvenilir metin bulunamadı. Daha net ve metne yakın bir fotoğraf seç.',
+      SourceIngestFailureKind.imageOcrFailure =>
+        'Fotoğraf metni okunamadı. Fotoğrafını değiştir veya metni doğrudan ekle.',
+      _ => 'Fotoğraftaki metin güvenli biçimde okunamadı. Daha net bir fotoğraf seç veya metni doğrudan ekle.',
     };
   }
 
@@ -1036,7 +1224,7 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
             Text(
               _editingExistingSource
                   ? 'Yeni sürüm eski öğrenme kanıtını devralmaz.'
-                  : 'PDF ya da metin. Kaynak açık kalır; hazır olduğunda kapatıp hatırlarsın.',
+                  : 'PDF, Word, PowerPoint, fotoğraf ya da metin. Hepsi aynı kaynak-gerçeği akışına bağlanır.',
               style: const TextStyle(color: AtelierStyle.muted, fontSize: 14, height: 1.45),
             ),
 
@@ -1082,6 +1270,26 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
                       enabled: !_busy,
                       onTap: _pickPdf,
                     );
+                    final officeChoice = _SourceChoiceCard(
+                      key: const ValueKey('source-choice-office'),
+                      icon: Icons.description_outlined,
+                      eyebrow: 'WORD / PPT',
+                      title: 'Belge veya sunu seç',
+                      body: 'DOCX/PPTX metnini çıkar. Eski DOC/PPT güvenli değilse açıkça durur.',
+                      primary: false,
+                      enabled: !_busy,
+                      onTap: _pickOffice,
+                    );
+                    final imageChoice = _SourceChoiceCard(
+                      key: const ValueKey('source-choice-image'),
+                      icon: Icons.document_scanner_outlined,
+                      eyebrow: 'FOTOĞRAF / OCR',
+                      title: 'Fotoğraf seç',
+                      body: 'Not veya tahta fotoğrafındaki metni cihazda tara. OCR sonucu kaynak uyarısıyla saklanır.',
+                      primary: false,
+                      enabled: !_busy,
+                      onTap: _pickImage,
+                    );
                     final textChoice = _SourceChoiceCard(
                       key: const ValueKey('source-choice-text'),
                       icon: Icons.notes_rounded,
@@ -1092,18 +1300,15 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
                       enabled: !_busy,
                       onTap: _switchToTextSource,
                     );
-                    if (compactChoices) {
-                      return Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [pdfChoice, const SizedBox(height: 10), textChoice],
-                      );
-                    }
-                    return Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                    final choiceWidth = compactChoices ? constraints.maxWidth : (constraints.maxWidth - 10) / 2;
+                    return Wrap(
+                      spacing: 10,
+                      runSpacing: 10,
                       children: [
-                        Expanded(child: pdfChoice),
-                        const SizedBox(width: 10),
-                        Expanded(child: textChoice),
+                        SizedBox(width: choiceWidth, child: pdfChoice),
+                        SizedBox(width: choiceWidth, child: officeChoice),
+                        SizedBox(width: choiceWidth, child: imageChoice),
+                        SizedBox(width: choiceWidth, child: textChoice),
                       ],
                     );
                   },
@@ -1287,8 +1492,8 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
           const SizedBox(height: 8),
           Text(
             _editingExistingSource
-                ? 'Yeni PDF veya metin ayrı bir kaynak sürümü olur; eski kanıt yeni sürüme taşınmaz.'
-                : 'PDF seçebilir veya metni doğrudan yapıştırabilirsin.',
+                ? 'Yeni PDF, Word, PowerPoint, fotoğraf veya metin ayrı bir kaynak sürümü olur; eski kanıt yeni sürüme taşınmaz.'
+                : 'PDF, Word (DOC/DOCX), PowerPoint (PPT/PPTX) veya fotoğraf seçebilir ya da metni doğrudan yapıştırabilirsin.',
           ),
           if (_busy) ...[
             Semantics(
@@ -1313,6 +1518,20 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
             onPressed: _busy ? null : _pickPdf,
             icon: const Icon(Icons.picture_as_pdf_outlined),
             label: Text(_busy ? 'PDF hazırlanıyor…' : 'PDF seç'),
+          ),
+          const SizedBox(height: 8),
+          OutlinedButton.icon(
+            key: const ValueKey('source-office-button'),
+            onPressed: _busy ? null : _pickOffice,
+            icon: const Icon(Icons.description_outlined),
+            label: const Text('Word / PowerPoint seç'),
+          ),
+          const SizedBox(height: 8),
+          OutlinedButton.icon(
+            key: const ValueKey('source-image-button'),
+            onPressed: _busy ? null : _pickImage,
+            icon: const Icon(Icons.document_scanner_outlined),
+            label: const Text('Fotoğraf seç · OCR'),
           ),
           const Padding(
             padding: EdgeInsets.symmetric(vertical: 14),
