@@ -180,6 +180,12 @@ class AppRuntime {
     telemetry: telemetry,
   );
 
+  Future<int> syncAuthenticatedLearningContinuity() async {
+    final service = recall;
+    if (!learner.isAuthenticated || service is! AuthenticatedRecallLearningService) return 0;
+    return service.syncLatestContinuity(learner: learner);
+  }
+
   Future<void> deleteAccount() async {
     await accountDeletion.deleteAccount(learner: learner);
     try {

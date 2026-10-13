@@ -85,15 +85,24 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
           .reconcileAll(learner: widget.runtime.learner)
           .timeout(const Duration(seconds: 8));
       _continuityNotice = _CloudContinuityNotice.fromResults(results);
+      final learningFailures = await widget.runtime
+          .syncAuthenticatedLearningContinuity()
+          .timeout(const Duration(seconds: 8));
+      if (learningFailures > 0 && _continuityNotice == null) {
+        _continuityNotice = const _CloudContinuityNotice(
+          kind: _CloudContinuityNoticeKind.unavailable,
+          message: 'Öğrenme geçmişinin bir bölümü bu cihazda yenilenemedi. Yerel çalışmaların korunuyor.',
+        );
+      }
     } on TimeoutException {
-      _continuityNotice = const _CloudContinuityNotice(
+      _continuityNotice ??= const _CloudContinuityNotice(
         kind: _CloudContinuityNoticeKind.unavailable,
         message: 'Cihazlar arası güncelleme şu anda tamamlanamadı. Bu cihazdaki çalışmaların açık kalıyor.',
       );
     } on CloudContinuityException catch (error) {
-      _continuityNotice = _CloudContinuityNotice.fromFailure(error);
+      _continuityNotice ??= _CloudContinuityNotice.fromFailure(error);
     } catch (_) {
-      _continuityNotice = const _CloudContinuityNotice(
+      _continuityNotice ??= const _CloudContinuityNotice(
         kind: _CloudContinuityNoticeKind.unavailable,
         message: 'Cihazlar arası güncelleme şu anda kullanılamıyor. Yerel çalışmaların korunuyor.',
       );

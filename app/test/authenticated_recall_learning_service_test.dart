@@ -11,6 +11,7 @@ import 'package:sesli_ogren/src/data/sqlite_source_store.dart';
 import 'package:sesli_ogren/src/domain/authenticated_learner.dart';
 import 'package:sesli_ogren/src/domain/learning_contracts.dart';
 import 'package:sesli_ogren/src/domain/learning_truth.dart';
+import 'package:sesli_ogren/src/domain/retention_schedule.dart';
 import 'package:sesli_ogren/src/learning/authenticated_recall_learning_service.dart';
 import 'package:sesli_ogren/src/learning/server_recall_gateway.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
@@ -161,6 +162,55 @@ class _FakeServerRecallGateway implements ServerRecallGateway {
       promptText: 'Fotosentez _____ enerjisini kimyasal enerjiye dönüştürür.',
       anchor: SourceAnchor(startOffset: 0, endOffset: sourceText.length),
     );
+  }
+
+  @override
+  Future<ServerRecallProjection?> readLatest({
+    required AuthenticatedLearner learner,
+    required MaterialId materialId,
+  }) async => null;
+
+  @override
+  Future<List<RetentionScheduleRecord>> readRetention({
+    required AuthenticatedLearner learner,
+    required MaterialId materialId,
+  }) async {
+    final outcomeBand = switch (assistance) {
+      RecallAssistance.none => RetentionOutcomeBand.independentRetrieval,
+      RecallAssistance.hint => RetentionOutcomeBand.supportedRetrieval,
+      RecallAssistance.answerExposed => RetentionOutcomeBand.unassessed,
+    };
+    final anchor = SourceAnchor(startOffset: 0, endOffset: sourceText.length);
+    final interval = switch (outcomeBand) {
+      RetentionOutcomeBand.independentRetrieval => const Duration(days: 1),
+      RetentionOutcomeBand.supportedRetrieval => const Duration(hours: 12),
+      RetentionOutcomeBand.repairNeeded => const Duration(minutes: 10),
+      RetentionOutcomeBand.unassessed => Duration.zero,
+    };
+    final reviewedAt = DateTime.utc(2026, 10, 14, 1);
+    return [
+      RetentionScheduleRecord(
+        id: RetentionPolicy.scheduleIdFor(sourceVersionId, anchor),
+        materialId: this.materialId,
+        sourceVersionId: sourceVersionId,
+        sourceAnchor: anchor,
+        latestEvidenceKind: RetentionEvidenceKind.recall,
+        latestOutcomeBand: outcomeBand,
+        latestEventId: 'server-recall:22222222-2222-4222-8222-222222222222',
+        reasonCode: switch (outcomeBand) {
+          RetentionOutcomeBand.independentRetrieval => 'INDEPENDENT_RETRIEVAL_OBSERVED',
+          RetentionOutcomeBand.supportedRetrieval => 'SUPPORTED_OR_PARTIAL_RETRIEVAL',
+          RetentionOutcomeBand.repairNeeded => 'RETRIEVAL_REPAIR_NEEDED',
+          RetentionOutcomeBand.unassessed => 'NO_POSITIVE_RETENTION_EVIDENCE',
+        },
+        reviewCount: 1,
+        successStreak: outcomeBand == RetentionOutcomeBand.independentRetrieval ? 1 : 0,
+        interval: interval,
+        dueAt: reviewedAt.add(interval),
+        lastReviewedAt: reviewedAt,
+        policyVersion: RetentionPolicy.version,
+      ),
+    ];
   }
 }
 
