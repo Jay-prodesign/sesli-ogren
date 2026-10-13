@@ -111,7 +111,9 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('scheduled quiz review opens the exact due question and completes after truthful feedback', (tester) async {
+  testWidgets('scheduled quiz review opens the exact due question and completes after truthful feedback', (
+    tester,
+  ) async {
     final runtime = await _runtime();
     addTearDown(runtime.close);
     const materialId = MaterialId('quiz-scheduled-screen');
