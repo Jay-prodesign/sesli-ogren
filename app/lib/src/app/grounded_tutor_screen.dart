@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart' show ScrollCacheExtent;
 
 import '../domain/grounded_tutor.dart';
 import '../domain/learning_contracts.dart';
