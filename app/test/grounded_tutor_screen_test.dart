@@ -41,7 +41,7 @@ Future<void> _waitForTutorSubmitToFinish(
   expect(field.controller?.text ?? '', isEmpty, reason: 'Tutor submit should finish before response UI assertions.');
 }
 
-Future<void> _scrollTutorUntilFound(WidgetTester tester, Finder target, {int maxSteps = 40}) async {
+Future<void> _scrollTutorUntilFound(WidgetTester tester, Finder target, {int maxSteps = 100}) async {
   final listFinder = find.byKey(const ValueKey('grounded-tutor-scroll'));
   expect(listFinder, findsOneWidget);
   final list = tester.widget<ListView>(listFinder);
@@ -59,9 +59,7 @@ Future<void> _scrollTutorUntilFound(WidgetTester tester, Finder target, {int max
 
   for (var i = 0; i < maxSteps && target.evaluate().isEmpty; i++) {
     final position = controller.position;
-    final next = (position.pixels + position.viewportDimension * 0.55)
-        .clamp(position.minScrollExtent, position.maxScrollExtent)
-        .toDouble();
+    final next = (position.pixels + 60).clamp(position.minScrollExtent, position.maxScrollExtent).toDouble();
     if ((next - position.pixels).abs() < 0.5) break;
     controller.jumpTo(next);
     await tester.pump();
@@ -125,6 +123,19 @@ void main() {
     expect(send, findsOneWidget);
     await tester.tap(send);
     await _waitForTutorSubmitToFinish(tester, questionField: questionField);
+
+    final durableThread = await tester.runAsync(
+      () => runtime.tutor.openThread(
+        learner: runtime.learner,
+        materialId: materialId,
+        expectedSourceVersionId: result.sourceVersion.identity.sourceVersionId,
+      ),
+    );
+    expect(durableThread, isNotNull);
+    expect(durableThread!.turns, hasLength(2));
+    expect(durableThread.turns.last.hasSourceSupport, isTrue);
+    expect(durableThread.turns.last.sourceExcerpt, contains('Klorofil ışığın soğurulmasına yardım eder.'));
+
     await _scrollTutorUntilFound(tester, find.textContaining('TUTOR · KAYNAĞA BAĞLI'));
     expect(find.textContaining('TUTOR · KAYNAĞA BAĞLI'), findsOneWidget);
     expect(find.textContaining('Klorofil ışığın soğurulmasına yardım eder.'), findsOneWidget);
