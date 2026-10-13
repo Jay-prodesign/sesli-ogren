@@ -22,11 +22,7 @@ class _UnusedPdfExtractor implements PdfTextExtractor {
   }
 }
 
-Future<void> _scrollTutorUntilFound(
-  WidgetTester tester,
-  Finder target, {
-  int maxDrags = 20,
-}) async {
+Future<void> _scrollTutorUntilFound(WidgetTester tester, Finder target, {int maxDrags = 20}) async {
   expect(find.byKey(const ValueKey('grounded-tutor-scroll')), findsOneWidget);
   for (var i = 0; i < maxDrags && target.evaluate().isEmpty; i++) {
     // Use a stable point inside the 320px Tutor conversation viewport instead
