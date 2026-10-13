@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../domain/learning_contracts.dart';
 import '../domain/learning_truth.dart';
 import '../domain/retention_schedule.dart';
+import '../domain/study_plan.dart';
 import '../learning/recall_learning_service.dart';
 import '../generation/supabase_source_summary_gateway.dart';
 import 'app_runtime.dart';
@@ -16,6 +17,7 @@ import 'living_study_desk_home.dart';
 import 'listen_screen.dart';
 import 'material_workspace_screen.dart';
 import 'source_reader_screen.dart';
+import 'study_plan_screen.dart';
 import 'quick_recap_screen.dart';
 import 'profile_surface.dart';
 import 'progress_surface.dart';
@@ -80,8 +82,19 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
     // initState (unlike dependOnInheritedWidgetOfExactType).
     final livingReview = context.getElementForInheritedWidgetOfExactType<LivingDeskReviewScope>() != null;
     final snapshotAt = DateTime.now().toUtc();
+    final targetRecord = await widget.runtime.store.activeStudyTarget(learner: widget.runtime.learner);
     final materials = await widget.runtime.store.activeMaterials(learner: widget.runtime.learner);
-    if (materials.isEmpty) return const _HomeSnapshot();
+    if (materials.isEmpty) {
+      final studyTarget = targetRecord == null
+          ? null
+          : StudyTargetProjection.evaluate(
+              target: targetRecord,
+              activeMaterials: const [],
+              currentSourceVersions: const {},
+              evaluatedAt: snapshotAt,
+            );
+      return _HomeSnapshot(studyTarget: studyTarget);
+    }
     final progress = await Future.wait(
       materials.map((item) async {
         final continuation = await _continuationFor(item.id);
@@ -137,7 +150,19 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
       }),
     );
     final sortedProgress = [...progress]..sort((a, b) => _activityAt(b).compareTo(_activityAt(a)));
-    final dailyStudy = DailyStudyPlan.build(progress: sortedProgress, evaluatedAt: snapshotAt);
+    final studyTarget = targetRecord == null
+        ? null
+        : StudyTargetProjection.evaluate(
+            target: targetRecord,
+            activeMaterials: materials,
+            currentSourceVersions: {for (final item in sortedProgress) item.material.id: item.sourceVersionId},
+            evaluatedAt: snapshotAt,
+          );
+    final dailyStudy = DailyStudyPlan.build(
+      progress: sortedProgress,
+      evaluatedAt: snapshotAt,
+      preferredMaterialIds: studyTarget?.currentMaterialIds ?? const <MaterialId>{},
+    );
     final primaryMaterialId = dailyStudy.primary?.materialId;
     final active = primaryMaterialId == null
         ? sortedProgress.first
@@ -161,6 +186,7 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
       continuation: continuation,
       retention: active.retention,
       dailyStudy: dailyStudy,
+      studyTarget: studyTarget,
       listenResumeChunk: active.listenResumeChunk,
       readerResumeProgress: active.readerResumeProgress,
       readerResumePreferred: active.prefersReaderResume,
@@ -221,6 +247,17 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
     if (sourceAdded == true) {
       await _openWorkspace(materialId, true);
     }
+  }
+
+  Future<void> _openStudyPlan() async {
+    if (!mounted) return;
+    await Navigator.of(context).push<void>(
+      MaterialPageRoute(
+        builder: (_) => StudyPlanScreen(runtime: widget.runtime),
+      ),
+    );
+    if (!mounted) return;
+    setState(_refresh);
   }
 
   Future<void> _openMaterialNextAction(MaterialId materialId) async {
@@ -658,6 +695,7 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
                       onOpenWorkspace: () => _openWorkspace(),
                       onOpenReader: () => _openSourceReader(),
                       onOpenMaterial: _openMaterialNextAction,
+                      onOpenStudyPlan: _openStudyPlan,
                     ),
                   ),
                   TickerMode(
@@ -727,6 +765,7 @@ class _HomeSurface extends StatelessWidget {
     required this.onOpenWorkspace,
     required this.onOpenReader,
     required this.onOpenMaterial,
+    required this.onOpenStudyPlan,
   });
 
   final _HomeSnapshot data;
@@ -735,6 +774,7 @@ class _HomeSurface extends StatelessWidget {
   final VoidCallback onOpenWorkspace;
   final VoidCallback onOpenReader;
   final ValueChanged<MaterialId> onOpenMaterial;
+  final VoidCallback onOpenStudyPlan;
 
   @override
   Widget build(BuildContext context) {
@@ -744,6 +784,7 @@ class _HomeSurface extends StatelessWidget {
         continuation: data.continuation,
         retention: data.retention,
         dailyStudy: data.dailyStudy,
+        studyTarget: data.studyTarget,
         listenResumeChunk: data.listenResumeChunk,
         readerResumeProgress: data.readerResumeProgress,
         readerResumePreferred: data.readerResumePreferred,
@@ -754,6 +795,7 @@ class _HomeSurface extends StatelessWidget {
         onOpenLearning: onOpenLearning,
         onOpenListen: onOpenListen,
         onOpenMaterial: onOpenMaterial,
+        onOpenStudyPlan: onOpenStudyPlan,
       );
     }
     final theme = Theme.of(context);
@@ -842,6 +884,13 @@ class _HomeSurface extends StatelessWidget {
           ),
           const SizedBox(height: 10),
           _ContextRow(onRecall: onOpenLearning, onListen: onOpenListen),
+          const SizedBox(height: 14),
+          OutlinedButton.icon(
+            key: const ValueKey('home-study-plan'),
+            onPressed: onOpenStudyPlan,
+            icon: const Icon(Icons.flag_outlined),
+            label: Text(data.studyTarget == null ? 'Sınav / çalışma hedefi ekle' : 'Sınav / çalışma planını aç'),
+          ),
         ],
       ],
     );
@@ -1799,6 +1848,7 @@ class _HomeSnapshot {
     this.continuation,
     this.retention,
     this.dailyStudy,
+    this.studyTarget,
     this.listenResumeChunk = 0,
     this.readerResumeProgress = 0,
     this.readerResumePreferred = false,
@@ -1812,6 +1862,7 @@ class _HomeSnapshot {
   final LearningContinuation? continuation;
   final RetentionMaterialStatus? retention;
   final DailyStudyPlan? dailyStudy;
+  final StudyTargetProjection? studyTarget;
   final int listenResumeChunk;
   final double readerResumeProgress;
   final bool readerResumePreferred;

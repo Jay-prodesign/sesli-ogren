@@ -127,6 +127,33 @@ void main() {
     expect(plan.nextScheduledMaterialId, const MaterialId('future'));
   });
 
+  test('Study target preference only breaks ties and never outranks learning truth', () {
+    final targetFresh = ProgressItem(
+      material: material('target-fresh', updatedAt: now.subtract(const Duration(days: 2))),
+      sourceVersionId: const SourceVersionId('source-target-fresh'),
+      continuation: null,
+    );
+    final otherFresh = ProgressItem(
+      material: material('other-fresh', updatedAt: now),
+      sourceVersionId: const SourceVersionId('source-other-fresh'),
+      continuation: null,
+    );
+    final urgentOther = ProgressItem(
+      material: material('urgent-other'),
+      sourceVersionId: const SourceVersionId('source-urgent-other'),
+      continuation: continuation('urgent-other', NextLearningActionKind.reviewSourceThenRecall),
+    );
+
+    final plan = DailyStudyPlan.build(
+      progress: [otherFresh, targetFresh, urgentOther],
+      evaluatedAt: now,
+      preferredMaterialIds: const {MaterialId('target-fresh')},
+    );
+
+    expect(plan.items.map((item) => item.materialId.value), ['urgent-other', 'target-fresh', 'other-fresh']);
+    expect(plan.primary?.kind, DailyStudyActionKind.sourceRepair);
+  });
+
   test('Daily Study gives repair prerequisite authority over a simultaneously due schedule', () {
     final item = ProgressItem(
       material: material('blocked-due'),
