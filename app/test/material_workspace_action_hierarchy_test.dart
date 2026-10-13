@@ -255,8 +255,13 @@ void main() {
     expect(find.text('Planlanan tekrarın hazır'), findsOneWidget);
     expect(find.text('Quiz tekrarını aç'), findsWidgets);
     expect(find.textContaining('ustalık sayılmıyor'), findsOneWidget);
+    final compactMotion = tester.widget<AnimatedSwitcher>(
+      find.byKey(const ValueKey('workspace-active-step-motion-compact')),
+    );
+    expect(compactMotion.duration, Duration.zero);
+    expect(find.byKey(const ValueKey('la0040-atelier-workspace-recall')).hitTestable(), findsOneWidget);
 
-    await tester.tap(find.byKey(const ValueKey('la0040-atelier-workspace-recall')));
+    await tester.tap(find.byKey(const ValueKey('la0040-atelier-workspace-recall')).hitTestable());
     await tester.pump();
     expect(retentionReview, 1);
     expect(readSource, 0);
