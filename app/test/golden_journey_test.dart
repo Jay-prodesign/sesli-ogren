@@ -11,6 +11,7 @@ import 'package:sesli_ogren/src/app/source_reader_screen.dart';
 import 'package:sesli_ogren/src/data/pdf_text_extractor.dart';
 import 'package:sesli_ogren/src/data/source_ingest_service.dart';
 import 'package:sesli_ogren/src/data/sqlite_source_store.dart';
+import 'package:sesli_ogren/src/domain/learning_truth.dart';
 import 'package:sesli_ogren/src/learning/recall_learning_service.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
@@ -132,4 +133,55 @@ void main() {
     expect(durableEvidence, findsOneWidget);
     expect(tester.takeException(), isNull);
   });
+  testWidgets('scheduled Recall bypasses repeat-later continuation for the still-current source', (tester) async {
+    final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
+    addTearDown(store.close);
+    final ingest = SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor());
+    final runtime = AppRuntime(
+      learner: AppRuntime.localM5LearnerFixture,
+      store: store,
+      ingest: ingest,
+      recall: RecallLearningService(sourceStore: store, learningStore: store.learningTruthStore()),
+      telemetry: store.operationalTelemetry(),
+    );
+    const materialId = MaterialId('scheduled-recall-material');
+    await ingest.ingestPastedText(
+      learner: runtime.learner,
+      materialId: materialId,
+      sourceName: 'Planlı Recall kaynağı',
+      text:
+          'Fotosentez ışık enerjisini kimyasal enerjiye dönüştürür. '
+          'Klorofil ışığın soğurulmasına yardım eder.',
+    );
+    final source = await store.currentSourceVersion(learner: runtime.learner, materialId: materialId);
+    final prompt = await runtime.recall.createCurrentPrompt(learner: runtime.learner, materialId: materialId);
+    final action = await store.learningTruthStore().recallAction(learner: runtime.learner, actionId: prompt.id);
+    final attempt = await runtime.recall.openAttempt(learner: runtime.learner, actionId: prompt.id);
+    final result = await runtime.recall.submit(
+      learner: runtime.learner,
+      actionId: prompt.id,
+      attemptId: attempt.attempt.attemptId,
+      disposition: RecallResponseDisposition.answer,
+      answer: action!.expectedAnswer,
+    );
+    expect(result.nextAction.kind, NextLearningActionKind.repeatRecallLater);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: LivingDeskReviewScope(
+          child: LearningSliceScreen(
+            runtime: runtime,
+            materialId: materialId,
+            scheduledReviewSourceVersionId: source!.identity.sourceVersionId,
+          ),
+        ),
+      ),
+    );
+    await _pumpUntilFound(tester, find.byKey(const ValueKey('la0040-atelier-recall')));
+    expect(find.byKey(const ValueKey('continuation')), findsNothing);
+    expect(find.text('KAYNAK KAPALI · ŞİMDİ SEN'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+
 }

@@ -259,7 +259,10 @@ class _MaterialWorkspaceScreenState extends State<MaterialWorkspaceScreen> {
     });
   }
 
-  Future<void> _openRecall({bool autoAdvanceContinuation = false}) async {
+  Future<void> _openRecall({
+    bool autoAdvanceContinuation = false,
+    SourceVersionId? scheduledReviewSourceVersionId,
+  }) async {
     final treatment = LearningVisualTreatmentScope.maybeOf(context);
     await Navigator.of(context).push<bool>(
       MaterialPageRoute<bool>(
@@ -268,6 +271,7 @@ class _MaterialWorkspaceScreenState extends State<MaterialWorkspaceScreen> {
             runtime: widget.runtime,
             materialId: widget.materialId,
             autoAdvanceContinuation: autoAdvanceContinuation,
+            scheduledReviewSourceVersionId: scheduledReviewSourceVersionId,
           );
           if (treatment != null) return LearningVisualTreatmentScope(treatment: treatment, child: screen);
           return LivingDeskReviewScope.active(context) ? LivingDeskReviewScope(child: screen) : screen;
@@ -308,11 +312,20 @@ class _MaterialWorkspaceScreenState extends State<MaterialWorkspaceScreen> {
     });
   }
 
-  Future<void> _openFlashcards() async {
+  Future<void> _openFlashcards({
+    SourceVersionId? scheduledReviewSourceVersionId,
+    SourceAnchor? scheduledReviewSourceAnchor,
+  }) async {
     await Navigator.of(context).push<void>(
       MaterialPageRoute(
-        builder: (_) =>
-            _preserveProductExperience(FlashcardScreen(runtime: widget.runtime, materialId: widget.materialId)),
+        builder: (_) => _preserveProductExperience(
+          FlashcardScreen(
+            runtime: widget.runtime,
+            materialId: widget.materialId,
+            scheduledReviewSourceVersionId: scheduledReviewSourceVersionId,
+            scheduledReviewSourceAnchor: scheduledReviewSourceAnchor,
+          ),
+        ),
       ),
     );
     if (!mounted) return;
@@ -321,10 +334,20 @@ class _MaterialWorkspaceScreenState extends State<MaterialWorkspaceScreen> {
     });
   }
 
-  Future<void> _openQuiz() async {
+  Future<void> _openQuiz({
+    SourceVersionId? scheduledReviewSourceVersionId,
+    SourceAnchor? scheduledReviewSourceAnchor,
+  }) async {
     await Navigator.of(context).push<void>(
       MaterialPageRoute(
-        builder: (_) => _preserveProductExperience(QuizScreen(runtime: widget.runtime, materialId: widget.materialId)),
+        builder: (_) => _preserveProductExperience(
+          QuizScreen(
+            runtime: widget.runtime,
+            materialId: widget.materialId,
+            scheduledReviewSourceVersionId: scheduledReviewSourceVersionId,
+            scheduledReviewSourceAnchor: scheduledReviewSourceAnchor,
+          ),
+        ),
       ),
     );
     if (!mounted) return;
@@ -334,15 +357,56 @@ class _MaterialWorkspaceScreenState extends State<MaterialWorkspaceScreen> {
   }
 
   Future<void> _openRetentionReview(_WorkspaceSnapshot data) async {
-    final due = data.retention?.nextDue;
-    if (due == null) return;
+    final candidate = data.retention?.nextDue;
+    if (candidate == null) return;
+
+    final currentSource = await widget.runtime.store.currentSourceVersion(
+      learner: widget.runtime.learner,
+      materialId: data.material.id,
+    );
+    if (!mounted) return;
+    if (currentSource?.identity.sourceVersionId != candidate.sourceVersionId) {
+      setState(() => _snapshot = _load());
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Kaynak güncellendi. Tekrar planı güncel kaynaktan yeniden hazırlanıyor.')),
+      );
+      return;
+    }
+
+    final currentSchedules = await widget.runtime.store.retentionSchedulesForMaterial(
+      learner: widget.runtime.learner,
+      materialId: data.material.id,
+    );
+    if (!mounted) return;
+    final now = DateTime.now().toUtc();
+    RetentionScheduleRecord? due;
+    for (final schedule in currentSchedules) {
+      if (schedule.id == candidate.id && schedule.isDueAt(now)) {
+        due = schedule;
+        break;
+      }
+    }
+    if (due == null) {
+      setState(() => _snapshot = _load());
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Bu tekrar artık güncel değil. Sıradaki plan yenilendi.')),
+      );
+      return;
+    }
+
     switch (due.latestEvidenceKind) {
       case RetentionEvidenceKind.recall:
-        await _openRecall();
+        await _openRecall(scheduledReviewSourceVersionId: due.sourceVersionId);
       case RetentionEvidenceKind.flashcard:
-        await _openFlashcards();
+        await _openFlashcards(
+          scheduledReviewSourceVersionId: due.sourceVersionId,
+          scheduledReviewSourceAnchor: due.sourceAnchor,
+        );
       case RetentionEvidenceKind.quiz:
-        await _openQuiz();
+        await _openQuiz(
+          scheduledReviewSourceVersionId: due.sourceVersionId,
+          scheduledReviewSourceAnchor: due.sourceAnchor,
+        );
     }
   }
 

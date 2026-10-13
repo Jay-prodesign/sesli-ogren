@@ -27,6 +27,7 @@ class LearningSliceScreen extends StatefulWidget {
     this.materialId = AppRuntime.primaryMaterialId,
     this.autoAdvanceContinuation = false,
     this.reviewedSourceVersionId,
+    this.scheduledReviewSourceVersionId,
     this.startInSourceEditor = false,
     this.sourceGateway = const SupabaseSourceSummaryGateway(),
     this.pickPdfFile,
@@ -40,6 +41,11 @@ class LearningSliceScreen extends StatefulWidget {
   /// Exact source version the learner just reviewed before entering Recall.
   /// This is a handoff fact, not learning evidence or a mastery signal.
   final SourceVersionId? reviewedSourceVersionId;
+
+  /// Exact current source version that owns a due retention item. Scheduled
+  /// review must bypass an old repeat-later continuation and start a fresh
+  /// source-hidden Recall attempt, but only while this version remains current.
+  final SourceVersionId? scheduledReviewSourceVersionId;
 
   final bool startInSourceEditor;
   final SupabaseSourceSummaryGateway sourceGateway;
@@ -162,37 +168,50 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
       );
       if (!mounted) return;
 
-      final reviewedSourceVersionId = widget.reviewedSourceVersionId;
-      if (reviewedSourceVersionId != null) {
+      final scheduledReviewSourceVersionId = widget.scheduledReviewSourceVersionId;
+      if (scheduledReviewSourceVersionId != null) {
         final currentSource = await widget.runtime.store.currentSourceVersion(
           learner: widget.runtime.learner,
           materialId: widget.materialId,
         );
         if (!mounted) return;
-        if (currentSource?.identity.sourceVersionId != reviewedSourceVersionId) {
-          throw StateError('reviewed_source_version_is_no_longer_current');
+        if (currentSource?.identity.sourceVersionId != scheduledReviewSourceVersionId) {
+          throw StateError('scheduled_review_source_version_is_no_longer_current');
         }
-      }
-
-      final reviewedRequiredSource =
-          continuation != null &&
-          reviewedSourceVersionId != null &&
-          continuation.nextAction.kind == NextLearningActionKind.reviewSourceThenRecall &&
-          continuation.state.sourceVersionId == reviewedSourceVersionId;
-      if (reviewedRequiredSource) {
-        // The learner arrived from Reader after reviewing the exact source
-        // required by this continuation. Reopening the review step would form
-        // a loop; proceed to a fresh source-hidden attempt instead.
         await _openRecall();
-      } else if (continuation != null) {
-        setState(() {
-          _continuation = continuation;
-          _phase = _SlicePhase.continuation;
-          _inlineError = null;
-        });
-        if (widget.autoAdvanceContinuation) continuationToAdvance = continuation;
       } else {
-        await _openRecall();
+        final reviewedSourceVersionId = widget.reviewedSourceVersionId;
+        if (reviewedSourceVersionId != null) {
+          final currentSource = await widget.runtime.store.currentSourceVersion(
+            learner: widget.runtime.learner,
+            materialId: widget.materialId,
+          );
+          if (!mounted) return;
+          if (currentSource?.identity.sourceVersionId != reviewedSourceVersionId) {
+            throw StateError('reviewed_source_version_is_no_longer_current');
+          }
+        }
+
+        final reviewedRequiredSource =
+            continuation != null &&
+            reviewedSourceVersionId != null &&
+            continuation.nextAction.kind == NextLearningActionKind.reviewSourceThenRecall &&
+            continuation.state.sourceVersionId == reviewedSourceVersionId;
+        if (reviewedRequiredSource) {
+          // The learner arrived from Reader after reviewing the exact source
+          // required by this continuation. Reopening the review step would form
+          // a loop; proceed to a fresh source-hidden attempt instead.
+          await _openRecall();
+        } else if (continuation != null) {
+          setState(() {
+            _continuation = continuation;
+            _phase = _SlicePhase.continuation;
+            _inlineError = null;
+          });
+          if (widget.autoAdvanceContinuation) continuationToAdvance = continuation;
+        } else {
+          await _openRecall();
+        }
       }
 
       stopwatch.stop();

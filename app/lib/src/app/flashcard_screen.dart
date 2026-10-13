@@ -11,10 +11,23 @@ import 'atelier_learning_surfaces.dart';
 import 'companion_view.dart';
 
 class FlashcardScreen extends StatefulWidget {
-  const FlashcardScreen({required this.runtime, required this.materialId, super.key});
+  const FlashcardScreen({
+    required this.runtime,
+    required this.materialId,
+    this.scheduledReviewSourceVersionId,
+    this.scheduledReviewSourceAnchor,
+    super.key,
+  }) : assert(
+         (scheduledReviewSourceVersionId == null) == (scheduledReviewSourceAnchor == null),
+         'Scheduled flashcard review requires both source version and source anchor.',
+       );
 
   final AppRuntime runtime;
   final MaterialId materialId;
+  final SourceVersionId? scheduledReviewSourceVersionId;
+  final SourceAnchor? scheduledReviewSourceAnchor;
+
+  bool get isScheduledReview => scheduledReviewSourceVersionId != null;
 
   @override
   State<FlashcardScreen> createState() => _FlashcardScreenState();
@@ -42,10 +55,17 @@ class _FlashcardScreenState extends State<FlashcardScreen> {
     if (material == null || !material.isActive) {
       throw const FlashcardLearningException('Materyal artık kullanılamıyor.');
     }
-    final study = await widget.runtime.flashcards.openCurrentSet(
-      learner: widget.runtime.learner,
-      materialId: widget.materialId,
-    );
+    final study = widget.isScheduledReview
+        ? await widget.runtime.flashcards.startScheduledReview(
+            learner: widget.runtime.learner,
+            materialId: widget.materialId,
+            sourceVersionId: widget.scheduledReviewSourceVersionId!,
+            sourceAnchor: widget.scheduledReviewSourceAnchor!,
+          )
+        : await widget.runtime.flashcards.openCurrentSet(
+            learner: widget.runtime.learner,
+            materialId: widget.materialId,
+          );
     final source = await widget.runtime.store.currentSourceVersion(
       learner: widget.runtime.learner,
       materialId: widget.materialId,
@@ -111,6 +131,10 @@ class _FlashcardScreenState extends State<FlashcardScreen> {
       );
       if (!mounted) return;
       _feedback(strong: response == FlashcardResponse.remembered);
+      if (widget.isScheduledReview && Navigator.of(context).canPop()) {
+        Navigator.of(context).pop();
+        return;
+      }
       setState(() {
         _data = _FlashcardViewData(material: data.material, source: data.source, study: next);
         _revealed = false;
