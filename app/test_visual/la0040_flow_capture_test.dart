@@ -7,6 +7,7 @@ import 'package:sesli_ogren/src/account/account_overview_gateway.dart';
 import 'package:sesli_ogren/src/app/account_entry_screen.dart';
 import 'package:sesli_ogren/src/app/app_runtime.dart';
 import 'package:sesli_ogren/src/app/app_theme.dart';
+import 'package:sesli_ogren/src/app/daily_study_plan.dart';
 import 'package:sesli_ogren/src/app/atelier_learning_surfaces.dart';
 import 'package:sesli_ogren/src/app/explain_back_screen.dart';
 import 'package:sesli_ogren/src/app/first_value_intent_surface.dart';
@@ -155,6 +156,45 @@ void main() {
     createdAt: now,
   );
   final continuation = LearningContinuation(state: state, nextAction: next);
+  const todaySecondaryMaterialId = MaterialId('visual-today-secondary');
+  const todaySecondaryVersionId = SourceVersionId('visual-today-secondary-version');
+  final todaySecondaryMaterial = MaterialRecord(
+    id: todaySecondaryMaterialId,
+    title: 'Momentum: soru çözüm notu',
+    mediaType: SourceMediaType.pastedText,
+    lifecycleStatus: MaterialLifecycleStatus.active,
+    processingState: MaterialProcessingState.ready,
+    createdAt: now,
+    updatedAt: now,
+  );
+  final todayPlan = DailyStudyPlan(
+    evaluatedAt: DateTime.utc(2026, 10, 13, 8),
+    items: [
+      DailyStudyItem(
+        materialId: materialId,
+        materialTitle: material.title,
+        sourceVersionId: versionId,
+        kind: DailyStudyActionKind.scheduledReview,
+        title: 'Planlanan tekrarın hazır',
+        actionLabel: 'Tekrarı aç',
+        reasonCode: 'RETENTION_REVIEW_DUE',
+        reasonText: 'Planlanan tekrar zamanı geldi. Yeni aktif deneme kalıcılığı yeniden ölçer.',
+        activityAt: now,
+        dueAt: DateTime.utc(2026, 10, 13, 7),
+      ),
+      DailyStudyItem(
+        materialId: todaySecondaryMaterialId,
+        materialTitle: todaySecondaryMaterial.title,
+        sourceVersionId: todaySecondaryVersionId,
+        kind: DailyStudyActionKind.sourceRepair,
+        title: 'Kaynağı onar, sonra yeniden dene',
+        actionLabel: 'Kaynağı gözden geçir',
+        reasonCode: 'REVIEW_SOURCE',
+        reasonText: 'Eksik kısmı güncel kaynaktan yeniden gör; sonra kaynağı kapatıp yeniden dene.',
+        activityAt: now.subtract(const Duration(minutes: 20)),
+      ),
+    ],
+  );
   final result = RecallAttemptResult(
     evidence: evidence,
     state: state,
@@ -200,8 +240,9 @@ void main() {
       LivingStudyDeskHome(
         material: material,
         continuation: continuation,
+        dailyStudy: todayPlan,
         sourceText: source,
-        otherMaterials: const [],
+        otherMaterials: [todaySecondaryMaterial],
         onOpenWorkspace: () {},
         onOpenLearning: () {},
         onOpenListen: () {},
@@ -221,8 +262,9 @@ void main() {
           child: LivingStudyDeskHome(
             material: material,
             continuation: continuation,
+            dailyStudy: todayPlan,
             sourceText: source,
-            otherMaterials: const [],
+            otherMaterials: [todaySecondaryMaterial],
             onOpenWorkspace: () {},
             onOpenLearning: () {},
             onOpenListen: () {},
@@ -233,6 +275,47 @@ void main() {
       size: const Size(320, 700),
       textScaler: const TextScaler.linear(1.5),
     );
+  });
+
+  testWidgets('LA-0040 Today queue at 390x844', (tester) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        debugShowCheckedModeBanner: false,
+        theme: SesliOgrenTheme.light(),
+        home: MediaQuery(
+          data: const MediaQueryData(disableAnimations: true),
+          child: Scaffold(
+            body: LivingStudyDeskHome(
+              material: material,
+              continuation: continuation,
+              dailyStudy: todayPlan,
+              sourceText: source,
+              otherMaterials: [todaySecondaryMaterial],
+              onOpenWorkspace: () {},
+              onOpenLearning: () {},
+              onOpenListen: () {},
+              onOpenMaterial: (_) {},
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.runAsync(() async {
+      await Future<void>.delayed(const Duration(milliseconds: 250));
+    });
+    await tester.pump(const Duration(milliseconds: 300));
+    final queue = find.text('Bugün sırada');
+    await tester.scrollUntilVisible(queue, 200, scrollable: find.byType(Scrollable).first);
+    await tester.pump();
+    expect(queue, findsOneWidget);
+    expect(find.text('Momentum: soru çözüm notu'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+    await expectLater(find.byType(Scaffold), matchesGoldenFile('goldens/la0040_today_queue_390x844.png'));
   });
 
   testWidgets('LA-0040 empty Home survives 320px + large type', (tester) async {

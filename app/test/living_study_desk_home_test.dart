@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:sesli_ogren/src/app/daily_study_plan.dart';
 import 'package:sesli_ogren/src/app/living_study_desk_home.dart';
 import 'package:sesli_ogren/src/domain/learning_contracts.dart';
 import 'package:sesli_ogren/src/domain/learning_truth.dart';
@@ -60,6 +61,9 @@ void main() {
     WidgetTester tester, {
     required LearningContinuation continuation,
     RetentionMaterialStatus? retention,
+    DailyStudyPlan? dailyStudy,
+    List<MaterialRecord> otherMaterials = const [],
+    ValueChanged<MaterialId>? onOpenMaterial,
     required VoidCallback onOpenWorkspace,
     required VoidCallback onOpenReader,
     required VoidCallback onOpenLearning,
@@ -76,13 +80,14 @@ void main() {
             material: material,
             continuation: continuation,
             retention: retention,
+            dailyStudy: dailyStudy,
             sourceText: 'Fotosentez sırasında klorofil ışık enerjisinin yakalanmasına yardım eder.',
-            otherMaterials: const [],
+            otherMaterials: otherMaterials,
             onOpenWorkspace: onOpenWorkspace,
             onOpenReader: onOpenReader,
             onOpenLearning: onOpenLearning,
             onOpenListen: () {},
-            onOpenMaterial: (_) {},
+            onOpenMaterial: onOpenMaterial ?? (_) {},
           ),
         ),
       ),
@@ -169,6 +174,133 @@ void main() {
     expect(workspaceOpens, 1);
     expect(readerOpens, 0);
     expect(learningOpens, 0);
+  });
+
+  testWidgets('Today queue explains and routes current-source actions at narrow large text', (tester) async {
+    usePhoneViewport(tester, size: const Size(320, 844));
+    const secondId = MaterialId('today-second-material');
+    const secondVersion = SourceVersionId('today-second-version');
+    final second = MaterialRecord(
+      id: secondId,
+      title: 'Momentum soru notu',
+      mediaType: SourceMediaType.pastedText,
+      lifecycleStatus: MaterialLifecycleStatus.active,
+      processingState: MaterialProcessingState.ready,
+      createdAt: now,
+      updatedAt: now,
+    );
+    final plan = DailyStudyPlan(
+      evaluatedAt: DateTime.utc(2026, 10, 13, 8),
+      items: [
+        DailyStudyItem(
+          materialId: materialId,
+          materialTitle: material.title,
+          sourceVersionId: versionId,
+          kind: DailyStudyActionKind.scheduledReview,
+          title: 'Planlanan tekrarın hazır',
+          actionLabel: 'Tekrarı aç',
+          reasonCode: 'RETENTION_REVIEW_DUE',
+          reasonText: 'Planlanan tekrar zamanı geldi. Yeni aktif deneme kalıcılığı yeniden ölçer.',
+          activityAt: now,
+          dueAt: DateTime.utc(2026, 10, 13, 7),
+        ),
+        DailyStudyItem(
+          materialId: secondId,
+          materialTitle: second.title,
+          sourceVersionId: secondVersion,
+          kind: DailyStudyActionKind.sourceRepair,
+          title: 'Kaynağı onar, sonra yeniden dene',
+          actionLabel: 'Kaynağı gözden geçir',
+          reasonCode: 'REVIEW_SOURCE',
+          reasonText: 'Eksik kısmı güncel kaynaktan yeniden gör.',
+          activityAt: now,
+        ),
+      ],
+    );
+    MaterialId? opened;
+
+    await pumpHome(
+      tester,
+      continuation: continuationFor(RecallOutcome.correct, RecallStateKind.retrievedOnce),
+      dailyStudy: plan,
+      otherMaterials: [second],
+      onOpenMaterial: (id) => opened = id,
+      onOpenWorkspace: () {},
+      onOpenReader: () {},
+      onOpenLearning: () {},
+      textScaler: const TextScaler.linear(1.5),
+    );
+
+    expect(tester.takeException(), isNull);
+    expect(find.text('Bugün ne çalışman gerektiği belli.'), findsOneWidget);
+    expect(find.text('Planlanan tekrarın hazır'), findsOneWidget);
+    expect(find.text('Bugün sırada'), findsOneWidget);
+    expect(find.text('Momentum soru notu'), findsOneWidget);
+    expect(find.text('Kaynağı onar, sonra yeniden dene'), findsOneWidget);
+
+    final secondAction = find.byKey(const ValueKey('today-item-today-second-material'));
+    await tester.scrollUntilVisible(secondAction, 220, scrollable: find.byType(Scrollable).first);
+    await tester.ensureVisible(secondAction);
+    await tester.pump();
+    expect(secondAction.hitTestable(), findsOneWidget);
+    await tester.tap(secondAction.hitTestable());
+    await tester.pump();
+    expect(opened, secondId);
+  });
+
+  testWidgets('Today keeps secondary work bounded to three visible actions', (tester) async {
+    usePhoneViewport(tester);
+    DailyStudyItem item(int index) => DailyStudyItem(
+      materialId: MaterialId('bounded-$index'),
+      materialTitle: 'Bounded $index',
+      sourceVersionId: SourceVersionId('bounded-source-$index'),
+      kind: DailyStudyActionKind.beginRecall,
+      title: 'İlk hatırlamayı dene',
+      actionLabel: 'Hatırlamayı dene',
+      reasonCode: 'NO_DURABLE_RECALL_EVIDENCE',
+      reasonText: 'Güncel kaynak için aktif kanıt yok.',
+      activityAt: now.subtract(Duration(minutes: index)),
+    );
+    final plan = DailyStudyPlan(evaluatedAt: now, items: [item(0), item(1), item(2), item(3), item(4), item(5)]);
+
+    await pumpHome(
+      tester,
+      continuation: continuationFor(RecallOutcome.correct, RecallStateKind.retrievedOnce),
+      dailyStudy: plan,
+      onOpenWorkspace: () {},
+      onOpenReader: () {},
+      onOpenLearning: () {},
+    );
+
+    expect(find.byKey(const ValueKey('today-item-bounded-1')), findsOneWidget);
+    expect(find.byKey(const ValueKey('today-item-bounded-2')), findsOneWidget);
+    expect(find.byKey(const ValueKey('today-item-bounded-3')), findsOneWidget);
+    expect(find.byKey(const ValueKey('today-item-bounded-4')), findsNothing);
+    expect(find.byKey(const ValueKey('today-item-bounded-5')), findsNothing);
+  });
+
+  testWidgets('Today quiet state does not invent work before the next scheduled return', (tester) async {
+    usePhoneViewport(tester);
+    final plan = DailyStudyPlan(
+      items: const [],
+      evaluatedAt: DateTime.utc(2026, 10, 13, 8),
+      nextScheduledAt: DateTime.utc(2026, 10, 14, 8),
+      nextScheduledMaterialId: materialId,
+    );
+
+    await pumpHome(
+      tester,
+      continuation: continuationFor(RecallOutcome.correct, RecallStateKind.retrievedOnce),
+      dailyStudy: plan,
+      onOpenWorkspace: () {},
+      onOpenReader: () {},
+      onOpenLearning: () {},
+    );
+
+    expect(find.text('Bugün için bekleyen bir tekrar yok.'), findsOneWidget);
+    expect(find.text('Şu an planlı bir tekrar yok'), findsOneWidget);
+    expect(find.textContaining('1 gün sonra'), findsOneWidget);
+    expect(find.text('Materyali aç'), findsOneWidget);
   });
 
   testWidgets('review-required Home CTA keeps the learner in the repair and Recall journey', (tester) async {

@@ -186,8 +186,8 @@ void main() {
     expect(find.text('İlk aktif denemeni yap'), findsOneWidget);
 
     Navigator.of(tester.element(find.byType(MaterialWorkspaceScreen))).pop();
-    await pumpUntilFound(tester, find.text('Kaldığın yer hazır.'));
-    expect(find.text('İlk hatırlama denemeni yap'), findsOneWidget);
+    await pumpUntilFound(tester, find.text('Bugün ne çalışman gerektiği belli.'));
+    expect(find.text('İlk hatırlamayı dene'), findsOneWidget);
     expect(find.text('Hatırlamayı dene'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
@@ -406,7 +406,9 @@ void main() {
     expect(cta, findsOneWidget);
     expect(cta.hitTestable(), findsOneWidget);
     expect(tester.getBottomRight(cta).dy, lessThanOrEqualTo(844));
-    expect(find.textContaining('Sonraki tekrar'), findsOneWidget);
+    expect(find.text('Şu an planlı bir tekrar yok'), findsOneWidget);
+    final reason = tester.widget<Text>(find.byKey(const ValueKey('la0040-home-next-reason')));
+    expect(reason.data, contains('planlı dönüş'));
     expect(tester.takeException(), isNull);
   });
 
@@ -474,7 +476,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 180));
 
     expect(find.text('Enerji onarım notu'), findsWidgets);
-    expect(find.text('Kaynağa dön, sonra yeniden dene'), findsOneWidget);
+    expect(find.text('Kaynağı onar, sonra yeniden dene'), findsOneWidget);
     final repairAction = find.text('Kaynağı gözden geçir');
     expect(repairAction, findsOneWidget);
 
@@ -599,10 +601,55 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 150));
 
-    expect(find.text('İlk hatırlama denemeni yap'), findsOneWidget);
+    expect(find.text('Bugün ne çalışman gerektiği belli.'), findsOneWidget);
+    expect(find.text('İlk hatırlamayı dene'), findsOneWidget);
     expect(find.text('Okumaya devam et'), findsNothing);
     expect(find.text('Dinlemeye devam et'), findsNothing);
     expect(find.text('Biyoloji sürüm 2'), findsWidgets);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('Today action fails closed when the source changes after Home was rendered', (tester) async {
+    usePhoneViewport(tester);
+    final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
+    final ingest = SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor());
+    final runtime = AppRuntime(
+      learner: AppRuntime.localM5LearnerFixture,
+      store: store,
+      ingest: ingest,
+      recall: RecallLearningService(sourceStore: store, learningStore: store.learningTruthStore()),
+      telemetry: store.operationalTelemetry(),
+    );
+    addTearDown(runtime.close);
+    const materialId = AppRuntime.primaryMaterialId;
+
+    await ingest.ingestPastedText(
+      learner: runtime.learner,
+      materialId: materialId,
+      text:
+          'Fotosentez ışık enerjisini kimyasal enerjiye dönüştürür. '
+          'Klorofil ışığın soğurulmasına yardım eder.',
+      sourceName: 'Today sürüm 1',
+    );
+
+    await tester.pumpWidget(_testApp(LivingDeskReviewScope(child: ProductShellScreen(runtime: runtime))));
+    await pumpUntilFound(tester, find.text('Hatırlamayı dene'));
+
+    await ingest.ingestPastedText(
+      learner: runtime.learner,
+      materialId: materialId,
+      text:
+          'Mitokondri hücresel solunumla enerji dönüşümüne katkı sağlar. '
+          'ATP kullanılabilir enerji aktarımında rol alır.',
+      sourceName: 'Today sürüm 2',
+    );
+
+    await tapVisible(tester, find.text('Hatırlamayı dene'));
+    await pumpUntilFound(tester, find.text('Kaynak güncellendi. Bugün planını güncel sürüme göre yeniledik.'));
+
+    expect(find.byType(LearningSliceScreen), findsNothing);
+    expect(find.byType(MaterialWorkspaceScreen), findsNothing);
+    await pumpUntilFound(tester, find.text('Today sürüm 2'));
     expect(tester.takeException(), isNull);
   });
 

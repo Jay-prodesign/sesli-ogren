@@ -120,14 +120,15 @@ void main() {
 
     Navigator.of(tester.element(find.byType(MaterialWorkspaceScreen))).pop();
     await _pumpUntilGone(tester, find.byType(MaterialWorkspaceScreen));
-    await _pumpUntilFound(tester, find.text('Çalışma alanına dön'));
+    await _pumpUntilFound(tester, find.text('Şu an planlı bir tekrar yok'));
 
     expect(find.byType(ProductShellScreen), findsOneWidget);
     expect(find.text('Kendi başına hatırladın'), findsOneWidget);
-    final workspaceReturn = find.text('Çalışma alanına dön');
-    await tester.scrollUntilVisible(workspaceReturn, 180, scrollable: find.byType(Scrollable).last);
+    expect(find.text('Bugün için bekleyen bir tekrar yok.'), findsOneWidget);
+    final quietReturn = find.text('Materyali aç');
+    await tester.scrollUntilVisible(quietReturn, 180, scrollable: find.byType(Scrollable).last);
     await tester.pump();
-    expect(workspaceReturn, findsOneWidget);
+    expect(quietReturn, findsOneWidget);
     final durableEvidence = find.text('İlk bağımsız hatırlaman kaydedildi. Kalıcılığı sonraki deneme gösterecek.');
     await tester.scrollUntilVisible(durableEvidence, 180, scrollable: find.byType(Scrollable).last);
     await tester.pump();
