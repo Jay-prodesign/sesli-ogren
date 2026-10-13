@@ -205,7 +205,11 @@ void main() {
     expect(find.text('Güncellenmiş not'), findsOneWidget);
     expect(tester.takeException(), isNull);
 
-    await tester.tap(find.byTooltip('İşareti sil'));
+    final deleteAction = find.byTooltip('İşareti sil');
+    await tester.ensureVisible(deleteAction);
+    await tester.pump();
+    expect(deleteAction.hitTestable(), findsOneWidget);
+    await tester.tap(deleteAction.hitTestable());
     await tester.pump();
     expect(deleted, original.id);
     expect(find.byKey(const ValueKey('reader-annotation-reader-note-crud')), findsNothing);
