@@ -41,11 +41,7 @@ class AuthenticatedRecallLearningService extends RecallLearningService {
     required SourceVersionId sourceVersionId,
     required SourceAnchor selectedAnchor,
   }) async {
-    await _requireSyncedMaterial(
-      learner: learner,
-      materialId: materialId,
-      expectedSourceVersionId: sourceVersionId,
-    );
+    await _requireSyncedMaterial(learner: learner, materialId: materialId, expectedSourceVersionId: sourceVersionId);
     final extracted = await store.extractedContentForSource(learner: learner, sourceVersionId: sourceVersionId);
     if (extracted == null ||
         !extracted.isValid ||
@@ -64,11 +60,7 @@ class AuthenticatedRecallLearningService extends RecallLearningService {
     required SourceVersionId sourceVersionId,
     required SourceAnchor sourceAnchor,
   }) async {
-    await _requireSyncedMaterial(
-      learner: learner,
-      materialId: materialId,
-      expectedSourceVersionId: sourceVersionId,
-    );
+    await _requireSyncedMaterial(learner: learner, materialId: materialId, expectedSourceVersionId: sourceVersionId);
     return _createServerPrompt(learner: learner, materialId: materialId, anchor: sourceAnchor);
   }
 
@@ -84,10 +76,7 @@ class AuthenticatedRecallLearningService extends RecallLearningService {
         action.sourceVersionId != source.identity.sourceVersionId) {
       throw const RecallLearningException('Server Recall action does not match the current local source.');
     }
-    final extracted = await store.extractedContentForSource(
-      learner: learner,
-      sourceVersionId: action.sourceVersionId,
-    );
+    final extracted = await store.extractedContentForSource(learner: learner, sourceVersionId: action.sourceVersionId);
     if (extracted == null ||
         !extracted.isValid ||
         action.anchor.startOffset < 0 ||
@@ -109,11 +98,7 @@ class AuthenticatedRecallLearningService extends RecallLearningService {
         .convert(utf8.encode('${learner.id.value}\u0000${actionId.value}\u0000${now.microsecondsSinceEpoch}'))
         .toString();
     final attemptId = RecallAttemptId('srv_attempt_${seed.substring(0, 32)}');
-    final assistance = await gateway.openAttempt(
-      learner: learner,
-      actionId: actionId,
-      attemptId: attemptId,
-    );
+    final assistance = await gateway.openAttempt(learner: learner, actionId: actionId, attemptId: attemptId);
 
     final action = _activeActions[actionId];
     if (action == null) {
@@ -152,11 +137,7 @@ class AuthenticatedRecallLearningService extends RecallLearningService {
     required RecallAttemptId attemptId,
   }) async {
     final answer = await gateway.revealAnswer(learner: learner, actionId: actionId, attemptId: attemptId);
-    return RecallSupport(
-      kind: RecallSupportKind.answer,
-      text: answer,
-      assistance: RecallAssistance.answerExposed,
-    );
+    return RecallSupport(kind: RecallSupportKind.answer, text: answer, assistance: RecallAssistance.answerExposed);
   }
 
   @override
@@ -183,17 +164,15 @@ class AuthenticatedRecallLearningService extends RecallLearningService {
     if (source == null || source.identity.sourceVersionId != server.sourceVersionId) {
       throw const RecallLearningException('Server Recall result belongs to a stale local source.');
     }
-    final extracted = await store.extractedContentForSource(
-      learner: learner,
-      sourceVersionId: server.sourceVersionId,
-    );
+    final extracted = await store.extractedContentForSource(learner: learner, sourceVersionId: server.sourceVersionId);
     if (extracted == null || !extracted.isValid) {
       throw const RecallLearningException('Server Recall result has no current local source evidence.');
     }
     if (server.anchor.startOffset < 0 ||
         server.anchor.endOffset <= server.anchor.startOffset ||
         server.anchor.endOffset > extracted.normalizedText.length ||
-        extracted.normalizedText.substring(server.anchor.startOffset, server.anchor.endOffset) != server.sourceExcerpt) {
+        extracted.normalizedText.substring(server.anchor.startOffset, server.anchor.endOffset) !=
+            server.sourceExcerpt) {
       throw const RecallLearningException('Server Recall source evidence does not match the local source.');
     }
 
@@ -265,5 +244,4 @@ class AuthenticatedRecallLearningService extends RecallLearningService {
       throw const RecallLearningException('Recall request belongs to a source version that is no longer current.');
     }
   }
-
 }

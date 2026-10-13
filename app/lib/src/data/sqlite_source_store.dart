@@ -4143,11 +4143,7 @@ LIMIT 1
         'assistance': assistance.name,
         'updated_at_utc': evidenceCreatedAt.toUtc().toIso8601String(),
       };
-      await transaction.insert(
-        'recall_attempt_support',
-        supportRow,
-        conflictAlgorithm: ConflictAlgorithm.replace,
-      );
+      await transaction.insert('recall_attempt_support', supportRow, conflictAlgorithm: ConflictAlgorithm.replace);
 
       final existingRows = await transaction.query(
         'learner_evidence',

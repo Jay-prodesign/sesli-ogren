@@ -62,11 +62,7 @@ class _InSyncGateway implements CloudContinuityGateway {
 }
 
 class _FakeServerRecallGateway implements ServerRecallGateway {
-  _FakeServerRecallGateway({
-    required this.materialId,
-    required this.sourceVersionId,
-    required this.sourceText,
-  });
+  _FakeServerRecallGateway({required this.materialId, required this.sourceVersionId, required this.sourceText});
 
   final MaterialId materialId;
   final SourceVersionId sourceVersionId;

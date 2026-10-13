@@ -20,10 +20,7 @@ class SupabaseServerRecallGateway implements ServerRecallGateway {
       final client = await _clientFor(learner);
       final rows = await client.rpc<List<dynamic>>(
         'create_recall_continuity_action',
-        params: {
-          'p_client_material_id': materialId.value,
-          'p_source_anchor': anchor?.toJson(),
-        },
+        params: {'p_client_material_id': materialId.value, 'p_source_anchor': anchor?.toJson()},
       );
       if (rows.length != 1 || rows.first is! Map) {
         throw const RecallLearningException('Server Recall action was not created.');
