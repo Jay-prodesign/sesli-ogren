@@ -4,6 +4,7 @@ import '../auth/supabase_learner_auth.dart';
 import '../domain/authenticated_learner.dart';
 import '../domain/learning_contracts.dart';
 import '../domain/learning_truth.dart';
+import 'recall_learning_service.dart';
 import 'server_recall_gateway.dart';
 
 class SupabaseServerRecallGateway implements ServerRecallGateway {

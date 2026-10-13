@@ -23,6 +23,7 @@ class AuthenticatedRecallLearningService extends RecallLearningService {
   final CloudContinuityService continuity;
   final ServerRecallGateway gateway;
   final DateTime Function() _now;
+  final Map<RecallActionId, ServerRecallAction> _activeActions = <RecallActionId, ServerRecallAction>{};
 
   @override
   Future<RecallPrompt> createCurrentPrompt({
@@ -94,6 +95,7 @@ class AuthenticatedRecallLearningService extends RecallLearningService {
         action.anchor.endOffset > extracted.normalizedText.length) {
       throw const RecallLearningException('Server Recall action returned invalid source provenance.');
     }
+    _activeActions[action.id] = action;
     return action.toPrompt();
   }
 
@@ -113,7 +115,10 @@ class AuthenticatedRecallLearningService extends RecallLearningService {
       attemptId: attemptId,
     );
 
-    final action = await _serverActionContext(learner: learner, actionId: actionId);
+    final action = _activeActions[actionId];
+    if (action == null) {
+      throw const RecallLearningException('Active server Recall action is no longer available. Reopen Recall.');
+    }
     return RecallAttemptSession(
       attempt: ActiveRecallAttempt(
         attemptId: attemptId,
@@ -169,6 +174,10 @@ class AuthenticatedRecallLearningService extends RecallLearningService {
       disposition: disposition,
       answer: answer,
     );
+    final normalizedDigest = sha256.convert(utf8.encode(server.normalizedResponse)).toString();
+    if (normalizedDigest != server.responseDigest || server.normalizedResponse.length != server.responseLength) {
+      throw const RecallLearningException('Server Recall response evidence failed integrity validation.');
+    }
 
     final source = await store.currentSourceVersion(learner: learner, materialId: server.materialId);
     if (source == null || source.identity.sourceVersionId != server.sourceVersionId) {
@@ -257,24 +266,4 @@ class AuthenticatedRecallLearningService extends RecallLearningService {
     }
   }
 
-  Future<ServerRecallAction> _serverActionContext({
-    required AuthenticatedLearner learner,
-    required RecallActionId actionId,
-  }) async {
-    // The UI always calls openAttempt immediately after a prompt returned by
-    // this service. Recreate the exact server action idempotently from the
-    // current source rather than keeping a second mutable action cache.
-    final materials = await store.activeMaterials(learner: learner);
-    for (final material in materials) {
-      final source = await store.currentSourceVersion(learner: learner, materialId: material.id);
-      if (source == null) continue;
-      try {
-        final candidate = await gateway.createAction(learner: learner, materialId: material.id);
-        if (candidate.id == actionId) return candidate;
-      } catch (_) {
-        continue;
-      }
-    }
-    throw const RecallLearningException('Active server Recall action could not be resolved.');
-  }
 }
