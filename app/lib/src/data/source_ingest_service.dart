@@ -21,7 +21,10 @@ class SourceIngestService {
     this.maxPdfBytes = 25 * 1024 * 1024,
     this.maxOfficeBytes = 25 * 1024 * 1024,
     this.maxImageBytes = 15 * 1024 * 1024,
-  }) : _officeTextExtractor = officeTextExtractor,
+  }) : // The public named arguments intentionally map to private runtime dependencies.
+       // ignore: prefer_initializing_formals
+       _officeTextExtractor = officeTextExtractor,
+       // ignore: prefer_initializing_formals
        _imageTextExtractor = imageTextExtractor,
        _now = now ?? DateTime.now;
 

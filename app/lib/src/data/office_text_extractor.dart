@@ -226,7 +226,16 @@ class OpenXmlOfficeTextExtractor implements OfficeTextExtractor {
 
   static XmlDocument _parseXml(ArchiveFile entry) {
     try {
-      return XmlDocument.parse(utf8.decode(entry.readBytes(), allowMalformed: false));
+      final bytes = entry.readBytes();
+      if (bytes == null) {
+        throw const OfficeTextExtractionException(
+          'Office XML part could not be read.',
+          kind: OfficeTextExtractionFailureKind.encryptedOrCorrupt,
+        );
+      }
+      return XmlDocument.parse(utf8.decode(bytes, allowMalformed: false));
+    } on OfficeTextExtractionException {
+      rethrow;
     } catch (_) {
       throw const OfficeTextExtractionException(
         'Office XML part is malformed.',
