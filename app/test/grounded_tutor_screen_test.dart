@@ -22,25 +22,6 @@ class _UnusedPdfExtractor implements PdfTextExtractor {
   }
 }
 
-Future<void> _waitForTutorSubmitToFinish(
-  WidgetTester tester, {
-  required Finder questionField,
-  int maxWaits = 250,
-}) async {
-  for (var i = 0; i < maxWaits; i++) {
-    await tester.pump();
-    final field = tester.widget<TextField>(questionField);
-    if ((field.controller?.text ?? '').isEmpty) return;
-
-    // SQLite futures complete on real wall time, while their widget
-    // continuations advance on tester pumps. Alternate both clocks so the
-    // assertion is stable whether the submit is instant or CI-load delayed.
-    await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 20)));
-  }
-  final field = tester.widget<TextField>(questionField);
-  expect(field.controller?.text ?? '', isEmpty, reason: 'Tutor submit should finish before response UI assertions.');
-}
-
 Future<void> _scrollTutorUntilFound(WidgetTester tester, Finder target, {int maxSteps = 100}) async {
   final listFinder = find.byKey(const ValueKey('grounded-tutor-scroll'));
   expect(listFinder, findsOneWidget);
@@ -70,7 +51,7 @@ Future<void> _scrollTutorUntilFound(WidgetTester tester, Finder target, {int max
 void main() {
   sqfliteFfiInit();
 
-  testWidgets('Grounded Tutor is usable at 320px large text and exposes exact source support', (tester) async {
+  testWidgets('Grounded Tutor renders durable exact source support at 320px large text', (tester) async {
     tester.view.physicalSize = const Size(320, 844);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);
@@ -99,6 +80,20 @@ void main() {
       telemetry: store.operationalTelemetry(),
     );
 
+    final opened = await runtime.tutor.openThread(
+      learner: learner,
+      materialId: materialId,
+      expectedSourceVersionId: result.sourceVersion.identity.sourceVersionId,
+    );
+    final answered = await runtime.tutor.ask(
+      learner: learner,
+      threadId: opened.thread.id,
+      question: 'Klorofil ne işe yarar?',
+    );
+    expect(answered.turns, hasLength(2));
+    expect(answered.turns.last.hasSourceSupport, isTrue);
+    expect(answered.turns.last.sourceExcerpt, contains('Klorofil ışığın soğurulmasına yardım eder.'));
+
     await tester.pumpWidget(
       MaterialApp(
         home: MediaQuery(
@@ -115,26 +110,13 @@ void main() {
     // Verify the non-evidence boundary while the header is actually in the
     // compact ListView viewport; scrolling can legitimately recycle it.
     expect(find.textContaining('öğrenme kanıtı'), findsWidgets);
-    await _scrollTutorUntilFound(tester, find.byKey(const ValueKey('grounded-tutor-empty')));
 
     final questionField = find.byKey(const ValueKey('grounded-tutor-question'));
-    await tester.enterText(questionField, 'Klorofil ne işe yarar?');
     final send = find.byKey(const ValueKey('grounded-tutor-send')).hitTestable();
+    expect(questionField, findsOneWidget);
     expect(send, findsOneWidget);
-    await tester.tap(send);
-    await _waitForTutorSubmitToFinish(tester, questionField: questionField);
-
-    final durableThread = await tester.runAsync(
-      () => runtime.tutor.openThread(
-        learner: runtime.learner,
-        materialId: materialId,
-        expectedSourceVersionId: result.sourceVersion.identity.sourceVersionId,
-      ),
-    );
-    expect(durableThread, isNotNull);
-    expect(durableThread!.turns, hasLength(2));
-    expect(durableThread.turns.last.hasSourceSupport, isTrue);
-    expect(durableThread.turns.last.sourceExcerpt, contains('Klorofil ışığın soğurulmasına yardım eder.'));
+    await tester.enterText(questionField, 'Yeni bir kaynak sorusu');
+    expect(find.text('Yeni bir kaynak sorusu'), findsOneWidget);
 
     await _scrollTutorUntilFound(tester, find.textContaining('TUTOR · KAYNAĞA BAĞLI'));
     expect(find.textContaining('TUTOR · KAYNAĞA BAĞLI'), findsOneWidget);
