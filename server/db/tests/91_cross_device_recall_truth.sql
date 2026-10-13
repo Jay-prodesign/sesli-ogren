@@ -112,7 +112,7 @@ select pg_temp.ok(
 select *
 from public.create_recall_continuity_action(
   'material_recall_continuity_0001',
-  '{"startOffset":62,"endOffset":103}'::jsonb
+  '{"startOffset":57,"endOffset":99}'::jsonb
 )
 \gset anchored_
 
