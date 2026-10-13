@@ -28,6 +28,7 @@ class LearningSliceScreen extends StatefulWidget {
     this.autoAdvanceContinuation = false,
     this.reviewedSourceVersionId,
     this.scheduledReviewSourceVersionId,
+    this.scheduledReviewSourceAnchor,
     this.startInSourceEditor = false,
     this.sourceGateway = const SupabaseSourceSummaryGateway(),
     this.pickPdfFile,
@@ -46,6 +47,7 @@ class LearningSliceScreen extends StatefulWidget {
   /// review must bypass an old repeat-later continuation and start a fresh
   /// source-hidden Recall attempt, but only while this version remains current.
   final SourceVersionId? scheduledReviewSourceVersionId;
+  final SourceAnchor? scheduledReviewSourceAnchor;
 
   final bool startInSourceEditor;
   final SupabaseSourceSummaryGateway sourceGateway;
@@ -169,6 +171,10 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
       if (!mounted) return;
 
       final scheduledReviewSourceVersionId = widget.scheduledReviewSourceVersionId;
+      final scheduledReviewSourceAnchor = widget.scheduledReviewSourceAnchor;
+      if ((scheduledReviewSourceVersionId == null) != (scheduledReviewSourceAnchor == null)) {
+        throw StateError('scheduled_review_requires_source_version_and_anchor');
+      }
       if (scheduledReviewSourceVersionId != null) {
         final currentSource = await widget.runtime.store.currentSourceVersion(
           learner: widget.runtime.learner,
@@ -542,10 +548,19 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
       ),
     );
     try {
-      final prompt = await widget.runtime.recall.createCurrentPrompt(
-        learner: widget.runtime.learner,
-        materialId: widget.materialId,
-      );
+      final scheduledSourceVersionId = widget.scheduledReviewSourceVersionId;
+      final scheduledSourceAnchor = widget.scheduledReviewSourceAnchor;
+      final prompt = scheduledSourceVersionId != null && scheduledSourceAnchor != null
+          ? await widget.runtime.recall.createScheduledPrompt(
+              learner: widget.runtime.learner,
+              materialId: widget.materialId,
+              sourceVersionId: scheduledSourceVersionId,
+              sourceAnchor: scheduledSourceAnchor,
+            )
+          : await widget.runtime.recall.createCurrentPrompt(
+              learner: widget.runtime.learner,
+              materialId: widget.materialId,
+            );
       final sourceVersion = await widget.runtime.store.sourceVersion(
         learner: widget.runtime.learner,
         sourceVersionId: prompt.sourceVersionId,

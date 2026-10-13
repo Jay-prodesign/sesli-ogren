@@ -262,6 +262,7 @@ class _MaterialWorkspaceScreenState extends State<MaterialWorkspaceScreen> {
   Future<void> _openRecall({
     bool autoAdvanceContinuation = false,
     SourceVersionId? scheduledReviewSourceVersionId,
+    SourceAnchor? scheduledReviewSourceAnchor,
   }) async {
     final treatment = LearningVisualTreatmentScope.maybeOf(context);
     await Navigator.of(context).push<bool>(
@@ -272,6 +273,7 @@ class _MaterialWorkspaceScreenState extends State<MaterialWorkspaceScreen> {
             materialId: widget.materialId,
             autoAdvanceContinuation: autoAdvanceContinuation,
             scheduledReviewSourceVersionId: scheduledReviewSourceVersionId,
+            scheduledReviewSourceAnchor: scheduledReviewSourceAnchor,
           );
           if (treatment != null) return LearningVisualTreatmentScope(treatment: treatment, child: screen);
           return LivingDeskReviewScope.active(context) ? LivingDeskReviewScope(child: screen) : screen;
@@ -396,7 +398,10 @@ class _MaterialWorkspaceScreenState extends State<MaterialWorkspaceScreen> {
 
     switch (due.latestEvidenceKind) {
       case RetentionEvidenceKind.recall:
-        await _openRecall(scheduledReviewSourceVersionId: due.sourceVersionId);
+        await _openRecall(
+          scheduledReviewSourceVersionId: due.sourceVersionId,
+          scheduledReviewSourceAnchor: due.sourceAnchor,
+        );
       case RetentionEvidenceKind.flashcard:
         await _openFlashcards(
           scheduledReviewSourceVersionId: due.sourceVersionId,

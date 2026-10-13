@@ -173,6 +173,7 @@ void main() {
             runtime: runtime,
             materialId: materialId,
             scheduledReviewSourceVersionId: source!.identity.sourceVersionId,
+            scheduledReviewSourceAnchor: prompt.anchor,
           ),
         ),
       ),
@@ -180,6 +181,7 @@ void main() {
     await _pumpUntilFound(tester, find.byKey(const ValueKey('la0040-atelier-recall')));
     expect(find.byKey(const ValueKey('continuation')), findsNothing);
     expect(find.text('KAYNAK KAPALI · ŞİMDİ SEN'), findsOneWidget);
+    expect(find.text(prompt.promptText), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 }
