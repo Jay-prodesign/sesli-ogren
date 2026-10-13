@@ -143,7 +143,11 @@ abstract final class GroundedTutorPolicy {
   }) {
     if (contextAnchor != null) {
       final excerpt = sourceText.substring(contextAnchor.startOffset, contextAnchor.endOffset).trim();
-      if (excerpt.isNotEmpty) {
+      final questionTerms = _terms(question);
+      final excerptTerms = _terms(excerpt);
+      final refersToSelectedContext = _refersToSelectedContext(question);
+      final overlapsSelectedContext = questionTerms.any(excerptTerms.contains);
+      if (excerpt.isNotEmpty && (refersToSelectedContext || overlapsSelectedContext)) {
         return GroundedTutorAnswer(
           text:
               'Seçtiğin bölüm bu soruya doğrudan kaynak dayanağı sağlıyor. '
@@ -196,6 +200,13 @@ abstract final class GroundedTutorPolicy {
     sourceAnchor: null,
     sourceExcerpt: null,
   );
+
+  static bool _refersToSelectedContext(String question) {
+    final normalized = question.toLowerCase().replaceAll('İ', 'i').replaceAll('I', 'ı');
+    return RegExp(
+      r'\b(bu|bunu|şu|şunu|burada|buradaki|bölüm|bölümü|seçili|seçtiğim|seçtiğin)\b',
+    ).hasMatch(normalized);
+  }
 
   static Set<String> _terms(String value) {
     final normalized = value.toLowerCase().replaceAll('İ', 'i').replaceAll('I', 'ı');

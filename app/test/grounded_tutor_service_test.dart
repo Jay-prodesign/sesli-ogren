@@ -118,6 +118,31 @@ void main() {
     expect(tutor.sourceExcerpt, text.substring(start));
   });
 
+  test('Reader context does not make an unrelated question look source-supported', () async {
+    final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
+    addTearDown(store.close);
+    final ingest = SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor());
+    final service = GroundedTutorService(store: store, now: () => DateTime.utc(2026, 10, 13, 13, 30));
+    const learner = LearnerIdentity.local();
+    const materialId = MaterialId('context-unrelated-tutor');
+    const text =
+        'Fotosentez ışık enerjisini kimyasal enerjiye dönüştürür. '
+        'Klorofil ışığın soğurulmasına yardım eder.';
+    await ingest.ingestPastedText(learner: learner, materialId: materialId, sourceName: 'Bağlam notu', text: text);
+    final start = text.indexOf('Klorofil');
+    final anchor = SourceAnchor(startOffset: start, endOffset: text.length);
+    final opened = await service.openThread(learner: learner, materialId: materialId, contextAnchor: anchor);
+    final answered = await service.ask(
+      learner: learner,
+      threadId: opened.thread.id,
+      question: 'Roma İmparatorluğu neden yıkıldı?',
+    );
+    final tutor = answered.turns.last;
+    expect(tutor.supportState, GroundedTutorSupportState.sourceUnsupported);
+    expect(tutor.sourceAnchor, isNull);
+    expect(tutor.sourceExcerpt, isNull);
+  });
+
   test('Source replacement invalidates old Tutor grounding without rebinding conversation', () async {
     final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
     addTearDown(store.close);
