@@ -116,7 +116,7 @@ void main() {
     expect(questionField, findsOneWidget);
     expect(send, findsOneWidget);
     await tester.enterText(questionField, 'Yeni bir kaynak sorusu');
-    expect(find.text('Yeni bir kaynak sorusu'), findsOneWidget);
+    expect(tester.widget<TextField>(questionField).controller?.text, 'Yeni bir kaynak sorusu');
 
     await _scrollTutorUntilFound(tester, find.textContaining('TUTOR · KAYNAĞA BAĞLI'));
     expect(find.textContaining('TUTOR · KAYNAĞA BAĞLI'), findsOneWidget);
