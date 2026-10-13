@@ -1,3 +1,7 @@
+import 'dart:convert';
+
+import 'package:crypto/crypto.dart';
+
 import 'learning_contracts.dart';
 
 class RetentionScheduleId {
@@ -97,6 +101,18 @@ class RetentionPolicy {
   const RetentionPolicy._();
 
   static const version = 'retention-v1';
+
+  static RetentionScheduleId scheduleIdFor(SourceVersionId sourceVersionId, SourceAnchor anchor) {
+    final digest = sha256
+        .convert(
+          utf8.encode(
+            '${sourceVersionId.value}\u0000${anchor.startOffset}\u0000'
+            '${anchor.endOffset}\u0000${anchor.pageNumber ?? -1}',
+          ),
+        )
+        .toString();
+    return RetentionScheduleId('rs_${digest.substring(0, 32)}');
+  }
 
   static RetentionScheduleRecord advance({
     required RetentionScheduleRecord? existing,

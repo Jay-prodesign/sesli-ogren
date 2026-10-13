@@ -373,6 +373,7 @@ returns table (
   response_length integer,
   evidence_rule_version text,
   evidence_created_at timestamptz,
+  next_reason_code text,
   correct_answer text,
   source_excerpt text,
   client_material_id text,
@@ -395,6 +396,7 @@ as $$
          ev.response_length,
          ev.rule_version,
          ev.created_at,
+         public.la_recall_next_reason_for_outcome(ev.outcome),
          a.expected_answer,
          substring(
            ec.normalized_text

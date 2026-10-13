@@ -3064,6 +3064,81 @@ LIMIT 1
     });
   }
 
+  Future<void> replaceServerVerifiedRecallRetention({
+    required AuthenticatedLearner learner,
+    required MaterialId materialId,
+    required SourceVersionId sourceVersionId,
+    required List<RetentionScheduleRecord> schedules,
+  }) {
+    if (!learner.isAuthenticated) {
+      throw const SourceStoreConflict('Server retention cache requires an authenticated learner.');
+    }
+    return _database.transaction((transaction) async {
+      final authority = await transaction.query(
+        'materials',
+        columns: ['current_source_version_id'],
+        where:
+            'learner_id = ? AND material_id = ? AND lifecycle_status = ? '
+            'AND deleted_at_utc IS NULL',
+        whereArgs: [learner.id.value, materialId.value, MaterialLifecycleStatus.active.name],
+        limit: 1,
+      );
+      if (authority.isEmpty || authority.single['current_source_version_id'] != sourceVersionId.value) {
+        throw const SourceStoreConflict('Server retention does not belong to the current local source.');
+      }
+
+      for (final schedule in schedules) {
+        if (schedule.materialId != materialId ||
+            schedule.sourceVersionId != sourceVersionId ||
+            schedule.latestEvidenceKind != RetentionEvidenceKind.recall ||
+            schedule.policyVersion != RetentionPolicy.version ||
+            schedule.id != RetentionPolicy.scheduleIdFor(sourceVersionId, schedule.sourceAnchor) ||
+            schedule.reviewCount < 1 ||
+            schedule.successStreak < 0 ||
+            schedule.interval.isNegative ||
+            schedule.dueAt.toUtc() != schedule.lastReviewedAt.toUtc().add(schedule.interval)) {
+          throw const SourceStoreConflict('Server retention projection failed local lineage validation.');
+        }
+      }
+
+      await transaction.delete(
+        'retention_schedules',
+        where:
+            'learner_id = ? AND material_id = ? AND source_version_id = ? '
+            'AND latest_evidence_kind = ?',
+        whereArgs: [
+          learner.id.value,
+          materialId.value,
+          sourceVersionId.value,
+          RetentionEvidenceKind.recall.name,
+        ],
+      );
+
+      for (final schedule in schedules) {
+        await transaction.insert('retention_schedules', {
+          'learner_id': learner.id.value,
+          'retention_schedule_id': schedule.id.value,
+          'material_id': schedule.materialId.value,
+          'source_version_id': schedule.sourceVersionId.value,
+          'source_start': schedule.sourceAnchor.startOffset,
+          'source_end': schedule.sourceAnchor.endOffset,
+          'page_number': schedule.sourceAnchor.pageNumber,
+          'latest_evidence_kind': schedule.latestEvidenceKind.name,
+          'latest_outcome_band': schedule.latestOutcomeBand.name,
+          'latest_event_id': schedule.latestEventId,
+          'reason_code': schedule.reasonCode,
+          'review_count': schedule.reviewCount,
+          'success_streak': schedule.successStreak,
+          'interval_seconds': schedule.interval.inSeconds,
+          'due_at_utc': schedule.dueAt.toUtc().toIso8601String(),
+          'last_reviewed_at_utc': schedule.lastReviewedAt.toUtc().toIso8601String(),
+          'policy_version': schedule.policyVersion,
+          'invalidated_at_utc': null,
+        }, conflictAlgorithm: ConflictAlgorithm.abort);
+      }
+    });
+  }
+
   Future<List<RetentionScheduleRecord>> retentionSchedulesForMaterial({
     required AuthenticatedLearner learner,
     required MaterialId materialId,
@@ -3494,17 +3569,8 @@ ON CONFLICT(learner_id) DO UPDATE SET
     );
   }
 
-  static RetentionScheduleId _retentionScheduleId(SourceVersionId sourceVersionId, SourceAnchor anchor) {
-    final digest = sha256
-        .convert(
-          utf8.encode(
-            '${sourceVersionId.value}\u0000${anchor.startOffset}\u0000'
-            '${anchor.endOffset}\u0000${anchor.pageNumber ?? -1}',
-          ),
-        )
-        .toString();
-    return RetentionScheduleId('rs_${digest.substring(0, 32)}');
-  }
+  static RetentionScheduleId _retentionScheduleId(SourceVersionId sourceVersionId, SourceAnchor anchor) =>
+      RetentionPolicy.scheduleIdFor(sourceVersionId, anchor);
 
   static Future<RetentionScheduleRecord> _upsertRetentionSchedule(
     DatabaseExecutor executor, {
@@ -4207,23 +4273,6 @@ LIMIT 1
         'active_recall_attempts',
         where: 'learner_id = ? AND material_id = ?',
         whereArgs: [learner.id.value, action.materialId.value],
-      );
-
-      await SqliteSourceStore._upsertRetentionSchedule(
-        transaction,
-        learnerId: learner.id.value,
-        materialId: action.materialId,
-        sourceVersionId: action.sourceVersionId,
-        sourceAnchor: action.anchor,
-        evidenceKind: RetentionEvidenceKind.recall,
-        outcomeBand: switch (outcome) {
-          RecallOutcome.correct => RetentionOutcomeBand.independentRetrieval,
-          RecallOutcome.helpedCorrect || RecallOutcome.partial => RetentionOutcomeBand.supportedRetrieval,
-          RecallOutcome.incorrect => RetentionOutcomeBand.repairNeeded,
-          RecallOutcome.answerExposed || RecallOutcome.unknown => RetentionOutcomeBand.unassessed,
-        },
-        eventId: 'server-recall:${evidenceId.value}',
-        occurredAt: evidenceCreatedAt,
       );
 
       return PersistedLearningTruth(evidence: evidence, state: state, nextAction: nextAction);
