@@ -591,7 +591,7 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
 
   String _officeFailureMessage(Object error) {
     if (error is! SourceIngestException) {
-      return 'Belge veya sunu işlenemedi. DOCX/PPTX deneyebilir ya da çalışacağın bölümü metin olarak ekleyebilirsin.';
+      return 'Belge veya sunu işlenemedi. DOC/DOCX/PPT/PPTX biçimlerinden birini deneyebilir ya da çalışacağın bölümü metin olarak ekleyebilirsin.';
     }
     return switch (error.kind) {
       SourceIngestFailureKind.officeEmpty => 'Seçtiğin belge boş görünüyor. Başka bir dosya seç.',
@@ -602,7 +602,7 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
         'Bu belge veya sunuda güvenilir metin bulunamadı. Metin içeren başka bir sürüm seç veya metni doğrudan ekle.',
       SourceIngestFailureKind.officeParseFailure =>
         'Belge güvenli biçimde açılamadı. Dosya bozuk, şifreli veya desteklenmeyen bir yapıda olabilir.',
-      _ => 'Belge veya sunu işlenemedi. DOCX/PPTX deneyebilir ya da çalışacağın bölümü metin olarak ekleyebilirsin.',
+      _ => 'Belge veya sunu işlenemedi. DOC/DOCX/PPT/PPTX biçimlerinden birini deneyebilir ya da çalışacağın bölümü metin olarak ekleyebilirsin.',
     };
   }
 
@@ -1492,7 +1492,7 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
           Text(
             _editingExistingSource
                 ? 'Yeni PDF, Word, PowerPoint, fotoğraf veya metin ayrı bir kaynak sürümü olur; eski kanıt yeni sürüme taşınmaz.'
-                : 'PDF, DOCX/PPTX veya fotoğraf seçebilir ya da metni doğrudan yapıştırabilirsin.',
+                : 'PDF, Word (DOC/DOCX), PowerPoint (PPT/PPTX) veya fotoğraf seçebilir ya da metni doğrudan yapıştırabilirsin.',
           ),
           if (_busy) ...[
             Semantics(
