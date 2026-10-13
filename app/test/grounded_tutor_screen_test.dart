@@ -22,6 +22,13 @@ class _UnusedPdfExtractor implements PdfTextExtractor {
   }
 }
 
+Future<void> _pumpTutorUntilFound(WidgetTester tester, Finder target, {int maxPumps = 120}) async {
+  for (var i = 0; i < maxPumps && target.evaluate().isEmpty; i++) {
+    await tester.pump(const Duration(milliseconds: 20));
+  }
+  expect(target, findsWidgets);
+}
+
 Future<void> _scrollTutorUntilFound(WidgetTester tester, Finder target, {int maxDrags = 20}) async {
   final listFinder = find.byKey(const ValueKey('grounded-tutor-scroll'));
   expect(listFinder, findsOneWidget);
@@ -93,7 +100,7 @@ void main() {
     final send = find.byKey(const ValueKey('grounded-tutor-send')).hitTestable();
     expect(send, findsOneWidget);
     await tester.tap(send);
-    await tester.pumpAndSettle();
+    await _pumpTutorUntilFound(tester, find.textContaining('TUTOR · KAYNAĞA BAĞLI'));
 
     await _scrollTutorUntilFound(tester, find.byKey(const ValueKey('grounded-tutor-next-actions')));
     expect(find.textContaining('KAYNAĞA BAĞLI'), findsWidgets);
