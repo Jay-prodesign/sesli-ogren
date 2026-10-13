@@ -653,6 +653,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.2.1"
+  quds_office_engine:
+    dependency: "direct main"
+    description:
+      name: quds_office_engine
+      sha256: "06219447561ce09dfbfba754888d4411ac935eb5d47de6f225d552e48bb59505"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.2.0"
   realtime_client:
     dependency: transitive
     description:
