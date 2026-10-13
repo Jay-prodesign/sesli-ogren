@@ -35,6 +35,21 @@ class _OfficeExtractor implements OfficeTextExtractor {
   }
 }
 
+class _LegacyOfficeExtractor implements OfficeTextExtractor {
+  const _LegacyOfficeExtractor();
+
+  @override
+  Future<ExtractedOfficeText> extract(Uint8List bytes, {required String sourceName}) async {
+    return const ExtractedOfficeText(
+      text: 'Eski Word ders notu',
+      anchors: [SourceAnchor(startOffset: 0, endOffset: 19)],
+      format: OfficeSourceFormat.doc,
+      unitCount: 1,
+      warnings: ['LEGACY_DOC_TEXT_ONLY'],
+    );
+  }
+}
+
 class _ImageExtractor implements ImageTextExtractor {
   const _ImageExtractor();
 
@@ -82,6 +97,33 @@ void main() {
       (await store.currentSourceVersion(learner: learner, materialId: materialId))!.identity.sourceVersionId,
       result.sourceVersion.identity.sourceVersionId,
     );
+  });
+
+  test('legacy DOC ingest records truthful OLE provenance in the canonical source pipeline', () async {
+    final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
+    addTearDown(store.close);
+    final service = SourceIngestService(
+      store: store,
+      pdfTextExtractor: const _UnusedPdfExtractor(),
+      officeTextExtractor: const _LegacyOfficeExtractor(),
+      imageTextExtractor: const _ImageExtractor(),
+      now: () => DateTime.utc(2026, 10, 13, 10, 30),
+    );
+    const learner = LearnerIdentity.local();
+    const materialId = MaterialId('legacy-doc-material');
+
+    final result = await service.ingestOffice(
+      learner: learner,
+      materialId: materialId,
+      bytes: Uint8List.fromList([0xd0, 0xcf, 0x11, 0xe0, 1, 2, 3]),
+      originalName: 'Tarih.doc',
+    );
+
+    expect(result.material.mediaType, SourceMediaType.document);
+    expect(result.sourceVersion.mimeType, 'application/msword');
+    expect(result.extractedContent.method, 'office_legacy_ole_text');
+    expect(result.extractedContent.methodVersion, 'legacy-ole-v1');
+    expect(result.extractedContent.warnings, contains('LEGACY_DOC_TEXT_ONLY'));
   });
 
   test('image OCR stays user-provided source truth and carries an explicit OCR warning', () async {

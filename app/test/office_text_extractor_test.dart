@@ -3,6 +3,7 @@ import 'dart:typed_data';
 
 import 'package:archive/archive.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:quds_office_engine/quds_office_engine.dart' show CfbfWriter;
 import 'package:sesli_ogren/src/data/office_text_extractor.dart';
 
 Uint8List _zip(Map<String, String> files) {
@@ -57,16 +58,22 @@ void main() {
     expect(result.warnings, contains('PPTX_SLIDE_TEXT_ONLY'));
   });
 
-  test('legacy Office formats fail closed instead of fabricating extracted text', () async {
-    await expectLater(
-      extractor.extract(Uint8List.fromList([0xd0, 0xcf, 0x11, 0xe0]), sourceName: 'old.doc'),
-      throwsA(
-        isA<OfficeTextExtractionException>().having(
-          (error) => error.kind,
-          'kind',
-          OfficeTextExtractionFailureKind.unsupportedFormat,
-        ),
-      ),
-    );
+  test('legacy DOC dispatches through the bounded OLE extractor', () async {
+    final word = Uint8List(512);
+    const text = 'Fotosentez ışık enerjisini dönüştürür.\rKlorofil ışığı yakalar.';
+    final encoded = Uint8List.fromList(text.codeUnits);
+    const start = 0x100;
+    word.setRange(start, start + encoded.length, encoded);
+    final view = ByteData.sublistView(word);
+    view.setUint32(0x18, start, Endian.little);
+    view.setUint32(0x1c, start + encoded.length, Endian.little);
+    final bytes = (CfbfWriter()..addStream('WordDocument', word)).build();
+
+    final result = await extractor.extract(bytes, sourceName: 'old.doc');
+
+    expect(result.format, OfficeSourceFormat.doc);
+    expect(result.text, contains('Fotosentez'));
+    expect(result.text, contains('Klorofil'));
+    expect(result.warnings, contains('LEGACY_DOC_TEXT_ONLY'));
   });
 }
