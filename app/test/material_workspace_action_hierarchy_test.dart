@@ -253,7 +253,7 @@ void main() {
     expect(tester.takeException(), isNull);
     expect(find.byKey(const ValueKey('workspace-retention-state')), findsOneWidget);
     expect(find.text('Planlanan tekrar hazır'), findsOneWidget);
-    expect(find.byKey(const ValueKey('workspace-active-step-retention-workspace-due-retention')), findsOneWidget);
+    expect(find.text('TEKRAR ZAMANI'), findsOneWidget);
     expect(find.text('Quiz tekrarını aç'), findsWidgets);
     expect(find.textContaining('ustalık sayılmıyor'), findsOneWidget);
     final compactMotion = tester.widget<AnimatedSwitcher>(
