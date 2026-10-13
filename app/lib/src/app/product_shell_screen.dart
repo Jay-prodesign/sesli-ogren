@@ -1,5 +1,9 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
+import '../continuity/cloud_continuity_gateway.dart';
+import '../continuity/cloud_continuity_service.dart';
 import '../domain/learning_contracts.dart';
 import '../domain/learning_truth.dart';
 import '../domain/retention_schedule.dart';
@@ -44,11 +48,12 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
   int _index = 0;
   MaterialId? _deletingMaterialId;
   late Future<_HomeSnapshot> _snapshot;
+  _CloudContinuityNotice? _continuityNotice;
 
   @override
   void initState() {
     super.initState();
-    _refresh();
+    _refreshForRuntime();
   }
 
   @override
@@ -61,11 +66,43 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
     // the device-local runtime (or vice versa).
     _index = 0;
     _deletingMaterialId = null;
-    _refresh();
+    _continuityNotice = null;
+    _refreshForRuntime();
   }
 
   void _refresh() {
     _snapshot = _loadSnapshot();
+  }
+
+  void _refreshForRuntime() {
+    _snapshot = widget.runtime.learner.isAuthenticated ? _reconcileThenLoadSnapshot() : _loadSnapshot();
+  }
+
+  Future<_HomeSnapshot> _reconcileThenLoadSnapshot() async {
+    _continuityNotice = null;
+    try {
+      final results = await widget.runtime.continuity
+          .reconcileAll(learner: widget.runtime.learner)
+          .timeout(const Duration(seconds: 8));
+      _continuityNotice = _CloudContinuityNotice.fromResults(results);
+    } on TimeoutException {
+      _continuityNotice = const _CloudContinuityNotice(
+        kind: _CloudContinuityNoticeKind.unavailable,
+        message: 'Cihazlar arası güncelleme şu anda tamamlanamadı. Bu cihazdaki çalışmaların açık kalıyor.',
+      );
+    } on CloudContinuityException catch (error) {
+      _continuityNotice = _CloudContinuityNotice.fromFailure(error);
+    } catch (_) {
+      _continuityNotice = const _CloudContinuityNotice(
+        kind: _CloudContinuityNoticeKind.unavailable,
+        message: 'Cihazlar arası güncelleme şu anda kullanılamıyor. Yerel çalışmaların korunuyor.',
+      );
+    }
+    return _loadSnapshot();
+  }
+
+  void _retryContinuity() {
+    setState(() => _snapshot = _reconcileThenLoadSnapshot());
   }
 
   Future<LearningContinuation?> _continuationFor(MaterialId materialId) async {
@@ -679,6 +716,8 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
         final data = snapshot.data!;
         return Column(
           children: [
+            if (_continuityNotice != null)
+              _CloudContinuityNoticeCard(notice: _continuityNotice!, onRetry: _retryContinuity),
             Expanded(
               child: IndexedStack(
                 index: _index,
@@ -750,6 +789,111 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
               child: _buildNavigationBar(context),
             )
           : _buildNavigationBar(context),
+    );
+  }
+}
+
+enum _CloudContinuityNoticeKind { conflict, unsupported, unavailable }
+
+class _CloudContinuityNotice {
+  const _CloudContinuityNotice({required this.kind, required this.message});
+
+  final _CloudContinuityNoticeKind kind;
+  final String message;
+
+  static _CloudContinuityNotice? fromResults(List<CloudContinuityItemResult> results) {
+    final conflicts = results.where((item) => item.disposition == CloudContinuityDisposition.conflict).length;
+    if (conflicts > 0) {
+      return _CloudContinuityNotice(
+        kind: _CloudContinuityNoticeKind.conflict,
+        message: conflicts == 1
+            ? 'Bir kaynak iki cihazda değişti. Otomatik üzerine yazmadık; bu cihazdaki sürüm korundu.'
+            : '$conflicts kaynak iki cihazda değişti. Otomatik üzerine yazmadık; bu cihazdaki sürümler korundu.',
+      );
+    }
+    final unsupported = results.where((item) => item.disposition == CloudContinuityDisposition.unsupportedSource).length;
+    if (unsupported > 0) {
+      return _CloudContinuityNotice(
+        kind: _CloudContinuityNoticeKind.unsupported,
+        message: unsupported == 1
+            ? 'Bir dosya kaynağının aslı henüz cihazlar arasında taşınmıyor. Bu cihazdaki kaynak korunuyor.'
+            : '$unsupported dosya kaynağının aslı henüz cihazlar arasında taşınmıyor. Bu cihazdaki kaynaklar korunuyor.',
+      );
+    }
+    final unavailable = results.where((item) => item.disposition == CloudContinuityDisposition.unavailable).length;
+    if (unavailable > 0) {
+      return const _CloudContinuityNotice(
+        kind: _CloudContinuityNoticeKind.unavailable,
+        message: 'Cihazlar arası güncelleme şu anda kullanılamıyor. Yerel çalışmaların korunuyor.',
+      );
+    }
+    return null;
+  }
+
+  static _CloudContinuityNotice fromFailure(CloudContinuityException error) {
+    return switch (error.kind) {
+      CloudContinuityFailureKind.conflict || CloudContinuityFailureKind.staleSource => _CloudContinuityNotice(
+        kind: _CloudContinuityNoticeKind.conflict,
+        message: 'Kaynak geçmişi iki cihazda ayrıştı. Otomatik üzerine yazmadık; bu cihazdaki sürüm korundu.',
+      ),
+      CloudContinuityFailureKind.unsupportedSource => const _CloudContinuityNotice(
+        kind: _CloudContinuityNoticeKind.unsupported,
+        message: 'Bu kaynak türünün aslı henüz cihazlar arasında taşınmıyor. Bu cihazdaki kaynak korunuyor.',
+      ),
+      CloudContinuityFailureKind.authenticationRequired ||
+      CloudContinuityFailureKind.unavailable ||
+      CloudContinuityFailureKind.invalidPayload => const _CloudContinuityNotice(
+        kind: _CloudContinuityNoticeKind.unavailable,
+        message: 'Cihazlar arası güncelleme şu anda kullanılamıyor. Yerel çalışmaların korunuyor.',
+      ),
+    };
+  }
+}
+
+class _CloudContinuityNoticeCard extends StatelessWidget {
+  const _CloudContinuityNoticeCard({required this.notice, required this.onRetry});
+
+  final _CloudContinuityNotice notice;
+  final VoidCallback onRetry;
+
+  @override
+  Widget build(BuildContext context) {
+    final (icon, accent) = switch (notice.kind) {
+      _CloudContinuityNoticeKind.conflict => (Icons.compare_arrows_rounded, AtelierStyle.attention),
+      _CloudContinuityNoticeKind.unsupported => (Icons.cloud_off_outlined, AtelierStyle.muted),
+      _CloudContinuityNoticeKind.unavailable => (Icons.cloud_sync_outlined, AtelierStyle.teal),
+    };
+    return Semantics(
+      container: true,
+      liveRegion: true,
+      label: notice.message,
+      child: Container(
+        key: const ValueKey('cloud-continuity-notice'),
+        margin: const EdgeInsets.fromLTRB(16, 8, 16, 4),
+        padding: const EdgeInsets.fromLTRB(12, 10, 8, 10),
+        decoration: BoxDecoration(
+          color: AtelierStyle.paper,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: accent.withValues(alpha: 0.28)),
+        ),
+        child: Row(
+          children: [
+            Icon(icon, color: accent, size: 20),
+            const SizedBox(width: 9),
+            Expanded(
+              child: Text(
+                notice.message,
+                style: const TextStyle(color: AtelierStyle.ink, fontSize: 12.5, height: 1.35),
+              ),
+            ),
+            TextButton(
+              key: const ValueKey('cloud-continuity-retry'),
+              onPressed: onRetry,
+              child: const Text('Tekrar dene'),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
