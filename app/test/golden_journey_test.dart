@@ -182,6 +182,4 @@ void main() {
     expect(find.text('KAYNAK KAPALI · ŞİMDİ SEN'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
-
-
 }
