@@ -11,6 +11,7 @@ import 'package:sesli_ogren/src/data/pdf_text_extractor.dart';
 import 'package:sesli_ogren/src/data/source_ingest_service.dart';
 import 'package:sesli_ogren/src/data/sqlite_source_store.dart';
 import 'package:sesli_ogren/src/domain/authenticated_learner.dart';
+import 'package:sesli_ogren/src/domain/learning_contracts.dart';
 import 'package:sesli_ogren/src/learning/recall_learning_service.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
@@ -42,7 +43,7 @@ class _RecoveringContinuityGateway implements CloudContinuityGateway {
   @override
   Future<CloudMaterialSnapshot?> readMaterial({
     required AuthenticatedLearner learner,
-    required materialId,
+    required MaterialId materialId,
   }) {
     throw UnimplementedError();
   }
@@ -50,8 +51,8 @@ class _RecoveringContinuityGateway implements CloudContinuityGateway {
   @override
   Future<CloudMaterialSnapshot> ensureTextSource({
     required AuthenticatedLearner learner,
-    required source,
-    expectedPreviousSourceVersionId,
+    required SourceIngestResult source,
+    SourceVersionId? expectedPreviousSourceVersionId,
   }) {
     throw UnimplementedError();
   }
