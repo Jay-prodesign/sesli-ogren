@@ -28,7 +28,7 @@ class _UnusedPdfExtractor implements PdfTextExtractor {
 void main() {
   sqfliteFfiInit();
 
-  test('independent retrieval schedules a source-bound review without claiming mastery', () async {
+  test('revealed flashcard self-report schedules support without claiming independent retrieval', () async {
     final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
     addTearDown(store.close);
     final ingest = SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor());
@@ -62,12 +62,12 @@ void main() {
     expect(schedules.single.sourceVersionId, state.set.sourceVersionId);
     expect(schedules.single.sourceAnchor.startOffset, firstCard.sourceAnchor.startOffset);
     expect(schedules.single.latestEvidenceKind, RetentionEvidenceKind.flashcard);
-    expect(schedules.single.latestOutcomeBand, RetentionOutcomeBand.independentRetrieval);
-    expect(schedules.single.successStreak, 1);
+    expect(schedules.single.latestOutcomeBand, RetentionOutcomeBand.supportedRetrieval);
+    expect(schedules.single.successStreak, 0);
     expect(schedules.single.reviewCount, 1);
-    expect(schedules.single.interval, const Duration(days: 1));
-    expect(schedules.single.dueAt, now.add(const Duration(days: 1)));
-    expect(schedules.single.reasonCode, 'INDEPENDENT_RETRIEVAL_OBSERVED');
+    expect(schedules.single.interval, const Duration(hours: 12));
+    expect(schedules.single.dueAt, now.add(const Duration(hours: 12)));
+    expect(schedules.single.reasonCode, 'SUPPORTED_OR_PARTIAL_RETRIEVAL');
     expect(await store.dueRetentionSchedules(learner: learner, at: now), isEmpty);
 
     await flashcards.restartSession(learner: learner, materialId: materialId);
@@ -83,10 +83,48 @@ void main() {
     );
 
     schedules = await store.retentionSchedulesForMaterial(learner: learner, materialId: materialId);
-    expect(schedules.single.successStreak, 2);
+    expect(schedules.single.latestOutcomeBand, RetentionOutcomeBand.supportedRetrieval);
+    expect(schedules.single.successStreak, 0);
     expect(schedules.single.reviewCount, 2);
-    expect(schedules.single.interval, const Duration(days: 3));
-    expect(schedules.single.dueAt, now.add(const Duration(days: 3)));
+    expect(schedules.single.interval, const Duration(hours: 12));
+    expect(schedules.single.dueAt, now.add(const Duration(hours: 12)));
+  });
+
+  test('independent retrieval alone grows the deterministic retention interval', () {
+    const id = RetentionScheduleId('policy-retention');
+    const materialId = MaterialId('policy-material');
+    const sourceVersionId = SourceVersionId('policy-source');
+    const anchor = SourceAnchor(startOffset: 0, endOffset: 42);
+    final firstAt = DateTime.utc(2026, 10, 13, 8);
+    final first = RetentionPolicy.advance(
+      existing: null,
+      id: id,
+      materialId: materialId,
+      sourceVersionId: sourceVersionId,
+      sourceAnchor: anchor,
+      evidenceKind: RetentionEvidenceKind.recall,
+      outcomeBand: RetentionOutcomeBand.independentRetrieval,
+      eventId: 'recall:first',
+      occurredAt: firstAt,
+    );
+    expect(first.successStreak, 1);
+    expect(first.interval, const Duration(days: 1));
+
+    final secondAt = firstAt.add(const Duration(days: 1));
+    final second = RetentionPolicy.advance(
+      existing: first,
+      id: id,
+      materialId: materialId,
+      sourceVersionId: sourceVersionId,
+      sourceAnchor: anchor,
+      evidenceKind: RetentionEvidenceKind.quiz,
+      outcomeBand: RetentionOutcomeBand.independentRetrieval,
+      eventId: 'quiz:second',
+      occurredAt: secondAt,
+    );
+    expect(second.successStreak, 2);
+    expect(second.interval, const Duration(days: 3));
+    expect(second.dueAt, secondAt.add(const Duration(days: 3)));
   });
 
   test('Recall creates a durable retention schedule that survives database reopen', () async {

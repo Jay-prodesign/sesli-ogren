@@ -1242,7 +1242,7 @@ ORDER BY r.last_reviewed_at_utc ASC
         ),
         evidenceKind: RetentionEvidenceKind.flashcard,
         outcomeBand: response == FlashcardResponse.remembered
-            ? RetentionOutcomeBand.independentRetrieval
+            ? RetentionOutcomeBand.supportedRetrieval
             : RetentionOutcomeBand.repairNeeded,
         eventId: 'flashcard:${row['card_id']! as String}:${row['review_count']! as int}',
         occurredAt: DateTime.parse(row['last_reviewed_at_utc']! as String).toUtc(),
@@ -1915,7 +1915,7 @@ ON CONFLICT(learner_id, flashcard_set_id) DO UPDATE SET
         sourceAnchor: card.sourceAnchor,
         evidenceKind: RetentionEvidenceKind.flashcard,
         outcomeBand: response == FlashcardResponse.remembered
-            ? RetentionOutcomeBand.independentRetrieval
+            ? RetentionOutcomeBand.supportedRetrieval
             : RetentionOutcomeBand.repairNeeded,
         eventId: 'flashcard:${card.id.value}:${reviewRow['review_count']! as int}',
         occurredAt: reviewedAt.toUtc(),
