@@ -23,12 +23,18 @@ class _UnusedPdfExtractor implements PdfTextExtractor {
 }
 
 Future<void> _scrollTutorUntilFound(WidgetTester tester, Finder target, {int maxDrags = 20}) async {
-  expect(find.byKey(const ValueKey('grounded-tutor-scroll')), findsOneWidget);
+  final listFinder = find.byKey(const ValueKey('grounded-tutor-scroll'));
+  expect(listFinder, findsOneWidget);
+  final list = tester.widget<ListView>(listFinder);
+  final controller = list.controller;
+  expect(controller, isNotNull);
+  expect(controller!.hasClients, isTrue);
+  expect(controller.position.viewportDimension, greaterThan(0));
+
   for (var i = 0; i < maxDrags && target.evaluate().isEmpty; i++) {
-    // Use a stable point inside the 320px Tutor conversation viewport instead
-    // of the ListView RenderBox centre, which can sit behind the pinned
-    // composer at large text scale.
-    await tester.dragFrom(const Offset(160, 300), const Offset(0, -120));
+    final position = controller.position;
+    final next = (position.pixels + 120).clamp(position.minScrollExtent, position.maxScrollExtent);
+    controller.jumpTo(next);
     await tester.pump();
   }
   expect(target, findsOneWidget);
