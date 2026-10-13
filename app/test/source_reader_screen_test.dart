@@ -98,8 +98,10 @@ void main() {
     await tester.pump();
 
     final selectable = tester.widget<SelectableText>(find.byKey(const ValueKey('reader-selectable-source')));
+    final selectedStart = source.indexOf('ışık enerjisini');
+    final selectedEnd = selectedStart + 'ışık enerjisini'.length;
     selectable.onSelectionChanged!(
-      const TextSelection(baseOffset: 11, extentOffset: 25),
+      TextSelection(baseOffset: selectedStart, extentOffset: selectedEnd),
       SelectionChangedCause.longPress,
     );
     await tester.pump();
@@ -111,16 +113,16 @@ void main() {
 
     expect(saved, isNotNull);
     expect(saved!.selectedText, 'ışık enerjisini');
-    expect(saved!.sourceAnchor.startOffset, 11);
-    expect(saved!.sourceAnchor.endOffset, 25);
+    expect(saved!.sourceAnchor.startOffset, selectedStart);
+    expect(saved!.sourceAnchor.endOffset, selectedEnd);
     expect(saved!.sourceAnchor.pageNumber, 1);
     expect(find.byKey(const ValueKey('reader-annotation-reader-test-highlight')), findsOneWidget);
 
     await tester.tap(find.byKey(const ValueKey('reader-selection-recall')));
     await tester.pump();
     expect(recalledAnchor, isNotNull);
-    expect(recalledAnchor!.startOffset, 11);
-    expect(recalledAnchor!.endOffset, 25);
+    expect(recalledAnchor!.startOffset, selectedStart);
+    expect(recalledAnchor!.endOffset, selectedEnd);
     expect(tester.takeException(), isNull);
   });
 
