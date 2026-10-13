@@ -240,7 +240,10 @@ void main() {
 
     final secondAction = find.byKey(const ValueKey('today-item-today-second-material'));
     await tester.scrollUntilVisible(secondAction, 220, scrollable: find.byType(Scrollable).first);
-    await tester.tap(secondAction);
+    await tester.ensureVisible(secondAction);
+    await tester.pump();
+    expect(secondAction.hitTestable(), findsOneWidget);
+    await tester.tap(secondAction.hitTestable());
     await tester.pump();
     expect(opened, secondId);
   });
