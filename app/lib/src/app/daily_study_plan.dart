@@ -56,10 +56,7 @@ class DailyStudyPlan {
 
   DailyStudyItem? get primary => items.isEmpty ? null : items.first;
 
-  static DailyStudyPlan build({
-    required List<ProgressItem> progress,
-    required DateTime evaluatedAt,
-  }) {
+  static DailyStudyPlan build({required List<ProgressItem> progress, required DateTime evaluatedAt}) {
     final at = evaluatedAt.toUtc();
     final items = <DailyStudyItem>[];
     DateTime? nextScheduledAt;
@@ -96,11 +93,7 @@ class DailyStudyPlan {
     );
   }
 
-  static DailyStudyItem? _project(
-    ProgressItem progress,
-    SourceVersionId sourceVersionId,
-    DateTime evaluatedAt,
-  ) {
+  static DailyStudyItem? _project(ProgressItem progress, SourceVersionId sourceVersionId, DateTime evaluatedAt) {
     final action = progress.continuation?.nextAction.kind;
     final material = progress.material;
     final activityAt = _activityAt(progress);
@@ -173,8 +166,7 @@ class DailyStudyPlan {
         title: 'Dinlemeye kaldığın yerden devam et',
         actionLabel: 'Dinlemeye devam et',
         reasonCode: 'LISTEN_RESUME_AVAILABLE',
-        reasonText:
-            'Dinleme konumun güncel kaynakta kayıtlı. Dinlemek öğrenme kanıtı değildir; ardından aktif hatırlamayı dene.',
+        reasonText: 'Dinleme konumun güncel kaynakta kayıtlı. Dinlemek öğrenme kanıtı değildir; ardından aktif hatırlamayı dene.',
         activityAt: activityAt,
       );
     }
@@ -188,8 +180,7 @@ class DailyStudyPlan {
         title: 'İlk hatırlamayı dene',
         actionLabel: 'Hatırlamayı dene',
         reasonCode: 'NO_DURABLE_RECALL_EVIDENCE',
-        reasonText:
-            'Bu kaynak için henüz bağımsız hatırlama kanıtı yok. Kaynağa bakmadan kısa bir deneme yap.',
+        reasonText: 'Bu kaynak için henüz bağımsız hatırlama kanıtı yok. Kaynağa bakmadan kısa bir deneme yap.',
         activityAt: activityAt,
       );
     }
@@ -203,8 +194,7 @@ class DailyStudyPlan {
         title: 'Planlı dönüşü yeniden kontrol et',
         actionLabel: 'Çalışma alanını aç',
         reasonCode: 'RETENTION_SCHEDULE_MISSING',
-        reasonText:
-            'Önceki deneme kaydedilmiş ancak planlı dönüş görünmüyor. Güncel kaynak ve sıradaki adımı çalışma alanında doğrula.',
+        reasonText: 'Önceki deneme kaydedilmiş ancak planlı dönüş görünmüyor. Güncel kaynak ve sıradaki adımı çalışma alanında doğrula.',
         activityAt: activityAt,
       );
     }
@@ -218,8 +208,7 @@ class DailyStudyPlan {
     final priority = _priority(right.kind).compareTo(_priority(left.kind));
     if (priority != 0) return priority;
 
-    if (left.kind == DailyStudyActionKind.scheduledReview &&
-        right.kind == DailyStudyActionKind.scheduledReview) {
+    if (left.kind == DailyStudyActionKind.scheduledReview && right.kind == DailyStudyActionKind.scheduledReview) {
       final leftDue = left.dueAt;
       final rightDue = right.dueAt;
       if (leftDue != null && rightDue != null) {

@@ -474,7 +474,9 @@ class LivingStudyDeskHome extends StatelessWidget {
         SizedBox(height: compactFirstViewport ? 5 : 9),
         Text(
           _todayPrimary != null
-              ? (compactFirstViewport ? 'En yararlı adım hazır.' : 'Güncel öğrenme kanıtına göre en yararlı adım hazır.')
+              ? (compactFirstViewport
+                    ? 'En yararlı adım hazır.'
+                    : 'Güncel öğrenme kanıtına göre en yararlı adım hazır.')
               : _todayQuiet
               ? 'Bir sonraki planlı dönüşü zamanı gelince öne çıkaracağız.'
               : compactFirstViewport
@@ -703,17 +705,17 @@ class LivingStudyDeskHome extends StatelessWidget {
           const SizedBox(height: 20),
           const Divider(color: _line),
           const SizedBox(height: 12),
-          const Text('Bugün sırada', style: TextStyle(color: _ink, fontSize: 17, fontWeight: FontWeight.w900)),
+          const Text(
+            'Bugün sırada',
+            style: TextStyle(color: _ink, fontSize: 17, fontWeight: FontWeight.w900),
+          ),
           const SizedBox(height: 3),
           const Text(
             'Yalnız güncel kaynak ve kayıtlı öğrenme durumundan çıkan adımlar.',
             style: TextStyle(color: _sub, fontSize: 12, height: 1.35),
           ),
           const SizedBox(height: 9),
-          for (final item in dailyStudy!.items.skip(1)) ...[
-            _todayQueueItem(context, item),
-            const SizedBox(height: 8),
-          ],
+          for (final item in dailyStudy!.items.skip(1)) ...[_todayQueueItem(context, item), const SizedBox(height: 8)],
         ],
         if (secondaryMaterials.isNotEmpty) ...[
           const SizedBox(height: 22),

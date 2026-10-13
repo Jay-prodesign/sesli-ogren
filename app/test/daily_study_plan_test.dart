@@ -75,7 +75,11 @@ void main() {
     final due = ProgressItem(
       material: material('due'),
       sourceVersionId: const SourceVersionId('source-due'),
-      continuation: continuation('due', NextLearningActionKind.repeatRecallLater, stateKind: RecallStateKind.retrievedOnce),
+      continuation: continuation(
+        'due',
+        NextLearningActionKind.repeatRecallLater,
+        stateKind: RecallStateKind.retrievedOnce,
+      ),
       retention: retention('due', now.subtract(const Duration(minutes: 20))),
     );
     final repair = ProgressItem(
@@ -108,10 +112,7 @@ void main() {
 
     final plan = DailyStudyPlan.build(progress: [reader, future, fresh, repair, due], evaluatedAt: now);
 
-    expect(
-      plan.items.map((item) => item.materialId.value),
-      ['due', 'repair', 'reader', 'fresh'],
-    );
+    expect(plan.items.map((item) => item.materialId.value), ['due', 'repair', 'reader', 'fresh']);
     expect(plan.primary?.kind, DailyStudyActionKind.scheduledReview);
     expect(plan.items[1].kind, DailyStudyActionKind.sourceRepair);
     expect(plan.items[2].kind, DailyStudyActionKind.resumeReader);
