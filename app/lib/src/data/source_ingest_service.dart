@@ -6,22 +6,34 @@ import 'package:crypto/crypto.dart';
 import '../domain/authenticated_learner.dart';
 import '../domain/learning_contracts.dart';
 import 'pdf_text_extractor.dart';
+import 'office_text_extractor.dart';
+import 'image_text_extractor.dart';
 import 'source_store.dart';
 
 class SourceIngestService {
   const SourceIngestService({
     required this._store,
     required this._pdfTextExtractor,
+    OfficeTextExtractor? officeTextExtractor,
+    ImageTextExtractor? imageTextExtractor,
     DateTime Function()? now,
     this.maxTextCharacters = 200000,
     this.maxPdfBytes = 25 * 1024 * 1024,
-  }) : _now = now ?? DateTime.now;
+    this.maxOfficeBytes = 25 * 1024 * 1024,
+    this.maxImageBytes = 15 * 1024 * 1024,
+  }) : _officeTextExtractor = officeTextExtractor,
+       _imageTextExtractor = imageTextExtractor,
+       _now = now ?? DateTime.now;
 
   final SourceStore _store;
   final PdfTextExtractor _pdfTextExtractor;
+  final OfficeTextExtractor? _officeTextExtractor;
+  final ImageTextExtractor? _imageTextExtractor;
   final DateTime Function() _now;
   final int maxTextCharacters;
   final int maxPdfBytes;
+  final int maxOfficeBytes;
+  final int maxImageBytes;
 
   Future<SourceIngestResult> ingestPastedText({
     required AuthenticatedLearner learner,
@@ -127,6 +139,145 @@ class SourceIngestService {
     );
   }
 
+  Future<SourceIngestResult> ingestOffice({
+    required AuthenticatedLearner learner,
+    required MaterialId materialId,
+    required Uint8List bytes,
+    required String originalName,
+  }) async {
+    _requireIdentity(learner: learner, materialId: materialId);
+    if (bytes.isEmpty) {
+      throw const SourceIngestException(
+        'Office source cannot be empty.',
+        kind: SourceIngestFailureKind.officeEmpty,
+      );
+    }
+    if (bytes.length > maxOfficeBytes) {
+      throw const SourceIngestException(
+        'Office source exceeds the bounded byte safety limit.',
+        kind: SourceIngestFailureKind.officeTooLarge,
+      );
+    }
+    final extractor = _officeTextExtractor;
+    if (extractor == null) {
+      throw const SourceIngestException(
+        'Office extraction is unavailable on this runtime.',
+        kind: SourceIngestFailureKind.officeUnsupported,
+      );
+    }
+
+    final safeName = _validatedTitle(_safeFileName(originalName), fallback: 'document.docx');
+    final ExtractedOfficeText extracted;
+    try {
+      extracted = await extractor.extract(bytes, sourceName: safeName);
+    } on OfficeTextExtractionException catch (error) {
+      final kind = switch (error.kind) {
+        OfficeTextExtractionFailureKind.emptyFile => SourceIngestFailureKind.officeEmpty,
+        OfficeTextExtractionFailureKind.tooLarge || OfficeTextExtractionFailureKind.textLimit =>
+          SourceIngestFailureKind.officeTooLarge,
+        OfficeTextExtractionFailureKind.unsupportedFormat => SourceIngestFailureKind.officeUnsupported,
+        OfficeTextExtractionFailureKind.noExtractableText => SourceIngestFailureKind.officeNoExtractableText,
+        OfficeTextExtractionFailureKind.invalidContainer || OfficeTextExtractionFailureKind.encryptedOrCorrupt =>
+          SourceIngestFailureKind.officeParseFailure,
+      };
+      throw SourceIngestException(error.message, kind: kind);
+    } catch (_) {
+      throw const SourceIngestException(
+        'Office source could not be processed safely.',
+        kind: SourceIngestFailureKind.officeParseFailure,
+      );
+    }
+
+    final digest = sha256.convert(bytes).toString();
+    final mediaType = switch (extracted.format) {
+      OfficeSourceFormat.docx || OfficeSourceFormat.doc => SourceMediaType.document,
+      OfficeSourceFormat.pptx || OfficeSourceFormat.ppt => SourceMediaType.presentation,
+    };
+    final mimeType = switch (extracted.format) {
+      OfficeSourceFormat.docx => 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      OfficeSourceFormat.pptx => 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+      OfficeSourceFormat.doc => 'application/msword',
+      OfficeSourceFormat.ppt => 'application/vnd.ms-powerpoint',
+    };
+    return _persist(
+      learner: learner,
+      materialId: materialId,
+      digest: digest,
+      mediaType: mediaType,
+      sourceName: safeName,
+      mimeType: mimeType,
+      byteSize: bytes.length,
+      rawSourceBytes: bytes,
+      extractedText: extracted.text,
+      extractionMethod: 'office_text',
+      extractionMethodVersion: 'openxml-v1',
+      anchors: extracted.anchors,
+      warnings: extracted.warnings,
+    );
+  }
+
+  Future<SourceIngestResult> ingestImage({
+    required AuthenticatedLearner learner,
+    required MaterialId materialId,
+    required Uint8List bytes,
+    required String originalName,
+  }) async {
+    _requireIdentity(learner: learner, materialId: materialId);
+    if (bytes.isEmpty) {
+      throw const SourceIngestException('Image source cannot be empty.', kind: SourceIngestFailureKind.imageEmpty);
+    }
+    if (bytes.length > maxImageBytes) {
+      throw const SourceIngestException(
+        'Image source exceeds the bounded byte safety limit.',
+        kind: SourceIngestFailureKind.imageTooLarge,
+      );
+    }
+    final extractor = _imageTextExtractor;
+    if (extractor == null) {
+      throw const SourceIngestException(
+        'Image OCR is unavailable on this runtime.',
+        kind: SourceIngestFailureKind.imageUnsupported,
+      );
+    }
+
+    final safeName = _validatedTitle(_safeFileName(originalName), fallback: 'photo.jpg');
+    final ExtractedImageText extracted;
+    try {
+      extracted = await extractor.extract(bytes, sourceName: safeName);
+    } on ImageTextExtractionException catch (error) {
+      final kind = switch (error.kind) {
+        ImageTextExtractionFailureKind.emptyFile => SourceIngestFailureKind.imageEmpty,
+        ImageTextExtractionFailureKind.tooLarge => SourceIngestFailureKind.imageTooLarge,
+        ImageTextExtractionFailureKind.unsupportedFormat => SourceIngestFailureKind.imageUnsupported,
+        ImageTextExtractionFailureKind.noExtractableText => SourceIngestFailureKind.imageNoExtractableText,
+        ImageTextExtractionFailureKind.recognitionFailure => SourceIngestFailureKind.imageOcrFailure,
+      };
+      throw SourceIngestException(error.message, kind: kind);
+    } catch (_) {
+      throw const SourceIngestException(
+        'Image OCR could not be processed safely.',
+        kind: SourceIngestFailureKind.imageOcrFailure,
+      );
+    }
+
+    final digest = sha256.convert(bytes).toString();
+    return _persist(
+      learner: learner,
+      materialId: materialId,
+      digest: digest,
+      mediaType: SourceMediaType.image,
+      sourceName: safeName,
+      mimeType: _imageMimeType(safeName),
+      byteSize: bytes.length,
+      rawSourceBytes: bytes,
+      extractedText: extracted.text,
+      extractionMethod: 'mlkit_ocr',
+      extractionMethodVersion: 'mlkit-text-recognition-0.17.1',
+      anchors: extracted.anchors,
+      warnings: extracted.warnings,
+    );
+  }
+
   Future<SourceIngestResult> _persist({
     required AuthenticatedLearner learner,
     required MaterialId materialId,
@@ -139,6 +290,7 @@ class SourceIngestService {
     required String extractionMethod,
     required String extractionMethodVersion,
     required List<SourceAnchor> anchors,
+    List<String> warnings = const [],
     String? inlineText,
     Uint8List? rawSourceBytes,
   }) {
@@ -196,7 +348,7 @@ class SourceIngestService {
       method: extractionMethod,
       methodVersion: extractionMethodVersion,
       anchors: List.unmodifiable(anchors),
-      warnings: const [],
+      warnings: List.unmodifiable(warnings),
       sourceContentDigest: digest,
       createdAt: now,
     );
@@ -247,6 +399,14 @@ class SourceIngestService {
     return resolved;
   }
 
+  static String _imageMimeType(String sourceName) {
+    final lower = sourceName.toLowerCase();
+    if (lower.endsWith('.png')) return 'image/png';
+    if (lower.endsWith('.heic')) return 'image/heic';
+    if (lower.endsWith('.heif')) return 'image/heif';
+    return 'image/jpeg';
+  }
+
   static String _safeFileName(String value) {
     final pieces = value.split(RegExp(r'[\\/]'));
     final candidate = pieces.isEmpty ? value : pieces.last;
@@ -263,6 +423,16 @@ enum SourceIngestFailureKind {
   pdfTextLimit,
   pdfNoExtractableText,
   pdfParseFailure,
+  officeEmpty,
+  officeTooLarge,
+  officeUnsupported,
+  officeNoExtractableText,
+  officeParseFailure,
+  imageEmpty,
+  imageTooLarge,
+  imageUnsupported,
+  imageNoExtractableText,
+  imageOcrFailure,
   other,
 }
 
