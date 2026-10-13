@@ -3001,11 +3001,16 @@ LIMIT 1
       }
 
       final timestamp = createdAt.toUtc();
+      final countRows = await transaction.rawQuery(
+        'SELECT COUNT(*) AS count FROM grounded_tutor_turns WHERE learner_id = ? AND tutor_thread_id = ?',
+        [learner.id.value, threadId.value],
+      );
+      final sequence = countRows.single['count']! as int;
       final idDigest = sha256
           .convert(
             utf8.encode(
-              '${learner.id.value}\u0000${threadId.value}\u0000${role.name}\u0000'
-              '${timestamp.microsecondsSinceEpoch}\u0000$normalizedText',
+              '${learner.id.value}\u0000${threadId.value}\u0000$sequence\u0000'
+              '${role.name}\u0000$normalizedText',
             ),
           )
           .toString();

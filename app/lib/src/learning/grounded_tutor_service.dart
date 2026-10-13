@@ -171,7 +171,7 @@ abstract final class GroundedTutorPolicy {
       final sentenceTerms = _terms(sentence);
       final overlap = questionTerms.where(sentenceTerms.contains).length;
       if (overlap == 0) continue;
-      final score = overlap * 100 - sentence.length.clamp(0, 500);
+      final score = overlap * 100 - (sentence.length > 500 ? 500 : sentence.length);
       final page = _pageFor(start, end, sourceAnchors);
       final candidate = _SentenceCandidate(
         text: sentence,
