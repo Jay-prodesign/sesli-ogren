@@ -186,8 +186,8 @@ void main() {
     expect(find.text('İlk aktif denemeni yap'), findsOneWidget);
 
     Navigator.of(tester.element(find.byType(MaterialWorkspaceScreen))).pop();
-    await pumpUntilFound(tester, find.text('Kaldığın yer hazır.'));
-    expect(find.text('İlk hatırlama denemeni yap'), findsOneWidget);
+    await pumpUntilFound(tester, find.text('Bugün ne çalışman gerektiği belli.'));
+    expect(find.text('İlk hatırlamayı dene'), findsOneWidget);
     expect(find.text('Hatırlamayı dene'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
@@ -406,7 +406,8 @@ void main() {
     expect(cta, findsOneWidget);
     expect(cta.hitTestable(), findsOneWidget);
     expect(tester.getBottomRight(cta).dy, lessThanOrEqualTo(844));
-    expect(find.textContaining('Sonraki tekrar'), findsOneWidget);
+    expect(find.text('Şu an planlı bir tekrar yok'), findsOneWidget);
+    expect(find.textContaining('planlı dönüş'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 
@@ -474,7 +475,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 180));
 
     expect(find.text('Enerji onarım notu'), findsWidgets);
-    expect(find.text('Kaynağa dön, sonra yeniden dene'), findsOneWidget);
+    expect(find.text('Kaynağı onar, sonra yeniden dene'), findsOneWidget);
     final repairAction = find.text('Kaynağı gözden geçir');
     expect(repairAction, findsOneWidget);
 
@@ -599,7 +600,8 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 150));
 
-    expect(find.text('İlk hatırlama denemeni yap'), findsOneWidget);
+    expect(find.text('Bugün ne çalışman gerektiği belli.'), findsOneWidget);
+    expect(find.text('İlk hatırlamayı dene'), findsOneWidget);
     expect(find.text('Okumaya devam et'), findsNothing);
     expect(find.text('Dinlemeye devam et'), findsNothing);
     expect(find.text('Biyoloji sürüm 2'), findsWidgets);

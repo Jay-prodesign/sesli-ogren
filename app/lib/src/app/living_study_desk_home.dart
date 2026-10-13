@@ -448,6 +448,72 @@ class LivingStudyDeskHome extends StatelessWidget {
       ],
     );
 
+    final materialCard = Material(
+      color: _paper,
+      elevation: 1,
+      shadowColor: const Color(0x140F1F47),
+      borderRadius: BorderRadius.circular(18),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        key: const ValueKey('la0040-living-material-open'),
+        onTap: () => _runLearningAction(context, onOpenWorkspace),
+        child: Container(
+          width: double.infinity,
+          padding: compactFirstViewport
+              ? const EdgeInsets.fromLTRB(13, 10, 12, 10)
+              : const EdgeInsets.fromLTRB(16, 14, 15, 14),
+          decoration: const BoxDecoration(
+            border: Border(left: BorderSide(color: _accent, width: 3)),
+          ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Icon(Icons.auto_stories_outlined, color: _accent, size: compactFirstViewport ? 19 : 21),
+              SizedBox(width: compactFirstViewport ? 8 : 11),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      _type(current),
+                      style: const TextStyle(
+                        color: _accent,
+                        fontSize: 9.5,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: 0.9,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      current.title,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: compactFirstViewport ? 16 : 19,
+                        height: 1.18,
+                        letterSpacing: -0.35,
+                        fontWeight: FontWeight.w900,
+                        color: _ink,
+                      ),
+                    ),
+                    const SizedBox(height: 5),
+                    Text(
+                      _preview,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(fontSize: compactFirstViewport ? 11.5 : 13, color: _sub, height: 1.4),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 8),
+              const Icon(Icons.arrow_forward_rounded, color: _accent, size: 19),
+            ],
+          ),
+        ),
+      ),
+    );
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -480,72 +546,10 @@ class LivingStudyDeskHome extends StatelessWidget {
           style: TextStyle(color: _sub, fontSize: compactFirstViewport ? 13 : 15, height: 1.4),
         ),
         SizedBox(height: compactFirstViewport ? 10 : 17),
-        Material(
-          color: _paper,
-          elevation: 1,
-          shadowColor: const Color(0x140F1F47),
-          borderRadius: BorderRadius.circular(18),
-          clipBehavior: Clip.antiAlias,
-          child: InkWell(
-            key: const ValueKey('la0040-living-material-open'),
-            onTap: () => _runLearningAction(context, onOpenWorkspace),
-            child: Container(
-              width: double.infinity,
-              padding: compactFirstViewport
-                  ? const EdgeInsets.fromLTRB(13, 10, 12, 10)
-                  : const EdgeInsets.fromLTRB(16, 14, 15, 14),
-              decoration: const BoxDecoration(
-                border: Border(left: BorderSide(color: _accent, width: 3)),
-              ),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Icon(Icons.auto_stories_outlined, color: _accent, size: compactFirstViewport ? 19 : 21),
-                  SizedBox(width: compactFirstViewport ? 8 : 11),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          _type(current),
-                          style: const TextStyle(
-                            color: _accent,
-                            fontSize: 9.5,
-                            fontWeight: FontWeight.w900,
-                            letterSpacing: 0.9,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          current.title,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            fontSize: compactFirstViewport ? 16 : 19,
-                            height: 1.18,
-                            letterSpacing: -0.35,
-                            fontWeight: FontWeight.w900,
-                            color: _ink,
-                          ),
-                        ),
-                        const SizedBox(height: 5),
-                        Text(
-                          _preview,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(fontSize: compactFirstViewport ? 11.5 : 13, color: _sub, height: 1.4),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  const Icon(Icons.arrow_forward_rounded, color: _accent, size: 19),
-                ],
-              ),
-            ),
-          ),
-        ),
-        SizedBox(height: compactFirstViewport ? 10 : 16),
+        if (!compactFirstViewport) ...[
+          materialCard,
+          const SizedBox(height: 16),
+        ],
         Container(
           key: const ValueKey('la0040-source-to-recall-thread'),
           padding: const EdgeInsets.fromLTRB(2, 0, 0, 0),
@@ -635,7 +639,12 @@ class LivingStudyDeskHome extends StatelessWidget {
                   ),
           ),
         ),
-        if (compactFirstViewport) ...[const SizedBox(height: 6), nextReasonCopy(reasonSize: 11.5)],
+        if (compactFirstViewport) ...[
+          const SizedBox(height: 6),
+          nextReasonCopy(reasonSize: 11.5),
+          const SizedBox(height: 8),
+          materialCard,
+        ],
         const SizedBox(height: 6),
         Align(
           alignment: Alignment.center,
