@@ -9,7 +9,7 @@ import '../domain/retention_schedule.dart';
 import '../domain/study_plan.dart';
 import 'app_theme.dart';
 import 'daily_study_plan.dart';
-import 'study_plan_screen.dart';
+import 'study_plan_home_card.dart';
 import 'companion_view.dart';
 
 /// Current source-first product experience scope.

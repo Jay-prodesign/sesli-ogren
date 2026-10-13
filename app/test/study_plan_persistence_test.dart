@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter_test/flutter_test.dart';
@@ -22,9 +23,10 @@ void main() {
   sqfliteFfiInit();
 
   test('study target persists per learner and survives reopen', () async {
-    final path = inMemoryDatabasePath;
-    final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: path);
-    addTearDown(store.close);
+    final directory = await Directory.systemTemp.createTemp('sesli-ogren-study-plan-');
+    addTearDown(() => directory.delete(recursive: true));
+    final path = '${directory.path}/study-plan.db';
+    var store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: path);
     final ingest = SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor());
     const learner = LearnerIdentity.local();
     const materialId = MaterialId('exam-target-material');
@@ -50,6 +52,9 @@ void main() {
       updatedAt: now,
     );
     await store.saveStudyTarget(learner: learner, target: target);
+    await store.close();
+    store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: path);
+    addTearDown(store.close);
 
     final restored = await store.activeStudyTarget(learner: learner);
     expect(restored, isNotNull);
@@ -108,8 +113,8 @@ void main() {
     expect(projection.materials.single.state, StudyTargetBindingState.sourceChanged);
     expect(projection.currentMaterialIds, isEmpty);
 
-    expect(
-      () => store.saveStudyTarget(
+    await expectLater(
+      store.saveStudyTarget(
         learner: learner,
         target: StudyTargetRecord(
           id: restored.id,
