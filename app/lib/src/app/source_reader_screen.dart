@@ -340,7 +340,7 @@ class _SourceReaderScreenState extends State<SourceReaderScreen> {
 
   List<TextSpan> _sourceSpans({
     required String source,
-    required List<SourceTextMatch> matches,
+    required List<SourceTextRange> matches,
     required Color ink,
     required Color searchHighlight,
     required Color annotationHighlight,
