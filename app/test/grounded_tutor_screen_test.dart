@@ -84,8 +84,10 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byKey(const ValueKey('grounded-tutor-screen')), findsOneWidget);
-    await _scrollTutorUntilFound(tester, find.byKey(const ValueKey('grounded-tutor-empty')));
+    // Verify the non-evidence boundary while the header is actually in the
+    // compact ListView viewport; scrolling can legitimately recycle it.
     expect(find.textContaining('öğrenme kanıtı'), findsWidgets);
+    await _scrollTutorUntilFound(tester, find.byKey(const ValueKey('grounded-tutor-empty')));
 
     await tester.enterText(find.byKey(const ValueKey('grounded-tutor-question')), 'Klorofil ne işe yarar?');
     final send = find.byKey(const ValueKey('grounded-tutor-send')).hitTestable();
