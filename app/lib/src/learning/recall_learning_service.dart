@@ -67,18 +67,14 @@ class RecallLearningService {
     if (source == null || source.identity.sourceVersionId != sourceVersionId) {
       throw const RecallLearningException('Scheduled Recall belongs to a stale source version.');
     }
-    final extracted = await _sourceStore.extractedContentForSource(
-      learner: learner,
-      sourceVersionId: sourceVersionId,
-    );
+    final extracted = await _sourceStore.extractedContentForSource(learner: learner, sourceVersionId: sourceVersionId);
     if (extracted == null || !extracted.isValid) {
       throw const RecallLearningException('Scheduled Recall source has no valid extracted content.');
     }
     final candidates = _findCandidates(extracted.normalizedText);
     final candidateOrdinal = candidates.indexWhere(
       (candidate) =>
-          candidate.sentenceStart == sourceAnchor.startOffset &&
-          candidate.sentenceEnd == sourceAnchor.endOffset,
+          candidate.sentenceStart == sourceAnchor.startOffset && candidate.sentenceEnd == sourceAnchor.endOffset,
     );
     if (candidateOrdinal < 0) {
       throw const RecallLearningException('Scheduled Recall source anchor is no longer available.');
