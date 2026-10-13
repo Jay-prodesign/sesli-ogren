@@ -161,7 +161,8 @@ class _ProgressCard extends StatelessWidget {
     final state = item.continuation?.state.kind ?? RecallStateKind.notAssessed;
     final action = item.continuation?.nextAction.kind;
     final immediateRepair =
-        action == NextLearningActionKind.reviewSourceThenRecall || action == NextLearningActionKind.retryRecallWithoutHint;
+        action == NextLearningActionKind.reviewSourceThenRecall ||
+        action == NextLearningActionKind.retryRecallWithoutHint;
     final retentionDue =
         item.retention?.hasDue == true && !immediateRepair && !item.prefersReaderResume && !item.hasListenResume;
     final label = retentionDue

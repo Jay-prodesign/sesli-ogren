@@ -92,8 +92,7 @@ class LivingStudyDeskHome extends StatelessWidget {
     final item = retention?.nextDue ?? retention?.nextScheduled;
     if (item == null) return 'Aktif çalışmandan sonra planlanan tekrar burada görünecek.';
     return switch (item.latestOutcomeBand) {
-      RetentionOutcomeBand.independentRetrieval =>
-        'Bağımsız bir geri çağırma kaydedildi. Yeni tekrar kalıcılığı yeniden ölçer; bu sonuç ustalık iddiası değildir.',
+      RetentionOutcomeBand.independentRetrieval => 'Bağımsız bir geri çağırma kaydedildi. Yeni tekrar kalıcılığı yeniden ölçer; bu sonuç ustalık iddiası değildir.',
       RetentionOutcomeBand.supportedRetrieval =>
         'Önceki deneme destekli ya da kısmiydi. Planlanan tekrar bağımsız geri çağırmayı yeniden denetler.',
       RetentionOutcomeBand.repairNeeded =>
@@ -289,7 +288,8 @@ class LivingStudyDeskHome extends StatelessWidget {
   Widget _populated(BuildContext context) {
     final current = material!;
     final hasRecallEvidence = continuation != null && continuation!.state.kind != RecallStateKind.notAssessed;
-    final hasActiveContinuation = continuation != null || retention?.hasSchedule == true || _hasReaderResume || _hasListenResume;
+    final hasActiveContinuation =
+        continuation != null || retention?.hasSchedule == true || _hasReaderResume || _hasListenResume;
     final textScale = MediaQuery.textScalerOf(context).scale(1);
     final compactFirstViewport = MediaQuery.sizeOf(context).width < 350 && textScale > 1.2;
     final companionState = _hasListenResume

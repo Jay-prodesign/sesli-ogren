@@ -58,13 +58,11 @@ class RetentionScheduleRecord {
 }
 
 class RetentionMaterialStatus {
-  RetentionMaterialStatus({
-    required List<RetentionScheduleRecord> schedules,
-    required DateTime evaluatedAt,
-  }) : schedules = List<RetentionScheduleRecord>.unmodifiable(
-         [...schedules]..sort((left, right) => left.dueAt.compareTo(right.dueAt)),
-       ),
-       evaluatedAt = evaluatedAt.toUtc();
+  RetentionMaterialStatus({required List<RetentionScheduleRecord> schedules, required DateTime evaluatedAt})
+    : schedules = List<RetentionScheduleRecord>.unmodifiable(
+        [...schedules]..sort((left, right) => left.dueAt.compareTo(right.dueAt)),
+      ),
+      evaluatedAt = evaluatedAt.toUtc();
 
   final List<RetentionScheduleRecord> schedules;
   final DateTime evaluatedAt;

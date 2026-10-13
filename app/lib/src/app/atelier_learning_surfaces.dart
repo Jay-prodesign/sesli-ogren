@@ -372,9 +372,7 @@ class AtelierWorkspace extends StatelessWidget {
     if (status == null || item == null) return const SizedBox.shrink();
     final due = status.hasDue;
     final title = due ? 'Planlanan tekrar hazır' : 'Sonraki tekrar $_retentionTiming';
-    final semantic = due
-        ? 'Tekrar zamanı. $title. $_retentionDetail'
-        : 'Tekrar planı. $title. $_retentionDetail';
+    final semantic = due ? 'Tekrar zamanı. $title. $_retentionDetail' : 'Tekrar planı. $title. $_retentionDetail';
     return Semantics(
       container: true,
       label: semantic,
