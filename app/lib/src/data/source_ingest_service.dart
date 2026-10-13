@@ -206,8 +206,14 @@ class SourceIngestService {
       byteSize: bytes.length,
       rawSourceBytes: bytes,
       extractedText: extracted.text,
-      extractionMethod: 'office_text',
-      extractionMethodVersion: 'openxml-v1',
+      extractionMethod: switch (extracted.format) {
+        OfficeSourceFormat.docx || OfficeSourceFormat.pptx => 'office_openxml_text',
+        OfficeSourceFormat.doc || OfficeSourceFormat.ppt => 'office_legacy_ole_text',
+      },
+      extractionMethodVersion: switch (extracted.format) {
+        OfficeSourceFormat.docx || OfficeSourceFormat.pptx => 'openxml-v1',
+        OfficeSourceFormat.doc || OfficeSourceFormat.ppt => 'legacy-ole-v1',
+      },
       anchors: extracted.anchors,
       warnings: extracted.warnings,
     );
