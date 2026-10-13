@@ -458,8 +458,7 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
       dialogTitle: 'Çalışmak istediğin Word veya PowerPoint dosyasını seç',
       pickerFailure: 'Belge seçici açılamadı. Tekrar deneyebilir veya notunu metin olarak yapıştırabilirsin.',
       maxBytes: widget.runtime.ingest.maxOfficeBytes,
-      oversizedMessage:
-          'Bu belge güvenli dosya sınırını aşıyor. Daha küçük bir DOC/DOCX/PPT/PPTX seç veya çalışacağın bölümü metin olarak ekle.',
+      oversizedMessage: 'Bu belge güvenli dosya sınırını aşıyor. Daha küçük bir DOC/DOCX/PPT/PPTX seç veya çalışacağın bölümü metin olarak ekle.',
       emptyMessage: 'Seçtiğin belge boş görünüyor. Başka bir dosya seç.',
       ingestSource: (bytes, name) => widget.runtime.ingest.ingestOffice(
         learner: widget.runtime.learner,
@@ -598,8 +597,7 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
       SourceIngestFailureKind.officeEmpty => 'Seçtiğin belge boş görünüyor. Başka bir dosya seç.',
       SourceIngestFailureKind.officeTooLarge =>
         'Bu belge güvenli işleme sınırını aşıyor. Daha küçük bir dosya veya yalnız çalışacağın bölümü ekle.',
-      SourceIngestFailureKind.officeUnsupported =>
-        'Eski .doc/.ppt biçimi henüz güvenli metin çıkarımına uygun değil. Dosyayı .docx/.pptx olarak dışa aktar veya metni ekle.',
+      SourceIngestFailureKind.officeUnsupported => 'Eski .doc/.ppt biçimi henüz güvenli metin çıkarımına uygun değil. Dosyayı .docx/.pptx olarak dışa aktar veya metni ekle.',
       SourceIngestFailureKind.officeNoExtractableText =>
         'Bu belge veya sunuda güvenilir metin bulunamadı. Metin içeren başka bir sürüm seç veya metni doğrudan ekle.',
       SourceIngestFailureKind.officeParseFailure =>
