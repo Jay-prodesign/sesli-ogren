@@ -127,6 +127,7 @@ class AtelierWorkspace extends StatelessWidget {
     required this.onGroundedExplain,
     required this.onExplain,
     this.onFlashcards,
+    this.onQuiz,
     required this.onFocus,
     super.key,
   });
@@ -143,6 +144,7 @@ class AtelierWorkspace extends StatelessWidget {
   final VoidCallback onGroundedExplain;
   final VoidCallback onExplain;
   final VoidCallback? onFlashcards;
+  final VoidCallback? onQuiz;
   final VoidCallback onFocus;
 
   String get _activeStepTitle {
@@ -394,6 +396,19 @@ class AtelierWorkspace extends StatelessWidget {
                   onTap: () {
                     Navigator.of(sheetContext).pop();
                     onFlashcards!();
+                  },
+                ),
+              if (onQuiz != null)
+                ListTile(
+                  key: const ValueKey('workspace-other-quiz'),
+                  leading: const Icon(Icons.fact_check_outlined),
+                  title: const Text('Quiz ile kendimi sına'),
+                  subtitle: const Text(
+                    'Kaynağa bağlı soruyu yanıtla; kaynak kanıtını yalnız yanıtını kaydettikten sonra gör.',
+                  ),
+                  onTap: () {
+                    Navigator.of(sheetContext).pop();
+                    onQuiz!();
                   },
                 ),
               ListTile(

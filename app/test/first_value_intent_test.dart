@@ -5,6 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:sesli_ogren/src/app/app_runtime.dart';
 import 'package:sesli_ogren/src/app/focus_screen.dart';
 import 'package:sesli_ogren/src/app/living_study_desk_home.dart';
+import 'package:sesli_ogren/src/app/listen_screen.dart';
 import 'package:sesli_ogren/src/app/material_workspace_screen.dart';
 import 'package:sesli_ogren/src/app/source_reader_screen.dart';
 import 'package:sesli_ogren/src/data/pdf_text_extractor.dart';
@@ -78,15 +79,21 @@ void main() {
     );
     await _pumpUntilFound(tester, find.byKey(const ValueKey('first-value-intent')));
 
-    final reasonFinder = find.text('Sonra kaynağı kapatıp ne kaldığını sınarsın.');
-    await tester.scrollUntilVisible(reasonFinder, 180, scrollable: find.byType(Scrollable).last);
+    final firstValueScroll = find.descendant(
+      of: find.byKey(const ValueKey('first-value-intent')),
+      matching: find.byType(Scrollable),
+    );
+    expect(firstValueScroll, findsOneWidget);
+
+    final reasonFinder = find.text('Önce bütünü gör; sonra kaynağı kapatıp ne kaldığını sınarsın.');
+    await tester.scrollUntilVisible(reasonFinder, 180, scrollable: firstValueScroll);
     await tester.pump();
     final reason = tester.widget<Text>(reasonFinder);
     expect(reason.maxLines, isNull);
     expect(reason.overflow, isNull);
 
     final evidenceFinder = find.text('Hatırla denemesi öğrenme kanıtını oluşturur.');
-    await tester.scrollUntilVisible(evidenceFinder, 180, scrollable: find.byType(Scrollable).last);
+    await tester.scrollUntilVisible(evidenceFinder, 180, scrollable: firstValueScroll);
     await tester.pump();
     final evidenceTruth = tester.widget<Text>(evidenceFinder);
     expect(evidenceTruth.maxLines, isNull);
@@ -99,17 +106,9 @@ void main() {
     expect(find.text('Dinle'), findsOneWidget);
     expect(find.text('Hızlı özet'), findsOneWidget);
     expect(find.text('Bildiğimi kontrol et'), findsOneWidget);
-    final focusPath = find.text('Birlikte odaklanalım');
-    await tester.scrollUntilVisible(
-      focusPath,
-      140,
-      scrollable: find.descendant(
-        of: find.byKey(const ValueKey('first-intent-other-paths-scroll')),
-        matching: find.byType(Scrollable),
-      ),
-    );
-    await tester.pump();
-    expect(focusPath.hitTestable(), findsOneWidget);
+    await _tapVisible(tester, find.text('Dinle'));
+    await _pumpUntilFound(tester, find.byType(ListenScreen));
+    expect(find.byType(ListenScreen), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 

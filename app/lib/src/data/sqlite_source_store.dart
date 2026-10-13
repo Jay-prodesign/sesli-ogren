@@ -6,6 +6,7 @@ import 'package:sqflite/sqflite.dart';
 
 import '../domain/authenticated_learner.dart';
 import '../domain/flashcard_learning.dart';
+import '../domain/quiz_learning.dart';
 import '../domain/learning_contracts.dart';
 import '../domain/learning_truth.dart';
 import '../domain/operational_event.dart';
@@ -37,7 +38,7 @@ class SqliteSourceStore implements SourceStore {
     final database = await selectedFactory.openDatabase(
       databasePath,
       options: OpenDatabaseOptions(
-        version: 14,
+        version: 15,
         onConfigure: (db) => db.execute('PRAGMA foreign_keys = ON'),
         onUpgrade: (db, oldVersion, newVersion) async {
           if (oldVersion < 2) {
@@ -78,6 +79,9 @@ class SqliteSourceStore implements SourceStore {
           }
           if (oldVersion < 14) {
             await _upgradeFlashcardSchema(db);
+          }
+          if (oldVersion < 15) {
+            await _upgradeQuizSchema(db);
           }
         },
         onCreate: (db, version) async {
@@ -299,6 +303,7 @@ CREATE TABLE learner_preferences (
           await _upgradeSummaryCacheSchema(db);
           await _upgradeServerMaterialBindingSchema(db);
           await _upgradeFlashcardSchema(db);
+          await _upgradeQuizSchema(db);
           await db.execute('''
 CREATE TABLE operational_events (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -433,6 +438,112 @@ CREATE TABLE IF NOT EXISTS flashcard_sessions (
     await db.execute('''
 CREATE INDEX IF NOT EXISTS idx_flashcard_sets_material
 ON flashcard_sets (learner_id, material_id, source_version_id)
+''');
+  }
+
+  static Future<void> _upgradeQuizSchema(Database db) async {
+    await db.execute('''
+CREATE TABLE IF NOT EXISTS quiz_sets (
+  learner_id TEXT NOT NULL,
+  quiz_set_id TEXT NOT NULL,
+  material_id TEXT NOT NULL,
+  source_version_id TEXT NOT NULL,
+  generation_version TEXT NOT NULL,
+  created_at_utc TEXT NOT NULL,
+  PRIMARY KEY (learner_id, quiz_set_id),
+  UNIQUE (learner_id, material_id, source_version_id, generation_version),
+  FOREIGN KEY (learner_id, material_id)
+    REFERENCES materials (learner_id, material_id) ON DELETE CASCADE,
+  FOREIGN KEY (learner_id, source_version_id)
+    REFERENCES source_versions (learner_id, source_version_id) ON DELETE CASCADE
+)
+''');
+    await db.execute('''
+CREATE TABLE IF NOT EXISTS quiz_questions (
+  learner_id TEXT NOT NULL,
+  question_id TEXT NOT NULL,
+  quiz_set_id TEXT NOT NULL,
+  ordinal INTEGER NOT NULL,
+  prompt_text TEXT NOT NULL,
+  options_json TEXT NOT NULL,
+  correct_option_index INTEGER NOT NULL,
+  source_start INTEGER NOT NULL,
+  source_end INTEGER NOT NULL,
+  page_number INTEGER,
+  source_excerpt TEXT NOT NULL,
+  PRIMARY KEY (learner_id, question_id),
+  UNIQUE (learner_id, quiz_set_id, ordinal),
+  FOREIGN KEY (learner_id, quiz_set_id)
+    REFERENCES quiz_sets (learner_id, quiz_set_id) ON DELETE CASCADE,
+  CHECK (ordinal >= 0),
+  CHECK (correct_option_index >= 0),
+  CHECK (source_start >= 0 AND source_end > source_start)
+)
+''');
+    await db.execute('''
+CREATE TABLE IF NOT EXISTS quiz_answers (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  learner_id TEXT NOT NULL,
+  question_id TEXT NOT NULL,
+  quiz_set_id TEXT NOT NULL,
+  answer_kind TEXT NOT NULL,
+  selected_option_index INTEGER,
+  is_correct INTEGER,
+  answered_at_utc TEXT NOT NULL,
+  FOREIGN KEY (learner_id, question_id)
+    REFERENCES quiz_questions (learner_id, question_id) ON DELETE CASCADE,
+  FOREIGN KEY (learner_id, quiz_set_id)
+    REFERENCES quiz_sets (learner_id, quiz_set_id) ON DELETE CASCADE,
+  CHECK (answer_kind IN ('selected', 'unknown')),
+  CHECK (is_correct IS NULL OR is_correct IN (0, 1))
+)
+''');
+    await db.execute('''
+CREATE TABLE IF NOT EXISTS quiz_reviews (
+  learner_id TEXT NOT NULL,
+  question_id TEXT NOT NULL,
+  answer_count INTEGER NOT NULL,
+  correct_count INTEGER NOT NULL,
+  incorrect_count INTEGER NOT NULL,
+  unknown_count INTEGER NOT NULL,
+  last_answer_kind TEXT NOT NULL,
+  last_selected_option_index INTEGER,
+  last_is_correct INTEGER,
+  last_answered_at_utc TEXT NOT NULL,
+  PRIMARY KEY (learner_id, question_id),
+  FOREIGN KEY (learner_id, question_id)
+    REFERENCES quiz_questions (learner_id, question_id) ON DELETE CASCADE,
+  CHECK (answer_count >= 1),
+  CHECK (correct_count >= 0 AND incorrect_count >= 0 AND unknown_count >= 0),
+  CHECK (last_answer_kind IN ('selected', 'unknown')),
+  CHECK (last_is_correct IS NULL OR last_is_correct IN (0, 1))
+)
+''');
+    await db.execute('''
+CREATE TABLE IF NOT EXISTS quiz_sessions (
+  learner_id TEXT NOT NULL,
+  quiz_set_id TEXT NOT NULL,
+  cursor_index INTEGER NOT NULL,
+  correct_count INTEGER NOT NULL,
+  incorrect_count INTEGER NOT NULL,
+  unknown_count INTEGER NOT NULL,
+  is_completed INTEGER NOT NULL,
+  updated_at_utc TEXT NOT NULL,
+  PRIMARY KEY (learner_id, quiz_set_id),
+  FOREIGN KEY (learner_id, quiz_set_id)
+    REFERENCES quiz_sets (learner_id, quiz_set_id) ON DELETE CASCADE,
+  CHECK (cursor_index >= 0),
+  CHECK (correct_count >= 0 AND incorrect_count >= 0 AND unknown_count >= 0),
+  CHECK (is_completed IN (0, 1))
+)
+''');
+    await db.execute('''
+CREATE INDEX IF NOT EXISTS idx_quiz_sets_material
+ON quiz_sets (learner_id, material_id, source_version_id)
+''');
+    await db.execute('''
+CREATE INDEX IF NOT EXISTS idx_quiz_answers_set
+ON quiz_answers (learner_id, quiz_set_id, id)
 ''');
   }
 
@@ -1676,6 +1787,360 @@ ON CONFLICT(learner_id, flashcard_set_id) DO UPDATE SET
     });
   }
 
+  Future<QuizSetRecord?> quizSet({
+    required AuthenticatedLearner learner,
+    required MaterialId materialId,
+    required SourceVersionId sourceVersionId,
+    required String generationVersion,
+  }) async {
+    final setRows = await _database.query(
+      'quiz_sets',
+      where:
+          'learner_id = ? AND material_id = ? AND source_version_id = ? '
+          'AND generation_version = ?',
+      whereArgs: [learner.id.value, materialId.value, sourceVersionId.value, generationVersion],
+      limit: 1,
+    );
+    if (setRows.isEmpty) return null;
+    final row = setRows.single;
+    final setId = QuizSetId(row['quiz_set_id']! as String);
+    final questionRows = await _database.query(
+      'quiz_questions',
+      where: 'learner_id = ? AND quiz_set_id = ?',
+      whereArgs: [learner.id.value, setId.value],
+      orderBy: 'ordinal ASC',
+    );
+    return QuizSetRecord(
+      id: setId,
+      materialId: MaterialId(row['material_id']! as String),
+      sourceVersionId: SourceVersionId(row['source_version_id']! as String),
+      generationVersion: row['generation_version']! as String,
+      createdAt: DateTime.parse(row['created_at_utc']! as String).toUtc(),
+      questions: questionRows
+          .map((question) {
+            final options = (jsonDecode(question['options_json']! as String) as List<dynamic>).cast<String>().toList(
+              growable: false,
+            );
+            return QuizQuestionRecord(
+              id: QuizQuestionId(question['question_id']! as String),
+              setId: setId,
+              ordinal: question['ordinal']! as int,
+              prompt: question['prompt_text']! as String,
+              options: options,
+              correctOptionIndex: question['correct_option_index']! as int,
+              sourceAnchor: SourceAnchor(
+                startOffset: question['source_start']! as int,
+                endOffset: question['source_end']! as int,
+                pageNumber: question['page_number'] as int?,
+              ),
+              sourceExcerpt: question['source_excerpt']! as String,
+            );
+          })
+          .toList(growable: false),
+    );
+  }
+
+  Future<void> saveQuizSet({required AuthenticatedLearner learner, required QuizSetRecord set}) {
+    return _database.transaction((transaction) async {
+      await transaction.insert('quiz_sets', {
+        'learner_id': learner.id.value,
+        'quiz_set_id': set.id.value,
+        'material_id': set.materialId.value,
+        'source_version_id': set.sourceVersionId.value,
+        'generation_version': set.generationVersion,
+        'created_at_utc': set.createdAt.toUtc().toIso8601String(),
+      }, conflictAlgorithm: ConflictAlgorithm.ignore);
+      for (final question in set.questions) {
+        await transaction.insert('quiz_questions', {
+          'learner_id': learner.id.value,
+          'question_id': question.id.value,
+          'quiz_set_id': set.id.value,
+          'ordinal': question.ordinal,
+          'prompt_text': question.prompt,
+          'options_json': jsonEncode(question.options),
+          'correct_option_index': question.correctOptionIndex,
+          'source_start': question.sourceAnchor.startOffset,
+          'source_end': question.sourceAnchor.endOffset,
+          'page_number': question.sourceAnchor.pageNumber,
+          'source_excerpt': question.sourceExcerpt,
+        }, conflictAlgorithm: ConflictAlgorithm.ignore);
+      }
+    });
+  }
+
+  Future<List<QuizAnswerRecord>> quizAnswerHistory({
+    required AuthenticatedLearner learner,
+    required QuizSetId setId,
+  }) async {
+    final rows = await _database.query(
+      'quiz_answers',
+      where: 'learner_id = ? AND quiz_set_id = ?',
+      whereArgs: [learner.id.value, setId.value],
+      orderBy: 'id ASC',
+    );
+    return rows
+        .map(
+          (row) => QuizAnswerRecord(
+            questionId: QuizQuestionId(row['question_id']! as String),
+            setId: QuizSetId(row['quiz_set_id']! as String),
+            kind: QuizAnswerKind.values.byName(row['answer_kind']! as String),
+            selectedOptionIndex: row['selected_option_index'] as int?,
+            isCorrect: row['is_correct'] == null ? null : row['is_correct'] == 1,
+            answeredAt: DateTime.parse(row['answered_at_utc']! as String).toUtc(),
+          ),
+        )
+        .toList(growable: false);
+  }
+
+  Future<List<QuizQuestionReviewState>> quizReviews({
+    required AuthenticatedLearner learner,
+    required QuizSetId setId,
+  }) async {
+    final rows = await _database.rawQuery(
+      '''
+SELECT r.question_id, r.answer_count, r.correct_count, r.incorrect_count,
+       r.unknown_count, r.last_answer_kind, r.last_selected_option_index,
+       r.last_is_correct, r.last_answered_at_utc
+FROM quiz_reviews r
+JOIN quiz_questions q
+  ON q.learner_id = r.learner_id AND q.question_id = r.question_id
+WHERE r.learner_id = ? AND q.quiz_set_id = ?
+ORDER BY q.ordinal ASC
+''',
+      [learner.id.value, setId.value],
+    );
+    return rows
+        .map(
+          (row) => QuizQuestionReviewState(
+            questionId: QuizQuestionId(row['question_id']! as String),
+            answerCount: row['answer_count']! as int,
+            correctCount: row['correct_count']! as int,
+            incorrectCount: row['incorrect_count']! as int,
+            unknownCount: row['unknown_count']! as int,
+            lastAnswerKind: QuizAnswerKind.values.byName(row['last_answer_kind']! as String),
+            lastSelectedOptionIndex: row['last_selected_option_index'] as int?,
+            lastIsCorrect: row['last_is_correct'] == null ? null : row['last_is_correct'] == 1,
+            lastAnsweredAt: DateTime.parse(row['last_answered_at_utc']! as String).toUtc(),
+          ),
+        )
+        .toList(growable: false);
+  }
+
+  Future<QuizSessionState?> quizSession({required AuthenticatedLearner learner, required QuizSetId setId}) async {
+    final rows = await _database.query(
+      'quiz_sessions',
+      where: 'learner_id = ? AND quiz_set_id = ?',
+      whereArgs: [learner.id.value, setId.value],
+      limit: 1,
+    );
+    if (rows.isEmpty) return null;
+    final row = rows.single;
+    return QuizSessionState(
+      setId: setId,
+      cursorIndex: row['cursor_index']! as int,
+      correctCount: row['correct_count']! as int,
+      incorrectCount: row['incorrect_count']! as int,
+      unknownCount: row['unknown_count']! as int,
+      isCompleted: row['is_completed'] == 1,
+      updatedAt: DateTime.parse(row['updated_at_utc']! as String).toUtc(),
+    );
+  }
+
+  Future<QuizAnswerCommit> recordQuizAnswer({
+    required AuthenticatedLearner learner,
+    required QuizSetRecord set,
+    required QuizQuestionRecord question,
+    required QuizAnswerKind kind,
+    required int? selectedOptionIndex,
+    required DateTime answeredAt,
+  }) {
+    return _database.transaction((transaction) async {
+      final materialRows = await transaction.query(
+        'materials',
+        columns: ['current_source_version_id', 'lifecycle_status', 'deleted_at_utc'],
+        where: 'learner_id = ? AND material_id = ?',
+        whereArgs: [learner.id.value, set.materialId.value],
+        limit: 1,
+      );
+      if (materialRows.isEmpty ||
+          materialRows.single['lifecycle_status'] != MaterialLifecycleStatus.active.name ||
+          materialRows.single['deleted_at_utc'] != null ||
+          materialRows.single['current_source_version_id'] != set.sourceVersionId.value) {
+        throw const SourceStoreConflict('Quiz answer is stale for the current source version.');
+      }
+
+      final sessionRows = await transaction.query(
+        'quiz_sessions',
+        where: 'learner_id = ? AND quiz_set_id = ?',
+        whereArgs: [learner.id.value, set.id.value],
+        limit: 1,
+      );
+      final cursor = sessionRows.isEmpty ? 0 : sessionRows.single['cursor_index']! as int;
+      final completed = sessionRows.isNotEmpty && sessionRows.single['is_completed'] == 1;
+      if (completed || cursor < 0 || cursor >= set.questions.length || set.questions[cursor].id != question.id) {
+        throw const SourceStoreConflict('Quiz answer does not match the active durable session.');
+      }
+      if (kind == QuizAnswerKind.selected &&
+          (selectedOptionIndex == null || selectedOptionIndex < 0 || selectedOptionIndex >= question.options.length)) {
+        throw const SourceStoreConflict('Quiz answer option is outside the active question.');
+      }
+      if (kind == QuizAnswerKind.unknown && selectedOptionIndex != null) {
+        throw const SourceStoreConflict('Unknown quiz answer cannot carry a selected option.');
+      }
+
+      final isCorrect = kind == QuizAnswerKind.selected ? selectedOptionIndex == question.correctOptionIndex : null;
+      final correctIncrement = isCorrect == true ? 1 : 0;
+      final incorrectIncrement = isCorrect == false ? 1 : 0;
+      final unknownIncrement = kind == QuizAnswerKind.unknown ? 1 : 0;
+      final timestamp = answeredAt.toUtc().toIso8601String();
+
+      await transaction.insert('quiz_answers', {
+        'learner_id': learner.id.value,
+        'question_id': question.id.value,
+        'quiz_set_id': set.id.value,
+        'answer_kind': kind.name,
+        'selected_option_index': selectedOptionIndex,
+        'is_correct': isCorrect == null ? null : (isCorrect ? 1 : 0),
+        'answered_at_utc': timestamp,
+      });
+
+      await transaction.rawInsert(
+        '''
+INSERT INTO quiz_reviews (
+  learner_id, question_id, answer_count, correct_count, incorrect_count,
+  unknown_count, last_answer_kind, last_selected_option_index, last_is_correct,
+  last_answered_at_utc
+)
+VALUES (?, ?, 1, ?, ?, ?, ?, ?, ?, ?)
+ON CONFLICT(learner_id, question_id) DO UPDATE SET
+  answer_count = quiz_reviews.answer_count + 1,
+  correct_count = quiz_reviews.correct_count + excluded.correct_count,
+  incorrect_count = quiz_reviews.incorrect_count + excluded.incorrect_count,
+  unknown_count = quiz_reviews.unknown_count + excluded.unknown_count,
+  last_answer_kind = excluded.last_answer_kind,
+  last_selected_option_index = excluded.last_selected_option_index,
+  last_is_correct = excluded.last_is_correct,
+  last_answered_at_utc = excluded.last_answered_at_utc
+''',
+        [
+          learner.id.value,
+          question.id.value,
+          correctIncrement,
+          incorrectIncrement,
+          unknownIncrement,
+          kind.name,
+          selectedOptionIndex,
+          isCorrect == null ? null : (isCorrect ? 1 : 0),
+          timestamp,
+        ],
+      );
+
+      final nextCursor = cursor + 1;
+      final correct = (sessionRows.isEmpty ? 0 : sessionRows.single['correct_count']! as int) + correctIncrement;
+      final incorrect = (sessionRows.isEmpty ? 0 : sessionRows.single['incorrect_count']! as int) + incorrectIncrement;
+      final unknown = (sessionRows.isEmpty ? 0 : sessionRows.single['unknown_count']! as int) + unknownIncrement;
+      await transaction.rawInsert(
+        '''
+INSERT INTO quiz_sessions (
+  learner_id, quiz_set_id, cursor_index, correct_count, incorrect_count,
+  unknown_count, is_completed, updated_at_utc
+)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+ON CONFLICT(learner_id, quiz_set_id) DO UPDATE SET
+  cursor_index = excluded.cursor_index,
+  correct_count = excluded.correct_count,
+  incorrect_count = excluded.incorrect_count,
+  unknown_count = excluded.unknown_count,
+  is_completed = excluded.is_completed,
+  updated_at_utc = excluded.updated_at_utc
+''',
+        [
+          learner.id.value,
+          set.id.value,
+          nextCursor,
+          correct,
+          incorrect,
+          unknown,
+          nextCursor >= set.questions.length ? 1 : 0,
+          timestamp,
+        ],
+      );
+
+      final reviewRows = await transaction.query(
+        'quiz_reviews',
+        where: 'learner_id = ? AND question_id = ?',
+        whereArgs: [learner.id.value, question.id.value],
+        limit: 1,
+      );
+      final reviewRow = reviewRows.single;
+      return QuizAnswerCommit(
+        review: QuizQuestionReviewState(
+          questionId: question.id,
+          answerCount: reviewRow['answer_count']! as int,
+          correctCount: reviewRow['correct_count']! as int,
+          incorrectCount: reviewRow['incorrect_count']! as int,
+          unknownCount: reviewRow['unknown_count']! as int,
+          lastAnswerKind: QuizAnswerKind.values.byName(reviewRow['last_answer_kind']! as String),
+          lastSelectedOptionIndex: reviewRow['last_selected_option_index'] as int?,
+          lastIsCorrect: reviewRow['last_is_correct'] == null ? null : reviewRow['last_is_correct'] == 1,
+          lastAnsweredAt: DateTime.parse(reviewRow['last_answered_at_utc']! as String).toUtc(),
+        ),
+        session: QuizSessionState(
+          setId: set.id,
+          cursorIndex: nextCursor,
+          correctCount: correct,
+          incorrectCount: incorrect,
+          unknownCount: unknown,
+          isCompleted: nextCursor >= set.questions.length,
+          updatedAt: answeredAt.toUtc(),
+        ),
+      );
+    });
+  }
+
+  Future<QuizSessionState> resetQuizSession({
+    required AuthenticatedLearner learner,
+    required QuizSetRecord set,
+    required DateTime updatedAt,
+  }) {
+    return _database.transaction((transaction) async {
+      final materialRows = await transaction.query(
+        'materials',
+        columns: ['current_source_version_id', 'lifecycle_status', 'deleted_at_utc'],
+        where: 'learner_id = ? AND material_id = ?',
+        whereArgs: [learner.id.value, set.materialId.value],
+        limit: 1,
+      );
+      if (materialRows.isEmpty ||
+          materialRows.single['lifecycle_status'] != MaterialLifecycleStatus.active.name ||
+          materialRows.single['deleted_at_utc'] != null ||
+          materialRows.single['current_source_version_id'] != set.sourceVersionId.value) {
+        throw const SourceStoreConflict('Quiz session reset is stale for the current source version.');
+      }
+
+      final resetAt = updatedAt.toUtc();
+      await transaction.insert('quiz_sessions', {
+        'learner_id': learner.id.value,
+        'quiz_set_id': set.id.value,
+        'cursor_index': 0,
+        'correct_count': 0,
+        'incorrect_count': 0,
+        'unknown_count': 0,
+        'is_completed': 0,
+        'updated_at_utc': resetAt.toIso8601String(),
+      }, conflictAlgorithm: ConflictAlgorithm.replace);
+      return QuizSessionState(
+        setId: set.id,
+        cursorIndex: 0,
+        correctCount: 0,
+        incorrectCount: 0,
+        unknownCount: 0,
+        isCompleted: false,
+        updatedAt: resetAt,
+      );
+    });
+  }
+
   @override
   Future<void> deleteMaterial({
     required AuthenticatedLearner learner,
@@ -1710,6 +2175,11 @@ ON CONFLICT(learner_id, flashcard_set_id) DO UPDATE SET
       );
       await transaction.delete(
         'flashcard_sets',
+        where: 'learner_id = ? AND material_id = ?',
+        whereArgs: [learner.id.value, materialId.value],
+      );
+      await transaction.delete(
+        'quiz_sets',
         where: 'learner_id = ? AND material_id = ?',
         whereArgs: [learner.id.value, materialId.value],
       );
@@ -1837,6 +2307,7 @@ ON CONFLICT(learner_id) DO UPDATE SET
       await transaction.delete('recall_actions', where: 'learner_id = ?', whereArgs: [id]);
       await transaction.delete('listen_progress', where: 'learner_id = ?', whereArgs: [id]);
       await transaction.delete('flashcard_sets', where: 'learner_id = ?', whereArgs: [id]);
+      await transaction.delete('quiz_sets', where: 'learner_id = ?', whereArgs: [id]);
       await transaction.delete('extracted_contents', where: 'learner_id = ?', whereArgs: [id]);
       await transaction.delete('source_versions', where: 'learner_id = ?', whereArgs: [id]);
       await transaction.delete('materials', where: 'learner_id = ?', whereArgs: [id]);

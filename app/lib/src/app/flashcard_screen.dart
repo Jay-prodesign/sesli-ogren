@@ -96,6 +96,7 @@ class _FlashcardScreenState extends State<FlashcardScreen> {
     if (data == null || card == null || !_revealed || _busy) return;
     setState(() {
       _busy = true;
+      _revealed = false;
       _inlineError = null;
       _recoveryNotice = null;
     });
@@ -314,7 +315,6 @@ class _FlashcardStudyView extends StatelessWidget {
   Widget build(BuildContext context) {
     final media = MediaQuery.of(context);
     final compact = media.size.width < 360 || media.textScaler.scale(1) > 1.2;
-    final reducedMotion = media.disableAnimations || media.accessibleNavigation;
     final study = data.study;
     final card = study.currentCard;
     final completed = study.session.isCompleted || card == null;
@@ -515,8 +515,8 @@ class _FlashcardStudyView extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 16),
-                    AnimatedSwitcher(
-                      duration: reducedMotion ? Duration.zero : const Duration(milliseconds: 200),
+                    KeyedSubtree(
+                      key: ValueKey(revealed ? 'flashcards-revealed-answer' : 'flashcards-hidden-answer'),
                       child: revealed
                           ? Semantics(
                               liveRegion: true,

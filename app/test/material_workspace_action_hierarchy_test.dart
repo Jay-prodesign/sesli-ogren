@@ -5,6 +5,37 @@ import 'package:sesli_ogren/src/app/atelier_learning_surfaces.dart';
 import 'package:sesli_ogren/src/domain/learning_contracts.dart';
 import 'package:sesli_ogren/src/domain/learning_truth.dart';
 
+Future<void> _pumpUntilGone(WidgetTester tester, Finder finder, {int maxPumps = 80}) async {
+  for (var i = 0; i < maxPumps; i++) {
+    await tester.pump(const Duration(milliseconds: 20));
+    if (finder.evaluate().isEmpty) return;
+  }
+  fail('Expected modal route to close within bounded pumps.');
+}
+
+Future<void> _scrollUntilFound(
+  WidgetTester tester,
+  Finder target, {
+  required Finder scrollable,
+  int maxDrags = 20,
+}) async {
+  for (var i = 0; i < 40 && scrollable.hitTestable().evaluate().isEmpty; i++) {
+    await tester.pump(const Duration(milliseconds: 20));
+  }
+
+  for (var i = 0; i < maxDrags && target.evaluate().isEmpty; i++) {
+    var active = scrollable.hitTestable();
+    for (var j = 0; j < 20 && active.evaluate().isEmpty; j++) {
+      await tester.pump(const Duration(milliseconds: 20));
+      active = scrollable.hitTestable();
+    }
+    expect(active, findsWidgets);
+    await tester.drag(active.first, const Offset(0, -140), warnIfMissed: false);
+    await tester.pump();
+  }
+  expect(target, findsOneWidget);
+}
+
 void main() {
   final now = DateTime.utc(2026, 10, 12, 8);
   const materialId = MaterialId('workspace-action-material');
@@ -48,6 +79,7 @@ void main() {
     required VoidCallback onRecall,
     required VoidCallback onListen,
     VoidCallback? onFlashcards,
+    VoidCallback? onQuiz,
   }) {
     return MaterialApp(
       theme: SesliOgrenTheme.light(),
@@ -67,6 +99,7 @@ void main() {
             onGroundedExplain: () {},
             onExplain: () {},
             onFlashcards: onFlashcards,
+            onQuiz: onQuiz,
             onFocus: () {},
           ),
         ),
@@ -79,6 +112,7 @@ void main() {
     var recall = 0;
     var listen = 0;
     var flashcards = 0;
+    var quiz = 0;
 
     await tester.pumpWidget(
       frame(
@@ -87,6 +121,7 @@ void main() {
         onRecall: () => recall += 1,
         onListen: () => listen += 1,
         onFlashcards: () => flashcards += 1,
+        onQuiz: () => quiz += 1,
       ),
     );
 
@@ -110,7 +145,7 @@ void main() {
     expect(switcher.duration, const Duration(milliseconds: 220));
 
     await tester.tap(find.byKey(const ValueKey('workspace-other-study-paths')));
-    await tester.pumpAndSettle();
+    await tester.pump(const Duration(milliseconds: 400));
     expect(find.text('Bu kaynakla başka bir yol seç'), findsOneWidget);
     expect(find.text('HAZIRLIK'), findsOneWidget);
     expect(find.text('AKTİF ÇALIŞMA'), findsOneWidget);
@@ -125,10 +160,26 @@ void main() {
         matching: find.byType(Scrollable),
       ),
     );
-    await tester.pump();
+    await tester.ensureVisible(flashcardAction);
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(flashcardAction.hitTestable(), findsOneWidget);
     await tester.tap(flashcardAction.hitTestable());
-    await tester.pump();
     expect(flashcards, 1);
+    await _pumpUntilGone(tester, find.byKey(const ValueKey('workspace-other-study-paths-scroll')));
+
+    final reopenPaths = find.byKey(const ValueKey('workspace-other-study-paths')).hitTestable();
+    expect(reopenPaths, findsOneWidget);
+    await tester.tap(reopenPaths);
+    await tester.pump(const Duration(milliseconds: 400));
+    final quizAction = find.byKey(const ValueKey('workspace-other-quiz'));
+    final reopenedScroll = find.byKey(const ValueKey('workspace-other-study-paths-scroll'));
+    await _scrollUntilFound(tester, quizAction, scrollable: reopenedScroll);
+    await tester.ensureVisible(quizAction);
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(quizAction.hitTestable(), findsOneWidget);
+    await tester.tap(quizAction.hitTestable());
+    await tester.pump();
+    expect(quiz, 1);
   });
 
   testWidgets('Workspace keeps source recovery actions reachable when extracted text is unavailable', (tester) async {
