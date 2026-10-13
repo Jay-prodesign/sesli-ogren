@@ -146,8 +146,11 @@ void main() {
     await _scrollUntilFound(tester, reconcileAction);
     expect(reconcileAction, findsOneWidget);
 
-    final reconcile = find.byKey(const ValueKey('study-plan-primary'));
+    final reconcile = find.widgetWithText(FilledButton, 'Planı güncel kaynaklara bağla');
+    await _scrollUntilFound(tester, reconcile);
     await tester.ensureVisible(reconcile);
+    await tester.pump();
+    expect(reconcile.hitTestable(), findsOneWidget);
     await tester.tap(reconcile.hitTestable());
     await tester.pump();
     await _pumpUntilFound(tester, find.byKey(const ValueKey('study-plan-editor')));
