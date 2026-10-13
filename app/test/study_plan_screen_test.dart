@@ -53,11 +53,8 @@ Future<void> _pumpPlan(WidgetTester tester, AppRuntime runtime) async {
     MaterialApp(
       theme: SesliOgrenTheme.light(),
       builder: (context, child) => MediaQuery(
-        data: MediaQuery.of(context).copyWith(
-          disableAnimations: true,
-          accessibleNavigation: true,
-          textScaler: const TextScaler.linear(1.5),
-        ),
+        data: MediaQuery.of(context)
+            .copyWith(disableAnimations: true, accessibleNavigation: true, textScaler: const TextScaler.linear(1.5)),
         child: child!,
       ),
       home: LivingDeskReviewScope(child: StudyPlanScreen(runtime: runtime)),
