@@ -256,9 +256,9 @@ class DailyStudyPlan {
   }
 
   static int _priority(DailyStudyActionKind kind) => switch (kind) {
-    DailyStudyActionKind.scheduledReview => 700,
-    DailyStudyActionKind.sourceRepair => 650,
-    DailyStudyActionKind.retryRecall => 640,
+    DailyStudyActionKind.sourceRepair => 700,
+    DailyStudyActionKind.retryRecall => 690,
+    DailyStudyActionKind.scheduledReview => 600,
     DailyStudyActionKind.resumeReader => 430,
     DailyStudyActionKind.resumeListen => 420,
     DailyStudyActionKind.beginRecall => 300,
