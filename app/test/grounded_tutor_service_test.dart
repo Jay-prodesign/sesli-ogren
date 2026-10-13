@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter_test/flutter_test.dart';
@@ -64,6 +65,47 @@ void main() {
       ),
       isEmpty,
     );
+  });
+
+  test('Tutor conversation order and grounding survive SQLite close and reopen', () async {
+    final directory = await Directory.systemTemp.createTemp('sesli-ogren-tutor-reopen-');
+    addTearDown(() async {
+      if (await directory.exists()) await directory.delete(recursive: true);
+    });
+    final dbPath = '${directory.path}/learning.sqlite';
+    const learner = LearnerIdentity.local();
+    const materialId = MaterialId('durable-tutor');
+
+    final firstStore = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: dbPath);
+    final firstIngest = SourceIngestService(store: firstStore, pdfTextExtractor: const _UnusedPdfExtractor());
+    final firstService = GroundedTutorService(store: firstStore, now: () => DateTime.utc(2026, 10, 13, 12, 15));
+    await firstIngest.ingestPastedText(
+      learner: learner,
+      materialId: materialId,
+      sourceName: 'Kalıcı Tutor notu',
+      text:
+          'Fotosentez ışık enerjisini kimyasal enerjiye dönüştürür. '
+          'Klorofil ışığın soğurulmasına yardım eder.',
+    );
+    final opened = await firstService.openThread(learner: learner, materialId: materialId);
+    await firstService.ask(
+      learner: learner,
+      threadId: opened.thread.id,
+      question: 'Klorofil ne işe yarar?',
+    );
+    await firstStore.close();
+
+    final reopenedStore = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: dbPath);
+    addTearDown(reopenedStore.close);
+    final reopenedService = GroundedTutorService(store: reopenedStore);
+    final reopened = await reopenedService.openThread(learner: learner, materialId: materialId);
+
+    expect(reopened.thread.id, opened.thread.id);
+    expect(reopened.turns, hasLength(2));
+    expect(reopened.turns.first.role, GroundedTutorTurnRole.learner);
+    expect(reopened.turns.last.role, GroundedTutorTurnRole.tutor);
+    expect(reopened.turns.last.supportState, GroundedTutorSupportState.sourceSupported);
+    expect(reopened.turns.last.sourceExcerpt, contains('Klorofil'));
   });
 
   test('Tutor says unsupported instead of fabricating an answer', () async {
