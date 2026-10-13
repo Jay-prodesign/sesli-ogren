@@ -45,7 +45,13 @@ class SqliteSourceStore implements SourceStore {
         // upgrade transaction begins. Runtime enforcement is restored in
         // onOpen before any product read/write can occur.
         onConfigure: (db) => db.execute('PRAGMA foreign_keys = OFF'),
-        onOpen: (db) => db.execute('PRAGMA foreign_keys = ON'),
+        onOpen: (db) async {
+          await db.execute('PRAGMA foreign_keys = ON');
+          final violations = await db.rawQuery('PRAGMA foreign_key_check');
+          if (violations.isNotEmpty) {
+            throw StateError('source_store_foreign_key_check_failed');
+          }
+        },
         onUpgrade: (db, oldVersion, newVersion) async {
           if (oldVersion < 2) {
             await _upgradeLearningTruthSchema(db);
@@ -1406,6 +1412,10 @@ SELECT
 FROM source_versions_v17
 ''');
       await db.execute('DROP TABLE source_versions_v17');
+      await db.execute('''
+CREATE INDEX IF NOT EXISTS idx_source_versions_material
+ON source_versions (learner_id, material_id, created_at_utc)
+''');
     } finally {
       await db.execute('PRAGMA legacy_alter_table = OFF');
     }

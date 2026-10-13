@@ -529,6 +529,8 @@ CREATE TABLE extracted_contents (
       final foreignKeys = await inspected.rawQuery('PRAGMA foreign_key_list(extracted_contents)');
       expect(foreignKeys.map((row) => row['table']).toSet(), contains('source_versions'));
       expect(await inspected.rawQuery('PRAGMA foreign_key_check'), isEmpty);
+      final sourceIndexes = await inspected.rawQuery("PRAGMA index_list('source_versions')");
+      expect(sourceIndexes.map((row) => row['name']), contains('idx_source_versions_material'));
 
       await inspected.insert('source_versions', {
         'learner_id': 'owner',
