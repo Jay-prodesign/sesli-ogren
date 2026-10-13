@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter_test/flutter_test.dart';
@@ -7,10 +8,12 @@ import 'package:sesli_ogren/src/data/sqlite_source_store.dart';
 import 'package:sesli_ogren/src/domain/authenticated_learner.dart';
 import 'package:sesli_ogren/src/domain/flashcard_learning.dart';
 import 'package:sesli_ogren/src/domain/learning_contracts.dart';
+import 'package:sesli_ogren/src/domain/learning_truth.dart';
 import 'package:sesli_ogren/src/domain/quiz_learning.dart';
 import 'package:sesli_ogren/src/domain/retention_schedule.dart';
 import 'package:sesli_ogren/src/learning/flashcard_learning_service.dart';
 import 'package:sesli_ogren/src/learning/quiz_learning_service.dart';
+import 'package:sesli_ogren/src/learning/recall_learning_service.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 class _UnusedPdfExtractor implements PdfTextExtractor {
@@ -84,6 +87,69 @@ void main() {
     expect(schedules.single.reviewCount, 2);
     expect(schedules.single.interval, const Duration(days: 3));
     expect(schedules.single.dueAt, now.add(const Duration(days: 3)));
+  });
+
+  test('Recall creates a durable retention schedule that survives database reopen', () async {
+    final directory = await Directory.systemTemp.createTemp('sesli-ogren-retention-');
+    final path = '${directory.path}/retention.db';
+    SqliteSourceStore? activeStore;
+    addTearDown(() async {
+      if (activeStore != null) await activeStore!.close();
+      if (await directory.exists()) await directory.delete(recursive: true);
+    });
+
+    final at = DateTime.utc(2026, 10, 13, 8, 30);
+    activeStore = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: path);
+    final ingest = SourceIngestService(store: activeStore!, pdfTextExtractor: const _UnusedPdfExtractor());
+    final recall = RecallLearningService(
+      sourceStore: activeStore!,
+      learningStore: activeStore!.learningTruthStore(),
+      now: () => at,
+    );
+    const learner = LearnerIdentity.local();
+    const materialId = MaterialId('retention-recall');
+
+    await ingest.ingestPastedText(
+      learner: learner,
+      materialId: materialId,
+      sourceName: 'Fizik',
+      text:
+          'Momentum bir cismin kütlesi ile hızının çarpımıdır. '
+          'Kapalı bir sistemde toplam momentum korunur.',
+    );
+    final prompt = await recall.createCurrentPrompt(learner: learner, materialId: materialId);
+    final action = await activeStore!.learningTruthStore().recallAction(learner: learner, actionId: prompt.id);
+    expect(action, isNotNull);
+
+    final result = await recall.submit(
+      learner: learner,
+      actionId: prompt.id,
+      attemptId: const RecallAttemptId('retention-recall-attempt'),
+      disposition: RecallResponseDisposition.answer,
+      answer: action!.expectedAnswer,
+    );
+    expect(result.evidence.outcome, RecallOutcome.correct);
+
+    var schedules = await activeStore!.retentionSchedulesForMaterial(learner: learner, materialId: materialId);
+    expect(schedules, hasLength(1));
+    expect(schedules.single.latestEvidenceKind, RetentionEvidenceKind.recall);
+    expect(schedules.single.latestOutcomeBand, RetentionOutcomeBand.independentRetrieval);
+    expect(schedules.single.sourceAnchor.startOffset, action.anchor.startOffset);
+    expect(schedules.single.dueAt, at.add(const Duration(days: 1)));
+
+    await activeStore!.close();
+    activeStore = null;
+    activeStore = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: path);
+
+    schedules = await activeStore!.retentionSchedulesForMaterial(learner: learner, materialId: materialId);
+    expect(schedules, hasLength(1));
+    expect(schedules.single.latestEventId, 'recall:${result.evidence.id.value}');
+    expect(schedules.single.policyVersion, RetentionPolicy.version);
+    expect(await activeStore!.dueRetentionSchedules(learner: learner, at: at), isEmpty);
+    expect(
+      await activeStore!.dueRetentionSchedules(learner: learner, at: at.add(const Duration(days: 1))),
+      hasLength(1),
+    );
   });
 
   test('again and unknown never become positive retention evidence', () async {
