@@ -1007,10 +1007,14 @@ void main() {
     );
     tester.view.physicalSize = const Size(320, 700);
     await pumpPlan(textScaler: const TextScaler.linear(1.5));
-    for (var i = 0; i < 40 && find.text('Kaynak değişti').evaluate().isEmpty; i++) {
-      await tester.pump(const Duration(milliseconds: 30));
+    final changedSource = find.text('Kaynak değişti');
+    for (var i = 0; i < 12 && changedSource.evaluate().isEmpty; i++) {
+      final scrollable = find.byType(Scrollable).hitTestable();
+      expect(scrollable, findsWidgets);
+      await tester.drag(scrollable.last, const Offset(0, -140), warnIfMissed: false);
+      await tester.pump();
     }
-    expect(find.text('Kaynak değişti'), findsOneWidget);
+    expect(changedSource, findsOneWidget);
     expect(find.textContaining('Eski sürümden yeni görev üretmiyoruz'), findsOneWidget);
     expect(tester.takeException(), isNull);
     await expectLater(find.byType(Scaffold), matchesGoldenFile('goldens/la0040_study_plan_reconcile_320_text150.png'));
