@@ -317,8 +317,6 @@ class LivingStudyDeskHome extends StatelessWidget {
                       const SizedBox(height: 3),
                       Text(
                         item.reasonText,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
                         style: const TextStyle(color: _sub, fontSize: 11.5, height: 1.35),
                       ),
                     ],
