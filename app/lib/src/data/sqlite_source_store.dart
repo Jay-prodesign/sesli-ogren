@@ -11,6 +11,7 @@ import '../domain/learning_contracts.dart';
 import '../domain/learning_truth.dart';
 import '../domain/operational_event.dart';
 import '../domain/retention_schedule.dart';
+import '../domain/study_plan.dart';
 import 'learning_truth_store.dart';
 import 'operational_telemetry.dart';
 import 'source_store.dart';
@@ -39,7 +40,7 @@ class SqliteSourceStore implements SourceStore {
     final database = await selectedFactory.openDatabase(
       databasePath,
       options: OpenDatabaseOptions(
-        version: 16,
+        version: 17,
         onConfigure: (db) => db.execute('PRAGMA foreign_keys = ON'),
         onUpgrade: (db, oldVersion, newVersion) async {
           if (oldVersion < 2) {
@@ -86,6 +87,9 @@ class SqliteSourceStore implements SourceStore {
           }
           if (oldVersion < 16) {
             await _upgradeRetentionSchema(db);
+          }
+          if (oldVersion < 17) {
+            await _upgradeStudyPlanSchema(db);
           }
         },
         onCreate: (db, version) async {
@@ -309,6 +313,7 @@ CREATE TABLE learner_preferences (
           await _upgradeFlashcardSchema(db);
           await _upgradeQuizSchema(db);
           await _upgradeRetentionSchema(db);
+          await _upgradeStudyPlanSchema(db);
           await db.execute('''
 CREATE TABLE operational_events (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -1287,6 +1292,43 @@ ORDER BY a.id ASC
         occurredAt: DateTime.parse(row['answered_at_utc']! as String).toUtc(),
       );
     }
+  }
+
+  static Future<void> _upgradeStudyPlanSchema(Database db) async {
+    await db.execute('''
+CREATE TABLE IF NOT EXISTS study_targets (
+  learner_id TEXT NOT NULL,
+  study_target_id TEXT NOT NULL,
+  title TEXT NOT NULL,
+  target_date_utc TEXT NOT NULL,
+  created_at_utc TEXT NOT NULL,
+  updated_at_utc TEXT NOT NULL,
+  archived_at_utc TEXT,
+  PRIMARY KEY (learner_id, study_target_id)
+)
+''');
+    await db.execute(
+      'CREATE INDEX IF NOT EXISTS idx_study_targets_active '
+      'ON study_targets (learner_id, archived_at_utc, updated_at_utc)',
+    );
+    await db.execute('''
+CREATE TABLE IF NOT EXISTS study_target_materials (
+  learner_id TEXT NOT NULL,
+  study_target_id TEXT NOT NULL,
+  material_id TEXT NOT NULL,
+  source_version_id TEXT NOT NULL,
+  ordinal INTEGER NOT NULL,
+  PRIMARY KEY (learner_id, study_target_id, material_id),
+  UNIQUE (learner_id, study_target_id, ordinal),
+  FOREIGN KEY (learner_id, study_target_id)
+    REFERENCES study_targets (learner_id, study_target_id) ON DELETE CASCADE,
+  FOREIGN KEY (learner_id, material_id)
+    REFERENCES materials (learner_id, material_id),
+  FOREIGN KEY (learner_id, source_version_id)
+    REFERENCES source_versions (learner_id, source_version_id),
+  CHECK (ordinal >= 0)
+)
+''');
   }
 
   @override
@@ -2409,6 +2451,146 @@ LIMIT ?
     return rows.map(_retentionFromRow).toList(growable: false);
   }
 
+  Future<StudyTargetRecord?> activeStudyTarget({required AuthenticatedLearner learner}) async {
+    final rows = await _database.query(
+      'study_targets',
+      where: 'learner_id = ? AND archived_at_utc IS NULL',
+      whereArgs: [learner.id.value],
+      orderBy: 'updated_at_utc DESC, study_target_id ASC',
+      limit: 1,
+    );
+    if (rows.isEmpty) return null;
+    final row = rows.single;
+    final targetId = StudyTargetId(row['study_target_id']! as String);
+    final bindingRows = await _database.query(
+      'study_target_materials',
+      where: 'learner_id = ? AND study_target_id = ?',
+      whereArgs: [learner.id.value, targetId.value],
+      orderBy: 'ordinal ASC, material_id ASC',
+    );
+    return StudyTargetRecord(
+      id: targetId,
+      title: row['title']! as String,
+      targetDate: DateTime.parse(row['target_date_utc']! as String).toUtc(),
+      materials: bindingRows
+          .map(
+            (binding) => StudyTargetMaterialBinding(
+              materialId: MaterialId(binding['material_id']! as String),
+              sourceVersionId: SourceVersionId(binding['source_version_id']! as String),
+              ordinal: binding['ordinal']! as int,
+            ),
+          )
+          .toList(growable: false),
+      createdAt: DateTime.parse(row['created_at_utc']! as String).toUtc(),
+      updatedAt: DateTime.parse(row['updated_at_utc']! as String).toUtc(),
+      archivedAt: null,
+    );
+  }
+
+  Future<void> saveStudyTarget({
+    required AuthenticatedLearner learner,
+    required StudyTargetRecord target,
+  }) {
+    return _database.transaction((transaction) async {
+      if (target.archivedAt != null) {
+        throw const SourceStoreConflict('Active study target cannot be saved as archived.');
+      }
+      final title = target.title.trim();
+      if (title.isEmpty || title.length > 120) {
+        throw const SourceStoreConflict('Study target title must contain 1-120 characters.');
+      }
+      if (target.materials.isEmpty) {
+        throw const SourceStoreConflict('Study target requires at least one current material.');
+      }
+      final materialIds = <String>{};
+      for (final binding in target.materials) {
+        if (!materialIds.add(binding.materialId.value)) {
+          throw const SourceStoreConflict('Study target cannot contain the same material twice.');
+        }
+        final authority = await transaction.rawQuery(
+          '''
+SELECT 1
+FROM materials m
+JOIN source_versions s
+  ON s.learner_id = m.learner_id
+ AND s.source_version_id = m.current_source_version_id
+WHERE m.learner_id = ?
+  AND m.material_id = ?
+  AND m.lifecycle_status = ?
+  AND m.deleted_at_utc IS NULL
+  AND m.processing_state = ?
+  AND s.source_version_id = ?
+  AND s.revoked_at_utc IS NULL
+LIMIT 1
+''',
+          [
+            learner.id.value,
+            binding.materialId.value,
+            MaterialLifecycleStatus.active.name,
+            MaterialProcessingState.ready.name,
+            binding.sourceVersionId.value,
+          ],
+        );
+        if (authority.isEmpty) {
+          throw const SourceStoreConflict(
+            'Study target material binding is stale or not ready; reconcile it with current source truth first.',
+          );
+        }
+      }
+
+      final updatedAt = target.updatedAt.toUtc().toIso8601String();
+      await transaction.update(
+        'study_targets',
+        {'archived_at_utc': updatedAt},
+        where: 'learner_id = ? AND archived_at_utc IS NULL AND study_target_id != ?',
+        whereArgs: [learner.id.value, target.id.value],
+      );
+      await transaction.insert(
+        'study_targets',
+        {
+          'learner_id': learner.id.value,
+          'study_target_id': target.id.value,
+          'title': title,
+          'target_date_utc': StudyTargetRecord.normalizeDate(target.targetDate).toIso8601String(),
+          'created_at_utc': target.createdAt.toUtc().toIso8601String(),
+          'updated_at_utc': updatedAt,
+          'archived_at_utc': null,
+        },
+        conflictAlgorithm: ConflictAlgorithm.replace,
+      );
+      await transaction.delete(
+        'study_target_materials',
+        where: 'learner_id = ? AND study_target_id = ?',
+        whereArgs: [learner.id.value, target.id.value],
+      );
+      for (final binding in target.materials) {
+        await transaction.insert('study_target_materials', {
+          'learner_id': learner.id.value,
+          'study_target_id': target.id.value,
+          'material_id': binding.materialId.value,
+          'source_version_id': binding.sourceVersionId.value,
+          'ordinal': binding.ordinal,
+        });
+      }
+    });
+  }
+
+  Future<void> archiveStudyTarget({
+    required AuthenticatedLearner learner,
+    required StudyTargetId targetId,
+    required DateTime archivedAt,
+  }) async {
+    await _database.update(
+      'study_targets',
+      {
+        'archived_at_utc': archivedAt.toUtc().toIso8601String(),
+        'updated_at_utc': archivedAt.toUtc().toIso8601String(),
+      },
+      where: 'learner_id = ? AND study_target_id = ? AND archived_at_utc IS NULL',
+      whereArgs: [learner.id.value, targetId.value],
+    );
+  }
+
   @override
   Future<void> deleteMaterial({
     required AuthenticatedLearner learner,
@@ -2572,6 +2754,7 @@ ON CONFLICT(learner_id) DO UPDATE SET
     return _database.transaction((transaction) async {
       final id = learner.id.value;
       await transaction.delete('learner_preferences', where: 'learner_id = ?', whereArgs: [id]);
+      await transaction.delete('study_targets', where: 'learner_id = ?', whereArgs: [id]);
       await transaction.delete('retention_schedules', where: 'learner_id = ?', whereArgs: [id]);
       await transaction.delete('active_recall_attempts', where: 'learner_id = ?', whereArgs: [id]);
       await transaction.delete('recall_attempt_support', where: 'learner_id = ?', whereArgs: [id]);
