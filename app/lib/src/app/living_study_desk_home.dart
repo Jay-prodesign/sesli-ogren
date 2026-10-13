@@ -6,8 +6,10 @@ import 'package:flutter/services.dart';
 import '../domain/learning_contracts.dart';
 import '../domain/learning_truth.dart';
 import '../domain/retention_schedule.dart';
+import '../domain/study_plan.dart';
 import 'app_theme.dart';
 import 'daily_study_plan.dart';
+import 'study_plan_home_card.dart';
 import 'companion_view.dart';
 
 /// Current source-first product experience scope.
@@ -32,6 +34,7 @@ class LivingStudyDeskHome extends StatelessWidget {
     required this.continuation,
     this.retention,
     this.dailyStudy,
+    this.studyTarget,
     this.listenResumeChunk = 0,
     this.readerResumeProgress = 0,
     this.readerResumePreferred = false,
@@ -42,6 +45,7 @@ class LivingStudyDeskHome extends StatelessWidget {
     required this.onOpenLearning,
     required this.onOpenListen,
     required this.onOpenMaterial,
+    this.onOpenStudyPlan,
     super.key,
   });
 
@@ -49,6 +53,7 @@ class LivingStudyDeskHome extends StatelessWidget {
   final LearningContinuation? continuation;
   final RetentionMaterialStatus? retention;
   final DailyStudyPlan? dailyStudy;
+  final StudyTargetProjection? studyTarget;
   final int listenResumeChunk;
   final double readerResumeProgress;
   final bool readerResumePreferred;
@@ -59,6 +64,7 @@ class LivingStudyDeskHome extends StatelessWidget {
   final VoidCallback onOpenLearning;
   final VoidCallback onOpenListen;
   final ValueChanged<MaterialId> onOpenMaterial;
+  final VoidCallback? onOpenStudyPlan;
 
   static const _canvas = AppPalette.canvas;
   static const _paper = AppPalette.surface;
@@ -657,6 +663,8 @@ class LivingStudyDeskHome extends StatelessWidget {
             style: TextButton.styleFrom(foregroundColor: _accent),
           ),
         ),
+        const SizedBox(height: 10),
+        StudyPlanHomeCard(projection: studyTarget, hasMaterials: material != null, onOpen: onOpenStudyPlan),
         if (_evidenceHeadline != null) ...[
           const SizedBox(height: 12),
           Semantics(
@@ -854,6 +862,10 @@ class LivingStudyDeskHome extends StatelessWidget {
               ],
             ),
           ),
+          if (studyTarget != null) ...[
+            const SizedBox(height: 12),
+            StudyPlanHomeCard(projection: studyTarget, hasMaterials: false, onOpen: onOpenStudyPlan),
+          ],
         ],
       );
     },

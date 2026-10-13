@@ -56,7 +56,11 @@ class DailyStudyPlan {
 
   DailyStudyItem? get primary => items.isEmpty ? null : items.first;
 
-  static DailyStudyPlan build({required List<ProgressItem> progress, required DateTime evaluatedAt}) {
+  static DailyStudyPlan build({
+    required List<ProgressItem> progress,
+    required DateTime evaluatedAt,
+    Set<MaterialId> preferredMaterialIds = const <MaterialId>{},
+  }) {
     final at = evaluatedAt.toUtc();
     final items = <DailyStudyItem>[];
     DateTime? nextScheduledAt;
@@ -84,7 +88,7 @@ class DailyStudyPlan {
       if (item != null) items.add(item);
     }
 
-    items.sort(_compare);
+    items.sort((left, right) => _compare(left, right, preferredMaterialIds));
     return DailyStudyPlan(
       items: List<DailyStudyItem>.unmodifiable(items),
       evaluatedAt: at,
@@ -237,9 +241,15 @@ class DailyStudyPlan {
     return null;
   }
 
-  static int _compare(DailyStudyItem left, DailyStudyItem right) {
+  static int _compare(DailyStudyItem left, DailyStudyItem right, Set<MaterialId> preferredMaterialIds) {
     final priority = _priority(right.kind).compareTo(_priority(left.kind));
     if (priority != 0) return priority;
+
+    // Exam/Study Plan never outranks repair, due-ness or resume truth. It only
+    // breaks ties between otherwise equivalent actions.
+    final leftPreferred = preferredMaterialIds.contains(left.materialId);
+    final rightPreferred = preferredMaterialIds.contains(right.materialId);
+    if (leftPreferred != rightPreferred) return rightPreferred ? 1 : -1;
 
     if (left.kind == DailyStudyActionKind.scheduledReview && right.kind == DailyStudyActionKind.scheduledReview) {
       final leftDue = left.dueAt;
