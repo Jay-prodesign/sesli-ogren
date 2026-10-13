@@ -148,9 +148,15 @@ void main() {
     expect(persisted.currentQuestion?.id, target.id);
     expect(find.text('SORU 2 / 3'), findsOneWidget);
 
-    await tester.tap(find.byKey(ValueKey('quiz-option-${target.correctOptionIndex}')).hitTestable());
+    final correctOption = find.byKey(ValueKey('quiz-option-${target.correctOptionIndex}'));
+    await tester.ensureVisible(correctOption);
     await tester.pump();
-    await tester.tap(find.byKey(const ValueKey('quiz-submit')));
+    await tester.tap(correctOption.hitTestable());
+    await tester.pump();
+    final submit = find.byKey(const ValueKey('quiz-submit'));
+    await tester.ensureVisible(submit);
+    await tester.pump();
+    await tester.tap(submit.hitTestable());
     await _pumpUntilFound(tester, find.byKey(const ValueKey('quiz-source-evidence')));
     expect(find.text('Tekrarı tamamla'), findsOneWidget);
     expect(find.byKey(const ValueKey('quiz-source-evidence')), findsOneWidget);
