@@ -597,7 +597,8 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
       SourceIngestFailureKind.officeEmpty => 'Seçtiğin belge boş görünüyor. Başka bir dosya seç.',
       SourceIngestFailureKind.officeTooLarge =>
         'Bu belge güvenli işleme sınırını aşıyor. Daha küçük bir dosya veya yalnız çalışacağın bölümü ekle.',
-      SourceIngestFailureKind.officeUnsupported => 'Bu Office dosya türü bu girişte desteklenmiyor. DOC, DOCX, PPT veya PPTX seç ya da metni doğrudan ekle.',
+      SourceIngestFailureKind.officeUnsupported =>
+        'Bu Office dosya türü bu girişte desteklenmiyor. DOC, DOCX, PPT veya PPTX seç ya da metni doğrudan ekle.',
       SourceIngestFailureKind.officeNoExtractableText =>
         'Bu belge veya sunuda güvenilir metin bulunamadı. Metin içeren başka bir sürüm seç veya metni doğrudan ekle.',
       SourceIngestFailureKind.officeParseFailure =>
