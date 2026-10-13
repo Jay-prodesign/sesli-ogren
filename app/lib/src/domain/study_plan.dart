@@ -71,9 +71,8 @@ class StudyTargetProjection {
   StudyTargetProjection({
     required this.target,
     required List<StudyTargetMaterialStatus> materials,
-    required DateTime evaluatedAt,
-  }) : materials = List<StudyTargetMaterialStatus>.unmodifiable(materials),
-       evaluatedAt = evaluatedAt;
+    required this.evaluatedAt,
+  }) : materials = List<StudyTargetMaterialStatus>.unmodifiable(materials);
 
   final StudyTargetRecord target;
   final List<StudyTargetMaterialStatus> materials;
