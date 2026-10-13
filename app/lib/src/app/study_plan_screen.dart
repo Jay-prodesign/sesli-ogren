@@ -411,6 +411,7 @@ class _StudyPlanScreenState extends State<StudyPlanScreen> {
     final projection = data.projection!;
     final issues = projection.materials.where((item) => item.state != StudyTargetBindingState.current).length;
     return ListView(
+      key: const ValueKey('study-plan-summary-scroll'),
       padding: const EdgeInsets.fromLTRB(20, 20, 20, 36),
       children: [
         const Text(
