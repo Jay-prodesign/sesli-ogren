@@ -33,8 +33,7 @@ Future<void> _scrollTutorUntilFound(WidgetTester tester, Finder target, {int max
 
   for (var i = 0; i < maxDrags && target.evaluate().isEmpty; i++) {
     final position = controller.position;
-    final next = (position.pixels + 120).clamp(position.minScrollExtent, position.maxScrollExtent);
-    controller.jumpTo(next);
+    controller.jumpTo(position.maxScrollExtent);
     await tester.pump();
   }
   expect(target, findsOneWidget);
@@ -89,7 +88,9 @@ void main() {
     expect(find.textContaining('öğrenme kanıtı'), findsWidgets);
 
     await tester.enterText(find.byKey(const ValueKey('grounded-tutor-question')), 'Klorofil ne işe yarar?');
-    await tester.tap(find.byKey(const ValueKey('grounded-tutor-send')));
+    final send = find.byKey(const ValueKey('grounded-tutor-send')).hitTestable();
+    expect(send, findsOneWidget);
+    await tester.tap(send);
     await tester.pumpAndSettle();
 
     await _scrollTutorUntilFound(tester, find.byKey(const ValueKey('grounded-tutor-next-actions')));
