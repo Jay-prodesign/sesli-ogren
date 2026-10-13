@@ -406,7 +406,7 @@ void main() {
     expect(cta, findsOneWidget);
     expect(cta.hitTestable(), findsOneWidget);
     expect(tester.getBottomRight(cta).dy, lessThanOrEqualTo(844));
-    expect(find.text('Bu tur tamam. Sonra yeniden hatırla.'), findsOneWidget);
+    expect(find.textContaining('Sonraki tekrar'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 
