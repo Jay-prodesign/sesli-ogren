@@ -40,6 +40,19 @@ android {
         }
     }
 
+    buildTypes {
+        release {
+            // google_mlkit_text_recognition includes runtime branches for
+            // optional CJK/Devanagari recognizers. Sesli Öğren intentionally
+            // ships only the default Latin recognizer (covers Turkish/English);
+            // do not pull ~30MB of unused script models just to satisfy R8.
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro",
+            )
+        }
+    }
+
 }
 
 kotlin {
