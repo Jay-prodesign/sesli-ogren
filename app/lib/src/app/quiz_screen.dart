@@ -11,10 +11,23 @@ import 'atelier_learning_surfaces.dart';
 import 'companion_view.dart';
 
 class QuizScreen extends StatefulWidget {
-  const QuizScreen({required this.runtime, required this.materialId, super.key});
+  const QuizScreen({
+    required this.runtime,
+    required this.materialId,
+    this.scheduledReviewSourceVersionId,
+    this.scheduledReviewSourceAnchor,
+    super.key,
+  }) : assert(
+         (scheduledReviewSourceVersionId == null) == (scheduledReviewSourceAnchor == null),
+         'Scheduled quiz review requires both source version and source anchor.',
+       );
 
   final AppRuntime runtime;
   final MaterialId materialId;
+  final SourceVersionId? scheduledReviewSourceVersionId;
+  final SourceAnchor? scheduledReviewSourceAnchor;
+
+  bool get isScheduledReview => scheduledReviewSourceVersionId != null;
 
   @override
   State<QuizScreen> createState() => _QuizScreenState();
@@ -42,10 +55,14 @@ class _QuizScreenState extends State<QuizScreen> {
     if (material == null || !material.isActive) {
       throw const QuizLearningException('Materyal artık kullanılamıyor.');
     }
-    final study = await widget.runtime.quiz.openCurrentSet(
-      learner: widget.runtime.learner,
-      materialId: widget.materialId,
-    );
+    final study = widget.isScheduledReview
+        ? await widget.runtime.quiz.startScheduledReview(
+            learner: widget.runtime.learner,
+            materialId: widget.materialId,
+            sourceVersionId: widget.scheduledReviewSourceVersionId!,
+            sourceAnchor: widget.scheduledReviewSourceAnchor!,
+          )
+        : await widget.runtime.quiz.openCurrentSet(learner: widget.runtime.learner, materialId: widget.materialId);
     final source = await widget.runtime.store.currentSourceVersion(
       learner: widget.runtime.learner,
       materialId: widget.materialId,
@@ -135,6 +152,10 @@ class _QuizScreenState extends State<QuizScreen> {
   void _continueAfterFeedback() {
     if (_busy || _feedback == null) return;
     _feedbackHaptic(strong: false);
+    if (widget.isScheduledReview && Navigator.of(context).canPop()) {
+      Navigator.of(context).pop();
+      return;
+    }
     setState(() => _feedback = null);
   }
 
@@ -182,6 +203,7 @@ class _QuizScreenState extends State<QuizScreen> {
           feedback: _feedback,
           busy: _busy,
           recoveryNotice: _recoveryNotice,
+          scheduledReview: widget.isScheduledReview,
           onSelect: _selectOption,
           onSubmit: () => _commit(kind: QuizAnswerKind.selected),
           onUnknown: () => _commit(kind: QuizAnswerKind.unknown),
@@ -302,6 +324,7 @@ class _QuizStudyView extends StatelessWidget {
     required this.feedback,
     required this.busy,
     required this.recoveryNotice,
+    required this.scheduledReview,
     required this.onSelect,
     required this.onSubmit,
     required this.onUnknown,
@@ -314,6 +337,7 @@ class _QuizStudyView extends StatelessWidget {
   final _QuizFeedback? feedback;
   final bool busy;
   final String? recoveryNotice;
+  final bool scheduledReview;
   final ValueChanged<int> onSelect;
   final VoidCallback onSubmit;
   final VoidCallback onUnknown;
@@ -352,8 +376,20 @@ class _QuizStudyView extends StatelessWidget {
                     ? FilledButton.icon(
                         key: const ValueKey('quiz-next'),
                         onPressed: busy ? null : onContinue,
-                        icon: Icon(study.session.isCompleted ? Icons.fact_check_outlined : Icons.arrow_forward_rounded),
-                        label: Text(study.session.isCompleted ? 'Sonucu gör' : 'Sonraki soru'),
+                        icon: Icon(
+                          scheduledReview
+                              ? Icons.check_rounded
+                              : study.session.isCompleted
+                              ? Icons.fact_check_outlined
+                              : Icons.arrow_forward_rounded,
+                        ),
+                        label: Text(
+                          scheduledReview
+                              ? 'Tekrarı tamamla'
+                              : study.session.isCompleted
+                              ? 'Sonucu gör'
+                              : 'Sonraki soru',
+                        ),
                         style: FilledButton.styleFrom(
                           backgroundColor: AtelierStyle.pulse,
                           foregroundColor: Colors.white,

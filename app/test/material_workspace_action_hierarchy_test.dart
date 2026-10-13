@@ -4,6 +4,7 @@ import 'package:sesli_ogren/src/app/app_theme.dart';
 import 'package:sesli_ogren/src/app/atelier_learning_surfaces.dart';
 import 'package:sesli_ogren/src/domain/learning_contracts.dart';
 import 'package:sesli_ogren/src/domain/learning_truth.dart';
+import 'package:sesli_ogren/src/domain/retention_schedule.dart';
 
 Future<void> _pumpUntilGone(WidgetTester tester, Finder finder, {int maxPumps = 80}) async {
   for (var i = 0; i < maxPumps; i++) {
@@ -72,6 +73,7 @@ void main() {
   Widget frame({
     required bool disableAnimations,
     LearningContinuation? continuation,
+    RetentionMaterialStatus? retention,
     String sourceText =
         'Klorofil ışık enerjisinin kimyasal enerjiye dönüşümünde rol alır. '
         'Bitkiler karbondioksit ve suyu kullanır.',
@@ -80,17 +82,21 @@ void main() {
     required VoidCallback onListen,
     VoidCallback? onFlashcards,
     VoidCallback? onQuiz,
+    VoidCallback? onRetentionReview,
+    Size size = const Size(390, 844),
+    TextScaler textScaler = TextScaler.noScaling,
   }) {
     return MaterialApp(
       theme: SesliOgrenTheme.light(),
       home: MediaQuery(
-        data: MediaQueryData(size: const Size(390, 844), disableAnimations: disableAnimations),
+        data: MediaQueryData(size: size, disableAnimations: disableAnimations, textScaler: textScaler),
         child: Scaffold(
           body: AtelierWorkspace(
             material: material(),
             sourceText: sourceText,
             sourceVersion: source(),
             continuation: continuation,
+            retention: retention,
             onReadSource: onReadSource,
             onQuickRecap: () {},
             onUpdateSource: () {},
@@ -100,6 +106,7 @@ void main() {
             onExplain: () {},
             onFlashcards: onFlashcards,
             onQuiz: onQuiz,
+            onRetentionReview: onRetentionReview,
             onFocus: () {},
           ),
         ),
@@ -180,6 +187,82 @@ void main() {
     await tester.tap(quizAction.hitTestable());
     await tester.pump();
     expect(quiz, 1);
+  });
+
+  testWidgets('due retention becomes the Workspace primary action and reuses its last active mode', (tester) async {
+    var readSource = 0;
+    var recall = 0;
+    var retentionReview = 0;
+    final continuation = LearningContinuation(
+      state: LearnerState(
+        materialId: materialId,
+        sourceVersionId: sourceVersionId,
+        kind: RecallStateKind.retrievedOnce,
+        evidenceCount: 1,
+        latestEvidenceId: evidenceId,
+        ruleVersion: RecallTruthPolicy.stateRuleVersion,
+        updatedAt: now,
+      ),
+      nextAction: NextLearningAction(
+        materialId: materialId,
+        sourceVersionId: sourceVersionId,
+        latestEvidenceId: evidenceId,
+        kind: NextLearningActionKind.repeatRecallLater,
+        reasonCode: 'ONE_UNASSISTED_RETRIEVAL_OBSERVED',
+        reasonText: 'One unassisted retrieval was observed; repeat later.',
+        policyVersion: RecallTruthPolicy.nextActionPolicyVersion,
+        createdAt: now,
+      ),
+    );
+    final retention = RetentionMaterialStatus(
+      evaluatedAt: now.add(const Duration(days: 1)),
+      schedules: [
+        RetentionScheduleRecord(
+          id: const RetentionScheduleId('workspace-due-retention'),
+          materialId: materialId,
+          sourceVersionId: sourceVersionId,
+          sourceAnchor: const SourceAnchor(startOffset: 0, endOffset: 68),
+          latestEvidenceKind: RetentionEvidenceKind.quiz,
+          latestOutcomeBand: RetentionOutcomeBand.independentRetrieval,
+          latestEventId: 'quiz:event-1',
+          reasonCode: 'INDEPENDENT_RETRIEVAL_OBSERVED',
+          reviewCount: 1,
+          successStreak: 1,
+          interval: const Duration(days: 1),
+          dueAt: now.add(const Duration(days: 1)),
+          lastReviewedAt: now,
+          policyVersion: RetentionPolicy.version,
+        ),
+      ],
+    );
+
+    await tester.pumpWidget(
+      frame(
+        disableAnimations: true,
+        continuation: continuation,
+        retention: retention,
+        onReadSource: () => readSource += 1,
+        onRecall: () => recall += 1,
+        onListen: () {},
+        onRetentionReview: () => retentionReview += 1,
+        size: const Size(320, 844),
+        textScaler: const TextScaler.linear(1.5),
+      ),
+    );
+
+    expect(tester.takeException(), isNull);
+    expect(find.byKey(const ValueKey('workspace-retention-state')), findsOneWidget);
+    expect(find.text('Planlanan tekrar hazır'), findsOneWidget);
+    expect(find.text('TEKRAR ZAMANI'), findsOneWidget);
+    expect(find.text('Quiz tekrarını aç'), findsWidgets);
+    expect(find.textContaining('ustalık sayılmıyor'), findsOneWidget);
+    expect(find.byKey(const ValueKey('la0040-atelier-workspace-recall')).hitTestable(), findsOneWidget);
+
+    await tester.tap(find.byKey(const ValueKey('la0040-atelier-workspace-recall')).hitTestable());
+    await tester.pump();
+    expect(retentionReview, 1);
+    expect(readSource, 0);
+    expect(recall, 0);
   });
 
   testWidgets('Workspace keeps source recovery actions reachable when extracted text is unavailable', (tester) async {

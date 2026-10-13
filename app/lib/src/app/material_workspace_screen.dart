@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../domain/learning_contracts.dart';
 import '../domain/learning_truth.dart';
+import '../domain/retention_schedule.dart';
 import '../learning/recall_learning_service.dart';
 import 'app_runtime.dart';
 import 'app_theme.dart';
@@ -82,6 +83,13 @@ class _MaterialWorkspaceScreenState extends State<MaterialWorkspaceScreen> {
         materialId: material.id,
       );
     }
+    final retentionSchedules = await widget.runtime.store.retentionSchedulesForMaterial(
+      learner: widget.runtime.learner,
+      materialId: material.id,
+    );
+    final retention = retentionSchedules.isEmpty
+        ? null
+        : RetentionMaterialStatus(schedules: retentionSchedules, evaluatedAt: DateTime.now().toUtc());
 
     // Source replacement may land while extraction/continuation is loading.
     // Do not compose one Workspace from an old source snapshot and newer truth.
@@ -92,7 +100,13 @@ class _MaterialWorkspaceScreenState extends State<MaterialWorkspaceScreen> {
     if (currentSource?.identity.sourceVersionId != source.identity.sourceVersionId) {
       return retryOnSourceChange ? _load(retryOnSourceChange: false) : null;
     }
-    return _WorkspaceSnapshot(material: material, source: source, extracted: extracted, continuation: continuation);
+    return _WorkspaceSnapshot(
+      material: material,
+      source: source,
+      extracted: extracted,
+      continuation: continuation,
+      retention: retention,
+    );
   }
 
   Future<void> _openSourceReader(_WorkspaceSnapshot data) async {
@@ -245,7 +259,11 @@ class _MaterialWorkspaceScreenState extends State<MaterialWorkspaceScreen> {
     });
   }
 
-  Future<void> _openRecall({bool autoAdvanceContinuation = false}) async {
+  Future<void> _openRecall({
+    bool autoAdvanceContinuation = false,
+    SourceVersionId? scheduledReviewSourceVersionId,
+    SourceAnchor? scheduledReviewSourceAnchor,
+  }) async {
     final treatment = LearningVisualTreatmentScope.maybeOf(context);
     await Navigator.of(context).push<bool>(
       MaterialPageRoute<bool>(
@@ -254,6 +272,8 @@ class _MaterialWorkspaceScreenState extends State<MaterialWorkspaceScreen> {
             runtime: widget.runtime,
             materialId: widget.materialId,
             autoAdvanceContinuation: autoAdvanceContinuation,
+            scheduledReviewSourceVersionId: scheduledReviewSourceVersionId,
+            scheduledReviewSourceAnchor: scheduledReviewSourceAnchor,
           );
           if (treatment != null) return LearningVisualTreatmentScope(treatment: treatment, child: screen);
           return LivingDeskReviewScope.active(context) ? LivingDeskReviewScope(child: screen) : screen;
@@ -294,11 +314,20 @@ class _MaterialWorkspaceScreenState extends State<MaterialWorkspaceScreen> {
     });
   }
 
-  Future<void> _openFlashcards() async {
+  Future<void> _openFlashcards({
+    SourceVersionId? scheduledReviewSourceVersionId,
+    SourceAnchor? scheduledReviewSourceAnchor,
+  }) async {
     await Navigator.of(context).push<void>(
       MaterialPageRoute(
-        builder: (_) =>
-            _preserveProductExperience(FlashcardScreen(runtime: widget.runtime, materialId: widget.materialId)),
+        builder: (_) => _preserveProductExperience(
+          FlashcardScreen(
+            runtime: widget.runtime,
+            materialId: widget.materialId,
+            scheduledReviewSourceVersionId: scheduledReviewSourceVersionId,
+            scheduledReviewSourceAnchor: scheduledReviewSourceAnchor,
+          ),
+        ),
       ),
     );
     if (!mounted) return;
@@ -307,16 +336,83 @@ class _MaterialWorkspaceScreenState extends State<MaterialWorkspaceScreen> {
     });
   }
 
-  Future<void> _openQuiz() async {
+  Future<void> _openQuiz({
+    SourceVersionId? scheduledReviewSourceVersionId,
+    SourceAnchor? scheduledReviewSourceAnchor,
+  }) async {
     await Navigator.of(context).push<void>(
       MaterialPageRoute(
-        builder: (_) => _preserveProductExperience(QuizScreen(runtime: widget.runtime, materialId: widget.materialId)),
+        builder: (_) => _preserveProductExperience(
+          QuizScreen(
+            runtime: widget.runtime,
+            materialId: widget.materialId,
+            scheduledReviewSourceVersionId: scheduledReviewSourceVersionId,
+            scheduledReviewSourceAnchor: scheduledReviewSourceAnchor,
+          ),
+        ),
       ),
     );
     if (!mounted) return;
     setState(() {
       _snapshot = _load();
     });
+  }
+
+  // Activation revalidates the scheduled source lineage before opening a fresh review action.
+  Future<void> _openRetentionReview(_WorkspaceSnapshot data) async {
+    final candidate = data.retention?.nextDue;
+    if (candidate == null) return;
+
+    final currentSource = await widget.runtime.store.currentSourceVersion(
+      learner: widget.runtime.learner,
+      materialId: data.material.id,
+    );
+    if (!mounted) return;
+    if (currentSource?.identity.sourceVersionId != candidate.sourceVersionId) {
+      setState(() => _snapshot = _load());
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Kaynak güncellendi. Tekrar planı güncel kaynaktan yeniden hazırlanıyor.')),
+      );
+      return;
+    }
+
+    final currentSchedules = await widget.runtime.store.retentionSchedulesForMaterial(
+      learner: widget.runtime.learner,
+      materialId: data.material.id,
+    );
+    if (!mounted) return;
+    final now = DateTime.now().toUtc();
+    RetentionScheduleRecord? due;
+    for (final schedule in currentSchedules) {
+      if (schedule.id == candidate.id && schedule.isDueAt(now)) {
+        due = schedule;
+        break;
+      }
+    }
+    if (due == null) {
+      setState(() => _snapshot = _load());
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text('Bu tekrar artık güncel değil. Sıradaki plan yenilendi.')));
+      return;
+    }
+
+    switch (due.latestEvidenceKind) {
+      case RetentionEvidenceKind.recall:
+        await _openRecall(
+          scheduledReviewSourceVersionId: due.sourceVersionId,
+          scheduledReviewSourceAnchor: due.sourceAnchor,
+        );
+      case RetentionEvidenceKind.flashcard:
+        await _openFlashcards(
+          scheduledReviewSourceVersionId: due.sourceVersionId,
+          scheduledReviewSourceAnchor: due.sourceAnchor,
+        );
+      case RetentionEvidenceKind.quiz:
+        await _openQuiz(
+          scheduledReviewSourceVersionId: due.sourceVersionId,
+          scheduledReviewSourceAnchor: due.sourceAnchor,
+        );
+    }
   }
 
   Future<void> _openFocus(_WorkspaceSnapshot data) async {
@@ -473,6 +569,10 @@ class _MaterialWorkspaceScreenState extends State<MaterialWorkspaceScreen> {
                 _consumeFirstValueIntent();
                 _openQuiz();
               },
+              onRetentionReview: () {
+                _consumeFirstValueIntent();
+                _openRetentionReview(snapshot.data!);
+              },
               onFocus: () {
                 _consumeFirstValueIntent();
                 _openFocus(snapshot.data!);
@@ -498,6 +598,7 @@ class _WorkspaceBody extends StatelessWidget {
     required this.onExplain,
     required this.onFlashcards,
     required this.onQuiz,
+    required this.onRetentionReview,
     required this.onFocus,
   });
 
@@ -512,6 +613,7 @@ class _WorkspaceBody extends StatelessWidget {
   final VoidCallback onExplain;
   final VoidCallback onFlashcards;
   final VoidCallback onQuiz;
+  final VoidCallback onRetentionReview;
   final VoidCallback onFocus;
 
   @override
@@ -538,6 +640,7 @@ class _WorkspaceBody extends StatelessWidget {
         sourceText: data.extracted?.normalizedText ?? '',
         sourceVersion: data.source,
         continuation: data.continuation,
+        retention: data.retention,
         onReadSource: onReadSource,
         onQuickRecap: onQuickRecap,
         onUpdateSource: onUpdateSource,
@@ -547,6 +650,7 @@ class _WorkspaceBody extends StatelessWidget {
         onExplain: onExplain,
         onFlashcards: onFlashcards,
         onQuiz: onQuiz,
+        onRetentionReview: onRetentionReview,
         onFocus: onFocus,
       );
     }
@@ -985,10 +1089,12 @@ class _WorkspaceSnapshot {
     required this.source,
     required this.extracted,
     required this.continuation,
+    required this.retention,
   });
 
   final MaterialRecord material;
   final SourceVersionRecord source;
   final ExtractedContentRecord? extracted;
   final LearningContinuation? continuation;
+  final RetentionMaterialStatus? retention;
 }

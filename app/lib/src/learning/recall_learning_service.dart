@@ -57,6 +57,44 @@ class RecallLearningService {
     return persisted.toPrompt();
   }
 
+  Future<RecallPrompt> createScheduledPrompt({
+    required AuthenticatedLearner learner,
+    required MaterialId materialId,
+    required SourceVersionId sourceVersionId,
+    required SourceAnchor sourceAnchor,
+  }) async {
+    final source = await _sourceStore.currentSourceVersion(learner: learner, materialId: materialId);
+    if (source == null || source.identity.sourceVersionId != sourceVersionId) {
+      throw const RecallLearningException('Scheduled Recall belongs to a stale source version.');
+    }
+    final extracted = await _sourceStore.extractedContentForSource(learner: learner, sourceVersionId: sourceVersionId);
+    if (extracted == null || !extracted.isValid) {
+      throw const RecallLearningException('Scheduled Recall source has no valid extracted content.');
+    }
+    final candidates = _findCandidates(extracted.normalizedText);
+    final candidateOrdinal = candidates.indexWhere(
+      (candidate) =>
+          candidate.sentenceStart == sourceAnchor.startOffset && candidate.sentenceEnd == sourceAnchor.endOffset,
+    );
+    if (candidateOrdinal < 0) {
+      throw const RecallLearningException('Scheduled Recall source anchor is no longer available.');
+    }
+    final action = _buildAction(
+      materialId: materialId,
+      sourceVersionId: sourceVersionId,
+      extracted: extracted,
+      candidateOrdinal: candidateOrdinal,
+      now: _now().toUtc(),
+    );
+    if (action.anchor.startOffset != sourceAnchor.startOffset ||
+        action.anchor.endOffset != sourceAnchor.endOffset ||
+        action.anchor.pageNumber != sourceAnchor.pageNumber) {
+      throw const RecallLearningException('Scheduled Recall source anchor no longer matches canonical provenance.');
+    }
+    final persisted = await _learningStore.persistRecallAction(learner: learner, action: action);
+    return persisted.toPrompt();
+  }
+
   Future<RecallAttemptSession> openAttempt({
     required AuthenticatedLearner learner,
     required RecallActionId actionId,
