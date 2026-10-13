@@ -10,6 +10,7 @@ import '../domain/quiz_learning.dart';
 import '../domain/learning_contracts.dart';
 import '../domain/learning_truth.dart';
 import '../domain/operational_event.dart';
+import '../domain/retention_schedule.dart';
 import 'learning_truth_store.dart';
 import 'operational_telemetry.dart';
 import 'source_store.dart';
@@ -38,7 +39,7 @@ class SqliteSourceStore implements SourceStore {
     final database = await selectedFactory.openDatabase(
       databasePath,
       options: OpenDatabaseOptions(
-        version: 15,
+        version: 16,
         onConfigure: (db) => db.execute('PRAGMA foreign_keys = ON'),
         onUpgrade: (db, oldVersion, newVersion) async {
           if (oldVersion < 2) {
@@ -82,6 +83,9 @@ class SqliteSourceStore implements SourceStore {
           }
           if (oldVersion < 15) {
             await _upgradeQuizSchema(db);
+          }
+          if (oldVersion < 16) {
+            await _upgradeRetentionSchema(db);
           }
         },
         onCreate: (db, version) async {
@@ -304,6 +308,7 @@ CREATE TABLE learner_preferences (
           await _upgradeServerMaterialBindingSchema(db);
           await _upgradeFlashcardSchema(db);
           await _upgradeQuizSchema(db);
+          await _upgradeRetentionSchema(db);
           await db.execute('''
 CREATE TABLE operational_events (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -1116,6 +1121,154 @@ JOIN learner_evidence e
     );
   }
 
+  static Future<void> _upgradeRetentionSchema(Database db) async {
+    await db.execute('''
+CREATE TABLE IF NOT EXISTS retention_schedules (
+  learner_id TEXT NOT NULL,
+  retention_schedule_id TEXT NOT NULL,
+  material_id TEXT NOT NULL,
+  source_version_id TEXT NOT NULL,
+  source_start INTEGER NOT NULL,
+  source_end INTEGER NOT NULL,
+  page_number INTEGER,
+  latest_evidence_kind TEXT NOT NULL,
+  latest_outcome_band TEXT NOT NULL,
+  latest_event_id TEXT NOT NULL,
+  reason_code TEXT NOT NULL,
+  review_count INTEGER NOT NULL,
+  success_streak INTEGER NOT NULL,
+  interval_seconds INTEGER NOT NULL,
+  due_at_utc TEXT NOT NULL,
+  last_reviewed_at_utc TEXT NOT NULL,
+  policy_version TEXT NOT NULL,
+  invalidated_at_utc TEXT,
+  PRIMARY KEY (learner_id, retention_schedule_id),
+  FOREIGN KEY (learner_id, material_id)
+    REFERENCES materials (learner_id, material_id) ON DELETE CASCADE,
+  FOREIGN KEY (learner_id, source_version_id)
+    REFERENCES source_versions (learner_id, source_version_id) ON DELETE CASCADE,
+  CHECK (source_start >= 0 AND source_end > source_start),
+  CHECK (review_count >= 1),
+  CHECK (success_streak >= 0),
+  CHECK (interval_seconds >= 0)
+)
+''');
+    await db.execute(
+      'CREATE INDEX IF NOT EXISTS idx_retention_due '
+      'ON retention_schedules (learner_id, due_at_utc, invalidated_at_utc)',
+    );
+    await db.execute(
+      'CREATE INDEX IF NOT EXISTS idx_retention_material '
+      'ON retention_schedules (learner_id, material_id, source_version_id, invalidated_at_utc)',
+    );
+
+    // Recall has canonical event history, so it can be replayed exactly into
+    // the new scheduling projection. This migration never invents mastery.
+    final recallRows = await db.rawQuery('''
+SELECT e.learner_id, e.evidence_id, e.material_id, e.source_version_id,
+       e.outcome, e.created_at_utc,
+       a.anchor_start, a.anchor_end, a.page_number
+FROM learner_evidence e
+JOIN recall_actions a
+  ON a.learner_id = e.learner_id AND a.action_id = e.action_id
+ORDER BY e.created_at_utc ASC
+''');
+    for (final row in recallRows) {
+      final outcome = RecallOutcome.values.byName(row['outcome']! as String);
+      await _upsertRetentionSchedule(
+        db,
+        learnerId: row['learner_id']! as String,
+        materialId: MaterialId(row['material_id']! as String),
+        sourceVersionId: SourceVersionId(row['source_version_id']! as String),
+        sourceAnchor: SourceAnchor(
+          startOffset: row['anchor_start']! as int,
+          endOffset: row['anchor_end']! as int,
+          pageNumber: row['page_number'] as int?,
+        ),
+        evidenceKind: RetentionEvidenceKind.recall,
+        outcomeBand: switch (outcome) {
+          RecallOutcome.correct => RetentionOutcomeBand.independentRetrieval,
+          RecallOutcome.helpedCorrect || RecallOutcome.partial => RetentionOutcomeBand.supportedRetrieval,
+          RecallOutcome.incorrect => RetentionOutcomeBand.repairNeeded,
+          RecallOutcome.answerExposed || RecallOutcome.unknown => RetentionOutcomeBand.unassessed,
+        },
+        eventId: 'recall:${row['evidence_id']! as String}',
+        occurredAt: DateTime.parse(row['created_at_utc']! as String).toUtc(),
+      );
+    }
+
+    // Flashcards historically store a cumulative review projection rather than
+    // one row per response. Backfill only the latest durable signal and keep
+    // the streak conservative instead of fabricating prior intervals.
+    final flashcardRows = await db.rawQuery('''
+SELECT r.learner_id, r.card_id, r.review_count, r.last_response,
+       r.last_reviewed_at_utc, s.material_id, s.source_version_id,
+       c.source_start, c.source_end, c.page_number
+FROM flashcard_reviews r
+JOIN flashcards c
+  ON c.learner_id = r.learner_id AND c.card_id = r.card_id
+JOIN flashcard_sets s
+  ON s.learner_id = c.learner_id AND s.flashcard_set_id = c.flashcard_set_id
+ORDER BY r.last_reviewed_at_utc ASC
+''');
+    for (final row in flashcardRows) {
+      final response = FlashcardResponse.values.byName(row['last_response']! as String);
+      await _upsertRetentionSchedule(
+        db,
+        learnerId: row['learner_id']! as String,
+        materialId: MaterialId(row['material_id']! as String),
+        sourceVersionId: SourceVersionId(row['source_version_id']! as String),
+        sourceAnchor: SourceAnchor(
+          startOffset: row['source_start']! as int,
+          endOffset: row['source_end']! as int,
+          pageNumber: row['page_number'] as int?,
+        ),
+        evidenceKind: RetentionEvidenceKind.flashcard,
+        outcomeBand: response == FlashcardResponse.remembered
+            ? RetentionOutcomeBand.independentRetrieval
+            : RetentionOutcomeBand.repairNeeded,
+        eventId: 'flashcard:${row['card_id']! as String}:${row['review_count']! as int}',
+        occurredAt: DateTime.parse(row['last_reviewed_at_utc']! as String).toUtc(),
+      );
+    }
+
+    // Quiz keeps every durable answer, allowing chronological replay.
+    final quizRows = await db.rawQuery('''
+SELECT a.id, a.learner_id, a.answer_kind, a.is_correct, a.answered_at_utc,
+       s.material_id, s.source_version_id,
+       q.source_start, q.source_end, q.page_number
+FROM quiz_answers a
+JOIN quiz_questions q
+  ON q.learner_id = a.learner_id AND q.question_id = a.question_id
+JOIN quiz_sets s
+  ON s.learner_id = q.learner_id AND s.quiz_set_id = q.quiz_set_id
+ORDER BY a.id ASC
+''');
+    for (final row in quizRows) {
+      final kind = QuizAnswerKind.values.byName(row['answer_kind']! as String);
+      final isCorrect = row['is_correct'] == null ? null : row['is_correct'] == 1;
+      await _upsertRetentionSchedule(
+        db,
+        learnerId: row['learner_id']! as String,
+        materialId: MaterialId(row['material_id']! as String),
+        sourceVersionId: SourceVersionId(row['source_version_id']! as String),
+        sourceAnchor: SourceAnchor(
+          startOffset: row['source_start']! as int,
+          endOffset: row['source_end']! as int,
+          pageNumber: row['page_number'] as int?,
+        ),
+        evidenceKind: RetentionEvidenceKind.quiz,
+        outcomeBand: kind == QuizAnswerKind.unknown
+            ? RetentionOutcomeBand.unassessed
+            : isCorrect == true
+            ? RetentionOutcomeBand.independentRetrieval
+            : RetentionOutcomeBand.repairNeeded,
+        eventId: 'quiz:${row['id']! as int}',
+        occurredAt: DateTime.parse(row['answered_at_utc']! as String).toUtc(),
+      );
+    }
+  }
+
   @override
   Future<MaterialRecord?> material({required AuthenticatedLearner learner, required MaterialId materialId}) async {
     final rows = await _database.query(
@@ -1435,6 +1588,14 @@ LIMIT 1
               'AND invalidated_at_utc IS NULL',
           whereArgs: [learner.id.value, previousSourceId.value],
         );
+        await transaction.update(
+          'retention_schedules',
+          {'invalidated_at_utc': supersededAt},
+          where:
+              'learner_id = ? AND source_version_id = ? '
+              'AND invalidated_at_utc IS NULL',
+          whereArgs: [learner.id.value, previousSourceId.value],
+        );
       }
 
       if (previousSourceId != null) {
@@ -1725,6 +1886,19 @@ ON CONFLICT(learner_id, flashcard_set_id) DO UPDATE SET
         limit: 1,
       );
       final reviewRow = reviewRows.single;
+      await _upsertRetentionSchedule(
+        transaction,
+        learnerId: learner.id.value,
+        materialId: set.materialId,
+        sourceVersionId: set.sourceVersionId,
+        sourceAnchor: card.sourceAnchor,
+        evidenceKind: RetentionEvidenceKind.flashcard,
+        outcomeBand: response == FlashcardResponse.remembered
+            ? RetentionOutcomeBand.independentRetrieval
+            : RetentionOutcomeBand.repairNeeded,
+        eventId: 'flashcard:${card.id.value}:${reviewRow['review_count']! as int}',
+        occurredAt: reviewedAt.toUtc(),
+      );
       return FlashcardResponseCommit(
         review: FlashcardReviewState(
           cardId: card.id,
@@ -2073,6 +2247,21 @@ ON CONFLICT(learner_id, quiz_set_id) DO UPDATE SET
         limit: 1,
       );
       final reviewRow = reviewRows.single;
+      await _upsertRetentionSchedule(
+        transaction,
+        learnerId: learner.id.value,
+        materialId: set.materialId,
+        sourceVersionId: set.sourceVersionId,
+        sourceAnchor: question.sourceAnchor,
+        evidenceKind: RetentionEvidenceKind.quiz,
+        outcomeBand: kind == QuizAnswerKind.unknown
+            ? RetentionOutcomeBand.unassessed
+            : isCorrect == true
+            ? RetentionOutcomeBand.independentRetrieval
+            : RetentionOutcomeBand.repairNeeded,
+        eventId: 'quiz:${question.id.value}:${reviewRow['answer_count']! as int}',
+        occurredAt: answeredAt.toUtc(),
+      );
       return QuizAnswerCommit(
         review: QuizQuestionReviewState(
           questionId: question.id,
@@ -2141,6 +2330,57 @@ ON CONFLICT(learner_id, quiz_set_id) DO UPDATE SET
     });
   }
 
+  Future<List<RetentionScheduleRecord>> retentionSchedulesForMaterial({
+    required AuthenticatedLearner learner,
+    required MaterialId materialId,
+  }) async {
+    final rows = await _database.rawQuery(
+      '''
+SELECT r.*
+FROM retention_schedules r
+JOIN materials m
+  ON m.learner_id = r.learner_id AND m.material_id = r.material_id
+WHERE r.learner_id = ?
+  AND r.material_id = ?
+  AND m.lifecycle_status = ?
+  AND m.deleted_at_utc IS NULL
+  AND m.current_source_version_id = r.source_version_id
+  AND r.invalidated_at_utc IS NULL
+ORDER BY r.due_at_utc ASC, r.source_start ASC, r.source_end ASC
+''',
+      [learner.id.value, materialId.value, MaterialLifecycleStatus.active.name],
+    );
+    return rows.map(_retentionFromRow).toList(growable: false);
+  }
+
+  Future<List<RetentionScheduleRecord>> dueRetentionSchedules({
+    required AuthenticatedLearner learner,
+    required DateTime at,
+    int limit = 20,
+  }) async {
+    if (limit < 1 || limit > 100) {
+      throw ArgumentError.value(limit, 'limit', 'Expected 1-100 due retention items.');
+    }
+    final rows = await _database.rawQuery(
+      '''
+SELECT r.*
+FROM retention_schedules r
+JOIN materials m
+  ON m.learner_id = r.learner_id AND m.material_id = r.material_id
+WHERE r.learner_id = ?
+  AND m.lifecycle_status = ?
+  AND m.deleted_at_utc IS NULL
+  AND m.current_source_version_id = r.source_version_id
+  AND r.invalidated_at_utc IS NULL
+  AND r.due_at_utc <= ?
+ORDER BY r.due_at_utc ASC, r.last_reviewed_at_utc ASC
+LIMIT ?
+''',
+      [learner.id.value, MaterialLifecycleStatus.active.name, at.toUtc().toIso8601String(), limit],
+    );
+    return rows.map(_retentionFromRow).toList(growable: false);
+  }
+
   @override
   Future<void> deleteMaterial({
     required AuthenticatedLearner learner,
@@ -2168,6 +2408,11 @@ ON CONFLICT(learner_id, quiz_set_id) DO UPDATE SET
         return;
       }
 
+      await transaction.delete(
+        'retention_schedules',
+        where: 'learner_id = ? AND material_id = ?',
+        whereArgs: [learner.id.value, materialId.value],
+      );
       await transaction.delete(
         'summary_jobs',
         where: 'learner_id = ? AND material_id = ?',
@@ -2299,6 +2544,7 @@ ON CONFLICT(learner_id) DO UPDATE SET
     return _database.transaction((transaction) async {
       final id = learner.id.value;
       await transaction.delete('learner_preferences', where: 'learner_id = ?', whereArgs: [id]);
+      await transaction.delete('retention_schedules', where: 'learner_id = ?', whereArgs: [id]);
       await transaction.delete('active_recall_attempts', where: 'learner_id = ?', whereArgs: [id]);
       await transaction.delete('recall_attempt_support', where: 'learner_id = ?', whereArgs: [id]);
       await transaction.delete('next_learning_actions', where: 'learner_id = ?', whereArgs: [id]);
@@ -2313,6 +2559,94 @@ ON CONFLICT(learner_id) DO UPDATE SET
       await transaction.delete('materials', where: 'learner_id = ?', whereArgs: [id]);
       await transaction.delete('operational_events', where: 'learner_id = ?', whereArgs: [id]);
     });
+  }
+
+  static RetentionScheduleId _retentionScheduleId(SourceVersionId sourceVersionId, SourceAnchor anchor) {
+    final digest = sha256
+        .convert(
+          utf8.encode(
+            '${sourceVersionId.value}\u0000${anchor.startOffset}\u0000'
+            '${anchor.endOffset}\u0000${anchor.pageNumber ?? -1}',
+          ),
+        )
+        .toString();
+    return RetentionScheduleId('rs_${digest.substring(0, 32)}');
+  }
+
+  static Future<RetentionScheduleRecord> _upsertRetentionSchedule(
+    DatabaseExecutor executor, {
+    required String learnerId,
+    required MaterialId materialId,
+    required SourceVersionId sourceVersionId,
+    required SourceAnchor sourceAnchor,
+    required RetentionEvidenceKind evidenceKind,
+    required RetentionOutcomeBand outcomeBand,
+    required String eventId,
+    required DateTime occurredAt,
+  }) async {
+    final scheduleId = _retentionScheduleId(sourceVersionId, sourceAnchor);
+    final rows = await executor.query(
+      'retention_schedules',
+      where: 'learner_id = ? AND retention_schedule_id = ? AND invalidated_at_utc IS NULL',
+      whereArgs: [learnerId, scheduleId.value],
+      limit: 1,
+    );
+    final existing = rows.isEmpty ? null : _retentionFromRow(rows.single);
+    final next = RetentionPolicy.advance(
+      existing: existing,
+      id: scheduleId,
+      materialId: materialId,
+      sourceVersionId: sourceVersionId,
+      sourceAnchor: sourceAnchor,
+      evidenceKind: evidenceKind,
+      outcomeBand: outcomeBand,
+      eventId: eventId,
+      occurredAt: occurredAt.toUtc(),
+    );
+    await executor.insert('retention_schedules', {
+      'learner_id': learnerId,
+      'retention_schedule_id': next.id.value,
+      'material_id': next.materialId.value,
+      'source_version_id': next.sourceVersionId.value,
+      'source_start': next.sourceAnchor.startOffset,
+      'source_end': next.sourceAnchor.endOffset,
+      'page_number': next.sourceAnchor.pageNumber,
+      'latest_evidence_kind': next.latestEvidenceKind.name,
+      'latest_outcome_band': next.latestOutcomeBand.name,
+      'latest_event_id': next.latestEventId,
+      'reason_code': next.reasonCode,
+      'review_count': next.reviewCount,
+      'success_streak': next.successStreak,
+      'interval_seconds': next.interval.inSeconds,
+      'due_at_utc': next.dueAt.toUtc().toIso8601String(),
+      'last_reviewed_at_utc': next.lastReviewedAt.toUtc().toIso8601String(),
+      'policy_version': next.policyVersion,
+      'invalidated_at_utc': null,
+    }, conflictAlgorithm: ConflictAlgorithm.replace);
+    return next;
+  }
+
+  static RetentionScheduleRecord _retentionFromRow(Map<String, Object?> row) {
+    return RetentionScheduleRecord(
+      id: RetentionScheduleId(row['retention_schedule_id']! as String),
+      materialId: MaterialId(row['material_id']! as String),
+      sourceVersionId: SourceVersionId(row['source_version_id']! as String),
+      sourceAnchor: SourceAnchor(
+        startOffset: row['source_start']! as int,
+        endOffset: row['source_end']! as int,
+        pageNumber: row['page_number'] as int?,
+      ),
+      latestEvidenceKind: RetentionEvidenceKind.values.byName(row['latest_evidence_kind']! as String),
+      latestOutcomeBand: RetentionOutcomeBand.values.byName(row['latest_outcome_band']! as String),
+      latestEventId: row['latest_event_id']! as String,
+      reasonCode: row['reason_code']! as String,
+      reviewCount: row['review_count']! as int,
+      successStreak: row['success_streak']! as int,
+      interval: Duration(seconds: row['interval_seconds']! as int),
+      dueAt: DateTime.parse(row['due_at_utc']! as String).toUtc(),
+      lastReviewedAt: DateTime.parse(row['last_reviewed_at_utc']! as String).toUtc(),
+      policyVersion: row['policy_version']! as String,
+    );
   }
 
   @override
@@ -2959,6 +3293,23 @@ WHERE learner_id = ?
         'active_recall_attempts',
         where: 'learner_id = ? AND material_id = ? AND attempt_id = ?',
         whereArgs: [learner.id.value, evidence.materialId.value, evidence.attemptId.value],
+      );
+
+      await SqliteSourceStore._upsertRetentionSchedule(
+        transaction,
+        learnerId: learner.id.value,
+        materialId: evidence.materialId,
+        sourceVersionId: evidence.sourceVersionId,
+        sourceAnchor: action.anchor,
+        evidenceKind: RetentionEvidenceKind.recall,
+        outcomeBand: switch (canonicalOutcome) {
+          RecallOutcome.correct => RetentionOutcomeBand.independentRetrieval,
+          RecallOutcome.helpedCorrect || RecallOutcome.partial => RetentionOutcomeBand.supportedRetrieval,
+          RecallOutcome.incorrect => RetentionOutcomeBand.repairNeeded,
+          RecallOutcome.answerExposed || RecallOutcome.unknown => RetentionOutcomeBand.unassessed,
+        },
+        eventId: 'recall:${evidence.id.value}',
+        occurredAt: evidence.createdAt,
       );
 
       return PersistedLearningTruth(evidence: evidence, state: state, nextAction: nextAction);
