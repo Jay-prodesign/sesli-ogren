@@ -546,10 +546,7 @@ class LivingStudyDeskHome extends StatelessWidget {
           style: TextStyle(color: _sub, fontSize: compactFirstViewport ? 13 : 15, height: 1.4),
         ),
         SizedBox(height: compactFirstViewport ? 10 : 17),
-        if (!compactFirstViewport) ...[
-          materialCard,
-          const SizedBox(height: 16),
-        ],
+        if (!compactFirstViewport) ...[materialCard, const SizedBox(height: 16)],
         Container(
           key: const ValueKey('la0040-source-to-recall-thread'),
           padding: const EdgeInsets.fromLTRB(2, 0, 0, 0),
