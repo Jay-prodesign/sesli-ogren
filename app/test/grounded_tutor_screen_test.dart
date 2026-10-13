@@ -82,10 +82,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byKey(const ValueKey('grounded-tutor-screen')), findsOneWidget);
-    final tutorScrollable = find.descendant(
-      of: find.byKey(const ValueKey('grounded-tutor-scroll')),
-      matching: find.byType(Scrollable),
-    );
+    final tutorScrollable = find.byKey(const ValueKey('grounded-tutor-scroll'));
     await _scrollUntilFound(tester, find.byKey(const ValueKey('grounded-tutor-empty')), scrollable: tutorScrollable);
     expect(find.textContaining('öğrenme kanıtı'), findsWidgets);
 
