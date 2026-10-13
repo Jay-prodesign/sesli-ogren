@@ -11,6 +11,7 @@ import 'explain_back_screen.dart';
 import 'explain_screen.dart';
 import 'first_value_intent_surface.dart';
 import 'focus_screen.dart';
+import 'grounded_tutor_screen.dart';
 import 'flashcard_screen.dart';
 import 'learning_slice_screen.dart';
 import 'la0040_visual_treatments.dart';
@@ -182,6 +183,15 @@ class _MaterialWorkspaceScreenState extends State<MaterialWorkspaceScreen> {
               learner: widget.runtime.learner,
               annotationId: annotationId,
             ),
+            onTutorSelection: (anchor) {
+              Navigator.of(readerContext).push<void>(
+                MaterialPageRoute<void>(
+                  builder: (_) => _preserveProductExperience(
+                    GroundedTutorScreen(runtime: widget.runtime, source: data.source, initialContextAnchor: anchor),
+                  ),
+                ),
+              );
+            },
             onRecallSelection: (anchor) => _replaceReaderWith(
               readerContext,
               LearningSliceScreen(
@@ -476,6 +486,24 @@ class _MaterialWorkspaceScreenState extends State<MaterialWorkspaceScreen> {
     });
   }
 
+  Future<void> _openGroundedTutor(_WorkspaceSnapshot data, {SourceAnchor? contextAnchor}) async {
+    final exit = await Navigator.of(context).push<GroundedTutorExit>(
+      MaterialPageRoute<GroundedTutorExit>(
+        builder: (_) => _preserveProductExperience(
+          GroundedTutorScreen(runtime: widget.runtime, source: data.source, initialContextAnchor: contextAnchor),
+        ),
+      ),
+    );
+    if (!mounted) return;
+    if (exit == GroundedTutorExit.reviewSource) {
+      await _openSourceReader(data);
+    }
+    if (!mounted) return;
+    setState(() {
+      _snapshot = _load();
+    });
+  }
+
   Future<void> _openGroundedExplain(SourceVersionRecord source) async {
     await Navigator.of(context).push<void>(
       MaterialPageRoute(
@@ -597,6 +625,10 @@ class _MaterialWorkspaceScreenState extends State<MaterialWorkspaceScreen> {
                 _openListen();
               },
               onGroundedExplain: () => _openGroundedExplain(snapshot.data!.source),
+              onGroundedTutor: () {
+                _consumeFirstValueIntent();
+                _openGroundedTutor(snapshot.data!);
+              },
               onExplain: () => _openExplainBack(snapshot.data!.source),
               onFlashcards: () {
                 _consumeFirstValueIntent();
@@ -632,6 +664,7 @@ class _WorkspaceBody extends StatelessWidget {
     required this.onReadSource,
     required this.onListen,
     required this.onGroundedExplain,
+    required this.onGroundedTutor,
     required this.onExplain,
     required this.onFlashcards,
     required this.onQuiz,
@@ -647,6 +680,7 @@ class _WorkspaceBody extends StatelessWidget {
   final VoidCallback onReadSource;
   final VoidCallback onListen;
   final VoidCallback onGroundedExplain;
+  final VoidCallback onGroundedTutor;
   final VoidCallback onExplain;
   final VoidCallback onFlashcards;
   final VoidCallback onQuiz;
@@ -684,6 +718,7 @@ class _WorkspaceBody extends StatelessWidget {
         onRecall: onRecall,
         onListen: onListen,
         onGroundedExplain: onGroundedExplain,
+        onGroundedTutor: onGroundedTutor,
         onExplain: onExplain,
         onFlashcards: onFlashcards,
         onQuiz: onQuiz,

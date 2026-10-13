@@ -12,6 +12,7 @@ import '../domain/learning_truth.dart';
 import '../domain/operational_event.dart';
 import '../domain/retention_schedule.dart';
 import '../domain/reader_annotation.dart';
+import '../domain/grounded_tutor.dart';
 import '../domain/study_plan.dart';
 import 'learning_truth_store.dart';
 import 'operational_telemetry.dart';
@@ -41,7 +42,7 @@ class SqliteSourceStore implements SourceStore {
     final database = await selectedFactory.openDatabase(
       databasePath,
       options: OpenDatabaseOptions(
-        version: 19,
+        version: 20,
         // Schema-rebuild migrations need foreign keys disabled before the
         // upgrade transaction begins. Runtime enforcement is restored in
         // onOpen before any product read/write can occur.
@@ -107,6 +108,9 @@ class SqliteSourceStore implements SourceStore {
           }
           if (oldVersion < 19) {
             await _upgradeReaderAnnotationSchema(db);
+          }
+          if (oldVersion < 20) {
+            await _upgradeGroundedTutorSchema(db);
           }
         },
         onCreate: (db, version) async {
@@ -336,6 +340,7 @@ CREATE TABLE learner_preferences (
           await _upgradeRetentionSchema(db);
           await _upgradeStudyPlanSchema(db);
           await _upgradeReaderAnnotationSchema(db);
+          await _upgradeGroundedTutorSchema(db);
           await db.execute('''
 CREATE TABLE operational_events (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -1316,6 +1321,69 @@ ORDER BY a.id ASC
     }
   }
 
+  static Future<void> _upgradeGroundedTutorSchema(Database db) async {
+    await db.execute('''
+CREATE TABLE IF NOT EXISTS grounded_tutor_threads (
+  learner_id TEXT NOT NULL,
+  tutor_thread_id TEXT NOT NULL,
+  material_id TEXT NOT NULL,
+  source_version_id TEXT NOT NULL,
+  context_start INTEGER,
+  context_end INTEGER,
+  context_page_number INTEGER,
+  created_at_utc TEXT NOT NULL,
+  updated_at_utc TEXT NOT NULL,
+  invalidated_at_utc TEXT,
+  PRIMARY KEY (learner_id, tutor_thread_id),
+  FOREIGN KEY (learner_id, material_id)
+    REFERENCES materials (learner_id, material_id) ON DELETE CASCADE,
+  FOREIGN KEY (learner_id, source_version_id)
+    REFERENCES source_versions (learner_id, source_version_id) ON DELETE CASCADE,
+  CHECK (
+    (context_start IS NULL AND context_end IS NULL)
+    OR
+    (context_start >= 0 AND context_end > context_start)
+  )
+)
+''');
+    await db.execute(
+      'CREATE INDEX IF NOT EXISTS idx_tutor_threads_material '
+      'ON grounded_tutor_threads (learner_id, material_id, source_version_id, invalidated_at_utc)',
+    );
+    await db.execute('''
+CREATE TABLE IF NOT EXISTS grounded_tutor_turns (
+  learner_id TEXT NOT NULL,
+  tutor_turn_id TEXT NOT NULL,
+  tutor_thread_id TEXT NOT NULL,
+  role TEXT NOT NULL,
+  text TEXT NOT NULL,
+  support_state TEXT NOT NULL,
+  source_start INTEGER,
+  source_end INTEGER,
+  page_number INTEGER,
+  source_excerpt TEXT,
+  turn_sequence INTEGER NOT NULL,
+  created_at_utc TEXT NOT NULL,
+  PRIMARY KEY (learner_id, tutor_turn_id),
+  UNIQUE (learner_id, tutor_thread_id, turn_sequence),
+  FOREIGN KEY (learner_id, tutor_thread_id)
+    REFERENCES grounded_tutor_threads (learner_id, tutor_thread_id) ON DELETE CASCADE,
+  CHECK (role IN ('learner', 'tutor')),
+  CHECK (turn_sequence >= 0),
+  CHECK (support_state IN ('learnerQuestion', 'sourceSupported', 'sourceUnsupported')),
+  CHECK (
+    (source_start IS NULL AND source_end IS NULL)
+    OR
+    (source_start >= 0 AND source_end > source_start)
+  )
+)
+''');
+    await db.execute(
+      'CREATE INDEX IF NOT EXISTS idx_tutor_turns_thread '
+      'ON grounded_tutor_turns (learner_id, tutor_thread_id, turn_sequence)',
+    );
+  }
+
   static Future<void> _upgradeReaderAnnotationSchema(Database db) async {
     await db.execute('''
 CREATE TABLE IF NOT EXISTS reader_annotations (
@@ -1821,6 +1889,14 @@ LIMIT 1
         );
         await transaction.update(
           'reader_annotations',
+          {'invalidated_at_utc': supersededAt, 'updated_at_utc': supersededAt},
+          where:
+              'learner_id = ? AND source_version_id = ? '
+              'AND invalidated_at_utc IS NULL',
+          whereArgs: [learner.id.value, previousSourceId.value],
+        );
+        await transaction.update(
+          'grounded_tutor_threads',
           {'invalidated_at_utc': supersededAt, 'updated_at_utc': supersededAt},
           where:
               'learner_id = ? AND source_version_id = ? '
@@ -2724,6 +2800,251 @@ WHERE learner_id = ?
     );
   }
 
+  Future<GroundedTutorThreadRecord> openGroundedTutorThread({
+    required AuthenticatedLearner learner,
+    required MaterialId materialId,
+    required SourceVersionId sourceVersionId,
+    SourceAnchor? contextAnchor,
+    required DateTime openedAt,
+  }) {
+    return _database.transaction((transaction) async {
+      final materialRows = await transaction.query(
+        'materials',
+        columns: ['current_source_version_id', 'lifecycle_status', 'deleted_at_utc'],
+        where: 'learner_id = ? AND material_id = ?',
+        whereArgs: [learner.id.value, materialId.value],
+        limit: 1,
+      );
+      if (materialRows.isEmpty ||
+          materialRows.single['lifecycle_status'] != MaterialLifecycleStatus.active.name ||
+          materialRows.single['deleted_at_utc'] != null ||
+          materialRows.single['current_source_version_id'] != sourceVersionId.value) {
+        throw const SourceStoreConflict('Tutor thread belongs to a stale or unavailable source version.');
+      }
+
+      if (contextAnchor != null) {
+        final extractedRows = await transaction.query(
+          'extracted_contents',
+          columns: ['normalized_text'],
+          where: 'learner_id = ? AND source_version_id = ? AND invalidated_at_utc IS NULL',
+          whereArgs: [learner.id.value, sourceVersionId.value],
+          limit: 1,
+        );
+        if (extractedRows.isEmpty) {
+          throw const SourceStoreConflict('Tutor context has no valid extracted source.');
+        }
+        final text = extractedRows.single['normalized_text']! as String;
+        if (contextAnchor.startOffset < 0 ||
+            contextAnchor.endOffset <= contextAnchor.startOffset ||
+            contextAnchor.endOffset > text.length) {
+          throw const SourceStoreConflict('Tutor context anchor is outside the current source.');
+        }
+      }
+
+      final digest = sha256
+          .convert(
+            utf8.encode(
+              '${learner.id.value}\u0000${materialId.value}\u0000${sourceVersionId.value}\u0000'
+              '${contextAnchor?.startOffset ?? -1}\u0000${contextAnchor?.endOffset ?? -1}\u0000'
+              '${contextAnchor?.pageNumber ?? -1}',
+            ),
+          )
+          .toString();
+      final threadId = GroundedTutorThreadId('gtt_${digest.substring(0, 32)}');
+      final now = openedAt.toUtc();
+      await transaction.rawInsert(
+        '''
+INSERT INTO grounded_tutor_threads (
+  learner_id, tutor_thread_id, material_id, source_version_id,
+  context_start, context_end, context_page_number,
+  created_at_utc, updated_at_utc, invalidated_at_utc
+)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NULL)
+ON CONFLICT(learner_id, tutor_thread_id) DO UPDATE SET
+  updated_at_utc = excluded.updated_at_utc
+WHERE grounded_tutor_threads.invalidated_at_utc IS NULL
+''',
+        [
+          learner.id.value,
+          threadId.value,
+          materialId.value,
+          sourceVersionId.value,
+          contextAnchor?.startOffset,
+          contextAnchor?.endOffset,
+          contextAnchor?.pageNumber,
+          now.toIso8601String(),
+          now.toIso8601String(),
+        ],
+      );
+      final rows = await transaction.query(
+        'grounded_tutor_threads',
+        where: 'learner_id = ? AND tutor_thread_id = ? AND invalidated_at_utc IS NULL',
+        whereArgs: [learner.id.value, threadId.value],
+        limit: 1,
+      );
+      if (rows.isEmpty) {
+        throw const SourceStoreConflict('Tutor thread is stale for the current source version.');
+      }
+      return _groundedTutorThreadFromRow(rows.single);
+    });
+  }
+
+  Future<GroundedTutorThreadRecord?> groundedTutorThread({
+    required AuthenticatedLearner learner,
+    required GroundedTutorThreadId threadId,
+  }) async {
+    final rows = await _database.rawQuery(
+      '''
+SELECT t.*
+FROM grounded_tutor_threads t
+JOIN materials m
+  ON m.learner_id = t.learner_id AND m.material_id = t.material_id
+WHERE t.learner_id = ?
+  AND t.tutor_thread_id = ?
+  AND t.invalidated_at_utc IS NULL
+  AND m.lifecycle_status = ?
+  AND m.deleted_at_utc IS NULL
+  AND m.current_source_version_id = t.source_version_id
+LIMIT 1
+''',
+      [learner.id.value, threadId.value, MaterialLifecycleStatus.active.name],
+    );
+    if (rows.isEmpty) return null;
+    return _groundedTutorThreadFromRow(rows.single);
+  }
+
+  Future<List<GroundedTutorTurnRecord>> groundedTutorTurns({
+    required AuthenticatedLearner learner,
+    required GroundedTutorThreadId threadId,
+  }) async {
+    final thread = await groundedTutorThread(learner: learner, threadId: threadId);
+    if (thread == null) return const [];
+    final rows = await _database.query(
+      'grounded_tutor_turns',
+      where: 'learner_id = ? AND tutor_thread_id = ?',
+      whereArgs: [learner.id.value, threadId.value],
+      orderBy: 'turn_sequence ASC',
+    );
+    return rows.map(_groundedTutorTurnFromRow).toList(growable: false);
+  }
+
+  Future<GroundedTutorTurnRecord> saveGroundedTutorTurn({
+    required AuthenticatedLearner learner,
+    required GroundedTutorThreadId threadId,
+    required GroundedTutorTurnRole role,
+    required String text,
+    required GroundedTutorSupportState supportState,
+    SourceAnchor? sourceAnchor,
+    String? sourceExcerpt,
+    required DateTime createdAt,
+  }) {
+    final normalizedText = text.trim();
+    if (normalizedText.isEmpty || normalizedText.length > 8000) {
+      throw ArgumentError.value(text, 'text', 'Tutor turns must contain 1-8000 characters.');
+    }
+    if (role == GroundedTutorTurnRole.learner &&
+        (supportState != GroundedTutorSupportState.learnerQuestion || sourceAnchor != null || sourceExcerpt != null)) {
+      throw ArgumentError('Learner tutor turns cannot carry answer support.');
+    }
+    if (role == GroundedTutorTurnRole.tutor && supportState == GroundedTutorSupportState.learnerQuestion) {
+      throw ArgumentError('Tutor answer requires a supported or unsupported state.');
+    }
+    if (supportState == GroundedTutorSupportState.sourceSupported &&
+        (sourceAnchor == null || sourceExcerpt == null || sourceExcerpt.trim().isEmpty)) {
+      throw ArgumentError('Supported tutor answer requires an exact source anchor and excerpt.');
+    }
+    if (supportState == GroundedTutorSupportState.sourceUnsupported &&
+        (sourceAnchor != null || sourceExcerpt != null)) {
+      throw ArgumentError('Unsupported tutor answer cannot fabricate a source anchor.');
+    }
+
+    return _database.transaction((transaction) async {
+      final threadRows = await transaction.rawQuery(
+        '''
+SELECT t.*
+FROM grounded_tutor_threads t
+JOIN materials m
+  ON m.learner_id = t.learner_id AND m.material_id = t.material_id
+WHERE t.learner_id = ?
+  AND t.tutor_thread_id = ?
+  AND t.invalidated_at_utc IS NULL
+  AND m.lifecycle_status = ?
+  AND m.deleted_at_utc IS NULL
+  AND m.current_source_version_id = t.source_version_id
+LIMIT 1
+''',
+        [learner.id.value, threadId.value, MaterialLifecycleStatus.active.name],
+      );
+      if (threadRows.isEmpty) {
+        throw const SourceStoreConflict('Tutor turn belongs to a stale or unavailable source thread.');
+      }
+      final thread = _groundedTutorThreadFromRow(threadRows.single);
+
+      if (supportState == GroundedTutorSupportState.sourceSupported) {
+        final extractedRows = await transaction.query(
+          'extracted_contents',
+          columns: ['normalized_text'],
+          where: 'learner_id = ? AND source_version_id = ? AND invalidated_at_utc IS NULL',
+          whereArgs: [learner.id.value, thread.sourceVersionId.value],
+          limit: 1,
+        );
+        if (extractedRows.isEmpty) {
+          throw const SourceStoreConflict('Tutor support source is no longer available.');
+        }
+        final sourceText = extractedRows.single['normalized_text']! as String;
+        if (sourceAnchor!.startOffset < 0 ||
+            sourceAnchor.endOffset <= sourceAnchor.startOffset ||
+            sourceAnchor.endOffset > sourceText.length ||
+            sourceText.substring(sourceAnchor.startOffset, sourceAnchor.endOffset) != sourceExcerpt) {
+          throw const SourceStoreConflict('Tutor answer support no longer matches the current source.');
+        }
+      }
+
+      final timestamp = createdAt.toUtc();
+      final countRows = await transaction.rawQuery(
+        'SELECT COUNT(*) AS count FROM grounded_tutor_turns WHERE learner_id = ? AND tutor_thread_id = ?',
+        [learner.id.value, threadId.value],
+      );
+      final sequence = countRows.single['count']! as int;
+      final idDigest = sha256
+          .convert(
+            utf8.encode(
+              '${learner.id.value}\u0000${threadId.value}\u0000$sequence\u0000'
+              '${role.name}\u0000$normalizedText',
+            ),
+          )
+          .toString();
+      final turnId = GroundedTutorTurnId('gtr_${idDigest.substring(0, 32)}');
+      await transaction.insert('grounded_tutor_turns', {
+        'learner_id': learner.id.value,
+        'tutor_turn_id': turnId.value,
+        'tutor_thread_id': threadId.value,
+        'role': role.name,
+        'text': normalizedText,
+        'support_state': supportState.name,
+        'source_start': sourceAnchor?.startOffset,
+        'source_end': sourceAnchor?.endOffset,
+        'page_number': sourceAnchor?.pageNumber,
+        'source_excerpt': sourceExcerpt,
+        'turn_sequence': sequence,
+        'created_at_utc': timestamp.toIso8601String(),
+      }, conflictAlgorithm: ConflictAlgorithm.abort);
+      await transaction.update(
+        'grounded_tutor_threads',
+        {'updated_at_utc': timestamp.toIso8601String()},
+        where: 'learner_id = ? AND tutor_thread_id = ?',
+        whereArgs: [learner.id.value, threadId.value],
+      );
+      final rows = await transaction.query(
+        'grounded_tutor_turns',
+        where: 'learner_id = ? AND tutor_turn_id = ?',
+        whereArgs: [learner.id.value, turnId.value],
+        limit: 1,
+      );
+      return _groundedTutorTurnFromRow(rows.single);
+    });
+  }
+
   Future<List<RetentionScheduleRecord>> retentionSchedulesForMaterial({
     required AuthenticatedLearner learner,
     required MaterialId materialId,
@@ -2933,6 +3254,11 @@ LIMIT 1
       }
 
       await transaction.delete(
+        'grounded_tutor_threads',
+        where: 'learner_id = ? AND material_id = ?',
+        whereArgs: [learner.id.value, materialId.value],
+      );
+      await transaction.delete(
         'retention_schedules',
         where: 'learner_id = ? AND material_id = ?',
         whereArgs: [learner.id.value, materialId.value],
@@ -3069,6 +3395,7 @@ ON CONFLICT(learner_id) DO UPDATE SET
       final id = learner.id.value;
       await transaction.delete('learner_preferences', where: 'learner_id = ?', whereArgs: [id]);
       await transaction.delete('study_targets', where: 'learner_id = ?', whereArgs: [id]);
+      await transaction.delete('grounded_tutor_threads', where: 'learner_id = ?', whereArgs: [id]);
       await transaction.delete('reader_annotations', where: 'learner_id = ?', whereArgs: [id]);
       await transaction.delete('retention_schedules', where: 'learner_id = ?', whereArgs: [id]);
       await transaction.delete('active_recall_attempts', where: 'learner_id = ?', whereArgs: [id]);
@@ -3085,6 +3412,45 @@ ON CONFLICT(learner_id) DO UPDATE SET
       await transaction.delete('materials', where: 'learner_id = ?', whereArgs: [id]);
       await transaction.delete('operational_events', where: 'learner_id = ?', whereArgs: [id]);
     });
+  }
+
+  static GroundedTutorThreadRecord _groundedTutorThreadFromRow(Map<String, Object?> row) {
+    return GroundedTutorThreadRecord(
+      id: GroundedTutorThreadId(row['tutor_thread_id']! as String),
+      materialId: MaterialId(row['material_id']! as String),
+      sourceVersionId: SourceVersionId(row['source_version_id']! as String),
+      contextAnchor: row['context_start'] == null
+          ? null
+          : SourceAnchor(
+              startOffset: row['context_start']! as int,
+              endOffset: row['context_end']! as int,
+              pageNumber: row['context_page_number'] as int?,
+            ),
+      createdAt: DateTime.parse(row['created_at_utc']! as String).toUtc(),
+      updatedAt: DateTime.parse(row['updated_at_utc']! as String).toUtc(),
+      invalidatedAt: row['invalidated_at_utc'] == null
+          ? null
+          : DateTime.parse(row['invalidated_at_utc']! as String).toUtc(),
+    );
+  }
+
+  static GroundedTutorTurnRecord _groundedTutorTurnFromRow(Map<String, Object?> row) {
+    return GroundedTutorTurnRecord(
+      id: GroundedTutorTurnId(row['tutor_turn_id']! as String),
+      threadId: GroundedTutorThreadId(row['tutor_thread_id']! as String),
+      role: GroundedTutorTurnRole.values.byName(row['role']! as String),
+      text: row['text']! as String,
+      supportState: GroundedTutorSupportState.values.byName(row['support_state']! as String),
+      sourceAnchor: row['source_start'] == null
+          ? null
+          : SourceAnchor(
+              startOffset: row['source_start']! as int,
+              endOffset: row['source_end']! as int,
+              pageNumber: row['page_number'] as int?,
+            ),
+      sourceExcerpt: row['source_excerpt'] as String?,
+      createdAt: DateTime.parse(row['created_at_utc']! as String).toUtc(),
+    );
   }
 
   static ReaderAnnotationRecord _readerAnnotationFromRow(Map<String, Object?> row) {

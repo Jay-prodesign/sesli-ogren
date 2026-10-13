@@ -13,6 +13,7 @@ import 'package:sesli_ogren/src/app/explain_back_screen.dart';
 import 'package:sesli_ogren/src/app/first_value_intent_surface.dart';
 import 'package:sesli_ogren/src/app/flashcard_screen.dart';
 import 'package:sesli_ogren/src/app/focus_screen.dart';
+import 'package:sesli_ogren/src/app/grounded_tutor_screen.dart';
 import 'package:sesli_ogren/src/app/listen_screen.dart';
 import 'package:sesli_ogren/src/app/learning_slice_screen.dart';
 import 'package:sesli_ogren/src/app/product_shell_screen.dart';
@@ -1360,6 +1361,59 @@ void main() {
       FocusScreen(runtime: runtime, source: sourceForTools, sourceText: source),
     );
     await captureScreen('la0040_explain_back_390x844', ExplainBackScreen(runtime: runtime, source: sourceForTools));
+  });
+
+  testWidgets('LA-0040 source-grounded Tutor conversation', (tester) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
+    addTearDown(store.close);
+    final ingest = SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor());
+    final runtime = AppRuntime(
+      learner: AppRuntime.localM5LearnerFixture,
+      store: store,
+      ingest: ingest,
+      recall: RecallLearningService(sourceStore: store, learningStore: store.learningTruthStore()),
+      telemetry: store.operationalTelemetry(),
+    );
+    const tutorMaterialId = MaterialId('visual-grounded-tutor');
+    final ingested = await ingest.ingestPastedText(
+      learner: runtime.learner,
+      materialId: tutorMaterialId,
+      sourceName: 'Fotosentez: Tutor kaynağı',
+      text:
+          'Fotosentez sırasında bitkiler ışık enerjisini kimyasal enerjiye dönüştürür. '
+          'Klorofil ışığın soğurulmasında görev alır. '
+          'Bu süreçte karbondioksit ve su kullanılır.',
+    );
+    final thread = await runtime.tutor.openThread(learner: runtime.learner, materialId: tutorMaterialId);
+    await runtime.tutor.ask(learner: runtime.learner, threadId: thread.thread.id, question: 'Klorofil ne işe yarar?');
+
+    await tester.pumpWidget(
+      MaterialApp(
+        debugShowCheckedModeBanner: false,
+        theme: SesliOgrenTheme.light(),
+        home: MediaQuery(
+          data: const MediaQueryData(disableAnimations: true),
+          child: LivingDeskReviewScope(
+            child: GroundedTutorScreen(runtime: runtime, source: ingested.sourceVersion),
+          ),
+        ),
+      ),
+    );
+    for (var i = 0; i < 60 && find.byKey(const ValueKey('grounded-tutor-next-actions')).evaluate().isEmpty; i++) {
+      await tester.pump(const Duration(milliseconds: 30));
+    }
+    expect(find.byKey(const ValueKey('grounded-tutor-screen')), findsOneWidget);
+    expect(find.byKey(const ValueKey('grounded-tutor-next-actions')), findsOneWidget);
+    expect(find.textContaining('TUTOR · KAYNAĞA BAĞLI'), findsWidgets);
+    expect(find.textContaining('Klorofil'), findsWidgets);
+    expect(find.textContaining('öğrenme kanıtı'), findsWidgets);
+    expect(tester.takeException(), isNull);
+    await expectLater(find.byType(Scaffold), matchesGoldenFile('goldens/la0040_grounded_tutor_390x844.png'));
   });
 
   testWidgets('LA-0040 source-hidden Recall', (tester) async {

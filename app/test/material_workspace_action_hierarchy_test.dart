@@ -82,6 +82,7 @@ void main() {
     required VoidCallback onListen,
     VoidCallback? onFlashcards,
     VoidCallback? onQuiz,
+    VoidCallback? onGroundedTutor,
     VoidCallback? onRetentionReview,
     Size size = const Size(390, 844),
     TextScaler textScaler = TextScaler.noScaling,
@@ -103,6 +104,7 @@ void main() {
             onRecall: onRecall,
             onListen: onListen,
             onGroundedExplain: () {},
+            onGroundedTutor: onGroundedTutor,
             onExplain: () {},
             onFlashcards: onFlashcards,
             onQuiz: onQuiz,
@@ -120,6 +122,7 @@ void main() {
     var listen = 0;
     var flashcards = 0;
     var quiz = 0;
+    var tutor = 0;
 
     await tester.pumpWidget(
       frame(
@@ -129,6 +132,7 @@ void main() {
         onListen: () => listen += 1,
         onFlashcards: () => flashcards += 1,
         onQuiz: () => quiz += 1,
+        onGroundedTutor: () => tutor += 1,
       ),
     );
 
@@ -155,18 +159,24 @@ void main() {
     await tester.pump(const Duration(milliseconds: 400));
     expect(find.text('Bu kaynakla başka bir yol seç'), findsOneWidget);
     expect(find.text('HAZIRLIK'), findsOneWidget);
+    final studyPathsScroll = find.byKey(const ValueKey('workspace-other-study-paths-scroll'));
+    await _scrollUntilFound(tester, find.text('AKTİF ÇALIŞMA'), scrollable: studyPathsScroll);
     expect(find.text('AKTİF ÇALIŞMA'), findsOneWidget);
     expect(find.text('Kaynağı hızlıca toparla'), findsOneWidget);
+    final tutorAction = find.byKey(const ValueKey('workspace-other-grounded-tutor'));
+    expect(tutorAction, findsOneWidget);
+    await tester.tap(tutorAction.hitTestable());
+    await tester.pump();
+    expect(tutor, 1);
+    await _pumpUntilGone(tester, find.byKey(const ValueKey('workspace-other-study-paths-scroll')));
+
+    final reopenAfterTutor = find.byKey(const ValueKey('workspace-other-study-paths')).hitTestable();
+    expect(reopenAfterTutor, findsOneWidget);
+    await tester.tap(reopenAfterTutor);
+    await tester.pump(const Duration(milliseconds: 400));
     final flashcardAction = find.byKey(const ValueKey('workspace-other-flashcards'));
-    expect(flashcardAction, findsOneWidget);
-    await tester.scrollUntilVisible(
-      flashcardAction,
-      120,
-      scrollable: find.descendant(
-        of: find.byKey(const ValueKey('workspace-other-study-paths-scroll')),
-        matching: find.byType(Scrollable),
-      ),
-    );
+    final reopenedAfterTutorScroll = find.byKey(const ValueKey('workspace-other-study-paths-scroll'));
+    await _scrollUntilFound(tester, flashcardAction, scrollable: reopenedAfterTutorScroll);
     await tester.ensureVisible(flashcardAction);
     await tester.pump(const Duration(milliseconds: 200));
     expect(flashcardAction.hitTestable(), findsOneWidget);
