@@ -22,16 +22,17 @@ class _UnusedPdfExtractor implements PdfTextExtractor {
   }
 }
 
-Future<void> _scrollUntilFound(
+Future<void> _scrollTutorUntilFound(
   WidgetTester tester,
   Finder target, {
-  required Finder scrollable,
   int maxDrags = 20,
 }) async {
+  expect(find.byKey(const ValueKey('grounded-tutor-scroll')), findsOneWidget);
   for (var i = 0; i < maxDrags && target.evaluate().isEmpty; i++) {
-    final active = scrollable.hitTestable();
-    expect(active, findsWidgets);
-    await tester.drag(active.first, const Offset(0, -120), warnIfMissed: false);
+    // Use a stable point inside the 320px Tutor conversation viewport instead
+    // of the ListView RenderBox centre, which can sit behind the pinned
+    // composer at large text scale.
+    await tester.dragFrom(const Offset(160, 300), const Offset(0, -120));
     await tester.pump();
   }
   expect(target, findsOneWidget);
@@ -82,19 +83,14 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byKey(const ValueKey('grounded-tutor-screen')), findsOneWidget);
-    final tutorScrollable = find.byKey(const ValueKey('grounded-tutor-scroll'));
-    await _scrollUntilFound(tester, find.byKey(const ValueKey('grounded-tutor-empty')), scrollable: tutorScrollable);
+    await _scrollTutorUntilFound(tester, find.byKey(const ValueKey('grounded-tutor-empty')));
     expect(find.textContaining('öğrenme kanıtı'), findsWidgets);
 
     await tester.enterText(find.byKey(const ValueKey('grounded-tutor-question')), 'Klorofil ne işe yarar?');
     await tester.tap(find.byKey(const ValueKey('grounded-tutor-send')));
     await tester.pumpAndSettle();
 
-    await _scrollUntilFound(
-      tester,
-      find.byKey(const ValueKey('grounded-tutor-next-actions')),
-      scrollable: tutorScrollable,
-    );
+    await _scrollTutorUntilFound(tester, find.byKey(const ValueKey('grounded-tutor-next-actions')));
     expect(find.textContaining('KAYNAĞA BAĞLI'), findsWidgets);
     expect(find.textContaining('Klorofil'), findsWidgets);
     expect(tester.takeException(), isNull);
