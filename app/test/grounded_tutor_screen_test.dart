@@ -41,7 +41,7 @@ Future<void> _waitForTutorSubmitToFinish(
   expect(field.controller?.text ?? '', isEmpty, reason: 'Tutor submit should finish before response UI assertions.');
 }
 
-Future<void> _scrollTutorUntilFound(WidgetTester tester, Finder target, {int maxDrags = 20}) async {
+Future<void> _scrollTutorUntilFound(WidgetTester tester, Finder target, {int maxSteps = 40}) async {
   final listFinder = find.byKey(const ValueKey('grounded-tutor-scroll'));
   expect(listFinder, findsOneWidget);
   final list = tester.widget<ListView>(listFinder);
@@ -50,9 +50,20 @@ Future<void> _scrollTutorUntilFound(WidgetTester tester, Finder target, {int max
   expect(controller!.hasClients, isTrue);
   expect(controller.position.viewportDimension, greaterThan(0));
 
-  for (var i = 0; i < maxDrags && target.evaluate().isEmpty; i++) {
+  // Tutor auto-scrolls to the newest action after a response. On compact,
+  // large-text layouts that can place the supported turn just above the
+  // viewport. Traverse from the top instead of repeatedly jumping to the
+  // bottom, which can skip and recycle the very card this proof is checking.
+  controller.jumpTo(controller.position.minScrollExtent);
+  await tester.pump();
+
+  for (var i = 0; i < maxSteps && target.evaluate().isEmpty; i++) {
     final position = controller.position;
-    controller.jumpTo(position.maxScrollExtent);
+    final next = (position.pixels + position.viewportDimension * 0.55)
+        .clamp(position.minScrollExtent, position.maxScrollExtent)
+        .toDouble();
+    if ((next - position.pixels).abs() < 0.5) break;
+    controller.jumpTo(next);
     await tester.pump();
   }
   expect(target, findsOneWidget);
@@ -115,9 +126,11 @@ void main() {
     await tester.tap(send);
     await _waitForTutorSubmitToFinish(tester, questionField: questionField);
     await _scrollTutorUntilFound(tester, find.textContaining('TUTOR · KAYNAĞA BAĞLI'));
+    expect(find.textContaining('TUTOR · KAYNAĞA BAĞLI'), findsOneWidget);
+    expect(find.textContaining('Klorofil ışığın soğurulmasına yardım eder.'), findsOneWidget);
+
     await _scrollTutorUntilFound(tester, find.byKey(const ValueKey('grounded-tutor-next-actions')));
-    expect(find.textContaining('KAYNAĞA BAĞLI'), findsWidgets);
-    expect(find.textContaining('Klorofil'), findsWidgets);
+    expect(find.byKey(const ValueKey('grounded-tutor-next-actions')), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 }
