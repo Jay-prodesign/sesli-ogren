@@ -68,6 +68,7 @@ void main() {
     addTearDown(() => tester.binding.setSurfaceSize(null));
     const source = 'Fotosentez ışık enerjisini kimyasal enerjiye dönüştürür.';
     ReaderAnnotationRecord? saved;
+    SourceAnchor? tutorAnchor;
     SourceAnchor? recalledAnchor;
 
     await tester.pumpWidget(
@@ -95,6 +96,7 @@ void main() {
             );
             return saved!;
           },
+          onTutorSelection: (anchor) => tutorAnchor = anchor,
           onRecallSelection: (anchor) => recalledAnchor = anchor,
         ),
       ),
@@ -134,6 +136,12 @@ void main() {
     expect(saved!.noteText, 'Enerji dönüşümünü tekrar sor.');
     expect(find.byKey(const ValueKey('reader-annotation-reader-test-note')), findsOneWidget);
     expect(tester.takeException(), isNull);
+
+    await tester.tap(find.byKey(const ValueKey('reader-selection-tutor')));
+    await tester.pump();
+    expect(tutorAnchor, isNotNull);
+    expect(tutorAnchor!.startOffset, selectedStart);
+    expect(tutorAnchor!.endOffset, selectedEnd);
 
     await tester.tap(find.byKey(const ValueKey('reader-selection-recall')));
     await tester.pump();
