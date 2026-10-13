@@ -129,6 +129,28 @@ void main() {
     );
   });
 
+  test('study target evaluation preserves the caller calendar zone', () {
+    final evaluatedAt = DateTime(2026, 10, 13, 23, 59);
+    expect(evaluatedAt.isUtc, isFalse);
+
+    final projection = StudyTargetProjection(
+      target: StudyTargetRecord(
+        id: const StudyTargetId('calendar-zone-target'),
+        title: 'Yerel gün hedefi',
+        targetDate: DateTime(2026, 10, 14),
+        materials: const [],
+        createdAt: DateTime.utc(2026, 10, 13),
+        updatedAt: DateTime.utc(2026, 10, 13),
+      ),
+      materials: const [],
+      evaluatedAt: evaluatedAt,
+    );
+
+    expect(projection.evaluatedAt, same(evaluatedAt));
+    expect(projection.evaluatedAt.isUtc, isFalse);
+    expect(projection.daysUntilTarget, 1);
+  });
+
   test('target date is calendar context and never produces readiness math', () {
     final target = StudyTargetRecord(
       id: const StudyTargetId('exam-date-only'),
