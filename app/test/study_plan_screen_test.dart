@@ -154,9 +154,13 @@ void main() {
     expect(find.byKey(const ValueKey('study-plan-material-study-plan-screen-material')), findsOneWidget);
 
     final save = find.byKey(const ValueKey('study-plan-save'));
+    await _scrollUntilFound(tester, save);
     await tester.ensureVisible(save);
     await tester.tap(save.hitTestable());
-    await _pumpUntilFound(tester, find.text('Güncel kaynak'));
+    await tester.pump();
+    final reconciledSource = find.text('Güncel kaynak');
+    await _scrollUntilFound(tester, reconciledSource);
+    expect(reconciledSource, findsOneWidget);
     expect(find.text('Kaynak değişti'), findsNothing);
 
     final stored = await runtime.store.activeStudyTarget(learner: runtime.learner);
