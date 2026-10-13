@@ -124,10 +124,7 @@ class RetentionPolicy {
     );
   }
 
-  static Duration _intervalFor({
-    required RetentionOutcomeBand outcomeBand,
-    required int successStreak,
-  }) {
+  static Duration _intervalFor({required RetentionOutcomeBand outcomeBand, required int successStreak}) {
     return switch (outcomeBand) {
       RetentionOutcomeBand.independentRetrieval => switch (successStreak) {
         <= 1 => const Duration(days: 1),
