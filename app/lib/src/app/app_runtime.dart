@@ -2,6 +2,9 @@ import '../account/account_deletion_gateway.dart';
 import '../account/account_overview_gateway.dart';
 import '../account/supabase_account_deletion_gateway.dart';
 import '../account/supabase_account_overview_gateway.dart';
+import '../continuity/cloud_continuity_gateway.dart';
+import '../continuity/cloud_continuity_service.dart';
+import '../continuity/supabase_cloud_continuity_gateway.dart';
 import '../data/operational_telemetry.dart';
 import '../data/image_text_extractor.dart';
 import '../data/office_text_extractor.dart';
@@ -40,6 +43,7 @@ class AppRuntime {
     FlashcardLearningService? flashcards,
     QuizLearningService? quiz,
     GroundedTutorService? tutor,
+    CloudContinuityService? continuity,
     this.explain = const UnavailableGroundedExplainGateway(),
     this.explainBack = const UnavailableExplainBackGateway(),
     this.focusHelp = const UnavailableFocusHelpGateway(),
@@ -47,7 +51,14 @@ class AppRuntime {
     this.accountDeletion = const UnavailableAccountDeletionGateway(),
   }) : flashcards = flashcards ?? FlashcardLearningService(store: store),
        quiz = quiz ?? QuizLearningService(store: store),
-       tutor = tutor ?? GroundedTutorService(store: store);
+       tutor = tutor ?? GroundedTutorService(store: store),
+       continuity =
+           continuity ??
+           CloudContinuityService(
+             store: store,
+             ingest: ingest,
+             gateway: const UnavailableCloudContinuityGateway(),
+           );
 
   /// Device-local production namespace. It is explicitly not an account.
   static const localLearner = LearnerIdentity.local();
@@ -67,6 +78,7 @@ class AppRuntime {
   final FlashcardLearningService flashcards;
   final QuizLearningService quiz;
   final GroundedTutorService tutor;
+  final CloudContinuityService continuity;
   final OperationalTelemetry telemetry;
   final GroundedExplainGateway explain;
   final ExplainBackGateway explainBack;
@@ -89,6 +101,11 @@ class AppRuntime {
       ingest: ingest,
       recall: recall,
       telemetry: store.operationalTelemetry(),
+      continuity: CloudContinuityService(
+        store: store,
+        ingest: ingest,
+        gateway: const SupabaseCloudContinuityGateway(),
+      ),
       explain: const SupabaseGroundedExplainGateway(),
       explainBack: const SupabaseExplainBackGateway(),
       focusHelp: const SupabaseFocusHelpGateway(),
@@ -131,6 +148,11 @@ class AppRuntime {
       ingest: ingest,
       recall: recall,
       telemetry: telemetry,
+      continuity: CloudContinuityService(
+        store: store,
+        ingest: ingest,
+        gateway: const SupabaseCloudContinuityGateway(),
+      ),
       explain: const SupabaseGroundedExplainGateway(),
       explainBack: const SupabaseExplainBackGateway(),
       focusHelp: const SupabaseFocusHelpGateway(),

@@ -653,6 +653,25 @@ FROM summary_jobs
 ''');
   }
 
+  Future<ServerMaterialBinding?> serverMaterialBinding({
+    required AuthenticatedLearner learner,
+    required MaterialId materialId,
+  }) async {
+    final rows = await _database.query(
+      'server_material_bindings',
+      columns: ['source_version_id', 'server_material_id'],
+      where: 'learner_id = ? AND material_id = ?',
+      whereArgs: [learner.id.value, materialId.value],
+      limit: 1,
+    );
+    if (rows.isEmpty) return null;
+    return ServerMaterialBinding(
+      materialId: materialId,
+      sourceVersionId: SourceVersionId(rows.first['source_version_id']! as String),
+      serverMaterialId: rows.first['server_material_id']! as String,
+    );
+  }
+
   Future<String?> summaryJobId({
     required AuthenticatedLearner learner,
     required MaterialId materialId,
@@ -4565,6 +4584,18 @@ class SqliteOperationalTelemetry implements OperationalTelemetry {
         })
         .toList(growable: false);
   }
+}
+
+class ServerMaterialBinding {
+  const ServerMaterialBinding({
+    required this.materialId,
+    required this.sourceVersionId,
+    required this.serverMaterialId,
+  });
+
+  final MaterialId materialId;
+  final SourceVersionId sourceVersionId;
+  final String serverMaterialId;
 }
 
 class CachedSummaryResult {

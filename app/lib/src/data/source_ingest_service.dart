@@ -284,6 +284,24 @@ class SourceIngestService {
     );
   }
 
+  static SourceVersionId deriveSourceVersionId({
+    required AuthenticatedLearner learner,
+    required MaterialId materialId,
+    required SourceMediaType mediaType,
+    required String contentDigest,
+  }) {
+    _requireIdentity(learner: learner, materialId: materialId);
+    final versionDigest = sha256
+        .convert(
+          utf8.encode(
+            '${learner.id.value}\u0000${materialId.value}\u0000'
+            '${mediaType.name}\u0000$contentDigest',
+          ),
+        )
+        .toString();
+    return SourceVersionId('sv_${versionDigest.substring(0, 32)}');
+  }
+
   Future<SourceIngestResult> _persist({
     required AuthenticatedLearner learner,
     required MaterialId materialId,
@@ -302,15 +320,12 @@ class SourceIngestService {
   }) {
     _requireIdentity(learner: learner, materialId: materialId);
 
-    final versionDigest = sha256
-        .convert(
-          utf8.encode(
-            '${learner.id.value}\u0000${materialId.value}\u0000'
-            '${mediaType.name}\u0000$digest',
-          ),
-        )
-        .toString();
-    final sourceVersionId = SourceVersionId('sv_${versionDigest.substring(0, 32)}');
+    final sourceVersionId = deriveSourceVersionId(
+      learner: learner,
+      materialId: materialId,
+      mediaType: mediaType,
+      contentDigest: digest,
+    );
     final extractionDigest = sha256
         .convert(
           utf8.encode(

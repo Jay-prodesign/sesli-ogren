@@ -186,6 +186,15 @@ select pg_temp.ok(
   'legacy server mirror was duplicated instead of adopting stable Material lineage'
 );
 
+select count(*)::integer as visible_count
+from public.list_material_continuity()
+\gset user_a_list_
+
+select pg_temp.ok(
+  :'user_a_list_visible_count'::integer = 2,
+  'continuity library discovery did not return both active learner materials'
+);
+
 reset role;
 
 select set_config('request.jwt.claim.sub', :user_b, false);
@@ -214,6 +223,15 @@ select pg_temp.ok(
   :'other_read_material_id'::uuid = :'other_material_id'::uuid
   and :'other_read_client_source_id' = 'sv_cross_device_000000000000000000000001',
   'tenant continuity read escaped the authenticated learner namespace'
+);
+
+select count(*)::integer as visible_count
+from public.list_material_continuity()
+\gset user_b_list_
+
+select pg_temp.ok(
+  :'user_b_list_visible_count'::integer = 1,
+  'continuity library discovery crossed the authenticated learner boundary'
 );
 
 reset role;

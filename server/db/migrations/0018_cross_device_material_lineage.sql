@@ -372,6 +372,9 @@ returns table (
   client_source_id text,
   source_version integer,
   source_content_hash text,
+  source_type text,
+  mime_type text,
+  byte_size bigint,
   inline_text text,
   extracted_content_id uuid,
   normalized_text text,
@@ -390,6 +393,9 @@ as $$
          s.client_source_version_key,
          s.source_version,
          s.content_hash,
+         s.source_type,
+         s.mime_type,
+         s.byte_size,
          s.inline_text,
          e.id,
          e.normalized_text,
@@ -410,16 +416,74 @@ as $$
     and m.lifecycle_status = 'active'
   order by s.source_version desc, e.created_at desc
   limit 1
-$$;
+$;
+
+create or replace function public.list_material_continuity()
+returns table (
+  material_id uuid,
+  title text,
+  client_material_id text,
+  source_asset_id uuid,
+  client_source_id text,
+  source_version integer,
+  source_content_hash text,
+  source_type text,
+  mime_type text,
+  byte_size bigint,
+  inline_text text,
+  extracted_content_id uuid,
+  normalized_text text,
+  anchors jsonb,
+  material_updated_at timestamptz,
+  source_created_at timestamptz
+)
+language sql
+security definer
+set search_path = ''
+as $
+  select m.id,
+         m.title,
+         m.client_material_key,
+         s.id,
+         s.client_source_version_key,
+         s.source_version,
+         s.content_hash,
+         s.source_type,
+         s.mime_type,
+         s.byte_size,
+         s.inline_text,
+         e.id,
+         e.normalized_text,
+         e.anchors,
+         m.updated_at,
+         s.created_at
+  from public.materials m
+  join public.source_assets s
+    on s.material_id = m.id
+   and s.account_id = m.account_id
+   and s.revoked_at is null
+  join public.extracted_contents e
+    on e.source_asset_id = s.id
+   and e.account_id = m.account_id
+   and e.invalidated_at is null
+  where m.account_id = public.la_require_user()
+    and m.client_material_key is not null
+    and s.client_source_version_key is not null
+    and m.lifecycle_status = 'active'
+  order by m.updated_at desc, m.id, s.source_version desc, e.created_at desc
+$;
 
 revoke all on function public.ensure_text_material_continuity(text, text, text, text, text),
-                       public.read_material_continuity(text)
+                       public.read_material_continuity(text),
+                       public.list_material_continuity()
 from public, anon, authenticated;
 
 grant execute on function public.ensure_text_material_continuity(text, text, text, text, text),
-                          public.read_material_continuity(text)
+                          public.read_material_continuity(text),
+                          public.list_material_continuity()
 to authenticated;
 
 grant execute on function public.ensure_text_material_continuity(text, text, text, text, text),
-                          public.read_material_continuity(text)
+                          public.read_material_continuity(text),
+                          public.list_material_continuity()
 to service_role;
