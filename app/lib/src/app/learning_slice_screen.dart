@@ -753,14 +753,23 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
       ),
     );
     try {
-      final anchoredSourceVersionId = widget.requestedRecallSourceVersionId ?? widget.scheduledReviewSourceVersionId;
-      final anchoredSourceAnchor = widget.requestedRecallSourceAnchor ?? widget.scheduledReviewSourceAnchor;
-      final prompt = anchoredSourceVersionId != null && anchoredSourceAnchor != null
+      final requestedSourceVersionId = widget.requestedRecallSourceVersionId;
+      final requestedSourceAnchor = widget.requestedRecallSourceAnchor;
+      final scheduledSourceVersionId = widget.scheduledReviewSourceVersionId;
+      final scheduledSourceAnchor = widget.scheduledReviewSourceAnchor;
+      final prompt = requestedSourceVersionId != null && requestedSourceAnchor != null
+          ? await widget.runtime.recall.createContextPrompt(
+              learner: widget.runtime.learner,
+              materialId: widget.materialId,
+              sourceVersionId: requestedSourceVersionId,
+              selectedAnchor: requestedSourceAnchor,
+            )
+          : scheduledSourceVersionId != null && scheduledSourceAnchor != null
           ? await widget.runtime.recall.createScheduledPrompt(
               learner: widget.runtime.learner,
               materialId: widget.materialId,
-              sourceVersionId: anchoredSourceVersionId,
-              sourceAnchor: anchoredSourceAnchor,
+              sourceVersionId: scheduledSourceVersionId,
+              sourceAnchor: scheduledSourceAnchor,
             )
           : await widget.runtime.recall.createCurrentPrompt(
               learner: widget.runtime.learner,

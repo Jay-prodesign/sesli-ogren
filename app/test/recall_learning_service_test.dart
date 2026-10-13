@@ -607,4 +607,39 @@ void main() {
       await temp.delete(recursive: true);
     }
   });
+  test('Reader context Recall resolves a normal selected phrase to a source-grounded prompt', () async {
+    final source = await sourceStore.currentSourceVersion(learner: learnerA, materialId: materialId);
+    expect(source, isNotNull);
+    final extracted = await sourceStore.extractedContentForSource(
+      learner: learnerA,
+      sourceVersionId: source!.identity.sourceVersionId,
+    );
+    expect(extracted, isNotNull);
+    final text = extracted!.normalizedText;
+    final start = text.indexOf('ışık enerjisini');
+    expect(start, greaterThanOrEqualTo(0));
+
+    final prompt = await recall.createContextPrompt(
+      learner: learnerA,
+      materialId: materialId,
+      sourceVersionId: source.identity.sourceVersionId,
+      selectedAnchor: SourceAnchor(startOffset: start, endOffset: start + 'ışık enerjisini'.length),
+    );
+
+    expect(prompt.sourceVersionId, source.identity.sourceVersionId);
+    expect(prompt.anchor.startOffset, lessThanOrEqualTo(start));
+    expect(prompt.anchor.endOffset, greaterThan(start));
+    expect(prompt.promptText, contains('_____'));
+    final action = await storedAction(prompt);
+    expect(action.expectedAnswer, 'enerjisini');
+    expect(
+      await sourceStore.learningTruthStore().evidenceForMaterial(
+        learner: learnerA,
+        materialId: materialId,
+        sourceVersionId: source.identity.sourceVersionId,
+      ),
+      isEmpty,
+    );
+  });
+
 }
