@@ -551,7 +551,7 @@ class _SourceReaderScreenState extends State<SourceReaderScreen> {
                     Icon(
                       annotation.kind == ReaderAnnotationKind.note
                           ? Icons.note_alt_outlined
-                          : Icons.ink_highlighter_outlined,
+                          : Icons.border_color_outlined,
                       size: 18,
                       color: accent,
                     ),
@@ -871,7 +871,7 @@ class _SourceReaderScreenState extends State<SourceReaderScreen> {
                           OutlinedButton.icon(
                             key: const ValueKey('reader-selection-highlight'),
                             onPressed: _annotationBusy ? null : () => _saveAnnotation(ReaderAnnotationKind.highlight),
-                            icon: const Icon(Icons.ink_highlighter_outlined),
+                            icon: const Icon(Icons.border_color_outlined),
                             label: const Text('Vurgula'),
                           ),
                         if (widget.onSaveAnnotation != null)
