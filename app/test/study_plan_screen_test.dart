@@ -115,13 +115,15 @@ void main() {
     await _pumpUntilFound(tester, find.text('Fizik ara sınavı'));
     expect(tester.takeException(), isNull);
     expect(find.textContaining('hazır olma puanı değildir'), findsOneWidget);
-    expect(find.text('Güncel kaynak'), findsOneWidget);
     expect(find.textContaining('%'), findsNothing);
     final nextAction = find.byKey(const ValueKey('study-plan-next-action'));
     await _scrollUntilFound(tester, nextAction);
     expect(nextAction, findsOneWidget);
     expect(find.text('İlk hatırlamayı dene'), findsOneWidget);
     expect(find.textContaining('henüz bağımsız hatırlama kanıtı yok'), findsOneWidget);
+    final currentSourceStatus = find.text('Güncel kaynak');
+    await _scrollUntilFound(tester, currentSourceStatus);
+    expect(currentSourceStatus, findsOneWidget);
 
     await runtime.ingest.ingestPastedText(
       learner: runtime.learner,
@@ -134,11 +136,15 @@ void main() {
 
     await tester.pumpWidget(const SizedBox.shrink());
     await _pumpPlan(tester, runtime);
-    await _pumpUntilFound(tester, find.text('Kaynak değişti'));
     expect(tester.takeException(), isNull);
     expect(find.textContaining('Eski sürümden yeni görev üretmiyoruz'), findsOneWidget);
-    expect(find.text('Planı güncel kaynaklara bağla'), findsOneWidget);
     expect(find.byKey(const ValueKey('study-plan-next-action')), findsNothing);
+    final changedSourceStatus = find.text('Kaynak değişti');
+    await _scrollUntilFound(tester, changedSourceStatus);
+    expect(changedSourceStatus, findsOneWidget);
+    final reconcileAction = find.text('Planı güncel kaynaklara bağla');
+    await _scrollUntilFound(tester, reconcileAction);
+    expect(reconcileAction, findsOneWidget);
 
     final reconcile = find.byKey(const ValueKey('study-plan-primary'));
     await tester.ensureVisible(reconcile);
