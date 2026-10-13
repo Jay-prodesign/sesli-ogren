@@ -8,12 +8,7 @@ import 'companion_view.dart';
 import 'living_study_desk_home.dart';
 
 class StudyPlanHomeCard extends StatelessWidget {
-  const StudyPlanHomeCard({
-    required this.projection,
-    required this.hasMaterials,
-    required this.onOpen,
-    super.key,
-  });
+  const StudyPlanHomeCard({required this.projection, required this.hasMaterials, required this.onOpen, super.key});
 
   final StudyTargetProjection? projection;
   final bool hasMaterials;
@@ -321,20 +316,7 @@ class _StudyPlanScreenState extends State<StudyPlanScreen> {
   }
 
   String _dateLabel(DateTime date) {
-    const months = <String>[
-      'Oca',
-      'Şub',
-      'Mar',
-      'Nis',
-      'May',
-      'Haz',
-      'Tem',
-      'Ağu',
-      'Eyl',
-      'Eki',
-      'Kas',
-      'Ara',
-    ];
+    const months = <String>['Oca', 'Şub', 'Mar', 'Nis', 'May', 'Haz', 'Tem', 'Ağu', 'Eyl', 'Eki', 'Kas', 'Ara'];
     return '${date.day} ${months[date.month - 1]} ${date.year}';
   }
 
@@ -350,10 +332,7 @@ class _StudyPlanScreenState extends State<StudyPlanScreen> {
     return Scaffold(
       key: const ValueKey('study-plan-screen'),
       backgroundColor: living ? AtelierStyle.canvas : null,
-      appBar: AppBar(
-        title: const Text('Sınav / Çalışma Planı'),
-        backgroundColor: living ? AtelierStyle.canvas : null,
-      ),
+      appBar: AppBar(title: const Text('Sınav / Çalışma Planı'), backgroundColor: living ? AtelierStyle.canvas : null),
       body: SafeArea(
         child: FutureBuilder<_StudyPlanData>(
           future: _future,
@@ -438,12 +417,12 @@ class _StudyPlanScreenState extends State<StudyPlanScreen> {
           ),
         ),
         const SizedBox(height: 18),
-        const Text('Kaynak kapsamı', style: TextStyle(color: AtelierStyle.ink, fontSize: 17, fontWeight: FontWeight.w900)),
+        const Text(
+          'Kaynak kapsamı',
+          style: TextStyle(color: AtelierStyle.ink, fontSize: 17, fontWeight: FontWeight.w900),
+        ),
         const SizedBox(height: 8),
-        for (final item in projection.materials) ...[
-          _materialStatus(item),
-          const SizedBox(height: 8),
-        ],
+        for (final item in projection.materials) ...[_materialStatus(item), const SizedBox(height: 8)],
         const SizedBox(height: 12),
         FilledButton.icon(
           key: const ValueKey('study-plan-primary'),
@@ -503,7 +482,10 @@ class _StudyPlanScreenState extends State<StudyPlanScreen> {
               children: [
                 Text(title, maxLines: 2, overflow: TextOverflow.ellipsis),
                 const SizedBox(height: 2),
-                Text(label, style: TextStyle(color: color, fontSize: 11.5, fontWeight: FontWeight.w800)),
+                Text(
+                  label,
+                  style: TextStyle(color: color, fontSize: 11.5, fontWeight: FontWeight.w800),
+                ),
               ],
             ),
           ),
@@ -545,13 +527,13 @@ class _StudyPlanScreenState extends State<StudyPlanScreen> {
           label: Text(_selectedDate == null ? 'Hedef tarihini seç' : _dateLabel(_selectedDate!)),
         ),
         const SizedBox(height: 18),
-        const Text('Bu hedefe bağlı kaynaklar', style: TextStyle(color: AtelierStyle.ink, fontWeight: FontWeight.w900)),
+        const Text(
+          'Bu hedefe bağlı kaynaklar',
+          style: TextStyle(color: AtelierStyle.ink, fontWeight: FontWeight.w900),
+        ),
         const SizedBox(height: 6),
         if (available.isEmpty)
-          const Text(
-            'Planlanabilecek güncel ve hazır bir kaynak yok.',
-            style: TextStyle(color: AtelierStyle.muted),
-          )
+          const Text('Planlanabilecek güncel ve hazır bir kaynak yok.', style: TextStyle(color: AtelierStyle.muted))
         else
           for (final item in available)
             CheckboxListTile(
@@ -575,7 +557,11 @@ class _StudyPlanScreenState extends State<StudyPlanScreen> {
             ),
         if (_error != null) ...[
           const SizedBox(height: 10),
-          Text(_error!, key: const ValueKey('study-plan-error'), style: const TextStyle(color: AppPalette.attention)),
+          Text(
+            _error!,
+            key: const ValueKey('study-plan-error'),
+            style: const TextStyle(color: AppPalette.attention),
+          ),
         ],
         const SizedBox(height: 18),
         FilledButton.icon(
@@ -656,7 +642,11 @@ class _StudyPlanError extends StatelessWidget {
           const SizedBox(height: 12),
           const Text('Plan açılamadı. Öğrenme durumunu tahmin etmiyoruz.', textAlign: TextAlign.center),
           const SizedBox(height: 14),
-          OutlinedButton.icon(onPressed: onRetry, icon: const Icon(Icons.refresh_rounded), label: const Text('Tekrar dene')),
+          OutlinedButton.icon(
+            onPressed: onRetry,
+            icon: const Icon(Icons.refresh_rounded),
+            label: const Text('Tekrar dene'),
+          ),
         ],
       ),
     ),

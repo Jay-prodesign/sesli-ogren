@@ -13,11 +13,7 @@ class StudyTargetId {
 }
 
 class StudyTargetMaterialBinding {
-  const StudyTargetMaterialBinding({
-    required this.materialId,
-    required this.sourceVersionId,
-    required this.ordinal,
-  });
+  const StudyTargetMaterialBinding({required this.materialId, required this.sourceVersionId, required this.ordinal});
 
   final MaterialId materialId;
   final SourceVersionId sourceVersionId;

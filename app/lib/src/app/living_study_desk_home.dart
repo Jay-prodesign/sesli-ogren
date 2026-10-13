@@ -664,11 +664,7 @@ class LivingStudyDeskHome extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 10),
-        StudyPlanHomeCard(
-          projection: studyTarget,
-          hasMaterials: material != null,
-          onOpen: onOpenStudyPlan,
-        ),
+        StudyPlanHomeCard(projection: studyTarget, hasMaterials: material != null, onOpen: onOpenStudyPlan),
         if (_evidenceHeadline != null) ...[
           const SizedBox(height: 12),
           Semantics(

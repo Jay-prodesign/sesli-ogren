@@ -2487,10 +2487,7 @@ LIMIT ?
     );
   }
 
-  Future<void> saveStudyTarget({
-    required AuthenticatedLearner learner,
-    required StudyTargetRecord target,
-  }) {
+  Future<void> saveStudyTarget({required AuthenticatedLearner learner, required StudyTargetRecord target}) {
     return _database.transaction((transaction) async {
       if (target.archivedAt != null) {
         throw const SourceStoreConflict('Active study target cannot be saved as archived.');
@@ -2545,19 +2542,15 @@ LIMIT 1
         where: 'learner_id = ? AND archived_at_utc IS NULL AND study_target_id != ?',
         whereArgs: [learner.id.value, target.id.value],
       );
-      await transaction.insert(
-        'study_targets',
-        {
-          'learner_id': learner.id.value,
-          'study_target_id': target.id.value,
-          'title': title,
-          'target_date_utc': StudyTargetRecord.normalizeDate(target.targetDate).toIso8601String(),
-          'created_at_utc': target.createdAt.toUtc().toIso8601String(),
-          'updated_at_utc': updatedAt,
-          'archived_at_utc': null,
-        },
-        conflictAlgorithm: ConflictAlgorithm.replace,
-      );
+      await transaction.insert('study_targets', {
+        'learner_id': learner.id.value,
+        'study_target_id': target.id.value,
+        'title': title,
+        'target_date_utc': StudyTargetRecord.normalizeDate(target.targetDate).toIso8601String(),
+        'created_at_utc': target.createdAt.toUtc().toIso8601String(),
+        'updated_at_utc': updatedAt,
+        'archived_at_utc': null,
+      }, conflictAlgorithm: ConflictAlgorithm.replace);
       await transaction.delete(
         'study_target_materials',
         where: 'learner_id = ? AND study_target_id = ?',
@@ -2582,10 +2575,7 @@ LIMIT 1
   }) async {
     await _database.update(
       'study_targets',
-      {
-        'archived_at_utc': archivedAt.toUtc().toIso8601String(),
-        'updated_at_utc': archivedAt.toUtc().toIso8601String(),
-      },
+      {'archived_at_utc': archivedAt.toUtc().toIso8601String(), 'updated_at_utc': archivedAt.toUtc().toIso8601String()},
       where: 'learner_id = ? AND study_target_id = ? AND archived_at_utc IS NULL',
       whereArgs: [learner.id.value, targetId.value],
     );

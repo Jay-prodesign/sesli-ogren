@@ -251,11 +251,7 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
 
   Future<void> _openStudyPlan() async {
     if (!mounted) return;
-    await Navigator.of(context).push<void>(
-      MaterialPageRoute(
-        builder: (_) => StudyPlanScreen(runtime: widget.runtime),
-      ),
-    );
+    await Navigator.of(context).push<void>(MaterialPageRoute(builder: (_) => StudyPlanScreen(runtime: widget.runtime)));
     if (!mounted) return;
     setState(_refresh);
   }
