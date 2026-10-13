@@ -225,10 +225,8 @@ class _SourceReaderScreenState extends State<SourceReaderScreen> {
       final saved = await callback(anchor, selected, kind, noteText);
       if (!mounted) return;
       setState(() {
-        _annotations = [
-          ..._annotations.where((item) => item.id != saved.id),
-          saved,
-        ]..sort((left, right) => left.sourceAnchor.startOffset.compareTo(right.sourceAnchor.startOffset));
+        _annotations = [..._annotations.where((item) => item.id != saved.id), saved]
+          ..sort((left, right) => left.sourceAnchor.startOffset.compareTo(right.sourceAnchor.startOffset));
       });
     } catch (_) {
       if (!mounted) return;
@@ -366,10 +364,7 @@ class _SourceReaderScreenState extends State<SourceReaderScreen> {
       if (end <= start) continue;
       final inSearch = matches.any((match) => start >= match.start && end <= match.end);
       final annotation = _annotations.cast<ReaderAnnotationRecord?>().firstWhere(
-        (item) =>
-            item != null &&
-            start >= item.sourceAnchor.startOffset &&
-            end <= item.sourceAnchor.endOffset,
+        (item) => item != null && start >= item.sourceAnchor.startOffset && end <= item.sourceAnchor.endOffset,
         orElse: () => null,
       );
       spans.add(
@@ -377,7 +372,11 @@ class _SourceReaderScreenState extends State<SourceReaderScreen> {
           text: source.substring(start, end),
           style: TextStyle(
             color: ink,
-            backgroundColor: inSearch ? searchHighlight : annotation != null ? annotationHighlight : null,
+            backgroundColor: inSearch
+                ? searchHighlight
+                : annotation != null
+                ? annotationHighlight
+                : null,
             fontWeight: inSearch ? FontWeight.w700 : null,
             decoration: annotation?.kind == ReaderAnnotationKind.note ? TextDecoration.underline : null,
             decorationThickness: annotation?.kind == ReaderAnnotationKind.note ? 1.5 : null,
@@ -550,7 +549,9 @@ class _SourceReaderScreenState extends State<SourceReaderScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Icon(
-                      annotation.kind == ReaderAnnotationKind.note ? Icons.note_alt_outlined : Icons.ink_highlighter_outlined,
+                      annotation.kind == ReaderAnnotationKind.note
+                          ? Icons.note_alt_outlined
+                          : Icons.ink_highlighter_outlined,
                       size: 18,
                       color: accent,
                     ),
@@ -808,25 +809,25 @@ class _SourceReaderScreenState extends State<SourceReaderScreen> {
                       ),
                     )
                   : ListView(
-                        key: const ValueKey('reader-source-scroll'),
-                        controller: _readingScroll,
-                        padding: const EdgeInsets.fromLTRB(20, 16, 20, 28),
-                        children: [
-                          if (living)
-                            DecoratedBox(
-                              decoration: BoxDecoration(
-                                color: paper,
-                                borderRadius: BorderRadius.circular(22),
-                                boxShadow: const [
-                                  BoxShadow(color: Color(0x1014224A), blurRadius: 24, offset: Offset(0, 10)),
-                                ],
-                              ),
-                              child: Padding(padding: const EdgeInsets.fromLTRB(22, 22, 22, 28), child: article),
-                            )
-                          else
-                            article,
-                        ],
-                      ),
+                      key: const ValueKey('reader-source-scroll'),
+                      controller: _readingScroll,
+                      padding: const EdgeInsets.fromLTRB(20, 16, 20, 28),
+                      children: [
+                        if (living)
+                          DecoratedBox(
+                            decoration: BoxDecoration(
+                              color: paper,
+                              borderRadius: BorderRadius.circular(22),
+                              boxShadow: const [
+                                BoxShadow(color: Color(0x1014224A), blurRadius: 24, offset: Offset(0, 10)),
+                              ],
+                            ),
+                            child: Padding(padding: const EdgeInsets.fromLTRB(22, 22, 22, 28), child: article),
+                          )
+                        else
+                          article,
+                      ],
+                    ),
             ),
             if (_selectedAnchor != null && _selectedText != null)
               Container(
@@ -896,7 +897,10 @@ class _SourceReaderScreenState extends State<SourceReaderScreen> {
                     ),
                     if (_annotationError != null) ...[
                       const SizedBox(height: 6),
-                      Text(_annotationError!, style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.error)),
+                      Text(
+                        _annotationError!,
+                        style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.error),
+                      ),
                     ],
                   ],
                 ),

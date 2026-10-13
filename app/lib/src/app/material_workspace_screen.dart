@@ -169,17 +169,16 @@ class _MaterialWorkspaceScreenState extends State<MaterialWorkspaceScreen> {
             sourceAnchors: extracted.anchors,
             initialAnnotations: annotations,
             staleAnnotationCount: staleAnnotationCount,
-            onSaveAnnotation: (anchor, selectedText, kind, noteText) =>
-                widget.runtime.store.upsertReaderAnnotation(
-                  learner: widget.runtime.learner,
-                  materialId: data.material.id,
-                  sourceVersionId: sourceVersionId,
-                  sourceAnchor: anchor,
-                  selectedText: selectedText,
-                  kind: kind,
-                  noteText: noteText,
-                  updatedAt: DateTime.now().toUtc(),
-                ),
+            onSaveAnnotation: (anchor, selectedText, kind, noteText) => widget.runtime.store.upsertReaderAnnotation(
+              learner: widget.runtime.learner,
+              materialId: data.material.id,
+              sourceVersionId: sourceVersionId,
+              sourceAnchor: anchor,
+              selectedText: selectedText,
+              kind: kind,
+              noteText: noteText,
+              updatedAt: DateTime.now().toUtc(),
+            ),
             onDeleteAnnotation: (annotationId) => widget.runtime.store.deleteReaderAnnotation(
               learner: widget.runtime.learner,
               annotationId: annotationId,

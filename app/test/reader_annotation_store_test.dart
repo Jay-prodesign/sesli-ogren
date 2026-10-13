@@ -67,7 +67,10 @@ void main() {
       sourceVersionId: sourceVersionId,
     );
     expect(annotations.map((item) => item.id), containsAll([highlight.id, note.id]));
-    expect(annotations.where((item) => item.kind == ReaderAnnotationKind.note).single.noteText, 'Enerji dönüşümünü tekrar sor.');
+    expect(
+      annotations.where((item) => item.kind == ReaderAnnotationKind.note).single.noteText,
+      'Enerji dönüşümünü tekrar sor.',
+    );
     expect(
       await store.readerAnnotationsForSource(
         learner: account,
@@ -147,11 +150,7 @@ void main() {
     );
     final secondSourceId = second.sourceVersion.identity.sourceVersionId;
     expect(
-      await store.readerAnnotationsForSource(
-        learner: learner,
-        materialId: materialId,
-        sourceVersionId: secondSourceId,
-      ),
+      await store.readerAnnotationsForSource(learner: learner, materialId: materialId, sourceVersionId: secondSourceId),
       isEmpty,
     );
     expect(

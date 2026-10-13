@@ -753,8 +753,7 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
       ),
     );
     try {
-      final anchoredSourceVersionId =
-          widget.requestedRecallSourceVersionId ?? widget.scheduledReviewSourceVersionId;
+      final anchoredSourceVersionId = widget.requestedRecallSourceVersionId ?? widget.scheduledReviewSourceVersionId;
       final anchoredSourceAnchor = widget.requestedRecallSourceAnchor ?? widget.scheduledReviewSourceAnchor;
       final prompt = anchoredSourceVersionId != null && anchoredSourceAnchor != null
           ? await widget.runtime.recall.createScheduledPrompt(

@@ -104,7 +104,6 @@ class SqliteSourceStore implements SourceStore {
           }
           if (oldVersion < 18) {
             await _upgradeSourceVersionMediaSchema(db);
-          await _upgradeReaderAnnotationSchema(db);
           }
           if (oldVersion < 19) {
             await _upgradeReaderAnnotationSchema(db);
@@ -336,6 +335,7 @@ CREATE TABLE learner_preferences (
           await _upgradeQuizSchema(db);
           await _upgradeRetentionSchema(db);
           await _upgradeStudyPlanSchema(db);
+          await _upgradeReaderAnnotationSchema(db);
           await db.execute('''
 CREATE TABLE operational_events (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
