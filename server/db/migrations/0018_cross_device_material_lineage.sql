@@ -416,7 +416,7 @@ as $$
     and m.lifecycle_status = 'active'
   order by s.source_version desc, e.created_at desc
   limit 1
-$;
+$$;
 
 create or replace function public.list_material_continuity()
 returns table (
@@ -471,7 +471,7 @@ as $
     and s.client_source_version_key is not null
     and m.lifecycle_status = 'active'
   order by m.updated_at desc, m.id, s.source_version desc, e.created_at desc
-$;
+$$;
 
 revoke all on function public.ensure_text_material_continuity(text, text, text, text, text),
                        public.read_material_continuity(text),
