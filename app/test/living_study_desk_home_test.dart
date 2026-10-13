@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:sesli_ogren/src/app/living_study_desk_home.dart';
 import 'package:sesli_ogren/src/domain/learning_contracts.dart';
 import 'package:sesli_ogren/src/domain/learning_truth.dart';
+import 'package:sesli_ogren/src/domain/retention_schedule.dart';
 
 void usePhoneViewport(WidgetTester tester) {
   tester.view.physicalSize = const Size(390, 844);
@@ -58,6 +59,7 @@ void main() {
   Future<void> pumpHome(
     WidgetTester tester, {
     required LearningContinuation continuation,
+    RetentionMaterialStatus? retention,
     required VoidCallback onOpenWorkspace,
     required VoidCallback onOpenReader,
     required VoidCallback onOpenLearning,
@@ -70,6 +72,7 @@ void main() {
           body: LivingStudyDeskHome(
             material: material,
             continuation: continuation,
+            retention: retention,
             sourceText: 'Fotosentez sırasında klorofil ışık enerjisinin yakalanmasına yardım eder.',
             otherMaterials: const [],
             onOpenWorkspace: onOpenWorkspace,
@@ -106,6 +109,56 @@ void main() {
     expect(find.text('Çalışma alanına dön'), findsOneWidget);
     final cta = find.byKey(const ValueKey('la0040-living-continue'));
     await tapHomeCta(tester, cta);
+    await tester.pump();
+
+    expect(workspaceOpens, 1);
+    expect(readerOpens, 0);
+    expect(learningOpens, 0);
+  });
+
+  testWidgets('due retention becomes the truthful Home next action without claiming mastery', (tester) async {
+    usePhoneViewport(tester);
+    var workspaceOpens = 0;
+    var readerOpens = 0;
+    var learningOpens = 0;
+    final dueAt = DateTime.utc(2026, 10, 13, 8);
+    final retention = RetentionMaterialStatus(
+      evaluatedAt: dueAt,
+      schedules: [
+        RetentionScheduleRecord(
+          id: const RetentionScheduleId('home-due-retention'),
+          materialId: materialId,
+          sourceVersionId: versionId,
+          sourceAnchor: const SourceAnchor(startOffset: 0, endOffset: 48),
+          latestEvidenceKind: RetentionEvidenceKind.quiz,
+          latestOutcomeBand: RetentionOutcomeBand.independentRetrieval,
+          latestEventId: 'quiz:event-1',
+          reasonCode: 'INDEPENDENT_RETRIEVAL_OBSERVED',
+          reviewCount: 1,
+          successStreak: 1,
+          interval: const Duration(days: 1),
+          dueAt: dueAt,
+          lastReviewedAt: dueAt.subtract(const Duration(days: 1)),
+          policyVersion: RetentionPolicy.version,
+        ),
+      ],
+    );
+
+    await pumpHome(
+      tester,
+      continuation: continuationFor(RecallOutcome.correct, RecallStateKind.retrievedOnce),
+      retention: retention,
+      onOpenWorkspace: () => workspaceOpens++,
+      onOpenReader: () => readerOpens++,
+      onOpenLearning: () => learningOpens++,
+    );
+
+    expect(find.text('TEKRAR ZAMANI'), findsOneWidget);
+    expect(find.text('Tekrar zamanı geldi'), findsOneWidget);
+    expect(find.text('Tekrarı aç'), findsOneWidget);
+    expect(find.textContaining('ustalık iddiası değildir'), findsOneWidget);
+
+    await tapHomeCta(tester, find.byKey(const ValueKey('la0040-living-continue')));
     await tester.pump();
 
     expect(workspaceOpens, 1);

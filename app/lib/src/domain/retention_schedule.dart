@@ -57,6 +57,44 @@ class RetentionScheduleRecord {
   bool isDueAt(DateTime instant) => !dueAt.isAfter(instant.toUtc());
 }
 
+class RetentionMaterialStatus {
+  RetentionMaterialStatus({
+    required List<RetentionScheduleRecord> schedules,
+    required DateTime evaluatedAt,
+  }) : schedules = List<RetentionScheduleRecord>.unmodifiable(
+         [...schedules]..sort((left, right) => left.dueAt.compareTo(right.dueAt)),
+       ),
+       evaluatedAt = evaluatedAt.toUtc();
+
+  final List<RetentionScheduleRecord> schedules;
+  final DateTime evaluatedAt;
+
+  bool get hasSchedule => schedules.isNotEmpty;
+
+  int get dueCount => schedules.where((item) => item.isDueAt(evaluatedAt)).length;
+
+  bool get hasDue => dueCount > 0;
+
+  RetentionScheduleRecord? get nextScheduled => schedules.isEmpty ? null : schedules.first;
+
+  RetentionScheduleRecord? get nextDue {
+    for (final item in schedules) {
+      if (item.isDueAt(evaluatedAt)) return item;
+    }
+    return null;
+  }
+
+  DateTime? get latestReviewedAt {
+    DateTime? latest;
+    for (final item in schedules) {
+      if (latest == null || item.lastReviewedAt.isAfter(latest)) {
+        latest = item.lastReviewedAt;
+      }
+    }
+    return latest;
+  }
+}
+
 class RetentionPolicy {
   const RetentionPolicy._();
 

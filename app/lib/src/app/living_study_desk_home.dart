@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 
 import '../domain/learning_contracts.dart';
 import '../domain/learning_truth.dart';
+import '../domain/retention_schedule.dart';
 import 'app_theme.dart';
 import 'companion_view.dart';
 
@@ -28,6 +29,7 @@ class LivingStudyDeskHome extends StatelessWidget {
   const LivingStudyDeskHome({
     required this.material,
     required this.continuation,
+    this.retention,
     this.listenResumeChunk = 0,
     this.readerResumeProgress = 0,
     this.readerResumePreferred = false,
@@ -43,6 +45,7 @@ class LivingStudyDeskHome extends StatelessWidget {
 
   final MaterialRecord? material;
   final LearningContinuation? continuation;
+  final RetentionMaterialStatus? retention;
   final int listenResumeChunk;
   final double readerResumeProgress;
   final bool readerResumePreferred;
@@ -66,16 +69,53 @@ class LivingStudyDeskHome extends StatelessWidget {
 
   bool get _hasListenResume => continuation == null && !_hasReaderResume && listenResumeChunk > 0;
 
+  bool get _retentionIsPrimary {
+    if (retention?.hasDue != true || _hasReaderResume || _hasListenResume) return false;
+    return switch (continuation?.nextAction.kind) {
+      NextLearningActionKind.reviewSourceThenRecall || NextLearningActionKind.retryRecallWithoutHint => false,
+      NextLearningActionKind.repeatRecallLater || null => true,
+    };
+  }
+
+  String get _retentionTiming {
+    final status = retention;
+    final dueAt = status?.nextScheduled?.dueAt;
+    if (status == null || dueAt == null || status.hasDue) return 'şimdi';
+    final difference = dueAt.difference(status.evaluatedAt);
+    if (difference.inMinutes < 60) return '${difference.inMinutes.clamp(1, 59)} dk sonra';
+    if (difference.inHours < 24) return '${difference.inHours} sa sonra';
+    final days = difference.inDays;
+    return '${days < 1 ? 1 : days} gün sonra';
+  }
+
+  String get _retentionReason {
+    final item = retention?.nextDue ?? retention?.nextScheduled;
+    if (item == null) return 'Aktif çalışmandan sonra planlanan tekrar burada görünecek.';
+    return switch (item.latestOutcomeBand) {
+      RetentionOutcomeBand.independentRetrieval =>
+        'Bağımsız bir geri çağırma kaydedildi. Yeni tekrar kalıcılığı yeniden ölçer; bu sonuç ustalık iddiası değildir.',
+      RetentionOutcomeBand.supportedRetrieval =>
+        'Önceki deneme destekli ya da kısmiydi. Planlanan tekrar bağımsız geri çağırmayı yeniden denetler.',
+      RetentionOutcomeBand.repairNeeded =>
+        'Önceki aktif deneme onarım gerektiriyordu. Kısa aralıkla yeniden çalışmak için tekrar hazır.',
+      RetentionOutcomeBand.unassessed =>
+        'Önceki aktif çalışma ölçülebilir olumlu kanıt üretmedi. Tekrar hazır; henüz kalıcılık sonucu yok.',
+    };
+  }
+
   String get _nextStep {
     if (_hasReaderResume) return 'Okumaya kaldığın yerden devam et';
     if (_hasListenResume) return 'Dinlemeye kaldığın yerden devam et';
     final action = continuation?.nextAction.kind;
-    return switch (action) {
-      NextLearningActionKind.reviewSourceThenRecall => 'Kaynağa dön, sonra yeniden dene',
-      NextLearningActionKind.retryRecallWithoutHint => 'İpucusuz bir kez daha dene',
-      NextLearningActionKind.repeatRecallLater => 'Bu tur tamam. Sonra yeniden hatırla.',
-      null => 'İlk hatırlama denemeni yap',
-    };
+    if (action == NextLearningActionKind.reviewSourceThenRecall) return 'Kaynağa dön, sonra yeniden dene';
+    if (action == NextLearningActionKind.retryRecallWithoutHint) return 'İpucusuz bir kez daha dene';
+    if (_retentionIsPrimary) return 'Tekrar zamanı geldi';
+    if (action == NextLearningActionKind.repeatRecallLater && retention?.hasSchedule == true) {
+      return 'Sonraki tekrar $_retentionTiming';
+    }
+    return action == NextLearningActionKind.repeatRecallLater
+        ? 'Bu tur tamam. Sonra yeniden hatırla.'
+        : 'İlk hatırlama denemeni yap';
   }
 
   String get _why {
@@ -85,12 +125,16 @@ class LivingStudyDeskHome extends StatelessWidget {
     if (_hasListenResume) {
       return 'Dinleme konumun kayıtlı. Devam et; hazır olduğunda kaynağı kapatıp hatırlamayı dene.';
     }
+    if (_retentionIsPrimary || continuation?.nextAction.kind == NextLearningActionKind.repeatRecallLater) {
+      if (retention?.hasSchedule == true) return _retentionReason;
+    }
     return continuation?.nextAction.reasonText ?? 'Kaynağa bakmadan kısa bir hatırlama denemesi yap.';
   }
 
   String get _continuationLabel {
     if (_hasReaderResume) return 'OKUMA KONUMUN KAYITLI';
     if (_hasListenResume) return 'DİNLEME KONUMUN KAYITLI';
+    if (_retentionIsPrimary) return 'TEKRAR ZAMANI';
     if (continuation == null) return 'KAYNAĞINDAN ÖĞREN';
     return continuation!.nextAction.kind == NextLearningActionKind.repeatRecallLater
         ? 'DENEMEN KAYITLI · SONRA YENİDEN HATIRLA'
@@ -101,6 +145,7 @@ class LivingStudyDeskHome extends StatelessWidget {
     if (_hasReaderResume) return 'Okumaya devam et';
     if (_hasListenResume) return 'Dinlemeye devam et';
     final action = continuation?.nextAction.kind;
+    if (_retentionIsPrimary) return 'Tekrarı aç';
     return switch (action) {
       NextLearningActionKind.reviewSourceThenRecall => 'Kaynağı gözden geçir',
       NextLearningActionKind.retryRecallWithoutHint => 'İpucusuz tekrar dene',
@@ -112,6 +157,7 @@ class LivingStudyDeskHome extends StatelessWidget {
   VoidCallback get _nextActionHandler {
     if (_hasReaderResume) return onOpenReader ?? onOpenWorkspace;
     if (_hasListenResume) return onOpenListen;
+    if (_retentionIsPrimary) return onOpenWorkspace;
     return switch (continuation?.nextAction.kind) {
       NextLearningActionKind.reviewSourceThenRecall => onOpenReader ?? onOpenWorkspace,
       NextLearningActionKind.retryRecallWithoutHint => onOpenLearning,
@@ -123,6 +169,7 @@ class LivingStudyDeskHome extends StatelessWidget {
   IconData get _nextActionIcon {
     if (_hasReaderResume) return Icons.menu_book_outlined;
     if (_hasListenResume) return Icons.headphones_rounded;
+    if (_retentionIsPrimary) return Icons.event_repeat_rounded;
     return continuation?.nextAction.kind == NextLearningActionKind.repeatRecallLater
         ? Icons.space_dashboard_outlined
         : Icons.psychology_alt_outlined;
@@ -242,11 +289,13 @@ class LivingStudyDeskHome extends StatelessWidget {
   Widget _populated(BuildContext context) {
     final current = material!;
     final hasRecallEvidence = continuation != null && continuation!.state.kind != RecallStateKind.notAssessed;
-    final hasActiveContinuation = continuation != null || _hasReaderResume || _hasListenResume;
+    final hasActiveContinuation = continuation != null || retention?.hasSchedule == true || _hasReaderResume || _hasListenResume;
     final textScale = MediaQuery.textScalerOf(context).scale(1);
     final compactFirstViewport = MediaQuery.sizeOf(context).width < 350 && textScale > 1.2;
     final companionState = _hasListenResume
         ? CompanionVisualState.listen
+        : _retentionIsPrimary
+        ? CompanionVisualState.think
         : hasRecallEvidence
         ? CompanionVisualState.idle
         : CompanionVisualState.think;

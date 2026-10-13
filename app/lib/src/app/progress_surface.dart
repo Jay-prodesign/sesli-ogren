@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../domain/learning_contracts.dart';
 import '../domain/learning_truth.dart';
+import '../domain/retention_schedule.dart';
 import 'app_theme.dart';
 import 'atelier_learning_surfaces.dart';
 import 'companion_view.dart';
@@ -15,6 +16,7 @@ class ProgressItem {
     this.listenResumeChunk = 0,
     this.readerActivityAt,
     this.readerResumeProgress = 0,
+    this.retention,
   });
   final MaterialRecord material;
   final LearningContinuation? continuation;
@@ -22,6 +24,7 @@ class ProgressItem {
   final int listenResumeChunk;
   final DateTime? readerActivityAt;
   final double readerResumeProgress;
+  final RetentionMaterialStatus? retention;
 
   bool get hasReaderResume => continuation == null && readerResumeProgress > 0.02 && readerResumeProgress < 0.95;
   bool get hasListenResume => continuation == null && listenResumeChunk > 0;
@@ -156,35 +159,47 @@ class _ProgressCard extends StatelessWidget {
     final theme = Theme.of(context);
     final living = LivingDeskReviewScope.active(context);
     final state = item.continuation?.state.kind ?? RecallStateKind.notAssessed;
-    final label = switch (state) {
-      RecallStateKind.notAssessed => item.continuation == null ? 'Henüz ölçülmedi' : 'Bağımsız kanıt yok',
-      RecallStateKind.developing => 'İpucuyla ilerledi',
-      RecallStateKind.retrievedOnce => 'Kendi başına hatırlandı',
-      RecallStateKind.needsReview => 'Bir tur daha gerekiyor',
-    };
-    final reason =
-        item.continuation?.nextAction.reasonText ??
-        (item.prefersReaderResume
-            ? 'Okuma konumun kayıtlı. Devam et; hazır olduğunda kaynağı kapatıp hatırlamayı dene.'
-            : item.hasListenResume
-            ? 'Dinleme konumun kayıtlı. Devam et; hazır olduğunda kaynağı kapatıp hatırlamayı dene.'
-            : 'Henüz bağımsız bir hatırlama denemen yok.');
-    final actionLabel = switch (item.continuation?.nextAction.kind) {
-      NextLearningActionKind.reviewSourceThenRecall => 'Kaynağı gözden geçir',
-      NextLearningActionKind.retryRecallWithoutHint => 'İpucusuz tekrar dene',
-      NextLearningActionKind.repeatRecallLater => 'Çalışma alanına dön',
-      null when item.prefersReaderResume => 'Okumaya devam et',
-      null when item.hasListenResume => 'Dinlemeye devam et',
-      null => 'İlk hatırlamayı dene',
-    };
-    final actionIcon = switch (item.continuation?.nextAction.kind) {
-      NextLearningActionKind.reviewSourceThenRecall => Icons.auto_stories_outlined,
-      NextLearningActionKind.retryRecallWithoutHint => Icons.refresh_rounded,
-      NextLearningActionKind.repeatRecallLater => Icons.space_dashboard_outlined,
-      null when item.prefersReaderResume => Icons.menu_book_outlined,
-      null when item.hasListenResume => Icons.headphones_rounded,
-      null => Icons.psychology_alt_outlined,
-    };
+    final action = item.continuation?.nextAction.kind;
+    final immediateRepair =
+        action == NextLearningActionKind.reviewSourceThenRecall || action == NextLearningActionKind.retryRecallWithoutHint;
+    final retentionDue =
+        item.retention?.hasDue == true && !immediateRepair && !item.prefersReaderResume && !item.hasListenResume;
+    final label = retentionDue
+        ? 'Tekrar zamanı'
+        : switch (state) {
+            RecallStateKind.notAssessed => item.continuation == null ? 'Henüz ölçülmedi' : 'Bağımsız kanıt yok',
+            RecallStateKind.developing => 'İpucuyla ilerledi',
+            RecallStateKind.retrievedOnce => 'Kendi başına hatırlandı',
+            RecallStateKind.needsReview => 'Bir tur daha gerekiyor',
+          };
+    final reason = retentionDue
+        ? 'Planlanan tekrar zamanı geldi. Yeni aktif deneme kalıcılığı yeniden ölçer; bu bir ustalık iddiası değildir.'
+        : item.continuation?.nextAction.reasonText ??
+              (item.prefersReaderResume
+                  ? 'Okuma konumun kayıtlı. Devam et; hazır olduğunda kaynağı kapatıp hatırlamayı dene.'
+                  : item.hasListenResume
+                  ? 'Dinleme konumun kayıtlı. Devam et; hazır olduğunda kaynağı kapatıp hatırlamayı dene.'
+                  : 'Henüz bağımsız bir hatırlama denemen yok.');
+    final actionLabel = retentionDue
+        ? 'Planlanan tekrarı aç'
+        : switch (action) {
+            NextLearningActionKind.reviewSourceThenRecall => 'Kaynağı gözden geçir',
+            NextLearningActionKind.retryRecallWithoutHint => 'İpucusuz tekrar dene',
+            NextLearningActionKind.repeatRecallLater => 'Çalışma alanına dön',
+            null when item.prefersReaderResume => 'Okumaya devam et',
+            null when item.hasListenResume => 'Dinlemeye devam et',
+            null => 'İlk hatırlamayı dene',
+          };
+    final actionIcon = retentionDue
+        ? Icons.event_repeat_rounded
+        : switch (action) {
+            NextLearningActionKind.reviewSourceThenRecall => Icons.auto_stories_outlined,
+            NextLearningActionKind.retryRecallWithoutHint => Icons.refresh_rounded,
+            NextLearningActionKind.repeatRecallLater => Icons.space_dashboard_outlined,
+            null when item.prefersReaderResume => Icons.menu_book_outlined,
+            null when item.hasListenResume => Icons.headphones_rounded,
+            null => Icons.psychology_alt_outlined,
+          };
     final (legacyAccent, legacySoft, icon) = switch (state) {
       RecallStateKind.notAssessed => (
         AppPalette.inkMuted,

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../domain/learning_contracts.dart';
 import '../domain/learning_truth.dart';
+import '../domain/retention_schedule.dart';
 import '../learning/recall_learning_service.dart';
 import '../generation/supabase_source_summary_gateway.dart';
 import 'app_runtime.dart';
@@ -77,6 +78,7 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
     // legacy fallback skips this extra read. This ancestor lookup is safe during
     // initState (unlike dependOnInheritedWidgetOfExactType).
     final livingReview = context.getElementForInheritedWidgetOfExactType<LivingDeskReviewScope>() != null;
+    final snapshotAt = DateTime.now().toUtc();
     final materials = await widget.runtime.store.activeMaterials(learner: widget.runtime.learner);
     if (materials.isEmpty) return const _HomeSnapshot();
     final progress = await Future.wait(
@@ -86,6 +88,13 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
           learner: widget.runtime.learner,
           materialId: item.id,
         );
+        final retentionSchedules = await widget.runtime.store.retentionSchedulesForMaterial(
+          learner: widget.runtime.learner,
+          materialId: item.id,
+        );
+        final retention = retentionSchedules.isEmpty
+            ? null
+            : RetentionMaterialStatus(schedules: retentionSchedules, evaluatedAt: snapshotAt);
         final listenActivityAt = source == null
             ? null
             : await widget.runtime.store.listenResumeUpdatedAt(
@@ -121,6 +130,7 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
           listenResumeChunk: listenResumeChunk,
           readerActivityAt: readerActivityAt,
           readerResumeProgress: readerResumeProgress,
+          retention: retention,
         );
       }),
     );
@@ -149,6 +159,7 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
       source: source,
       extracted: extracted,
       continuation: continuation,
+      retention: active.retention,
       listenResumeChunk: active.listenResumeChunk,
       readerResumeProgress: active.readerResumeProgress,
       readerResumePreferred: active.prefersReaderResume,
@@ -158,13 +169,13 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
   }
 
   int _homeRecommendationPriority(ProgressItem item) {
-    return switch (item.continuation?.nextAction.kind) {
-      NextLearningActionKind.reviewSourceThenRecall => 5,
-      NextLearningActionKind.retryRecallWithoutHint => 4,
-      null when item.prefersReaderResume || item.hasListenResume => 3,
-      null => 2,
-      NextLearningActionKind.repeatRecallLater => 1,
-    };
+    final action = item.continuation?.nextAction.kind;
+    if (action == NextLearningActionKind.reviewSourceThenRecall) return 7;
+    if (action == NextLearningActionKind.retryRecallWithoutHint) return 6;
+    if (action == null && (item.prefersReaderResume || item.hasListenResume)) return 5;
+    if (item.retention?.hasDue == true) return 4;
+    if (action == null) return 3;
+    return 2;
   }
 
   DateTime _activityAt(ProgressItem item) {
@@ -175,6 +186,8 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
     if (listenAt != null && listenAt.isAfter(latest)) latest = listenAt;
     final readerAt = item.readerActivityAt;
     if (readerAt != null && readerAt.isAfter(latest)) latest = readerAt;
+    final retentionAt = item.retention?.latestReviewedAt;
+    if (retentionAt != null && retentionAt.isAfter(latest)) latest = retentionAt;
     return latest;
   }
 
@@ -237,8 +250,8 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
       await _openSourceReader(materialId);
       return;
     }
-    if (continuation?.nextAction.kind == NextLearningActionKind.repeatRecallLater) {
-      await _openWorkspace(materialId);
+    if (continuation?.nextAction.kind == NextLearningActionKind.retryRecallWithoutHint) {
+      await _openLearningFor(materialId, autoAdvanceContinuation: true);
       return;
     }
     if (continuation == null && progressItem?.prefersReaderResume == true) {
@@ -247,6 +260,11 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
     }
     if (continuation == null && progressItem?.hasListenResume == true) {
       await _openListenFor(materialId);
+      return;
+    }
+    if (progressItem?.retention?.hasDue == true ||
+        continuation?.nextAction.kind == NextLearningActionKind.repeatRecallLater) {
+      await _openWorkspace(materialId);
       return;
     }
     await _openLearningFor(materialId, autoAdvanceContinuation: continuation != null);
@@ -714,6 +732,7 @@ class _HomeSurface extends StatelessWidget {
       return LivingStudyDeskHome(
         material: data.material,
         continuation: data.continuation,
+        retention: data.retention,
         listenResumeChunk: data.listenResumeChunk,
         readerResumeProgress: data.readerResumeProgress,
         readerResumePreferred: data.readerResumePreferred,
@@ -1767,6 +1786,7 @@ class _HomeSnapshot {
     this.source,
     this.extracted,
     this.continuation,
+    this.retention,
     this.listenResumeChunk = 0,
     this.readerResumeProgress = 0,
     this.readerResumePreferred = false,
@@ -1778,6 +1798,7 @@ class _HomeSnapshot {
   final SourceVersionRecord? source;
   final ExtractedContentRecord? extracted;
   final LearningContinuation? continuation;
+  final RetentionMaterialStatus? retention;
   final int listenResumeChunk;
   final double readerResumeProgress;
   final bool readerResumePreferred;

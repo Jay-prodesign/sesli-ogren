@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../domain/learning_contracts.dart';
 import '../domain/learning_truth.dart';
+import '../domain/retention_schedule.dart';
 import '../learning/recall_learning_service.dart';
 import 'app_runtime.dart';
 import 'app_theme.dart';
@@ -82,6 +83,13 @@ class _MaterialWorkspaceScreenState extends State<MaterialWorkspaceScreen> {
         materialId: material.id,
       );
     }
+    final retentionSchedules = await widget.runtime.store.retentionSchedulesForMaterial(
+      learner: widget.runtime.learner,
+      materialId: material.id,
+    );
+    final retention = retentionSchedules.isEmpty
+        ? null
+        : RetentionMaterialStatus(schedules: retentionSchedules, evaluatedAt: DateTime.now().toUtc());
 
     // Source replacement may land while extraction/continuation is loading.
     // Do not compose one Workspace from an old source snapshot and newer truth.
@@ -92,7 +100,13 @@ class _MaterialWorkspaceScreenState extends State<MaterialWorkspaceScreen> {
     if (currentSource?.identity.sourceVersionId != source.identity.sourceVersionId) {
       return retryOnSourceChange ? _load(retryOnSourceChange: false) : null;
     }
-    return _WorkspaceSnapshot(material: material, source: source, extracted: extracted, continuation: continuation);
+    return _WorkspaceSnapshot(
+      material: material,
+      source: source,
+      extracted: extracted,
+      continuation: continuation,
+      retention: retention,
+    );
   }
 
   Future<void> _openSourceReader(_WorkspaceSnapshot data) async {
@@ -319,6 +333,19 @@ class _MaterialWorkspaceScreenState extends State<MaterialWorkspaceScreen> {
     });
   }
 
+  Future<void> _openRetentionReview(_WorkspaceSnapshot data) async {
+    final due = data.retention?.nextDue;
+    if (due == null) return;
+    switch (due.latestEvidenceKind) {
+      case RetentionEvidenceKind.recall:
+        await _openRecall();
+      case RetentionEvidenceKind.flashcard:
+        await _openFlashcards();
+      case RetentionEvidenceKind.quiz:
+        await _openQuiz();
+    }
+  }
+
   Future<void> _openFocus(_WorkspaceSnapshot data) async {
     await Navigator.of(context).push<void>(
       MaterialPageRoute(
@@ -473,6 +500,10 @@ class _MaterialWorkspaceScreenState extends State<MaterialWorkspaceScreen> {
                 _consumeFirstValueIntent();
                 _openQuiz();
               },
+              onRetentionReview: () {
+                _consumeFirstValueIntent();
+                _openRetentionReview(snapshot.data!);
+              },
               onFocus: () {
                 _consumeFirstValueIntent();
                 _openFocus(snapshot.data!);
@@ -498,6 +529,7 @@ class _WorkspaceBody extends StatelessWidget {
     required this.onExplain,
     required this.onFlashcards,
     required this.onQuiz,
+    required this.onRetentionReview,
     required this.onFocus,
   });
 
@@ -512,6 +544,7 @@ class _WorkspaceBody extends StatelessWidget {
   final VoidCallback onExplain;
   final VoidCallback onFlashcards;
   final VoidCallback onQuiz;
+  final VoidCallback onRetentionReview;
   final VoidCallback onFocus;
 
   @override
@@ -538,6 +571,7 @@ class _WorkspaceBody extends StatelessWidget {
         sourceText: data.extracted?.normalizedText ?? '',
         sourceVersion: data.source,
         continuation: data.continuation,
+        retention: data.retention,
         onReadSource: onReadSource,
         onQuickRecap: onQuickRecap,
         onUpdateSource: onUpdateSource,
@@ -547,6 +581,7 @@ class _WorkspaceBody extends StatelessWidget {
         onExplain: onExplain,
         onFlashcards: onFlashcards,
         onQuiz: onQuiz,
+        onRetentionReview: onRetentionReview,
         onFocus: onFocus,
       );
     }
@@ -985,10 +1020,12 @@ class _WorkspaceSnapshot {
     required this.source,
     required this.extracted,
     required this.continuation,
+    required this.retention,
   });
 
   final MaterialRecord material;
   final SourceVersionRecord source;
   final ExtractedContentRecord? extracted;
   final LearningContinuation? continuation;
+  final RetentionMaterialStatus? retention;
 }

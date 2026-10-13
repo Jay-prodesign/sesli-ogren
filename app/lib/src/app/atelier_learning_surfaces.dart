@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 
 import '../domain/learning_contracts.dart';
 import '../domain/learning_truth.dart';
+import '../domain/retention_schedule.dart';
 import 'app_theme.dart';
 import 'companion_view.dart';
 import 'source_text_matching.dart';
@@ -119,6 +120,7 @@ class AtelierWorkspace extends StatelessWidget {
     required this.sourceText,
     this.sourceVersion,
     required this.continuation,
+    this.retention,
     required this.onReadSource,
     required this.onQuickRecap,
     required this.onUpdateSource,
@@ -128,6 +130,7 @@ class AtelierWorkspace extends StatelessWidget {
     required this.onExplain,
     this.onFlashcards,
     this.onQuiz,
+    this.onRetentionReview,
     required this.onFocus,
     super.key,
   });
@@ -136,6 +139,7 @@ class AtelierWorkspace extends StatelessWidget {
   final String sourceText;
   final SourceVersionRecord? sourceVersion;
   final LearningContinuation? continuation;
+  final RetentionMaterialStatus? retention;
   final VoidCallback onReadSource;
   final VoidCallback onQuickRecap;
   final VoidCallback onUpdateSource;
@@ -145,9 +149,54 @@ class AtelierWorkspace extends StatelessWidget {
   final VoidCallback onExplain;
   final VoidCallback? onFlashcards;
   final VoidCallback? onQuiz;
+  final VoidCallback? onRetentionReview;
   final VoidCallback onFocus;
 
+  bool get _retentionIsPrimary {
+    if (retention?.hasDue != true || onRetentionReview == null) return false;
+    return switch (continuation?.nextAction.kind) {
+      NextLearningActionKind.reviewSourceThenRecall || NextLearningActionKind.retryRecallWithoutHint => false,
+      NextLearningActionKind.repeatRecallLater || null => true,
+    };
+  }
+
+  String get _retentionTiming {
+    final status = retention;
+    final dueAt = status?.nextScheduled?.dueAt;
+    if (status == null || dueAt == null || status.hasDue) return 'şimdi';
+    final difference = dueAt.difference(status.evaluatedAt);
+    if (difference.inMinutes < 60) return '${difference.inMinutes.clamp(1, 59)} dk sonra';
+    if (difference.inHours < 24) return '${difference.inHours} sa sonra';
+    final days = difference.inDays;
+    return '${days < 1 ? 1 : days} gün sonra';
+  }
+
+  String get _retentionDetail {
+    final item = retention?.nextDue ?? retention?.nextScheduled;
+    if (item == null) return 'Aktif çalışma sonrası planlanan tekrar burada görünür.';
+    return switch (item.latestOutcomeBand) {
+      RetentionOutcomeBand.independentRetrieval =>
+        'Bağımsız geri çağırma kaydedildi. Bu tekrar kalıcılığı yeniden ölçer; önceki başarı ustalık sayılmıyor.',
+      RetentionOutcomeBand.supportedRetrieval =>
+        'Önceki deneme destekli ya da kısmiydi. Yeni tekrar bağımsız geri çağırmayı yeniden denetler.',
+      RetentionOutcomeBand.repairNeeded =>
+        'Önceki aktif deneme onarım gerektirdi. Kısa aralıklı tekrar şimdi yeniden çalışmanı ister.',
+      RetentionOutcomeBand.unassessed =>
+        'Önceki aktif çalışma olumlu kalıcılık kanıtı üretmedi. Tekrar hazır; henüz kalıcılık sonucu yok.',
+    };
+  }
+
+  String get _retentionActionLabel {
+    return switch (retention?.nextDue?.latestEvidenceKind) {
+      RetentionEvidenceKind.flashcard => 'Kart tekrarını aç',
+      RetentionEvidenceKind.quiz => 'Quiz tekrarını aç',
+      RetentionEvidenceKind.recall => 'Hatırlamayı yeniden dene',
+      null => 'Tekrarı aç',
+    };
+  }
+
   String get _activeStepTitle {
+    if (_retentionIsPrimary) return 'Planlanan tekrarın hazır';
     final action = continuation?.nextAction.kind;
     return switch (action) {
       NextLearningActionKind.reviewSourceThenRecall => 'Kaynak onarımın hazır',
@@ -158,12 +207,17 @@ class AtelierWorkspace extends StatelessWidget {
   }
 
   String get _activeStepReason {
+    if (_retentionIsPrimary) return _retentionDetail;
     final action = continuation?.nextAction;
+    if (action?.kind == NextLearningActionKind.repeatRecallLater && retention?.hasSchedule == true) {
+      return 'Sonraki planlanan tekrar $_retentionTiming. $_retentionDetail';
+    }
     if (action != null) return action.reasonText;
     return 'Önce kaynağı gözden geçir. Hazır olduğunda kapatıp hatırlamayı dene.';
   }
 
   String get _activeStepLabel {
+    if (_retentionIsPrimary) return _retentionActionLabel;
     return switch (continuation?.nextAction.kind) {
       NextLearningActionKind.reviewSourceThenRecall => 'Kaynağı gözden geçir',
       NextLearningActionKind.retryRecallWithoutHint => 'İpucusuz tekrar dene',
@@ -173,6 +227,7 @@ class AtelierWorkspace extends StatelessWidget {
   }
 
   IconData get _activeStepIcon {
+    if (_retentionIsPrimary) return Icons.event_repeat_rounded;
     return switch (continuation?.nextAction.kind) {
       NextLearningActionKind.reviewSourceThenRecall => Icons.auto_stories_outlined,
       NextLearningActionKind.retryRecallWithoutHint => Icons.refresh_rounded,
@@ -311,6 +366,81 @@ class AtelierWorkspace extends StatelessWidget {
     );
   }
 
+  Widget _retentionState() {
+    final status = retention;
+    final item = status?.nextDue ?? status?.nextScheduled;
+    if (status == null || item == null) return const SizedBox.shrink();
+    final due = status.hasDue;
+    final title = due ? 'Planlanan tekrar hazır' : 'Sonraki tekrar $_retentionTiming';
+    final semantic = due
+        ? 'Tekrar zamanı. $title. $_retentionDetail'
+        : 'Tekrar planı. $title. $_retentionDetail';
+    return Semantics(
+      container: true,
+      label: semantic,
+      child: ExcludeSemantics(
+        child: Container(
+          key: const ValueKey('workspace-retention-state'),
+          width: double.infinity,
+          padding: const EdgeInsets.fromLTRB(13, 11, 13, 12),
+          decoration: BoxDecoration(
+            color: due ? const Color(0xFFF0F9D7) : AtelierStyle.paper,
+            borderRadius: BorderRadius.circular(15),
+            border: Border.all(color: due ? AtelierStyle.pulse : AtelierStyle.line),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Icon(Icons.event_repeat_rounded, color: AtelierStyle.pulse, size: 19),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      due ? 'TEKRAR ZAMANI' : 'TEKRAR PLANI',
+                      style: const TextStyle(
+                        color: AtelierStyle.pulse,
+                        fontSize: 9.5,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: 0.9,
+                      ),
+                    ),
+                  ),
+                  if (status.dueCount > 1)
+                    Text(
+                      '${status.dueCount} NOKTA',
+                      style: const TextStyle(
+                        color: AtelierStyle.muted,
+                        fontSize: 9,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                ],
+              ),
+              const SizedBox(height: 5),
+              Text(
+                title,
+                style: const TextStyle(color: AtelierStyle.ink, fontSize: 14.5, fontWeight: FontWeight.w900),
+              ),
+              const SizedBox(height: 3),
+              Text(_retentionDetail, style: const TextStyle(color: AtelierStyle.muted, fontSize: 12, height: 1.35)),
+              if (due && onRetentionReview != null) ...[
+                const SizedBox(height: 9),
+                OutlinedButton.icon(
+                  key: const ValueKey('workspace-retention-review'),
+                  onPressed: onRetentionReview,
+                  icon: const Icon(Icons.arrow_forward_rounded),
+                  label: Text(_retentionActionLabel),
+                ),
+              ],
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   void _showOtherStudyPaths(BuildContext context) {
     showModalBottomSheet<void>(
       context: context,
@@ -436,11 +566,15 @@ class AtelierWorkspace extends StatelessWidget {
     final compactSurface = media.size.width < 340 || media.textScaler.scale(1) > 1.25;
     final reducedMotion = media.disableAnimations || media.accessibleNavigation;
     final motionDuration = reducedMotion ? Duration.zero : const Duration(milliseconds: 220);
-    final activeStepKey = continuation?.nextAction.kind.name ?? 'first-recall';
-    final primaryAction = switch (continuation?.nextAction.kind) {
-      NextLearningActionKind.reviewSourceThenRecall || NextLearningActionKind.repeatRecallLater => onReadSource,
-      NextLearningActionKind.retryRecallWithoutHint || null => onRecall,
-    };
+    final activeStepKey = _retentionIsPrimary
+        ? 'retention-${retention!.nextDue!.id.value}'
+        : continuation?.nextAction.kind.name ?? 'first-recall';
+    final primaryAction = _retentionIsPrimary
+        ? onRetentionReview!
+        : switch (continuation?.nextAction.kind) {
+            NextLearningActionKind.reviewSourceThenRecall || NextLearningActionKind.repeatRecallLater => onReadSource,
+            NextLearningActionKind.retryRecallWithoutHint || null => onRecall,
+          };
 
     void runPrimaryAction() {
       if (!reducedMotion) {
@@ -489,6 +623,7 @@ class AtelierWorkspace extends StatelessWidget {
                   AtelierSourceTrustStrip(sourceVersion: sourceVersion!),
                 ],
                 if (continuation != null) ...[const SizedBox(height: 10), _evidenceState(compact: compactSurface)],
+                if (retention?.hasSchedule == true) ...[const SizedBox(height: 10), _retentionState()],
                 const SizedBox(height: 17),
                 if (sourceText.trim().isNotEmpty && !compactSurface) ...[
                   const AtelierLearningRail(phase: AtelierLearningPhase.source),
