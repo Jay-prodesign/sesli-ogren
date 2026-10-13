@@ -458,12 +458,13 @@ class _GroundedTutorScreenState extends State<GroundedTutorScreen> {
       controller: _question,
       enabled: !_busy && _state != null,
       minLines: 1,
-      maxLines: compact ? 3 : 2,
+      maxLines: 2,
       maxLength: 2000,
       textInputAction: TextInputAction.newline,
-      decoration: const InputDecoration(
+      decoration: InputDecoration(
         hintText: 'Bu kaynak hakkında sor…',
-        helperText: 'Soru ve Tutor yanıtı öğrenme kanıtı değildir.',
+        helperText: compact ? null : 'Soru ve Tutor yanıtı öğrenme kanıtı değildir.',
+        counterText: compact ? '' : null,
       ),
     );
     final send = FilledButton.icon(
@@ -477,7 +478,9 @@ class _GroundedTutorScreenState extends State<GroundedTutorScreen> {
     return SafeArea(
       top: false,
       child: Container(
-        padding: const EdgeInsets.fromLTRB(14, 10, 14, 12),
+        padding: compact
+            ? const EdgeInsets.fromLTRB(12, 8, 12, 8)
+            : const EdgeInsets.fromLTRB(14, 10, 14, 12),
         decoration: const BoxDecoration(
           color: AtelierStyle.paper,
           border: Border(top: BorderSide(color: AtelierStyle.line)),
