@@ -214,6 +214,7 @@ class AuthenticatedRecallLearningService extends RecallLearningService {
       stateRuleVersion: RecallTruthPolicy.stateRuleVersion,
       nextAction: nextAction,
     );
+    await _syncRetention(learner: learner, materialId: server.materialId, sourceVersionId: server.sourceVersionId);
 
     return RecallAttemptResult(
       evidence: cached.evidence,
@@ -221,6 +222,109 @@ class AuthenticatedRecallLearningService extends RecallLearningService {
       nextAction: cached.nextAction,
       correctAnswer: server.correctAnswer,
       sourceExcerpt: server.sourceExcerpt,
+    );
+  }
+
+  Future<int> syncLatestContinuity({required AuthenticatedLearner learner}) async {
+    if (!learner.isAuthenticated) return 0;
+    final materials = await store.activeMaterials(learner: learner);
+    var failures = 0;
+    for (final material in materials) {
+      try {
+        final projection = await gateway.readLatest(learner: learner, materialId: material.id);
+        if (projection != null) {
+          await _cacheProjection(learner: learner, projection: projection);
+        }
+        final current = await store.currentSourceVersion(learner: learner, materialId: material.id);
+        if (current != null) {
+          await _syncRetention(
+            learner: learner,
+            materialId: material.id,
+            sourceVersionId: current.identity.sourceVersionId,
+          );
+        }
+      } catch (_) {
+        failures += 1;
+      }
+    }
+    return failures;
+  }
+
+  Future<void> _cacheProjection({
+    required AuthenticatedLearner learner,
+    required ServerRecallProjection projection,
+  }) async {
+    final source = await store.currentSourceVersion(learner: learner, materialId: projection.materialId);
+    if (source == null || source.identity.sourceVersionId != projection.sourceVersionId) {
+      throw const RecallLearningException('Server Recall projection belongs to a stale local source.');
+    }
+    final extracted = await store.extractedContentForSource(
+      learner: learner,
+      sourceVersionId: projection.sourceVersionId,
+    );
+    if (extracted == null ||
+        !extracted.isValid ||
+        projection.anchor.startOffset < 0 ||
+        projection.anchor.endOffset <= projection.anchor.startOffset ||
+        projection.anchor.endOffset > extracted.normalizedText.length ||
+        extracted.normalizedText.substring(projection.anchor.startOffset, projection.anchor.endOffset) !=
+            projection.sourceExcerpt) {
+      throw const RecallLearningException('Server Recall projection source evidence does not match local source.');
+    }
+
+    final action = RecallAction(
+      id: projection.actionId,
+      materialId: projection.materialId,
+      sourceVersionId: projection.sourceVersionId,
+      extractedContentId: extracted.id,
+      promptText: projection.promptText,
+      expectedAnswer: projection.correctAnswer,
+      anchor: projection.anchor,
+      ruleVersion: 'recall-cloze-v1',
+      createdAt: projection.evidenceCreatedAt,
+    );
+    final nextAction = RecallTruthPolicy.nextActionFor(
+      materialId: projection.materialId,
+      sourceVersionId: projection.sourceVersionId,
+      evidenceId: projection.evidenceId,
+      outcome: projection.outcome,
+      createdAt: projection.evidenceCreatedAt,
+    );
+    if (nextAction.reasonCode != projection.nextReasonCode) {
+      throw const RecallLearningException('Server Recall projection next action is inconsistent.');
+    }
+    await store.cacheServerVerifiedRecallTruth(
+      learner: learner,
+      action: action,
+      attemptId: projection.attemptId,
+      evidenceId: projection.evidenceId,
+      outcome: projection.outcome,
+      assistance: projection.assistance,
+      responseDigest: projection.responseDigest,
+      responseLength: projection.responseLength,
+      evidenceRuleVersion: projection.evidenceRuleVersion,
+      evidenceCreatedAt: projection.evidenceCreatedAt,
+      stateKind: projection.stateKind,
+      evidenceCount: projection.evidenceCount,
+      stateRuleVersion: RecallTruthPolicy.stateRuleVersion,
+      nextAction: nextAction,
+    );
+  }
+
+  Future<void> _syncRetention({
+    required AuthenticatedLearner learner,
+    required MaterialId materialId,
+    required SourceVersionId sourceVersionId,
+  }) async {
+    final schedules = await gateway.readRetention(learner: learner, materialId: materialId);
+    if (schedules.any((item) => item.sourceVersionId != sourceVersionId)) {
+      throw const RecallLearningException('Server retention projection belongs to a stale source.');
+    }
+    await store.replaceServerVerifiedRecallRetention(
+      learner: learner,
+      materialId: materialId,
+      sourceVersionId: sourceVersionId,
+      schedules: schedules,
     );
   }
 

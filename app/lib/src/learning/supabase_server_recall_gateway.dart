@@ -4,6 +4,7 @@ import '../auth/supabase_learner_auth.dart';
 import '../domain/authenticated_learner.dart';
 import '../domain/learning_contracts.dart';
 import '../domain/learning_truth.dart';
+import '../domain/retention_schedule.dart';
 import 'recall_learning_service.dart';
 import 'server_recall_gateway.dart';
 
@@ -146,6 +147,88 @@ class SupabaseServerRecallGateway implements ServerRecallGateway {
     }
   }
 
+  @override
+  Future<ServerRecallProjection?> readLatest({
+    required AuthenticatedLearner learner,
+    required MaterialId materialId,
+  }) async {
+    try {
+      final client = await _clientFor(learner);
+      final rows = await client.rpc<List<dynamic>>(
+        'read_latest_recall_continuity',
+        params: {'p_client_material_id': materialId.value},
+      );
+      if (rows.isEmpty) return null;
+      if (rows.length != 1 || rows.first is! Map) {
+        throw const RecallLearningException('Server Recall projection is malformed.');
+      }
+      final row = Map<String, dynamic>.from(rows.first as Map);
+      return ServerRecallProjection(
+        actionId: RecallActionId(row['action_id'] as String),
+        attemptId: RecallAttemptId(row['attempt_id'] as String),
+        evidenceId: LearnerEvidenceId(row['evidence_id'] as String),
+        outcome: _outcome(row['outcome'] as String),
+        stateKind: _state(row['state_kind'] as String),
+        evidenceCount: row['evidence_count'] as int,
+        nextReasonCode: row['next_reason_code'] as String,
+        assistance: _assistance(row['assistance'] as String),
+        responseDigest: row['response_digest'] as String,
+        responseLength: row['response_length'] as int,
+        evidenceRuleVersion: row['evidence_rule_version'] as String,
+        evidenceCreatedAt: DateTime.parse(row['evidence_created_at'] as String).toUtc(),
+        correctAnswer: row['correct_answer'] as String,
+        sourceExcerpt: row['source_excerpt'] as String,
+        materialId: MaterialId(row['client_material_id'] as String),
+        sourceVersionId: SourceVersionId(row['client_source_id'] as String),
+        promptText: row['action_prompt'] as String,
+        anchor: SourceAnchor.fromJson(Map<String, Object?>.from(row['source_anchor'] as Map)),
+      );
+    } on RecallLearningException {
+      rethrow;
+    } on PostgrestException catch (error) {
+      throw _mapError(error);
+    }
+  }
+
+  @override
+  Future<List<RetentionScheduleRecord>> readRetention({
+    required AuthenticatedLearner learner,
+    required MaterialId materialId,
+  }) async {
+    try {
+      final client = await _clientFor(learner);
+      final rows = await client.rpc<List<dynamic>>(
+        'read_recall_retention_continuity',
+        params: {'p_client_material_id': materialId.value},
+      );
+      return rows.whereType<Map>().map((raw) {
+        final row = Map<String, dynamic>.from(raw);
+        final sourceVersionId = SourceVersionId(row['client_source_id'] as String);
+        final anchor = SourceAnchor.fromJson(Map<String, Object?>.from(row['source_anchor'] as Map));
+        final latestEvidenceId = row['latest_evidence_id'] as String;
+        final interval = Duration(seconds: row['interval_seconds'] as int);
+        return RetentionScheduleRecord(
+          id: RetentionPolicy.scheduleIdFor(sourceVersionId, anchor),
+          materialId: MaterialId(row['client_material_id'] as String),
+          sourceVersionId: sourceVersionId,
+          sourceAnchor: anchor,
+          latestEvidenceKind: RetentionEvidenceKind.recall,
+          latestOutcomeBand: _outcomeBand(row['latest_outcome_band'] as String),
+          latestEventId: 'server-recall:$latestEvidenceId',
+          reasonCode: row['reason_code'] as String,
+          reviewCount: row['review_count'] as int,
+          successStreak: row['success_streak'] as int,
+          interval: interval,
+          dueAt: DateTime.parse(row['due_at'] as String).toUtc(),
+          lastReviewedAt: DateTime.parse(row['last_reviewed_at'] as String).toUtc(),
+          policyVersion: row['policy_version'] as String,
+        );
+      }).toList(growable: false);
+    } on PostgrestException catch (error) {
+      throw _mapError(error);
+    }
+  }
+
   static Future<SupabaseClient> _clientFor(AuthenticatedLearner learner) async {
     if (!learner.isAuthenticated) {
       throw const RecallLearningException('Server Recall requires an authenticated learner.');
@@ -181,6 +264,14 @@ class SupabaseServerRecallGateway implements ServerRecallGateway {
     'developing' => RecallStateKind.developing,
     'retrieved_once' => RecallStateKind.retrievedOnce,
     _ => throw const RecallLearningException('Server Recall returned an invalid learner state.'),
+  };
+
+  static RetentionOutcomeBand _outcomeBand(String value) => switch (value) {
+    'independent_retrieval' => RetentionOutcomeBand.independentRetrieval,
+    'supported_retrieval' => RetentionOutcomeBand.supportedRetrieval,
+    'repair_needed' => RetentionOutcomeBand.repairNeeded,
+    'unassessed' => RetentionOutcomeBand.unassessed,
+    _ => throw const RecallLearningException('Server Recall returned invalid retention truth.'),
   };
 
   static RecallLearningException _mapError(PostgrestException error) {
