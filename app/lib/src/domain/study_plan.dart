@@ -73,7 +73,7 @@ class StudyTargetProjection {
     required List<StudyTargetMaterialStatus> materials,
     required DateTime evaluatedAt,
   }) : materials = List<StudyTargetMaterialStatus>.unmodifiable(materials),
-       evaluatedAt = evaluatedAt.toUtc();
+       evaluatedAt = evaluatedAt;
 
   final StudyTargetRecord target;
   final List<StudyTargetMaterialStatus> materials;

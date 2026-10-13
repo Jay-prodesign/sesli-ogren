@@ -147,7 +147,7 @@ void main() {
     final plan = DailyStudyPlan.build(
       progress: [otherFresh, targetFresh, urgentOther],
       evaluatedAt: now,
-      preferredMaterialIds: const {MaterialId('target-fresh')},
+      preferredMaterialIds: {const MaterialId('target-fresh')},
     );
 
     expect(plan.items.map((item) => item.materialId.value), ['urgent-other', 'target-fresh', 'other-fresh']);

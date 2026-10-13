@@ -8,7 +8,7 @@ class StudyPlanHomeCard extends StatelessWidget {
 
   final StudyTargetProjection? projection;
   final bool hasMaterials;
-  final VoidCallback onOpen;
+  final VoidCallback? onOpen;
 
   String _timing(StudyTargetProjection value) {
     if (value.isPastTarget) return 'Hedef tarihi geçti · sonucu varsaymıyoruz';
@@ -20,9 +20,11 @@ class StudyPlanHomeCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final value = projection;
     final hasIssue = value?.hasReconciliationIssues == true;
+    final callback = onOpen;
+    final interactive = callback != null && (hasMaterials || value != null);
     return Semantics(
       container: true,
-      button: true,
+      button: interactive,
       label: value == null
           ? 'Sınav veya çalışma hedefi ekle'
           : 'Çalışma hedefi. ${value.target.title}. ${_timing(value)}. '
@@ -31,7 +33,7 @@ class StudyPlanHomeCard extends StatelessWidget {
         color: Colors.transparent,
         child: InkWell(
           key: const ValueKey('home-study-plan'),
-          onTap: hasMaterials || value != null ? onOpen : null,
+          onTap: interactive ? callback : null,
           borderRadius: BorderRadius.circular(16),
           child: Container(
             width: double.infinity,
@@ -105,7 +107,7 @@ class StudyPlanHomeCard extends StatelessWidget {
                           ],
                         ),
                 ),
-                if (hasMaterials || value != null)
+                if (interactive)
                   const Padding(
                     padding: EdgeInsets.only(top: 8),
                     child: Icon(Icons.chevron_right_rounded, color: AppPalette.inkMuted),

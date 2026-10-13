@@ -81,7 +81,8 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
     // legacy fallback skips this extra read. This ancestor lookup is safe during
     // initState (unlike dependOnInheritedWidgetOfExactType).
     final livingReview = context.getElementForInheritedWidgetOfExactType<LivingDeskReviewScope>() != null;
-    final snapshotAt = DateTime.now().toUtc();
+    final calendarNow = DateTime.now();
+    final snapshotAt = calendarNow.toUtc();
     final targetRecord = await widget.runtime.store.activeStudyTarget(learner: widget.runtime.learner);
     final materials = await widget.runtime.store.activeMaterials(learner: widget.runtime.learner);
     if (materials.isEmpty) {
@@ -91,7 +92,7 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
               target: targetRecord,
               activeMaterials: const [],
               currentSourceVersions: const {},
-              evaluatedAt: snapshotAt,
+              evaluatedAt: calendarNow,
             );
       return _HomeSnapshot(studyTarget: studyTarget);
     }
@@ -156,7 +157,7 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
             target: targetRecord,
             activeMaterials: materials,
             currentSourceVersions: {for (final item in sortedProgress) item.material.id: item.sourceVersionId},
-            evaluatedAt: snapshotAt,
+            evaluatedAt: calendarNow,
           );
     final dailyStudy = DailyStudyPlan.build(
       progress: sortedProgress,

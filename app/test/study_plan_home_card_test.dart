@@ -40,7 +40,7 @@ void main() {
           updatedAt: DateTime.utc(2026, 10, 13),
         ),
       ],
-      currentSourceVersions: const {MaterialId('biology'): SourceVersionId('biology-new-source')},
+      currentSourceVersions: {const MaterialId('biology'): const SourceVersionId('biology-new-source')},
       evaluatedAt: DateTime.utc(2026, 10, 13),
     );
 

@@ -44,6 +44,20 @@ Future<void> _pumpUntilFound(WidgetTester tester, Finder finder, {int maxPumps =
   fail('Expected Study Plan surface was not reached within bounded pumps.');
 }
 
+Future<void> _scrollUntilFound(WidgetTester tester, Finder finder, {int maxDrags = 20}) async {
+  for (var i = 0; i < maxDrags; i++) {
+    if (finder.evaluate().isNotEmpty) return;
+    final scrollable = find.byType(Scrollable).hitTestable();
+    if (scrollable.evaluate().isEmpty) {
+      await tester.pump(const Duration(milliseconds: 20));
+      continue;
+    }
+    await tester.drag(scrollable.first, const Offset(0, -180), warnIfMissed: false);
+    await tester.pump();
+  }
+  if (finder.evaluate().isEmpty) fail('Expected Study Plan content was not reached while scrolling.');
+}
+
 Future<void> _pumpPlan(WidgetTester tester, AppRuntime runtime) async {
   tester.view.physicalSize = const Size(320, 844);
   tester.view.devicePixelRatio = 1;
@@ -103,6 +117,11 @@ void main() {
     expect(find.textContaining('hazır olma puanı değildir'), findsOneWidget);
     expect(find.text('Güncel kaynak'), findsOneWidget);
     expect(find.textContaining('%'), findsNothing);
+    final nextAction = find.byKey(const ValueKey('study-plan-next-action'));
+    await _scrollUntilFound(tester, nextAction);
+    expect(nextAction, findsOneWidget);
+    expect(find.text('İlk hatırlamayı dene'), findsOneWidget);
+    expect(find.textContaining('henüz bağımsız hatırlama kanıtı yok'), findsOneWidget);
 
     await runtime.ingest.ingestPastedText(
       learner: runtime.learner,
@@ -119,6 +138,7 @@ void main() {
     expect(tester.takeException(), isNull);
     expect(find.textContaining('Eski sürümden yeni görev üretmiyoruz'), findsOneWidget);
     expect(find.text('Planı güncel kaynaklara bağla'), findsOneWidget);
+    expect(find.byKey(const ValueKey('study-plan-next-action')), findsNothing);
 
     final reconcile = find.byKey(const ValueKey('study-plan-primary'));
     await tester.ensureVisible(reconcile);

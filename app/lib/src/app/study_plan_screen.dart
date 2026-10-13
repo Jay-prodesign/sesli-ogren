@@ -1,12 +1,17 @@
 import 'package:flutter/material.dart';
 
 import '../domain/learning_contracts.dart';
+import '../domain/learning_truth.dart';
+import '../domain/retention_schedule.dart';
 import '../domain/study_plan.dart';
+import '../learning/recall_learning_service.dart';
 import 'app_runtime.dart';
 import 'app_theme.dart';
 import 'atelier_learning_surfaces.dart';
 import 'companion_view.dart';
+import 'daily_study_plan.dart';
 import 'living_study_desk_home.dart';
+import 'progress_surface.dart';
 
 class StudyPlanScreen extends StatefulWidget {
   const StudyPlanScreen({required this.runtime, super.key});
@@ -38,8 +43,17 @@ class _StudyPlanScreenState extends State<StudyPlanScreen> {
     super.dispose();
   }
 
+  Future<LearningContinuation?> _continuationFor(MaterialId materialId) async {
+    try {
+      return await widget.runtime.recall.reopen(learner: widget.runtime.learner, materialId: materialId);
+    } on RecallLearningException {
+      return widget.runtime.recall.repairContinuation(learner: widget.runtime.learner, materialId: materialId);
+    }
+  }
+
   Future<_StudyPlanData> _load() async {
-    final evaluatedAt = DateTime.now().toUtc();
+    final evaluatedAt = DateTime.now();
+    final instantAt = evaluatedAt.toUtc();
     final target = await widget.runtime.store.activeStudyTarget(learner: widget.runtime.learner);
     final materials = await widget.runtime.store.activeMaterials(learner: widget.runtime.learner);
     final choices = <_StudyMaterialChoice>[];
@@ -60,7 +74,65 @@ class _StudyPlanScreenState extends State<StudyPlanScreen> {
             currentSourceVersions: currentSources,
             evaluatedAt: evaluatedAt,
           );
-    return _StudyPlanData(target: target, projection: projection, choices: choices, evaluatedAt: evaluatedAt);
+
+    DailyStudyPlan? targetToday;
+    if (projection != null && !projection.hasReconciliationIssues && !projection.isPastTarget) {
+      final progress = <ProgressItem>[];
+      for (final choice in choices) {
+        if (!projection.currentMaterialIds.contains(choice.material.id)) continue;
+        final sourceVersionId = choice.sourceVersionId;
+        if (sourceVersionId == null) continue;
+        final continuation = await _continuationFor(choice.material.id);
+        final retentionRows = await widget.runtime.store.retentionSchedulesForMaterial(
+          learner: widget.runtime.learner,
+          materialId: choice.material.id,
+        );
+        final retention = retentionRows.isEmpty
+            ? null
+            : RetentionMaterialStatus(schedules: retentionRows, evaluatedAt: instantAt);
+        final listenActivityAt = await widget.runtime.store.listenResumeUpdatedAt(
+          learner: widget.runtime.learner,
+          materialId: choice.material.id,
+          sourceVersionId: sourceVersionId,
+        );
+        final listenResumeChunk = await widget.runtime.store.listenResumeChunk(
+          learner: widget.runtime.learner,
+          materialId: choice.material.id,
+          sourceVersionId: sourceVersionId,
+        );
+        final readerActivityAt = await widget.runtime.store.readerResumeUpdatedAt(
+          learner: widget.runtime.learner,
+          materialId: choice.material.id,
+          sourceVersionId: sourceVersionId,
+        );
+        final readerResumeProgress = await widget.runtime.store.readerResumeProgress(
+          learner: widget.runtime.learner,
+          materialId: choice.material.id,
+          sourceVersionId: sourceVersionId,
+        );
+        progress.add(
+          ProgressItem(
+            material: choice.material,
+            continuation: continuation,
+            retention: retention,
+            sourceVersionId: sourceVersionId,
+            listenActivityAt: listenActivityAt,
+            listenResumeChunk: listenResumeChunk,
+            readerActivityAt: readerActivityAt,
+            readerResumeProgress: readerResumeProgress,
+          ),
+        );
+      }
+      targetToday = DailyStudyPlan.build(progress: progress, evaluatedAt: instantAt);
+    }
+
+    return _StudyPlanData(
+      target: target,
+      projection: projection,
+      choices: choices,
+      targetToday: targetToday,
+      evaluatedAt: evaluatedAt,
+    );
   }
 
   void _reload() {
@@ -211,6 +283,75 @@ class _StudyPlanScreenState extends State<StudyPlanScreen> {
     return '${projection.daysUntilTarget} gün kaldı. Bu yalnız takvim bilgisidir; hazır olma puanı değildir.';
   }
 
+  String _scheduledLabel(DateTime value) {
+    final local = value.toLocal();
+    final minute = local.minute.toString().padLeft(2, '0');
+    return '${_dateLabel(local)} · ${local.hour}:$minute';
+  }
+
+  Widget _nextUsefulAction(_StudyPlanData data) {
+    final daily = data.targetToday;
+    final item = daily?.primary;
+    final hasImmediate = item != null;
+    final title = hasImmediate ? item.title : 'Şimdi zorunlu yeni bir adım yok';
+    final detail = hasImmediate
+        ? item.reasonText
+        : daily?.nextScheduledAt != null
+        ? 'Bu hedefte şu an “hemen yap” görevi üretmiyoruz. Sıradaki planlı tekrar ${_scheduledLabel(daily!.nextScheduledAt!)}.'
+        : 'Bu hedefte yeni bir aktif çalışma zorunluluğu türetmiyoruz. Today, gerçek learner evidence değiştiğinde sıradaki adımı yeniden hesaplar.';
+
+    return Semantics(
+      container: true,
+      label: 'Bu hedefte sıradaki doğru çalışma. $title. $detail',
+      child: ExcludeSemantics(
+        child: Container(
+          key: const ValueKey('study-plan-next-action'),
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            color: AtelierStyle.paper,
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(color: AtelierStyle.line),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'BU HEDEFTE SIRADAKİ DOĞRU ÇALIŞMA',
+                style: TextStyle(
+                  color: AtelierStyle.pulse,
+                  fontSize: 9.5,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: 0.8,
+                ),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                title,
+                style: const TextStyle(color: AtelierStyle.ink, fontSize: 16, fontWeight: FontWeight.w900),
+              ),
+              if (hasImmediate) ...[
+                const SizedBox(height: 3),
+                Text(
+                  item.materialTitle,
+                  style: const TextStyle(color: AtelierStyle.muted, fontSize: 12, fontWeight: FontWeight.w800),
+                ),
+              ],
+              const SizedBox(height: 5),
+              Text(detail, style: const TextStyle(color: AtelierStyle.muted, height: 1.4)),
+              const SizedBox(height: 8),
+              Text(
+                hasImmediate
+                    ? 'Today bu adımı aynı öğrenme gerçeğinden açar. Hedef tarihi repair, due-repeat veya kanıt önceliğini yükseltmez.'
+                    : 'Hedef tarihi kendi başına görev, günlük kota veya hazır olma iddiası üretmez.',
+                style: const TextStyle(color: AtelierStyle.muted, fontSize: 11.5, height: 1.35),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final living = LivingDeskReviewScope.active(context);
@@ -301,6 +442,10 @@ class _StudyPlanScreenState extends State<StudyPlanScreen> {
             style: const TextStyle(color: AtelierStyle.ink, height: 1.4),
           ),
         ),
+        if (!projection.hasReconciliationIssues && !projection.isPastTarget) ...[
+          const SizedBox(height: 14),
+          _nextUsefulAction(data),
+        ],
         const SizedBox(height: 18),
         const Text(
           'Kaynak kapsamı',
@@ -479,12 +624,14 @@ class _StudyPlanData {
     required this.target,
     required this.projection,
     required this.choices,
+    required this.targetToday,
     required this.evaluatedAt,
   });
 
   final StudyTargetRecord? target;
   final StudyTargetProjection? projection;
   final List<_StudyMaterialChoice> choices;
+  final DailyStudyPlan? targetToday;
   final DateTime evaluatedAt;
 }
 
