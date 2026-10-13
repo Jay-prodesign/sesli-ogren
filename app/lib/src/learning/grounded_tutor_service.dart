@@ -203,9 +203,7 @@ abstract final class GroundedTutorPolicy {
 
   static bool _refersToSelectedContext(String question) {
     final normalized = question.toLowerCase().replaceAll('İ', 'i').replaceAll('I', 'ı');
-    return RegExp(
-      r'\b(bu|bunu|şu|şunu|burada|buradaki|bölüm|bölümü|seçili|seçtiğim|seçtiğin)\b',
-    ).hasMatch(normalized);
+    return RegExp(r'\b(bu|bunu|şu|şunu|burada|buradaki|bölüm|bölümü|seçili|seçtiğim|seçtiğin)\b').hasMatch(normalized);
   }
 
   static Set<String> _terms(String value) {

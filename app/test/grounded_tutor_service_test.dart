@@ -88,11 +88,7 @@ void main() {
           'Klorofil ışığın soğurulmasına yardım eder.',
     );
     final opened = await firstService.openThread(learner: learner, materialId: materialId);
-    await firstService.ask(
-      learner: learner,
-      threadId: opened.thread.id,
-      question: 'Klorofil ne işe yarar?',
-    );
+    await firstService.ask(learner: learner, threadId: opened.thread.id, question: 'Klorofil ne işe yarar?');
     await firstStore.close();
 
     final reopenedStore = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: dbPath);
