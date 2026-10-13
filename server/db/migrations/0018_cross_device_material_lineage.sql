@@ -440,7 +440,7 @@ returns table (
 language sql
 security definer
 set search_path = ''
-as $
+as $$
   select m.id,
          m.title,
          m.client_material_key,
