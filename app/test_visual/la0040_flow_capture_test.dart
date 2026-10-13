@@ -975,7 +975,9 @@ void main() {
       ),
     );
 
+    var planRenderRevision = 0;
     Future<void> pumpPlan({TextScaler textScaler = TextScaler.noScaling}) async {
+      final revision = planRenderRevision++;
       await tester.pumpWidget(
         MaterialApp(
           debugShowCheckedModeBanner: false,
@@ -984,7 +986,9 @@ void main() {
             data: MediaQuery.of(context).copyWith(disableAnimations: true, textScaler: textScaler),
             child: child!,
           ),
-          home: LivingDeskReviewScope(child: StudyPlanScreen(runtime: runtime)),
+          home: LivingDeskReviewScope(
+            child: StudyPlanScreen(key: ValueKey('visual-study-plan-$revision'), runtime: runtime),
+          ),
         ),
       );
       for (var i = 0; i < 80 && find.text('Fizik ara sınavı').evaluate().isEmpty; i++) {
