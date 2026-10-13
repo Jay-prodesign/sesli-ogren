@@ -27,6 +27,19 @@ android {
         versionCode = flutter.versionCode
         versionName = flutter.versionName
     }
+    buildTypes {
+        release {
+            // The Flutter ML Kit wrapper contains guarded references to
+            // optional non-Latin recognizer artifacts. Sesli Öğren only
+            // instantiates the Latin recognizer, so keep release shrinking
+            // strict while suppressing warnings for scripts we do not ship.
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro",
+            )
+        }
+    }
+
 }
 
 kotlin {
