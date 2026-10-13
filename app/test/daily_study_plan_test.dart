@@ -71,7 +71,7 @@ void main() {
     ],
   );
 
-  test('Daily Study orders due review before repair/resume and excludes future repeat-later work', () {
+  test('Daily Study orders urgent repair/retry before due review and excludes future repeat-later work', () {
     final due = ProgressItem(
       material: material('due'),
       sourceVersionId: const SourceVersionId('source-due'),
@@ -86,6 +86,11 @@ void main() {
       material: material('repair'),
       sourceVersionId: const SourceVersionId('source-repair'),
       continuation: continuation('repair', NextLearningActionKind.reviewSourceThenRecall),
+    );
+    final retry = ProgressItem(
+      material: material('retry'),
+      sourceVersionId: const SourceVersionId('source-retry'),
+      continuation: continuation('retry', NextLearningActionKind.retryRecallWithoutHint),
     );
     final reader = ProgressItem(
       material: material('reader'),
@@ -110,13 +115,14 @@ void main() {
       retention: retention('future', now.add(const Duration(days: 2))),
     );
 
-    final plan = DailyStudyPlan.build(progress: [reader, future, fresh, repair, due], evaluatedAt: now);
+    final plan = DailyStudyPlan.build(progress: [reader, future, fresh, retry, repair, due], evaluatedAt: now);
 
-    expect(plan.items.map((item) => item.materialId.value), ['due', 'repair', 'reader', 'fresh']);
-    expect(plan.primary?.kind, DailyStudyActionKind.scheduledReview);
-    expect(plan.items[1].kind, DailyStudyActionKind.sourceRepair);
-    expect(plan.items[2].kind, DailyStudyActionKind.resumeReader);
-    expect(plan.items[3].kind, DailyStudyActionKind.beginRecall);
+    expect(plan.items.map((item) => item.materialId.value), ['repair', 'retry', 'due', 'reader', 'fresh']);
+    expect(plan.primary?.kind, DailyStudyActionKind.sourceRepair);
+    expect(plan.items[1].kind, DailyStudyActionKind.retryRecall);
+    expect(plan.items[2].kind, DailyStudyActionKind.scheduledReview);
+    expect(plan.items[3].kind, DailyStudyActionKind.resumeReader);
+    expect(plan.items[4].kind, DailyStudyActionKind.beginRecall);
     expect(plan.nextScheduledAt, now.add(const Duration(days: 2)));
     expect(plan.nextScheduledMaterialId, const MaterialId('future'));
   });
@@ -134,6 +140,21 @@ void main() {
     expect(plan.items, hasLength(1));
     expect(plan.primary?.kind, DailyStudyActionKind.sourceRepair);
     expect(plan.primary?.reasonCode, 'reason-blocked-due');
+  });
+
+  test('Daily Study fails closed when continuation truth belongs to a stale source version', () {
+    final item = ProgressItem(
+      material: material('stale'),
+      sourceVersionId: const SourceVersionId('source-current'),
+      continuation: continuation('stale', NextLearningActionKind.retryRecallWithoutHint),
+    );
+
+    final plan = DailyStudyPlan.build(progress: [item], evaluatedAt: now);
+
+    expect(plan.items, hasLength(1));
+    expect(plan.primary?.kind, DailyStudyActionKind.workspaceRecovery);
+    expect(plan.primary?.reasonCode, 'STALE_CONTINUATION_SOURCE');
+    expect(plan.primary?.sourceVersionId, const SourceVersionId('source-current'));
   });
 
   test('Daily Study fails closed when a current source identity is unavailable', () {

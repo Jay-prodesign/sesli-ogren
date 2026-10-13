@@ -715,7 +715,10 @@ class LivingStudyDeskHome extends StatelessWidget {
             style: TextStyle(color: _sub, fontSize: 12, height: 1.35),
           ),
           const SizedBox(height: 9),
-          for (final item in dailyStudy!.items.skip(1)) ...[_todayQueueItem(context, item), const SizedBox(height: 8)],
+          for (final item in dailyStudy!.items.skip(1).take(3)) ...[
+            _todayQueueItem(context, item),
+            const SizedBox(height: 8),
+          ],
         ],
         if (secondaryMaterials.isNotEmpty) ...[
           const SizedBox(height: 22),

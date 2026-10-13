@@ -606,6 +606,50 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  testWidgets('Today action fails closed when the source changes after Home was rendered', (tester) async {
+    usePhoneViewport(tester);
+    final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
+    final ingest = SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor());
+    final runtime = AppRuntime(
+      learner: AppRuntime.localM5LearnerFixture,
+      store: store,
+      ingest: ingest,
+      recall: RecallLearningService(sourceStore: store, learningStore: store.learningTruthStore()),
+      telemetry: store.operationalTelemetry(),
+    );
+    addTearDown(runtime.close);
+    const materialId = AppRuntime.primaryMaterialId;
+
+    await ingest.ingestPastedText(
+      learner: runtime.learner,
+      materialId: materialId,
+      text:
+          'Fotosentez ışık enerjisini kimyasal enerjiye dönüştürür. '
+          'Klorofil ışığın soğurulmasına yardım eder.',
+      sourceName: 'Today sürüm 1',
+    );
+
+    await tester.pumpWidget(_testApp(LivingDeskReviewScope(child: ProductShellScreen(runtime: runtime))));
+    await pumpUntilFound(tester, find.text('Hatırlamayı dene'));
+
+    await ingest.ingestPastedText(
+      learner: runtime.learner,
+      materialId: materialId,
+      text:
+          'Mitokondri hücresel solunumla enerji dönüşümüne katkı sağlar. '
+          'ATP kullanılabilir enerji aktarımında rol alır.',
+      sourceName: 'Today sürüm 2',
+    );
+
+    await tapVisible(tester, find.text('Hatırlamayı dene'));
+    await pumpUntilFound(tester, find.text('Kaynak güncellendi. Bugün planını güncel sürüme göre yeniledik.'));
+
+    expect(find.byType(LearningSliceScreen), findsNothing);
+    expect(find.byType(MaterialWorkspaceScreen), findsNothing);
+    await pumpUntilFound(tester, find.text('Today sürüm 2'));
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('Home resumes the exact Reader source position before passive alternatives', (tester) async {
     usePhoneViewport(tester);
     final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);

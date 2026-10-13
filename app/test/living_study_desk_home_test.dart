@@ -245,6 +245,40 @@ void main() {
     expect(opened, secondId);
   });
 
+  testWidgets('Today keeps secondary work bounded to three visible actions', (tester) async {
+    usePhoneViewport(tester);
+    DailyStudyItem item(int index) => DailyStudyItem(
+      materialId: MaterialId('bounded-$index'),
+      materialTitle: 'Bounded $index',
+      sourceVersionId: SourceVersionId('bounded-source-$index'),
+      kind: DailyStudyActionKind.beginRecall,
+      title: 'İlk hatırlamayı dene',
+      actionLabel: 'Hatırlamayı dene',
+      reasonCode: 'NO_DURABLE_RECALL_EVIDENCE',
+      reasonText: 'Güncel kaynak için aktif kanıt yok.',
+      activityAt: now.subtract(Duration(minutes: index)),
+    );
+    final plan = DailyStudyPlan(
+      evaluatedAt: now,
+      items: [item(0), item(1), item(2), item(3), item(4), item(5)],
+    );
+
+    await pumpHome(
+      tester,
+      continuation: continuationFor(RecallOutcome.correct, RecallStateKind.retrievedOnce),
+      dailyStudy: plan,
+      onOpenWorkspace: () {},
+      onOpenReader: () {},
+      onOpenLearning: () {},
+    );
+
+    expect(find.byKey(const ValueKey('today-item-bounded-1')), findsOneWidget);
+    expect(find.byKey(const ValueKey('today-item-bounded-2')), findsOneWidget);
+    expect(find.byKey(const ValueKey('today-item-bounded-3')), findsOneWidget);
+    expect(find.byKey(const ValueKey('today-item-bounded-4')), findsNothing);
+    expect(find.byKey(const ValueKey('today-item-bounded-5')), findsNothing);
+  });
+
   testWidgets('Today quiet state does not invent work before the next scheduled return', (tester) async {
     usePhoneViewport(tester);
     final plan = DailyStudyPlan(

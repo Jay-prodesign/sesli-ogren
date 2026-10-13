@@ -233,6 +233,22 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
         break;
       }
     }
+    final expectedSourceVersionId = progressItem?.sourceVersionId;
+    if (expectedSourceVersionId != null) {
+      final currentSource = await widget.runtime.store.currentSourceVersion(
+        learner: widget.runtime.learner,
+        materialId: materialId,
+      );
+      if (!mounted) return;
+      if (currentSource?.identity.sourceVersionId != expectedSourceVersionId) {
+        setState(_refresh);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Kaynak güncellendi. Bugün planını güncel sürüme göre yeniledik.')),
+        );
+        return;
+      }
+    }
+
     final continuation = progressItem?.continuation;
     if (continuation?.nextAction.kind == NextLearningActionKind.reviewSourceThenRecall) {
       // A review recommendation must expose the source before another

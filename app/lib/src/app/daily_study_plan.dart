@@ -97,6 +97,21 @@ class DailyStudyPlan {
     final action = progress.continuation?.nextAction.kind;
     final material = progress.material;
     final activityAt = _activityAt(progress);
+    final continuationSource = progress.continuation?.state.sourceVersionId;
+    if (continuationSource != null && continuationSource != sourceVersionId) {
+      return DailyStudyItem(
+        materialId: material.id,
+        materialTitle: material.title,
+        sourceVersionId: sourceVersionId,
+        kind: DailyStudyActionKind.workspaceRecovery,
+        title: 'Güncel kaynağı yeniden doğrula',
+        actionLabel: 'Çalışma alanını yenile',
+        reasonCode: 'STALE_CONTINUATION_SOURCE',
+        reasonText:
+            'Kayıtlı sıradaki adım eski kaynak sürümüne ait. Öğrenme kanıtı taşımadan güncel kaynağı yeniden doğrula.',
+        activityAt: activityAt,
+      );
+    }
 
     if (action == NextLearningActionKind.reviewSourceThenRecall) {
       return DailyStudyItem(
@@ -223,9 +238,9 @@ class DailyStudyPlan {
   }
 
   static int _priority(DailyStudyActionKind kind) => switch (kind) {
+    DailyStudyActionKind.sourceRepair => 700,
+    DailyStudyActionKind.retryRecall => 690,
     DailyStudyActionKind.scheduledReview => 600,
-    DailyStudyActionKind.sourceRepair => 550,
-    DailyStudyActionKind.retryRecall => 540,
     DailyStudyActionKind.resumeReader => 430,
     DailyStudyActionKind.resumeListen => 420,
     DailyStudyActionKind.beginRecall => 300,
