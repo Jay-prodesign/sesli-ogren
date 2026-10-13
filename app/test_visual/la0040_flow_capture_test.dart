@@ -1277,10 +1277,7 @@ void main() {
     expect(find.text('Seçili bölüm · öğrenme kanıtı değil'), findsOneWidget);
     expect(find.text('Bu bölümden hatırla'), findsOneWidget);
     expect(tester.takeException(), isNull);
-    await expectLater(
-      find.byType(Scaffold),
-      matchesGoldenFile('goldens/la0040_source_reader_annotations_390x844.png'),
-    );
+    await expectLater(find.byType(Scaffold), matchesGoldenFile('goldens/la0040_source_reader_annotations_390x844.png'));
   });
 
   testWidgets('LA-0040 real source Reader survives 320px + large type', (tester) async {
