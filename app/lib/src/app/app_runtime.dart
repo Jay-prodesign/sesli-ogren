@@ -14,6 +14,7 @@ import '../learning/flashcard_learning_service.dart';
 import '../learning/quiz_learning_service.dart';
 import '../learning/explain_back_gateway.dart';
 import '../learning/focus_help_gateway.dart';
+import '../learning/grounded_tutor_service.dart';
 import '../learning/recall_learning_service.dart';
 import '../learning/supabase_explain_back_gateway.dart';
 import '../learning/supabase_focus_help_gateway.dart';
@@ -38,13 +39,15 @@ class AppRuntime {
     required this.telemetry,
     FlashcardLearningService? flashcards,
     QuizLearningService? quiz,
+    GroundedTutorService? tutor,
     this.explain = const UnavailableGroundedExplainGateway(),
     this.explainBack = const UnavailableExplainBackGateway(),
     this.focusHelp = const UnavailableFocusHelpGateway(),
     this.accountOverview = const UnavailableAccountOverviewGateway(),
     this.accountDeletion = const UnavailableAccountDeletionGateway(),
   }) : flashcards = flashcards ?? FlashcardLearningService(store: store),
-       quiz = quiz ?? QuizLearningService(store: store);
+       quiz = quiz ?? QuizLearningService(store: store),
+       tutor = tutor ?? GroundedTutorService(store: store);
 
   /// Device-local production namespace. It is explicitly not an account.
   static const localLearner = LearnerIdentity.local();
@@ -63,6 +66,7 @@ class AppRuntime {
   final RecallLearningService recall;
   final FlashcardLearningService flashcards;
   final QuizLearningService quiz;
+  final GroundedTutorService tutor;
   final OperationalTelemetry telemetry;
   final GroundedExplainGateway explain;
   final ExplainBackGateway explainBack;

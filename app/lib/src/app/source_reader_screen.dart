@@ -24,6 +24,7 @@ class SourceReaderScreen extends StatefulWidget {
     this.staleAnnotationCount = 0,
     this.onSaveAnnotation,
     this.onDeleteAnnotation,
+    this.onTutorSelection,
     this.onRecallSelection,
     this.onListen,
     this.onRecap,
@@ -48,6 +49,7 @@ class SourceReaderScreen extends StatefulWidget {
   )?
   onSaveAnnotation;
   final Future<void> Function(ReaderAnnotationId annotationId)? onDeleteAnnotation;
+  final void Function(SourceAnchor anchor)? onTutorSelection;
   final void Function(SourceAnchor anchor)? onRecallSelection;
   final VoidCallback? onListen;
   final VoidCallback? onRecap;
@@ -879,6 +881,18 @@ class _SourceReaderScreenState extends State<SourceReaderScreen> {
                             onPressed: _annotationBusy ? null : _addNoteForSelection,
                             icon: const Icon(Icons.note_add_outlined),
                             label: const Text('Not ekle'),
+                          ),
+                        if (widget.onTutorSelection != null)
+                          OutlinedButton.icon(
+                            key: const ValueKey('reader-selection-tutor'),
+                            onPressed: _annotationBusy
+                                ? null
+                                : () {
+                                    final anchor = _selectedAnchor;
+                                    if (anchor != null) widget.onTutorSelection!(anchor);
+                                  },
+                            icon: const Icon(Icons.forum_outlined),
+                            label: const Text('Bu bölümü sor'),
                           ),
                         if (widget.onRecallSelection != null)
                           FilledButton.icon(

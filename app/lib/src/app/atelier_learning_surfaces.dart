@@ -127,6 +127,7 @@ class AtelierWorkspace extends StatelessWidget {
     required this.onRecall,
     required this.onListen,
     required this.onGroundedExplain,
+    this.onGroundedTutor,
     required this.onExplain,
     this.onFlashcards,
     this.onQuiz,
@@ -146,6 +147,7 @@ class AtelierWorkspace extends StatelessWidget {
   final VoidCallback onRecall;
   final VoidCallback onListen;
   final VoidCallback onGroundedExplain;
+  final VoidCallback? onGroundedTutor;
   final VoidCallback onExplain;
   final VoidCallback? onFlashcards;
   final VoidCallback? onQuiz;
@@ -492,6 +494,19 @@ class AtelierWorkspace extends StatelessWidget {
                   onGroundedExplain();
                 },
               ),
+              if (onGroundedTutor != null)
+                ListTile(
+                  key: const ValueKey('workspace-other-grounded-tutor'),
+                  leading: const Icon(Icons.forum_outlined),
+                  title: const Text('Kaynağa soru sor'),
+                  subtitle: const Text(
+                    'Tutor yalnız güncel kaynağı kullanır; destek bulamazsa bunu açıkça söyler ve bu sohbet öğrenme kanıtı sayılmaz.',
+                  ),
+                  onTap: () {
+                    Navigator.of(sheetContext).pop();
+                    onGroundedTutor!();
+                  },
+                ),
               ListTile(
                 key: const ValueKey('workspace-other-focus'),
                 leading: const Icon(Icons.center_focus_strong),

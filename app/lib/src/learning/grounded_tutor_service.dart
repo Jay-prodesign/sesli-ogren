@@ -20,11 +20,15 @@ class GroundedTutorService {
   Future<GroundedTutorThreadState> openThread({
     required AuthenticatedLearner learner,
     required MaterialId materialId,
+    SourceVersionId? expectedSourceVersionId,
     SourceAnchor? contextAnchor,
   }) async {
     final source = await store.currentSourceVersion(learner: learner, materialId: materialId);
     if (source == null || !source.isCurrent) {
       throw const GroundedTutorException('Güncel kaynak bulunamadı.');
+    }
+    if (expectedSourceVersionId != null && source.identity.sourceVersionId != expectedSourceVersionId) {
+      throw const GroundedTutorException('Kaynak değişti. Tutor eski kaynak bağlamını yeni sürüme taşımadı.');
     }
     final extracted = await store.extractedContentForSource(
       learner: learner,
