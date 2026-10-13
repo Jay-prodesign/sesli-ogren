@@ -97,6 +97,24 @@ class DailyStudyPlan {
     final action = progress.continuation?.nextAction.kind;
     final material = progress.material;
     final activityAt = _activityAt(progress);
+    if (material.processingState != MaterialProcessingState.ready) {
+      return DailyStudyItem(
+        materialId: material.id,
+        materialTitle: material.title,
+        sourceVersionId: sourceVersionId,
+        kind: DailyStudyActionKind.workspaceRecovery,
+        title: 'Kaynağı yeniden doğrula',
+        actionLabel: 'Çalışma alanını aç',
+        reasonCode: material.processingState == MaterialProcessingState.failed
+            ? 'SOURCE_PROCESSING_FAILED'
+            : 'SOURCE_PROCESSING_NOT_READY',
+        reasonText: material.processingState == MaterialProcessingState.failed
+            ? 'Kaynak hazırlama tamamlanmadı. Yeni öğrenme kanıtı üretmeden çalışma alanında kaynağı yeniden doğrula.'
+            : 'Kaynak henüz aktif öğrenmeye hazır değil. Hazır olmayan içerikten çalışma görevi üretmiyoruz.',
+        activityAt: activityAt,
+      );
+    }
+
     final continuationSource = progress.continuation?.state.sourceVersionId;
     if (continuationSource != null && continuationSource != sourceVersionId) {
       return DailyStudyItem(

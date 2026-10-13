@@ -142,6 +142,31 @@ void main() {
     expect(plan.primary?.reasonCode, 'reason-blocked-due');
   });
 
+  test('Daily Study turns a non-ready source into recovery instead of an active-learning claim', () {
+    final pendingMaterial = MaterialRecord(
+      id: const MaterialId('pending'),
+      title: 'Pending source',
+      mediaType: SourceMediaType.pastedText,
+      lifecycleStatus: MaterialLifecycleStatus.active,
+      processingState: MaterialProcessingState.none,
+      currentSourceVersionId: const SourceVersionId('source-pending'),
+      createdAt: now.subtract(const Duration(days: 1)),
+      updatedAt: now,
+    );
+    final item = ProgressItem(
+      material: pendingMaterial,
+      sourceVersionId: const SourceVersionId('source-pending'),
+      continuation: null,
+    );
+
+    final plan = DailyStudyPlan.build(progress: [item], evaluatedAt: now);
+
+    expect(plan.items, hasLength(1));
+    expect(plan.primary?.kind, DailyStudyActionKind.workspaceRecovery);
+    expect(plan.primary?.reasonCode, 'SOURCE_PROCESSING_NOT_READY');
+    expect(plan.primary?.reasonText, contains('çalışma görevi üretmiyoruz'));
+  });
+
   test('Daily Study fails closed when continuation truth belongs to a stale source version', () {
     final item = ProgressItem(
       material: material('stale'),
