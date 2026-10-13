@@ -11,6 +11,7 @@ import '../domain/learning_contracts.dart';
 import '../domain/learning_truth.dart';
 import '../domain/operational_event.dart';
 import '../domain/retention_schedule.dart';
+import '../domain/reader_annotation.dart';
 import '../domain/study_plan.dart';
 import 'learning_truth_store.dart';
 import 'operational_telemetry.dart';
@@ -40,7 +41,7 @@ class SqliteSourceStore implements SourceStore {
     final database = await selectedFactory.openDatabase(
       databasePath,
       options: OpenDatabaseOptions(
-        version: 18,
+        version: 19,
         // Schema-rebuild migrations need foreign keys disabled before the
         // upgrade transaction begins. Runtime enforcement is restored in
         // onOpen before any product read/write can occur.
@@ -103,6 +104,9 @@ class SqliteSourceStore implements SourceStore {
           }
           if (oldVersion < 18) {
             await _upgradeSourceVersionMediaSchema(db);
+          }
+          if (oldVersion < 19) {
+            await _upgradeReaderAnnotationSchema(db);
           }
         },
         onCreate: (db, version) async {
@@ -331,6 +335,7 @@ CREATE TABLE learner_preferences (
           await _upgradeQuizSchema(db);
           await _upgradeRetentionSchema(db);
           await _upgradeStudyPlanSchema(db);
+          await _upgradeReaderAnnotationSchema(db);
           await db.execute('''
 CREATE TABLE operational_events (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -1311,6 +1316,37 @@ ORDER BY a.id ASC
     }
   }
 
+  static Future<void> _upgradeReaderAnnotationSchema(Database db) async {
+    await db.execute('''
+CREATE TABLE IF NOT EXISTS reader_annotations (
+  learner_id TEXT NOT NULL,
+  annotation_id TEXT NOT NULL,
+  material_id TEXT NOT NULL,
+  source_version_id TEXT NOT NULL,
+  source_start INTEGER NOT NULL,
+  source_end INTEGER NOT NULL,
+  page_number INTEGER,
+  selected_text TEXT NOT NULL,
+  selected_text_digest TEXT NOT NULL,
+  annotation_kind TEXT NOT NULL,
+  note_text TEXT,
+  created_at_utc TEXT NOT NULL,
+  updated_at_utc TEXT NOT NULL,
+  invalidated_at_utc TEXT,
+  PRIMARY KEY (learner_id, annotation_id),
+  FOREIGN KEY (learner_id, material_id)
+    REFERENCES materials (learner_id, material_id) ON DELETE CASCADE,
+  FOREIGN KEY (learner_id, source_version_id)
+    REFERENCES source_versions (learner_id, source_version_id) ON DELETE CASCADE,
+  CHECK (source_start >= 0 AND source_end > source_start)
+)
+''');
+    await db.execute(
+      'CREATE INDEX IF NOT EXISTS idx_reader_annotations_source '
+      'ON reader_annotations (learner_id, material_id, source_version_id, invalidated_at_utc)',
+    );
+  }
+
   static Future<void> _upgradeSourceVersionMediaSchema(Database db) async {
     final tableRows = await db.rawQuery(
       "SELECT sql FROM sqlite_master WHERE type = 'table' AND name = 'source_versions' LIMIT 1",
@@ -1778,6 +1814,14 @@ LIMIT 1
         await transaction.update(
           'retention_schedules',
           {'invalidated_at_utc': supersededAt},
+          where:
+              'learner_id = ? AND source_version_id = ? '
+              'AND invalidated_at_utc IS NULL',
+          whereArgs: [learner.id.value, previousSourceId.value],
+        );
+        await transaction.update(
+          'reader_annotations',
+          {'invalidated_at_utc': supersededAt, 'updated_at_utc': supersededAt},
           where:
               'learner_id = ? AND source_version_id = ? '
               'AND invalidated_at_utc IS NULL',
@@ -2525,6 +2569,161 @@ ON CONFLICT(learner_id, quiz_set_id) DO UPDATE SET
     });
   }
 
+  Future<List<ReaderAnnotationRecord>> readerAnnotationsForSource({
+    required AuthenticatedLearner learner,
+    required MaterialId materialId,
+    required SourceVersionId sourceVersionId,
+  }) async {
+    final rows = await _database.query(
+      'reader_annotations',
+      where:
+          'learner_id = ? AND material_id = ? AND source_version_id = ? '
+          'AND invalidated_at_utc IS NULL',
+      whereArgs: [learner.id.value, materialId.value, sourceVersionId.value],
+      orderBy: 'source_start ASC, source_end ASC, updated_at_utc ASC',
+    );
+    return rows.map(_readerAnnotationFromRow).toList(growable: false);
+  }
+
+  Future<int> staleReaderAnnotationCount({
+    required AuthenticatedLearner learner,
+    required MaterialId materialId,
+    required SourceVersionId currentSourceVersionId,
+  }) async {
+    final rows = await _database.rawQuery(
+      '''
+SELECT COUNT(*) AS count
+FROM reader_annotations
+WHERE learner_id = ?
+  AND material_id = ?
+  AND (
+    source_version_id != ?
+    OR invalidated_at_utc IS NOT NULL
+  )
+''',
+      [learner.id.value, materialId.value, currentSourceVersionId.value],
+    );
+    return (rows.single['count']! as int);
+  }
+
+  Future<ReaderAnnotationRecord> upsertReaderAnnotation({
+    required AuthenticatedLearner learner,
+    required MaterialId materialId,
+    required SourceVersionId sourceVersionId,
+    required SourceAnchor sourceAnchor,
+    required String selectedText,
+    required ReaderAnnotationKind kind,
+    String? noteText,
+    required DateTime updatedAt,
+  }) {
+    final trimmedSelected = selectedText.trim();
+    final normalizedNote = noteText?.trim();
+    if (trimmedSelected.isEmpty || selectedText.length > 2000) {
+      throw ArgumentError.value(selectedText, 'selectedText', 'Reader selection must contain 1-2000 characters.');
+    }
+    if (kind == ReaderAnnotationKind.note && (normalizedNote == null || normalizedNote.isEmpty)) {
+      throw ArgumentError.value(noteText, 'noteText', 'A Reader note requires note text.');
+    }
+    if ((normalizedNote?.length ?? 0) > 4000) {
+      throw ArgumentError.value(noteText, 'noteText', 'Reader note must be at most 4000 characters.');
+    }
+    return _database.transaction((transaction) async {
+      final materialRows = await transaction.query(
+        'materials',
+        columns: ['current_source_version_id', 'lifecycle_status', 'deleted_at_utc'],
+        where: 'learner_id = ? AND material_id = ?',
+        whereArgs: [learner.id.value, materialId.value],
+        limit: 1,
+      );
+      if (materialRows.isEmpty ||
+          materialRows.single['lifecycle_status'] != MaterialLifecycleStatus.active.name ||
+          materialRows.single['deleted_at_utc'] != null ||
+          materialRows.single['current_source_version_id'] != sourceVersionId.value) {
+        throw const SourceStoreConflict('Reader annotation belongs to a stale or unavailable source version.');
+      }
+
+      final extractedRows = await transaction.query(
+        'extracted_contents',
+        columns: ['normalized_text'],
+        where:
+            'learner_id = ? AND source_version_id = ? '
+            'AND invalidated_at_utc IS NULL',
+        whereArgs: [learner.id.value, sourceVersionId.value],
+        limit: 1,
+      );
+      if (extractedRows.isEmpty) {
+        throw const SourceStoreConflict('Reader annotation source has no valid extracted content.');
+      }
+      final sourceText = extractedRows.single['normalized_text']! as String;
+      if (sourceAnchor.startOffset < 0 ||
+          sourceAnchor.endOffset <= sourceAnchor.startOffset ||
+          sourceAnchor.endOffset > sourceText.length) {
+        throw const SourceStoreConflict('Reader annotation anchor is outside the current source.');
+      }
+      final canonicalSelection = sourceText.substring(sourceAnchor.startOffset, sourceAnchor.endOffset);
+      if (canonicalSelection != selectedText) {
+        throw const SourceStoreConflict('Reader annotation selection no longer matches the current source.');
+      }
+
+      final idDigest = sha256
+          .convert(
+            utf8.encode(
+              '${learner.id.value}\u0000${sourceVersionId.value}\u0000'
+              '${sourceAnchor.startOffset}\u0000${sourceAnchor.endOffset}\u0000${kind.name}',
+            ),
+          )
+          .toString();
+      final annotationId = ReaderAnnotationId('ran_${idDigest.substring(0, 32)}');
+      final selectedDigest = sha256.convert(utf8.encode(selectedText)).toString();
+      final now = updatedAt.toUtc();
+      final existingRows = await transaction.query(
+        'reader_annotations',
+        columns: ['created_at_utc'],
+        where: 'learner_id = ? AND annotation_id = ?',
+        whereArgs: [learner.id.value, annotationId.value],
+        limit: 1,
+      );
+      final createdAt = existingRows.isEmpty
+          ? now
+          : DateTime.parse(existingRows.single['created_at_utc']! as String).toUtc();
+      await transaction.insert('reader_annotations', {
+        'learner_id': learner.id.value,
+        'annotation_id': annotationId.value,
+        'material_id': materialId.value,
+        'source_version_id': sourceVersionId.value,
+        'source_start': sourceAnchor.startOffset,
+        'source_end': sourceAnchor.endOffset,
+        'page_number': sourceAnchor.pageNumber,
+        'selected_text': selectedText,
+        'selected_text_digest': selectedDigest,
+        'annotation_kind': kind.name,
+        'note_text': kind == ReaderAnnotationKind.note ? normalizedNote : null,
+        'created_at_utc': createdAt.toIso8601String(),
+        'updated_at_utc': now.toIso8601String(),
+        'invalidated_at_utc': null,
+      }, conflictAlgorithm: ConflictAlgorithm.replace);
+
+      final rows = await transaction.query(
+        'reader_annotations',
+        where: 'learner_id = ? AND annotation_id = ?',
+        whereArgs: [learner.id.value, annotationId.value],
+        limit: 1,
+      );
+      return _readerAnnotationFromRow(rows.single);
+    });
+  }
+
+  Future<void> deleteReaderAnnotation({
+    required AuthenticatedLearner learner,
+    required ReaderAnnotationId annotationId,
+  }) async {
+    await _database.delete(
+      'reader_annotations',
+      where: 'learner_id = ? AND annotation_id = ?',
+      whereArgs: [learner.id.value, annotationId.value],
+    );
+  }
+
   Future<List<RetentionScheduleRecord>> retentionSchedulesForMaterial({
     required AuthenticatedLearner learner,
     required MaterialId materialId,
@@ -2870,6 +3069,7 @@ ON CONFLICT(learner_id) DO UPDATE SET
       final id = learner.id.value;
       await transaction.delete('learner_preferences', where: 'learner_id = ?', whereArgs: [id]);
       await transaction.delete('study_targets', where: 'learner_id = ?', whereArgs: [id]);
+      await transaction.delete('reader_annotations', where: 'learner_id = ?', whereArgs: [id]);
       await transaction.delete('retention_schedules', where: 'learner_id = ?', whereArgs: [id]);
       await transaction.delete('active_recall_attempts', where: 'learner_id = ?', whereArgs: [id]);
       await transaction.delete('recall_attempt_support', where: 'learner_id = ?', whereArgs: [id]);
@@ -2885,6 +3085,28 @@ ON CONFLICT(learner_id) DO UPDATE SET
       await transaction.delete('materials', where: 'learner_id = ?', whereArgs: [id]);
       await transaction.delete('operational_events', where: 'learner_id = ?', whereArgs: [id]);
     });
+  }
+
+  static ReaderAnnotationRecord _readerAnnotationFromRow(Map<String, Object?> row) {
+    return ReaderAnnotationRecord(
+      id: ReaderAnnotationId(row['annotation_id']! as String),
+      materialId: MaterialId(row['material_id']! as String),
+      sourceVersionId: SourceVersionId(row['source_version_id']! as String),
+      sourceAnchor: SourceAnchor(
+        startOffset: row['source_start']! as int,
+        endOffset: row['source_end']! as int,
+        pageNumber: row['page_number'] as int?,
+      ),
+      selectedText: row['selected_text']! as String,
+      selectedTextDigest: row['selected_text_digest']! as String,
+      kind: ReaderAnnotationKind.values.byName(row['annotation_kind']! as String),
+      noteText: row['note_text'] as String?,
+      createdAt: DateTime.parse(row['created_at_utc']! as String).toUtc(),
+      updatedAt: DateTime.parse(row['updated_at_utc']! as String).toUtc(),
+      invalidatedAt: row['invalidated_at_utc'] == null
+          ? null
+          : DateTime.parse(row['invalidated_at_utc']! as String).toUtc(),
+    );
   }
 
   static RetentionScheduleId _retentionScheduleId(SourceVersionId sourceVersionId, SourceAnchor anchor) {

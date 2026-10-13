@@ -27,6 +27,7 @@ import 'package:sesli_ogren/src/data/sqlite_source_store.dart';
 import 'package:sesli_ogren/src/domain/authenticated_learner.dart';
 import 'package:sesli_ogren/src/domain/learning_contracts.dart';
 import 'package:sesli_ogren/src/domain/learning_truth.dart';
+import 'package:sesli_ogren/src/domain/reader_annotation.dart';
 import 'package:sesli_ogren/src/domain/study_plan.dart';
 import 'package:sesli_ogren/src/learning/recall_learning_service.dart';
 import 'package:sesli_ogren/src/speech/device_speech_output.dart';
@@ -1213,6 +1214,70 @@ void main() {
     expect(find.byType(AtelierLearningRail), findsOneWidget);
     expect(tester.takeException(), isNull);
     await expectLater(find.byType(Scaffold), matchesGoldenFile('goldens/la0040_source_reader_390x844.png'));
+  });
+
+  testWidgets('LA-0040 Reader annotations and selected context at 390x844', (tester) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    final selectedStart = source.indexOf('ışık enerjisini');
+    final selectedEnd = selectedStart + 'ışık enerjisini'.length;
+    final annotation = ReaderAnnotationRecord(
+      id: const ReaderAnnotationId('visual-reader-note'),
+      materialId: materialId,
+      sourceVersionId: versionId,
+      sourceAnchor: SourceAnchor(startOffset: selectedStart, endOffset: selectedEnd),
+      selectedText: source.substring(selectedStart, selectedEnd),
+      selectedTextDigest: 'visual-reader-note-digest',
+      kind: ReaderAnnotationKind.note,
+      noteText: 'Enerji dönüşümünü tekrar sor.',
+      createdAt: now,
+      updatedAt: now,
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        debugShowCheckedModeBanner: false,
+        theme: SesliOgrenTheme.light(),
+        home: MediaQuery(
+          data: const MediaQueryData(disableAnimations: true),
+          child: LivingDeskReviewScope(
+            child: SourceReaderScreen(
+              title: material.title,
+              sourceText: source,
+              sourceVersion: sourceVersion,
+              sourceAnchors: const [SourceAnchor(startOffset: 0, endOffset: source.length, pageNumber: 1)],
+              initialAnnotations: [annotation],
+              staleAnnotationCount: 1,
+              onSaveAnnotation: (anchor, selectedText, kind, noteText) async => annotation,
+              onDeleteAnnotation: (_) async {},
+              onRecallSelection: (_) {},
+              onListen: () {},
+              onRecap: () {},
+              onRecall: () {},
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pump(const Duration(milliseconds: 300));
+
+    final selectable = tester.widget<SelectableText>(find.byKey(const ValueKey('reader-selectable-source')));
+    selectable.onSelectionChanged!(
+      TextSelection(baseOffset: selectedStart, extentOffset: selectedEnd),
+      SelectionChangedCause.longPress,
+    );
+    await tester.pump();
+
+    expect(find.byKey(const ValueKey('reader-selection-context')), findsOneWidget);
+    expect(find.byKey(const ValueKey('reader-stale-annotations')), findsOneWidget);
+    expect(find.byKey(const ValueKey('reader-annotation-visual-reader-note')), findsOneWidget);
+    expect(find.text('Seçili bölüm · öğrenme kanıtı değil'), findsOneWidget);
+    expect(find.text('Bu bölümden hatırla'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+    await expectLater(find.byType(Scaffold), matchesGoldenFile('goldens/la0040_source_reader_annotations_390x844.png'));
   });
 
   testWidgets('LA-0040 real source Reader survives 320px + large type', (tester) async {

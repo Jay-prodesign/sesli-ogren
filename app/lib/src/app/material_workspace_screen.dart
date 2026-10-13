@@ -116,6 +116,16 @@ class _MaterialWorkspaceScreenState extends State<MaterialWorkspaceScreen> {
       materialId: data.material.id,
       sourceVersionId: sourceVersionId,
     );
+    final annotations = await widget.runtime.store.readerAnnotationsForSource(
+      learner: widget.runtime.learner,
+      materialId: data.material.id,
+      sourceVersionId: sourceVersionId,
+    );
+    final staleAnnotationCount = await widget.runtime.store.staleReaderAnnotationCount(
+      learner: widget.runtime.learner,
+      materialId: data.material.id,
+      currentSourceVersionId: sourceVersionId,
+    );
     if (!mounted) return;
     // Revalidate the source identity after the asynchronous resume read. An
     // updated document must not reopen a stale Reader snapshot.
@@ -155,6 +165,32 @@ class _MaterialWorkspaceScreenState extends State<MaterialWorkspaceScreen> {
             sourceVersion: data.source,
             sourceWarnings: extracted.warnings,
             initialProgress: initialProgress,
+            sourceAnchors: extracted.anchors,
+            initialAnnotations: annotations,
+            staleAnnotationCount: staleAnnotationCount,
+            onSaveAnnotation: (anchor, selectedText, kind, noteText) => widget.runtime.store.upsertReaderAnnotation(
+              learner: widget.runtime.learner,
+              materialId: data.material.id,
+              sourceVersionId: sourceVersionId,
+              sourceAnchor: anchor,
+              selectedText: selectedText,
+              kind: kind,
+              noteText: noteText,
+              updatedAt: DateTime.now().toUtc(),
+            ),
+            onDeleteAnnotation: (annotationId) => widget.runtime.store.deleteReaderAnnotation(
+              learner: widget.runtime.learner,
+              annotationId: annotationId,
+            ),
+            onRecallSelection: (anchor) => _replaceReaderWith(
+              readerContext,
+              LearningSliceScreen(
+                runtime: widget.runtime,
+                materialId: widget.materialId,
+                requestedRecallSourceVersionId: sourceVersionId,
+                requestedRecallSourceAnchor: anchor,
+              ),
+            ),
             onProgressChanged: (progress) => widget.runtime.store.saveReaderResumeProgress(
               learner: widget.runtime.learner,
               materialId: data.material.id,

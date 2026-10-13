@@ -57,6 +57,41 @@ class RecallLearningService {
     return persisted.toPrompt();
   }
 
+  Future<RecallPrompt> createContextPrompt({
+    required AuthenticatedLearner learner,
+    required MaterialId materialId,
+    required SourceVersionId sourceVersionId,
+    required SourceAnchor selectedAnchor,
+  }) async {
+    final source = await _sourceStore.currentSourceVersion(learner: learner, materialId: materialId);
+    if (source == null || source.identity.sourceVersionId != sourceVersionId) {
+      throw const RecallLearningException('Reader context belongs to a stale source version.');
+    }
+    final extracted = await _sourceStore.extractedContentForSource(learner: learner, sourceVersionId: sourceVersionId);
+    if (extracted == null || !extracted.isValid) {
+      throw const RecallLearningException('Reader context source has no valid extracted content.');
+    }
+    final text = extracted.normalizedText;
+    if (selectedAnchor.startOffset < 0 ||
+        selectedAnchor.endOffset <= selectedAnchor.startOffset ||
+        selectedAnchor.endOffset > text.length) {
+      throw const RecallLearningException('Reader context anchor is outside current extracted content.');
+    }
+    final candidate = _contextCandidate(text, selectedAnchor);
+    if (candidate == null) {
+      throw const RecallLearningException('Reader context does not contain a suitable bounded Recall prompt.');
+    }
+    final action = _buildActionFromCandidate(
+      materialId: materialId,
+      sourceVersionId: sourceVersionId,
+      extracted: extracted,
+      candidate: candidate,
+      now: _now().toUtc(),
+    );
+    final persisted = await _learningStore.persistRecallAction(learner: learner, action: action);
+    return persisted.toPrompt();
+  }
+
   Future<RecallPrompt> createScheduledPrompt({
     required AuthenticatedLearner learner,
     required MaterialId materialId,
@@ -375,8 +410,22 @@ class RecallLearningService {
     if (candidates.isEmpty) {
       throw const RecallLearningException('Source does not contain a suitable bounded recall prompt.');
     }
-    final candidate = candidates[candidateOrdinal % candidates.length];
+    return _buildActionFromCandidate(
+      materialId: materialId,
+      sourceVersionId: sourceVersionId,
+      extracted: extracted,
+      candidate: candidates[candidateOrdinal % candidates.length],
+      now: now,
+    );
+  }
 
+  static RecallAction _buildActionFromCandidate({
+    required MaterialId materialId,
+    required SourceVersionId sourceVersionId,
+    required ExtractedContentRecord extracted,
+    required _RecallCandidate candidate,
+    required DateTime now,
+  }) {
     SourceAnchor? sourceAnchor;
     for (final anchor in extracted.anchors) {
       if (candidate.sentenceStart >= anchor.startOffset && candidate.sentenceStart < anchor.endOffset) {
@@ -411,6 +460,60 @@ class RecallLearningService {
       ruleVersion: promptRuleVersion,
       createdAt: now,
     );
+  }
+
+  static _RecallCandidate? _contextCandidate(String text, SourceAnchor selectedAnchor) {
+    _RecallCandidate? fallback;
+    var bestOverlap = 0;
+
+    for (final sentenceMatch in RegExp(r'[^.!?\n]+[.!?]?').allMatches(text)) {
+      final rawSentence = sentenceMatch.group(0)!;
+      final leftTrimmed = rawSentence.trimLeft();
+      final sentence = leftTrimmed.trimRight();
+      if (sentence.length < 20 || sentence.length > 1200) continue;
+
+      final leadingWhitespace = rawSentence.length - leftTrimmed.length;
+      final sentenceStart = sentenceMatch.start + leadingWhitespace;
+      final sentenceEnd = sentenceStart + sentence.length;
+      final overlapStart = selectedAnchor.startOffset > sentenceStart ? selectedAnchor.startOffset : sentenceStart;
+      final overlapEnd = selectedAnchor.endOffset < sentenceEnd ? selectedAnchor.endOffset : sentenceEnd;
+      final overlap = overlapEnd > overlapStart ? overlapEnd - overlapStart : 0;
+      if (overlap == 0) continue;
+
+      final words = RegExp(r'[A-Za-zÇĞİÖŞÜçğıöşü]+').allMatches(sentence).where((match) {
+        final word = match.group(0)!;
+        return word.length >= 5 && !_stopWords.contains(RecallTruthPolicy.normalizeAnswer(word));
+      }).toList();
+      if (words.isEmpty) continue;
+
+      final selectedWords = words.where((match) {
+        final absoluteStart = sentenceStart + match.start;
+        final absoluteEnd = sentenceStart + match.end;
+        return absoluteStart < selectedAnchor.endOffset && absoluteEnd > selectedAnchor.startOffset;
+      }).toList();
+      final pool = selectedWords.isNotEmpty ? selectedWords : words;
+      pool.sort((a, b) {
+        final scoreOrder = _topicCueScore(b).compareTo(_topicCueScore(a));
+        if (scoreOrder != 0) return scoreOrder;
+        return a.start.compareTo(b.start);
+      });
+      final selected = pool.first;
+      final candidate = _RecallCandidate(
+        sentence: sentence,
+        sentenceStart: sentenceStart,
+        sentenceEnd: sentenceEnd,
+        wordStartInSentence: selected.start,
+        wordEndInSentence: selected.end,
+        expectedAnswer: selected.group(0)!,
+      );
+      final containsSelection = selectedAnchor.startOffset >= sentenceStart && selectedAnchor.endOffset <= sentenceEnd;
+      if (containsSelection) return candidate;
+      if (overlap > bestOverlap) {
+        bestOverlap = overlap;
+        fallback = candidate;
+      }
+    }
+    return fallback;
   }
 
   static List<_RecallCandidate> _findCandidates(String text) {

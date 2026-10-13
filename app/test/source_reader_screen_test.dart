@@ -4,6 +4,7 @@ import 'package:sesli_ogren/src/app/atelier_learning_surfaces.dart';
 import 'package:sesli_ogren/src/app/source_reader_screen.dart';
 import 'package:sesli_ogren/src/app/living_study_desk_home.dart';
 import 'package:sesli_ogren/src/domain/learning_contracts.dart';
+import 'package:sesli_ogren/src/domain/reader_annotation.dart';
 
 void main() {
   testWidgets('source reader keeps local search and learning exits usable', (tester) async {
@@ -60,6 +61,180 @@ void main() {
     await tester.tap(find.text('Hızlı özet').last);
     await tester.pump();
     expect(recap, 1);
+  });
+
+  testWidgets('Reader selection creates source-bound non-evidence context actions', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(320, 700));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    const source = 'Fotosentez ışık enerjisini kimyasal enerjiye dönüştürür.';
+    ReaderAnnotationRecord? saved;
+    SourceAnchor? recalledAnchor;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        builder: (context, child) => MediaQuery(
+          data: MediaQuery.of(context).copyWith(textScaler: const TextScaler.linear(1.5)),
+          child: child!,
+        ),
+        home: SourceReaderScreen(
+          title: 'Biyoloji',
+          sourceText: source,
+          sourceAnchors: const [SourceAnchor(startOffset: 0, endOffset: source.length, pageNumber: 1)],
+          onSaveAnnotation: (anchor, text, kind, noteText) async {
+            saved = ReaderAnnotationRecord(
+              id: ReaderAnnotationId('reader-test-${kind.name}'),
+              materialId: const MaterialId('reader-test-material'),
+              sourceVersionId: const SourceVersionId('reader-test-source'),
+              sourceAnchor: anchor,
+              selectedText: text,
+              selectedTextDigest: 'digest',
+              kind: kind,
+              noteText: noteText,
+              createdAt: DateTime.utc(2026, 10, 13),
+              updatedAt: DateTime.utc(2026, 10, 13),
+            );
+            return saved!;
+          },
+          onRecallSelection: (anchor) => recalledAnchor = anchor,
+        ),
+      ),
+    );
+    await tester.pump();
+
+    final selectable = tester.widget<SelectableText>(find.byKey(const ValueKey('reader-selectable-source')));
+    final selectedStart = source.indexOf('ışık enerjisini');
+    final selectedEnd = selectedStart + 'ışık enerjisini'.length;
+    selectable.onSelectionChanged!(
+      TextSelection(baseOffset: selectedStart, extentOffset: selectedEnd),
+      SelectionChangedCause.longPress,
+    );
+    await tester.pump();
+
+    expect(find.byKey(const ValueKey('reader-selection-context')), findsOneWidget);
+    expect(find.text('Seçili bölüm · öğrenme kanıtı değil'), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('reader-selection-highlight')));
+    await tester.pump();
+
+    expect(saved, isNotNull);
+    expect(saved!.selectedText, 'ışık enerjisini');
+    expect(saved!.sourceAnchor.startOffset, selectedStart);
+    expect(saved!.sourceAnchor.endOffset, selectedEnd);
+    expect(saved!.sourceAnchor.pageNumber, 1);
+    expect(find.byKey(const ValueKey('reader-annotation-reader-test-highlight')), findsOneWidget);
+    expect(tester.takeException(), isNull);
+
+    await tester.tap(find.byKey(const ValueKey('reader-selection-note')));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byKey(const ValueKey('reader-note-input')), 'Enerji dönüşümünü tekrar sor.');
+    await tester.tap(find.byKey(const ValueKey('reader-note-save')));
+    await tester.pumpAndSettle();
+
+    expect(saved, isNotNull);
+    expect(saved!.kind, ReaderAnnotationKind.note);
+    expect(saved!.noteText, 'Enerji dönüşümünü tekrar sor.');
+    expect(find.byKey(const ValueKey('reader-annotation-reader-test-note')), findsOneWidget);
+    expect(tester.takeException(), isNull);
+
+    await tester.tap(find.byKey(const ValueKey('reader-selection-recall')));
+    await tester.pump();
+    expect(recalledAnchor, isNotNull);
+    expect(recalledAnchor!.startOffset, selectedStart);
+    expect(recalledAnchor!.endOffset, selectedEnd);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('Reader note edit and delete remain explicit and local', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(320, 700));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    final original = ReaderAnnotationRecord(
+      id: const ReaderAnnotationId('reader-note-crud'),
+      materialId: const MaterialId('reader-note-material'),
+      sourceVersionId: const SourceVersionId('reader-note-source'),
+      sourceAnchor: const SourceAnchor(startOffset: 0, endOffset: 10),
+      selectedText: 'Fotosentez',
+      selectedTextDigest: 'digest',
+      kind: ReaderAnnotationKind.note,
+      noteText: 'İlk not',
+      createdAt: DateTime.utc(2026, 10, 13),
+      updatedAt: DateTime.utc(2026, 10, 13),
+    );
+    ReaderAnnotationRecord? edited;
+    ReaderAnnotationId? deleted;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        builder: (context, child) => MediaQuery(
+          data: MediaQuery.of(context).copyWith(textScaler: const TextScaler.linear(1.5)),
+          child: child!,
+        ),
+        home: SourceReaderScreen(
+          title: 'Biyoloji',
+          sourceText: 'Fotosentez ışık enerjisini kimyasal enerjiye dönüştürür.',
+          initialAnnotations: [original],
+          onSaveAnnotation: (anchor, text, kind, noteText) async {
+            edited = ReaderAnnotationRecord(
+              id: original.id,
+              materialId: original.materialId,
+              sourceVersionId: original.sourceVersionId,
+              sourceAnchor: anchor,
+              selectedText: text,
+              selectedTextDigest: original.selectedTextDigest,
+              kind: kind,
+              noteText: noteText,
+              createdAt: original.createdAt,
+              updatedAt: DateTime.utc(2026, 10, 13, 1),
+            );
+            return edited!;
+          },
+          onDeleteAnnotation: (annotationId) async {
+            deleted = annotationId;
+          },
+        ),
+      ),
+    );
+    await tester.pump();
+
+    expect(find.text('İlk not'), findsOneWidget);
+    await tester.tap(find.byTooltip('Notu düzenle'));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byKey(const ValueKey('reader-note-edit-input')), 'Güncellenmiş not');
+    await tester.tap(find.widgetWithText(FilledButton, 'Kaydet'));
+    await tester.pumpAndSettle();
+
+    expect(edited?.noteText, 'Güncellenmiş not');
+    expect(find.text('Güncellenmiş not'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+
+    final deleteAction = find.byTooltip('İşareti sil');
+    await tester.ensureVisible(deleteAction);
+    await tester.pump();
+    expect(deleteAction.hitTestable(), findsOneWidget);
+    await tester.tap(deleteAction.hitTestable());
+    await tester.pump();
+    expect(deleted, original.id);
+    expect(find.byKey(const ValueKey('reader-annotation-reader-note-crud')), findsNothing);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('Reader shows stale annotations without rebinding them to current source', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(320, 650));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: SourceReaderScreen(
+          title: 'Güncel kaynak',
+          sourceText: 'Yeni kaynak metni burada.',
+          staleAnnotationCount: 2,
+        ),
+      ),
+    );
+    await tester.pump();
+
+    expect(find.byKey(const ValueKey('reader-stale-annotations')), findsOneWidget);
+    expect(find.textContaining('2 eski işaret'), findsOneWidget);
+    expect(find.textContaining('yeniden bağlanmış sayılmıyor'), findsOneWidget);
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('OCR provenance warning stays visible and is not presented as learner evidence', (tester) async {

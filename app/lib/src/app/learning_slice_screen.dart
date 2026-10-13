@@ -29,6 +29,8 @@ class LearningSliceScreen extends StatefulWidget {
     this.reviewedSourceVersionId,
     this.scheduledReviewSourceVersionId,
     this.scheduledReviewSourceAnchor,
+    this.requestedRecallSourceVersionId,
+    this.requestedRecallSourceAnchor,
     this.startInSourceEditor = false,
     this.sourceGateway = const SupabaseSourceSummaryGateway(),
     this.pickPdfFile,
@@ -50,6 +52,12 @@ class LearningSliceScreen extends StatefulWidget {
   /// source-hidden Recall attempt, but only while this version remains current.
   final SourceVersionId? scheduledReviewSourceVersionId;
   final SourceAnchor? scheduledReviewSourceAnchor;
+
+  /// Exact current source selection requested from Reader context actions.
+  /// This only chooses the Recall prompt provenance; no evidence exists until
+  /// the learner submits a response in Recall.
+  final SourceVersionId? requestedRecallSourceVersionId;
+  final SourceAnchor? requestedRecallSourceAnchor;
 
   final bool startInSourceEditor;
   final SupabaseSourceSummaryGateway sourceGateway;
@@ -176,17 +184,26 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
 
       final scheduledReviewSourceVersionId = widget.scheduledReviewSourceVersionId;
       final scheduledReviewSourceAnchor = widget.scheduledReviewSourceAnchor;
+      final requestedRecallSourceVersionId = widget.requestedRecallSourceVersionId;
+      final requestedRecallSourceAnchor = widget.requestedRecallSourceAnchor;
       if ((scheduledReviewSourceVersionId == null) != (scheduledReviewSourceAnchor == null)) {
         throw StateError('scheduled_review_requires_source_version_and_anchor');
       }
-      if (scheduledReviewSourceVersionId != null) {
+      if ((requestedRecallSourceVersionId == null) != (requestedRecallSourceAnchor == null)) {
+        throw StateError('requested_recall_requires_source_version_and_anchor');
+      }
+      if (scheduledReviewSourceVersionId != null && requestedRecallSourceVersionId != null) {
+        throw StateError('recall_anchor_request_is_ambiguous');
+      }
+      final anchoredSourceVersionId = requestedRecallSourceVersionId ?? scheduledReviewSourceVersionId;
+      if (anchoredSourceVersionId != null) {
         final currentSource = await widget.runtime.store.currentSourceVersion(
           learner: widget.runtime.learner,
           materialId: widget.materialId,
         );
         if (!mounted) return;
-        if (currentSource?.identity.sourceVersionId != scheduledReviewSourceVersionId) {
-          throw StateError('scheduled_review_source_version_is_no_longer_current');
+        if (currentSource?.identity.sourceVersionId != anchoredSourceVersionId) {
+          throw StateError('anchored_recall_source_version_is_no_longer_current');
         }
         await _openRecall();
       } else {
@@ -736,9 +753,18 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
       ),
     );
     try {
+      final requestedSourceVersionId = widget.requestedRecallSourceVersionId;
+      final requestedSourceAnchor = widget.requestedRecallSourceAnchor;
       final scheduledSourceVersionId = widget.scheduledReviewSourceVersionId;
       final scheduledSourceAnchor = widget.scheduledReviewSourceAnchor;
-      final prompt = scheduledSourceVersionId != null && scheduledSourceAnchor != null
+      final prompt = requestedSourceVersionId != null && requestedSourceAnchor != null
+          ? await widget.runtime.recall.createContextPrompt(
+              learner: widget.runtime.learner,
+              materialId: widget.materialId,
+              sourceVersionId: requestedSourceVersionId,
+              selectedAnchor: requestedSourceAnchor,
+            )
+          : scheduledSourceVersionId != null && scheduledSourceAnchor != null
           ? await widget.runtime.recall.createScheduledPrompt(
               learner: widget.runtime.learner,
               materialId: widget.materialId,
