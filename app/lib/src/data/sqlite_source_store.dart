@@ -1342,9 +1342,7 @@ ORDER BY a.id ASC
     if (!columnNames.containsAll(canonicalColumns)) return;
 
     final createSql = tableRows.single['sql'] as String? ?? '';
-    if (createSql.contains("'image'") &&
-        createSql.contains("'document'") &&
-        createSql.contains("'presentation'")) {
+    if (createSql.contains("'image'") && createSql.contains("'document'") && createSql.contains("'presentation'")) {
       return;
     }
 
