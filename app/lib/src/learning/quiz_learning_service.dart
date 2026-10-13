@@ -118,6 +118,37 @@ class QuizLearningService {
     return QuizStudyState(set: state.set, reviews: state.reviews, session: session);
   }
 
+  Future<QuizStudyState> startScheduledReview({
+    required AuthenticatedLearner learner,
+    required MaterialId materialId,
+    required SourceVersionId sourceVersionId,
+    required SourceAnchor sourceAnchor,
+  }) async {
+    final state = await openCurrentSet(learner: learner, materialId: materialId);
+    if (state.set.sourceVersionId != sourceVersionId) {
+      throw const QuizLearningException('Planlanan quiz tekrarı artık güncel kaynak sürümüne ait değil.');
+    }
+    final matches = state.set.questions
+        .where((question) => _sameAnchor(question.sourceAnchor, sourceAnchor))
+        .toList(growable: false);
+    if (matches.length != 1) {
+      throw const QuizLearningException('Planlanan quiz sorusunun kaynak noktası güncel sette bulunamadı.');
+    }
+    final target = matches.single;
+    final session = await store.resetQuizSession(
+      learner: learner,
+      set: state.set,
+      updatedAt: _now().toUtc(),
+      cursorIndex: target.ordinal,
+    );
+    return QuizStudyState(set: state.set, reviews: state.reviews, session: session);
+  }
+
+  static bool _sameAnchor(SourceAnchor left, SourceAnchor right) =>
+      left.startOffset == right.startOffset &&
+      left.endOffset == right.endOffset &&
+      left.pageNumber == right.pageNumber;
+
   QuizSetRecord _buildSet({
     required MaterialId materialId,
     required SourceVersionId sourceVersionId,

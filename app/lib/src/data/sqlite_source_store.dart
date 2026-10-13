@@ -1944,7 +1944,11 @@ ON CONFLICT(learner_id, flashcard_set_id) DO UPDATE SET
     required AuthenticatedLearner learner,
     required FlashcardSetRecord set,
     required DateTime updatedAt,
+    int cursorIndex = 0,
   }) {
+    if (cursorIndex < 0 || cursorIndex >= set.cards.length) {
+      throw const SourceStoreConflict('Flashcard session cursor is outside the current source-grounded set.');
+    }
     return _database.transaction((transaction) async {
       final materialRows = await transaction.query(
         'materials',
@@ -1964,7 +1968,7 @@ ON CONFLICT(learner_id, flashcard_set_id) DO UPDATE SET
       await transaction.insert('flashcard_sessions', {
         'learner_id': learner.id.value,
         'flashcard_set_id': set.id.value,
-        'cursor_index': 0,
+        'cursor_index': cursorIndex,
         'remembered_count': 0,
         'again_count': 0,
         'is_completed': 0,
@@ -1972,7 +1976,7 @@ ON CONFLICT(learner_id, flashcard_set_id) DO UPDATE SET
       }, conflictAlgorithm: ConflictAlgorithm.replace);
       return FlashcardSessionState(
         setId: set.id,
-        cursorIndex: 0,
+        cursorIndex: cursorIndex,
         rememberedCount: 0,
         againCount: 0,
         isCompleted: false,
@@ -2311,7 +2315,11 @@ ON CONFLICT(learner_id, quiz_set_id) DO UPDATE SET
     required AuthenticatedLearner learner,
     required QuizSetRecord set,
     required DateTime updatedAt,
+    int cursorIndex = 0,
   }) {
+    if (cursorIndex < 0 || cursorIndex >= set.questions.length) {
+      throw const SourceStoreConflict('Quiz session cursor is outside the current source-grounded set.');
+    }
     return _database.transaction((transaction) async {
       final materialRows = await transaction.query(
         'materials',
@@ -2331,7 +2339,7 @@ ON CONFLICT(learner_id, quiz_set_id) DO UPDATE SET
       await transaction.insert('quiz_sessions', {
         'learner_id': learner.id.value,
         'quiz_set_id': set.id.value,
-        'cursor_index': 0,
+        'cursor_index': cursorIndex,
         'correct_count': 0,
         'incorrect_count': 0,
         'unknown_count': 0,
@@ -2340,7 +2348,7 @@ ON CONFLICT(learner_id, quiz_set_id) DO UPDATE SET
       }, conflictAlgorithm: ConflictAlgorithm.replace);
       return QuizSessionState(
         setId: set.id,
-        cursorIndex: 0,
+        cursorIndex: cursorIndex,
         correctCount: 0,
         incorrectCount: 0,
         unknownCount: 0,

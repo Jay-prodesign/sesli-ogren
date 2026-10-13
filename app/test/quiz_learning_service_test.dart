@@ -100,6 +100,57 @@ void main() {
     expect(restarted.reviews[firstQuestion.id]?.correctCount, 1);
   });
 
+  test('scheduled quiz review targets the exact current-source anchor and rejects stale lineage', () async {
+    final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
+    addTearDown(store.close);
+    final ingest = SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor());
+    final service = QuizLearningService(store: store, now: () => DateTime.utc(2026, 10, 13, 9, 15));
+    const learner = LearnerIdentity.local();
+    const materialId = MaterialId('quiz-scheduled-review');
+
+    await ingest.ingestPastedText(
+      learner: learner,
+      materialId: materialId,
+      sourceName: 'Planlı quiz kaynağı',
+      text:
+          'Fotosentez ışık enerjisini kimyasal enerjiye dönüştürür. '
+          'Klorofil ışığın soğurulmasına yardım eder. '
+          'Karbondioksit süreçte önemli bir girdidir. '
+          'Oksijen süreç sonunda çevreye bırakılabilir.',
+    );
+    final state = await service.openCurrentSet(learner: learner, materialId: materialId);
+    final target = state.set.questions[2];
+
+    final scheduled = await service.startScheduledReview(
+      learner: learner,
+      materialId: materialId,
+      sourceVersionId: state.set.sourceVersionId,
+      sourceAnchor: target.sourceAnchor,
+    );
+    expect(scheduled.session.cursorIndex, target.ordinal);
+    expect(scheduled.currentQuestion?.id, target.id);
+    expect(scheduled.session.isCompleted, isFalse);
+
+    await ingest.ingestPastedText(
+      learner: learner,
+      materialId: materialId,
+      sourceName: 'Yeni quiz kaynağı',
+      text:
+          'Hücresel solunum glikoz enerjisini kullanılabilir enerjiye dönüştürür. '
+          'Mitokondri enerji dönüşümünde görev alır. '
+          'Oksijenli solunum oksijen kullanır.',
+    );
+    await expectLater(
+      service.startScheduledReview(
+        learner: learner,
+        materialId: materialId,
+        sourceVersionId: state.set.sourceVersionId,
+        sourceAnchor: target.sourceAnchor,
+      ),
+      throwsA(isA<QuizLearningException>()),
+    );
+  });
+
   test('learner namespaces never share quiz state', () async {
     final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
     addTearDown(store.close);

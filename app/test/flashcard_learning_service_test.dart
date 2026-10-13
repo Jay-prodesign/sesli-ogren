@@ -106,6 +106,57 @@ void main() {
     expect(restarted.reviews[first.currentCard!.id]?.rememberedCount, 1);
   });
 
+  test('scheduled flashcard review targets the exact current-source anchor and rejects stale lineage', () async {
+    final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
+    addTearDown(store.close);
+    final ingest = SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor());
+    final service = FlashcardLearningService(store: store, now: () => DateTime.utc(2026, 10, 13, 9));
+    const learner = LearnerIdentity.local();
+    const materialId = MaterialId('flashcard-scheduled-review');
+
+    await ingest.ingestPastedText(
+      learner: learner,
+      materialId: materialId,
+      sourceName: 'Planlı kart kaynağı',
+      text:
+          'Fotosentez ışık enerjisini kimyasal enerjiye dönüştürür. '
+          'Klorofil ışığın soğurulmasına yardım eder. '
+          'Karbondioksit süreçte önemli bir girdidir. '
+          'Oksijen süreç sonunda çevreye bırakılabilir.',
+    );
+    final state = await service.openCurrentSet(learner: learner, materialId: materialId);
+    final target = state.set.cards[2];
+
+    final scheduled = await service.startScheduledReview(
+      learner: learner,
+      materialId: materialId,
+      sourceVersionId: state.set.sourceVersionId,
+      sourceAnchor: target.sourceAnchor,
+    );
+    expect(scheduled.session.cursorIndex, target.ordinal);
+    expect(scheduled.currentCard?.id, target.id);
+    expect(scheduled.session.isCompleted, isFalse);
+
+    await ingest.ingestPastedText(
+      learner: learner,
+      materialId: materialId,
+      sourceName: 'Yeni kart kaynağı',
+      text:
+          'Hücresel solunum glikoz enerjisini kullanılabilir enerjiye dönüştürür. '
+          'Mitokondri enerji dönüşümünde görev alır. '
+          'Oksijenli solunum oksijen kullanır.',
+    );
+    await expectLater(
+      service.startScheduledReview(
+        learner: learner,
+        materialId: materialId,
+        sourceVersionId: state.set.sourceVersionId,
+        sourceAnchor: target.sourceAnchor,
+      ),
+      throwsA(isA<FlashcardLearningException>()),
+    );
+  });
+
   test('learner namespaces never share flashcard review state', () async {
     final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
     addTearDown(store.close);

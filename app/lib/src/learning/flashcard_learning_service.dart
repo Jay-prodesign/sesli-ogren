@@ -117,6 +117,37 @@ class FlashcardLearningService {
     return FlashcardStudyState(set: state.set, reviews: state.reviews, session: session);
   }
 
+  Future<FlashcardStudyState> startScheduledReview({
+    required AuthenticatedLearner learner,
+    required MaterialId materialId,
+    required SourceVersionId sourceVersionId,
+    required SourceAnchor sourceAnchor,
+  }) async {
+    final state = await openCurrentSet(learner: learner, materialId: materialId);
+    if (state.set.sourceVersionId != sourceVersionId) {
+      throw const FlashcardLearningException('Planlanan kart tekrarı artık güncel kaynak sürümüne ait değil.');
+    }
+    final matches = state.set.cards
+        .where((card) => _sameAnchor(card.sourceAnchor, sourceAnchor))
+        .toList(growable: false);
+    if (matches.length != 1) {
+      throw const FlashcardLearningException('Planlanan kartın kaynak noktası güncel sette bulunamadı.');
+    }
+    final target = matches.single;
+    final session = await store.resetFlashcardSession(
+      learner: learner,
+      set: state.set,
+      updatedAt: _now().toUtc(),
+      cursorIndex: target.ordinal,
+    );
+    return FlashcardStudyState(set: state.set, reviews: state.reviews, session: session);
+  }
+
+  static bool _sameAnchor(SourceAnchor left, SourceAnchor right) =>
+      left.startOffset == right.startOffset &&
+      left.endOffset == right.endOffset &&
+      left.pageNumber == right.pageNumber;
+
   FlashcardSetRecord _buildSet({
     required MaterialId materialId,
     required SourceVersionId sourceVersionId,
