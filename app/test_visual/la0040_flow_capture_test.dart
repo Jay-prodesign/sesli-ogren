@@ -1390,11 +1390,7 @@ void main() {
           'Bu süreçte karbondioksit ve su kullanılır.',
     );
     final thread = await runtime.tutor.openThread(learner: runtime.learner, materialId: tutorMaterialId);
-    await runtime.tutor.ask(
-      learner: runtime.learner,
-      threadId: thread.thread.id,
-      question: 'Klorofil ne işe yarar?',
-    );
+    await runtime.tutor.ask(learner: runtime.learner, threadId: thread.thread.id, question: 'Klorofil ne işe yarar?');
 
     await tester.pumpWidget(
       MaterialApp(
