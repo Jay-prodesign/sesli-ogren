@@ -1362,11 +1362,14 @@ CREATE TABLE IF NOT EXISTS grounded_tutor_turns (
   source_end INTEGER,
   page_number INTEGER,
   source_excerpt TEXT,
+  turn_sequence INTEGER NOT NULL,
   created_at_utc TEXT NOT NULL,
   PRIMARY KEY (learner_id, tutor_turn_id),
+  UNIQUE (learner_id, tutor_thread_id, turn_sequence),
   FOREIGN KEY (learner_id, tutor_thread_id)
     REFERENCES grounded_tutor_threads (learner_id, tutor_thread_id) ON DELETE CASCADE,
   CHECK (role IN ('learner', 'tutor')),
+  CHECK (turn_sequence >= 0),
   CHECK (support_state IN ('learnerQuestion', 'sourceSupported', 'sourceUnsupported')),
   CHECK (
     (source_start IS NULL AND source_end IS NULL)
@@ -1377,7 +1380,7 @@ CREATE TABLE IF NOT EXISTS grounded_tutor_turns (
 ''');
     await db.execute(
       'CREATE INDEX IF NOT EXISTS idx_tutor_turns_thread '
-      'ON grounded_tutor_turns (learner_id, tutor_thread_id, created_at_utc, tutor_turn_id)',
+      'ON grounded_tutor_turns (learner_id, tutor_thread_id, turn_sequence)',
     );
   }
 
@@ -2920,7 +2923,7 @@ LIMIT 1
       'grounded_tutor_turns',
       where: 'learner_id = ? AND tutor_thread_id = ?',
       whereArgs: [learner.id.value, threadId.value],
-      orderBy: 'created_at_utc ASC, tutor_turn_id ASC',
+      orderBy: 'turn_sequence ASC',
     );
     return rows.map(_groundedTutorTurnFromRow).toList(growable: false);
   }
@@ -3023,6 +3026,7 @@ LIMIT 1
         'source_end': sourceAnchor?.endOffset,
         'page_number': sourceAnchor?.pageNumber,
         'source_excerpt': sourceExcerpt,
+        'turn_sequence': sequence,
         'created_at_utc': timestamp.toIso8601String(),
       }, conflictAlgorithm: ConflictAlgorithm.abort);
       await transaction.update(

@@ -159,6 +159,8 @@ void main() {
     await tester.pump(const Duration(milliseconds: 400));
     expect(find.text('Bu kaynakla başka bir yol seç'), findsOneWidget);
     expect(find.text('HAZIRLIK'), findsOneWidget);
+    final studyPathsScroll = find.byKey(const ValueKey('workspace-other-study-paths-scroll'));
+    await _scrollUntilFound(tester, find.text('AKTİF ÇALIŞMA'), scrollable: studyPathsScroll);
     expect(find.text('AKTİF ÇALIŞMA'), findsOneWidget);
     expect(find.text('Kaynağı hızlıca toparla'), findsOneWidget);
     final tutorAction = find.byKey(const ValueKey('workspace-other-grounded-tutor'));
