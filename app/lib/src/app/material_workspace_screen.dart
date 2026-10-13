@@ -358,6 +358,7 @@ class _MaterialWorkspaceScreenState extends State<MaterialWorkspaceScreen> {
     });
   }
 
+  // Activation revalidates the scheduled source lineage before opening a fresh review action.
   Future<void> _openRetentionReview(_WorkspaceSnapshot data) async {
     final candidate = data.retention?.nextDue;
     if (candidate == null) return;
