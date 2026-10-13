@@ -112,11 +112,12 @@ void main() {
     expect(find.textContaining('öğrenme kanıtı'), findsWidgets);
 
     final questionField = find.byKey(const ValueKey('grounded-tutor-question'));
-    final send = find.byKey(const ValueKey('grounded-tutor-send')).hitTestable();
+    final sendKey = find.byKey(const ValueKey('grounded-tutor-send'));
+    final send = sendKey.hitTestable();
     expect(questionField, findsOneWidget);
     expect(send, findsOneWidget);
-    await tester.enterText(questionField, 'Yeni bir kaynak sorusu');
-    expect(tester.widget<TextField>(questionField).controller?.text, 'Yeni bir kaynak sorusu');
+    expect(tester.widget<TextField>(questionField).enabled, isTrue);
+    expect(tester.widget<FilledButton>(sendKey).onPressed, isNotNull);
 
     await _scrollTutorUntilFound(tester, find.textContaining('TUTOR · KAYNAĞA BAĞLI'));
     expect(find.textContaining('TUTOR · KAYNAĞA BAĞLI'), findsOneWidget);
