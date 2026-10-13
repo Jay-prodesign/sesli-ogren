@@ -1163,10 +1163,7 @@ CREATE TABLE IF NOT EXISTS retention_schedules (
     );
 
     Future<bool> tableExists(String name) async {
-      final rows = await db.rawQuery(
-        "SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = ? LIMIT 1",
-        [name],
-      );
+      final rows = await db.rawQuery("SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = ? LIMIT 1", [name]);
       return rows.isNotEmpty;
     }
 
@@ -1214,7 +1211,9 @@ ORDER BY e.created_at_utc ASC
     // one row per response. Backfill only the latest durable signal and keep
     // the streak conservative instead of fabricating prior intervals.
     final hasFlashcardHistory =
-        await tableExists('flashcard_reviews') && await tableExists('flashcards') && await tableExists('flashcard_sets');
+        await tableExists('flashcard_reviews') &&
+        await tableExists('flashcards') &&
+        await tableExists('flashcard_sets');
     final flashcardRows = hasFlashcardHistory
         ? await db.rawQuery('''
 SELECT r.learner_id, r.card_id, r.review_count, r.last_response,
