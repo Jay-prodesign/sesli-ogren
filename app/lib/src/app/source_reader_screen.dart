@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../domain/learning_contracts.dart';
+import '../domain/reader_annotation.dart';
 
 import 'atelier_learning_surfaces.dart';
 import 'living_study_desk_home.dart';
@@ -18,6 +19,12 @@ class SourceReaderScreen extends StatefulWidget {
     this.sourceWarnings = const [],
     this.initialProgress = 0,
     this.onProgressChanged,
+    this.sourceAnchors = const [],
+    this.initialAnnotations = const [],
+    this.staleAnnotationCount = 0,
+    this.onSaveAnnotation,
+    this.onDeleteAnnotation,
+    this.onRecallSelection,
     this.onListen,
     this.onRecap,
     this.onRecall,
@@ -30,6 +37,18 @@ class SourceReaderScreen extends StatefulWidget {
   final List<String> sourceWarnings;
   final double initialProgress;
   final Future<void> Function(double progress)? onProgressChanged;
+  final List<SourceAnchor> sourceAnchors;
+  final List<ReaderAnnotationRecord> initialAnnotations;
+  final int staleAnnotationCount;
+  final Future<ReaderAnnotationRecord> Function(
+    SourceAnchor anchor,
+    String selectedText,
+    ReaderAnnotationKind kind,
+    String? noteText,
+  )?
+  onSaveAnnotation;
+  final Future<void> Function(ReaderAnnotationId annotationId)? onDeleteAnnotation;
+  final void Function(SourceAnchor anchor)? onRecallSelection;
   final VoidCallback? onListen;
   final VoidCallback? onRecap;
   final VoidCallback? onRecall;
@@ -48,12 +67,18 @@ class _SourceReaderScreenState extends State<SourceReaderScreen> {
   bool _sourceFitsViewport = false;
   bool _initialProgressRestored = false;
   bool _progressSaveWarningShown = false;
+  late List<ReaderAnnotationRecord> _annotations;
+  SourceAnchor? _selectedAnchor;
+  String? _selectedText;
+  bool _annotationBusy = false;
+  String? _annotationError;
 
   @override
   void initState() {
     super.initState();
     _readingProgress = widget.initialProgress.clamp(0.0, 1.0);
     _lastReportedProgress = _readingProgress;
+    _annotations = [...widget.initialAnnotations];
     _readingScroll.addListener(_updateReadingProgress);
     _scheduleReadingProgressUpdate();
   }
@@ -61,6 +86,9 @@ class _SourceReaderScreenState extends State<SourceReaderScreen> {
   @override
   void didUpdateWidget(covariant SourceReaderScreen oldWidget) {
     super.didUpdateWidget(oldWidget);
+    if (oldWidget.initialAnnotations != widget.initialAnnotations) {
+      _annotations = [...widget.initialAnnotations];
+    }
     if (oldWidget.sourceText != widget.sourceText || oldWidget.initialProgress != widget.initialProgress) {
       _readingProgress = widget.initialProgress.clamp(0.0, 1.0);
       _lastReportedProgress = _readingProgress;
@@ -146,6 +174,220 @@ class _SourceReaderScreenState extends State<SourceReaderScreen> {
     _scheduleReadingProgressUpdate();
   }
 
+  int? _pageForSelection(int start, int end) {
+    for (final anchor in widget.sourceAnchors) {
+      if (start >= anchor.startOffset && end <= anchor.endOffset) {
+        return anchor.pageNumber;
+      }
+    }
+    return null;
+  }
+
+  void _selectionChanged(TextSelection selection, SelectionChangedCause? cause) {
+    if (selection.isCollapsed) return;
+    final source = widget.sourceText.trim();
+    final start = selection.start < selection.end ? selection.start : selection.end;
+    final end = selection.start < selection.end ? selection.end : selection.start;
+    if (start < 0 || end <= start || end > source.length || end - start > 2000) {
+      setState(() {
+        _selectedAnchor = null;
+        _selectedText = null;
+        _annotationError = 'Bu seçim kaynakta güvenli bir işaret oluşturmak için kullanılamıyor.';
+      });
+      return;
+    }
+    final selected = source.substring(start, end);
+    setState(() {
+      _selectedAnchor = SourceAnchor(startOffset: start, endOffset: end, pageNumber: _pageForSelection(start, end));
+      _selectedText = selected;
+      _annotationError = null;
+    });
+  }
+
+  void _clearSelectionContext() {
+    setState(() {
+      _selectedAnchor = null;
+      _selectedText = null;
+      _annotationError = null;
+    });
+  }
+
+  Future<void> _saveAnnotation(ReaderAnnotationKind kind, {String? noteText}) async {
+    final callback = widget.onSaveAnnotation;
+    final anchor = _selectedAnchor;
+    final selected = _selectedText;
+    if (callback == null || anchor == null || selected == null || _annotationBusy) return;
+    setState(() {
+      _annotationBusy = true;
+      _annotationError = null;
+    });
+    try {
+      final saved = await callback(anchor, selected, kind, noteText);
+      if (!mounted) return;
+      setState(() {
+        _annotations = [
+          ..._annotations.where((item) => item.id != saved.id),
+          saved,
+        ]..sort((left, right) => left.sourceAnchor.startOffset.compareTo(right.sourceAnchor.startOffset));
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        _annotationError = 'İşaret kaydedilemedi. Kaynak değişmiş olabilir; Reader’ı yeniden açıp tekrar dene.';
+      });
+    } finally {
+      if (mounted) setState(() => _annotationBusy = false);
+    }
+  }
+
+  Future<void> _addNoteForSelection() async {
+    final anchor = _selectedAnchor;
+    final selected = _selectedText;
+    if (anchor == null || selected == null || _annotationBusy) return;
+    final controller = TextEditingController();
+    final note = await showDialog<String>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Bu bölüme not ekle'),
+        content: TextField(
+          key: const ValueKey('reader-note-input'),
+          controller: controller,
+          autofocus: true,
+          minLines: 2,
+          maxLines: 6,
+          maxLength: 4000,
+          decoration: const InputDecoration(
+            hintText: 'Bu bölümde neyi hatırlamak istiyorsun?',
+            helperText: 'Not, öğrenme kanıtı sayılmaz.',
+          ),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.of(dialogContext).pop(), child: const Text('Vazgeç')),
+          FilledButton(
+            key: const ValueKey('reader-note-save'),
+            onPressed: () {
+              final value = controller.text.trim();
+              if (value.isEmpty) return;
+              Navigator.of(dialogContext).pop(value);
+            },
+            child: const Text('Notu kaydet'),
+          ),
+        ],
+      ),
+    );
+    controller.dispose();
+    if (note == null || !mounted) return;
+    await _saveAnnotation(ReaderAnnotationKind.note, noteText: note);
+  }
+
+  Future<void> _editNote(ReaderAnnotationRecord annotation) async {
+    if (_annotationBusy || widget.onSaveAnnotation == null) return;
+    final controller = TextEditingController(text: annotation.noteText ?? '');
+    final note = await showDialog<String>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Notu düzenle'),
+        content: TextField(
+          key: const ValueKey('reader-note-edit-input'),
+          controller: controller,
+          autofocus: true,
+          minLines: 2,
+          maxLines: 6,
+          maxLength: 4000,
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.of(dialogContext).pop(), child: const Text('Vazgeç')),
+          FilledButton(
+            onPressed: () {
+              final value = controller.text.trim();
+              if (value.isEmpty) return;
+              Navigator.of(dialogContext).pop(value);
+            },
+            child: const Text('Kaydet'),
+          ),
+        ],
+      ),
+    );
+    controller.dispose();
+    if (note == null || !mounted) return;
+    setState(() {
+      _selectedAnchor = annotation.sourceAnchor;
+      _selectedText = annotation.selectedText;
+    });
+    await _saveAnnotation(ReaderAnnotationKind.note, noteText: note);
+  }
+
+  Future<void> _deleteAnnotation(ReaderAnnotationRecord annotation) async {
+    final callback = widget.onDeleteAnnotation;
+    if (callback == null || _annotationBusy) return;
+    setState(() {
+      _annotationBusy = true;
+      _annotationError = null;
+    });
+    try {
+      await callback(annotation.id);
+      if (!mounted) return;
+      setState(() {
+        _annotations = _annotations.where((item) => item.id != annotation.id).toList(growable: false);
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _annotationError = 'İşaret silinemedi. Tekrar deneyebilirsin.');
+    } finally {
+      if (mounted) setState(() => _annotationBusy = false);
+    }
+  }
+
+  List<TextSpan> _sourceSpans({
+    required String source,
+    required List<SourceTextMatch> matches,
+    required Color ink,
+    required Color searchHighlight,
+    required Color annotationHighlight,
+  }) {
+    final boundaries = <int>{0, source.length};
+    for (final match in matches) {
+      boundaries
+        ..add(match.start)
+        ..add(match.end);
+    }
+    for (final annotation in _annotations) {
+      final start = annotation.sourceAnchor.startOffset.clamp(0, source.length);
+      final end = annotation.sourceAnchor.endOffset.clamp(start, source.length);
+      boundaries
+        ..add(start)
+        ..add(end);
+    }
+    final sorted = boundaries.toList()..sort();
+    final spans = <TextSpan>[];
+    for (var index = 0; index < sorted.length - 1; index++) {
+      final start = sorted[index];
+      final end = sorted[index + 1];
+      if (end <= start) continue;
+      final inSearch = matches.any((match) => start >= match.start && end <= match.end);
+      final annotation = _annotations.cast<ReaderAnnotationRecord?>().firstWhere(
+        (item) =>
+            item != null &&
+            start >= item.sourceAnchor.startOffset &&
+            end <= item.sourceAnchor.endOffset,
+        orElse: () => null,
+      );
+      spans.add(
+        TextSpan(
+          text: source.substring(start, end),
+          style: TextStyle(
+            color: ink,
+            backgroundColor: inSearch ? searchHighlight : annotation != null ? annotationHighlight : null,
+            fontWeight: inSearch ? FontWeight.w700 : null,
+            decoration: annotation?.kind == ReaderAnnotationKind.note ? TextDecoration.underline : null,
+            decorationThickness: annotation?.kind == ReaderAnnotationKind.note ? 1.5 : null,
+          ),
+        ),
+      );
+    }
+    return spans;
+  }
+
   Future<void> _runLearningAction(VoidCallback? action) async {
     final callback = widget.onProgressChanged;
     if (callback != null) {
@@ -201,27 +443,13 @@ class _SourceReaderScreenState extends State<SourceReaderScreen> {
     final compactReadingSurface =
         MediaQuery.sizeOf(context).width < 360 || MediaQuery.textScalerOf(context).scale(1) > 1.2;
 
-    final spans = <TextSpan>[];
-    if (matches.isEmpty) {
-      spans.add(TextSpan(text: source));
-    } else {
-      var cursor = 0;
-      for (final match in matches) {
-        if (match.start > cursor) spans.add(TextSpan(text: source.substring(cursor, match.start)));
-        spans.add(
-          TextSpan(
-            text: source.substring(match.start, match.end),
-            style: TextStyle(
-              backgroundColor: living ? AtelierStyle.mark : theme.colorScheme.tertiaryContainer,
-              color: ink,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-        );
-        cursor = match.end;
-      }
-      if (cursor < source.length) spans.add(TextSpan(text: source.substring(cursor)));
-    }
+    final spans = _sourceSpans(
+      source: source,
+      matches: matches,
+      ink: ink,
+      searchHighlight: living ? AtelierStyle.mark : theme.colorScheme.tertiaryContainer,
+      annotationHighlight: living ? AtelierStyle.mint : theme.colorScheme.secondaryContainer,
+    );
 
     final article = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -270,17 +498,96 @@ class _SourceReaderScreenState extends State<SourceReaderScreen> {
             ),
           ),
         ],
+        if (widget.staleAnnotationCount > 0) ...[
+          const SizedBox(height: 10),
+          Container(
+            key: const ValueKey('reader-stale-annotations'),
+            width: double.infinity,
+            padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
+            decoration: BoxDecoration(
+              color: living ? AtelierStyle.attentionSoft : theme.colorScheme.errorContainer,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Text(
+              '${widget.staleAnnotationCount} eski işaret önceki kaynak sürümüne bağlı. '
+              'Bu sürümde uygulanmıyor; yeniden bağlanmış sayılmıyor.',
+              style: theme.textTheme.bodySmall?.copyWith(color: ink, height: 1.35),
+            ),
+          ),
+        ],
         if (living && !compactReadingSurface) ...[
           const SizedBox(height: 14),
           const AtelierLearningRail(phase: AtelierLearningPhase.source),
         ],
         const SizedBox(height: 16),
-        RichText(
-          text: TextSpan(
+        SelectableText.rich(
+          TextSpan(
             style: theme.textTheme.bodyLarge?.copyWith(color: ink, fontSize: _fontSize, height: 1.65),
             children: spans,
           ),
+          key: const ValueKey('reader-selectable-source'),
+          onSelectionChanged: _selectionChanged,
         ),
+        if (_annotations.isNotEmpty) ...[
+          const SizedBox(height: 24),
+          Text(
+            'İşaretlerin',
+            style: theme.textTheme.titleMedium?.copyWith(color: ink, fontWeight: FontWeight.w900),
+          ),
+          const SizedBox(height: 8),
+          ..._annotations.map(
+            (annotation) => Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: Container(
+                key: ValueKey('reader-annotation-${annotation.id.value}'),
+                padding: const EdgeInsets.fromLTRB(12, 10, 8, 10),
+                decoration: BoxDecoration(
+                  color: living ? AtelierStyle.mint : theme.colorScheme.secondaryContainer,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: line),
+                ),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Icon(
+                      annotation.kind == ReaderAnnotationKind.note ? Icons.note_alt_outlined : Icons.ink_highlighter_outlined,
+                      size: 18,
+                      color: accent,
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            annotation.selectedText,
+                            maxLines: 3,
+                            overflow: TextOverflow.ellipsis,
+                            style: theme.textTheme.bodySmall?.copyWith(color: ink, fontWeight: FontWeight.w800),
+                          ),
+                          if ((annotation.noteText ?? '').isNotEmpty) ...[
+                            const SizedBox(height: 5),
+                            Text(annotation.noteText!, style: theme.textTheme.bodySmall?.copyWith(color: ink)),
+                          ],
+                        ],
+                      ),
+                    if (annotation.kind == ReaderAnnotationKind.note)
+                      IconButton(
+                        tooltip: 'Notu düzenle',
+                        onPressed: _annotationBusy ? null : () => _editNote(annotation),
+                        icon: const Icon(Icons.edit_outlined, size: 18),
+                      ),
+                    IconButton(
+                      tooltip: 'İşareti sil',
+                      onPressed: _annotationBusy ? null : () => _deleteAnnotation(annotation),
+                      icon: const Icon(Icons.delete_outline_rounded, size: 18),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
       ],
     );
 
@@ -499,8 +806,7 @@ class _SourceReaderScreenState extends State<SourceReaderScreen> {
                         ),
                       ),
                     )
-                  : SelectionArea(
-                      child: ListView(
+                  : ListView(
                         key: const ValueKey('reader-source-scroll'),
                         controller: _readingScroll,
                         padding: const EdgeInsets.fromLTRB(20, 16, 20, 28),
@@ -522,6 +828,79 @@ class _SourceReaderScreenState extends State<SourceReaderScreen> {
                       ),
                     ),
             ),
+            if (_selectedAnchor != null && _selectedText != null)
+              Container(
+                key: const ValueKey('reader-selection-context'),
+                width: double.infinity,
+                padding: const EdgeInsets.fromLTRB(14, 10, 10, 10),
+                decoration: BoxDecoration(
+                  color: living ? AtelierStyle.paper : theme.colorScheme.surfaceContainerHighest,
+                  border: Border(top: BorderSide(color: line)),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            'Seçili bölüm · öğrenme kanıtı değil',
+                            style: theme.textTheme.labelMedium?.copyWith(color: accent, fontWeight: FontWeight.w900),
+                          ),
+                        ),
+                        IconButton(
+                          tooltip: 'Seçim araçlarını kapat',
+                          onPressed: _clearSelectionContext,
+                          icon: const Icon(Icons.close_rounded, size: 19),
+                        ),
+                      ],
+                    ),
+                    Text(
+                      _selectedText!,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.textTheme.bodySmall?.copyWith(color: ink),
+                    ),
+                    const SizedBox(height: 8),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: [
+                        if (widget.onSaveAnnotation != null)
+                          OutlinedButton.icon(
+                            key: const ValueKey('reader-selection-highlight'),
+                            onPressed: _annotationBusy ? null : () => _saveAnnotation(ReaderAnnotationKind.highlight),
+                            icon: const Icon(Icons.ink_highlighter_outlined),
+                            label: const Text('Vurgula'),
+                          ),
+                        if (widget.onSaveAnnotation != null)
+                          OutlinedButton.icon(
+                            key: const ValueKey('reader-selection-note'),
+                            onPressed: _annotationBusy ? null : _addNoteForSelection,
+                            icon: const Icon(Icons.note_add_outlined),
+                            label: const Text('Not ekle'),
+                          ),
+                        if (widget.onRecallSelection != null)
+                          FilledButton.icon(
+                            key: const ValueKey('reader-selection-recall'),
+                            onPressed: _annotationBusy
+                                ? null
+                                : () {
+                                    final anchor = _selectedAnchor;
+                                    if (anchor != null) widget.onRecallSelection!(anchor);
+                                  },
+                            icon: const Icon(Icons.psychology_alt_outlined),
+                            label: const Text('Bu bölümden hatırla'),
+                          ),
+                      ],
+                    ),
+                    if (_annotationError != null) ...[
+                      const SizedBox(height: 6),
+                      Text(_annotationError!, style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.error)),
+                    ],
+                  ],
+                ),
+              ),
             if (source.isNotEmpty && (widget.onListen != null || widget.onRecap != null || widget.onRecall != null))
               Semantics(
                 container: true,

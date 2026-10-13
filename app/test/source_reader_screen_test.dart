@@ -4,6 +4,7 @@ import 'package:sesli_ogren/src/app/atelier_learning_surfaces.dart';
 import 'package:sesli_ogren/src/app/source_reader_screen.dart';
 import 'package:sesli_ogren/src/app/living_study_desk_home.dart';
 import 'package:sesli_ogren/src/domain/learning_contracts.dart';
+import 'package:sesli_ogren/src/domain/reader_annotation.dart';
 
 void main() {
   testWidgets('source reader keeps local search and learning exits usable', (tester) async {
@@ -60,6 +61,88 @@ void main() {
     await tester.tap(find.text('Hızlı özet').last);
     await tester.pump();
     expect(recap, 1);
+  });
+
+  testWidgets('Reader selection creates source-bound non-evidence context actions', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(320, 700));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    const source = 'Fotosentez ışık enerjisini kimyasal enerjiye dönüştürür.';
+    ReaderAnnotationRecord? saved;
+    SourceAnchor? recalledAnchor;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: SourceReaderScreen(
+          title: 'Biyoloji',
+          sourceText: source,
+          sourceAnchors: const [SourceAnchor(startOffset: 0, endOffset: source.length, pageNumber: 1)],
+          onSaveAnnotation: (anchor, text, kind, noteText) async {
+            saved = ReaderAnnotationRecord(
+              id: const ReaderAnnotationId('reader-test-highlight'),
+              materialId: const MaterialId('reader-test-material'),
+              sourceVersionId: const SourceVersionId('reader-test-source'),
+              sourceAnchor: anchor,
+              selectedText: text,
+              selectedTextDigest: 'digest',
+              kind: kind,
+              noteText: noteText,
+              createdAt: DateTime.utc(2026, 10, 13),
+              updatedAt: DateTime.utc(2026, 10, 13),
+            );
+            return saved!;
+          },
+          onRecallSelection: (anchor) => recalledAnchor = anchor,
+        ),
+      ),
+    );
+    await tester.pump();
+
+    final selectable = tester.widget<SelectableText>(find.byKey(const ValueKey('reader-selectable-source')));
+    selectable.onSelectionChanged!(
+      const TextSelection(baseOffset: 11, extentOffset: 25),
+      SelectionChangedCause.longPress,
+    );
+    await tester.pump();
+
+    expect(find.byKey(const ValueKey('reader-selection-context')), findsOneWidget);
+    expect(find.text('Seçili bölüm · öğrenme kanıtı değil'), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('reader-selection-highlight')));
+    await tester.pump();
+
+    expect(saved, isNotNull);
+    expect(saved!.selectedText, 'ışık enerjisini');
+    expect(saved!.sourceAnchor.startOffset, 11);
+    expect(saved!.sourceAnchor.endOffset, 25);
+    expect(saved!.sourceAnchor.pageNumber, 1);
+    expect(find.byKey(const ValueKey('reader-annotation-reader-test-highlight')), findsOneWidget);
+
+    await tester.tap(find.byKey(const ValueKey('reader-selection-recall')));
+    await tester.pump();
+    expect(recalledAnchor, isNotNull);
+    expect(recalledAnchor!.startOffset, 11);
+    expect(recalledAnchor!.endOffset, 25);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('Reader shows stale annotations without rebinding them to current source', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(320, 650));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: SourceReaderScreen(
+          title: 'Güncel kaynak',
+          sourceText: 'Yeni kaynak metni burada.',
+          staleAnnotationCount: 2,
+        ),
+      ),
+    );
+    await tester.pump();
+
+    expect(find.byKey(const ValueKey('reader-stale-annotations')), findsOneWidget);
+    expect(find.textContaining('2 eski işaret'), findsOneWidget);
+    expect(find.textContaining('yeniden bağlanmış sayılmıyor'), findsOneWidget);
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('OCR provenance warning stays visible and is not presented as learner evidence', (tester) async {
