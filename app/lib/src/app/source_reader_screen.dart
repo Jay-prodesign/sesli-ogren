@@ -192,6 +192,10 @@ class _SourceReaderScreenState extends State<SourceReaderScreen> {
         ? 'Bu sunuda yalnız okunabilir slayt metni çıkarıldı; görsel yerleşim ve grafikler kaynak metne dönüşmedi.'
         : widget.sourceWarnings.contains('DOCX_LAYOUT_NOT_PRESERVED')
         ? 'Bu Word belgesinde okunabilir metin çıkarıldı; sayfa yerleşimi kaynak metne dönüşmedi.'
+        : widget.sourceWarnings.contains('LEGACY_DOC_TEXT_ONLY')
+        ? 'Bu eski Word dosyasında yalnız doğrulanabilen metin çıkarıldı; sayfa düzeni ve gömülü nesneler kaynak metne dönüşmedi.'
+        : widget.sourceWarnings.contains('LEGACY_PPT_TEXT_ONLY')
+        ? 'Bu eski PowerPoint dosyasında yalnız doğrulanabilen slayt metni çıkarıldı; görsel yerleşim ve nesneler kaynak metne dönüşmedi.'
         : null;
     final restoredFromSavedPosition = widget.initialProgress > 0.02 && widget.initialProgress < 0.95;
     final compactReadingSurface =

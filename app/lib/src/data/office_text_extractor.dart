@@ -5,6 +5,7 @@ import 'package:archive/archive.dart';
 import 'package:xml/xml.dart';
 
 import '../domain/learning_contracts.dart';
+import 'legacy_office_text_extractor.dart';
 
 enum OfficeSourceFormat { docx, pptx, doc, ppt }
 
@@ -68,9 +69,19 @@ class OpenXmlOfficeTextExtractor implements OfficeTextExtractor {
 
     final format = _formatFromName(sourceName);
     if (format == OfficeSourceFormat.doc || format == OfficeSourceFormat.ppt) {
-      throw const OfficeTextExtractionException(
-        'Legacy binary Office source requires the legacy text extractor.',
-        kind: OfficeTextExtractionFailureKind.unsupportedFormat,
+      final legacy = const LegacyOfficeTextExtractor().extract(bytes, format: format);
+      if (legacy.text.length > maxExtractedCharacters) {
+        throw const OfficeTextExtractionException(
+          'Legacy Office extracted text exceeds the bounded safety limit.',
+          kind: OfficeTextExtractionFailureKind.textLimit,
+        );
+      }
+      return ExtractedOfficeText(
+        text: legacy.text,
+        anchors: legacy.anchors,
+        format: format,
+        unitCount: legacy.anchors.length,
+        warnings: legacy.warnings,
       );
     }
     if (!_hasZipHeader(bytes)) {
@@ -111,10 +122,7 @@ class OpenXmlOfficeTextExtractor implements OfficeTextExtractor {
     return switch (format) {
       OfficeSourceFormat.docx => _extractDocx(archive),
       OfficeSourceFormat.pptx => _extractPptx(archive),
-      OfficeSourceFormat.doc || OfficeSourceFormat.ppt => throw const OfficeTextExtractionException(
-        'Legacy Office source is not available in the Open XML extractor.',
-        kind: OfficeTextExtractionFailureKind.unsupportedFormat,
-      ),
+      OfficeSourceFormat.doc || OfficeSourceFormat.ppt => throw StateError('legacy_office_dispatch_unreachable'),
     };
   }
 
