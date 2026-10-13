@@ -111,13 +111,16 @@ select pg_temp.ok(
   'source replacement did not preserve Material lineage and advance Source lineage'
 );
 
+reset role;
+set role service_role;
+
 select pg_temp.ok(
   (
     select revoked_at is not null
     from public.source_assets
     where id = :'first_source_asset_id'::uuid
   ),
-  'previous canonical source remained active after replacement'
+  'previous canonical source was not revoked after replacement'
 );
 
 select pg_temp.ok(
@@ -126,8 +129,11 @@ select pg_temp.ok(
     from public.extracted_contents
     where id = :'first_extracted_content_id'::uuid
   ),
-  'previous extracted source truth remained valid after replacement'
+  'previous extracted source truth was not invalidated after replacement'
 );
+
+reset role;
+set role authenticated;
 
 select pg_temp.expect_continuity_error(
   'Stale device',
