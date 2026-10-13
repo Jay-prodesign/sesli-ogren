@@ -5,8 +5,8 @@ import 'package:sesli_ogren/src/domain/learning_contracts.dart';
 import 'package:sesli_ogren/src/domain/learning_truth.dart';
 import 'package:sesli_ogren/src/domain/retention_schedule.dart';
 
-void usePhoneViewport(WidgetTester tester) {
-  tester.view.physicalSize = const Size(390, 844);
+void usePhoneViewport(WidgetTester tester, {Size size = const Size(390, 844)}) {
+  tester.view.physicalSize = size;
   tester.view.devicePixelRatio = 1;
   addTearDown(tester.view.resetPhysicalSize);
   addTearDown(tester.view.resetDevicePixelRatio);
@@ -63,11 +63,14 @@ void main() {
     required VoidCallback onOpenWorkspace,
     required VoidCallback onOpenReader,
     required VoidCallback onOpenLearning,
+    TextScaler textScaler = TextScaler.noScaling,
   }) async {
     await tester.pumpWidget(
       MaterialApp(
-        builder: (context, child) =>
-            MediaQuery(data: MediaQuery.of(context).copyWith(disableAnimations: true), child: child!),
+        builder: (context, child) => MediaQuery(
+          data: MediaQuery.of(context).copyWith(disableAnimations: true, textScaler: textScaler),
+          child: child!,
+        ),
         home: Scaffold(
           body: LivingStudyDeskHome(
             material: material,
@@ -117,7 +120,7 @@ void main() {
   });
 
   testWidgets('due retention becomes the truthful Home next action without claiming mastery', (tester) async {
-    usePhoneViewport(tester);
+    usePhoneViewport(tester, size: const Size(320, 844));
     var workspaceOpens = 0;
     var readerOpens = 0;
     var learningOpens = 0;
@@ -151,8 +154,10 @@ void main() {
       onOpenWorkspace: () => workspaceOpens++,
       onOpenReader: () => readerOpens++,
       onOpenLearning: () => learningOpens++,
+      textScaler: const TextScaler.linear(1.5),
     );
 
+    expect(tester.takeException(), isNull);
     expect(find.text('TEKRAR ZAMANI'), findsOneWidget);
     expect(find.text('Tekrar zamanı geldi'), findsOneWidget);
     expect(find.text('Tekrarı aç'), findsOneWidget);

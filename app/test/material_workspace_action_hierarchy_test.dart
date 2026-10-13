@@ -83,11 +83,13 @@ void main() {
     VoidCallback? onFlashcards,
     VoidCallback? onQuiz,
     VoidCallback? onRetentionReview,
+    Size size = const Size(390, 844),
+    TextScaler textScaler = TextScaler.noScaling,
   }) {
     return MaterialApp(
       theme: SesliOgrenTheme.light(),
       home: MediaQuery(
-        data: MediaQueryData(size: const Size(390, 844), disableAnimations: disableAnimations),
+        data: MediaQueryData(size: size, disableAnimations: disableAnimations, textScaler: textScaler),
         child: Scaffold(
           body: AtelierWorkspace(
             material: material(),
@@ -243,9 +245,12 @@ void main() {
         onRecall: () => recall += 1,
         onListen: () {},
         onRetentionReview: () => retentionReview += 1,
+        size: const Size(320, 844),
+        textScaler: const TextScaler.linear(1.5),
       ),
     );
 
+    expect(tester.takeException(), isNull);
     expect(find.byKey(const ValueKey('workspace-retention-state')), findsOneWidget);
     expect(find.text('Planlanan tekrarın hazır'), findsOneWidget);
     expect(find.text('Quiz tekrarını aç'), findsWidgets);

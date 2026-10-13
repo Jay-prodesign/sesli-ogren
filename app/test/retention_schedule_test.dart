@@ -190,6 +190,51 @@ void main() {
     );
   });
 
+  test('correct Quiz answer becomes independent source-bound retention evidence', () async {
+    final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
+    addTearDown(store.close);
+    final ingest = SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor());
+    final at = DateTime.utc(2026, 10, 13, 8, 45);
+    final quiz = QuizLearningService(store: store, now: () => at);
+    const learner = LearnerIdentity.local();
+    const materialId = MaterialId('retention-quiz-correct');
+
+    await ingest.ingestPastedText(
+      learner: learner,
+      materialId: materialId,
+      sourceName: 'Biyoloji quiz',
+      text:
+          'Fotosentez ışık enerjisini kimyasal enerjiye dönüştürür. '
+          'Klorofil ışığın soğurulmasına yardım eder. '
+          'Karbondioksit süreçte önemli bir girdidir. '
+          'Mitokondri hücresel enerji dönüşümünde görev alır.',
+    );
+    final state = await quiz.openCurrentSet(learner: learner, materialId: materialId);
+    final question = state.currentQuestion!;
+    await quiz.recordAnswer(
+      learner: learner,
+      materialId: materialId,
+      setId: state.set.id,
+      questionId: question.id,
+      kind: QuizAnswerKind.selected,
+      selectedOptionIndex: question.correctOptionIndex,
+    );
+
+    final schedules = await store.retentionSchedulesForMaterial(learner: learner, materialId: materialId);
+    final schedule = schedules.firstWhere(
+      (item) =>
+          item.sourceAnchor.startOffset == question.sourceAnchor.startOffset &&
+          item.sourceAnchor.endOffset == question.sourceAnchor.endOffset,
+    );
+    expect(schedule.sourceVersionId, state.set.sourceVersionId);
+    expect(schedule.latestEvidenceKind, RetentionEvidenceKind.quiz);
+    expect(schedule.latestOutcomeBand, RetentionOutcomeBand.independentRetrieval);
+    expect(schedule.successStreak, 1);
+    expect(schedule.interval, const Duration(days: 1));
+    expect(schedule.dueAt, at.add(const Duration(days: 1)));
+    expect(schedule.reasonCode, 'INDEPENDENT_RETRIEVAL_OBSERVED');
+  });
+
   test('again and unknown never become positive retention evidence', () async {
     final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
     addTearDown(store.close);
