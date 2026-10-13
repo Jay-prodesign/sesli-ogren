@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart' show ScrollCacheExtent;
 
 import '../domain/grounded_tutor.dart';
 import '../domain/learning_contracts.dart';
@@ -231,7 +230,6 @@ class _GroundedTutorScreenState extends State<GroundedTutorScreen> {
     return ListView(
       key: const ValueKey('grounded-tutor-scroll'),
       controller: _scroll,
-      scrollCacheExtent: const ScrollCacheExtent.pixels(2400),
       padding: EdgeInsets.fromLTRB(16, compact ? 12 : 16, 16, 28),
       children: [
         Row(

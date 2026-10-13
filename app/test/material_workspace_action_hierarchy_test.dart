@@ -175,15 +175,8 @@ void main() {
     await tester.tap(reopenAfterTutor);
     await tester.pump(const Duration(milliseconds: 400));
     final flashcardAction = find.byKey(const ValueKey('workspace-other-flashcards'));
-    expect(flashcardAction, findsOneWidget);
-    await tester.scrollUntilVisible(
-      flashcardAction,
-      120,
-      scrollable: find.descendant(
-        of: find.byKey(const ValueKey('workspace-other-study-paths-scroll')),
-        matching: find.byType(Scrollable),
-      ),
-    );
+    final reopenedAfterTutorScroll = find.byKey(const ValueKey('workspace-other-study-paths-scroll'));
+    await _scrollUntilFound(tester, flashcardAction, scrollable: reopenedAfterTutorScroll);
     await tester.ensureVisible(flashcardAction);
     await tester.pump(const Duration(milliseconds: 200));
     expect(flashcardAction.hitTestable(), findsOneWidget);

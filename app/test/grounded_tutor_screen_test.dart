@@ -22,6 +22,21 @@ class _UnusedPdfExtractor implements PdfTextExtractor {
   }
 }
 
+Future<void> _scrollUntilFound(
+  WidgetTester tester,
+  Finder target, {
+  required Finder scrollable,
+  int maxDrags = 20,
+}) async {
+  for (var i = 0; i < maxDrags && target.evaluate().isEmpty; i++) {
+    final active = scrollable.hitTestable();
+    expect(active, findsWidgets);
+    await tester.drag(active.first, const Offset(0, -120), warnIfMissed: false);
+    await tester.pump();
+  }
+  expect(target, findsOneWidget);
+}
+
 void main() {
   sqfliteFfiInit();
 
@@ -67,16 +82,28 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byKey(const ValueKey('grounded-tutor-screen')), findsOneWidget);
-    expect(find.byKey(const ValueKey('grounded-tutor-empty')), findsOneWidget);
+    final tutorScrollable = find.descendant(
+      of: find.byKey(const ValueKey('grounded-tutor-scroll')),
+      matching: find.byType(Scrollable),
+    );
+    await _scrollUntilFound(
+      tester,
+      find.byKey(const ValueKey('grounded-tutor-empty')),
+      scrollable: tutorScrollable,
+    );
     expect(find.textContaining('öğrenme kanıtı'), findsWidgets);
 
     await tester.enterText(find.byKey(const ValueKey('grounded-tutor-question')), 'Klorofil ne işe yarar?');
     await tester.tap(find.byKey(const ValueKey('grounded-tutor-send')));
     await tester.pumpAndSettle();
 
+    await _scrollUntilFound(
+      tester,
+      find.byKey(const ValueKey('grounded-tutor-next-actions')),
+      scrollable: tutorScrollable,
+    );
     expect(find.textContaining('KAYNAĞA BAĞLI'), findsWidgets);
     expect(find.textContaining('Klorofil'), findsWidgets);
-    expect(find.byKey(const ValueKey('grounded-tutor-next-actions')), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 }
