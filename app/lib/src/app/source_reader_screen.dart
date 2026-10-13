@@ -258,10 +258,7 @@ class _SourceReaderScreenState extends State<SourceReaderScreen> {
                     Icon(Icons.fact_check_outlined, size: 18, color: accent),
                     const SizedBox(width: 8),
                     Expanded(
-                      child: Text(
-                        sourceWarning,
-                        style: theme.textTheme.bodySmall?.copyWith(color: ink, height: 1.35),
-                      ),
+                      child: Text(sourceWarning, style: theme.textTheme.bodySmall?.copyWith(color: ink, height: 1.35)),
                     ),
                   ],
                 ),
