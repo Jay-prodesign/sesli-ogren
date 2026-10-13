@@ -1,0 +1,69 @@
+name: server-db-validation
+
+on:
+  pull_request:
+    paths:
+      - "spike/architecture-proof/db/migrations/**"
+      - "spike/architecture-proof/db/supabase_shim.sql"
+      - "server/db/**"
+      - ".github/workflows/server-db-validation.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: server-db-validation-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  postgres:
+    name: Canonical server PostgreSQL suite
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      PGPORT: "54331"
+      PGADMIN: supabase_admin
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Start disposable PostgreSQL 16 cluster
+        shell: bash
+        run: |
+          set -euo pipefail
+          PGBIN=/usr/lib/postgresql/16/bin
+          export PGHOST="$RUNNER_TEMP/pg"
+          mkdir -p "$PGHOST"
+          "$PGBIN/initdb" -D "$RUNNER_TEMP/pgdata" -U supabase_admin -A trust >/dev/null
+          "$PGBIN/pg_ctl" -D "$RUNNER_TEMP/pgdata" -o "-p $PGPORT -k $PGHOST -c listen_addresses=''" -l "$RUNNER_TEMP/pg.log" -w start
+          echo "PGHOST=$PGHOST" >> "$GITHUB_ENV"
+
+      - name: Apply canonical base + server migrations
+        shell: bash
+        run: |
+          set -euo pipefail
+          db=la_server_ci
+          psql -X -q -v ON_ERROR_STOP=1 -U "$PGADMIN" -d postgres -c "drop database if exists \"$db\" with (force);"
+          psql -X -q -v ON_ERROR_STOP=1 -U "$PGADMIN" -d postgres -c "create database \"$db\";"
+          psql -X -q -v ON_ERROR_STOP=1 -U "$PGADMIN" -d "$db" -f spike/architecture-proof/db/supabase_shim.sql >/dev/null
+          psql -X -q -v ON_ERROR_STOP=1 -U "$PGADMIN" -d postgres -c "alter database \"$db\" owner to postgres;"
+          psql -X -q -v ON_ERROR_STOP=1 -U postgres -d "$db" -f spike/architecture-proof/db/migrations/0001_canonical_core.sql >/dev/null
+          psql -X -q -v ON_ERROR_STOP=1 -U postgres -d "$db" -f spike/architecture-proof/db/migrations/0002_generation_rpcs.sql >/dev/null
+          for file in $(ls server/db/migrations/*.sql | sort); do
+            echo "Applying $file"
+            psql -X -q -v ON_ERROR_STOP=1 -U postgres -d "$db" -f "$file" >/dev/null
+          done
+
+      - name: Run canonical server SQL tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          db=la_server_ci
+          for file in $(ls server/db/tests/*.sql | sort); do
+            echo "::group::$file"
+            psql -X -q -v ON_ERROR_STOP=1 -U postgres -d "$db" -f "$file"
+            echo "::endgroup::"
+          done
