@@ -4022,6 +4022,218 @@ ON CONFLICT(learner_id, attempt_id) DO UPDATE SET
     return rows.isEmpty ? null : _nextActionFromRow(rows.single);
   }
 
+  /// Read-through cache for evidence already evaluated by the authenticated
+  /// server authority. This path never accepts a client-computed outcome:
+  /// callers must provide the exact server evidence identity/digest/rule
+  /// metadata, and this store still revalidates current local source lineage
+  /// before projecting the result for offline Home/resume use.
+  Future<PersistedLearningTruth> cacheServerVerifiedRecallTruth({
+    required AuthenticatedLearner learner,
+    required RecallAction action,
+    required RecallAttemptId attemptId,
+    required LearnerEvidenceId evidenceId,
+    required RecallOutcome outcome,
+    required RecallAssistance assistance,
+    required String responseDigest,
+    required int responseLength,
+    required String evidenceRuleVersion,
+    required DateTime evidenceCreatedAt,
+    required RecallStateKind stateKind,
+    required int evidenceCount,
+    required String stateRuleVersion,
+    required NextLearningAction nextAction,
+  }) {
+    if (!learner.isAuthenticated) {
+      throw const LearningTruthConflict('Server-verified Recall cache requires an authenticated learner.');
+    }
+    if (evidenceCount < 1) {
+      throw const LearningTruthConflict('Server evidence count must be positive.');
+    }
+    if (evidenceRuleVersion != RecallTruthPolicy.evidenceRuleVersion ||
+        stateRuleVersion != RecallTruthPolicy.stateRuleVersion) {
+      throw const LearningTruthConflict('Server Recall rule versions do not match the admitted client contract.');
+    }
+    if (nextAction.materialId != action.materialId ||
+        nextAction.sourceVersionId != action.sourceVersionId ||
+        nextAction.latestEvidenceId != evidenceId) {
+      throw const LearningTruthConflict('Server next-action projection does not match Recall lineage.');
+    }
+    if (RecallTruthPolicy.stateForOutcome(outcome) != stateKind) {
+      throw const LearningTruthConflict('Server Recall state does not match the admitted outcome contract.');
+    }
+    final expectedNext = RecallTruthPolicy.nextActionFor(
+      materialId: action.materialId,
+      sourceVersionId: action.sourceVersionId,
+      evidenceId: evidenceId,
+      outcome: outcome,
+      createdAt: evidenceCreatedAt.toUtc(),
+    );
+    if (!RecallTruthPolicy.sameNextAction(expectedNext, nextAction)) {
+      throw const LearningTruthConflict('Server Recall next action does not match the admitted outcome contract.');
+    }
+
+    final evidence = LearnerEvidence(
+      id: evidenceId,
+      attemptId: attemptId,
+      actionId: action.id,
+      materialId: action.materialId,
+      sourceVersionId: action.sourceVersionId,
+      extractedContentId: action.extractedContentId,
+      outcome: outcome,
+      assistance: assistance,
+      responseDigest: responseDigest,
+      responseLength: responseLength,
+      ruleVersion: evidenceRuleVersion,
+      createdAt: evidenceCreatedAt.toUtc(),
+    );
+
+    return _database.transaction((transaction) async {
+      final authorityRows = await transaction.rawQuery(
+        '''
+SELECT 1
+FROM materials m
+JOIN source_versions s
+  ON s.learner_id = m.learner_id
+ AND s.source_version_id = m.current_source_version_id
+JOIN extracted_contents e
+  ON e.learner_id = s.learner_id
+ AND e.source_version_id = s.source_version_id
+WHERE m.learner_id = ?
+  AND m.material_id = ?
+  AND m.lifecycle_status = ?
+  AND m.deleted_at_utc IS NULL
+  AND s.source_version_id = ?
+  AND s.revoked_at_utc IS NULL
+  AND e.extracted_content_id = ?
+  AND e.invalidated_at_utc IS NULL
+LIMIT 1
+''',
+        [
+          learner.id.value,
+          action.materialId.value,
+          MaterialLifecycleStatus.active.name,
+          action.sourceVersionId.value,
+          action.extractedContentId.value,
+        ],
+      );
+      if (authorityRows.isEmpty) {
+        throw const LearningTruthConflict('Server Recall evidence does not point at current local source truth.');
+      }
+
+      final actionRows = await transaction.query(
+        'recall_actions',
+        where: 'learner_id = ? AND action_id = ?',
+        whereArgs: [learner.id.value, action.id.value],
+        limit: 1,
+      );
+      if (actionRows.isEmpty) {
+        await transaction.insert(
+          'recall_actions',
+          _actionToRow(learner: learner, action: action),
+          conflictAlgorithm: ConflictAlgorithm.abort,
+        );
+      } else if (!_sameAction(_actionFromRow(actionRows.single), action)) {
+        throw const LearningTruthConflict('Server Recall action replay conflicts with cached action truth.');
+      }
+
+      final supportRow = {
+        'learner_id': learner.id.value,
+        'attempt_id': attemptId.value,
+        'action_id': action.id.value,
+        'assistance': assistance.name,
+        'updated_at_utc': evidenceCreatedAt.toUtc().toIso8601String(),
+      };
+      await transaction.insert(
+        'recall_attempt_support',
+        supportRow,
+        conflictAlgorithm: ConflictAlgorithm.replace,
+      );
+
+      final existingRows = await transaction.query(
+        'learner_evidence',
+        where: 'learner_id = ? AND attempt_id = ?',
+        whereArgs: [learner.id.value, attemptId.value],
+        limit: 1,
+      );
+      if (existingRows.isEmpty) {
+        await transaction.insert(
+          'learner_evidence',
+          _evidenceToRow(learner: learner, evidence: evidence),
+          conflictAlgorithm: ConflictAlgorithm.abort,
+        );
+      } else if (!_sameEvidence(_evidenceFromRow(existingRows.single), evidence)) {
+        throw const LearningTruthConflict('Server Recall attempt replay conflicts with cached evidence truth.');
+      }
+
+      final state = LearnerState(
+        materialId: action.materialId,
+        sourceVersionId: action.sourceVersionId,
+        kind: stateKind,
+        evidenceCount: evidenceCount,
+        latestEvidenceId: evidenceId,
+        ruleVersion: stateRuleVersion,
+        updatedAt: evidenceCreatedAt.toUtc(),
+      );
+      final stateRow = {
+        'source_version_id': state.sourceVersionId.value,
+        'state_kind': state.kind.name,
+        'evidence_count': state.evidenceCount,
+        'latest_evidence_id': state.latestEvidenceId.value,
+        'rule_version': state.ruleVersion,
+        'updated_at_utc': state.updatedAt.toIso8601String(),
+      };
+      final updatedState = await transaction.update(
+        'learner_states',
+        stateRow,
+        where: 'learner_id = ? AND material_id = ?',
+        whereArgs: [learner.id.value, state.materialId.value],
+      );
+      if (updatedState == 0) {
+        await transaction.insert('learner_states', {
+          'learner_id': learner.id.value,
+          'material_id': state.materialId.value,
+          ...stateRow,
+        }, conflictAlgorithm: ConflictAlgorithm.abort);
+      }
+
+      final nextRow = _nextActionToRow(learner: learner, action: nextAction);
+      final updatedNext = await transaction.update(
+        'next_learning_actions',
+        nextRow,
+        where: 'learner_id = ? AND material_id = ?',
+        whereArgs: [learner.id.value, nextAction.materialId.value],
+      );
+      if (updatedNext == 0) {
+        await transaction.insert('next_learning_actions', nextRow, conflictAlgorithm: ConflictAlgorithm.abort);
+      }
+
+      await transaction.delete(
+        'active_recall_attempts',
+        where: 'learner_id = ? AND material_id = ?',
+        whereArgs: [learner.id.value, action.materialId.value],
+      );
+
+      await SqliteSourceStore._upsertRetentionSchedule(
+        transaction,
+        learnerId: learner.id.value,
+        materialId: action.materialId,
+        sourceVersionId: action.sourceVersionId,
+        sourceAnchor: action.anchor,
+        evidenceKind: RetentionEvidenceKind.recall,
+        outcomeBand: switch (outcome) {
+          RecallOutcome.correct => RetentionOutcomeBand.independentRetrieval,
+          RecallOutcome.helpedCorrect || RecallOutcome.partial => RetentionOutcomeBand.supportedRetrieval,
+          RecallOutcome.incorrect => RetentionOutcomeBand.repairNeeded,
+          RecallOutcome.answerExposed || RecallOutcome.unknown => RetentionOutcomeBand.unassessed,
+        },
+        eventId: 'server-recall:${evidenceId.value}',
+        occurredAt: evidenceCreatedAt,
+      );
+
+      return PersistedLearningTruth(evidence: evidence, state: state, nextAction: nextAction);
+    });
+  }
+
   @override
   Future<PersistedLearningTruth> persistEvidenceStateAndNextAction({
     required AuthenticatedLearner learner,

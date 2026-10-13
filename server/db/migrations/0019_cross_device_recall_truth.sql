@@ -265,6 +265,7 @@ returns table (
   response_length integer,
   evidence_rule_version text,
   evidence_created_at timestamptz,
+  normalized_response text,
   correct_answer text,
   source_excerpt text,
   client_material_id text,
@@ -312,6 +313,10 @@ begin
          ev.response_length,
          ev.rule_version,
          ev.created_at,
+         case
+           when p_response_disposition = 'unknown' then ''
+           else public.la_recall_normalize(p_answer)
+         end,
          a.expected_answer,
          substring(
            ec.normalized_text

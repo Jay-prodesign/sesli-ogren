@@ -13,6 +13,7 @@ import '../data/source_ingest_service.dart';
 import '../data/sqlite_source_store.dart';
 import '../domain/authenticated_learner.dart';
 import '../domain/learning_contracts.dart';
+import '../learning/authenticated_recall_learning_service.dart';
 import '../learning/flashcard_learning_service.dart';
 import '../learning/quiz_learning_service.dart';
 import '../learning/explain_back_gateway.dart';
@@ -21,6 +22,7 @@ import '../learning/grounded_tutor_service.dart';
 import '../learning/recall_learning_service.dart';
 import '../learning/supabase_explain_back_gateway.dart';
 import '../learning/supabase_focus_help_gateway.dart';
+import '../learning/supabase_server_recall_gateway.dart';
 import '../generation/grounded_explain_gateway.dart';
 import '../generation/supabase_grounded_explain_gateway.dart';
 
@@ -90,14 +92,23 @@ class AppRuntime {
       officeTextExtractor: const OpenXmlOfficeTextExtractor(),
       imageTextExtractor: const MlKitImageTextExtractor(),
     );
-    final recall = RecallLearningService(sourceStore: store, learningStore: store.learningTruthStore());
+    final continuity = CloudContinuityService(
+      store: store,
+      ingest: ingest,
+      gateway: const SupabaseCloudContinuityGateway(),
+    );
+    final recall = AuthenticatedRecallLearningService(
+      store: store,
+      continuity: continuity,
+      gateway: const SupabaseServerRecallGateway(),
+    );
     return AppRuntime(
       learner: learner,
       store: store,
       ingest: ingest,
       recall: recall,
       telemetry: store.operationalTelemetry(),
-      continuity: CloudContinuityService(store: store, ingest: ingest, gateway: const SupabaseCloudContinuityGateway()),
+      continuity: continuity,
       explain: const SupabaseGroundedExplainGateway(),
       explainBack: const SupabaseExplainBackGateway(),
       focusHelp: const SupabaseFocusHelpGateway(),
@@ -134,13 +145,22 @@ class AppRuntime {
     if (!authenticatedLearner.isAuthenticated) {
       throw ArgumentError.value(authenticatedLearner.kind, 'authenticatedLearner', 'Expected authenticated identity.');
     }
+    final authenticatedContinuity = CloudContinuityService(
+      store: store,
+      ingest: ingest,
+      gateway: const SupabaseCloudContinuityGateway(),
+    );
     return AppRuntime(
       learner: authenticatedLearner,
       store: store,
       ingest: ingest,
-      recall: recall,
+      recall: AuthenticatedRecallLearningService(
+        store: store,
+        continuity: authenticatedContinuity,
+        gateway: const SupabaseServerRecallGateway(),
+      ),
       telemetry: telemetry,
-      continuity: CloudContinuityService(store: store, ingest: ingest, gateway: const SupabaseCloudContinuityGateway()),
+      continuity: authenticatedContinuity,
       explain: const SupabaseGroundedExplainGateway(),
       explainBack: const SupabaseExplainBackGateway(),
       focusHelp: const SupabaseFocusHelpGateway(),
@@ -152,8 +172,13 @@ class AppRuntime {
   /// Returns to the device-local namespace without reopening or closing the
   /// shared SQLite data plane. Local and authenticated rows remain separated by
   /// learner_id, so neither namespace fabricates or absorbs the other's truth.
-  AppRuntime asLocal() =>
-      AppRuntime(learner: localLearner, store: store, ingest: ingest, recall: recall, telemetry: telemetry);
+  AppRuntime asLocal() => AppRuntime(
+    learner: localLearner,
+    store: store,
+    ingest: ingest,
+    recall: RecallLearningService(sourceStore: store, learningStore: store.learningTruthStore()),
+    telemetry: telemetry,
+  );
 
   Future<void> deleteAccount() async {
     await accountDeletion.deleteAccount(learner: learner);
