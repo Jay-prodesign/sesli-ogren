@@ -457,6 +457,10 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
       allowedExtensions: const ['doc', 'docx', 'ppt', 'pptx'],
       dialogTitle: 'Çalışmak istediğin Word veya PowerPoint dosyasını seç',
       pickerFailure: 'Belge seçici açılamadı. Tekrar deneyebilir veya notunu metin olarak yapıştırabilirsin.',
+      maxBytes: widget.runtime.ingest.maxOfficeBytes,
+      oversizedMessage:
+          'Bu belge güvenli dosya sınırını aşıyor. Daha küçük bir DOC/DOCX/PPT/PPTX seç veya çalışacağın bölümü metin olarak ekle.',
+      emptyMessage: 'Seçtiğin belge boş görünüyor. Başka bir dosya seç.',
       ingestSource: (bytes, name) => widget.runtime.ingest.ingestOffice(
         learner: widget.runtime.learner,
         materialId: widget.materialId,
@@ -473,6 +477,9 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
       allowedExtensions: const ['jpg', 'jpeg', 'png', 'heic', 'heif'],
       dialogTitle: 'Metnini okumak istediğin fotoğrafı seç',
       pickerFailure: 'Fotoğraf seçici açılamadı. Tekrar deneyebilir veya notunu metin olarak yapıştırabilirsin.',
+      maxBytes: widget.runtime.ingest.maxImageBytes,
+      oversizedMessage: 'Bu fotoğraf güvenli dosya sınırını aşıyor. Daha küçük bir görüntü seç.',
+      emptyMessage: 'Seçtiğin fotoğraf boş görünüyor. Başka bir fotoğraf seç.',
       ingestSource: (bytes, name) => widget.runtime.ingest.ingestImage(
         learner: widget.runtime.learner,
         materialId: widget.materialId,
@@ -488,6 +495,9 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
     required List<String> allowedExtensions,
     required String dialogTitle,
     required String pickerFailure,
+    required int maxBytes,
+    required String oversizedMessage,
+    required String emptyMessage,
     required Future<SourceIngestResult> Function(Uint8List bytes, String name) ingestSource,
     required String Function(Object error) failureMessage,
   }) async {
@@ -507,6 +517,28 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
       return;
     }
     if (file == null || !mounted) return;
+
+    int? fileByteSize;
+    try {
+      fileByteSize = file.lengthSync() ?? await file.length();
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _inlineError = 'Dosya boyutu güvenli biçimde doğrulanamadı. Başka bir kaynak seç.');
+      return;
+    }
+    if (!mounted) return;
+    if (fileByteSize == null) {
+      setState(() => _inlineError = 'Dosya boyutu güvenli biçimde doğrulanamadı. Başka bir kaynak seç.');
+      return;
+    }
+    if (fileByteSize <= 0) {
+      setState(() => _inlineError = emptyMessage);
+      return;
+    }
+    if (fileByteSize > maxBytes) {
+      setState(() => _inlineError = oversizedMessage);
+      return;
+    }
 
     final stopwatch = Stopwatch()..start();
     await _recordEvent(
