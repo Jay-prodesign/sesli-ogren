@@ -725,6 +725,46 @@ void main() {
     expect(find.text('İpucu'), findsNothing);
   });
 
+  testWidgets('richer source chooser stays usable at 320px and large text without changing learning truth', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(320, 700);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
+    addTearDown(store.close);
+    final runtime = AppRuntime(
+      learner: AppRuntime.localM5LearnerFixture,
+      store: store,
+      ingest: SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor()),
+      recall: RecallLearningService(sourceStore: store, learningStore: store.learningTruthStore()),
+      telemetry: store.operationalTelemetry(),
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        builder: (context, child) => MediaQuery(
+          data: MediaQuery.of(context).copyWith(textScaler: const TextScaler.linear(1.5), disableAnimations: true),
+          child: child!,
+        ),
+        home: LivingDeskReviewScope(child: LearningSliceScreen(runtime: runtime)),
+      ),
+    );
+    await pumpUntilFound(tester, find.byKey(const ValueKey('source-choice-pdf')));
+
+    expect(find.byKey(const ValueKey('source-choice-pdf')), findsOneWidget);
+    expect(find.byKey(const ValueKey('source-choice-office')), findsOneWidget);
+    expect(find.byKey(const ValueKey('source-choice-image')), findsOneWidget);
+    expect(find.byKey(const ValueKey('source-choice-text')), findsOneWidget);
+    expect(find.text('Belge veya sunu seç'), findsOneWidget);
+    expect(find.text('Fotoğraf seç'), findsOneWidget);
+    expect(find.textContaining('OCR sonucu kaynak uyarısıyla saklanır'), findsOneWidget);
+    expect(await store.activeMaterials(learner: runtime.learner), isEmpty);
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('image-only PDF failure offers a one-tap text fallback without persisting a broken source', (
     tester,
   ) async {

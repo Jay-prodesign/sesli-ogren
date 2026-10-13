@@ -32,12 +32,12 @@ void main() {
     final result = await extractor.extract(bytes, sourceName: 'biyoloji.docx');
 
     expect(result.format, OfficeSourceFormat.docx);
-    expect(
-      result.text,
-      'Fotosentez ışık enerjisini dönüştürür.\n\nKlorofil ışığın yakalanmasına yardım eder.',
-    );
+    expect(result.text, 'Fotosentez ışık enerjisini dönüştürür.\n\nKlorofil ışığın yakalanmasına yardım eder.');
     expect(result.anchors, hasLength(2));
-    expect(result.text.substring(result.anchors.first.startOffset, result.anchors.first.endOffset), startsWith('Fotosentez'));
+    expect(
+      result.text.substring(result.anchors.first.startOffset, result.anchors.first.endOffset),
+      startsWith('Fotosentez'),
+    );
     expect(result.warnings, contains('DOCX_LAYOUT_NOT_PRESERVED'));
   });
 

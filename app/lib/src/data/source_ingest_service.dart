@@ -147,10 +147,7 @@ class SourceIngestService {
   }) async {
     _requireIdentity(learner: learner, materialId: materialId);
     if (bytes.isEmpty) {
-      throw const SourceIngestException(
-        'Office source cannot be empty.',
-        kind: SourceIngestFailureKind.officeEmpty,
-      );
+      throw const SourceIngestException('Office source cannot be empty.', kind: SourceIngestFailureKind.officeEmpty);
     }
     if (bytes.length > maxOfficeBytes) {
       throw const SourceIngestException(
@@ -173,12 +170,12 @@ class SourceIngestService {
     } on OfficeTextExtractionException catch (error) {
       final kind = switch (error.kind) {
         OfficeTextExtractionFailureKind.emptyFile => SourceIngestFailureKind.officeEmpty,
-        OfficeTextExtractionFailureKind.tooLarge || OfficeTextExtractionFailureKind.textLimit =>
-          SourceIngestFailureKind.officeTooLarge,
+        OfficeTextExtractionFailureKind.tooLarge ||
+        OfficeTextExtractionFailureKind.textLimit => SourceIngestFailureKind.officeTooLarge,
         OfficeTextExtractionFailureKind.unsupportedFormat => SourceIngestFailureKind.officeUnsupported,
         OfficeTextExtractionFailureKind.noExtractableText => SourceIngestFailureKind.officeNoExtractableText,
-        OfficeTextExtractionFailureKind.invalidContainer || OfficeTextExtractionFailureKind.encryptedOrCorrupt =>
-          SourceIngestFailureKind.officeParseFailure,
+        OfficeTextExtractionFailureKind.invalidContainer ||
+        OfficeTextExtractionFailureKind.encryptedOrCorrupt => SourceIngestFailureKind.officeParseFailure,
       };
       throw SourceIngestException(error.message, kind: kind);
     } catch (_) {
