@@ -3,7 +3,8 @@ import 'dart:typed_data';
 import 'package:quds_office_engine/quds_office_engine.dart' show CfbfException, CfbfFile;
 
 import '../domain/learning_contracts.dart';
-import 'office_text_extractor.dart' show OfficeSourceFormat, OfficeTextExtractionException, OfficeTextExtractionFailureKind;
+import 'office_text_extractor.dart'
+    show OfficeSourceFormat, OfficeTextExtractionException, OfficeTextExtractionFailureKind;
 
 class ExtractedLegacyOfficeText {
   const ExtractedLegacyOfficeText({required this.text, required this.anchors, required this.warnings});
@@ -90,10 +91,7 @@ class LegacyOfficeTextExtractor {
       }
     }
 
-    return _compose(
-      _splitParagraphs(text),
-      warning: 'LEGACY_DOC_TEXT_ONLY',
-    );
+    return _compose(_splitParagraphs(text), warning: 'LEGACY_DOC_TEXT_ONLY');
   }
 
   ExtractedLegacyOfficeText _extractPpt(CfbfFile file) {
@@ -241,18 +239,11 @@ class LegacyOfficeTextExtractor {
         kind: OfficeTextExtractionFailureKind.noExtractableText,
       );
     }
-    return ExtractedLegacyOfficeText(
-      text: buffer.toString(),
-      anchors: List.unmodifiable(anchors),
-      warnings: [warning],
-    );
+    return ExtractedLegacyOfficeText(text: buffer.toString(), anchors: List.unmodifiable(anchors), warnings: [warning]);
   }
 
-  static List<String> _splitParagraphs(String value) => value
-      .split(RegExp(r'[\r\n\x0b\x0c]+'))
-      .map(_clean)
-      .where((line) => line.isNotEmpty)
-      .toList(growable: false);
+  static List<String> _splitParagraphs(String value) =>
+      value.split(RegExp(r'[\r\n\x0b\x0c]+')).map(_clean).where((line) => line.isNotEmpty).toList(growable: false);
 
   static String _clean(String value) {
     final out = StringBuffer();
