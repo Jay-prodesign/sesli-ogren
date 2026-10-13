@@ -315,10 +315,7 @@ class LivingStudyDeskHome extends StatelessWidget {
                         style: const TextStyle(color: _accent, fontSize: 11.5, fontWeight: FontWeight.w800),
                       ),
                       const SizedBox(height: 3),
-                      Text(
-                        item.reasonText,
-                        style: const TextStyle(color: _sub, fontSize: 11.5, height: 1.35),
-                      ),
+                      Text(item.reasonText, style: const TextStyle(color: _sub, fontSize: 11.5, height: 1.35)),
                     ],
                   ),
                 ),
