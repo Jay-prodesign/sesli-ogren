@@ -646,7 +646,7 @@ returns table (storage_path text)
 language sql
 security definer
 set search_path = ''
-as $
+as $$
   select s.storage_path
   from public.materials m
   join public.source_assets s
@@ -659,7 +659,7 @@ as $
     and s.storage_bucket = 'study-materials'
     and s.storage_path is not null
   order by s.source_version asc
-$;
+$$;
 
 revoke all on function public.prepare_media_material_continuity(text, text, text, text, text, text, bigint, text),
                        public.finalize_media_material_continuity(
