@@ -20,10 +20,7 @@ class SupabasePassiveResumeGateway implements PassiveResumeGateway {
         'read_passive_resume_continuity',
         params: {'p_client_material_id': materialId.value},
       );
-      return rows
-          .whereType<Map>()
-          .map((row) => _record(Map<String, dynamic>.from(row)))
-          .toList(growable: false);
+      return rows.whereType<Map>().map((row) => _record(Map<String, dynamic>.from(row))).toList(growable: false);
     } on PostgrestException catch (error) {
       throw _mapError(error);
     }
@@ -89,10 +86,8 @@ class SupabasePassiveResumeGateway implements PassiveResumeGateway {
       final reader = (row['reader_progress'] as num?)?.toDouble();
       final listen = (row['listen_chunk_index'] as num?)?.toInt();
       if (revision < 1 ||
-          (surface == PassiveResumeSurface.reader &&
-              (reader == null || listen != null || reader < 0 || reader > 1)) ||
-          (surface == PassiveResumeSurface.listen &&
-              (listen == null || reader != null || listen < 0))) {
+          (surface == PassiveResumeSurface.reader && (reader == null || listen != null || reader < 0 || reader > 1)) ||
+          (surface == PassiveResumeSurface.listen && (listen == null || reader != null || listen < 0))) {
         throw const FormatException('invalid_resume_payload');
       }
       return PassiveResumeRemoteState(
