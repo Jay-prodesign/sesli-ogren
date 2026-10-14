@@ -178,11 +178,13 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.byKey(const ValueKey('cloud-continuity-notice')), findsOneWidget);
+    final notice = find.byKey(const ValueKey('cloud-continuity-notice'));
+    expect(notice, findsOneWidget);
     expect(find.byKey(const ValueKey('cloud-continuity-retry')), findsOneWidget);
     final primary = find.byKey(const ValueKey('la0040-living-add'));
     expect(primary, findsOneWidget);
     expect(primary.hitTestable(), findsOneWidget);
     expect(tester.getBottomRight(primary).dy, lessThanOrEqualTo(844));
+    expect(tester.getTopLeft(notice).dy, greaterThan(tester.getBottomRight(primary).dy));
   });
 }
