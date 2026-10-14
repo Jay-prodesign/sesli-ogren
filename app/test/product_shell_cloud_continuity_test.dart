@@ -3,7 +3,6 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sesli_ogren/src/app/app_runtime.dart';
-import 'package:sesli_ogren/src/app/atelier_learning_surfaces.dart';
 import 'package:sesli_ogren/src/app/product_shell_screen.dart';
 import 'package:sesli_ogren/src/continuity/cloud_continuity_gateway.dart';
 import 'package:sesli_ogren/src/continuity/cloud_continuity_service.dart';
@@ -80,9 +79,7 @@ void main() {
     addTearDown(runtime.close);
 
     await tester.pumpWidget(
-      MaterialApp(
-        home: LivingDeskReviewScope(child: ProductShellScreen(runtime: runtime)),
-      ),
+      MaterialApp(home: ProductShellScreen(runtime: runtime)),
     );
     await tester.pumpAndSettle();
 
@@ -106,9 +103,7 @@ void main() {
     addTearDown(runtime.close);
 
     await tester.pumpWidget(
-      MaterialApp(
-        home: LivingDeskReviewScope(child: ProductShellScreen(runtime: runtime)),
-      ),
+      MaterialApp(home: ProductShellScreen(runtime: runtime)),
     );
     await tester.pumpAndSettle();
 

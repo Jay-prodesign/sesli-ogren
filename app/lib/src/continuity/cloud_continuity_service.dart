@@ -66,7 +66,7 @@ class CloudContinuityService {
 
     try {
       final remote = await gateway.readMaterial(learner: learner, materialId: materialId);
-      return _reconcile(learner: learner, materialId: materialId, remote: remote);
+      return await _reconcile(learner: learner, materialId: materialId, remote: remote);
     } on CloudContinuityException catch (error) {
       return _failure(materialId, error);
     }
@@ -96,7 +96,7 @@ class CloudContinuityService {
             message: 'Cloud copy disappeared after an earlier sync; local data was preserved.',
           );
         }
-        return _pushLocal(
+        return await _pushLocal(
           learner: learner,
           materialId: materialId,
           localMaterial: localMaterial!,
@@ -106,7 +106,7 @@ class CloudContinuityService {
       }
 
       if (localSource == null) {
-        return _pullRemote(learner: learner, remote: remote);
+        return await _pullRemote(learner: learner, remote: remote);
       }
 
       if (localSource.identity.sourceVersionId == remote.sourceVersionId) {

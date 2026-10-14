@@ -34,6 +34,39 @@ class SqliteSourceStore implements SourceStore {
 
   LearningTruthStore learningTruthStore() => SqliteLearningTruthStore._(_database);
 
+  Future<PersistedLearningTruth> cacheServerVerifiedRecallTruth({
+    required AuthenticatedLearner learner,
+    required RecallAction action,
+    required RecallAttemptId attemptId,
+    required LearnerEvidenceId evidenceId,
+    required RecallOutcome outcome,
+    required RecallAssistance assistance,
+    required String responseDigest,
+    required int responseLength,
+    required String evidenceRuleVersion,
+    required DateTime evidenceCreatedAt,
+    required RecallStateKind stateKind,
+    required int evidenceCount,
+    required String stateRuleVersion,
+    required NextLearningAction nextAction,
+  }) =>
+      SqliteLearningTruthStore._(_database).cacheServerVerifiedRecallTruth(
+        learner: learner,
+        action: action,
+        attemptId: attemptId,
+        evidenceId: evidenceId,
+        outcome: outcome,
+        assistance: assistance,
+        responseDigest: responseDigest,
+        responseLength: responseLength,
+        evidenceRuleVersion: evidenceRuleVersion,
+        evidenceCreatedAt: evidenceCreatedAt,
+        stateKind: stateKind,
+        evidenceCount: evidenceCount,
+        stateRuleVersion: stateRuleVersion,
+        nextAction: nextAction,
+      );
+
   OperationalTelemetry operationalTelemetry() => SqliteOperationalTelemetry._(_database);
 
   static Future<SqliteSourceStore> open({DatabaseFactory? factory, String? path}) async {

@@ -15,9 +15,9 @@ class AuthenticatedRecallLearningService extends RecallLearningService {
     required this.store,
     required this.continuity,
     required this.gateway,
-    DateTime Function()? now,
-  }) : _now = now ?? DateTime.now,
-       super(sourceStore: store, learningStore: store.learningTruthStore(), now: now);
+    DateTime Function()? clock,
+  }) : _now = clock ?? DateTime.now,
+       super(sourceStore: store, learningStore: store.learningTruthStore(), now: clock);
 
   final SqliteSourceStore store;
   final CloudContinuityService continuity;
