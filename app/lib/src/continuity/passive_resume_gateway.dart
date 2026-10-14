@@ -15,10 +15,7 @@ class PassiveResumeException implements Exception {
 }
 
 abstract interface class PassiveResumeGateway {
-  Future<List<PassiveResumeRemoteState>> read({
-    required AuthenticatedLearner learner,
-    required MaterialId materialId,
-  });
+  Future<List<PassiveResumeRemoteState>> read({required AuthenticatedLearner learner, required MaterialId materialId});
 
   Future<PassiveResumeRemoteState> write({
     required AuthenticatedLearner learner,
