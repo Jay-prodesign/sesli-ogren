@@ -151,6 +151,15 @@ class AuthenticatedRecallLearningService extends RecallLearningService {
     required RecallResponseDisposition disposition,
     String answer = '',
   }) async {
+    final activeAction = _activeActions[actionId];
+    if (activeAction == null) {
+      throw const RecallLearningException('Active server Recall action is no longer available. Reopen Recall.');
+    }
+    await _syncRetention(
+      learner: learner,
+      materialId: activeAction.materialId,
+      sourceVersionId: activeAction.sourceVersionId,
+    );
     final server = await gateway.submit(
       learner: learner,
       actionId: actionId,
