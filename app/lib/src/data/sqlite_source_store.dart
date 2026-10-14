@@ -1636,6 +1636,23 @@ CREATE TABLE IF NOT EXISTS study_target_materials (
     return rows.map(_materialFromRow).toList(growable: false);
   }
 
+  Future<Uint8List?> rawSourceBytesForSource({
+    required AuthenticatedLearner learner,
+    required SourceVersionId sourceVersionId,
+  }) async {
+    final rows = await _database.query(
+      'source_versions',
+      columns: ['source_blob', 'media_type', 'revoked_at_utc'],
+      where: 'learner_id = ? AND source_version_id = ?',
+      whereArgs: [learner.id.value, sourceVersionId.value],
+      limit: 1,
+    );
+    if (rows.isEmpty || rows.single['revoked_at_utc'] != null) return null;
+    if (rows.single['media_type'] == SourceMediaType.pastedText.name) return null;
+    final blob = rows.single['source_blob'];
+    return blob is Uint8List ? Uint8List.fromList(blob) : null;
+  }
+
   @override
   Future<SourceVersionRecord?> currentSourceVersion({
     required AuthenticatedLearner learner,
