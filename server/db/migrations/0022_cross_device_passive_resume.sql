@@ -95,7 +95,6 @@ begin
   end if;
   if v_surface = 'reader' then
     if p_reader_progress is null
-       or not isfinite(p_reader_progress)
        or p_reader_progress < 0.0
        or p_reader_progress > 1.0
        or p_listen_chunk_index is not null then
