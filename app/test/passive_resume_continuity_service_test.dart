@@ -48,10 +48,7 @@ class _FakePassiveResumeGateway implements PassiveResumeGateway {
         throw const PassiveResumeException('resume_revision_conflict', kind: PassiveResumeFailureKind.conflict);
       }
     } else if (current.revision != expectedRevision) {
-      throw const PassiveResumeException(
-        'resume_revision_conflict',
-        kind: PassiveResumeFailureKind.conflict,
-      );
+      throw const PassiveResumeException('resume_revision_conflict', kind: PassiveResumeFailureKind.conflict);
     }
     final next = PassiveResumeRemoteState(
       materialId: local.materialId,
@@ -155,8 +152,10 @@ void main() {
     expect(local?.hasLocalChangeSinceSync, isTrue);
 
     result = await service.syncMaterial(learner: learner, materialId: materialId);
-    expect(result.singleWhere((item) => item.surface == PassiveResumeSurface.reader).disposition,
-        PassiveResumeSyncDisposition.pushedLocal);
+    expect(
+      result.singleWhere((item) => item.surface == PassiveResumeSurface.reader).disposition,
+      PassiveResumeSyncDisposition.pushedLocal,
+    );
     expect(gateway.remote[PassiveResumeSurface.reader]?.revision, 3);
     expect(gateway.remote[PassiveResumeSurface.reader]?.readerProgress, 0.82);
   });
