@@ -308,7 +308,7 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
       ),
     );
     if (!mounted) return;
-    await _syncPassiveResumeAfterActivity(materialId);
+    await _syncRetentionAfterLearningActivity(materialId);
     if (!mounted) return;
     setState(_refresh);
     if (sourceAdded == true) {
@@ -398,7 +398,7 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
       ),
     );
     if (!mounted) return;
-    await _syncPassiveResumeAfterActivity(selected);
+    await _syncRetentionAfterLearningActivity(selected);
     if (!mounted) return;
     setState(_refresh);
   }
@@ -541,7 +541,7 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
       ),
     );
     if (!mounted) return;
-    await _syncPassiveResumeAfterActivity(materialId);
+    await _syncRetentionAfterLearningActivity(materialId);
     if (mounted) setState(_refresh);
   }
 
@@ -580,7 +580,7 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
     setState(_refresh);
   }
 
-  Future<void> _syncPassiveResumeAfterActivity(MaterialId materialId) async {
+  Future<void> _syncRetentionAfterLearningActivity(MaterialId materialId) async {
     if (!widget.runtime.learner.isAuthenticated) return;
 
     try {
@@ -600,6 +600,10 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
       // Durable local retention remains authoritative on this device. Startup
       // retry will reconcile it before cloud timing is used as current truth.
     }
+  }
+
+  Future<void> _syncPassiveResumeAfterActivity(MaterialId materialId) async {
+    if (!widget.runtime.learner.isAuthenticated) return;
 
     try {
       final results = await widget.runtime.syncPassiveResumeForMaterial(materialId);
