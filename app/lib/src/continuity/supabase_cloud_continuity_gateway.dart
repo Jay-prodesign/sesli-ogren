@@ -234,14 +234,10 @@ class SupabaseCloudContinuityGateway implements CloudContinuityGateway {
     } on CloudContinuityException {
       rethrow;
     } on PostgrestException catch (error) {
-      if (storagePath != null) {
-        try {
-          await client.storage.from('study-materials').remove([storagePath]);
-        } catch (_) {
-          // The database rejected finalization; orphan cleanup is best-effort
-          // here and will be retried by continuity cleanup on the next run.
-        }
-      }
+      // Do not delete the uploaded object when finalization acknowledgement is
+      // uncertain. The transaction may already have committed; deleting here
+      // could destroy the canonical source. Later server-aware reconciliation
+      // can safely identify superseded objects.
       throw _mapError(error);
     } on StorageException {
       throw const CloudContinuityException(
