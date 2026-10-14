@@ -5,6 +5,8 @@ import 'package:crypto/crypto.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sesli_ogren/src/continuity/cloud_continuity_gateway.dart';
 import 'package:sesli_ogren/src/continuity/cloud_continuity_service.dart';
+import 'package:sesli_ogren/src/continuity/retention_continuity_gateway.dart';
+import 'package:sesli_ogren/src/continuity/retention_continuity_service.dart';
 import 'package:sesli_ogren/src/data/pdf_text_extractor.dart';
 import 'package:sesli_ogren/src/data/source_ingest_service.dart';
 import 'package:sesli_ogren/src/data/sqlite_source_store.dart';
@@ -12,7 +14,9 @@ import 'package:sesli_ogren/src/domain/authenticated_learner.dart';
 import 'package:sesli_ogren/src/domain/learning_contracts.dart';
 import 'package:sesli_ogren/src/domain/learning_truth.dart';
 import 'package:sesli_ogren/src/domain/retention_schedule.dart';
+import 'package:sesli_ogren/src/domain/quiz_learning.dart';
 import 'package:sesli_ogren/src/learning/authenticated_recall_learning_service.dart';
+import 'package:sesli_ogren/src/learning/quiz_learning_service.dart';
 import 'package:sesli_ogren/src/learning/server_recall_gateway.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
@@ -99,6 +103,7 @@ class _FakeServerRecallGateway implements ServerRecallGateway {
   RecallAssistance assistance = RecallAssistance.none;
   ServerRecallProjection? latestProjection;
   List<RetentionScheduleRecord>? retentionProjection;
+  Future<void> Function()? beforeSubmit;
 
   @override
   Future<ServerRecallAction> createAction({
@@ -152,6 +157,8 @@ class _FakeServerRecallGateway implements ServerRecallGateway {
     required RecallResponseDisposition disposition,
     required String answer,
   }) async {
+    final hook = beforeSubmit;
+    if (hook != null) await hook();
     final normalized = disposition == RecallResponseDisposition.unknown
         ? ''
         : RecallTruthPolicy.normalizeAnswer(answer);
@@ -242,6 +249,42 @@ class _FakeServerRecallGateway implements ServerRecallGateway {
         policyVersion: RetentionPolicy.version,
       ),
     ];
+  }
+}
+
+class _TrackingRetentionGateway implements RetentionContinuityGateway {
+  final List<CloudRetentionSnapshot> remote = <CloudRetentionSnapshot>[];
+  int writes = 0;
+
+  @override
+  Future<List<CloudRetentionSnapshot>> readMaterial({
+    required AuthenticatedLearner learner,
+    required MaterialId materialId,
+  }) async => remote.where((item) => item.schedule.materialId == materialId).toList(growable: false);
+
+  @override
+  Future<CloudRetentionSnapshot> writeSchedule({
+    required AuthenticatedLearner learner,
+    required RetentionScheduleRecord schedule,
+    required int? expectedRevision,
+  }) async {
+    writes += 1;
+    final existingIndex = remote.indexWhere((item) => item.schedule.id == schedule.id);
+    final current = existingIndex < 0 ? null : remote[existingIndex];
+    if ((current == null && expectedRevision != null) ||
+        (current != null && current.revision != expectedRevision)) {
+      throw const RetentionContinuityException(
+        'retention revision conflict',
+        kind: RetentionContinuityFailureKind.conflict,
+      );
+    }
+    final saved = CloudRetentionSnapshot(schedule: schedule, revision: (current?.revision ?? 0) + 1);
+    if (existingIndex < 0) {
+      remote.add(saved);
+    } else {
+      remote[existingIndex] = saved;
+    }
+    return saved;
   }
 }
 
@@ -425,4 +468,70 @@ void main() {
     expect(result.state.kind, RecallStateKind.developing);
     expect(result.nextAction.reasonCode, 'HINTED_SUCCESS_NEEDS_UNASSISTED_RETRIEVAL');
   });
+
+  test('authenticated Recall pushes pending Quiz retention before server evidence submit', () async {
+    final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
+    addTearDown(store.close);
+    const learner = AuthenticatedLearner(id: LearnerId('recall-retention-order'));
+    const materialId = MaterialId('material_recall_retention_order');
+    const text =
+        'Fotosentez ışık enerjisini kimyasal enerjiye dönüştürür. '
+        'Klorofil ışığın soğurulmasına yardım eder. '
+        'Stomalar gaz alışverişini düzenler. '
+        'Karbondioksit organik madde üretiminde kullanılır.';
+
+    final ingest = SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor());
+    final source = await ingest.ingestPastedText(
+      learner: learner,
+      materialId: materialId,
+      text: text,
+      sourceName: 'Biyoloji',
+    );
+    final quiz = QuizLearningService(store: store, clock: () => DateTime.utc(2026, 10, 14, 8));
+    final quizState = await quiz.openCurrentSet(learner: learner, materialId: materialId);
+    final question = quizState.currentQuestion!;
+    await quiz.recordAnswer(
+      learner: learner,
+      materialId: materialId,
+      setId: quizState.set.id,
+      questionId: question.id,
+      kind: QuizAnswerKind.selected,
+      selectedOptionIndex: question.correctOptionIndex,
+    );
+
+    final retentionGateway = _TrackingRetentionGateway();
+    final retention = RetentionContinuityService(store: store, gateway: retentionGateway);
+    final cloud = CloudContinuityService(store: store, ingest: ingest, gateway: _InSyncGateway());
+    final remote = _FakeServerRecallGateway(
+      materialId: materialId,
+      sourceVersionId: source.sourceVersion.identity.sourceVersionId,
+      sourceText: source.extractedContent.normalizedText,
+    );
+    remote.beforeSubmit = () async {
+      if (retentionGateway.writes != 1) {
+        throw StateError('server Recall submitted before pending Quiz retention was reconciled');
+      }
+    };
+    final service = AuthenticatedRecallLearningService(
+      store: store,
+      continuity: cloud,
+      gateway: remote,
+      retentionContinuity: retention,
+      clock: () => DateTime.utc(2026, 10, 14, 9),
+    );
+
+    final prompt = await service.createCurrentPrompt(learner: learner, materialId: materialId);
+    final session = await service.openAttempt(learner: learner, actionId: prompt.id);
+    final result = await service.submit(
+      learner: learner,
+      actionId: prompt.id,
+      attemptId: session.attempt.attemptId,
+      disposition: RecallResponseDisposition.answer,
+      answer: 'ışık',
+    );
+
+    expect(retentionGateway.writes, 1);
+    expect(result.evidence.outcome, RecallOutcome.correct);
+  });
+
 }
