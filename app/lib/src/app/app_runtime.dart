@@ -4,7 +4,10 @@ import '../account/supabase_account_deletion_gateway.dart';
 import '../account/supabase_account_overview_gateway.dart';
 import '../continuity/cloud_continuity_gateway.dart';
 import '../continuity/cloud_continuity_service.dart';
+import '../continuity/passive_resume_continuity_service.dart';
+import '../continuity/passive_resume_gateway.dart';
 import '../continuity/supabase_cloud_continuity_gateway.dart';
+import '../continuity/supabase_passive_resume_gateway.dart';
 import '../data/operational_telemetry.dart';
 import '../data/image_text_extractor.dart';
 import '../data/office_text_extractor.dart';
@@ -46,6 +49,7 @@ class AppRuntime {
     QuizLearningService? quiz,
     GroundedTutorService? tutor,
     CloudContinuityService? continuity,
+    PassiveResumeContinuityService? passiveResume,
     this.explain = const UnavailableGroundedExplainGateway(),
     this.explainBack = const UnavailableExplainBackGateway(),
     this.focusHelp = const UnavailableFocusHelpGateway(),
@@ -56,7 +60,10 @@ class AppRuntime {
        tutor = tutor ?? GroundedTutorService(store: store),
        continuity =
            continuity ??
-           CloudContinuityService(store: store, ingest: ingest, gateway: const UnavailableCloudContinuityGateway());
+           CloudContinuityService(store: store, ingest: ingest, gateway: const UnavailableCloudContinuityGateway()),
+       passiveResume =
+           passiveResume ??
+           PassiveResumeContinuityService(store: store, gateway: const UnavailablePassiveResumeGateway());
 
   /// Device-local production namespace. It is explicitly not an account.
   static const localLearner = LearnerIdentity.local();
@@ -77,6 +84,7 @@ class AppRuntime {
   final QuizLearningService quiz;
   final GroundedTutorService tutor;
   final CloudContinuityService continuity;
+  final PassiveResumeContinuityService passiveResume;
   final OperationalTelemetry telemetry;
   final GroundedExplainGateway explain;
   final ExplainBackGateway explainBack;
@@ -109,6 +117,10 @@ class AppRuntime {
       recall: recall,
       telemetry: store.operationalTelemetry(),
       continuity: continuity,
+      passiveResume: PassiveResumeContinuityService(
+        store: store,
+        gateway: const SupabasePassiveResumeGateway(),
+      ),
       explain: const SupabaseGroundedExplainGateway(),
       explainBack: const SupabaseExplainBackGateway(),
       focusHelp: const SupabaseFocusHelpGateway(),
@@ -161,6 +173,10 @@ class AppRuntime {
       ),
       telemetry: telemetry,
       continuity: authenticatedContinuity,
+      passiveResume: PassiveResumeContinuityService(
+        store: store,
+        gateway: const SupabasePassiveResumeGateway(),
+      ),
       explain: const SupabaseGroundedExplainGateway(),
       explainBack: const SupabaseExplainBackGateway(),
       focusHelp: const SupabaseFocusHelpGateway(),
@@ -184,6 +200,16 @@ class AppRuntime {
     final service = recall;
     if (!learner.isAuthenticated || service is! AuthenticatedRecallLearningService) return 0;
     return service.syncLatestContinuity(learner: learner);
+  }
+
+  Future<PassiveResumeSyncSummary> syncAuthenticatedPassiveResumeContinuity() {
+    if (!learner.isAuthenticated) return Future.value(const PassiveResumeSyncSummary(results: []));
+    return passiveResume.syncAll(learner: learner);
+  }
+
+  Future<List<PassiveResumeSyncResult>> syncPassiveResumeForMaterial(MaterialId materialId) {
+    if (!learner.isAuthenticated) return Future.value(const <PassiveResumeSyncResult>[]);
+    return passiveResume.syncMaterial(learner: learner, materialId: materialId);
   }
 
   Future<void> deleteAccount() async {
