@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../continuity/cloud_continuity_gateway.dart';
 import '../continuity/cloud_continuity_service.dart';
+import '../continuity/passive_resume_continuity_service.dart';
 import '../domain/learning_contracts.dart';
 import '../domain/learning_truth.dart';
 import '../domain/retention_schedule.dart';
@@ -92,6 +93,22 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
         _continuityNotice = const _CloudContinuityNotice(
           kind: _CloudContinuityNoticeKind.unavailable,
           message: 'Öğrenme geçmişinin bir bölümü bu cihazda yenilenemedi. Yerel çalışmaların korunuyor.',
+        );
+      }
+      final resumeSummary = await widget.runtime.syncAuthenticatedPassiveResumeContinuity().timeout(
+        const Duration(seconds: 8),
+      );
+      if (resumeSummary.conflicts > 0) {
+        _continuityNotice = _CloudContinuityNotice(
+          kind: _CloudContinuityNoticeKind.conflict,
+          message:
+              '${resumeSummary.conflicts} okuma/dinleme konumu iki cihazda değişti. '
+              'Otomatik üzerine yazmadık; bu cihazdaki konum korundu.',
+        );
+      } else if (resumeSummary.unavailable > 0 && _continuityNotice == null) {
+        _continuityNotice = const _CloudContinuityNotice(
+          kind: _CloudContinuityNoticeKind.unavailable,
+          message: 'Okuma/dinleme konumlarının bir bölümü yenilenemedi. Yerel konumların korunuyor.',
         );
       }
     } on TimeoutException {
