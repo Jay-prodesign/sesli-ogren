@@ -6,11 +6,14 @@ import 'package:sesli_ogren/src/app/app_runtime.dart';
 import 'package:sesli_ogren/src/app/product_shell_screen.dart';
 import 'package:sesli_ogren/src/continuity/cloud_continuity_gateway.dart';
 import 'package:sesli_ogren/src/continuity/cloud_continuity_service.dart';
+import 'package:sesli_ogren/src/continuity/passive_resume_continuity_service.dart';
+import 'package:sesli_ogren/src/continuity/passive_resume_gateway.dart';
 import 'package:sesli_ogren/src/data/pdf_text_extractor.dart';
 import 'package:sesli_ogren/src/data/source_ingest_service.dart';
 import 'package:sesli_ogren/src/data/sqlite_source_store.dart';
 import 'package:sesli_ogren/src/domain/authenticated_learner.dart';
 import 'package:sesli_ogren/src/domain/learning_contracts.dart';
+import 'package:sesli_ogren/src/domain/passive_resume.dart';
 import 'package:sesli_ogren/src/learning/recall_learning_service.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
@@ -19,6 +22,26 @@ class _UnusedPdfExtractor implements PdfTextExtractor {
 
   @override
   Future<ExtractedPdf> extract(Uint8List bytes, {required String sourceName}) {
+    throw UnimplementedError();
+  }
+}
+
+class _EmptyPassiveResumeGateway implements PassiveResumeGateway {
+  const _EmptyPassiveResumeGateway();
+
+  @override
+  Future<List<PassiveResumeRemoteState>> read({
+    required AuthenticatedLearner learner,
+    required MaterialId materialId,
+  }) async => const [];
+
+  @override
+  Future<PassiveResumeRemoteState> write({
+    required AuthenticatedLearner learner,
+    required PassiveResumeLocalState local,
+    required int? expectedRevision,
+    required String clientUpdateId,
+  }) {
     throw UnimplementedError();
   }
 }
@@ -85,6 +108,7 @@ Future<AppRuntime> _runtime({
     recall: RecallLearningService(sourceStore: store, learningStore: store.learningTruthStore()),
     telemetry: store.operationalTelemetry(),
     continuity: CloudContinuityService(store: store, ingest: ingest, gateway: gateway),
+    passiveResume: PassiveResumeContinuityService(store: store, gateway: const _EmptyPassiveResumeGateway()),
   );
 }
 
