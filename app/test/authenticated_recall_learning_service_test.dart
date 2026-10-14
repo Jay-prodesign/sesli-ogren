@@ -97,6 +97,8 @@ class _FakeServerRecallGateway implements ServerRecallGateway {
   final String sourceText;
   final actionId = const RecallActionId('11111111-1111-4111-8111-111111111111');
   RecallAssistance assistance = RecallAssistance.none;
+  ServerRecallProjection? latestProjection;
+  List<RetentionScheduleRecord>? retentionProjection;
 
   @override
   Future<ServerRecallAction> createAction({
@@ -195,13 +197,15 @@ class _FakeServerRecallGateway implements ServerRecallGateway {
   Future<ServerRecallProjection?> readLatest({
     required AuthenticatedLearner learner,
     required MaterialId materialId,
-  }) async => null;
+  }) async => latestProjection;
 
   @override
   Future<List<RetentionScheduleRecord>> readRetention({
     required AuthenticatedLearner learner,
     required MaterialId materialId,
   }) async {
+    final override = retentionProjection;
+    if (override != null) return override;
     final outcomeBand = switch (assistance) {
       RecallAssistance.none => RetentionOutcomeBand.independentRetrieval,
       RecallAssistance.hint => RetentionOutcomeBand.supportedRetrieval,
@@ -300,6 +304,87 @@ void main() {
     final retention = await store.retentionSchedulesForMaterial(learner: learner, materialId: materialId);
     expect(retention, hasLength(1));
     expect(retention.single.latestEventId, 'server-recall:${result.evidence.id.value}');
+  });
+
+  test('second device hydrates canonical Recall projection and server retention without raw answer history', () async {
+    final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
+    addTearDown(store.close);
+    const learner = AuthenticatedLearner(id: LearnerId('server-recall-second-device'));
+    const materialId = MaterialId('material_server_recall_second_device');
+    const text = 'Fotosentez ışık enerjisini kimyasal enerjiye dönüştürür.';
+
+    final ingest = SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor());
+    final source = await ingest.ingestPastedText(
+      learner: learner,
+      materialId: materialId,
+      text: text,
+      sourceName: 'Biyoloji',
+    );
+    final sourceId = source.sourceVersion.identity.sourceVersionId;
+    final cloud = CloudContinuityService(store: store, ingest: ingest, gateway: _InSyncGateway());
+    final remote = _FakeServerRecallGateway(
+      materialId: materialId,
+      sourceVersionId: sourceId,
+      sourceText: source.extractedContent.normalizedText,
+    );
+    final evidenceAt = DateTime.utc(2026, 10, 14, 6);
+    const evidenceId = LearnerEvidenceId('33333333-3333-4333-8333-333333333333');
+    remote.latestProjection = ServerRecallProjection(
+      actionId: remote.actionId,
+      attemptId: const RecallAttemptId('attempt-second-device-0001'),
+      evidenceId: evidenceId,
+      outcome: RecallOutcome.correct,
+      stateKind: RecallStateKind.retrievedOnce,
+      evidenceCount: 4,
+      nextReasonCode: 'ONE_UNASSISTED_RETRIEVAL_OBSERVED',
+      assistance: RecallAssistance.none,
+      responseDigest: sha256.convert(utf8.encode('ışık')).toString(),
+      responseLength: 4,
+      evidenceRuleVersion: RecallTruthPolicy.evidenceRuleVersion,
+      evidenceCreatedAt: evidenceAt,
+      correctAnswer: 'ışık',
+      sourceExcerpt: text,
+      materialId: materialId,
+      sourceVersionId: sourceId,
+      promptText: 'Fotosentez _____ enerjisini kimyasal enerjiye dönüştürür.',
+      anchor: SourceAnchor(startOffset: 0, endOffset: text.length),
+    );
+    final reviewedAt = DateTime.utc(2026, 10, 14, 6);
+    remote.retentionProjection = [
+      RetentionScheduleRecord(
+        id: RetentionPolicy.scheduleIdFor(sourceId, SourceAnchor(startOffset: 0, endOffset: text.length)),
+        materialId: materialId,
+        sourceVersionId: sourceId,
+        sourceAnchor: SourceAnchor(startOffset: 0, endOffset: text.length),
+        latestEvidenceKind: RetentionEvidenceKind.recall,
+        latestOutcomeBand: RetentionOutcomeBand.independentRetrieval,
+        latestEventId: 'server-recall:${evidenceId.value}',
+        reasonCode: 'INDEPENDENT_RETRIEVAL_OBSERVED',
+        reviewCount: 4,
+        successStreak: 3,
+        interval: const Duration(days: 7),
+        dueAt: reviewedAt.add(const Duration(days: 7)),
+        lastReviewedAt: reviewedAt,
+        policyVersion: RetentionPolicy.version,
+      ),
+    ];
+
+    final service = AuthenticatedRecallLearningService(store: store, continuity: cloud, gateway: remote);
+    expect(await service.syncLatestContinuity(learner: learner), 0);
+
+    final reopened = await service.reopen(learner: learner, materialId: materialId);
+    expect(reopened, isNotNull);
+    expect(reopened!.state.latestEvidenceId, evidenceId);
+    expect(reopened.state.evidenceCount, 4);
+    expect(reopened.state.kind, RecallStateKind.retrievedOnce);
+    expect(reopened.nextAction.reasonCode, 'ONE_UNASSISTED_RETRIEVAL_OBSERVED');
+
+    final retention = await store.retentionSchedulesForMaterial(learner: learner, materialId: materialId);
+    expect(retention, hasLength(1));
+    expect(retention.single.reviewCount, 4);
+    expect(retention.single.successStreak, 3);
+    expect(retention.single.interval, const Duration(days: 7));
+    expect(retention.single.latestEventId, 'server-recall:${evidenceId.value}');
   });
 
   test('server hint assistance is authoritative in the cached Recall result', () async {
