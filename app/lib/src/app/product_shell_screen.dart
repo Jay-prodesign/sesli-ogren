@@ -795,10 +795,13 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
           );
         }
         final data = snapshot.data!;
+        final living = LivingDeskReviewScope.active(context);
+        final continuityNotice = _continuityNotice == null
+            ? null
+            : _CloudContinuityNoticeCard(notice: _continuityNotice!, onRetry: _retryContinuity);
         return Column(
           children: [
-            if (_continuityNotice != null)
-              _CloudContinuityNoticeCard(notice: _continuityNotice!, onRetry: _retryContinuity),
+            if (!living && continuityNotice != null) continuityNotice,
             Expanded(
               child: IndexedStack(
                 index: _index,
@@ -807,6 +810,7 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
                     enabled: _index == 0,
                     child: _HomeSurface(
                       data: data,
+                      continuityNotice: living ? continuityNotice : null,
                       onOpenLearning: _openNextLearningAction,
                       onOpenListen: _openListen,
                       onOpenWorkspace: () => _openWorkspace(),
@@ -1001,6 +1005,7 @@ class _CloudContinuityNoticeCard extends StatelessWidget {
 class _HomeSurface extends StatelessWidget {
   const _HomeSurface({
     required this.data,
+    this.continuityNotice,
     required this.onOpenLearning,
     required this.onOpenListen,
     required this.onOpenWorkspace,
@@ -1010,6 +1015,7 @@ class _HomeSurface extends StatelessWidget {
   });
 
   final _HomeSnapshot data;
+  final Widget? continuityNotice;
   final VoidCallback onOpenLearning;
   final VoidCallback onOpenListen;
   final VoidCallback onOpenWorkspace;
@@ -1030,6 +1036,7 @@ class _HomeSurface extends StatelessWidget {
         readerResumeProgress: data.readerResumeProgress,
         readerResumePreferred: data.readerResumePreferred,
         sourceText: data.extracted?.normalizedText,
+        continuityNotice: continuityNotice,
         otherMaterials: data.materials.where((item) => item.id != data.material?.id).toList(),
         onOpenWorkspace: onOpenWorkspace,
         onOpenReader: onOpenReader,
