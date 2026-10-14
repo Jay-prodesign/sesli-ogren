@@ -491,7 +491,10 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
           },
         ),
       );
-      if (mounted) setState(_refresh);
+      if (mounted) {
+        await _syncPassiveResumeAfterActivity(selected);
+        if (mounted) setState(_refresh);
+      }
     } catch (_) {
       if (!mounted) return;
       ScaffoldMessenger.of(context)
@@ -565,7 +568,29 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
       ),
     );
     if (!mounted) return;
+    await _syncPassiveResumeAfterActivity(materialId);
+    if (!mounted) return;
     setState(_refresh);
+  }
+
+  Future<void> _syncPassiveResumeAfterActivity(MaterialId materialId) async {
+    if (!widget.runtime.learner.isAuthenticated) return;
+    try {
+      final results = await widget.runtime.syncPassiveResumeForMaterial(materialId);
+      if (!mounted) return;
+      final conflicts = results.where((item) => item.disposition == PassiveResumeSyncDisposition.conflict).length;
+      if (conflicts > 0) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Okuma/dinleme konumu başka bir cihazda da değişmiş. Otomatik üzerine yazmadık; bu cihazdaki konum korundu.',
+            ),
+          ),
+        );
+      }
+    } catch (_) {
+      // Local position is already durable. Home/startup retries cloud sync.
+    }
   }
 
   Future<void> _deleteMaterial(MaterialRecord material) async {
