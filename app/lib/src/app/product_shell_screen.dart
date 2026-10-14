@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import '../continuity/cloud_continuity_gateway.dart';
 import '../continuity/cloud_continuity_service.dart';
 import '../continuity/passive_resume_continuity_service.dart';
+import '../continuity/retention_continuity_service.dart';
 import '../domain/learning_contracts.dart';
 import '../domain/learning_truth.dart';
 import '../domain/retention_schedule.dart';
@@ -307,6 +308,8 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
       ),
     );
     if (!mounted) return;
+    await _syncPassiveResumeAfterActivity(materialId);
+    if (!mounted) return;
     setState(_refresh);
     if (sourceAdded == true) {
       await _openWorkspace(materialId, true);
@@ -394,6 +397,8 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
         },
       ),
     );
+    if (!mounted) return;
+    await _syncPassiveResumeAfterActivity(selected);
     if (!mounted) return;
     setState(_refresh);
   }
@@ -535,6 +540,8 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
             : screen,
       ),
     );
+    if (!mounted) return;
+    await _syncPassiveResumeAfterActivity(materialId);
     if (mounted) setState(_refresh);
   }
 
@@ -575,6 +582,26 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
 
   Future<void> _syncPassiveResumeAfterActivity(MaterialId materialId) async {
     if (!widget.runtime.learner.isAuthenticated) return;
+
+    try {
+      final retention = await widget.runtime.syncRetentionForMaterial(materialId);
+      if (!mounted) return;
+      final conflicts =
+          retention.where((item) => item.disposition == RetentionContinuityDisposition.conflict).length;
+      if (conflicts > 0) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Tekrar zamanlaması başka bir cihazda da değişmiş. Otomatik üzerine yazmadık; bu cihazdaki öğrenme kaydı korundu.',
+            ),
+          ),
+        );
+      }
+    } catch (_) {
+      // Durable local retention remains authoritative on this device. Startup
+      // retry will reconcile it before cloud timing is used as current truth.
+    }
+
     try {
       final results = await widget.runtime.syncPassiveResumeForMaterial(materialId);
       if (!mounted) return;

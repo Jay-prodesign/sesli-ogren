@@ -6,8 +6,11 @@ import '../continuity/cloud_continuity_gateway.dart';
 import '../continuity/cloud_continuity_service.dart';
 import '../continuity/passive_resume_continuity_service.dart';
 import '../continuity/passive_resume_gateway.dart';
+import '../continuity/retention_continuity_gateway.dart';
+import '../continuity/retention_continuity_service.dart';
 import '../continuity/supabase_cloud_continuity_gateway.dart';
 import '../continuity/supabase_passive_resume_gateway.dart';
+import '../continuity/supabase_retention_continuity_gateway.dart';
 import '../data/operational_telemetry.dart';
 import '../data/image_text_extractor.dart';
 import '../data/office_text_extractor.dart';
@@ -50,6 +53,7 @@ class AppRuntime {
     GroundedTutorService? tutor,
     CloudContinuityService? continuity,
     PassiveResumeContinuityService? passiveResume,
+    RetentionContinuityService? retentionContinuity,
     this.explain = const UnavailableGroundedExplainGateway(),
     this.explainBack = const UnavailableExplainBackGateway(),
     this.focusHelp = const UnavailableFocusHelpGateway(),
@@ -63,7 +67,10 @@ class AppRuntime {
            CloudContinuityService(store: store, ingest: ingest, gateway: const UnavailableCloudContinuityGateway()),
        passiveResume =
            passiveResume ??
-           PassiveResumeContinuityService(store: store, gateway: const UnavailablePassiveResumeGateway());
+           PassiveResumeContinuityService(store: store, gateway: const UnavailablePassiveResumeGateway()),
+       retentionContinuity =
+           retentionContinuity ??
+           RetentionContinuityService(store: store, gateway: const UnavailableRetentionContinuityGateway());
 
   /// Device-local production namespace. It is explicitly not an account.
   static const localLearner = LearnerIdentity.local();
@@ -85,6 +92,7 @@ class AppRuntime {
   final GroundedTutorService tutor;
   final CloudContinuityService continuity;
   final PassiveResumeContinuityService passiveResume;
+  final RetentionContinuityService retentionContinuity;
   final OperationalTelemetry telemetry;
   final GroundedExplainGateway explain;
   final ExplainBackGateway explainBack;
@@ -105,10 +113,15 @@ class AppRuntime {
       ingest: ingest,
       gateway: const SupabaseCloudContinuityGateway(),
     );
+    final retentionContinuity = RetentionContinuityService(
+      store: store,
+      gateway: const SupabaseRetentionContinuityGateway(),
+    );
     final recall = AuthenticatedRecallLearningService(
       store: store,
       continuity: continuity,
       gateway: const SupabaseServerRecallGateway(),
+      retentionContinuity: retentionContinuity,
     );
     return AppRuntime(
       learner: learner,
@@ -118,6 +131,7 @@ class AppRuntime {
       telemetry: store.operationalTelemetry(),
       continuity: continuity,
       passiveResume: PassiveResumeContinuityService(store: store, gateway: const SupabasePassiveResumeGateway()),
+      retentionContinuity: retentionContinuity,
       explain: const SupabaseGroundedExplainGateway(),
       explainBack: const SupabaseExplainBackGateway(),
       focusHelp: const SupabaseFocusHelpGateway(),
@@ -159,6 +173,10 @@ class AppRuntime {
       ingest: ingest,
       gateway: const SupabaseCloudContinuityGateway(),
     );
+    final authenticatedRetention = RetentionContinuityService(
+      store: store,
+      gateway: const SupabaseRetentionContinuityGateway(),
+    );
     return AppRuntime(
       learner: authenticatedLearner,
       store: store,
@@ -167,10 +185,12 @@ class AppRuntime {
         store: store,
         continuity: authenticatedContinuity,
         gateway: const SupabaseServerRecallGateway(),
+        retentionContinuity: authenticatedRetention,
       ),
       telemetry: telemetry,
       continuity: authenticatedContinuity,
       passiveResume: PassiveResumeContinuityService(store: store, gateway: const SupabasePassiveResumeGateway()),
+      retentionContinuity: authenticatedRetention,
       explain: const SupabaseGroundedExplainGateway(),
       explainBack: const SupabaseExplainBackGateway(),
       focusHelp: const SupabaseFocusHelpGateway(),
@@ -194,6 +214,13 @@ class AppRuntime {
     final service = recall;
     if (!learner.isAuthenticated || service is! AuthenticatedRecallLearningService) return 0;
     return service.syncLatestContinuity(learner: learner);
+  }
+
+  Future<List<RetentionContinuityItemResult>> syncRetentionForMaterial(MaterialId materialId) {
+    if (!learner.isAuthenticated) {
+      return Future.value(const <RetentionContinuityItemResult>[]);
+    }
+    return retentionContinuity.syncMaterial(learner: learner, materialId: materialId);
   }
 
   Future<PassiveResumeSyncSummary> syncAuthenticatedPassiveResumeContinuity() {

@@ -216,7 +216,7 @@ class SupabaseServerRecallGateway implements ServerRecallGateway {
               sourceAnchor: anchor,
               latestEvidenceKind: RetentionEvidenceKind.recall,
               latestOutcomeBand: _outcomeBand(row['latest_outcome_band'] as String),
-              latestEventId: 'server-recall:$latestEvidenceId',
+              latestEventId: 'recall:$latestEvidenceId',
               reasonCode: row['reason_code'] as String,
               reviewCount: row['review_count'] as int,
               successStreak: row['success_streak'] as int,

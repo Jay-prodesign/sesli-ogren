@@ -28,6 +28,21 @@ class SourceStoreConflict implements Exception {
   String toString() => 'SourceStoreConflict: $message';
 }
 
+class RetentionScheduleSyncState {
+  const RetentionScheduleSyncState({
+    required this.schedule,
+    required this.serverRevision,
+    required this.syncedLatestEventId,
+  });
+
+  final RetentionScheduleRecord schedule;
+  final int? serverRevision;
+  final String? syncedLatestEventId;
+
+  bool get hasLocalChangeSinceSync =>
+      syncedLatestEventId == null || syncedLatestEventId != schedule.latestEventId;
+}
+
 class SqliteSourceStore implements SourceStore {
   SqliteSourceStore._(this._database);
 
@@ -75,7 +90,7 @@ class SqliteSourceStore implements SourceStore {
     final database = await selectedFactory.openDatabase(
       databasePath,
       options: OpenDatabaseOptions(
-        version: 21,
+        version: 22,
         // Schema-rebuild migrations need foreign keys disabled before the
         // upgrade transaction begins. Runtime enforcement is restored in
         // onOpen before any product read/write can occur.
@@ -147,6 +162,9 @@ class SqliteSourceStore implements SourceStore {
           }
           if (oldVersion < 21) {
             await _upgradePassiveResumeCloudMetadataSchema(db);
+          }
+          if (oldVersion < 22) {
+            await _upgradeRetentionCloudMetadataSchema(db);
           }
         },
         onCreate: (db, version) async {
@@ -378,6 +396,7 @@ CREATE TABLE learner_preferences (
           await _upgradeFlashcardSchema(db);
           await _upgradeQuizSchema(db);
           await _upgradeRetentionSchema(db);
+          await _upgradeRetentionCloudMetadataSchema(db);
           await _upgradeStudyPlanSchema(db);
           await _upgradeReaderAnnotationSchema(db);
           await _upgradeGroundedTutorSchema(db);
@@ -1595,6 +1614,17 @@ ON source_versions (learner_id, material_id, created_at_utc)
     }
   }
 
+  static Future<void> _upgradeRetentionCloudMetadataSchema(Database db) async {
+    final columns = await db.rawQuery('PRAGMA table_info(retention_schedules)');
+    final names = columns.map((row) => row['name'] as String).toSet();
+    if (!names.contains('server_revision')) {
+      await db.execute('ALTER TABLE retention_schedules ADD COLUMN server_revision INTEGER');
+    }
+    if (!names.contains('synced_latest_event_id')) {
+      await db.execute('ALTER TABLE retention_schedules ADD COLUMN synced_latest_event_id TEXT');
+    }
+  }
+
   static Future<void> _upgradeStudyPlanSchema(Database db) async {
     await db.execute('''
 CREATE TABLE IF NOT EXISTS study_targets (
@@ -2442,7 +2472,7 @@ ON CONFLICT(learner_id, flashcard_set_id) DO UPDATE SET
         outcomeBand: response == FlashcardResponse.remembered
             ? RetentionOutcomeBand.supportedRetrieval
             : RetentionOutcomeBand.repairNeeded,
-        eventId: 'flashcard:${card.id.value}:${reviewRow['review_count']! as int}',
+        eventId: 'flashcard:${card.id.value}:${reviewedAt.toUtc().microsecondsSinceEpoch}',
         occurredAt: reviewedAt.toUtc(),
       );
       return FlashcardResponseCommit(
@@ -2809,7 +2839,7 @@ ON CONFLICT(learner_id, quiz_set_id) DO UPDATE SET
             : isCorrect == true
             ? RetentionOutcomeBand.independentRetrieval
             : RetentionOutcomeBand.repairNeeded,
-        eventId: 'quiz:${question.id.value}:${reviewRow['answer_count']! as int}',
+        eventId: 'quiz:${question.id.value}:${answeredAt.toUtc().microsecondsSinceEpoch}',
         occurredAt: answeredAt.toUtc(),
       );
       return QuizAnswerCommit(
@@ -3354,6 +3384,139 @@ LIMIT 1
     });
   }
 
+  Future<List<RetentionScheduleSyncState>> retentionSyncStatesForMaterial({
+    required AuthenticatedLearner learner,
+    required MaterialId materialId,
+    required SourceVersionId sourceVersionId,
+  }) async {
+    final rows = await _database.rawQuery(
+      '''
+SELECT r.*
+FROM retention_schedules r
+JOIN materials m
+  ON m.learner_id = r.learner_id AND m.material_id = r.material_id
+WHERE r.learner_id = ?
+  AND r.material_id = ?
+  AND r.source_version_id = ?
+  AND m.lifecycle_status = ?
+  AND m.deleted_at_utc IS NULL
+  AND m.current_source_version_id = r.source_version_id
+  AND r.invalidated_at_utc IS NULL
+ORDER BY r.source_start ASC, r.source_end ASC
+''',
+      [
+        learner.id.value,
+        materialId.value,
+        sourceVersionId.value,
+        MaterialLifecycleStatus.active.name,
+      ],
+    );
+    return rows
+        .map(
+          (row) => RetentionScheduleSyncState(
+            schedule: _retentionFromRow(row),
+            serverRevision: row['server_revision'] as int?,
+            syncedLatestEventId: row['synced_latest_event_id'] as String?,
+          ),
+        )
+        .toList(growable: false);
+  }
+
+  Future<void> markRetentionScheduleSynced({
+    required AuthenticatedLearner learner,
+    required RetentionScheduleRecord schedule,
+    required int serverRevision,
+  }) async {
+    if (!learner.isAuthenticated || serverRevision < 1) {
+      throw const SourceStoreConflict('Retention sync checkpoint requires an authenticated learner and revision.');
+    }
+    final changed = await _database.update(
+      'retention_schedules',
+      {
+        'server_revision': serverRevision,
+        'synced_latest_event_id': schedule.latestEventId,
+      },
+      where:
+          'learner_id = ? AND retention_schedule_id = ? AND material_id = ? '
+          'AND source_version_id = ? AND latest_event_id = ? AND invalidated_at_utc IS NULL',
+      whereArgs: [
+        learner.id.value,
+        schedule.id.value,
+        schedule.materialId.value,
+        schedule.sourceVersionId.value,
+        schedule.latestEventId,
+      ],
+    );
+    if (changed != 1) {
+      throw const SourceStoreConflict('Retention changed locally before its cloud checkpoint could be recorded.');
+    }
+  }
+
+  Future<void> applyCloudRetentionSchedule({
+    required AuthenticatedLearner learner,
+    required RetentionScheduleRecord schedule,
+    required int serverRevision,
+  }) {
+    if (!learner.isAuthenticated || serverRevision < 1) {
+      throw const SourceStoreConflict('Cloud retention requires an authenticated learner and valid revision.');
+    }
+    if (schedule.policyVersion != RetentionPolicy.version ||
+        schedule.id != RetentionPolicy.scheduleIdFor(schedule.sourceVersionId, schedule.sourceAnchor) ||
+        schedule.reviewCount < 1 ||
+        schedule.successStreak < 0 ||
+        schedule.interval.isNegative ||
+        schedule.dueAt.toUtc() != schedule.lastReviewedAt.toUtc().add(schedule.interval)) {
+      throw const SourceStoreConflict('Cloud retention failed deterministic local validation.');
+    }
+
+    return _database.transaction((transaction) async {
+      final authority = await transaction.query(
+        'materials',
+        columns: ['current_source_version_id'],
+        where:
+            'learner_id = ? AND material_id = ? AND lifecycle_status = ? '
+            'AND deleted_at_utc IS NULL',
+        whereArgs: [
+          learner.id.value,
+          schedule.materialId.value,
+          MaterialLifecycleStatus.active.name,
+        ],
+        limit: 1,
+      );
+      if (authority.isEmpty ||
+          authority.single['current_source_version_id'] != schedule.sourceVersionId.value) {
+        throw const SourceStoreConflict('Cloud retention belongs to a stale local source.');
+      }
+
+      await transaction.insert(
+        'retention_schedules',
+        {
+          'learner_id': learner.id.value,
+          'retention_schedule_id': schedule.id.value,
+          'material_id': schedule.materialId.value,
+          'source_version_id': schedule.sourceVersionId.value,
+          'source_start': schedule.sourceAnchor.startOffset,
+          'source_end': schedule.sourceAnchor.endOffset,
+          'page_number': schedule.sourceAnchor.pageNumber,
+          'latest_evidence_kind': schedule.latestEvidenceKind.name,
+          'latest_outcome_band': schedule.latestOutcomeBand.name,
+          'latest_event_id': schedule.latestEventId,
+          'reason_code': schedule.reasonCode,
+          'review_count': schedule.reviewCount,
+          'success_streak': schedule.successStreak,
+          'interval_seconds': schedule.interval.inSeconds,
+          'due_at_utc': schedule.dueAt.toUtc().toIso8601String(),
+          'last_reviewed_at_utc': schedule.lastReviewedAt.toUtc().toIso8601String(),
+          'policy_version': schedule.policyVersion,
+          'invalidated_at_utc': null,
+          'server_revision': serverRevision,
+          'synced_latest_event_id': schedule.latestEventId,
+        },
+        conflictAlgorithm: ConflictAlgorithm.replace,
+      );
+    });
+  }
+
   Future<List<RetentionScheduleRecord>> retentionSchedulesForMaterial({
     required AuthenticatedLearner learner,
     required MaterialId materialId,
@@ -3806,6 +3969,8 @@ ON CONFLICT(learner_id) DO UPDATE SET
       limit: 1,
     );
     final existing = rows.isEmpty ? null : _retentionFromRow(rows.single);
+    final previousServerRevision = rows.isEmpty ? null : rows.single['server_revision'] as int?;
+    final previousSyncedEventId = rows.isEmpty ? null : rows.single['synced_latest_event_id'] as String?;
     final next = RetentionPolicy.advance(
       existing: existing,
       id: scheduleId,
@@ -3836,6 +4001,8 @@ ON CONFLICT(learner_id) DO UPDATE SET
       'last_reviewed_at_utc': next.lastReviewedAt.toUtc().toIso8601String(),
       'policy_version': next.policyVersion,
       'invalidated_at_utc': null,
+      'server_revision': previousServerRevision,
+      'synced_latest_event_id': previousSyncedEventId,
     }, conflictAlgorithm: ConflictAlgorithm.replace);
     return next;
   }

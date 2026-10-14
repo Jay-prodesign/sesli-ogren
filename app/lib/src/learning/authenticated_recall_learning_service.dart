@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:crypto/crypto.dart';
 
 import '../continuity/cloud_continuity_service.dart';
+import '../continuity/retention_continuity_service.dart';
 import '../data/sqlite_source_store.dart';
 import '../domain/authenticated_learner.dart';
 import '../domain/learning_contracts.dart';
@@ -15,6 +16,7 @@ class AuthenticatedRecallLearningService extends RecallLearningService {
     required this.store,
     required this.continuity,
     required this.gateway,
+    this.retentionContinuity,
     DateTime Function()? clock,
   }) : _now = clock ?? DateTime.now,
        super(sourceStore: store, learningStore: store.learningTruthStore(), now: clock);
@@ -22,6 +24,7 @@ class AuthenticatedRecallLearningService extends RecallLearningService {
   final SqliteSourceStore store;
   final CloudContinuityService continuity;
   final ServerRecallGateway gateway;
+  final RetentionContinuityService? retentionContinuity;
   final DateTime Function() _now;
   final Map<RecallActionId, ServerRecallAction> _activeActions = <RecallActionId, ServerRecallAction>{};
 
@@ -316,6 +319,23 @@ class AuthenticatedRecallLearningService extends RecallLearningService {
     required MaterialId materialId,
     required SourceVersionId sourceVersionId,
   }) async {
+    final unified = retentionContinuity;
+    if (unified != null) {
+      final results = await unified.syncMaterial(learner: learner, materialId: materialId);
+      if (results.any(
+        (item) =>
+            item.disposition == RetentionContinuityDisposition.conflict ||
+            item.disposition == RetentionContinuityDisposition.unavailable,
+      )) {
+        throw const RecallLearningException(
+          'Unified retention timing could not be reconciled without overwriting another device.',
+        );
+      }
+      return;
+    }
+
+    // Compatibility path for bounded tests/older injected runtimes. Production
+    // authenticated runtime always supplies the unified reconciler.
     final schedules = await gateway.readRetention(learner: learner, materialId: materialId);
     if (schedules.any((item) => item.sourceVersionId != sourceVersionId)) {
       throw const RecallLearningException('Server retention projection belongs to a stale source.');
