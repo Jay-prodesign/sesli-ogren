@@ -10,6 +10,7 @@ import '../domain/quiz_learning.dart';
 import '../domain/learning_contracts.dart';
 import '../domain/learning_truth.dart';
 import '../domain/operational_event.dart';
+import '../domain/passive_resume.dart';
 import '../domain/retention_schedule.dart';
 import '../domain/reader_annotation.dart';
 import '../domain/grounded_tutor.dart';
@@ -74,7 +75,7 @@ class SqliteSourceStore implements SourceStore {
     final database = await selectedFactory.openDatabase(
       databasePath,
       options: OpenDatabaseOptions(
-        version: 20,
+        version: 21,
         // Schema-rebuild migrations need foreign keys disabled before the
         // upgrade transaction begins. Runtime enforcement is restored in
         // onOpen before any product read/write can occur.
@@ -143,6 +144,9 @@ class SqliteSourceStore implements SourceStore {
           }
           if (oldVersion < 20) {
             await _upgradeGroundedTutorSchema(db);
+          }
+          if (oldVersion < 21) {
+            await _upgradePassiveResumeCloudMetadataSchema(db);
           }
         },
         onCreate: (db, version) async {
@@ -333,6 +337,8 @@ CREATE TABLE listen_progress (
   source_version_id TEXT NOT NULL,
   chunk_index INTEGER NOT NULL,
   updated_at_utc TEXT NOT NULL,
+  server_revision INTEGER,
+  synced_local_updated_at_utc TEXT,
   PRIMARY KEY (learner_id, material_id),
   FOREIGN KEY (learner_id, source_version_id)
     REFERENCES source_versions (learner_id, source_version_id)
@@ -347,6 +353,8 @@ CREATE TABLE reader_progress (
   source_version_id TEXT NOT NULL,
   progress REAL NOT NULL,
   updated_at_utc TEXT NOT NULL,
+  server_revision INTEGER,
+  synced_local_updated_at_utc TEXT,
   PRIMARY KEY (learner_id, material_id),
   FOREIGN KEY (learner_id, source_version_id)
     REFERENCES source_versions (learner_id, source_version_id)
@@ -932,6 +940,19 @@ CREATE TABLE IF NOT EXISTS reader_progress (
   CHECK (progress >= 0.0 AND progress <= 1.0)
 )
 ''');
+  }
+
+  static Future<void> _upgradePassiveResumeCloudMetadataSchema(Database db) async {
+    for (final table in const ['listen_progress', 'reader_progress']) {
+      final columns = await db.rawQuery('PRAGMA table_info($table)');
+      final names = columns.map((row) => row['name'] as String).toSet();
+      if (!names.contains('server_revision')) {
+        await db.execute('ALTER TABLE $table ADD COLUMN server_revision INTEGER');
+      }
+      if (!names.contains('synced_local_updated_at_utc')) {
+        await db.execute('ALTER TABLE $table ADD COLUMN synced_local_updated_at_utc TEXT');
+      }
+    }
   }
 
   static Future<void> _upgradeLearnerPreferencesSchema(Database db) async {
@@ -1765,13 +1786,26 @@ LIMIT 1
     if (chunkIndex < 0) {
       throw ArgumentError.value(chunkIndex, 'chunkIndex', 'must be non-negative');
     }
-    await _database.insert('listen_progress', {
-      'learner_id': learner.id.value,
-      'material_id': materialId.value,
-      'source_version_id': sourceVersionId.value,
-      'chunk_index': chunkIndex,
-      'updated_at_utc': updatedAt.toUtc().toIso8601String(),
-    }, conflictAlgorithm: ConflictAlgorithm.replace);
+    await _database.rawInsert(
+      '''
+INSERT INTO listen_progress (
+  learner_id, material_id, source_version_id, chunk_index, updated_at_utc
+) VALUES (?, ?, ?, ?, ?)
+ON CONFLICT(learner_id, material_id) DO UPDATE SET
+  source_version_id = excluded.source_version_id,
+  chunk_index = excluded.chunk_index,
+  updated_at_utc = excluded.updated_at_utc,
+  server_revision = CASE
+    WHEN listen_progress.source_version_id = excluded.source_version_id THEN listen_progress.server_revision
+    ELSE NULL
+  END,
+  synced_local_updated_at_utc = CASE
+    WHEN listen_progress.source_version_id = excluded.source_version_id THEN listen_progress.synced_local_updated_at_utc
+    ELSE NULL
+  END
+''',
+      [learner.id.value, materialId.value, sourceVersionId.value, chunkIndex, updatedAt.toUtc().toIso8601String()],
+    );
   }
 
   @override
@@ -1820,13 +1854,153 @@ LIMIT 1
     if (!progress.isFinite || progress < 0 || progress > 1) {
       throw ArgumentError.value(progress, 'progress', 'must be finite and between 0 and 1');
     }
-    await _database.insert('reader_progress', {
-      'learner_id': learner.id.value,
-      'material_id': materialId.value,
-      'source_version_id': sourceVersionId.value,
-      'progress': progress,
-      'updated_at_utc': updatedAt.toUtc().toIso8601String(),
-    }, conflictAlgorithm: ConflictAlgorithm.replace);
+    await _database.rawInsert(
+      '''
+INSERT INTO reader_progress (
+  learner_id, material_id, source_version_id, progress, updated_at_utc
+) VALUES (?, ?, ?, ?, ?)
+ON CONFLICT(learner_id, material_id) DO UPDATE SET
+  source_version_id = excluded.source_version_id,
+  progress = excluded.progress,
+  updated_at_utc = excluded.updated_at_utc,
+  server_revision = CASE
+    WHEN reader_progress.source_version_id = excluded.source_version_id THEN reader_progress.server_revision
+    ELSE NULL
+  END,
+  synced_local_updated_at_utc = CASE
+    WHEN reader_progress.source_version_id = excluded.source_version_id THEN reader_progress.synced_local_updated_at_utc
+    ELSE NULL
+  END
+''',
+      [learner.id.value, materialId.value, sourceVersionId.value, progress, updatedAt.toUtc().toIso8601String()],
+    );
+  }
+
+  Future<PassiveResumeLocalState?> passiveResumeLocalState({
+    required AuthenticatedLearner learner,
+    required MaterialId materialId,
+    required SourceVersionId sourceVersionId,
+    required PassiveResumeSurface surface,
+  }) async {
+    final table = surface == PassiveResumeSurface.reader ? 'reader_progress' : 'listen_progress';
+    final rows = await _database.query(
+      table,
+      where: 'learner_id = ? AND material_id = ? AND source_version_id = ?',
+      whereArgs: [learner.id.value, materialId.value, sourceVersionId.value],
+      limit: 1,
+    );
+    if (rows.isEmpty) return null;
+    final row = rows.single;
+    final updatedAt = DateTime.parse(row['updated_at_utc']! as String).toUtc();
+    final syncedRaw = row['synced_local_updated_at_utc'];
+    return PassiveResumeLocalState(
+      materialId: materialId,
+      sourceVersionId: sourceVersionId,
+      surface: surface,
+      readerProgress: surface == PassiveResumeSurface.reader ? (row['progress']! as num).toDouble() : null,
+      listenChunkIndex: surface == PassiveResumeSurface.listen ? row['chunk_index']! as int : null,
+      updatedAt: updatedAt,
+      serverRevision: row['server_revision'] as int?,
+      syncedLocalUpdatedAt: syncedRaw is String ? DateTime.parse(syncedRaw).toUtc() : null,
+    );
+  }
+
+  Future<void> markPassiveResumePushed({
+    required AuthenticatedLearner learner,
+    required PassiveResumeLocalState local,
+    required int serverRevision,
+  }) async {
+    if (serverRevision < 1) {
+      throw ArgumentError.value(serverRevision, 'serverRevision', 'must be positive');
+    }
+    final table = local.surface == PassiveResumeSurface.reader ? 'reader_progress' : 'listen_progress';
+    await _database.update(
+      table,
+      {
+        'server_revision': serverRevision,
+        'synced_local_updated_at_utc': local.updatedAt.toUtc().toIso8601String(),
+      },
+      where:
+          'learner_id = ? AND material_id = ? AND source_version_id = ? '
+          'AND updated_at_utc = ?',
+      whereArgs: [
+        learner.id.value,
+        local.materialId.value,
+        local.sourceVersionId.value,
+        local.updatedAt.toUtc().toIso8601String(),
+      ],
+    );
+  }
+
+  Future<void> applyCloudPassiveResume({
+    required AuthenticatedLearner learner,
+    required PassiveResumeRemoteState remote,
+  }) async {
+    final current = await currentSourceVersion(learner: learner, materialId: remote.materialId);
+    if (current?.identity.sourceVersionId != remote.sourceVersionId) {
+      throw const SourceStoreConflict('Cloud passive resume belongs to a stale local source.');
+    }
+    if (remote.revision < 1) {
+      throw const SourceStoreConflict('Cloud passive resume revision must be positive.');
+    }
+    if (remote.surface == PassiveResumeSurface.reader) {
+      final value = remote.readerProgress;
+      if (value == null || !value.isFinite || value < 0 || value > 1 || remote.listenChunkIndex != null) {
+        throw const SourceStoreConflict('Cloud Reader resume payload is invalid.');
+      }
+      await _database.rawInsert(
+        '''
+INSERT INTO reader_progress (
+  learner_id, material_id, source_version_id, progress, updated_at_utc,
+  server_revision, synced_local_updated_at_utc
+) VALUES (?, ?, ?, ?, ?, ?, ?)
+ON CONFLICT(learner_id, material_id) DO UPDATE SET
+  source_version_id = excluded.source_version_id,
+  progress = excluded.progress,
+  updated_at_utc = excluded.updated_at_utc,
+  server_revision = excluded.server_revision,
+  synced_local_updated_at_utc = excluded.synced_local_updated_at_utc
+''',
+        [
+          learner.id.value,
+          remote.materialId.value,
+          remote.sourceVersionId.value,
+          value,
+          remote.updatedAt.toUtc().toIso8601String(),
+          remote.revision,
+          remote.updatedAt.toUtc().toIso8601String(),
+        ],
+      );
+      return;
+    }
+
+    final chunk = remote.listenChunkIndex;
+    if (chunk == null || chunk < 0 || remote.readerProgress != null) {
+      throw const SourceStoreConflict('Cloud Listen resume payload is invalid.');
+    }
+    await _database.rawInsert(
+      '''
+INSERT INTO listen_progress (
+  learner_id, material_id, source_version_id, chunk_index, updated_at_utc,
+  server_revision, synced_local_updated_at_utc
+) VALUES (?, ?, ?, ?, ?, ?, ?)
+ON CONFLICT(learner_id, material_id) DO UPDATE SET
+  source_version_id = excluded.source_version_id,
+  chunk_index = excluded.chunk_index,
+  updated_at_utc = excluded.updated_at_utc,
+  server_revision = excluded.server_revision,
+  synced_local_updated_at_utc = excluded.synced_local_updated_at_utc
+''',
+      [
+        learner.id.value,
+        remote.materialId.value,
+        remote.sourceVersionId.value,
+        chunk,
+        remote.updatedAt.toUtc().toIso8601String(),
+        remote.revision,
+        remote.updatedAt.toUtc().toIso8601String(),
+      ],
+    );
   }
 
   @override
