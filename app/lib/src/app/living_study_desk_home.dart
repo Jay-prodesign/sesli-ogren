@@ -650,10 +650,7 @@ class LivingStudyDeskHome extends StatelessWidget {
           const SizedBox(height: 8),
           materialCard,
         ],
-        if (continuityNotice != null) ...[
-          const SizedBox(height: 8),
-          continuityNotice!,
-        ],
+        if (continuityNotice != null) ...[const SizedBox(height: 8), continuityNotice!],
         const SizedBox(height: 6),
         Align(
           alignment: Alignment.center,
@@ -868,10 +865,7 @@ class LivingStudyDeskHome extends StatelessWidget {
               ],
             ),
           ),
-          if (continuityNotice != null) ...[
-            const SizedBox(height: 8),
-            continuityNotice!,
-          ],
+          if (continuityNotice != null) ...[const SizedBox(height: 8), continuityNotice!],
           if (studyTarget != null) ...[
             const SizedBox(height: 12),
             StudyPlanHomeCard(projection: studyTarget, hasMaterials: false, onOpen: onOpenStudyPlan),
