@@ -929,22 +929,39 @@ class _CloudContinuityNoticeCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(14),
           border: Border.all(color: accent.withValues(alpha: 0.28)),
         ),
-        child: Row(
-          children: [
-            Icon(icon, color: accent, size: 20),
-            const SizedBox(width: 9),
-            Expanded(
-              child: Text(
-                notice.message,
-                style: const TextStyle(color: AtelierStyle.ink, fontSize: 12.5, height: 1.35),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxHeight: 132),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Flexible(
+                child: SingleChildScrollView(
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Icon(icon, color: accent, size: 20),
+                      const SizedBox(width: 9),
+                      Expanded(
+                        child: Text(
+                          notice.message,
+                          style: const TextStyle(color: AtelierStyle.ink, fontSize: 12.5, height: 1.35),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ),
-            ),
-            TextButton(
-              key: const ValueKey('cloud-continuity-retry'),
-              onPressed: onRetry,
-              child: const Text('Tekrar dene'),
-            ),
-          ],
+              Align(
+                alignment: Alignment.centerRight,
+                child: TextButton(
+                  key: const ValueKey('cloud-continuity-retry'),
+                  onPressed: onRetry,
+                  child: const Text('Tekrar dene'),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
