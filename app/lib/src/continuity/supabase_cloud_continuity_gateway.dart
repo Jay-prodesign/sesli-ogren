@@ -156,7 +156,7 @@ class SupabaseCloudContinuityGateway implements CloudContinuityGateway {
       }
 
       if (!alreadyCurrent) {
-        final storage = client.storage.from(bucket);
+        final storage = client.storage.from('study-materials');
         try {
           await storage.uploadBinary(
             storagePath,
@@ -262,7 +262,7 @@ class SupabaseCloudContinuityGateway implements CloudContinuityGateway {
     }
     try {
       final client = await _clientFor(learner);
-      final bytes = await client.storage.from(bucket).download(path);
+      final bytes = await client.storage.from('study-materials').download(path);
       if (bytes.length != source.byteSize || sha256.convert(bytes).toString() != source.sourceContentHash) {
         throw const CloudContinuityException(
           'Downloaded media failed canonical source integrity validation.',
@@ -366,6 +366,14 @@ class SupabaseCloudContinuityGateway implements CloudContinuityGateway {
       );
     }
   }
+
+  static String _sourceTypeForServer(SourceMediaType type) => switch (type) {
+    SourceMediaType.pastedText => 'pasted_text',
+    SourceMediaType.pdf => 'pdf',
+    SourceMediaType.image => 'image',
+    SourceMediaType.document => 'document',
+    SourceMediaType.presentation => 'presentation',
+  };
 
   static SourceMediaType _mediaType(String value) => switch (value) {
     'pasted_text' => SourceMediaType.pastedText,
