@@ -129,11 +129,11 @@ class CloudContinuityService {
       }
 
       if (binding.sourceVersionId == localSource.identity.sourceVersionId) {
-        return _pullRemote(learner: learner, remote: remote);
+        return await _pullRemote(learner: learner, remote: remote);
       }
 
       if (binding.sourceVersionId == remote.sourceVersionId) {
-        return _pushLocal(
+        return await _pushLocal(
           learner: learner,
           materialId: materialId,
           localMaterial: localMaterial!,
