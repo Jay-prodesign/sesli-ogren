@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../continuity/passive_resume_continuity_service.dart';
 import '../domain/learning_contracts.dart';
 import '../domain/learning_truth.dart';
 import '../domain/retention_schedule.dart';
@@ -250,6 +251,8 @@ class _MaterialWorkspaceScreenState extends State<MaterialWorkspaceScreen> {
       ),
     );
     if (mounted) {
+      await _syncPassiveResumeAfterActivity(data.material.id);
+      if (!mounted) return;
       setState(() {
         _snapshot = _load();
       });
@@ -277,6 +280,27 @@ class _MaterialWorkspaceScreenState extends State<MaterialWorkspaceScreen> {
       return;
     }
     await _openSourceReader(data);
+  }
+
+  Future<void> _syncPassiveResumeAfterActivity(MaterialId materialId) async {
+    if (!widget.runtime.learner.isAuthenticated) return;
+    try {
+      final results = await widget.runtime.syncPassiveResumeForMaterial(materialId);
+      if (!mounted) return;
+      final conflicts = results.where((item) => item.disposition == PassiveResumeSyncDisposition.conflict).length;
+      if (conflicts > 0) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Okuma/dinleme konumu başka bir cihazda da değişmiş. Otomatik üzerine yazmadık; bu cihazdaki konum korundu.',
+            ),
+          ),
+        );
+      }
+    } catch (_) {
+      // Local Reader/Listen progress is already durable. Cloud retry happens
+      // from Home/startup; passive continuity must never block local study.
+    }
   }
 
   Future<void> _openSourceEditor() async {
@@ -355,6 +379,8 @@ class _MaterialWorkspaceScreenState extends State<MaterialWorkspaceScreen> {
         ),
       ),
     );
+    if (!mounted) return;
+    await _syncPassiveResumeAfterActivity(widget.materialId);
     if (!mounted) return;
     setState(() {
       _snapshot = _load();
