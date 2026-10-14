@@ -1916,10 +1916,7 @@ ON CONFLICT(learner_id, material_id) DO UPDATE SET
     final table = local.surface == PassiveResumeSurface.reader ? 'reader_progress' : 'listen_progress';
     await _database.update(
       table,
-      {
-        'server_revision': serverRevision,
-        'synced_local_updated_at_utc': local.updatedAt.toUtc().toIso8601String(),
-      },
+      {'server_revision': serverRevision, 'synced_local_updated_at_utc': local.updatedAt.toUtc().toIso8601String()},
       where:
           'learner_id = ? AND material_id = ? AND source_version_id = ? '
           'AND updated_at_utc = ?',
