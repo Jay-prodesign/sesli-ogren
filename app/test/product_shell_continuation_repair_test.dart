@@ -178,7 +178,9 @@ void main() {
       ),
     );
     await _pumpUntilFound(tester, find.text('Kaynağı gözden geçir'));
-    await tester.tap(find.text('Kaynağı gözden geçir'));
+    await tester.ensureVisible(find.text('Kaynağı gözden geçir'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Kaynağı gözden geçir').hitTestable());
     await _pumpUntilFound(tester, find.byType(SourceReaderScreen));
 
     await tester.tap(find.text('Kaynağı kapat ve hatırla'));
@@ -225,6 +227,8 @@ void main() {
     final continueReading = find.byKey(const ValueKey('library-continue-reader-return-material')).hitTestable();
     await _pumpUntilFound(tester, continueReading);
     expect(find.text('Okumaya devam et').hitTestable(), findsOneWidget);
+    await tester.ensureVisible(continueReading);
+    await tester.pumpAndSettle();
     await tester.tap(continueReading);
     await _pumpUntilFound(tester, find.byType(SourceReaderScreen));
     expect(find.byType(SourceReaderScreen), findsOneWidget);
@@ -274,6 +278,8 @@ void main() {
     final continueReading = find.byKey(const ValueKey('library-continue-reader-listen-recall-material')).hitTestable();
     await _pumpUntilFound(tester, continueReading);
     expect(find.text('Okumaya devam et').hitTestable(), findsOneWidget);
+    await tester.ensureVisible(continueReading);
+    await tester.pumpAndSettle();
     await tester.tap(continueReading);
     await _pumpUntilFound(tester, find.byType(SourceReaderScreen));
     expect(find.byType(SourceReaderScreen), findsOneWidget);
