@@ -86,10 +86,7 @@ class _InSyncGateway implements CloudContinuityGateway {
   }
 
   @override
-  Future<void> cleanupSupersededMedia({
-    required AuthenticatedLearner learner,
-    required MaterialId materialId,
-  }) async {}
+  Future<void> cleanupSupersededMedia({required AuthenticatedLearner learner, required MaterialId materialId}) async {}
 }
 
 class _FakeServerRecallGateway implements ServerRecallGateway {

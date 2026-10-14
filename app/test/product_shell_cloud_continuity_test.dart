@@ -69,10 +69,7 @@ class _RecoveringContinuityGateway implements CloudContinuityGateway {
   }
 
   @override
-  Future<void> cleanupSupersededMedia({
-    required AuthenticatedLearner learner,
-    required MaterialId materialId,
-  }) async {}
+  Future<void> cleanupSupersededMedia({required AuthenticatedLearner learner, required MaterialId materialId}) async {}
 }
 
 Future<AppRuntime> _runtime({
@@ -124,9 +121,7 @@ void main() {
     final runtime = await _runtime(learner: AppRuntime.localLearner, gateway: gateway);
     addTearDown(runtime.close);
 
-    await tester.pumpWidget(
-      MaterialApp(home: ProductShellScreen(runtime: runtime)),
-    );
+    await tester.pumpWidget(MaterialApp(home: ProductShellScreen(runtime: runtime)));
     await tester.pumpAndSettle();
 
     expect(gateway.listCalls, 0);

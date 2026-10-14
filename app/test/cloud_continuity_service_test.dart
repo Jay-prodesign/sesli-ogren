@@ -80,10 +80,7 @@ class _FakeCloudContinuityGateway implements CloudContinuityGateway {
     expect(rawSourceBytes.length, source.sourceVersion.byteSize);
     expect(sha256.convert(rawSourceBytes).toString(), source.sourceVersion.identity.contentDigest);
     mediaBytes[source.sourceVersion.identity.sourceVersionId] = Uint8List.fromList(rawSourceBytes);
-    final snapshot = _mediaSnapshotFromSource(
-      source: source,
-      sourceOrdinal: (current?.serverSourceVersion ?? 0) + 1,
-    );
+    final snapshot = _mediaSnapshotFromSource(source: source, sourceOrdinal: (current?.serverSourceVersion ?? 0) + 1);
     remote[source.material.id] = snapshot;
     return snapshot;
   }
@@ -94,26 +91,17 @@ class _FakeCloudContinuityGateway implements CloudContinuityGateway {
     required CloudMaterialSnapshot source,
   }) async {
     if (failMediaDownloadIntegrity) {
-      throw const CloudContinuityException(
-        'media_integrity_failed',
-        kind: CloudContinuityFailureKind.conflict,
-      );
+      throw const CloudContinuityException('media_integrity_failed', kind: CloudContinuityFailureKind.conflict);
     }
     final bytes = mediaBytes[source.sourceVersionId];
     if (bytes == null) {
-      throw const CloudContinuityException(
-        'media_missing',
-        kind: CloudContinuityFailureKind.unavailable,
-      );
+      throw const CloudContinuityException('media_missing', kind: CloudContinuityFailureKind.unavailable);
     }
     return Uint8List.fromList(bytes);
   }
 
   @override
-  Future<void> cleanupSupersededMedia({
-    required AuthenticatedLearner learner,
-    required MaterialId materialId,
-  }) async {
+  Future<void> cleanupSupersededMedia({required AuthenticatedLearner learner, required MaterialId materialId}) async {
     cleanupCalls += 1;
   }
 }
@@ -159,10 +147,7 @@ CloudMaterialSnapshot _snapshotFor({
   );
 }
 
-CloudMaterialSnapshot _mediaSnapshotFromSource({
-  required SourceIngestResult source,
-  required int sourceOrdinal,
-}) {
+CloudMaterialSnapshot _mediaSnapshotFromSource({required SourceIngestResult source, required int sourceOrdinal}) {
   final now = DateTime.utc(2026, 10, 14, 1, sourceOrdinal);
   return CloudMaterialSnapshot(
     serverMaterialId: 'server-${source.material.id.value}',
@@ -177,8 +162,7 @@ CloudMaterialSnapshot _mediaSnapshotFromSource({
     mimeType: source.sourceVersion.mimeType,
     byteSize: source.sourceVersion.byteSize,
     storageBucket: 'study-materials',
-    storagePath:
-        'learner/server-${source.material.id.value}/${source.sourceVersion.identity.sourceVersionId.value}',
+    storagePath: 'learner/server-${source.material.id.value}/${source.sourceVersion.identity.sourceVersionId.value}',
     inlineText: null,
     serverExtractedContentId: 'server-media-extracted-$sourceOrdinal',
     normalizedText: source.extractedContent.normalizedText,
@@ -393,8 +377,14 @@ void main() {
     final local = await store.currentSourceVersion(learner: learner, materialId: materialId);
     expect(local?.identity.sourceVersionId, snapshot.sourceVersionId);
     expect(local?.identity.contentDigest, snapshot.sourceContentHash);
-    expect(await store.rawSourceBytesForSource(learner: learner, sourceVersionId: snapshot.sourceVersionId), orderedEquals(bytes));
-    final extracted = await store.extractedContentForSource(learner: learner, sourceVersionId: snapshot.sourceVersionId);
+    expect(
+      await store.rawSourceBytesForSource(learner: learner, sourceVersionId: snapshot.sourceVersionId),
+      orderedEquals(bytes),
+    );
+    final extracted = await store.extractedContentForSource(
+      learner: learner,
+      sourceVersionId: snapshot.sourceVersionId,
+    );
     expect(extracted?.normalizedText, normalizedText);
     expect(extracted?.method, 'office_openxml_text');
     expect(extracted?.warnings, const ['Layout sadeleştirildi']);
