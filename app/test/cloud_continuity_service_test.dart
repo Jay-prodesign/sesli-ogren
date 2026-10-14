@@ -23,7 +23,10 @@ class _UnusedPdfExtractor implements PdfTextExtractor {
 
 class _FakeCloudContinuityGateway implements CloudContinuityGateway {
   final Map<MaterialId, CloudMaterialSnapshot> remote = {};
+  final Map<SourceVersionId, Uint8List> mediaBytes = {};
   final List<SourceVersionId?> expectedPrevious = [];
+  bool failMediaDownloadIntegrity = false;
+  int cleanupCalls = 0;
 
   @override
   Future<List<CloudMaterialSnapshot>> listMaterials({required AuthenticatedLearner learner}) async =>
@@ -66,23 +69,53 @@ class _FakeCloudContinuityGateway implements CloudContinuityGateway {
     required SourceIngestResult source,
     required Uint8List rawSourceBytes,
     SourceVersionId? expectedPreviousSourceVersionId,
-  }) {
-    throw UnimplementedError();
+  }) async {
+    expectedPrevious.add(expectedPreviousSourceVersionId);
+    final current = remote[source.material.id];
+    if (current != null && current.sourceVersionId != source.sourceVersion.identity.sourceVersionId) {
+      if (expectedPreviousSourceVersionId == null || expectedPreviousSourceVersionId != current.sourceVersionId) {
+        throw const CloudContinuityException('source_conflict', kind: CloudContinuityFailureKind.conflict);
+      }
+    }
+    expect(rawSourceBytes.length, source.sourceVersion.byteSize);
+    expect(sha256.convert(rawSourceBytes).toString(), source.sourceVersion.identity.contentDigest);
+    mediaBytes[source.sourceVersion.identity.sourceVersionId] = Uint8List.fromList(rawSourceBytes);
+    final snapshot = _mediaSnapshotFromSource(
+      source: source,
+      sourceOrdinal: (current?.serverSourceVersion ?? 0) + 1,
+    );
+    remote[source.material.id] = snapshot;
+    return snapshot;
   }
 
   @override
   Future<Uint8List> downloadMediaSource({
     required AuthenticatedLearner learner,
     required CloudMaterialSnapshot source,
-  }) {
-    throw UnimplementedError();
+  }) async {
+    if (failMediaDownloadIntegrity) {
+      throw const CloudContinuityException(
+        'media_integrity_failed',
+        kind: CloudContinuityFailureKind.conflict,
+      );
+    }
+    final bytes = mediaBytes[source.sourceVersionId];
+    if (bytes == null) {
+      throw const CloudContinuityException(
+        'media_missing',
+        kind: CloudContinuityFailureKind.unavailable,
+      );
+    }
+    return Uint8List.fromList(bytes);
   }
 
   @override
   Future<void> cleanupSupersededMedia({
     required AuthenticatedLearner learner,
     required MaterialId materialId,
-  }) async {}
+  }) async {
+    cleanupCalls += 1;
+  }
 }
 
 CloudMaterialSnapshot _snapshotFor({
@@ -121,6 +154,79 @@ CloudMaterialSnapshot _snapshotFor({
     extractionMethodVersion: 'v1',
     anchors: [SourceAnchor(startOffset: 0, endOffset: text.trim().length)],
     warnings: const [],
+    materialUpdatedAt: now,
+    sourceCreatedAt: now,
+  );
+}
+
+CloudMaterialSnapshot _mediaSnapshotFromSource({
+  required SourceIngestResult source,
+  required int sourceOrdinal,
+}) {
+  final now = DateTime.utc(2026, 10, 14, 1, sourceOrdinal);
+  return CloudMaterialSnapshot(
+    serverMaterialId: 'server-${source.material.id.value}',
+    materialId: source.material.id,
+    title: source.material.title,
+    serverSourceAssetId: 'server-media-$sourceOrdinal',
+    sourceVersionId: source.sourceVersion.identity.sourceVersionId,
+    serverSourceVersion: sourceOrdinal,
+    sourceContentHash: source.sourceVersion.identity.contentDigest,
+    mediaType: source.sourceVersion.mediaType,
+    sourceName: source.sourceVersion.sourceName,
+    mimeType: source.sourceVersion.mimeType,
+    byteSize: source.sourceVersion.byteSize,
+    storageBucket: 'study-materials',
+    storagePath:
+        'learner/server-${source.material.id.value}/${source.sourceVersion.identity.sourceVersionId.value}',
+    inlineText: null,
+    serverExtractedContentId: 'server-media-extracted-$sourceOrdinal',
+    normalizedText: source.extractedContent.normalizedText,
+    extractionMethod: source.extractedContent.method,
+    extractionMethodVersion: source.extractedContent.methodVersion,
+    anchors: source.extractedContent.anchors,
+    warnings: source.extractedContent.warnings,
+    materialUpdatedAt: now,
+    sourceCreatedAt: now,
+  );
+}
+
+CloudMaterialSnapshot _remoteMediaSnapshot({
+  required AuthenticatedLearner learner,
+  required MaterialId materialId,
+  required Uint8List bytes,
+  required String title,
+  required String normalizedText,
+}) {
+  final digest = sha256.convert(bytes).toString();
+  final sourceVersionId = SourceIngestService.deriveSourceVersionId(
+    learner: learner,
+    materialId: materialId,
+    mediaType: SourceMediaType.document,
+    contentDigest: digest,
+  );
+  final now = DateTime.utc(2026, 10, 14, 2);
+  return CloudMaterialSnapshot(
+    serverMaterialId: 'server-${materialId.value}',
+    materialId: materialId,
+    title: title,
+    serverSourceAssetId: 'server-media-remote',
+    sourceVersionId: sourceVersionId,
+    serverSourceVersion: 1,
+    sourceContentHash: digest,
+    mediaType: SourceMediaType.document,
+    sourceName: title,
+    mimeType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    byteSize: bytes.length,
+    storageBucket: 'study-materials',
+    storagePath: 'learner/server-${materialId.value}/${sourceVersionId.value}',
+    inlineText: null,
+    serverExtractedContentId: 'server-media-extracted-remote',
+    normalizedText: normalizedText,
+    extractionMethod: 'office_openxml_text',
+    extractionMethodVersion: 'openxml-v1',
+    anchors: [SourceAnchor(startOffset: 0, endOffset: normalizedText.length)],
+    warnings: const ['Layout sadeleştirildi'],
     materialUpdatedAt: now,
     sourceCreatedAt: now,
   );
@@ -223,6 +329,98 @@ void main() {
     expect(result.disposition, CloudContinuityDisposition.pulledRemote);
     expect(current?.identity.sourceVersionId, gateway.remote[materialId]!.sourceVersionId);
     expect(current?.identity.sourceVersionId, isNot(firstSource));
+  });
+
+  test('local original media pushes exact raw bytes and canonical extraction without conversion', () async {
+    final (store, ingest, gateway, service) = await harness();
+    addTearDown(store.close);
+    const learner = AuthenticatedLearner(id: LearnerId('continuity-media-local'));
+    const materialId = MaterialId('material_continuity_media_local');
+    final bytes = Uint8List.fromList(List<int>.generate(64, (index) => index));
+    final digest = sha256.convert(bytes).toString();
+    final sourceVersionId = SourceIngestService.deriveSourceVersionId(
+      learner: learner,
+      materialId: materialId,
+      mediaType: SourceMediaType.document,
+      contentDigest: digest,
+    );
+
+    await ingest.hydrateVerifiedMediaSource(
+      learner: learner,
+      materialId: materialId,
+      expectedSourceVersionId: sourceVersionId,
+      contentDigest: digest,
+      mediaType: SourceMediaType.document,
+      sourceName: 'Ders notu.docx',
+      mimeType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      rawSourceBytes: bytes,
+      normalizedText: 'Belgeden doğrulanmış kaynak metni.',
+      extractionMethod: 'office_openxml_text',
+      extractionMethodVersion: 'openxml-v1',
+      anchors: const [SourceAnchor(startOffset: 0, endOffset: 34)],
+      warnings: const ['Layout sadeleştirildi'],
+    );
+
+    final result = await service.reconcileMaterial(learner: learner, materialId: materialId);
+
+    expect(result.disposition, CloudContinuityDisposition.pushedLocal);
+    expect(gateway.mediaBytes[sourceVersionId], orderedEquals(bytes));
+    expect(gateway.remote[materialId]!.extractionMethod, 'office_openxml_text');
+    expect(gateway.remote[materialId]!.warnings, const ['Layout sadeleştirildi']);
+    expect(gateway.cleanupCalls, 1);
+  });
+
+  test('new device hydrates original media from verified bytes and server extraction provenance', () async {
+    final (store, _, gateway, service) = await harness();
+    addTearDown(store.close);
+    const learner = AuthenticatedLearner(id: LearnerId('continuity-media-remote'));
+    const materialId = MaterialId('material_continuity_media_remote');
+    final bytes = Uint8List.fromList(List<int>.generate(80, (index) => 255 - index));
+    const normalizedText = 'Sunucudan gelen doğrulanmış DOCX kaynak metni.';
+    final snapshot = _remoteMediaSnapshot(
+      learner: learner,
+      materialId: materialId,
+      bytes: bytes,
+      title: 'Ders notu.docx',
+      normalizedText: normalizedText,
+    );
+    gateway.remote[materialId] = snapshot;
+    gateway.mediaBytes[snapshot.sourceVersionId] = Uint8List.fromList(bytes);
+
+    final result = await service.reconcileAll(learner: learner);
+
+    expect(result.single.disposition, CloudContinuityDisposition.pulledRemote);
+    final local = await store.currentSourceVersion(learner: learner, materialId: materialId);
+    expect(local?.identity.sourceVersionId, snapshot.sourceVersionId);
+    expect(local?.identity.contentDigest, snapshot.sourceContentHash);
+    expect(await store.rawSourceBytesForSource(learner: learner, sourceVersionId: snapshot.sourceVersionId), orderedEquals(bytes));
+    final extracted = await store.extractedContentForSource(learner: learner, sourceVersionId: snapshot.sourceVersionId);
+    expect(extracted?.normalizedText, normalizedText);
+    expect(extracted?.method, 'office_openxml_text');
+    expect(extracted?.warnings, const ['Layout sadeleştirildi']);
+  });
+
+  test('original media download integrity failure is fail-closed and does not hydrate a local source', () async {
+    final (store, _, gateway, service) = await harness();
+    addTearDown(store.close);
+    const learner = AuthenticatedLearner(id: LearnerId('continuity-media-corrupt'));
+    const materialId = MaterialId('material_continuity_media_corrupt');
+    final bytes = Uint8List.fromList(List<int>.generate(48, (index) => index + 3));
+    final snapshot = _remoteMediaSnapshot(
+      learner: learner,
+      materialId: materialId,
+      bytes: bytes,
+      title: 'Bozuk indirme.docx',
+      normalizedText: 'Bu kaynak yalnız bütünlük doğrulaması geçerse hydrate olur.',
+    );
+    gateway.remote[materialId] = snapshot;
+    gateway.mediaBytes[snapshot.sourceVersionId] = Uint8List.fromList(bytes);
+    gateway.failMediaDownloadIntegrity = true;
+
+    final result = await service.reconcileAll(learner: learner);
+
+    expect(result.single.disposition, CloudContinuityDisposition.conflict);
+    expect(await store.material(learner: learner, materialId: materialId), isNull);
   });
 
   test('two devices changing after the shared ancestor fail closed without overwriting either source', () async {
