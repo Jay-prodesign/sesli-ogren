@@ -117,10 +117,7 @@ class AppRuntime {
       recall: recall,
       telemetry: store.operationalTelemetry(),
       continuity: continuity,
-      passiveResume: PassiveResumeContinuityService(
-        store: store,
-        gateway: const SupabasePassiveResumeGateway(),
-      ),
+      passiveResume: PassiveResumeContinuityService(store: store, gateway: const SupabasePassiveResumeGateway()),
       explain: const SupabaseGroundedExplainGateway(),
       explainBack: const SupabaseExplainBackGateway(),
       focusHelp: const SupabaseFocusHelpGateway(),
@@ -173,10 +170,7 @@ class AppRuntime {
       ),
       telemetry: telemetry,
       continuity: authenticatedContinuity,
-      passiveResume: PassiveResumeContinuityService(
-        store: store,
-        gateway: const SupabasePassiveResumeGateway(),
-      ),
+      passiveResume: PassiveResumeContinuityService(store: store, gateway: const SupabasePassiveResumeGateway()),
       explain: const SupabaseGroundedExplainGateway(),
       explainBack: const SupabaseExplainBackGateway(),
       focusHelp: const SupabaseFocusHelpGateway(),
