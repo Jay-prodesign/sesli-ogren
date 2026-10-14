@@ -531,4 +531,5 @@ void main() {
 
     expect(retentionGateway.writes, 1);
     expect(result.evidence.outcome, RecallOutcome.correct);
-  });}
+    });
+}
