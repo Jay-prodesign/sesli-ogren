@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../continuity/passive_resume_continuity_service.dart';
+import '../continuity/retention_continuity_service.dart';
 import '../domain/learning_contracts.dart';
 import '../domain/learning_truth.dart';
 import '../domain/retention_schedule.dart';
@@ -303,6 +304,29 @@ class _MaterialWorkspaceScreenState extends State<MaterialWorkspaceScreen> {
     }
   }
 
+  Future<void> _syncRetentionAfterActivity(MaterialId materialId) async {
+    if (!widget.runtime.learner.isAuthenticated) return;
+    try {
+      final results = await widget.runtime.syncRetentionForMaterial(materialId);
+      if (!mounted) return;
+      final conflicts = results
+          .where((item) => item.disposition == RetentionContinuityDisposition.conflict)
+          .length;
+      if (conflicts > 0) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Tekrar zamanlaması başka bir cihazda da değişmiş. Otomatik üzerine yazmadık; bu cihazdaki öğrenme kaydı korundu.',
+            ),
+          ),
+        );
+      }
+    } catch (_) {
+      // Local active-learning timing is already durable. Home/startup retries
+      // cloud reconciliation; network failure must not erase local study.
+    }
+  }
+
   Future<void> _openSourceEditor() async {
     final updated = await Navigator.of(context).push<bool>(
       MaterialPageRoute<bool>(
@@ -404,6 +428,8 @@ class _MaterialWorkspaceScreenState extends State<MaterialWorkspaceScreen> {
       ),
     );
     if (!mounted) return;
+    await _syncRetentionAfterActivity(widget.materialId);
+    if (!mounted) return;
     setState(() {
       _snapshot = _load();
     });
@@ -425,6 +451,8 @@ class _MaterialWorkspaceScreenState extends State<MaterialWorkspaceScreen> {
         ),
       ),
     );
+    if (!mounted) return;
+    await _syncRetentionAfterActivity(widget.materialId);
     if (!mounted) return;
     setState(() {
       _snapshot = _load();
