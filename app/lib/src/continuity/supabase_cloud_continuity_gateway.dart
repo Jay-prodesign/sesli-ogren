@@ -258,10 +258,7 @@ class SupabaseCloudContinuityGateway implements CloudContinuityGateway {
   }) async {
     final bucket = source.storageBucket;
     final path = source.storagePath;
-    if (source.mediaType == SourceMediaType.pastedText ||
-        bucket != 'study-materials' ||
-        path == null ||
-        path.isEmpty) {
+    if (source.mediaType == SourceMediaType.pastedText || bucket != 'study-materials' || path == null || path.isEmpty) {
       throw const CloudContinuityException(
         'Cloud source does not have an admitted original-media object.',
         kind: CloudContinuityFailureKind.invalidPayload,
@@ -288,10 +285,7 @@ class SupabaseCloudContinuityGateway implements CloudContinuityGateway {
   }
 
   @override
-  Future<void> cleanupSupersededMedia({
-    required AuthenticatedLearner learner,
-    required MaterialId materialId,
-  }) async {
+  Future<void> cleanupSupersededMedia({required AuthenticatedLearner learner, required MaterialId materialId}) async {
     try {
       final client = await _clientFor(learner);
       final rows = await client.rpc<List<dynamic>>(

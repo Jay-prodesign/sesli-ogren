@@ -49,6 +49,30 @@ class _RecoveringContinuityGateway implements CloudContinuityGateway {
   }) {
     throw UnimplementedError();
   }
+
+  @override
+  Future<CloudMaterialSnapshot> ensureMediaSource({
+    required AuthenticatedLearner learner,
+    required SourceIngestResult source,
+    required Uint8List rawSourceBytes,
+    SourceVersionId? expectedPreviousSourceVersionId,
+  }) {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<Uint8List> downloadMediaSource({
+    required AuthenticatedLearner learner,
+    required CloudMaterialSnapshot source,
+  }) {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<void> cleanupSupersededMedia({
+    required AuthenticatedLearner learner,
+    required MaterialId materialId,
+  }) async {}
 }
 
 Future<AppRuntime> _runtime({
@@ -78,9 +102,7 @@ void main() {
     final runtime = await _runtime(learner: learner, gateway: gateway);
     addTearDown(runtime.close);
 
-    await tester.pumpWidget(
-      MaterialApp(home: ProductShellScreen(runtime: runtime)),
-    );
+    await tester.pumpWidget(MaterialApp(home: ProductShellScreen(runtime: runtime)));
     await tester.pumpAndSettle();
 
     expect(find.byKey(const ValueKey('cloud-continuity-notice')), findsOneWidget);

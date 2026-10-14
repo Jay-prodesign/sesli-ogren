@@ -49,23 +49,22 @@ class SqliteSourceStore implements SourceStore {
     required int evidenceCount,
     required String stateRuleVersion,
     required NextLearningAction nextAction,
-  }) =>
-      SqliteLearningTruthStore._(_database).cacheServerVerifiedRecallTruth(
-        learner: learner,
-        action: action,
-        attemptId: attemptId,
-        evidenceId: evidenceId,
-        outcome: outcome,
-        assistance: assistance,
-        responseDigest: responseDigest,
-        responseLength: responseLength,
-        evidenceRuleVersion: evidenceRuleVersion,
-        evidenceCreatedAt: evidenceCreatedAt,
-        stateKind: stateKind,
-        evidenceCount: evidenceCount,
-        stateRuleVersion: stateRuleVersion,
-        nextAction: nextAction,
-      );
+  }) => SqliteLearningTruthStore._(_database).cacheServerVerifiedRecallTruth(
+    learner: learner,
+    action: action,
+    attemptId: attemptId,
+    evidenceId: evidenceId,
+    outcome: outcome,
+    assistance: assistance,
+    responseDigest: responseDigest,
+    responseLength: responseLength,
+    evidenceRuleVersion: evidenceRuleVersion,
+    evidenceCreatedAt: evidenceCreatedAt,
+    stateKind: stateKind,
+    evidenceCount: evidenceCount,
+    stateRuleVersion: stateRuleVersion,
+    nextAction: nextAction,
+  );
 
   OperationalTelemetry operationalTelemetry() => SqliteOperationalTelemetry._(_database);
 

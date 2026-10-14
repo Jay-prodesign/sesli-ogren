@@ -50,16 +50,46 @@ class _InSyncGateway implements CloudContinuityGateway {
       serverSourceVersion: 1,
       sourceContentHash: source.sourceVersion.identity.contentDigest,
       mediaType: source.sourceVersion.mediaType,
+      sourceName: source.sourceVersion.sourceName,
       mimeType: source.sourceVersion.mimeType,
       byteSize: source.sourceVersion.byteSize,
+      storageBucket: null,
+      storagePath: null,
       inlineText: source.sourceVersion.inlineText,
       serverExtractedContentId: 'server-extracted',
       normalizedText: source.extractedContent.normalizedText,
+      extractionMethod: source.extractedContent.method,
+      extractionMethodVersion: source.extractedContent.methodVersion,
       anchors: source.extractedContent.anchors,
+      warnings: source.extractedContent.warnings,
       materialUpdatedAt: source.material.updatedAt,
       sourceCreatedAt: source.sourceVersion.createdAt,
     );
   }
+
+  @override
+  Future<CloudMaterialSnapshot> ensureMediaSource({
+    required AuthenticatedLearner learner,
+    required SourceIngestResult source,
+    required Uint8List rawSourceBytes,
+    SourceVersionId? expectedPreviousSourceVersionId,
+  }) {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<Uint8List> downloadMediaSource({
+    required AuthenticatedLearner learner,
+    required CloudMaterialSnapshot source,
+  }) {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<void> cleanupSupersededMedia({
+    required AuthenticatedLearner learner,
+    required MaterialId materialId,
+  }) async {}
 }
 
 class _FakeServerRecallGateway implements ServerRecallGateway {
@@ -245,7 +275,7 @@ void main() {
       store: store,
       continuity: cloud,
       gateway: remote,
-      now: () => DateTime.utc(2026, 10, 14, 0, 30),
+      clock: () => DateTime.utc(2026, 10, 14, 0, 30),
     );
 
     final prompt = await service.createCurrentPrompt(learner: learner, materialId: materialId);

@@ -59,6 +59,30 @@ class _FakeCloudContinuityGateway implements CloudContinuityGateway {
     remote[source.material.id] = snapshot;
     return snapshot;
   }
+
+  @override
+  Future<CloudMaterialSnapshot> ensureMediaSource({
+    required AuthenticatedLearner learner,
+    required SourceIngestResult source,
+    required Uint8List rawSourceBytes,
+    SourceVersionId? expectedPreviousSourceVersionId,
+  }) {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<Uint8List> downloadMediaSource({
+    required AuthenticatedLearner learner,
+    required CloudMaterialSnapshot source,
+  }) {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<void> cleanupSupersededMedia({
+    required AuthenticatedLearner learner,
+    required MaterialId materialId,
+  }) async {}
 }
 
 CloudMaterialSnapshot _snapshotFor({
@@ -85,12 +109,18 @@ CloudMaterialSnapshot _snapshotFor({
     serverSourceVersion: sourceOrdinal,
     sourceContentHash: digest,
     mediaType: SourceMediaType.pastedText,
+    sourceName: title,
     mimeType: 'text/plain; charset=utf-8',
     byteSize: utf8.encode(text).length,
+    storageBucket: null,
+    storagePath: null,
     inlineText: text,
     serverExtractedContentId: 'server-extracted-$sourceOrdinal',
     normalizedText: text.trim(),
+    extractionMethod: 'inline_text',
+    extractionMethodVersion: 'v1',
     anchors: [SourceAnchor(startOffset: 0, endOffset: text.trim().length)],
+    warnings: const [],
     materialUpdatedAt: now,
     sourceCreatedAt: now,
   );
