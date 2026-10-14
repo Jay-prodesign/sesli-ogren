@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sesli_ogren/src/app/app_runtime.dart';
 import 'package:sesli_ogren/src/app/product_shell_screen.dart';
+import 'package:sesli_ogren/src/app/living_study_desk_home.dart';
 import 'package:sesli_ogren/src/continuity/cloud_continuity_gateway.dart';
 import 'package:sesli_ogren/src/continuity/cloud_continuity_service.dart';
 import 'package:sesli_ogren/src/continuity/passive_resume_continuity_service.dart';
@@ -152,4 +153,40 @@ void main() {
     expect(find.byKey(const ValueKey('cloud-continuity-notice')), findsNothing);
     expect(find.byKey(const ValueKey('la0040-living-add')), findsOneWidget);
   });
+
+  testWidgets('cloud recovery stays explicit without displacing the primary action at 320px large text', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(320, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    const learner = AuthenticatedLearner(id: LearnerId('cloud-shell-large-text'));
+    final gateway = _RecoveringContinuityGateway();
+    final runtime = await _runtime(learner: learner, gateway: gateway);
+    addTearDown(runtime.close);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        builder: (context, child) => MediaQuery(
+          data: MediaQuery.of(context).copyWith(
+            disableAnimations: true,
+            textScaler: const TextScaler.linear(1.5),
+          ),
+          child: child!,
+        ),
+        home: LivingDeskReviewScope(child: ProductShellScreen(runtime: runtime)),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const ValueKey('cloud-continuity-notice')), findsOneWidget);
+    expect(find.byKey(const ValueKey('cloud-continuity-retry')), findsOneWidget);
+    final primary = find.byKey(const ValueKey('la0040-living-add'));
+    expect(primary, findsOneWidget);
+    expect(primary.hitTestable(), findsOneWidget);
+    expect(tester.getBottomRight(primary).dy, lessThanOrEqualTo(844));
+  });
+
 }
