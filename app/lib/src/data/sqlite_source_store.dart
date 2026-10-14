@@ -39,8 +39,7 @@ class RetentionScheduleSyncState {
   final int? serverRevision;
   final String? syncedLatestEventId;
 
-  bool get hasLocalChangeSinceSync =>
-      syncedLatestEventId == null || syncedLatestEventId != schedule.latestEventId;
+  bool get hasLocalChangeSinceSync => syncedLatestEventId == null || syncedLatestEventId != schedule.latestEventId;
 }
 
 class SqliteSourceStore implements SourceStore {
@@ -3404,12 +3403,7 @@ WHERE r.learner_id = ?
   AND r.invalidated_at_utc IS NULL
 ORDER BY r.source_start ASC, r.source_end ASC
 ''',
-      [
-        learner.id.value,
-        materialId.value,
-        sourceVersionId.value,
-        MaterialLifecycleStatus.active.name,
-      ],
+      [learner.id.value, materialId.value, sourceVersionId.value, MaterialLifecycleStatus.active.name],
     );
     return rows
         .map(
@@ -3432,10 +3426,7 @@ ORDER BY r.source_start ASC, r.source_end ASC
     }
     final changed = await _database.update(
       'retention_schedules',
-      {
-        'server_revision': serverRevision,
-        'synced_latest_event_id': schedule.latestEventId,
-      },
+      {'server_revision': serverRevision, 'synced_latest_event_id': schedule.latestEventId},
       where:
           'learner_id = ? AND retention_schedule_id = ? AND material_id = ? '
           'AND source_version_id = ? AND latest_event_id = ? AND invalidated_at_utc IS NULL',
@@ -3476,44 +3467,35 @@ ORDER BY r.source_start ASC, r.source_end ASC
         where:
             'learner_id = ? AND material_id = ? AND lifecycle_status = ? '
             'AND deleted_at_utc IS NULL',
-        whereArgs: [
-          learner.id.value,
-          schedule.materialId.value,
-          MaterialLifecycleStatus.active.name,
-        ],
+        whereArgs: [learner.id.value, schedule.materialId.value, MaterialLifecycleStatus.active.name],
         limit: 1,
       );
-      if (authority.isEmpty ||
-          authority.single['current_source_version_id'] != schedule.sourceVersionId.value) {
+      if (authority.isEmpty || authority.single['current_source_version_id'] != schedule.sourceVersionId.value) {
         throw const SourceStoreConflict('Cloud retention belongs to a stale local source.');
       }
 
-      await transaction.insert(
-        'retention_schedules',
-        {
-          'learner_id': learner.id.value,
-          'retention_schedule_id': schedule.id.value,
-          'material_id': schedule.materialId.value,
-          'source_version_id': schedule.sourceVersionId.value,
-          'source_start': schedule.sourceAnchor.startOffset,
-          'source_end': schedule.sourceAnchor.endOffset,
-          'page_number': schedule.sourceAnchor.pageNumber,
-          'latest_evidence_kind': schedule.latestEvidenceKind.name,
-          'latest_outcome_band': schedule.latestOutcomeBand.name,
-          'latest_event_id': schedule.latestEventId,
-          'reason_code': schedule.reasonCode,
-          'review_count': schedule.reviewCount,
-          'success_streak': schedule.successStreak,
-          'interval_seconds': schedule.interval.inSeconds,
-          'due_at_utc': schedule.dueAt.toUtc().toIso8601String(),
-          'last_reviewed_at_utc': schedule.lastReviewedAt.toUtc().toIso8601String(),
-          'policy_version': schedule.policyVersion,
-          'invalidated_at_utc': null,
-          'server_revision': serverRevision,
-          'synced_latest_event_id': schedule.latestEventId,
-        },
-        conflictAlgorithm: ConflictAlgorithm.replace,
-      );
+      await transaction.insert('retention_schedules', {
+        'learner_id': learner.id.value,
+        'retention_schedule_id': schedule.id.value,
+        'material_id': schedule.materialId.value,
+        'source_version_id': schedule.sourceVersionId.value,
+        'source_start': schedule.sourceAnchor.startOffset,
+        'source_end': schedule.sourceAnchor.endOffset,
+        'page_number': schedule.sourceAnchor.pageNumber,
+        'latest_evidence_kind': schedule.latestEvidenceKind.name,
+        'latest_outcome_band': schedule.latestOutcomeBand.name,
+        'latest_event_id': schedule.latestEventId,
+        'reason_code': schedule.reasonCode,
+        'review_count': schedule.reviewCount,
+        'success_streak': schedule.successStreak,
+        'interval_seconds': schedule.interval.inSeconds,
+        'due_at_utc': schedule.dueAt.toUtc().toIso8601String(),
+        'last_reviewed_at_utc': schedule.lastReviewedAt.toUtc().toIso8601String(),
+        'policy_version': schedule.policyVersion,
+        'invalidated_at_utc': null,
+        'server_revision': serverRevision,
+        'synced_latest_event_id': schedule.latestEventId,
+      }, conflictAlgorithm: ConflictAlgorithm.replace);
     });
   }
 

@@ -33,9 +33,7 @@ class _FakeRetentionGateway implements RetentionContinuityGateway {
     required MaterialId materialId,
   }) async {
     reads += 1;
-    return remote.values
-        .where((item) => item.schedule.materialId == materialId)
-        .toList(growable: false);
+    return remote.values.where((item) => item.schedule.materialId == materialId).toList(growable: false);
   }
 
   @override
@@ -70,10 +68,7 @@ class _FakeRetentionGateway implements RetentionContinuityGateway {
       );
     }
 
-    final next = CloudRetentionSnapshot(
-      schedule: schedule,
-      revision: (current?.revision ?? 0) + 1,
-    );
+    final next = CloudRetentionSnapshot(schedule: schedule, revision: (current?.revision ?? 0) + 1);
     remote[schedule.id] = next;
     return next;
   }
@@ -83,10 +78,7 @@ Future<(SqliteSourceStore, SourceIngestResult)> _source({
   required AuthenticatedLearner learner,
   required MaterialId materialId,
 }) async {
-  final store = await SqliteSourceStore.open(
-    factory: databaseFactoryFfiNoIsolate,
-    path: inMemoryDatabasePath,
-  );
+  final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
   final ingest = SourceIngestService(
     store: store,
     pdfTextExtractor: const _UnusedPdfExtractor(),
@@ -259,18 +251,12 @@ void main() {
     expect(after.single.serverRevision, 1);
     expect(after.single.hasLocalChangeSinceSync, isTrue);
     expect(gateway.remote.values.single.revision, 2);
-    expect(
-      gateway.remote.values.single.schedule.latestEventId,
-      isNot(after.single.schedule.latestEventId),
-    );
+    expect(gateway.remote.values.single.schedule.latestEventId, isNot(after.single.schedule.latestEventId));
     expect(sourceA.sourceVersion.identity.sourceVersionId, sourceB.sourceVersion.identity.sourceVersionId);
   });
 
   test('guest retention sync never calls the cloud gateway', () async {
-    final store = await SqliteSourceStore.open(
-      factory: databaseFactoryFfiNoIsolate,
-      path: inMemoryDatabasePath,
-    );
+    final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
     addTearDown(store.close);
     final gateway = _FakeRetentionGateway();
     final service = RetentionContinuityService(store: store, gateway: gateway);

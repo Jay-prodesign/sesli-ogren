@@ -7,11 +7,7 @@ import 'retention_continuity_gateway.dart';
 enum RetentionContinuityDisposition { inSync, pushedLocal, pulledRemote, conflict, unavailable }
 
 class RetentionContinuityItemResult {
-  const RetentionContinuityItemResult({
-    required this.scheduleId,
-    required this.disposition,
-    this.message,
-  });
+  const RetentionContinuityItemResult({required this.scheduleId, required this.disposition, this.message});
 
   final RetentionScheduleId scheduleId;
   final RetentionContinuityDisposition disposition;
@@ -23,10 +19,8 @@ class RetentionContinuitySummary {
 
   final List<RetentionContinuityItemResult> results;
 
-  int get conflicts =>
-      results.where((item) => item.disposition == RetentionContinuityDisposition.conflict).length;
-  int get unavailable =>
-      results.where((item) => item.disposition == RetentionContinuityDisposition.unavailable).length;
+  int get conflicts => results.where((item) => item.disposition == RetentionContinuityDisposition.conflict).length;
+  int get unavailable => results.where((item) => item.disposition == RetentionContinuityDisposition.unavailable).length;
 }
 
 class RetentionContinuityService {
@@ -57,8 +51,7 @@ class RetentionContinuityService {
       final remote = await gateway.readMaterial(learner: learner, materialId: materialId);
       if (remote.any(
         (item) =>
-            item.schedule.materialId != materialId ||
-            item.schedule.sourceVersionId != current.identity.sourceVersionId,
+            item.schedule.materialId != materialId || item.schedule.sourceVersionId != current.identity.sourceVersionId,
       )) {
         throw const RetentionContinuityException(
           'Cloud retention belongs to a stale source.',
@@ -77,14 +70,7 @@ class RetentionContinuityService {
 
       final results = <RetentionContinuityItemResult>[];
       for (final id in ids) {
-        results.add(
-          await _reconcile(
-            learner: learner,
-            local: localById[id],
-            remote: remoteById[id],
-            scheduleId: id,
-          ),
-        );
+        results.add(await _reconcile(learner: learner, local: localById[id], remote: remoteById[id], scheduleId: id));
       }
       return results;
     } on RetentionContinuityException catch (error) {
@@ -152,10 +138,7 @@ class RetentionContinuityService {
         schedule: local.schedule,
         serverRevision: remote.revision,
       );
-      return RetentionContinuityItemResult(
-        scheduleId: scheduleId,
-        disposition: RetentionContinuityDisposition.inSync,
-      );
+      return RetentionContinuityItemResult(scheduleId: scheduleId, disposition: RetentionContinuityDisposition.inSync);
     }
 
     // Authenticated Recall evidence is server-canonical. If another device
@@ -201,11 +184,7 @@ class RetentionContinuityService {
       );
     }
 
-    return _pushLocal(
-      learner: learner,
-      local: local,
-      expectedRevision: remote.revision,
-    );
+    return _pushLocal(learner: learner, local: local, expectedRevision: remote.revision);
   }
 
   Future<RetentionContinuityItemResult> _pushLocal({

@@ -586,8 +586,7 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
     try {
       final retention = await widget.runtime.syncRetentionForMaterial(materialId);
       if (!mounted) return;
-      final conflicts =
-          retention.where((item) => item.disposition == RetentionContinuityDisposition.conflict).length;
+      final conflicts = retention.where((item) => item.disposition == RetentionContinuityDisposition.conflict).length;
       if (conflicts > 0) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
