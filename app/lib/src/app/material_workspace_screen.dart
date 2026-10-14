@@ -309,9 +309,7 @@ class _MaterialWorkspaceScreenState extends State<MaterialWorkspaceScreen> {
     try {
       final results = await widget.runtime.syncRetentionForMaterial(materialId);
       if (!mounted) return;
-      final conflicts = results
-          .where((item) => item.disposition == RetentionContinuityDisposition.conflict)
-          .length;
+      final conflicts = results.where((item) => item.disposition == RetentionContinuityDisposition.conflict).length;
       if (conflicts > 0) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(

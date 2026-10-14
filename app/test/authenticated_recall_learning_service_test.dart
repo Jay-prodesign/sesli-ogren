@@ -271,8 +271,7 @@ class _TrackingRetentionGateway implements RetentionContinuityGateway {
     writes += 1;
     final existingIndex = remote.indexWhere((item) => item.schedule.id == schedule.id);
     final current = existingIndex < 0 ? null : remote[existingIndex];
-    if ((current == null && expectedRevision != null) ||
-        (current != null && current.revision != expectedRevision)) {
+    if ((current == null && expectedRevision != null) || (current != null && current.revision != expectedRevision)) {
       throw const RetentionContinuityException(
         'retention revision conflict',
         kind: RetentionContinuityFailureKind.conflict,
@@ -532,6 +531,4 @@ void main() {
 
     expect(retentionGateway.writes, 1);
     expect(result.evidence.outcome, RecallOutcome.correct);
-  });
-
-}
+  });}
