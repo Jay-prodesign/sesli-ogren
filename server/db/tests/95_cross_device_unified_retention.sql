@@ -179,7 +179,7 @@ from public.write_retention_continuity(
   'flashcard:event-device-b-0001',
   3,
   0,
-  '2026-10-14T09:00:00Z'::timestamptz,
+  :'after_recall_last_reviewed_at'::timestamptz + interval '1 hour',
   2
 )
 \gset flash_
