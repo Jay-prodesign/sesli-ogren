@@ -639,13 +639,36 @@ as $$
   order by m.id, s.source_version desc, e.created_at desc
 $$;
 
+create or replace function public.list_superseded_media_storage_paths(
+  p_client_material_id text
+)
+returns table (storage_path text)
+language sql
+security definer
+set search_path = ''
+as $
+  select s.storage_path
+  from public.materials m
+  join public.source_assets s
+    on s.material_id = m.id
+   and s.account_id = m.account_id
+  where m.account_id = public.la_require_user()
+    and m.client_material_key = btrim(coalesce(p_client_material_id, ''))
+    and m.lifecycle_status = 'active'
+    and s.revoked_at is not null
+    and s.storage_bucket = 'study-materials'
+    and s.storage_path is not null
+  order by s.source_version asc
+$;
+
 revoke all on function public.prepare_media_material_continuity(text, text, text, text, text, text, bigint, text),
                        public.finalize_media_material_continuity(
                          text, text, text, text, text, text, text, bigint, text,
                          text, text, text, text, text, jsonb, jsonb
                        ),
                        public.read_material_continuity_v2(text),
-                       public.list_material_continuity_v2()
+                       public.list_material_continuity_v2(),
+                       public.list_superseded_media_storage_paths(text)
 from public, anon, authenticated;
 
 grant execute on function public.prepare_media_material_continuity(text, text, text, text, text, text, bigint, text),
@@ -654,5 +677,6 @@ grant execute on function public.prepare_media_material_continuity(text, text, t
                             text, text, text, text, text, jsonb, jsonb
                           ),
                           public.read_material_continuity_v2(text),
-                          public.list_material_continuity_v2()
+                          public.list_material_continuity_v2(),
+                          public.list_superseded_media_storage_paths(text)
 to authenticated, service_role;

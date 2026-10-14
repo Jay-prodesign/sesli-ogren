@@ -94,6 +94,11 @@ abstract interface class CloudContinuityGateway {
     required AuthenticatedLearner learner,
     required CloudMaterialSnapshot source,
   });
+
+  Future<void> cleanupSupersededMedia({
+    required AuthenticatedLearner learner,
+    required MaterialId materialId,
+  });
 }
 
 class UnavailableCloudContinuityGateway implements CloudContinuityGateway {
@@ -123,6 +128,12 @@ class UnavailableCloudContinuityGateway implements CloudContinuityGateway {
   Future<Uint8List> downloadMediaSource({
     required AuthenticatedLearner learner,
     required CloudMaterialSnapshot source,
+  }) async => _unavailable();
+
+  @override
+  Future<void> cleanupSupersededMedia({
+    required AuthenticatedLearner learner,
+    required MaterialId materialId,
   }) async => _unavailable();
 
   @override
