@@ -3106,12 +3106,7 @@ LIMIT 1
         where:
             'learner_id = ? AND material_id = ? AND source_version_id = ? '
             'AND latest_evidence_kind = ?',
-        whereArgs: [
-          learner.id.value,
-          materialId.value,
-          sourceVersionId.value,
-          RetentionEvidenceKind.recall.name,
-        ],
+        whereArgs: [learner.id.value, materialId.value, sourceVersionId.value, RetentionEvidenceKind.recall.name],
       );
 
       for (final schedule in schedules) {

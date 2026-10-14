@@ -201,29 +201,32 @@ class SupabaseServerRecallGateway implements ServerRecallGateway {
         'read_recall_retention_continuity',
         params: {'p_client_material_id': materialId.value},
       );
-      return rows.whereType<Map>().map((raw) {
-        final row = Map<String, dynamic>.from(raw);
-        final sourceVersionId = SourceVersionId(row['client_source_id'] as String);
-        final anchor = SourceAnchor.fromJson(Map<String, Object?>.from(row['source_anchor'] as Map));
-        final latestEvidenceId = row['latest_evidence_id'] as String;
-        final interval = Duration(seconds: row['interval_seconds'] as int);
-        return RetentionScheduleRecord(
-          id: RetentionPolicy.scheduleIdFor(sourceVersionId, anchor),
-          materialId: MaterialId(row['client_material_id'] as String),
-          sourceVersionId: sourceVersionId,
-          sourceAnchor: anchor,
-          latestEvidenceKind: RetentionEvidenceKind.recall,
-          latestOutcomeBand: _outcomeBand(row['latest_outcome_band'] as String),
-          latestEventId: 'server-recall:$latestEvidenceId',
-          reasonCode: row['reason_code'] as String,
-          reviewCount: row['review_count'] as int,
-          successStreak: row['success_streak'] as int,
-          interval: interval,
-          dueAt: DateTime.parse(row['due_at'] as String).toUtc(),
-          lastReviewedAt: DateTime.parse(row['last_reviewed_at'] as String).toUtc(),
-          policyVersion: row['policy_version'] as String,
-        );
-      }).toList(growable: false);
+      return rows
+          .whereType<Map>()
+          .map((raw) {
+            final row = Map<String, dynamic>.from(raw);
+            final sourceVersionId = SourceVersionId(row['client_source_id'] as String);
+            final anchor = SourceAnchor.fromJson(Map<String, Object?>.from(row['source_anchor'] as Map));
+            final latestEvidenceId = row['latest_evidence_id'] as String;
+            final interval = Duration(seconds: row['interval_seconds'] as int);
+            return RetentionScheduleRecord(
+              id: RetentionPolicy.scheduleIdFor(sourceVersionId, anchor),
+              materialId: MaterialId(row['client_material_id'] as String),
+              sourceVersionId: sourceVersionId,
+              sourceAnchor: anchor,
+              latestEvidenceKind: RetentionEvidenceKind.recall,
+              latestOutcomeBand: _outcomeBand(row['latest_outcome_band'] as String),
+              latestEventId: 'server-recall:$latestEvidenceId',
+              reasonCode: row['reason_code'] as String,
+              reviewCount: row['review_count'] as int,
+              successStreak: row['success_streak'] as int,
+              interval: interval,
+              dueAt: DateTime.parse(row['due_at'] as String).toUtc(),
+              lastReviewedAt: DateTime.parse(row['last_reviewed_at'] as String).toUtc(),
+              policyVersion: row['policy_version'] as String,
+            );
+          })
+          .toList(growable: false);
     } on PostgrestException catch (error) {
       throw _mapError(error);
     }

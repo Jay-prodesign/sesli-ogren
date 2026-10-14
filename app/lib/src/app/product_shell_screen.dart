@@ -85,9 +85,9 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
           .reconcileAll(learner: widget.runtime.learner)
           .timeout(const Duration(seconds: 8));
       _continuityNotice = _CloudContinuityNotice.fromResults(results);
-      final learningFailures = await widget.runtime
-          .syncAuthenticatedLearningContinuity()
-          .timeout(const Duration(seconds: 8));
+      final learningFailures = await widget.runtime.syncAuthenticatedLearningContinuity().timeout(
+        const Duration(seconds: 8),
+      );
       if (learningFailures > 0 && _continuityNotice == null) {
         _continuityNotice = const _CloudContinuityNotice(
           kind: _CloudContinuityNoticeKind.unavailable,

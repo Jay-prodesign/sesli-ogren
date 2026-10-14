@@ -145,10 +145,7 @@ abstract interface class ServerRecallGateway {
     required String answer,
   });
 
-  Future<ServerRecallProjection?> readLatest({
-    required AuthenticatedLearner learner,
-    required MaterialId materialId,
-  });
+  Future<ServerRecallProjection?> readLatest({required AuthenticatedLearner learner, required MaterialId materialId});
 
   Future<List<RetentionScheduleRecord>> readRetention({
     required AuthenticatedLearner learner,
