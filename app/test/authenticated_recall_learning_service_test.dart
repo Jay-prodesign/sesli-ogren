@@ -486,7 +486,7 @@ void main() {
       text: text,
       sourceName: 'Biyoloji',
     );
-    final quiz = QuizLearningService(store: store, clock: () => DateTime.utc(2026, 10, 14, 8));
+    final quiz = QuizLearningService(store: store, now: () => DateTime.utc(2026, 10, 14, 8));
     final quizState = await quiz.openCurrentSet(learner: learner, materialId: materialId);
     final question = quizState.currentQuestion!;
     await quiz.recordAnswer(
