@@ -110,6 +110,7 @@ class CloudContinuityService {
       }
 
       if (localSource.identity.sourceVersionId == remote.sourceVersionId) {
+        await gateway.cleanupSupersededMedia(learner: learner, materialId: materialId);
         await store.saveServerMaterialBinding(
           learner: learner,
           materialId: materialId,
@@ -158,13 +159,6 @@ class CloudContinuityService {
     required SourceVersionRecord localSource,
     required SourceVersionId? expectedPreviousSourceVersionId,
   }) async {
-    if (localSource.mediaType != SourceMediaType.pastedText || localSource.inlineText == null) {
-      return CloudContinuityItemResult(
-        materialId: materialId,
-        disposition: CloudContinuityDisposition.unsupportedSource,
-        message: 'Original-media cloud storage is required before this source can sync across devices.',
-      );
-    }
     final extracted = await store.extractedContentForSource(
       learner: learner,
       sourceVersionId: localSource.identity.sourceVersionId,
@@ -177,11 +171,42 @@ class CloudContinuityService {
       );
     }
 
-    final snapshot = await gateway.ensureTextSource(
-      learner: learner,
-      source: SourceIngestResult(material: localMaterial, sourceVersion: localSource, extractedContent: extracted),
-      expectedPreviousSourceVersionId: expectedPreviousSourceVersionId,
+    final ingestResult = SourceIngestResult(
+      material: localMaterial,
+      sourceVersion: localSource,
+      extractedContent: extracted,
     );
+    final CloudMaterialSnapshot snapshot;
+    if (localSource.mediaType == SourceMediaType.pastedText) {
+      if (localSource.inlineText == null) {
+        throw const CloudContinuityException(
+          'Pasted text source lost its canonical inline source.',
+          kind: CloudContinuityFailureKind.conflict,
+        );
+      }
+      snapshot = await gateway.ensureTextSource(
+        learner: learner,
+        source: ingestResult,
+        expectedPreviousSourceVersionId: expectedPreviousSourceVersionId,
+      );
+    } else {
+      final bytes = await store.rawSourceBytesForSource(
+        learner: learner,
+        sourceVersionId: localSource.identity.sourceVersionId,
+      );
+      if (bytes == null || bytes.isEmpty) {
+        throw const CloudContinuityException(
+          'Original-media source bytes are unavailable on this device.',
+          kind: CloudContinuityFailureKind.conflict,
+        );
+      }
+      snapshot = await gateway.ensureMediaSource(
+        learner: learner,
+        source: ingestResult,
+        rawSourceBytes: bytes,
+        expectedPreviousSourceVersionId: expectedPreviousSourceVersionId,
+      );
+    }
     if (snapshot.materialId != materialId ||
         snapshot.sourceVersionId != localSource.identity.sourceVersionId ||
         snapshot.sourceContentHash != localSource.identity.contentDigest) {
@@ -191,6 +216,7 @@ class CloudContinuityService {
       );
     }
 
+    await gateway.cleanupSupersededMedia(learner: learner, materialId: materialId);
     await store.saveServerMaterialBinding(
       learner: learner,
       materialId: materialId,
@@ -204,36 +230,53 @@ class CloudContinuityService {
     required AuthenticatedLearner learner,
     required CloudMaterialSnapshot remote,
   }) async {
-    final inlineText = remote.inlineText;
-    if (remote.mediaType != SourceMediaType.pastedText || inlineText == null) {
-      return CloudContinuityItemResult(
+    final SourceIngestResult result;
+    if (remote.mediaType == SourceMediaType.pastedText) {
+      final inlineText = remote.inlineText;
+      if (inlineText == null) {
+        throw const CloudContinuityException(
+          'Cloud pasted text lost its canonical inline source.',
+          kind: CloudContinuityFailureKind.invalidPayload,
+        );
+      }
+      final digest = sha256.convert(utf8.encode(inlineText)).toString();
+      final derivedSourceId = SourceIngestService.deriveSourceVersionId(
+        learner: learner,
         materialId: remote.materialId,
-        disposition: CloudContinuityDisposition.unsupportedSource,
-        message: 'This cloud source needs its original media before it can open on this device.',
+        mediaType: SourceMediaType.pastedText,
+        contentDigest: digest,
+      );
+      if (digest != remote.sourceContentHash || derivedSourceId != remote.sourceVersionId) {
+        return CloudContinuityItemResult(
+          materialId: remote.materialId,
+          disposition: CloudContinuityDisposition.conflict,
+          message: 'Cloud source identity cannot be reproduced exactly on this device.',
+        );
+      }
+      result = await ingest.ingestPastedText(
+        learner: learner,
+        materialId: remote.materialId,
+        text: inlineText,
+        sourceName: remote.sourceName,
+      );
+    } else {
+      final bytes = await gateway.downloadMediaSource(learner: learner, source: remote);
+      result = await ingest.hydrateVerifiedMediaSource(
+        learner: learner,
+        materialId: remote.materialId,
+        expectedSourceVersionId: remote.sourceVersionId,
+        contentDigest: remote.sourceContentHash,
+        mediaType: remote.mediaType,
+        sourceName: remote.sourceName,
+        mimeType: remote.mimeType,
+        rawSourceBytes: bytes,
+        normalizedText: remote.normalizedText,
+        extractionMethod: remote.extractionMethod,
+        extractionMethodVersion: remote.extractionMethodVersion,
+        anchors: remote.anchors,
+        warnings: remote.warnings,
       );
     }
-
-    final digest = sha256.convert(utf8.encode(inlineText)).toString();
-    final derivedSourceId = SourceIngestService.deriveSourceVersionId(
-      learner: learner,
-      materialId: remote.materialId,
-      mediaType: SourceMediaType.pastedText,
-      contentDigest: digest,
-    );
-    if (digest != remote.sourceContentHash || derivedSourceId != remote.sourceVersionId) {
-      return CloudContinuityItemResult(
-        materialId: remote.materialId,
-        disposition: CloudContinuityDisposition.conflict,
-        message: 'Cloud source identity cannot be reproduced exactly on this device.',
-      );
-    }
-
-    final result = await ingest.ingestPastedText(
-      learner: learner,
-      materialId: remote.materialId,
-      text: inlineText,
-      sourceName: remote.title,
-    );
     if (result.sourceVersion.identity.sourceVersionId != remote.sourceVersionId ||
         result.sourceVersion.identity.contentDigest != remote.sourceContentHash) {
       return CloudContinuityItemResult(
@@ -243,6 +286,7 @@ class CloudContinuityService {
       );
     }
 
+    await gateway.cleanupSupersededMedia(learner: learner, materialId: remote.materialId);
     await store.saveServerMaterialBinding(
       learner: learner,
       materialId: remote.materialId,
