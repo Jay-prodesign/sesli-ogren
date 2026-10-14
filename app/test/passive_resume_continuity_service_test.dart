@@ -45,10 +45,7 @@ class _FakePassiveResumeGateway implements PassiveResumeGateway {
     final current = remote[local.surface];
     if (current == null) {
       if (expectedRevision != null) {
-        throw const PassiveResumeException(
-          'resume_revision_conflict',
-          kind: PassiveResumeFailureKind.conflict,
-        );
+        throw const PassiveResumeException('resume_revision_conflict', kind: PassiveResumeFailureKind.conflict);
       }
     } else if (current.revision != expectedRevision) {
       throw const PassiveResumeException(
@@ -111,8 +108,10 @@ void main() {
     );
     var result = await service.syncMaterial(learner: learner, materialId: materialId);
 
-    expect(result.singleWhere((item) => item.surface == PassiveResumeSurface.reader).disposition,
-        PassiveResumeSyncDisposition.pushedLocal);
+    expect(
+      result.singleWhere((item) => item.surface == PassiveResumeSurface.reader).disposition,
+      PassiveResumeSyncDisposition.pushedLocal,
+    );
     var local = await store.passiveResumeLocalState(
       learner: learner,
       materialId: materialId,
@@ -133,8 +132,10 @@ void main() {
     );
     result = await service.syncMaterial(learner: learner, materialId: materialId);
 
-    expect(result.singleWhere((item) => item.surface == PassiveResumeSurface.reader).disposition,
-        PassiveResumeSyncDisposition.pulledRemote);
+    expect(
+      result.singleWhere((item) => item.surface == PassiveResumeSurface.reader).disposition,
+      PassiveResumeSyncDisposition.pulledRemote,
+    );
     expect(await store.readerResumeProgress(learner: learner, materialId: materialId, sourceVersionId: sourceId), 0.70);
 
     await store.saveReaderResumeProgress(
@@ -197,8 +198,10 @@ void main() {
 
     final result = await service.syncMaterial(learner: learner, materialId: materialId);
 
-    expect(result.singleWhere((item) => item.surface == PassiveResumeSurface.reader).disposition,
-        PassiveResumeSyncDisposition.conflict);
+    expect(
+      result.singleWhere((item) => item.surface == PassiveResumeSurface.reader).disposition,
+      PassiveResumeSyncDisposition.conflict,
+    );
     expect(await store.readerResumeProgress(learner: learner, materialId: materialId, sourceVersionId: sourceId), 0.60);
     expect(gateway.remote[PassiveResumeSurface.reader]?.readerProgress, 0.90);
   });
@@ -221,8 +224,10 @@ void main() {
     );
     final result = await service.syncMaterial(learner: learner, materialId: materialId);
 
-    expect(result.singleWhere((item) => item.surface == PassiveResumeSurface.listen).disposition,
-        PassiveResumeSyncDisposition.pushedLocal);
+    expect(
+      result.singleWhere((item) => item.surface == PassiveResumeSurface.listen).disposition,
+      PassiveResumeSyncDisposition.pushedLocal,
+    );
     expect(gateway.remote[PassiveResumeSurface.listen]?.listenChunkIndex, 4);
     expect(gateway.remote[PassiveResumeSurface.listen]?.revision, 1);
     expect(gateway.remote[PassiveResumeSurface.reader], isNull);
@@ -252,11 +257,10 @@ void main() {
     await deviceA.syncMaterial(learner: learner, materialId: materialId);
 
     await deviceB.syncMaterial(learner: learner, materialId: materialId);
-    expect(await storeB.readerResumeProgress(
-      learner: learner,
-      materialId: materialId,
-      sourceVersionId: sourceId,
-    ), 0.31);
+    expect(
+      await storeB.readerResumeProgress(learner: learner, materialId: materialId, sourceVersionId: sourceId),
+      0.31,
+    );
 
     await storeB.saveReaderResumeProgress(
       learner: learner,
@@ -273,11 +277,10 @@ void main() {
       result.singleWhere((item) => item.surface == PassiveResumeSurface.reader).disposition,
       PassiveResumeSyncDisposition.pulledRemote,
     );
-    expect(await storeA.readerResumeProgress(
-      learner: learner,
-      materialId: materialId,
-      sourceVersionId: sourceId,
-    ), 0.74);
+    expect(
+      await storeA.readerResumeProgress(learner: learner, materialId: materialId, sourceVersionId: sourceId),
+      0.74,
+    );
   });
 
   test('guest sync does not call the remote resume gateway', () async {
