@@ -226,9 +226,9 @@ void main() {
     await _openLibraryTab(tester);
     final continueReading = find.byKey(const ValueKey('library-continue-reader-return-material'));
     await _pumpUntilFound(tester, continueReading);
-    expect(find.text('Okumaya devam et').hitTestable(), findsOneWidget);
     await tester.ensureVisible(continueReading);
     await tester.pump(const Duration(milliseconds: 300));
+    expect(find.text('Okumaya devam et').hitTestable(), findsOneWidget);
     await tester.tap(continueReading.hitTestable());
     await _pumpUntilFound(tester, find.byType(SourceReaderScreen));
     expect(find.byType(SourceReaderScreen), findsOneWidget);
@@ -277,9 +277,9 @@ void main() {
     await _openLibraryTab(tester);
     final continueReading = find.byKey(const ValueKey('library-continue-reader-listen-recall-material'));
     await _pumpUntilFound(tester, continueReading);
-    expect(find.text('Okumaya devam et').hitTestable(), findsOneWidget);
     await tester.ensureVisible(continueReading);
     await tester.pump(const Duration(milliseconds: 300));
+    expect(find.text('Okumaya devam et').hitTestable(), findsOneWidget);
     await tester.tap(continueReading.hitTestable());
     await _pumpUntilFound(tester, find.byType(SourceReaderScreen));
     expect(find.byType(SourceReaderScreen), findsOneWidget);
