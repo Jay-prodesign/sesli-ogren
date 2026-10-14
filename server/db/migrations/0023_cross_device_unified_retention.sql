@@ -174,7 +174,7 @@ as $$
 declare
   v_user uuid := public.la_require_user();
   v_material public.materials%rowtype;
-  v_source public.source_assets%rowtype;
+  v_source_id uuid;
   v_text text;
   v_existing public.retention_schedules%rowtype;
   v_start integer;
@@ -230,8 +230,8 @@ begin
     raise exception 'material_not_found' using errcode = 'P0001';
   end if;
 
-  select s, e.normalized_text
-    into v_source, v_text
+  select s.id, e.normalized_text
+    into v_source_id, v_text
   from public.source_assets s
   join public.extracted_contents e
     on e.account_id = s.account_id
@@ -255,7 +255,7 @@ begin
     into v_existing
   from public.retention_schedules
   where account_id = v_user
-    and source_asset_id = v_source.id
+    and source_asset_id = v_source_id
     and source_start = v_start
     and source_end = v_end
     and page_number = v_page
@@ -289,7 +289,7 @@ begin
            v_existing.policy_version,
            v_existing.revision
     from public.materials m
-    join public.source_assets s on s.id = v_source.id
+    join public.source_assets s on s.id = v_source_id
     where m.id = v_material.id;
     return;
   end if;
@@ -360,7 +360,7 @@ begin
   values (
     v_user,
     v_material.id,
-    v_source.id,
+    v_source_id,
     v_start,
     v_end,
     v_page,
@@ -415,7 +415,7 @@ begin
   join public.materials m on m.id = r.material_id and m.account_id = r.account_id
   join public.source_assets s on s.id = r.source_asset_id and s.account_id = r.account_id
   where r.account_id = v_user
-    and r.source_asset_id = v_source.id
+    and r.source_asset_id = v_source_id
     and r.source_start = v_start
     and r.source_end = v_end
     and r.page_number = v_page;
