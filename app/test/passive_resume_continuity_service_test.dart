@@ -228,6 +228,58 @@ void main() {
     expect(gateway.remote[PassiveResumeSurface.reader], isNull);
   });
 
+  test('two device Reader resume round-trip converges without wall-clock arbitration', () async {
+    const learner = AuthenticatedLearner(id: LearnerId('resume-two-device-learner'));
+    const materialId = MaterialId('material_resume_two_device');
+    final (storeA, _, sourceA) = await _source(learner: learner, materialId: materialId);
+    final (storeB, _, sourceB) = await _source(learner: learner, materialId: materialId);
+    addTearDown(storeA.close);
+    addTearDown(storeB.close);
+    expect(sourceA.sourceVersion.identity.sourceVersionId, sourceB.sourceVersion.identity.sourceVersionId);
+
+    final gateway = _FakePassiveResumeGateway();
+    final deviceA = PassiveResumeContinuityService(store: storeA, gateway: gateway);
+    final deviceB = PassiveResumeContinuityService(store: storeB, gateway: gateway);
+    final sourceId = sourceA.sourceVersion.identity.sourceVersionId;
+
+    await storeA.saveReaderResumeProgress(
+      learner: learner,
+      materialId: materialId,
+      sourceVersionId: sourceId,
+      progress: 0.31,
+      updatedAt: DateTime.utc(2026, 10, 14, 8),
+    );
+    await deviceA.syncMaterial(learner: learner, materialId: materialId);
+
+    await deviceB.syncMaterial(learner: learner, materialId: materialId);
+    expect(await storeB.readerResumeProgress(
+      learner: learner,
+      materialId: materialId,
+      sourceVersionId: sourceId,
+    ), 0.31);
+
+    await storeB.saveReaderResumeProgress(
+      learner: learner,
+      materialId: materialId,
+      sourceVersionId: sourceId,
+      progress: 0.74,
+      updatedAt: DateTime.utc(2026, 10, 14, 9),
+    );
+    await deviceB.syncMaterial(learner: learner, materialId: materialId);
+    expect(gateway.remote[PassiveResumeSurface.reader]?.revision, 2);
+
+    final result = await deviceA.syncMaterial(learner: learner, materialId: materialId);
+    expect(
+      result.singleWhere((item) => item.surface == PassiveResumeSurface.reader).disposition,
+      PassiveResumeSyncDisposition.pulledRemote,
+    );
+    expect(await storeA.readerResumeProgress(
+      learner: learner,
+      materialId: materialId,
+      sourceVersionId: sourceId,
+    ), 0.74);
+  });
+
   test('guest sync does not call the remote resume gateway', () async {
     final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
     addTearDown(store.close);
