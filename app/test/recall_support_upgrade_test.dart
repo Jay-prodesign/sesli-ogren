@@ -558,6 +558,87 @@ CREATE TABLE extracted_contents (
     }
   });
 
+  test('v20 Reader and Listen progress upgrades to cloud sync ancestry without reset', () async {
+    final temp = await Directory.systemTemp.createTemp('sesli-ogren-v20-passive-resume-');
+    final path = '${temp.path}/passive-resume.db';
+    Database? legacy;
+    SqliteSourceStore? upgraded;
+    Database? inspected;
+
+    try {
+      legacy = await databaseFactoryFfi.openDatabase(
+        path,
+        options: OpenDatabaseOptions(
+          version: 20,
+          onCreate: (db, version) async {
+            await db.execute('''
+CREATE TABLE reader_progress (
+  learner_id TEXT NOT NULL,
+  material_id TEXT NOT NULL,
+  source_version_id TEXT NOT NULL,
+  progress REAL NOT NULL,
+  updated_at_utc TEXT NOT NULL,
+  PRIMARY KEY (learner_id, material_id)
+)
+''');
+            await db.execute('''
+CREATE TABLE listen_progress (
+  learner_id TEXT NOT NULL,
+  material_id TEXT NOT NULL,
+  source_version_id TEXT NOT NULL,
+  chunk_index INTEGER NOT NULL,
+  updated_at_utc TEXT NOT NULL,
+  PRIMARY KEY (learner_id, material_id)
+)
+''');
+            await db.insert('reader_progress', {
+              'learner_id': 'owner',
+              'material_id': 'material-a',
+              'source_version_id': 'source-a',
+              'progress': 0.42,
+              'updated_at_utc': '2026-10-13T09:00:00Z',
+            });
+            await db.insert('listen_progress', {
+              'learner_id': 'owner',
+              'material_id': 'material-a',
+              'source_version_id': 'source-a',
+              'chunk_index': 5,
+              'updated_at_utc': '2026-10-13T09:05:00Z',
+            });
+          },
+        ),
+      );
+      await legacy.close();
+      legacy = null;
+
+      upgraded = await SqliteSourceStore.open(factory: databaseFactoryFfi, path: path);
+      await upgraded.close();
+      upgraded = null;
+
+      inspected = await databaseFactoryFfi.openDatabase(path);
+      for (final table in const ['reader_progress', 'listen_progress']) {
+        final columns = await inspected.rawQuery('PRAGMA table_info($table)');
+        final names = columns.map((row) => row['name']).toSet();
+        expect(names, containsAll(['server_revision', 'synced_local_updated_at_utc']));
+      }
+
+      final reader = (await inspected.query('reader_progress')).single;
+      expect(reader['progress'], 0.42);
+      expect(reader['server_revision'], isNull);
+      expect(reader['synced_local_updated_at_utc'], isNull);
+
+      final listen = (await inspected.query('listen_progress')).single;
+      expect(listen['chunk_index'], 5);
+      expect(listen['server_revision'], isNull);
+      expect(listen['synced_local_updated_at_utc'], isNull);
+    } finally {
+      await legacy?.close();
+      await upgraded?.close();
+      await inspected?.close();
+      await temp.delete(recursive: true);
+    }
+  });
+
   test('summary job survives reopen and respects learner and source version', () async {
     final temp = await Directory.systemTemp.createTemp('sesli-ogren-summary-job-');
     final path = '${temp.path}/summary.db';
