@@ -157,6 +157,16 @@ Future<void> _pumpUntilFound(WidgetTester tester, Finder finder, {int maxPumps =
   expect(finder, findsOneWidget);
 }
 
+Future<void> _scrollUntilFound(WidgetTester tester, Finder finder) async {
+  await tester.scrollUntilVisible(
+    finder,
+    240,
+    scrollable: find.byType(Scrollable).first,
+    maxScrolls: 20,
+  );
+  expect(finder, findsOneWidget);
+}
+
 Future<(SqliteSourceStore, SourceIngestService, SourceIngestResult)> _source({
   required MaterialId materialId,
   String text =
@@ -219,8 +229,8 @@ void main() {
         home: QuickRecapScreen(runtime: runtime, materialId: materialId, summaryGateway: summary),
       ),
     );
-    await _pumpUntilFound(tester, find.byKey(const ValueKey('quick-recap-create')));
-    await tester.ensureVisible(find.byKey(const ValueKey('quick-recap-create')));
+    await _pumpUntilFound(tester, find.byKey(const ValueKey('quick-recap-source-trust')));
+    await _scrollUntilFound(tester, find.byKey(const ValueKey('quick-recap-create')));
     await tester.tap(find.byKey(const ValueKey('quick-recap-create')));
     await _pumpUntilFound(tester, find.byKey(const ValueKey('entitlement-access-boundary')));
 
@@ -382,8 +392,7 @@ void main() {
     );
     await _pumpUntilFound(tester, find.byType(TextField));
     await tester.enterText(find.byType(TextField), 'Karbondioksit süreçte nasıl kullanılır?');
-    await _pumpUntilFound(tester, find.text('İpucu ver'));
-    await tester.ensureVisible(find.text('İpucu ver'));
+    await _scrollUntilFound(tester, find.text('İpucu ver'));
     await tester.tap(find.text('İpucu ver'));
     await _pumpUntilFound(tester, find.textContaining('Kaynak ipucu'));
 
