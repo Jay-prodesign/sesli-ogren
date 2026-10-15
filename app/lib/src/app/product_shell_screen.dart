@@ -129,7 +129,9 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
   }
 
   void _retryContinuity() {
-    setState(() => _snapshot = _reconcileThenLoadSnapshot());
+    setState(() {
+      _snapshot = _reconcileThenLoadSnapshot();
+    });
   }
 
   Future<LearningContinuation?> _continuationFor(MaterialId materialId) async {
