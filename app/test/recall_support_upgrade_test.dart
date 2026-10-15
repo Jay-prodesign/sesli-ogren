@@ -669,16 +669,9 @@ CREATE TABLE sentinel (
       upgraded = null;
 
       inspected = await databaseFactoryFfi.openDatabase(path);
-      final tables = await inspected.rawQuery(
-        "SELECT name FROM sqlite_master WHERE type = 'table'",
-      );
-      expect(
-        tables.map((row) => row['name']),
-        contains('product_analytics_outbox'),
-      );
-      final columns = await inspected.rawQuery(
-        'PRAGMA table_info(product_analytics_outbox)',
-      );
+      final tables = await inspected.rawQuery("SELECT name FROM sqlite_master WHERE type = 'table'");
+      expect(tables.map((row) => row['name']), contains('product_analytics_outbox'));
+      final columns = await inspected.rawQuery('PRAGMA table_info(product_analytics_outbox)');
       final names = columns.map((row) => row['name']).toSet();
       expect(
         names,
@@ -698,12 +691,7 @@ CREATE TABLE sentinel (
           'synced_at_utc',
         ]),
       );
-      expect(
-        names,
-        isNot(
-          contains(anyOf('source_text', 'prompt', 'answer_text', 'content')),
-        ),
-      );
+      expect(names, isNot(contains(anyOf('source_text', 'prompt', 'answer_text', 'content'))));
       final sentinel = await inspected.query('sentinel');
       expect(sentinel.single['value'], 'preserved');
     } finally {
