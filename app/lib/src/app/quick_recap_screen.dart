@@ -216,6 +216,7 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> with WidgetsBinding
     if (!mounted) return false;
     if (!access.isAllowed) {
       setState(() => _access = access);
+      widget.runtime.recordEntitlementBoundary(access);
       return false;
     }
     if (_access != null) {
@@ -359,6 +360,7 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> with WidgetsBinding
         _access = access;
         _error = access == null ? 'Özet isteği gönderilemedi. Oturumunu ve bağlantını kontrol et.' : null;
       });
+      if (access != null) widget.runtime.recordEntitlementBoundary(access);
     } finally {
       if (mounted) setState(() => _busy = false);
     }
