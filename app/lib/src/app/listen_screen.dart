@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
+import '../analytics/product_analytics.dart';
 import '../domain/learning_contracts.dart';
 import '../speech/device_speech_output.dart';
 import 'app_runtime.dart';
@@ -47,6 +48,8 @@ class _ListenScreenState extends State<ListenScreen> {
   int _currentChunkIndex = 0;
   int _playToken = 0;
   double? _playbackRate;
+  DateTime? _listenStartedAt;
+  int? _analyticsFailureToken;
 
   @override
   void initState() {
@@ -147,6 +150,23 @@ class _ListenScreenState extends State<ListenScreen> {
     final safeStart = start >= 0 && start < source.chunks.length ? start : 0;
     final rate = _playbackRate ?? source.playbackRate;
     final token = ++_playToken;
+    _analyticsFailureToken = null;
+    _listenStartedAt ??= DateTime.now().toUtc();
+    unawaited(
+      widget.runtime.analytics.record(
+        learner: widget.runtime.learner,
+        event: ProductAnalyticsEvent(
+          type: ProductAnalyticsEventType.listenSession,
+          phase: ProductAnalyticsPhase.started,
+          createdAt: _listenStartedAt!,
+          materialId: widget.materialId,
+          sourceVersionId: source.sourceVersion.identity.sourceVersionId,
+          surface: ProductAnalyticsSurface.listen,
+          capability: ProductAnalyticsCapability.listen,
+          reasonCode: safeStart > 0 ? 'resume' : 'start',
+        ),
+      ),
+    );
     setState(() {
       _error = null;
       _currentChunkIndex = safeStart;
@@ -188,6 +208,7 @@ class _ListenScreenState extends State<ListenScreen> {
         rateMultiplier: rate,
         onError: (_) {
           if (!mounted || token != _playToken) return;
+          unawaited(_recordListenFailure(source, token));
           setState(() {
             _speaking = false;
             _startingPlayback = false;
@@ -197,6 +218,7 @@ class _ListenScreenState extends State<ListenScreen> {
       );
     } catch (_) {
       if (!mounted || token != _playToken) return;
+      unawaited(_recordListenFailure(source, token));
       setState(() {
         _speaking = false;
         _startingPlayback = false;
@@ -220,6 +242,27 @@ class _ListenScreenState extends State<ListenScreen> {
         }
       }
       if (!mounted || token != _playToken) return;
+      final startedAt = _listenStartedAt;
+      _listenStartedAt = null;
+      if (startedAt != null) {
+        unawaited(
+          widget.runtime.analytics.record(
+            learner: widget.runtime.learner,
+            event: ProductAnalyticsEvent(
+              type: ProductAnalyticsEventType.listenSession,
+              phase: ProductAnalyticsPhase.completed,
+              createdAt: DateTime.now().toUtc(),
+              materialId: widget.materialId,
+              sourceVersionId: source.sourceVersion.identity.sourceVersionId,
+              surface: ProductAnalyticsSurface.listen,
+              capability: ProductAnalyticsCapability.listen,
+              outcomeClass: 'completed',
+              durationMs: DateTime.now().toUtc().difference(startedAt).inMilliseconds,
+              quantity: source.chunks.length,
+            ),
+          ),
+        );
+      }
       setState(() {
         _speaking = false;
         _startingPlayback = false;
@@ -245,6 +288,30 @@ class _ListenScreenState extends State<ListenScreen> {
       _currentChunkIndex = next;
     });
     await _playChunk(source, next, token, rate);
+  }
+
+  Future<void> _recordListenFailure(_ListenSource source, int token) async {
+    if (_analyticsFailureToken == token) return;
+    _analyticsFailureToken = token;
+    final startedAt = _listenStartedAt;
+    _listenStartedAt = null;
+    await widget.runtime.analytics.record(
+      learner: widget.runtime.learner,
+      event: ProductAnalyticsEvent(
+        type: ProductAnalyticsEventType.listenSession,
+        phase: ProductAnalyticsPhase.failed,
+        createdAt: DateTime.now().toUtc(),
+        materialId: widget.materialId,
+        sourceVersionId: source.sourceVersion.identity.sourceVersionId,
+        surface: ProductAnalyticsSurface.listen,
+        capability: ProductAnalyticsCapability.listen,
+        outcomeClass: 'speech_unavailable',
+        reasonCode: 'device_speech',
+        durationMs: startedAt == null
+            ? null
+            : DateTime.now().toUtc().difference(startedAt).inMilliseconds,
+      ),
+    );
   }
 
   Future<void> _setPlaybackRate(double rate) async {
