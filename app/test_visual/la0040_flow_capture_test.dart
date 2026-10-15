@@ -1367,6 +1367,13 @@ void main() {
     expect(currentSource, isNotNull);
     final sourceForTools = currentSource!;
 
+    Future<void> pumpUntilFound(Finder finder, {int maxPumps = 250}) async {
+      for (var i = 0; i < maxPumps && finder.evaluate().isEmpty; i++) {
+        await tester.pump(const Duration(milliseconds: 30));
+      }
+      expect(finder, findsOneWidget);
+    }
+
     Future<void> captureScreen(String name, Widget child) async {
       await tester.pumpWidget(
         MaterialApp(
@@ -1425,11 +1432,10 @@ void main() {
         ),
       ),
     );
-    await tester.pump(const Duration(milliseconds: 500));
+    await pumpUntilFound(find.byKey(const ValueKey('quick-recap-create')));
     await tester.ensureVisible(find.byKey(const ValueKey('quick-recap-create')));
     await tester.tap(find.byKey(const ValueKey('quick-recap-create')));
-    await tester.pump(const Duration(milliseconds: 400));
-    expect(find.byKey(const ValueKey('entitlement-access-boundary')), findsOneWidget);
+    await pumpUntilFound(find.byKey(const ValueKey('entitlement-access-boundary')));
     expect(tester.takeException(), isNull);
     await expectLater(
       find.byType(Scaffold),
@@ -1464,11 +1470,10 @@ void main() {
         ),
       ),
     );
-    await tester.pump(const Duration(milliseconds: 500));
+    await pumpUntilFound(find.byKey(const ValueKey('quick-recap-create')));
     await tester.ensureVisible(find.byKey(const ValueKey('quick-recap-create')));
     await tester.tap(find.byKey(const ValueKey('quick-recap-create')));
-    await tester.pump(const Duration(milliseconds: 400));
-    expect(find.byKey(const ValueKey('entitlement-access-boundary')), findsOneWidget);
+    await pumpUntilFound(find.byKey(const ValueKey('entitlement-access-boundary')));
     expect(find.text('Plan durumun doğrulanıyor'), findsOneWidget);
     expect(tester.takeException(), isNull);
     await expectLater(
