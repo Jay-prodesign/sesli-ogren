@@ -962,6 +962,14 @@ CREATE TABLE IF NOT EXISTS reader_progress (
 
   static Future<void> _upgradePassiveResumeCloudMetadataSchema(Database db) async {
     for (final table in const ['listen_progress', 'reader_progress']) {
+      final existing = await db.rawQuery(
+        "SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = ? LIMIT 1",
+        [table],
+      );
+      if (existing.isEmpty) {
+        continue;
+      }
+
       final columns = await db.rawQuery('PRAGMA table_info($table)');
       final names = columns.map((row) => row['name'] as String).toSet();
       if (!names.contains('server_revision')) {
@@ -1614,6 +1622,13 @@ ON source_versions (learner_id, material_id, created_at_utc)
   }
 
   static Future<void> _upgradeRetentionCloudMetadataSchema(Database db) async {
+    final existing = await db.rawQuery(
+      "SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'retention_schedules' LIMIT 1",
+    );
+    if (existing.isEmpty) {
+      return;
+    }
+
     final columns = await db.rawQuery('PRAGMA table_info(retention_schedules)');
     final names = columns.map((row) => row['name'] as String).toSet();
     if (!names.contains('server_revision')) {
