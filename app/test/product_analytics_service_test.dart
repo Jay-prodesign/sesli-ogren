@@ -59,10 +59,7 @@ void main() {
   });
 
   test('authenticated analytics keeps an offline event pending and flushes it exactly once after recovery', () async {
-    final store = await SqliteSourceStore.open(
-      factory: databaseFactoryFfiNoIsolate,
-      path: inMemoryDatabasePath,
-    );
+    final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
     addTearDown(store.close);
     final gateway = _FakeAnalyticsGateway()..unavailable = true;
     final analytics = ProductAnalyticsService(store: store, gateway: gateway, sessionId: 'session_auth_test_000001');
@@ -101,10 +98,7 @@ void main() {
   });
 
   test('privacy-invalid free-form metadata is dropped before durable analytics storage', () async {
-    final store = await SqliteSourceStore.open(
-      factory: databaseFactoryFfiNoIsolate,
-      path: inMemoryDatabasePath,
-    );
+    final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
     addTearDown(store.close);
     final analytics = ProductAnalyticsService(
       store: store,
@@ -129,10 +123,7 @@ void main() {
   });
 
   test('account purge removes the local analytics outbox for that learner only', () async {
-    final store = await SqliteSourceStore.open(
-      factory: databaseFactoryFfiNoIsolate,
-      path: inMemoryDatabasePath,
-    );
+    final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
     addTearDown(store.close);
     final analytics = ProductAnalyticsService(
       store: store,
