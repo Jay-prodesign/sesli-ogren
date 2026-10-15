@@ -1,3 +1,4 @@
+import '../domain/authenticated_learner.dart';
 import '../domain/learning_contracts.dart';
 
 enum ProductAnalyticsEventType {
@@ -149,11 +150,11 @@ abstract interface class ProductAnalytics {
   String get sessionId;
 
   Future<void> record({
-    required dynamic learner,
+    required AuthenticatedLearner learner,
     required ProductAnalyticsEvent event,
   });
 
-  Future<void> flush({required dynamic learner});
+  Future<void> flush({required AuthenticatedLearner learner});
 }
 
 class UnavailableProductAnalytics implements ProductAnalytics {
@@ -163,8 +164,8 @@ class UnavailableProductAnalytics implements ProductAnalytics {
   String get sessionId => 'session_unavailable';
 
   @override
-  Future<void> record({required dynamic learner, required ProductAnalyticsEvent event}) async {}
+  Future<void> record({required AuthenticatedLearner learner, required ProductAnalyticsEvent event}) async {}
 
   @override
-  Future<void> flush({required dynamic learner}) async {}
+  Future<void> flush({required AuthenticatedLearner learner}) async {}
 }
