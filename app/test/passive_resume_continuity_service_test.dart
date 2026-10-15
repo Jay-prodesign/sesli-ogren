@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter_test/flutter_test.dart';
@@ -67,8 +68,12 @@ class _FakePassiveResumeGateway implements PassiveResumeGateway {
 Future<(SqliteSourceStore, SourceIngestService, SourceIngestResult)> _source({
   required AuthenticatedLearner learner,
   required MaterialId materialId,
+  String? path,
 }) async {
-  final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
+  final store = await SqliteSourceStore.open(
+    factory: databaseFactoryFfiNoIsolate,
+    path: path ?? inMemoryDatabasePath,
+  );
   final ingest = SourceIngestService(
     store: store,
     pdfTextExtractor: const _UnusedPdfExtractor(),
@@ -235,8 +240,18 @@ void main() {
   test('two device Reader resume round-trip converges without wall-clock arbitration', () async {
     const learner = AuthenticatedLearner(id: LearnerId('resume-two-device-learner'));
     const materialId = MaterialId('material_resume_two_device');
-    final (storeA, _, sourceA) = await _source(learner: learner, materialId: materialId);
-    final (storeB, _, sourceB) = await _source(learner: learner, materialId: materialId);
+    final temp = await Directory.systemTemp.createTemp('sesli-ogren-passive-two-device-');
+    addTearDown(() => temp.delete(recursive: true));
+    final (storeA, _, sourceA) = await _source(
+      learner: learner,
+      materialId: materialId,
+      path: '${temp.path}/device-a.db',
+    );
+    final (storeB, _, sourceB) = await _source(
+      learner: learner,
+      materialId: materialId,
+      path: '${temp.path}/device-b.db',
+    );
     addTearDown(storeA.close);
     addTearDown(storeB.close);
     expect(sourceA.sourceVersion.identity.sourceVersionId, sourceB.sourceVersion.identity.sourceVersionId);
