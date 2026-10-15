@@ -89,28 +89,24 @@ class SqliteSourceStore implements SourceStore {
     required ProductAnalyticsEnvelope envelope,
   }) async {
     final event = envelope.event;
-    await _database.insert(
-      'product_analytics_outbox',
-      {
-        'learner_id': learner.id.value,
-        'event_id': envelope.eventId,
-        'session_id': envelope.sessionId,
-        'schema_version': event.schemaVersion,
-        'event_type': event.type.wireValue,
-        'phase': event.phase.name,
-        'material_id': event.materialId?.value,
-        'source_version_id': event.sourceVersionId?.value,
-        'surface': event.surface?.wireValue,
-        'capability': event.capability?.wireValue,
-        'outcome_class': event.outcomeClass,
-        'reason_code': event.reasonCode,
-        'duration_ms': event.durationMs,
-        'quantity': event.quantity,
-        'created_at_utc': event.createdAt.toUtc().toIso8601String(),
-        'synced_at_utc': null,
-      },
-      conflictAlgorithm: ConflictAlgorithm.ignore,
-    );
+    await _database.insert('product_analytics_outbox', {
+      'learner_id': learner.id.value,
+      'event_id': envelope.eventId,
+      'session_id': envelope.sessionId,
+      'schema_version': event.schemaVersion,
+      'event_type': event.type.wireValue,
+      'phase': event.phase.name,
+      'material_id': event.materialId?.value,
+      'source_version_id': event.sourceVersionId?.value,
+      'surface': event.surface?.wireValue,
+      'capability': event.capability?.wireValue,
+      'outcome_class': event.outcomeClass,
+      'reason_code': event.reasonCode,
+      'duration_ms': event.durationMs,
+      'quantity': event.quantity,
+      'created_at_utc': event.createdAt.toUtc().toIso8601String(),
+      'synced_at_utc': null,
+    }, conflictAlgorithm: ConflictAlgorithm.ignore);
   }
 
   Future<List<ProductAnalyticsEnvelope>> pendingProductAnalyticsEvents({
@@ -146,9 +142,7 @@ class SqliteSourceStore implements SourceStore {
     }
   }
 
-  Future<List<ProductAnalyticsEnvelope>> productAnalyticsEvents({
-    required AuthenticatedLearner learner,
-  }) async {
+  Future<List<ProductAnalyticsEnvelope>> productAnalyticsEvents({required AuthenticatedLearner learner}) async {
     final rows = await _database.query(
       'product_analytics_outbox',
       where: 'learner_id = ?',
@@ -4002,9 +3996,7 @@ ON CONFLICT(learner_id) DO UPDATE SET
         type: ProductAnalyticsEventTypeWire.fromWire(row['event_type']! as String),
         phase: ProductAnalyticsPhase.values.byName(row['phase']! as String),
         materialId: row['material_id'] == null ? null : MaterialId(row['material_id']! as String),
-        sourceVersionId: row['source_version_id'] == null
-            ? null
-            : SourceVersionId(row['source_version_id']! as String),
+        sourceVersionId: row['source_version_id'] == null ? null : SourceVersionId(row['source_version_id']! as String),
         surface: surface == null ? null : ProductAnalyticsSurfaceWire.fromWire(surface),
         capability: capability == null ? null : ProductAnalyticsCapabilityWire.fromWire(capability),
         outcomeClass: row['outcome_class'] as String?,
