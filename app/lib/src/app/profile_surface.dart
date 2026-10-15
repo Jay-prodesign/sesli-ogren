@@ -637,10 +637,7 @@ class _AccountOverviewCard extends StatelessWidget {
                         if (reconciliationNote != null || renewalNote != null) ...[
                           const SizedBox(height: 5),
                           Text(
-                            [
-                              if (reconciliationNote != null) reconciliationNote,
-                              if (renewalNote != null) renewalNote,
-                            ].join(' '),
+                            [?reconciliationNote, ?renewalNote].join(' '),
                             key: const ValueKey('profile-entitlement-reconciliation'),
                             style: theme.textTheme.bodySmall?.copyWith(color: AppPalette.inkMuted, height: 1.35),
                           ),
