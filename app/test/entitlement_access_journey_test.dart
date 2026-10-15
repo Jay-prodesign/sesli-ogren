@@ -124,6 +124,19 @@ EntitlementAccess _quotaReached(EntitlementCapability capability) => Entitlement
   limit: 1,
 );
 
+EntitlementAccess _purchasePending(EntitlementCapability capability) => EntitlementAccess(
+  capability: capability,
+  kind: EntitlementAccessKind.pending,
+  reason: EntitlementAccessReason.purchasePending,
+  plan: 'free',
+  entitlementStatus: 'active',
+  reconciliationState: 'purchase_pending',
+  renewalState: 'none',
+  periodStart: DateTime.utc(2026, 10, 15),
+  consumed: 0,
+  limit: 0,
+);
+
 Future<void> _pumpUntilFound(WidgetTester tester, Finder finder, {int maxPumps = 100}) async {
   for (var i = 0; i < maxPumps && finder.evaluate().isEmpty; i++) {
     await tester.pump(const Duration(milliseconds: 30));
@@ -204,6 +217,32 @@ void main() {
     expect(find.byKey(const ValueKey('entitlement-access-usage')), findsOneWidget);
     expect(find.byKey(const ValueKey('entitlement-access-return')), findsOneWidget);
     expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('purchase pending blocks new generation without presenting another upgrade offer', (tester) async {
+    const materialId = MaterialId('entitlement-recap-purchase-pending');
+    final (store, ingest, _) = await _source(materialId: materialId);
+    addTearDown(store.close);
+    final entitlement = _FixedEntitlementGateway(_purchasePending(EntitlementCapability.summary));
+    final summary = _RecordingSummaryGateway();
+    final runtime = _runtime(store: store, ingest: ingest, entitlement: entitlement);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: QuickRecapScreen(runtime: runtime, materialId: materialId, summaryGateway: summary),
+      ),
+    );
+    await _pumpUntilFound(tester, find.byKey(const ValueKey('quick-recap-create')));
+    await tester.tap(find.byKey(const ValueKey('quick-recap-create')));
+    await _pumpUntilFound(tester, find.byKey(const ValueKey('entitlement-access-boundary')));
+
+    expect(entitlement.calls, 1);
+    expect(summary.submitCalls, 0);
+    expect(find.text('Plan durumun doğrulanıyor'), findsOneWidget);
+    expect(find.textContaining('Satın alma sonucu henüz sunucu tarafından doğrulanmadı'), findsOneWidget);
+    expect(find.textContaining('Daha yüksek bir plan'), findsNothing);
+    expect(find.byKey(const ValueKey('entitlement-access-retry')), findsOneWidget);
+    expect(find.byKey(const ValueKey('entitlement-access-return')), findsOneWidget);
   });
 
   testWidgets('cached Quick Recap stays accessible after generation quota is exhausted', (tester) async {
