@@ -962,10 +962,9 @@ CREATE TABLE IF NOT EXISTS reader_progress (
 
   static Future<void> _upgradePassiveResumeCloudMetadataSchema(Database db) async {
     for (final table in const ['listen_progress', 'reader_progress']) {
-      final existing = await db.rawQuery(
-        "SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = ? LIMIT 1",
-        [table],
-      );
+      final existing = await db.rawQuery("SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = ? LIMIT 1", [
+        table,
+      ]);
       if (existing.isEmpty) {
         continue;
       }
