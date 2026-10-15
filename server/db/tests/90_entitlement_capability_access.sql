@@ -53,7 +53,7 @@ select pg_temp.ok(
 );
 
 select pg_temp.denied(
-  $update public.entitlements set plan = 'premium' where account_id = '$ || :user_a || $'$,
+  'update public.entitlements set plan = ''premium'' where account_id = ' || quote_literal(:user_a),
   'permission denied',
   'authenticated client must not self-grant plan changes'
 );
