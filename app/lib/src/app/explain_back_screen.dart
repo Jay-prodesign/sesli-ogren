@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:crypto/crypto.dart';
 import 'package:flutter/material.dart';
 
+import '../account/entitlement_access_gateway.dart';
 import '../domain/learning_contracts.dart';
 import '../generation/supabase_source_summary_gateway.dart';
 import '../learning/explain_back_gateway.dart';
@@ -10,6 +11,7 @@ import 'app_runtime.dart';
 import 'app_theme.dart';
 import 'atelier_learning_surfaces.dart';
 import 'companion_view.dart';
+import 'entitlement_access_card.dart';
 import 'la0040_visual_treatments.dart';
 import 'learning_slice_screen.dart';
 import 'living_study_desk_home.dart';
@@ -41,6 +43,7 @@ class _ExplainBackScreenState extends State<ExplainBackScreen> {
 
   final _controller = TextEditingController();
   ExplainBackResult? _result;
+  CapabilityAccessDecision? _accessDecision;
   bool _submitting = false;
   bool _sourceChanged = false;
 
@@ -62,6 +65,22 @@ class _ExplainBackScreenState extends State<ExplainBackScreen> {
         _result = const ExplainBackUnavailable('Güvenilir anlamsal değerlendirme servisi henüz etkin değil.');
       });
       return;
+    }
+
+    if (widget.runtime.learner.isAuthenticated) {
+      final access = await widget.runtime.entitlementAccess.check(EntitlementCapability.explainBack);
+      if (!mounted) return;
+      if (access.isBlocked) {
+        setState(() {
+          _submitting = false;
+          _accessDecision = access;
+          _result = null;
+        });
+        return;
+      }
+      if (_accessDecision != null) {
+        setState(() => _accessDecision = null);
+      }
     }
 
     ExplainBackResult result;
@@ -215,6 +234,7 @@ class _ExplainBackScreenState extends State<ExplainBackScreen> {
   void _startFreshAttempt() => setState(() {
     _sourceChanged = false;
     _result = null;
+    _accessDecision = null;
     _controller.clear();
   });
 
@@ -323,7 +343,16 @@ class _ExplainBackScreenState extends State<ExplainBackScreen> {
               ),
             ),
             const SizedBox(height: 10),
-            if (result == null)
+            if (_accessDecision != null)
+              EntitlementAccessCard(
+                decision: _accessDecision!,
+                onRecheck: () {
+                  setState(() => _accessDecision = null);
+                  _submit();
+                },
+                onBack: _backToMaterial,
+              )
+            else if (result == null)
               FilledButton(
                 style: living
                     ? FilledButton.styleFrom(backgroundColor: AtelierStyle.teal, foregroundColor: Colors.white)
