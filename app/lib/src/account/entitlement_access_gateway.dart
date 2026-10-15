@@ -76,10 +76,7 @@ class EntitlementAccess {
 }
 
 abstract interface class EntitlementAccessGateway {
-  Future<EntitlementAccess> check({
-    required AuthenticatedLearner learner,
-    required EntitlementCapability capability,
-  });
+  Future<EntitlementAccess> check({required AuthenticatedLearner learner, required EntitlementCapability capability});
 }
 
 class UnavailableEntitlementAccessGateway implements EntitlementAccessGateway {
