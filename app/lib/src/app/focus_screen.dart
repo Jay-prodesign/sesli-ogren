@@ -390,6 +390,7 @@ class _FocusScreenState extends State<FocusScreen> {
         _access = access;
         _blockedKind = kind;
       });
+      widget.runtime.recordEntitlementBoundary(access);
       return;
     }
 
@@ -408,6 +409,7 @@ class _FocusScreenState extends State<FocusScreen> {
           _access = blockedAccess;
           _blockedKind = kind;
         });
+        widget.runtime.recordEntitlementBoundary(blockedAccess);
         return;
       }
     }
