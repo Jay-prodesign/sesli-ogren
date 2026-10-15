@@ -4,12 +4,14 @@ import 'package:crypto/crypto.dart';
 import 'package:flutter/material.dart';
 
 import '../domain/learning_contracts.dart';
+import '../account/entitlement_access_gateway.dart';
 import '../generation/supabase_source_summary_gateway.dart';
 import '../learning/explain_back_gateway.dart';
 import 'app_runtime.dart';
 import 'app_theme.dart';
 import 'atelier_learning_surfaces.dart';
 import 'companion_view.dart';
+import 'entitlement_access_card.dart';
 import 'la0040_visual_treatments.dart';
 import 'learning_slice_screen.dart';
 import 'living_study_desk_home.dart';
@@ -41,6 +43,7 @@ class _ExplainBackScreenState extends State<ExplainBackScreen> {
 
   final _controller = TextEditingController();
   ExplainBackResult? _result;
+  EntitlementAccess? _access;
   bool _submitting = false;
   bool _sourceChanged = false;
 
@@ -50,10 +53,41 @@ class _ExplainBackScreenState extends State<ExplainBackScreen> {
     super.dispose();
   }
 
+  Future<bool> _admitExplainBackEvaluation() async {
+    if (!widget.runtime.learner.isAuthenticated ||
+        widget.runtime.entitlementAccess is UnavailableEntitlementAccessGateway) {
+      return true;
+    }
+    final access = await widget.runtime.entitlementAccess.check(
+      learner: widget.runtime.learner,
+      capability: EntitlementCapability.explainBack,
+    );
+    if (!mounted) return false;
+    if (!access.isAllowed) {
+      setState(() => _access = access);
+      return false;
+    }
+    if (_access != null) {
+      setState(() => _access = null);
+    }
+    return true;
+  }
+
+  void _retryEntitlement() {
+    if (_submitting) return;
+    setState(() => _access = null);
+    _submit();
+  }
+
   Future<void> _submit() async {
     final response = _controller.text.trim();
     if (response.isEmpty || _submitting) return;
     setState(() => _submitting = true);
+
+    if (!await _admitExplainBackEvaluation()) {
+      if (mounted) setState(() => _submitting = false);
+      return;
+    }
 
     if (widget.runtime.explainBack is UnavailableExplainBackGateway) {
       if (!mounted) return;
@@ -208,6 +242,7 @@ class _ExplainBackScreenState extends State<ExplainBackScreen> {
   void _retryUnavailable() {
     if (_sourceChanged) return;
     setState(() {
+      _access = null;
       _result = null;
     });
   }
@@ -323,7 +358,13 @@ class _ExplainBackScreenState extends State<ExplainBackScreen> {
               ),
             ),
             const SizedBox(height: 10),
-            if (result == null)
+            if (_access != null) ...[
+              EntitlementAccessCard(
+                access: _access!,
+                onRetry: _retryEntitlement,
+                onReturnToStudy: _backToMaterial,
+              ),
+            ] else if (result == null)
               FilledButton(
                 style: living
                     ? FilledButton.styleFrom(backgroundColor: AtelierStyle.teal, foregroundColor: Colors.white)
