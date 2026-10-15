@@ -621,11 +621,7 @@ class _FocusScreenState extends State<FocusScreen> {
           ),
           if (_access != null) ...[
             const SizedBox(height: 16),
-            EntitlementAccessCard(
-              access: _access!,
-              onRetry: _retryEntitlement,
-              onReturnToStudy: _returnToStudy,
-            ),
+            EntitlementAccessCard(access: _access!, onRetry: _retryEntitlement, onReturnToStudy: _returnToStudy),
           ],
           if (busy) ...[const SizedBox(height: 12), const LinearProgressIndicator()],
           if (readyHelp != null) ...[
