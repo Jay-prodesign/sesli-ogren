@@ -214,6 +214,19 @@ class _ExplainBackScreenState extends State<ExplainBackScreen> {
       result = const ExplainBackUnavailable('Değerlendirme servisine şu anda ulaşılamıyor.');
     }
 
+    if (!sourceChanged && result is ExplainBackUnavailable && widget.runtime.learner.isAuthenticated) {
+      final access = await widget.runtime.entitlementAccess.check(EntitlementCapability.explainBack);
+      if (!mounted) return;
+      if (access.isBlocked) {
+        setState(() {
+          _submitting = false;
+          _accessDecision = access;
+          _result = null;
+        });
+        return;
+      }
+    }
+
     if (!mounted) return;
     setState(() {
       _submitting = false;
