@@ -69,6 +69,19 @@ class _ExplainScreenState extends State<ExplainScreen> {
     return true;
   }
 
+  Future<void> _captureBlockedAccessAfterFailure() async {
+    if (!widget.runtime.learner.isAuthenticated ||
+        widget.runtime.entitlementAccess is UnavailableEntitlementAccessGateway) {
+      return;
+    }
+    final access = await widget.runtime.entitlementAccess.check(
+      learner: widget.runtime.learner,
+      capability: EntitlementCapability.explain,
+    );
+    if (!mounted || access.isAllowed) return;
+    setState(() => _access = access);
+  }
+
   Future<GroundedExplainResult> _request() async {
     if (widget.runtime.explain is UnavailableGroundedExplainGateway) {
       return const GroundedExplainUnavailable(reason: GroundedExplainUnavailableReason.providerNotConfigured);
@@ -168,6 +181,10 @@ class _ExplainScreenState extends State<ExplainScreen> {
           outputLocale: 'tr-TR',
         ),
       );
+      if (result is GroundedExplainUnavailable &&
+          result.reason == GroundedExplainUnavailableReason.temporaryFailure) {
+        await _captureBlockedAccessAfterFailure();
+      }
 
       final sourceAfterExplain = await widget.runtime.store.currentSourceVersion(
         learner: widget.runtime.learner,
@@ -179,6 +196,7 @@ class _ExplainScreenState extends State<ExplainScreen> {
       }
       return result;
     } catch (_) {
+      await _captureBlockedAccessAfterFailure();
       return const GroundedExplainUnavailable(reason: GroundedExplainUnavailableReason.temporaryFailure);
     }
   }
