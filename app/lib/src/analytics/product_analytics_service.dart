@@ -9,11 +9,7 @@ import 'product_analytics.dart';
 import 'product_analytics_gateway.dart';
 
 class ProductAnalyticsService implements ProductAnalytics {
-  ProductAnalyticsService({
-    required this.store,
-    required this.gateway,
-    required this.sessionId,
-  });
+  ProductAnalyticsService({required this.store, required this.gateway, required this.sessionId});
 
   factory ProductAnalyticsService.forRuntime({
     required SqliteSourceStore store,
@@ -23,11 +19,7 @@ class ProductAnalyticsService implements ProductAnalytics {
     final clock = now ?? DateTime.now;
     final seed = '${clock().toUtc().microsecondsSinceEpoch}:${identityHashCode(store)}';
     final digest = sha256.convert(utf8.encode(seed)).toString();
-    return ProductAnalyticsService(
-      store: store,
-      gateway: gateway,
-      sessionId: 'session_${digest.substring(0, 32)}',
-    );
+    return ProductAnalyticsService(store: store, gateway: gateway, sessionId: 'session_${digest.substring(0, 32)}');
   }
 
   final SqliteSourceStore store;
@@ -40,22 +32,12 @@ class ProductAnalyticsService implements ProductAnalytics {
   bool _flushing = false;
 
   @override
-  Future<void> record({
-    required AuthenticatedLearner learner,
-    required ProductAnalyticsEvent event,
-  }) async {
+  Future<void> record({required AuthenticatedLearner learner, required ProductAnalyticsEvent event}) async {
     if (!_privacySafe(event)) return;
 
     try {
-      final envelope = ProductAnalyticsEnvelope(
-        eventId: _eventId(learner, event),
-        sessionId: sessionId,
-        event: event,
-      );
-      await store.enqueueProductAnalyticsEvent(
-        learner: learner,
-        envelope: envelope,
-      );
+      final envelope = ProductAnalyticsEnvelope(eventId: _eventId(learner, event), sessionId: sessionId, event: event);
+      await store.enqueueProductAnalyticsEvent(learner: learner, envelope: envelope);
       if (learner.isAuthenticated) {
         unawaited(flush(learner: learner));
       }
@@ -70,10 +52,7 @@ class ProductAnalyticsService implements ProductAnalytics {
     if (!learner.isAuthenticated || _flushing) return;
     _flushing = true;
     try {
-      final pending = await store.pendingProductAnalyticsEvents(
-        learner: learner,
-        limit: 100,
-      );
+      final pending = await store.pendingProductAnalyticsEvents(learner: learner, limit: 100);
       for (final envelope in pending) {
         try {
           final event = envelope.event;
@@ -84,11 +63,7 @@ class ProductAnalyticsService implements ProductAnalytics {
                   materialId: event.materialId!,
                   sourceVersionId: event.sourceVersionId,
                 );
-          await gateway.record(
-            learner: learner,
-            envelope: envelope,
-            serverMaterialId: serverMaterialId,
-          );
+          await gateway.record(learner: learner, envelope: envelope, serverMaterialId: serverMaterialId);
           await store.markProductAnalyticsEventSynced(
             learner: learner,
             eventId: envelope.eventId,
@@ -107,10 +82,7 @@ class ProductAnalyticsService implements ProductAnalytics {
     }
   }
 
-  String _eventId(
-    AuthenticatedLearner learner,
-    ProductAnalyticsEvent event,
-  ) {
+  String _eventId(AuthenticatedLearner learner, ProductAnalyticsEvent event) {
     final sequence = _sequence++;
     final seed =
         '${learner.id.value}|$sessionId|${event.createdAt.toUtc().microsecondsSinceEpoch}|'
@@ -121,16 +93,13 @@ class ProductAnalyticsService implements ProductAnalytics {
 
   static bool _privacySafe(ProductAnalyticsEvent event) {
     if (event.schemaVersion != 1) return false;
-    if (event.durationMs != null &&
-        (event.durationMs! < 0 || event.durationMs! > 86400000)) {
+    if (event.durationMs != null && (event.durationMs! < 0 || event.durationMs! > 86400000)) {
       return false;
     }
-    if (event.quantity != null &&
-        (event.quantity! < 0 || event.quantity! > 1000000000)) {
+    if (event.quantity != null && (event.quantity! < 0 || event.quantity! > 1000000000)) {
       return false;
     }
-    return _safeCode(event.outcomeClass, 64) &&
-        _safeCode(event.reasonCode, 96);
+    return _safeCode(event.outcomeClass, 64) && _safeCode(event.reasonCode, 96);
   }
 
   static bool _safeCode(String? value, int maxLength) {
