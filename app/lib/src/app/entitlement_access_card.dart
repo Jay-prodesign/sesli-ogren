@@ -29,8 +29,10 @@ class EntitlementAccessCard extends StatelessWidget {
       EntitlementAccessReason.quotaReached => 'Bu üretim hakkı için sunucunun doğruladığı dönem sınırı doldu. Daha önce oluşturduğun çalışmalar erişilebilir kalır.',
       EntitlementAccessReason.capabilityNotEntitled =>
         'Bu üretim türü mevcut doğrulanmış planında etkin değil. Kaydedilmiş çalışmaların etkilenmez.',
-      EntitlementAccessReason.entitlementInactive || EntitlementAccessReason.entitlementMissing =>
+      EntitlementAccessReason.entitlementInactive =>
         'Yeni üretim için etkin bir plan doğrulanamadı. Mevcut çalışma içeriğine dönmeye devam edebilirsin.',
+      EntitlementAccessReason.entitlementMissing =>
+        'Hesabın plan kaydı güvenilir biçimde doğrulanamadı. Durumu tahmin ederek yükseltme önermiyoruz.',
       EntitlementAccessReason.purchasePending =>
         'Satın alma sonucu henüz sunucu tarafından doğrulanmadı. Doğrulama bitmeden erişim varmış gibi davranmıyoruz.',
       EntitlementAccessReason.restorePending =>
