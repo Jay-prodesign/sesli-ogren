@@ -48,6 +48,7 @@ class EntitlementAccess {
     required this.periodStart,
     required this.consumed,
     required this.limit,
+    this.reserved = 0,
     this.effectiveUntil,
     this.lastAuthoritativeVerificationAt,
   });
@@ -62,6 +63,7 @@ class EntitlementAccess {
   final DateTime periodStart;
   final int consumed;
   final int limit;
+  final int reserved;
   final DateTime? effectiveUntil;
   final DateTime? lastAuthoritativeVerificationAt;
 
