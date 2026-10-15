@@ -150,7 +150,7 @@ returns uuid
 language plpgsql
 security definer
 set search_path = ''
-as $
+as $request_summary$
 declare
   v_user uuid := public.la_require_user();
   v_source uuid;
@@ -275,7 +275,7 @@ begin
 
   return v_job.id;
 end;
-$;
+$request_summary$;
 
 revoke all on function public.entitlement_capability_access(text)
 from public, anon;
