@@ -113,6 +113,16 @@ Future<AppRuntime> _runtime({
   );
 }
 
+Widget _motionStableShell(AppRuntime runtime) {
+  return MaterialApp(
+    builder: (context, child) => MediaQuery(
+      data: MediaQuery.of(context).copyWith(disableAnimations: true),
+      child: child!,
+    ),
+    home: ProductShellScreen(runtime: runtime),
+  );
+}
+
 void main() {
   sqfliteFfiInit();
 
@@ -124,7 +134,7 @@ void main() {
     final runtime = await _runtime(learner: learner, gateway: gateway);
     addTearDown(runtime.close);
 
-    await tester.pumpWidget(MaterialApp(home: ProductShellScreen(runtime: runtime)));
+    await tester.pumpWidget(_motionStableShell(runtime));
     await tester.pumpAndSettle();
 
     expect(find.byKey(const ValueKey('cloud-continuity-notice')), findsOneWidget);
@@ -146,7 +156,7 @@ void main() {
     final runtime = await _runtime(learner: AppRuntime.localLearner, gateway: gateway);
     addTearDown(runtime.close);
 
-    await tester.pumpWidget(MaterialApp(home: ProductShellScreen(runtime: runtime)));
+    await tester.pumpWidget(_motionStableShell(runtime));
     await tester.pumpAndSettle();
 
     expect(gateway.listCalls, 0);
