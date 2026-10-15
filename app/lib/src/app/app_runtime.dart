@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import '../account/account_deletion_gateway.dart';
 import '../account/account_overview_gateway.dart';
 import '../account/entitlement_access_gateway.dart';
@@ -268,6 +270,30 @@ class AppRuntime {
   }
 
   Future<void> retryDeletedAccountLocalCleanup() => store.purgeLearnerData(learner: learner);
+
+  void recordEntitlementBoundary(EntitlementAccess access) {
+    final capability = switch (access.capability) {
+      EntitlementCapability.summary => ProductAnalyticsCapability.summary,
+      EntitlementCapability.explain => ProductAnalyticsCapability.explain,
+      EntitlementCapability.focus => ProductAnalyticsCapability.focus,
+      EntitlementCapability.explainBack => ProductAnalyticsCapability.explainBack,
+    };
+    unawaited(
+      analytics.record(
+        learner: learner,
+        event: ProductAnalyticsEvent(
+          type: ProductAnalyticsEventType.entitlementBoundary,
+          phase: ProductAnalyticsPhase.viewed,
+          createdAt: DateTime.now().toUtc(),
+          surface: ProductAnalyticsSurface.entitlement,
+          capability: capability,
+          outcomeClass: access.kind.name,
+          reasonCode: access.reason.name,
+          quantity: 1,
+        ),
+      ),
+    );
+  }
 
   Future<void> close() => store.close();
 }
