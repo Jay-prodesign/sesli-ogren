@@ -135,11 +135,7 @@ class ProductAnalyticsEvent {
 }
 
 class ProductAnalyticsEnvelope {
-  const ProductAnalyticsEnvelope({
-    required this.eventId,
-    required this.sessionId,
-    required this.event,
-  });
+  const ProductAnalyticsEnvelope({required this.eventId, required this.sessionId, required this.event});
 
   final String eventId;
   final String sessionId;
@@ -149,10 +145,7 @@ class ProductAnalyticsEnvelope {
 abstract interface class ProductAnalytics {
   String get sessionId;
 
-  Future<void> record({
-    required AuthenticatedLearner learner,
-    required ProductAnalyticsEvent event,
-  });
+  Future<void> record({required AuthenticatedLearner learner, required ProductAnalyticsEvent event});
 
   Future<void> flush({required AuthenticatedLearner learner});
 }
