@@ -111,11 +111,7 @@ class EntitlementAccessCard extends StatelessWidget {
                   Text(planLabel, style: theme.textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w800)),
                   if (access.limit > 0) ...[
                     const SizedBox(height: 4),
-                    Text(
-                      usageLabel,
-                      key: const ValueKey('entitlement-access-usage'),
-                      style: theme.textTheme.bodySmall,
-                    ),
+                    Text(usageLabel, key: const ValueKey('entitlement-access-usage'), style: theme.textTheme.bodySmall),
                   ],
                 ],
               ),
