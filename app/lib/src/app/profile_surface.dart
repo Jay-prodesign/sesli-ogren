@@ -506,7 +506,7 @@ class _AccountOverviewCard extends StatelessWidget {
     };
     final planLabel = switch (overview.plan) {
       'free' => 'Ücretsiz plan',
-      'premium' => 'Premium plan',
+      'premium' => 'Ücretli plan',
       'tester' => 'Test planı',
       _ => 'Plan doğrulanamadı',
     };
