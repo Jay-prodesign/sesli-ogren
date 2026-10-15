@@ -49,6 +49,9 @@ class EntitlementAccessCard extends StatelessWidget {
       'tester' => 'Test planı',
       _ => 'Plan doğrulanamadı',
     };
+    final usageLabel = access.reserved > 0
+        ? '${access.consumed} tamamlandı · ${access.reserved} işlem sürüyor · ${access.limit} sınır'
+        : '${access.consumed} / ${access.limit} doğrulanmış kullanım';
     final background = living ? AtelierStyle.paper : theme.colorScheme.surfaceContainerLow;
     final border = living ? AtelierStyle.line : theme.colorScheme.outlineVariant;
     final accent = living ? AtelierStyle.pulse : AppPalette.primary;
@@ -109,7 +112,7 @@ class EntitlementAccessCard extends StatelessWidget {
                   if (access.limit > 0) ...[
                     const SizedBox(height: 4),
                     Text(
-                      '${access.consumed} / ${access.limit} doğrulanmış kullanım',
+                      usageLabel,
                       key: const ValueKey('entitlement-access-usage'),
                       style: theme.textTheme.bodySmall,
                     ),
