@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../account/entitlement_access_gateway.dart';
 import 'app_theme.dart';
+import 'atelier_learning_surfaces.dart';
 import 'living_study_desk_home.dart';
 
 class EntitlementAccessCard extends StatelessWidget {
