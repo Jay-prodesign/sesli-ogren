@@ -4,11 +4,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:share_plus/share_plus.dart';
 
+import '../account/entitlement_access_gateway.dart';
 import '../domain/learning_contracts.dart';
 import '../generation/supabase_source_summary_gateway.dart';
 import 'app_runtime.dart';
 import 'atelier_learning_surfaces.dart';
 import 'companion_view.dart';
+import 'entitlement_access_card.dart';
 import 'listen_screen.dart';
 import 'learning_slice_screen.dart';
 import 'la0040_visual_treatments.dart';
@@ -46,6 +48,7 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> with WidgetsBinding
   SourceVersionRecord? _boundSource;
   ServerSummaryStatus? _status;
   String? _error;
+  CapabilityAccessDecision? _accessDecision;
   bool _busy = false;
   bool _restoring = true;
   bool _restoreUncertain = false;
@@ -208,6 +211,17 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> with WidgetsBinding
       _error = null;
     });
     try {
+      if (widget.runtime.learner.isAuthenticated) {
+        final access = await widget.runtime.entitlementAccess.check(EntitlementCapability.summary);
+        if (!mounted) return;
+        if (access.isBlocked) {
+          setState(() => _accessDecision = access);
+          return;
+        }
+        if (_accessDecision != null) {
+          setState(() => _accessDecision = null);
+        }
+      }
       final material = await widget.runtime.store.material(
         learner: widget.runtime.learner,
         materialId: widget.materialId,
@@ -524,6 +538,7 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> with WidgetsBinding
       _boundSource = null;
       _status = null;
       _error = null;
+      _accessDecision = null;
       _restoring = true;
     });
     await _restore();
@@ -636,6 +651,16 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> with WidgetsBinding
                   ],
                 ),
               ),
+            ),
+            const SizedBox(height: 12),
+          ] else if (_accessDecision != null) ...[
+            EntitlementAccessCard(
+              decision: _accessDecision!,
+              onRecheck: () {
+                setState(() => _accessDecision = null);
+                _submit();
+              },
+              onBack: () => Navigator.of(context).maybePop(),
             ),
             const SizedBox(height: 12),
           ] else if (_jobId == null)
