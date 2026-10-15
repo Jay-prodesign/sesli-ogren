@@ -187,8 +187,10 @@ void main() {
   test('concurrent retention edits fail closed instead of overwriting another device', () async {
     const learner = AuthenticatedLearner(id: LearnerId('retention-conflict-learner'));
     const materialId = MaterialId('material_retention_conflict_01');
-    final (storeA, sourceA) = await _source(learner: learner, materialId: materialId);
-    final (storeB, sourceB) = await _source(learner: learner, materialId: materialId);
+    final temp = await Directory.systemTemp.createTemp('sesli-ogren-retention-conflict-');
+    addTearDown(() => temp.delete(recursive: true));
+    final (storeA, sourceA) = await _source(learner: learner, materialId: materialId, path: '${temp.path}/device-a.db');
+    final (storeB, sourceB) = await _source(learner: learner, materialId: materialId, path: '${temp.path}/device-b.db');
     addTearDown(storeA.close);
     addTearDown(storeB.close);
 
