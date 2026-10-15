@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:sesli_ogren/src/account/entitlement_access_gateway.dart';
 import 'package:sesli_ogren/src/app/app_runtime.dart';
 import 'package:sesli_ogren/src/app/quick_recap_screen.dart';
 import 'package:sesli_ogren/src/data/pdf_text_extractor.dart';
@@ -58,6 +59,22 @@ class _DispatchFailureGateway extends _RecordingSummaryGateway {
 
   @override
   Future<ServerSummaryStatus> status(String jobId) async => const ServerSummaryStatus(state: 'QUEUED');
+}
+
+class _BlockedEntitlementAccessGateway implements EntitlementAccessGateway {
+  const _BlockedEntitlementAccessGateway();
+
+  @override
+  Future<CapabilityAccessDecision> check(EntitlementCapability capability) async => CapabilityAccessDecision(
+    capability: capability,
+    disposition: CapabilityAccessDisposition.blocked,
+    reason: CapabilityAccessReason.quotaReached,
+    plan: 'free',
+    entitlementStatus: 'active',
+    limit: 1,
+    consumed: 1,
+    remaining: 0,
+  );
 }
 
 Future<void> _pumpUntilFound(WidgetTester tester, Finder finder, {int maxPumps = 80}) async {
@@ -257,6 +274,56 @@ void main() {
     expect(find.byKey(const ValueKey('quick-recap-utility-actions')), findsOneWidget);
     expect(find.text('Özeti dinle'), findsOneWidget);
     expect(find.text('Diğer araçlar'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('Quick Recap blocks new generation on authoritative quota denial and keeps study content safe', (
+    tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(320, 700));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
+    addTearDown(store.close);
+    final ingest = SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor());
+    const materialId = MaterialId('quick-recap-entitlement-blocked');
+    await ingest.ingestPastedText(
+      learner: AppRuntime.localM5LearnerFixture,
+      materialId: materialId,
+      text: 'Fotosentez ışık enerjisini kimyasal enerjiye dönüştürür.',
+      sourceName: 'Entitlement biyoloji notu',
+    );
+    final runtime = AppRuntime(
+      learner: AppRuntime.localM5LearnerFixture,
+      store: store,
+      ingest: ingest,
+      recall: RecallLearningService(sourceStore: store, learningStore: store.learningTruthStore()),
+      telemetry: store.operationalTelemetry(),
+      entitlementAccess: const _BlockedEntitlementAccessGateway(),
+    );
+    final gateway = _RecordingSummaryGateway(serverMaterialId: '11111111-1111-4111-8111-111111111111');
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: MediaQuery(
+          data: const MediaQueryData(textScaler: TextScaler.linear(1.5), disableAnimations: true),
+          child: QuickRecapScreen(runtime: runtime, materialId: materialId, summaryGateway: gateway),
+        ),
+      ),
+    );
+    final recapScroll = find.descendant(of: find.byType(QuickRecapScreen), matching: find.byType(Scrollable));
+    final create = find.byKey(const ValueKey('quick-recap-create'));
+    await _scrollUntilFound(tester, create, scrollable: recapScroll);
+    await _tapVisible(tester, create);
+    await _pumpUntilFound(tester, find.byKey(const ValueKey('entitlement-access-card')));
+
+    expect(gateway.submitCalls, 0);
+    expect(find.text('Bugünkü üretim sınırına ulaştın'), findsOneWidget);
+    expect(find.byKey(const ValueKey('entitlement-usage-value')), findsOneWidget);
+    expect(find.text('1 / 1'), findsOneWidget);
+    expect(find.textContaining('daha önce oluşturduğun içerikler açık kalır'), findsOneWidget);
+    expect(find.byKey(const ValueKey('entitlement-recheck')), findsOneWidget);
+    expect(find.byKey(const ValueKey('entitlement-safe-back')), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 
