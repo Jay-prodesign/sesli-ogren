@@ -1,7 +1,9 @@
 import '../account/account_deletion_gateway.dart';
 import '../account/account_overview_gateway.dart';
+import '../account/entitlement_access_gateway.dart';
 import '../account/supabase_account_deletion_gateway.dart';
 import '../account/supabase_account_overview_gateway.dart';
+import '../account/supabase_entitlement_access_gateway.dart';
 import '../continuity/cloud_continuity_gateway.dart';
 import '../continuity/cloud_continuity_service.dart';
 import '../continuity/passive_resume_continuity_service.dart';
@@ -58,6 +60,7 @@ class AppRuntime {
     this.explainBack = const UnavailableExplainBackGateway(),
     this.focusHelp = const UnavailableFocusHelpGateway(),
     this.accountOverview = const UnavailableAccountOverviewGateway(),
+    this.entitlementAccess = const UnavailableEntitlementAccessGateway(),
     this.accountDeletion = const UnavailableAccountDeletionGateway(),
   }) : flashcards = flashcards ?? FlashcardLearningService(store: store),
        quiz = quiz ?? QuizLearningService(store: store),
@@ -98,6 +101,7 @@ class AppRuntime {
   final ExplainBackGateway explainBack;
   final FocusHelpGateway focusHelp;
   final AccountOverviewGateway accountOverview;
+  final EntitlementAccessGateway entitlementAccess;
   final AccountDeletionGateway accountDeletion;
 
   static Future<AppRuntime> open({required AuthenticatedLearner learner}) async {
@@ -136,6 +140,7 @@ class AppRuntime {
       explainBack: const SupabaseExplainBackGateway(),
       focusHelp: const SupabaseFocusHelpGateway(),
       accountOverview: const SupabaseAccountOverviewGateway(),
+      entitlementAccess: const SupabaseEntitlementAccessGateway(),
       accountDeletion: const SupabaseAccountDeletionGateway(),
     );
   }
@@ -195,6 +200,7 @@ class AppRuntime {
       explainBack: const SupabaseExplainBackGateway(),
       focusHelp: const SupabaseFocusHelpGateway(),
       accountOverview: const SupabaseAccountOverviewGateway(),
+      entitlementAccess: const SupabaseEntitlementAccessGateway(),
       accountDeletion: const SupabaseAccountDeletionGateway(),
     );
   }

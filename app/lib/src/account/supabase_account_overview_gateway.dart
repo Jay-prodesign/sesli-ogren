@@ -14,7 +14,9 @@ class SupabaseAccountOverviewGateway implements AccountOverviewGateway {
       final account = await client.from('accounts').select('locale,status').eq('id', learner.id.value).maybeSingle();
       final entitlement = await client
           .from('entitlements')
-          .select('plan,status,limits')
+          .select(
+            'plan,status,limits,reconciliation_state,renewal_state,effective_until,last_authoritative_verification_at',
+          )
           .eq('account_id', learner.id.value)
           .maybeSingle();
       if (account == null || entitlement == null) return null;
@@ -59,11 +61,21 @@ class SupabaseAccountOverviewGateway implements AccountOverviewGateway {
         entitlementStatus: entitlement['status'] as String? ?? 'unknown',
         usage: usage,
         dailyLimits: Map.unmodifiable(dailyLimits),
+        reconciliationState: entitlement['reconciliation_state'] as String? ?? 'unknown',
+        renewalState: entitlement['renewal_state'] as String? ?? 'unknown',
+        effectiveUntil: _date(entitlement['effective_until']),
+        lastAuthoritativeVerificationAt: _date(entitlement['last_authoritative_verification_at']),
       );
     } on PostgrestException {
       return null;
     } catch (_) {
       return null;
     }
+  }
+
+  static DateTime? _date(Object? value) {
+    if (value is DateTime) return value.toUtc();
+    if (value is String) return DateTime.tryParse(value)?.toUtc();
+    return null;
   }
 }

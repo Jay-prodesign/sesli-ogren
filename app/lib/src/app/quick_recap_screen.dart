@@ -4,11 +4,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:share_plus/share_plus.dart';
 
+import '../account/entitlement_access_gateway.dart';
 import '../domain/learning_contracts.dart';
 import '../generation/supabase_source_summary_gateway.dart';
 import 'app_runtime.dart';
 import 'atelier_learning_surfaces.dart';
 import 'companion_view.dart';
+import 'entitlement_access_card.dart';
 import 'listen_screen.dart';
 import 'learning_slice_screen.dart';
 import 'la0040_visual_treatments.dart';
@@ -46,6 +48,7 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> with WidgetsBinding
   SourceVersionRecord? _boundSource;
   ServerSummaryStatus? _status;
   String? _error;
+  EntitlementAccess? _access;
   bool _busy = false;
   bool _restoring = true;
   bool _restoreUncertain = false;
@@ -201,6 +204,48 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> with WidgetsBinding
     });
   }
 
+  Future<bool> _admitSummaryGeneration() async {
+    if (!widget.runtime.learner.isAuthenticated ||
+        widget.runtime.entitlementAccess is UnavailableEntitlementAccessGateway) {
+      return true;
+    }
+    final access = await widget.runtime.entitlementAccess.check(
+      learner: widget.runtime.learner,
+      capability: EntitlementCapability.summary,
+    );
+    if (!mounted) return false;
+    if (!access.isAllowed) {
+      setState(() => _access = access);
+      return false;
+    }
+    if (_access != null) {
+      setState(() => _access = null);
+    }
+    return true;
+  }
+
+  Future<EntitlementAccess?> _accessAfterSubmissionFailure() async {
+    if (!widget.runtime.learner.isAuthenticated ||
+        widget.runtime.entitlementAccess is UnavailableEntitlementAccessGateway) {
+      return null;
+    }
+    final access = await widget.runtime.entitlementAccess.check(
+      learner: widget.runtime.learner,
+      capability: EntitlementCapability.summary,
+    );
+    return access.isAllowed ? null : access;
+  }
+
+  void _retryAccess() {
+    if (_busy) return;
+    setState(() => _access = null);
+    _submit();
+  }
+
+  void _returnToStudy() {
+    Navigator.of(context).maybePop();
+  }
+
   Future<void> _submit() async {
     if (_busy || _restoring || _restoreUncertain || _jobId != null) return;
     setState(() {
@@ -208,6 +253,7 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> with WidgetsBinding
       _error = null;
     });
     try {
+      if (!await _admitSummaryGeneration()) return;
       final material = await widget.runtime.store.material(
         learner: widget.runtime.learner,
         materialId: widget.materialId,
@@ -307,7 +353,12 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> with WidgetsBinding
         _startPolling();
       }
     } catch (_) {
-      if (mounted) setState(() => _error = 'Özet isteği gönderilemedi. Oturumunu ve bağlantını kontrol et.');
+      final access = await _accessAfterSubmissionFailure();
+      if (!mounted) return;
+      setState(() {
+        _access = access;
+        _error = access == null ? 'Özet isteği gönderilemedi. Oturumunu ve bağlantını kontrol et.' : null;
+      });
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -524,6 +575,7 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> with WidgetsBinding
       _boundSource = null;
       _status = null;
       _error = null;
+      _access = null;
       _restoring = true;
     });
     await _restore();
@@ -637,6 +689,9 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> with WidgetsBinding
                 ),
               ),
             ),
+            const SizedBox(height: 12),
+          ] else if (_access != null) ...[
+            EntitlementAccessCard(access: _access!, onRetry: _retryAccess, onReturnToStudy: _returnToStudy),
             const SizedBox(height: 12),
           ] else if (_jobId == null)
             Container(

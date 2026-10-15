@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sesli_ogren/src/account/account_overview_gateway.dart';
+import 'package:sesli_ogren/src/account/entitlement_access_gateway.dart';
 import 'package:sesli_ogren/src/app/account_entry_screen.dart';
 import 'package:sesli_ogren/src/app/app_runtime.dart';
 import 'package:sesli_ogren/src/app/app_theme.dart';
@@ -58,6 +59,33 @@ class _VisualAccountOverviewGateway implements AccountOverviewGateway {
     ],
     dailyLimits: const {'summary_daily': 20, 'explain_daily': 20, 'focus_daily': 20, 'explain_back_daily': 20},
   );
+}
+
+class _VisualEntitlementGateway implements EntitlementAccessGateway {
+  const _VisualEntitlementGateway({required this.kind, required this.reason, required this.reconciliationState});
+
+  final EntitlementAccessKind kind;
+  final EntitlementAccessReason reason;
+  final String reconciliationState;
+
+  @override
+  Future<EntitlementAccess> check({
+    required AuthenticatedLearner learner,
+    required EntitlementCapability capability,
+  }) async {
+    return EntitlementAccess(
+      capability: capability,
+      kind: kind,
+      reason: reason,
+      plan: 'free',
+      entitlementStatus: 'active',
+      reconciliationState: reconciliationState,
+      renewalState: 'none',
+      periodStart: DateTime.utc(2026, 10, 15),
+      consumed: kind == EntitlementAccessKind.denied ? 1 : 0,
+      limit: kind == EntitlementAccessKind.denied ? 1 : 0,
+    );
+  }
 }
 
 class _NoopSpeechOutput implements SpeechOutput {
@@ -1339,6 +1367,22 @@ void main() {
     expect(currentSource, isNotNull);
     final sourceForTools = currentSource!;
 
+    Future<void> pumpUntilFound(Finder finder, {int maxPumps = 250}) async {
+      for (var i = 0; i < maxPumps && finder.evaluate().isEmpty; i++) {
+        await tester.pump(const Duration(milliseconds: 30));
+      }
+      expect(finder, findsOneWidget);
+    }
+
+    Future<void> tapQuickRecapCreate() async {
+      final create = find.byKey(const ValueKey('quick-recap-create'));
+      await pumpUntilFound(create);
+      await tester.ensureVisible(create);
+      await tester.pump(const Duration(milliseconds: 120));
+      expect(create.hitTestable(), findsOneWidget);
+      await tester.tap(create.hitTestable());
+    }
+
     Future<void> captureScreen(String name, Widget child) async {
       await tester.pumpWidget(
         MaterialApp(
@@ -1361,6 +1405,79 @@ void main() {
       FocusScreen(runtime: runtime, source: sourceForTools, sourceText: source),
     );
     await captureScreen('la0040_explain_back_390x844', ExplainBackScreen(runtime: runtime, source: sourceForTools));
+
+    final quotaRuntime = AppRuntime(
+      learner: AppRuntime.localM5LearnerFixture,
+      store: store,
+      ingest: ingest,
+      recall: RecallLearningService(sourceStore: store, learningStore: store.learningTruthStore()),
+      telemetry: store.operationalTelemetry(),
+      entitlementAccess: const _VisualEntitlementGateway(
+        kind: EntitlementAccessKind.denied,
+        reason: EntitlementAccessReason.quotaReached,
+        reconciliationState: 'verified',
+      ),
+    );
+    await tester.pumpWidget(
+      MaterialApp(
+        debugShowCheckedModeBanner: false,
+        theme: SesliOgrenTheme.light(),
+        home: const MediaQuery(data: MediaQueryData(disableAnimations: true), child: SizedBox.shrink()),
+      ),
+    );
+    await tester.pump();
+    await tester.pumpWidget(
+      MaterialApp(
+        debugShowCheckedModeBanner: false,
+        theme: SesliOgrenTheme.light(),
+        home: MediaQuery(
+          data: const MediaQueryData(disableAnimations: true),
+          child: LivingDeskReviewScope(
+            child: QuickRecapScreen(runtime: quotaRuntime, materialId: toolMaterialId),
+          ),
+        ),
+      ),
+    );
+    await tapQuickRecapCreate();
+    await pumpUntilFound(find.byKey(const ValueKey('entitlement-access-boundary')));
+    expect(tester.takeException(), isNull);
+    await expectLater(find.byType(Scaffold), matchesGoldenFile('goldens/la0040_entitlement_quota_390x844.png'));
+
+    await tester.pumpWidget(
+      MaterialApp(debugShowCheckedModeBanner: false, theme: SesliOgrenTheme.light(), home: const SizedBox.shrink()),
+    );
+    await tester.pump();
+
+    tester.view.physicalSize = const Size(320, 844);
+    final pendingRuntime = AppRuntime(
+      learner: AppRuntime.localM5LearnerFixture,
+      store: store,
+      ingest: ingest,
+      recall: RecallLearningService(sourceStore: store, learningStore: store.learningTruthStore()),
+      telemetry: store.operationalTelemetry(),
+      entitlementAccess: const _VisualEntitlementGateway(
+        kind: EntitlementAccessKind.pending,
+        reason: EntitlementAccessReason.purchasePending,
+        reconciliationState: 'purchase_pending',
+      ),
+    );
+    await tester.pumpWidget(
+      MaterialApp(
+        debugShowCheckedModeBanner: false,
+        theme: SesliOgrenTheme.light(),
+        home: MediaQuery(
+          data: const MediaQueryData(textScaler: TextScaler.linear(1.5), disableAnimations: true),
+          child: LivingDeskReviewScope(
+            child: QuickRecapScreen(runtime: pendingRuntime, materialId: toolMaterialId),
+          ),
+        ),
+      ),
+    );
+    await tapQuickRecapCreate();
+    await pumpUntilFound(find.byKey(const ValueKey('entitlement-access-boundary')));
+    expect(find.text('Plan durumun doğrulanıyor'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+    await expectLater(find.byType(Scaffold), matchesGoldenFile('goldens/la0040_entitlement_pending_320_text150.png'));
   });
 
   testWidgets('LA-0040 source-grounded Tutor conversation', (tester) async {

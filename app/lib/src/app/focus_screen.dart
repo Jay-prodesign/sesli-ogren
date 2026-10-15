@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:crypto/crypto.dart';
 import 'package:flutter/material.dart';
 
+import '../account/entitlement_access_gateway.dart';
 import '../domain/learning_contracts.dart';
 import '../generation/supabase_source_summary_gateway.dart';
 import '../learning/focus_help_gateway.dart';
@@ -10,6 +11,7 @@ import 'app_runtime.dart';
 import 'app_theme.dart';
 import 'atelier_learning_surfaces.dart';
 import 'companion_view.dart';
+import 'entitlement_access_card.dart';
 import 'explain_back_screen.dart';
 import 'explain_screen.dart';
 import 'learning_slice_screen.dart';
@@ -49,6 +51,8 @@ class _FocusScreenState extends State<FocusScreen> {
   }
 
   FocusHelpResult? help;
+  EntitlementAccess? _access;
+  FocusHelpKind? _blockedKind;
   bool busy = false;
   bool _sourceChanged = false;
 
@@ -301,11 +305,39 @@ class _FocusScreenState extends State<FocusScreen> {
     Navigator.of(context).maybePop();
   }
 
+  Future<EntitlementAccess?> _focusAccess() async {
+    if (!widget.runtime.learner.isAuthenticated ||
+        widget.runtime.entitlementAccess is UnavailableEntitlementAccessGateway) {
+      return null;
+    }
+    final access = await widget.runtime.entitlementAccess.check(
+      learner: widget.runtime.learner,
+      capability: EntitlementCapability.focus,
+    );
+    return access.isAllowed ? null : access;
+  }
+
+  void _retryEntitlement() {
+    final kind = _blockedKind ?? FocusHelpKind.directExplanation;
+    if (busy) return;
+    setState(() {
+      _access = null;
+      _blockedKind = null;
+    });
+    request(kind);
+  }
+
+  void _returnToStudy() {
+    Navigator.of(context).maybePop();
+  }
+
   Future<void> request(FocusHelpKind kind) async {
     if (busy || _sourceChanged) return;
     setState(() {
       busy = true;
       help = null;
+      _access = null;
+      _blockedKind = null;
     });
 
     if (!await _sourceStillCurrent()) {
@@ -337,11 +369,47 @@ class _FocusScreenState extends State<FocusScreen> {
       return;
     }
 
+    final access = await _focusAccess();
+    if (access != null) {
+      if (kind == FocusHelpKind.hint) {
+        final result = await _localHintForCurrentSource();
+        final stillCurrent = await _sourceStillCurrent();
+        if (!mounted) return;
+        setState(() {
+          busy = false;
+          _sourceChanged = !stillCurrent;
+          help = stillCurrent
+              ? result
+              : const FocusHelpUnavailable('Kaynak değişti. Eski sürüme bağlı yardımı göstermiyoruz.');
+        });
+        return;
+      }
+      if (!mounted) return;
+      setState(() {
+        busy = false;
+        _access = access;
+        _blockedKind = kind;
+      });
+      return;
+    }
+
     FocusHelpResult result;
     try {
       result = await _requestServerHelp(kind);
     } catch (_) {
       result = const FocusHelpUnavailable('Kaynağa bağlı AI yardımına şu anda ulaşılamıyor.');
+    }
+    if (result is FocusHelpUnavailable && kind == FocusHelpKind.directExplanation) {
+      final blockedAccess = await _focusAccess();
+      if (blockedAccess != null) {
+        if (!mounted) return;
+        setState(() {
+          busy = false;
+          _access = blockedAccess;
+          _blockedKind = kind;
+        });
+        return;
+      }
     }
     if (kind == FocusHelpKind.hint && result is FocusHelpUnavailable) {
       result = await _localHintForCurrentSource();
@@ -551,6 +619,10 @@ class _FocusScreenState extends State<FocusScreen> {
               );
             },
           ),
+          if (_access != null) ...[
+            const SizedBox(height: 16),
+            EntitlementAccessCard(access: _access!, onRetry: _retryEntitlement, onReturnToStudy: _returnToStudy),
+          ],
           if (busy) ...[const SizedBox(height: 12), const LinearProgressIndicator()],
           if (readyHelp != null) ...[
             const SizedBox(height: 16),
