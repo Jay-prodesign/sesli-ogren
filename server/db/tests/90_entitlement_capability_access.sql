@@ -155,7 +155,7 @@ select pg_temp.ok(:'grace_decision' = 'allowed', 'grace access must survive a te
 select pg_temp.ok(:'grace_reason' = 'grace_access_preserved', 'grace access must be explicitly attributable');
 
 select pg_temp.denied(
-  $select * from public.get_capability_access('made_up_capability')$,
+  'select * from public.get_capability_access(''made_up_capability'')',
   'unsupported_capability',
   'unknown metering classes must fail closed'
 );
