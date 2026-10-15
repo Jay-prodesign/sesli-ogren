@@ -73,6 +73,18 @@ class _ExplainBackScreenState extends State<ExplainBackScreen> {
     return true;
   }
 
+  Future<EntitlementAccess?> _blockedExplainBackAccessAfterFailure() async {
+    if (!widget.runtime.learner.isAuthenticated ||
+        widget.runtime.entitlementAccess is UnavailableEntitlementAccessGateway) {
+      return null;
+    }
+    final access = await widget.runtime.entitlementAccess.check(
+      learner: widget.runtime.learner,
+      capability: EntitlementCapability.explainBack,
+    );
+    return access.isAllowed ? null : access;
+  }
+
   void _retryEntitlement() {
     if (_submitting) return;
     setState(() => _access = null);
@@ -227,6 +239,18 @@ class _ExplainBackScreenState extends State<ExplainBackScreen> {
       }
     } catch (_) {
       result = const ExplainBackUnavailable('Değerlendirme servisine şu anda ulaşılamıyor.');
+    }
+
+    if (result is ExplainBackUnavailable && !sourceChanged) {
+      final blockedAccess = await _blockedExplainBackAccessAfterFailure();
+      if (blockedAccess != null) {
+        if (!mounted) return;
+        setState(() {
+          _submitting = false;
+          _access = blockedAccess;
+        });
+        return;
+      }
     }
 
     if (!mounted) return;
