@@ -117,7 +117,7 @@ Widget _motionStableShell(AppRuntime runtime) {
   return MaterialApp(
     builder: (context, child) =>
         MediaQuery(data: MediaQuery.of(context).copyWith(disableAnimations: true), child: child!),
-    home: ProductShellScreen(runtime: runtime),
+    home: LivingDeskReviewScope(child: ProductShellScreen(runtime: runtime)),
   );
 }
 
