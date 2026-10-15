@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:crypto/crypto.dart';
 import 'package:flutter/material.dart';
 
+import '../account/entitlement_access_gateway.dart';
 import '../domain/learning_contracts.dart';
 import '../generation/supabase_source_summary_gateway.dart';
 import '../learning/focus_help_gateway.dart';
@@ -10,6 +11,7 @@ import 'app_runtime.dart';
 import 'app_theme.dart';
 import 'atelier_learning_surfaces.dart';
 import 'companion_view.dart';
+import 'entitlement_access_card.dart';
 import 'explain_back_screen.dart';
 import 'explain_screen.dart';
 import 'learning_slice_screen.dart';
@@ -49,6 +51,8 @@ class _FocusScreenState extends State<FocusScreen> {
   }
 
   FocusHelpResult? help;
+  CapabilityAccessDecision? _accessDecision;
+  FocusHelpKind? _blockedKind;
   bool busy = false;
   bool _sourceChanged = false;
 
@@ -337,6 +341,28 @@ class _FocusScreenState extends State<FocusScreen> {
       return;
     }
 
+    if (widget.runtime.learner.isAuthenticated) {
+      final access = await widget.runtime.entitlementAccess.check(EntitlementCapability.focus);
+      if (!mounted) return;
+      if (access.isBlocked) {
+        final localFallback = kind == FocusHelpKind.hint ? await _localHintForCurrentSource() : null;
+        if (!mounted) return;
+        setState(() {
+          busy = false;
+          _accessDecision = access;
+          _blockedKind = kind;
+          help = localFallback;
+        });
+        return;
+      }
+      if (_accessDecision != null || _blockedKind != null) {
+        setState(() {
+          _accessDecision = null;
+          _blockedKind = null;
+        });
+      }
+    }
+
     FocusHelpResult result;
     try {
       result = await _requestServerHelp(kind);
@@ -523,7 +549,7 @@ class _FocusScreenState extends State<FocusScreen> {
             builder: (context, constraints) {
               final stackActions = constraints.maxWidth < 340 || MediaQuery.textScalerOf(context).scale(1) > 1.25;
               final hintButton = OutlinedButton.icon(
-                onPressed: busy || _sourceChanged ? null : () => request(FocusHelpKind.hint),
+                onPressed: busy || _sourceChanged || _accessDecision != null ? null : () => request(FocusHelpKind.hint),
                 icon: const Icon(Icons.lightbulb_outline_rounded),
                 label: const Text('İpucu ver'),
               );
@@ -531,7 +557,9 @@ class _FocusScreenState extends State<FocusScreen> {
                 style: living
                     ? FilledButton.styleFrom(backgroundColor: AtelierStyle.pulse, foregroundColor: Colors.white)
                     : null,
-                onPressed: busy || _sourceChanged ? null : () => request(FocusHelpKind.directExplanation),
+                onPressed: busy || _sourceChanged || _accessDecision != null
+                    ? null
+                    : () => request(FocusHelpKind.directExplanation),
                 icon: const Icon(Icons.auto_awesome_outlined),
                 label: const Text('Sorumu açıkla'),
               );
@@ -552,6 +580,24 @@ class _FocusScreenState extends State<FocusScreen> {
             },
           ),
           if (busy) ...[const SizedBox(height: 12), const LinearProgressIndicator()],
+          if (_accessDecision != null) ...[
+            const SizedBox(height: 16),
+            EntitlementAccessCard(
+              decision: _accessDecision!,
+              onRecheck: () {
+                final kind = _blockedKind ?? FocusHelpKind.directExplanation;
+                setState(() {
+                  _accessDecision = null;
+                  _blockedKind = null;
+                });
+                request(kind);
+              },
+              onBack: () => setState(() {
+                _accessDecision = null;
+                _blockedKind = null;
+              }),
+            ),
+          ],
           if (readyHelp != null) ...[
             const SizedBox(height: 16),
             DecoratedBox(
