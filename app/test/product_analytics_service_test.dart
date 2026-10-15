@@ -28,17 +28,10 @@ void main() {
   sqfliteFfiInit();
 
   test('guest analytics stays durable and never calls the remote gateway', () async {
-    final store = await SqliteSourceStore.open(
-      factory: databaseFactoryFfiNoIsolate,
-      path: inMemoryDatabasePath,
-    );
+    final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
     addTearDown(store.close);
     final gateway = _FakeAnalyticsGateway();
-    final analytics = ProductAnalyticsService(
-      store: store,
-      gateway: gateway,
-      sessionId: 'session_guest_test_0001',
-    );
+    final analytics = ProductAnalyticsService(store: store, gateway: gateway, sessionId: 'session_guest_test_0001');
 
     await analytics.record(
       learner: const AuthenticatedLearner.local(),
@@ -55,9 +48,7 @@ void main() {
       ),
     );
 
-    final stored = await store.productAnalyticsEvents(
-      learner: const AuthenticatedLearner.local(),
-    );
+    final stored = await store.productAnalyticsEvents(learner: const AuthenticatedLearner.local());
     expect(stored, hasLength(1));
     expect(stored.single.event.type, ProductAnalyticsEventType.readerSession);
     expect(stored.single.event.materialId, const MaterialId('material_guest_analytics'));
@@ -74,11 +65,7 @@ void main() {
     );
     addTearDown(store.close);
     final gateway = _FakeAnalyticsGateway()..unavailable = true;
-    final analytics = ProductAnalyticsService(
-      store: store,
-      gateway: gateway,
-      sessionId: 'session_auth_test_000001',
-    );
+    final analytics = ProductAnalyticsService(store: store, gateway: gateway, sessionId: 'session_auth_test_000001');
     const learner = AuthenticatedLearner(id: LearnerId('analytics-auth-learner'));
 
     await analytics.record(
@@ -99,9 +86,7 @@ void main() {
     );
     await Future<void>.delayed(Duration.zero);
 
-    var pending = await store.pendingProductAnalyticsEvents(
-      learner: learner,
-    );
+    var pending = await store.pendingProductAnalyticsEvents(learner: learner);
     expect(pending, hasLength(1));
     expect(gateway.sent, isEmpty);
 
