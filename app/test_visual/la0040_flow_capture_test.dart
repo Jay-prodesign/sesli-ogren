@@ -1374,6 +1374,15 @@ void main() {
       expect(finder, findsOneWidget);
     }
 
+    Future<void> tapQuickRecapCreate() async {
+      final create = find.byKey(const ValueKey('quick-recap-create'));
+      await pumpUntilFound(create);
+      await tester.ensureVisible(create);
+      await tester.pump(const Duration(milliseconds: 120));
+      expect(create.hitTestable(), findsOneWidget);
+      await tester.tap(create.hitTestable());
+    }
+
     Future<void> captureScreen(String name, Widget child) async {
       await tester.pumpWidget(
         MaterialApp(
@@ -1429,19 +1438,13 @@ void main() {
         ),
       ),
     );
-    await pumpUntilFound(find.byKey(const ValueKey('quick-recap-create')));
-    await tester.ensureVisible(find.byKey(const ValueKey('quick-recap-create')));
-    await tester.tap(find.byKey(const ValueKey('quick-recap-create')));
+    await tapQuickRecapCreate();
     await pumpUntilFound(find.byKey(const ValueKey('entitlement-access-boundary')));
     expect(tester.takeException(), isNull);
     await expectLater(find.byType(Scaffold), matchesGoldenFile('goldens/la0040_entitlement_quota_390x844.png'));
 
     await tester.pumpWidget(
-      MaterialApp(
-        debugShowCheckedModeBanner: false,
-        theme: SesliOgrenTheme.light(),
-        home: const SizedBox.shrink(),
-      ),
+      MaterialApp(debugShowCheckedModeBanner: false, theme: SesliOgrenTheme.light(), home: const SizedBox.shrink()),
     );
     await tester.pump();
 
@@ -1470,9 +1473,7 @@ void main() {
         ),
       ),
     );
-    await pumpUntilFound(find.byKey(const ValueKey('quick-recap-create')));
-    await tester.ensureVisible(find.byKey(const ValueKey('quick-recap-create')));
-    await tester.tap(find.byKey(const ValueKey('quick-recap-create')));
+    await tapQuickRecapCreate();
     await pumpUntilFound(find.byKey(const ValueKey('entitlement-access-boundary')));
     expect(find.text('Plan durumun doğrulanıyor'), findsOneWidget);
     expect(tester.takeException(), isNull);
