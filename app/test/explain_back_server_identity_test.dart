@@ -198,10 +198,7 @@ void main() {
       text: 'Fotosentez ışık enerjisini kimyasal enerjiye dönüştürür.',
       sourceName: 'Entitlement açıklama notu',
     );
-    final source = await store.currentSourceVersion(
-      learner: AppRuntime.localM5LearnerFixture,
-      materialId: materialId,
-    );
+    final source = await store.currentSourceVersion(learner: AppRuntime.localM5LearnerFixture, materialId: materialId);
     expect(source, isNotNull);
 
     final explainBack = _RecordingExplainBackGateway();
