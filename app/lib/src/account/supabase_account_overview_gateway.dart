@@ -14,7 +14,9 @@ class SupabaseAccountOverviewGateway implements AccountOverviewGateway {
       final account = await client.from('accounts').select('locale,status').eq('id', learner.id.value).maybeSingle();
       final entitlement = await client
           .from('entitlements')
-          .select('plan,status,limits,reconciliation_state,renewal_state,effective_until,last_authoritative_verification_at')
+          .select(
+            'plan,status,limits,reconciliation_state,renewal_state,effective_until,last_authoritative_verification_at',
+          )
           .eq('account_id', learner.id.value)
           .maybeSingle();
       if (account == null || entitlement == null) return null;
