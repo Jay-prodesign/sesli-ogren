@@ -4,6 +4,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../analytics/product_analytics.dart';
 import '../domain/learning_contracts.dart';
 import '../domain/learning_truth.dart';
 import '../data/source_ingest_service.dart';
@@ -112,6 +113,37 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
       // Operational telemetry must never become learning-state authority
       // or block the learner's flow.
     }
+
+    unawaited(
+      widget.runtime.analytics.record(
+        learner: widget.runtime.learner,
+        event: ProductAnalyticsEvent(
+          type: ProductAnalyticsEventType.values.byName(event.type.name),
+          phase: ProductAnalyticsPhase.values.byName(event.phase.name),
+          createdAt: event.createdAt,
+          materialId: event.materialId,
+          sourceVersionId: event.sourceVersionId,
+          surface: switch (event.type) {
+            OperationalEventType.sourceIngest => ProductAnalyticsSurface.sourceEditor,
+            OperationalEventType.recallPrompt ||
+            OperationalEventType.recallAttempt ||
+            OperationalEventType.continuationRepair => ProductAnalyticsSurface.recall,
+            OperationalEventType.runtimeRestore => null,
+          },
+          capability: switch (event.type) {
+            OperationalEventType.sourceIngest => ProductAnalyticsCapability.sourceProcessing,
+            OperationalEventType.recallPrompt ||
+            OperationalEventType.recallAttempt => ProductAnalyticsCapability.recall,
+            OperationalEventType.continuationRepair => ProductAnalyticsCapability.continuity,
+            OperationalEventType.runtimeRestore => null,
+          },
+          outcomeClass: event.outcome?.name ?? (event.phase == OperationalEventPhase.failed ? 'failed' : null),
+          reasonCode: event.reasonCode ?? event.errorClass,
+          durationMs: event.durationMs,
+          quantity: event.phase == OperationalEventPhase.completed ? 1 : null,
+        ),
+      ),
+    );
   }
 
   Future<void> _restore() async {
