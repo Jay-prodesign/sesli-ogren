@@ -70,10 +70,7 @@ Future<(SqliteSourceStore, SourceIngestService, SourceIngestResult)> _source({
   required MaterialId materialId,
   String? path,
 }) async {
-  final store = await SqliteSourceStore.open(
-    factory: databaseFactoryFfiNoIsolate,
-    path: path ?? inMemoryDatabasePath,
-  );
+  final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: path ?? inMemoryDatabasePath);
   final ingest = SourceIngestService(
     store: store,
     pdfTextExtractor: const _UnusedPdfExtractor(),
