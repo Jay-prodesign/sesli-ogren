@@ -121,12 +121,14 @@ begin
         v_ent.plan, v_ent.status, v_ent.reconciliation_state, v_ent.renewal_state,
         current_date, v_used, v_limit, v_ent.effective_until,
         v_ent.last_authoritative_verification_at;
+      return;
     elsif v_used >= v_limit then
       return query select
         v_capability, 'denied'::text, 'quota_reached'::text,
         v_ent.plan, v_ent.status, v_ent.reconciliation_state, v_ent.renewal_state,
         current_date, v_used, v_limit, v_ent.effective_until,
         v_ent.last_authoritative_verification_at;
+      return;
     else
       return query select
         v_capability,
@@ -143,6 +145,7 @@ begin
         v_ent.plan, v_ent.status, v_ent.reconciliation_state, v_ent.renewal_state,
         current_date, v_used, v_limit, v_ent.effective_until,
         v_ent.last_authoritative_verification_at;
+      return;
     end if;
   end if;
 
@@ -152,6 +155,7 @@ begin
       v_ent.plan, v_ent.status, v_ent.reconciliation_state, v_ent.renewal_state,
       current_date, v_used, v_limit, v_ent.effective_until,
       v_ent.last_authoritative_verification_at;
+    return;
   end if;
 
   if v_ent.reconciliation_state = 'reconciliation_error' then
