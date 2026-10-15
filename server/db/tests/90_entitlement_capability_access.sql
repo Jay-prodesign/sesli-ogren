@@ -40,18 +40,77 @@ set role authenticated;
 select decision as initial_decision,
        reason as initial_reason,
        consumed::text as initial_consumed,
+       reserved::text as initial_reserved,
        limit_value::text as initial_limit
 from public.get_capability_access('summary')
 \gset
 
 select pg_temp.ok(:'initial_decision' = 'allowed', 'fresh free entitlement must admit configured Summary');
 select pg_temp.ok(:'initial_reason' = 'entitled', 'fresh access must be server-entitled');
-select pg_temp.ok(:'initial_consumed' = '0' and :'initial_limit' = '1', 'RPC must expose authoritative usage and limit');
+select pg_temp.ok(
+  :'initial_consumed' = '0' and :'initial_reserved' = '0' and :'initial_limit' = '1',
+  'RPC must expose authoritative consumed, reserved and limit state'
+);
 
 select pg_temp.denied(
-  $$update public.entitlements set plan = 'premium' where account_id = '$$ || :user_a || $$'$$,
+  $update public.entitlements set plan = 'premium' where account_id = '$ || :user_a || $'$,
   'permission denied',
   'authenticated client must not self-grant plan changes'
+);
+
+select material_id::text as reserved_material_id,
+       job_id::text as reserved_job_id
+from public.submit_text_summary(
+  'Reserved Summary',
+  'Fotosentez ışık enerjisini kimyasal enerjiye dönüştürür.',
+  'entitlement-reserved-summary-a'
+)
+\gset
+
+select decision as reserved_decision,
+       reason as reserved_reason,
+       consumed::text as reserved_consumed,
+       reserved::text as reserved_count
+from public.get_capability_access('summary')
+\gset
+
+select pg_temp.ok(:'reserved_decision' = 'denied', 'inflight Summary must reserve the configured capacity');
+select pg_temp.ok(:'reserved_reason' = 'quota_reached', 'reserved capacity must use the same authoritative quota reason');
+select pg_temp.ok(
+  :'reserved_consumed' = '0' and :'reserved_count' = '1',
+  'reserved Summary must remain distinguishable from completed usage'
+);
+
+reset role;
+
+update public.generation_jobs
+set target_artifact_type = 'EXPLAIN'
+where id = :'reserved_job_id'::uuid;
+
+select set_config('request.jwt.claim.sub', :user_a, false);
+set role authenticated;
+
+select decision as unrelated_decision,
+       reserved::text as unrelated_reserved
+from public.get_capability_access('summary')
+\gset
+
+select pg_temp.ok(
+  :'unrelated_decision' = 'allowed' and :'unrelated_reserved' = '0',
+  'an unrelated inflight Explain must not consume Summary capacity'
+);
+
+select job_id::text as second_summary_job_id
+from public.submit_text_summary(
+  'Second Summary',
+  'Klorofil ışığın soğurulmasına yardım eder.',
+  'entitlement-reserved-summary-b'
+)
+\gset
+
+select pg_temp.ok(
+  nullif(:'second_summary_job_id', '') is not null,
+  'Summary mutation must ignore unrelated inflight generation when enforcing its own quota'
 );
 
 reset role;
