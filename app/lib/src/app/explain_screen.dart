@@ -181,8 +181,7 @@ class _ExplainScreenState extends State<ExplainScreen> {
           outputLocale: 'tr-TR',
         ),
       );
-      if (result is GroundedExplainUnavailable &&
-          result.reason == GroundedExplainUnavailableReason.temporaryFailure) {
+      if (result is GroundedExplainUnavailable && result.reason == GroundedExplainUnavailableReason.temporaryFailure) {
         await _captureBlockedAccessAfterFailure();
       }
 
@@ -249,13 +248,7 @@ class _ExplainScreenState extends State<ExplainScreen> {
             if (access != null) {
               return ListView(
                 padding: const EdgeInsets.fromLTRB(20, 18, 20, 36),
-                children: [
-                  EntitlementAccessCard(
-                    access: access,
-                    onRetry: _retry,
-                    onReturnToStudy: _backToMaterial,
-                  ),
-                ],
+                children: [EntitlementAccessCard(access: access, onRetry: _retry, onReturnToStudy: _backToMaterial)],
               );
             }
             if (snapshot.hasError) {
