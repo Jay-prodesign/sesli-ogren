@@ -49,7 +49,7 @@ class EntitlementAccessCard extends StatelessWidget {
     };
     final planLabel = switch (access.plan) {
       'free' => 'Ücretsiz plan',
-      'premium' => 'Premium plan',
+      'premium' => 'Ücretli plan',
       'tester' => 'Test planı',
       _ => 'Plan doğrulanamadı',
     };
