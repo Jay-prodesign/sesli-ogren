@@ -235,13 +235,7 @@ class _ExplainScreenState extends State<ExplainScreen> {
             if (accessDecision != null) {
               return ListView(
                 padding: const EdgeInsets.all(20),
-                children: [
-                  EntitlementAccessCard(
-                    decision: accessDecision,
-                    onRecheck: _retry,
-                    onBack: _backToMaterial,
-                  ),
-                ],
+                children: [EntitlementAccessCard(decision: accessDecision, onRecheck: _retry, onBack: _backToMaterial)],
               );
             }
             if (snapshot.hasError) {
