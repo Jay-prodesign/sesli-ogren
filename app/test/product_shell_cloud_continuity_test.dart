@@ -115,10 +115,8 @@ Future<AppRuntime> _runtime({
 
 Widget _motionStableShell(AppRuntime runtime) {
   return MaterialApp(
-    builder: (context, child) => MediaQuery(
-      data: MediaQuery.of(context).copyWith(disableAnimations: true),
-      child: child!,
-    ),
+    builder: (context, child) =>
+        MediaQuery(data: MediaQuery.of(context).copyWith(disableAnimations: true), child: child!),
     home: ProductShellScreen(runtime: runtime),
   );
 }
