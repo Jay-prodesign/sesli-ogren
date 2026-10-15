@@ -80,10 +80,7 @@ Future<(SqliteSourceStore, SourceIngestResult)> _source({
   required MaterialId materialId,
   String? path,
 }) async {
-  final store = await SqliteSourceStore.open(
-    factory: databaseFactoryFfiNoIsolate,
-    path: path ?? inMemoryDatabasePath,
-  );
+  final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: path ?? inMemoryDatabasePath);
   final ingest = SourceIngestService(
     store: store,
     pdfTextExtractor: const _UnusedPdfExtractor(),
@@ -109,16 +106,8 @@ void main() {
     const materialId = MaterialId('material_retention_sync_0001');
     final temp = await Directory.systemTemp.createTemp('sesli-ogren-retention-two-device-');
     addTearDown(() => temp.delete(recursive: true));
-    final (storeA, sourceA) = await _source(
-      learner: learner,
-      materialId: materialId,
-      path: '${temp.path}/device-a.db',
-    );
-    final (storeB, sourceB) = await _source(
-      learner: learner,
-      materialId: materialId,
-      path: '${temp.path}/device-b.db',
-    );
+    final (storeA, sourceA) = await _source(learner: learner, materialId: materialId, path: '${temp.path}/device-a.db');
+    final (storeB, sourceB) = await _source(learner: learner, materialId: materialId, path: '${temp.path}/device-b.db');
     addTearDown(storeA.close);
     addTearDown(storeB.close);
     expect(sourceA.sourceVersion.identity.sourceVersionId, sourceB.sourceVersion.identity.sourceVersionId);
