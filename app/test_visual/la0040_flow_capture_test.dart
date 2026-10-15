@@ -1436,6 +1436,15 @@ void main() {
     expect(tester.takeException(), isNull);
     await expectLater(find.byType(Scaffold), matchesGoldenFile('goldens/la0040_entitlement_quota_390x844.png'));
 
+    await tester.pumpWidget(
+      MaterialApp(
+        debugShowCheckedModeBanner: false,
+        theme: SesliOgrenTheme.light(),
+        home: const SizedBox.shrink(),
+      ),
+    );
+    await tester.pump();
+
     tester.view.physicalSize = const Size(320, 844);
     final pendingRuntime = AppRuntime(
       learner: AppRuntime.localM5LearnerFixture,
