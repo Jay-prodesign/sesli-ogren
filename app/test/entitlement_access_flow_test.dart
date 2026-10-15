@@ -90,8 +90,7 @@ Future<(AppRuntime, SourceVersionRecord, String)> _fixture({
   final result = await ingest.ingestPastedText(
     learner: AppRuntime.localM5LearnerFixture,
     materialId: materialId,
-    text:
-        'Klorofil ışığın soğurulmasına yardım eder. Fotosentez ışık enerjisini kimyasal enerjiye dönüştürür.',
+    text: 'Klorofil ışığın soğurulmasına yardım eder. Fotosentez ışık enerjisini kimyasal enerjiye dönüştürür.',
     sourceName: 'Entitlement akış notu',
   );
   final runtime = AppRuntime(
