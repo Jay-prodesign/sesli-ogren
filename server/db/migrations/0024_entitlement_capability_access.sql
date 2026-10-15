@@ -81,7 +81,7 @@ begin
   if not found then
     return query select
       v_capability,
-      'denied'::text,
+      'unavailable'::text,
       'entitlement_missing'::text,
       'unknown'::text,
       'missing'::text,
@@ -112,29 +112,19 @@ begin
   v_used := coalesce(v_used, 0);
   v_effectively_active :=
     v_ent.status = 'active'
-    and (v_ent.effective_until is null or v_ent.effective_until > now());
+    and (
+      v_ent.effective_until is null
+      or v_ent.effective_until > now()
+      or v_ent.renewal_state = 'grace_or_retry'
+    );
 
   if v_effectively_active then
-    if v_limit <= 0 then
-      return query select
-        v_capability, 'denied'::text, 'capability_not_entitled'::text,
-        v_ent.plan, v_ent.status, v_ent.reconciliation_state, v_ent.renewal_state,
-        current_date, v_used, v_limit, v_ent.effective_until,
-        v_ent.last_authoritative_verification_at;
-      return;
-    elsif v_used >= v_limit then
-      return query select
-        v_capability, 'denied'::text, 'quota_reached'::text,
-        v_ent.plan, v_ent.status, v_ent.reconciliation_state, v_ent.renewal_state,
-        current_date, v_used, v_limit, v_ent.effective_until,
-        v_ent.last_authoritative_verification_at;
-      return;
-    else
+    if v_limit > 0 and v_used < v_limit then
       return query select
         v_capability,
         'allowed'::text,
         case
-          when v_ent.reconciliation_state in ('restore_pending', 'reconciliation_error')
+          when v_ent.reconciliation_state in ('purchase_pending', 'restore_pending', 'reconciliation_error')
             then 'access_preserved_during_reconciliation'::text
           when v_ent.renewal_state = 'grace_or_retry'
             then 'grace_access_preserved'::text
@@ -147,6 +137,33 @@ begin
         v_ent.last_authoritative_verification_at;
       return;
     end if;
+
+    if v_ent.reconciliation_state in ('purchase_pending', 'restore_pending') then
+      return query select
+        v_capability, 'pending'::text, v_ent.reconciliation_state,
+        v_ent.plan, v_ent.status, v_ent.reconciliation_state, v_ent.renewal_state,
+        current_date, v_used, v_limit, v_ent.effective_until,
+        v_ent.last_authoritative_verification_at;
+      return;
+    end if;
+
+    if v_ent.reconciliation_state = 'reconciliation_error' then
+      return query select
+        v_capability, 'unavailable'::text, 'reconciliation_error'::text,
+        v_ent.plan, v_ent.status, v_ent.reconciliation_state, v_ent.renewal_state,
+        current_date, v_used, v_limit, v_ent.effective_until,
+        v_ent.last_authoritative_verification_at;
+      return;
+    end if;
+
+    return query select
+      v_capability,
+      'denied'::text,
+      case when v_limit <= 0 then 'capability_not_entitled'::text else 'quota_reached'::text end,
+      v_ent.plan, v_ent.status, v_ent.reconciliation_state, v_ent.renewal_state,
+      current_date, v_used, v_limit, v_ent.effective_until,
+      v_ent.last_authoritative_verification_at;
+    return;
   end if;
 
   if v_ent.reconciliation_state in ('purchase_pending', 'restore_pending') then
