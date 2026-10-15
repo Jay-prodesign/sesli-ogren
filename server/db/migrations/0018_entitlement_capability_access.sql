@@ -87,12 +87,13 @@ begin
     return;
   end if;
 
-  select coalesce(q.consumed, 0)
+  select q.consumed
     into v_consumed
   from public.quota_ledger q
   where q.account_id = v_user
     and q.period_start = current_date
     and q.capability = v_capability;
+  v_consumed := coalesce(v_consumed, 0);
 
   if v_capability = 'summary' then
     v_target_artifact_type := 'SUMMARY';
