@@ -71,8 +71,7 @@ class EntitlementAccess {
       kind == EntitlementAccessKind.denied &&
       (reason == EntitlementAccessReason.quotaReached ||
           reason == EntitlementAccessReason.capabilityNotEntitled ||
-          reason == EntitlementAccessReason.entitlementInactive ||
-          reason == EntitlementAccessReason.entitlementMissing);
+          reason == EntitlementAccessReason.entitlementInactive);
 }
 
 abstract interface class EntitlementAccessGateway {
