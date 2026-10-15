@@ -534,9 +534,10 @@ class _AccountOverviewCard extends StatelessWidget {
     };
     final renewalNote = switch (overview.renewalState) {
       'grace_or_retry' => 'Plan geçici yenileme/grace döneminde.',
-      'cancelled_future_expiry' => overview.effectiveUntil == null
-          ? 'Plan yenilenmeyecek; mevcut erişim doğrulanmış süre boyunca devam eder.'
-          : 'Plan yenilenmeyecek; doğrulanmış bitiş tarihine kadar erişim devam eder.',
+      'cancelled_future_expiry' =>
+        overview.effectiveUntil == null
+            ? 'Plan yenilenmeyecek; mevcut erişim doğrulanmış süre boyunca devam eder.'
+            : 'Plan yenilenmeyecek; doğrulanmış bitiş tarihine kadar erişim devam eder.',
       _ => null,
     };
     final badgeLabel = active
@@ -636,8 +637,10 @@ class _AccountOverviewCard extends StatelessWidget {
                         if (reconciliationNote != null || renewalNote != null) ...[
                           const SizedBox(height: 5),
                           Text(
-                            [if (reconciliationNote != null) reconciliationNote, if (renewalNote != null) renewalNote]
-                                .join(' '),
+                            [
+                              if (reconciliationNote != null) reconciliationNote,
+                              if (renewalNote != null) renewalNote,
+                            ].join(' '),
                             key: const ValueKey('profile-entitlement-reconciliation'),
                             style: theme.textTheme.bodySmall?.copyWith(color: AppPalette.inkMuted, height: 1.35),
                           ),
