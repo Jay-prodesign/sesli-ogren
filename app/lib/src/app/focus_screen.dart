@@ -399,6 +399,18 @@ class _FocusScreenState extends State<FocusScreen> {
     } catch (_) {
       result = const FocusHelpUnavailable('Kaynağa bağlı AI yardımına şu anda ulaşılamıyor.');
     }
+    if (result is FocusHelpUnavailable && kind == FocusHelpKind.directExplanation) {
+      final blockedAccess = await _focusAccess();
+      if (blockedAccess != null) {
+        if (!mounted) return;
+        setState(() {
+          busy = false;
+          _access = blockedAccess;
+          _blockedKind = kind;
+        });
+        return;
+      }
+    }
     if (kind == FocusHelpKind.hint && result is FocusHelpUnavailable) {
       result = await _localHintForCurrentSource();
     }
