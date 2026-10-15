@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'package:crypto/crypto.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:sesli_ogren/src/account/entitlement_access_gateway.dart';
 import 'package:sesli_ogren/src/app/app_runtime.dart';
 import 'package:sesli_ogren/src/app/explain_back_screen.dart';
 import 'package:sesli_ogren/src/app/companion_view.dart';
@@ -72,6 +73,22 @@ class _MutatingExplainBackGateway implements ExplainBackGateway {
       executionRef: 'test:mutating-explain-back',
     );
   }
+}
+
+class _BlockedExplainBackEntitlementGateway implements EntitlementAccessGateway {
+  const _BlockedExplainBackEntitlementGateway();
+
+  @override
+  Future<CapabilityAccessDecision> check(EntitlementCapability capability) async => CapabilityAccessDecision(
+    capability: capability,
+    disposition: CapabilityAccessDisposition.blocked,
+    reason: CapabilityAccessReason.quotaReached,
+    plan: 'free',
+    entitlementStatus: 'active',
+    limit: 1,
+    consumed: 1,
+    remaining: 0,
+  );
 }
 
 class _RecordingSourceGateway extends SupabaseSourceSummaryGateway {
@@ -165,6 +182,60 @@ void main() {
     await _tapVisible(tester, find.text('Hatırla ile devam et'));
     await _pumpUntilFound(tester, find.text('Hatırla'));
     expect(find.text('Hatırla'), findsOneWidget);
+  });
+
+  testWidgets('Explain-back preserves learner response when authoritative quota blocks evaluation', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(320, 700));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
+    addTearDown(store.close);
+    final ingest = SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor());
+    const materialId = MaterialId('explain-back-entitlement-blocked');
+    await ingest.ingestPastedText(
+      learner: AppRuntime.localM5LearnerFixture,
+      materialId: materialId,
+      text: 'Fotosentez ışık enerjisini kimyasal enerjiye dönüştürür.',
+      sourceName: 'Entitlement açıklama notu',
+    );
+    final source = await store.currentSourceVersion(
+      learner: AppRuntime.localM5LearnerFixture,
+      materialId: materialId,
+    );
+    expect(source, isNotNull);
+
+    final explainBack = _RecordingExplainBackGateway();
+    final runtime = AppRuntime(
+      learner: AppRuntime.localM5LearnerFixture,
+      store: store,
+      ingest: ingest,
+      recall: RecallLearningService(sourceStore: store, learningStore: store.learningTruthStore()),
+      telemetry: store.operationalTelemetry(),
+      explainBack: explainBack,
+      entitlementAccess: const _BlockedExplainBackEntitlementGateway(),
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: MediaQuery(
+          data: const MediaQueryData(textScaler: TextScaler.linear(1.5), disableAnimations: true),
+          child: ExplainBackScreen(runtime: runtime, source: source!),
+        ),
+      ),
+    );
+
+    const response = 'Fotosentezde ışık enerjisi kimyasal enerjiye dönüşür.';
+    await tester.enterText(find.byType(TextField), response);
+    await _tapVisible(tester, find.text('Anlatımımı değerlendir'));
+    await _pumpUntilFound(tester, find.byKey(const ValueKey('entitlement-access-card')));
+
+    expect(explainBack.requests, isEmpty);
+    expect(find.text('Bugünkü üretim sınırına ulaştın'), findsOneWidget);
+    expect(find.text('1 / 1'), findsOneWidget);
+    final field = tester.widget<TextField>(find.byType(TextField));
+    expect(field.controller?.text, response);
+    expect(find.byKey(const ValueKey('entitlement-safe-back')), findsOneWidget);
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('Explain-back suppresses an evaluation when the source changes in flight', (tester) async {
