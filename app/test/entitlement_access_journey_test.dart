@@ -225,8 +225,12 @@ void main() {
       ),
     );
     await _pumpUntilFound(tester, find.byKey(const ValueKey('quick-recap-source-trust')));
-    await _scrollUntilFound(tester, find.byKey(const ValueKey('quick-recap-create')));
-    await tester.tap(find.byKey(const ValueKey('quick-recap-create')));
+    final create = find.byKey(const ValueKey('quick-recap-create'));
+    await _pumpUntilFound(tester, create);
+    await tester.ensureVisible(create);
+    await tester.pump();
+    expect(create.hitTestable(), findsOneWidget);
+    await tester.tap(create.hitTestable());
     await _pumpUntilFound(tester, find.byKey(const ValueKey('entitlement-access-boundary')));
 
     expect(entitlement.calls, 1);
