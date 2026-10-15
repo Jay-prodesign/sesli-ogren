@@ -5,12 +5,7 @@ import 'app_theme.dart';
 import 'living_study_desk_home.dart';
 
 class EntitlementAccessCard extends StatelessWidget {
-  const EntitlementAccessCard({
-    required this.decision,
-    required this.onRecheck,
-    required this.onBack,
-    super.key,
-  });
+  const EntitlementAccessCard({required this.decision, required this.onRecheck, required this.onBack, super.key});
 
   final CapabilityAccessDecision decision;
   final VoidCallback onRecheck;
