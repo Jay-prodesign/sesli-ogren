@@ -232,7 +232,9 @@ void main() {
     final runtime = _runtime(store: store, ingest: ingest, entitlement: entitlement);
 
     await tester.pumpWidget(
-      MaterialApp(home: QuickRecapScreen(runtime: runtime, materialId: materialId, summaryGateway: summary)),
+      MaterialApp(
+        home: QuickRecapScreen(runtime: runtime, materialId: materialId, summaryGateway: summary),
+      ),
     );
     await _pumpUntilFound(tester, find.text('Kaydedilmiş özet quota sınırından sonra da açılır.'));
 
@@ -249,7 +251,11 @@ void main() {
     final explain = _NeverExplainGateway();
     final runtime = _runtime(store: store, ingest: ingest, entitlement: entitlement, explain: explain);
 
-    await tester.pumpWidget(MaterialApp(home: ExplainScreen(runtime: runtime, source: source.sourceVersion)));
+    await tester.pumpWidget(
+      MaterialApp(
+        home: ExplainScreen(runtime: runtime, source: source.sourceVersion),
+      ),
+    );
     await _pumpUntilFound(tester, find.byKey(const ValueKey('entitlement-access-boundary')));
 
     expect(entitlement.calls, 1);
@@ -265,7 +271,11 @@ void main() {
     final explainBack = _NeverExplainBackGateway();
     final runtime = _runtime(store: store, ingest: ingest, entitlement: entitlement, explainBack: explainBack);
 
-    await tester.pumpWidget(MaterialApp(home: ExplainBackScreen(runtime: runtime, source: source.sourceVersion)));
+    await tester.pumpWidget(
+      MaterialApp(
+        home: ExplainBackScreen(runtime: runtime, source: source.sourceVersion),
+      ),
+    );
     await tester.enterText(find.byType(TextField), 'Fotosentez ışık enerjisini kimyasal enerjiye dönüştürür.');
     await tester.tap(find.text('Anlatımımı değerlendir'));
     await _pumpUntilFound(tester, find.byKey(const ValueKey('entitlement-access-boundary')));
