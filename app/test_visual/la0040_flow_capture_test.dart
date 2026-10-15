@@ -1413,10 +1413,7 @@ void main() {
       MaterialApp(
         debugShowCheckedModeBanner: false,
         theme: SesliOgrenTheme.light(),
-        home: const MediaQuery(
-          data: MediaQueryData(disableAnimations: true),
-          child: SizedBox.shrink(),
-        ),
+        home: const MediaQuery(data: MediaQueryData(disableAnimations: true), child: SizedBox.shrink()),
       ),
     );
     await tester.pump();
@@ -1437,10 +1434,7 @@ void main() {
     await tester.tap(find.byKey(const ValueKey('quick-recap-create')));
     await pumpUntilFound(find.byKey(const ValueKey('entitlement-access-boundary')));
     expect(tester.takeException(), isNull);
-    await expectLater(
-      find.byType(Scaffold),
-      matchesGoldenFile('goldens/la0040_entitlement_quota_390x844.png'),
-    );
+    await expectLater(find.byType(Scaffold), matchesGoldenFile('goldens/la0040_entitlement_quota_390x844.png'));
 
     tester.view.physicalSize = const Size(320, 844);
     final pendingRuntime = AppRuntime(
@@ -1460,10 +1454,7 @@ void main() {
         debugShowCheckedModeBanner: false,
         theme: SesliOgrenTheme.light(),
         home: MediaQuery(
-          data: const MediaQueryData(
-            textScaler: TextScaler.linear(1.5),
-            disableAnimations: true,
-          ),
+          data: const MediaQueryData(textScaler: TextScaler.linear(1.5), disableAnimations: true),
           child: LivingDeskReviewScope(
             child: QuickRecapScreen(runtime: pendingRuntime, materialId: toolMaterialId),
           ),
@@ -1476,10 +1467,7 @@ void main() {
     await pumpUntilFound(find.byKey(const ValueKey('entitlement-access-boundary')));
     expect(find.text('Plan durumun doğrulanıyor'), findsOneWidget);
     expect(tester.takeException(), isNull);
-    await expectLater(
-      find.byType(Scaffold),
-      matchesGoldenFile('goldens/la0040_entitlement_pending_320_text150.png'),
-    );
+    await expectLater(find.byType(Scaffold), matchesGoldenFile('goldens/la0040_entitlement_pending_320_text150.png'));
   });
 
   testWidgets('LA-0040 source-grounded Tutor conversation', (tester) async {
