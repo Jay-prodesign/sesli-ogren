@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
+import '../analytics/product_analytics.dart';
 import '../continuity/cloud_continuity_gateway.dart';
 import '../continuity/cloud_continuity_service.dart';
 import '../continuity/passive_resume_continuity_service.dart';
@@ -77,6 +78,9 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
   }
 
   void _refreshForRuntime() {
+    if (widget.runtime.learner.isAuthenticated) {
+      unawaited(widget.runtime.analytics.flush(learner: widget.runtime.learner));
+    }
     _snapshot = widget.runtime.learner.isAuthenticated ? _reconcileThenLoadSnapshot() : _loadSnapshot();
   }
 
@@ -385,6 +389,19 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
   Future<void> _openWorkspace([MaterialId? materialId, bool showFirstValueIntent = false]) async {
     final selected = materialId ?? (await _snapshot).material?.id;
     if (selected == null || !mounted) return;
+    unawaited(
+      widget.runtime.analytics.record(
+        learner: widget.runtime.learner,
+        event: ProductAnalyticsEvent(
+          type: ProductAnalyticsEventType.materialOpened,
+          phase: ProductAnalyticsPhase.completed,
+          createdAt: DateTime.now().toUtc(),
+          materialId: selected,
+          surface: ProductAnalyticsSurface.workspace,
+          quantity: 1,
+        ),
+      ),
+    );
     final treatment = LearningVisualTreatmentScope.maybeOf(context);
     await Navigator.of(context).push<void>(
       MaterialPageRoute(
@@ -450,6 +467,21 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
       // product-experience scope before the route leaves this subtree.
       final treatment = LearningVisualTreatmentScope.maybeOf(context);
       final livingReview = LivingDeskReviewScope.active(context);
+      final readerStopwatch = Stopwatch()..start();
+      unawaited(
+        widget.runtime.analytics.record(
+          learner: widget.runtime.learner,
+          event: ProductAnalyticsEvent(
+            type: ProductAnalyticsEventType.readerSession,
+            phase: ProductAnalyticsPhase.started,
+            createdAt: DateTime.now().toUtc(),
+            materialId: selected,
+            sourceVersionId: source.identity.sourceVersionId,
+            surface: ProductAnalyticsSurface.reader,
+            capability: ProductAnalyticsCapability.reader,
+          ),
+        ),
+      );
       await Navigator.of(context).push<void>(
         MaterialPageRoute(
           builder: (readerContext) {
@@ -496,6 +528,23 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
             if (treatment != null) return LearningVisualTreatmentScope(treatment: treatment, child: screen);
             return livingReview ? LivingDeskReviewScope(child: screen) : screen;
           },
+        ),
+      );
+      readerStopwatch.stop();
+      unawaited(
+        widget.runtime.analytics.record(
+          learner: widget.runtime.learner,
+          event: ProductAnalyticsEvent(
+            type: ProductAnalyticsEventType.readerSession,
+            phase: ProductAnalyticsPhase.completed,
+            createdAt: DateTime.now().toUtc(),
+            materialId: selected,
+            sourceVersionId: source.identity.sourceVersionId,
+            surface: ProductAnalyticsSurface.reader,
+            capability: ProductAnalyticsCapability.reader,
+            durationMs: readerStopwatch.elapsedMilliseconds,
+            quantity: initialReaderProgress > 0 ? 1 : 0,
+          ),
         ),
       );
       if (mounted) {
