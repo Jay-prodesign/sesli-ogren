@@ -160,6 +160,19 @@ class _ExplainScreenState extends State<ExplainScreen> {
         ),
       );
 
+      if (result is GroundedExplainUnavailable &&
+          result.reason == GroundedExplainUnavailableReason.temporaryFailure &&
+          widget.runtime.learner.isAuthenticated) {
+        final access = await widget.runtime.entitlementAccess.check(EntitlementCapability.explain);
+        if (!mounted) {
+          return const GroundedExplainUnavailable(reason: GroundedExplainUnavailableReason.temporaryFailure);
+        }
+        if (access.isBlocked) {
+          setState(() => _accessDecision = access);
+          return result;
+        }
+      }
+
       final sourceAfterExplain = await widget.runtime.store.currentSourceVersion(
         learner: widget.runtime.learner,
         materialId: widget.source.identity.materialId,
