@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:crypto/crypto.dart';
 import 'package:flutter/material.dart';
 
+import '../account/entitlement_access_gateway.dart';
 import '../domain/learning_contracts.dart';
 import '../generation/grounded_explain_gateway.dart';
 import '../generation/supabase_source_summary_gateway.dart';
@@ -10,6 +11,7 @@ import 'app_runtime.dart';
 import 'app_theme.dart';
 import 'atelier_learning_surfaces.dart';
 import 'companion_view.dart';
+import 'entitlement_access_card.dart';
 import 'explain_back_screen.dart';
 import 'learning_slice_screen.dart';
 import 'la0040_visual_treatments.dart';
@@ -39,6 +41,7 @@ class ExplainScreen extends StatefulWidget {
 
 class _ExplainScreenState extends State<ExplainScreen> {
   late Future<GroundedExplainResult> _result;
+  EntitlementAccess? _access;
 
   @override
   void initState() {
@@ -46,9 +49,32 @@ class _ExplainScreenState extends State<ExplainScreen> {
     _result = _request();
   }
 
+  Future<bool> _admitExplainGeneration() async {
+    if (!widget.runtime.learner.isAuthenticated ||
+        widget.runtime.entitlementAccess is UnavailableEntitlementAccessGateway) {
+      return true;
+    }
+    final access = await widget.runtime.entitlementAccess.check(
+      learner: widget.runtime.learner,
+      capability: EntitlementCapability.explain,
+    );
+    if (!mounted) return false;
+    if (!access.isAllowed) {
+      setState(() => _access = access);
+      return false;
+    }
+    if (_access != null) {
+      setState(() => _access = null);
+    }
+    return true;
+  }
+
   Future<GroundedExplainResult> _request() async {
     if (widget.runtime.explain is UnavailableGroundedExplainGateway) {
       return const GroundedExplainUnavailable(reason: GroundedExplainUnavailableReason.providerNotConfigured);
+    }
+    if (!await _admitExplainGeneration()) {
+      return const GroundedExplainUnavailable(reason: GroundedExplainUnavailableReason.temporaryFailure);
     }
 
     try {
@@ -157,7 +183,10 @@ class _ExplainScreenState extends State<ExplainScreen> {
     }
   }
 
-  void _retry() => setState(() => _result = _request());
+  void _retry() => setState(() {
+    _access = null;
+    _result = _request();
+  });
 
   Future<void> _openRecallFromRecovery() async {
     final sourceUpdated = await Navigator.of(context).push<bool>(
@@ -198,6 +227,19 @@ class _ExplainScreenState extends State<ExplainScreen> {
         child: FutureBuilder<GroundedExplainResult>(
           future: _result,
           builder: (context, snapshot) {
+            final access = _access;
+            if (access != null) {
+              return ListView(
+                padding: const EdgeInsets.fromLTRB(20, 18, 20, 36),
+                children: [
+                  EntitlementAccessCard(
+                    access: access,
+                    onRetry: _retry,
+                    onReturnToStudy: _backToMaterial,
+                  ),
+                ],
+              );
+            }
             if (snapshot.hasError) {
               return _unavailable(GroundedExplainUnavailableReason.temporaryFailure);
             }
