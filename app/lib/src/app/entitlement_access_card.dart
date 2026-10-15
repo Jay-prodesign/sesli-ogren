@@ -6,12 +6,7 @@ import 'atelier_learning_surfaces.dart';
 import 'living_study_desk_home.dart';
 
 class EntitlementAccessCard extends StatelessWidget {
-  const EntitlementAccessCard({
-    required this.access,
-    required this.onReturnToStudy,
-    this.onRetry,
-    super.key,
-  });
+  const EntitlementAccessCard({required this.access, required this.onReturnToStudy, this.onRetry, super.key});
 
   final EntitlementAccess access;
   final VoidCallback onReturnToStudy;
@@ -31,8 +26,7 @@ class EntitlementAccessCard extends StatelessWidget {
       EntitlementAccessKind.allowed => '${access.capability.displayLabel} kullanılabilir',
     };
     final detail = switch (access.reason) {
-      EntitlementAccessReason.quotaReached =>
-        'Bu üretim hakkı için sunucunun doğruladığı dönem sınırı doldu. Daha önce oluşturduğun çalışmalar erişilebilir kalır.',
+      EntitlementAccessReason.quotaReached => 'Bu üretim hakkı için sunucunun doğruladığı dönem sınırı doldu. Daha önce oluşturduğun çalışmalar erişilebilir kalır.',
       EntitlementAccessReason.capabilityNotEntitled =>
         'Bu üretim türü mevcut doğrulanmış planında etkin değil. Kaydedilmiş çalışmaların etkilenmez.',
       EntitlementAccessReason.entitlementInactive || EntitlementAccessReason.entitlementMissing =>
