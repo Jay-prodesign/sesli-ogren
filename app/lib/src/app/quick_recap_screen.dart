@@ -691,11 +691,7 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> with WidgetsBinding
             ),
             const SizedBox(height: 12),
           ] else if (_access != null) ...[
-            EntitlementAccessCard(
-              access: _access!,
-              onRetry: _retryAccess,
-              onReturnToStudy: _returnToStudy,
-            ),
+            EntitlementAccessCard(access: _access!, onRetry: _retryAccess, onReturnToStudy: _returnToStudy),
             const SizedBox(height: 12),
           ] else if (_jobId == null)
             Container(
