@@ -162,6 +162,15 @@ Future<void> _scrollUntilFound(WidgetTester tester, Finder finder) async {
   expect(finder, findsOneWidget);
 }
 
+Future<void> _scrollUntilHitTestable(WidgetTester tester, Finder finder, {int maxDrags = 20}) async {
+  final list = find.byType(ListView).first;
+  for (var i = 0; i < maxDrags && finder.hitTestable().evaluate().isEmpty; i++) {
+    await tester.drag(list, const Offset(0, -240), warnIfMissed: false);
+    await tester.pump();
+  }
+  expect(finder.hitTestable(), findsOneWidget);
+}
+
 Future<(SqliteSourceStore, SourceIngestService, SourceIngestResult)> _source({
   required MaterialId materialId,
   String text =
@@ -226,10 +235,7 @@ void main() {
     );
     await _pumpUntilFound(tester, find.byKey(const ValueKey('quick-recap-source-trust')));
     final create = find.byKey(const ValueKey('quick-recap-create'));
-    await _pumpUntilFound(tester, create);
-    await tester.ensureVisible(create);
-    await tester.pump();
-    expect(create.hitTestable(), findsOneWidget);
+    await _scrollUntilHitTestable(tester, create);
     await tester.tap(create.hitTestable());
     await _pumpUntilFound(tester, find.byKey(const ValueKey('entitlement-access-boundary')));
 
