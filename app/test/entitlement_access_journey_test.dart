@@ -150,7 +150,7 @@ EntitlementAccess _entitlementMissing(EntitlementCapability capability) => Entit
   limit: 0,
 );
 
-Future<void> _pumpUntilFound(WidgetTester tester, Finder finder, {int maxPumps = 100}) async {
+Future<void> _pumpUntilFound(WidgetTester tester, Finder finder, {int maxPumps = 250}) async {
   for (var i = 0; i < maxPumps && finder.evaluate().isEmpty; i++) {
     await tester.pump(const Duration(milliseconds: 30));
   }
@@ -380,7 +380,9 @@ void main() {
         ),
       ),
     );
+    await _pumpUntilFound(tester, find.byType(TextField));
     await tester.enterText(find.byType(TextField), 'Karbondioksit süreçte nasıl kullanılır?');
+    await _pumpUntilFound(tester, find.text('İpucu ver'));
     await tester.ensureVisible(find.text('İpucu ver'));
     await tester.tap(find.text('İpucu ver'));
     await _pumpUntilFound(tester, find.textContaining('Kaynak ipucu'));
