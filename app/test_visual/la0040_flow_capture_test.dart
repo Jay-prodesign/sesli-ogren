@@ -4,11 +4,13 @@ import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sesli_ogren/src/account/account_overview_gateway.dart';
+import 'package:sesli_ogren/src/account/entitlement_access_gateway.dart';
 import 'package:sesli_ogren/src/app/account_entry_screen.dart';
 import 'package:sesli_ogren/src/app/app_runtime.dart';
 import 'package:sesli_ogren/src/app/app_theme.dart';
 import 'package:sesli_ogren/src/app/daily_study_plan.dart';
 import 'package:sesli_ogren/src/app/atelier_learning_surfaces.dart';
+import 'package:sesli_ogren/src/app/entitlement_access_card.dart';
 import 'package:sesli_ogren/src/app/explain_back_screen.dart';
 import 'package:sesli_ogren/src/app/first_value_intent_surface.dart';
 import 'package:sesli_ogren/src/app/flashcard_screen.dart';
@@ -279,6 +281,39 @@ void main() {
       size: const Size(320, 700),
       textScaler: const TextScaler.linear(1.5),
     );
+  });
+
+  testWidgets('Entitlement quota surface survives 320px + large type', (tester) async {
+    await capture(
+      tester,
+      'entitlement_quota_blocked_320_text150',
+      SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: EntitlementAccessCard(
+            decision: const CapabilityAccessDecision(
+              capability: EntitlementCapability.summary,
+              disposition: CapabilityAccessDisposition.blocked,
+              reason: CapabilityAccessReason.quotaReached,
+              plan: 'free',
+              entitlementStatus: 'active',
+              limit: 3,
+              consumed: 2,
+              reserved: 1,
+              remaining: 0,
+            ),
+            onRecheck: () {},
+            onBack: () {},
+          ),
+        ),
+      ),
+      size: const Size(320, 700),
+      textScaler: const TextScaler.linear(1.5),
+    );
+    expect(find.byKey(const ValueKey('entitlement-access-card')), findsOneWidget);
+    expect(find.byKey(const ValueKey('entitlement-recheck')), findsOneWidget);
+    expect(find.byKey(const ValueKey('entitlement-safe-back')), findsOneWidget);
+    expect(find.text('3 / 3'), findsOneWidget);
   });
 
   testWidgets('LA-0040 Today queue at 390x844', (tester) async {
