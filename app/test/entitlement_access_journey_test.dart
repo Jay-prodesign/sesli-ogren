@@ -158,12 +158,7 @@ Future<void> _pumpUntilFound(WidgetTester tester, Finder finder, {int maxPumps =
 }
 
 Future<void> _scrollUntilFound(WidgetTester tester, Finder finder) async {
-  await tester.scrollUntilVisible(
-    finder,
-    240,
-    scrollable: find.byType(Scrollable).first,
-    maxScrolls: 20,
-  );
+  await tester.scrollUntilVisible(finder, 240, scrollable: find.byType(Scrollable).first, maxScrolls: 20);
   expect(finder, findsOneWidget);
 }
 
