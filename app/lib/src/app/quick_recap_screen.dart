@@ -321,6 +321,16 @@ class _QuickRecapScreenState extends State<QuickRecapScreen> with WidgetsBinding
         _startPolling();
       }
     } catch (_) {
+      if (widget.runtime.learner.isAuthenticated) {
+        final access = await widget.runtime.entitlementAccess.check(EntitlementCapability.summary);
+        if (mounted && access.isBlocked) {
+          setState(() {
+            _accessDecision = access;
+            _error = null;
+          });
+          return;
+        }
+      }
       if (mounted) setState(() => _error = 'Özet isteği gönderilemedi. Oturumunu ve bağlantını kontrol et.');
     } finally {
       if (mounted) setState(() => _busy = false);
