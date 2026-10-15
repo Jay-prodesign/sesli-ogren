@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter_test/flutter_test.dart';
@@ -77,8 +78,12 @@ class _FakeRetentionGateway implements RetentionContinuityGateway {
 Future<(SqliteSourceStore, SourceIngestResult)> _source({
   required AuthenticatedLearner learner,
   required MaterialId materialId,
+  String? path,
 }) async {
-  final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
+  final store = await SqliteSourceStore.open(
+    factory: databaseFactoryFfiNoIsolate,
+    path: path ?? inMemoryDatabasePath,
+  );
   final ingest = SourceIngestService(
     store: store,
     pdfTextExtractor: const _UnusedPdfExtractor(),
@@ -102,8 +107,18 @@ void main() {
   test('two devices converge Flashcard retention through a shared revision checkpoint', () async {
     const learner = AuthenticatedLearner(id: LearnerId('retention-sync-learner'));
     const materialId = MaterialId('material_retention_sync_0001');
-    final (storeA, sourceA) = await _source(learner: learner, materialId: materialId);
-    final (storeB, sourceB) = await _source(learner: learner, materialId: materialId);
+    final temp = await Directory.systemTemp.createTemp('sesli-ogren-retention-two-device-');
+    addTearDown(() => temp.delete(recursive: true));
+    final (storeA, sourceA) = await _source(
+      learner: learner,
+      materialId: materialId,
+      path: '${temp.path}/device-a.db',
+    );
+    final (storeB, sourceB) = await _source(
+      learner: learner,
+      materialId: materialId,
+      path: '${temp.path}/device-b.db',
+    );
     addTearDown(storeA.close);
     addTearDown(storeB.close);
     expect(sourceA.sourceVersion.identity.sourceVersionId, sourceB.sourceVersion.identity.sourceVersionId);
