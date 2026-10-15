@@ -383,11 +383,7 @@ class _ExplainBackScreenState extends State<ExplainBackScreen> {
             ),
             const SizedBox(height: 10),
             if (_access != null) ...[
-              EntitlementAccessCard(
-                access: _access!,
-                onRetry: _retryEntitlement,
-                onReturnToStudy: _backToMaterial,
-              ),
+              EntitlementAccessCard(access: _access!, onRetry: _retryEntitlement, onReturnToStudy: _backToMaterial),
             ] else if (result == null)
               FilledButton(
                 style: living
