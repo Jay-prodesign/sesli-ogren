@@ -105,6 +105,48 @@ select pg_temp.ok(
   ),
   'quota and reservation state must remain account scoped'
 );
+
+select public.create_text_material(
+  'Entitlement explain source B',
+  'Klorofil ışığın soğurulmasına yardım eder.'
+) as material_b_explain \gset
+
+select e.source_content_hash as hash_b_explain
+from public.materials m
+join public.source_assets s
+  on s.material_id = m.id
+ and s.revoked_at is null
+join public.extracted_contents e
+  on e.source_asset_id = s.id
+ and e.invalidated_at is null
+where m.id = :'material_b_explain'::uuid
+\gset
+
+select public.request_grounded_explain(
+  :'material_b_explain'::uuid,
+  :'hash_b_explain',
+  'entitlement-explain-b-0001'
+) as explain_job_b \gset
+
+select pg_temp.ok(
+  (
+    select decision = 'allowed'
+       and reserved = 0
+       and remaining = 1
+    from public.entitlement_capability_access('summary')
+  ),
+  'queued Explain work must not reserve Summary capacity'
+);
+
+select public.create_text_material(
+  'Entitlement summary source B',
+  'Fotosentez enerji dönüşümünü açıklar.'
+) as material_b_summary \gset
+
+select public.request_summary(
+  :'material_b_summary'::uuid,
+  'entitlement-summary-b-independent-0001'
+) as summary_job_b \gset
 reset role;
 
 update public.entitlements
