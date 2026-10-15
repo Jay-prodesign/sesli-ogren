@@ -137,6 +137,19 @@ EntitlementAccess _purchasePending(EntitlementCapability capability) => Entitlem
   limit: 0,
 );
 
+EntitlementAccess _entitlementMissing(EntitlementCapability capability) => EntitlementAccess(
+  capability: capability,
+  kind: EntitlementAccessKind.unavailable,
+  reason: EntitlementAccessReason.entitlementMissing,
+  plan: 'unknown',
+  entitlementStatus: 'missing',
+  reconciliationState: 'verified',
+  renewalState: 'none',
+  periodStart: DateTime.utc(2026, 10, 15),
+  consumed: 0,
+  limit: 0,
+);
+
 Future<void> _pumpUntilFound(WidgetTester tester, Finder finder, {int maxPumps = 100}) async {
   for (var i = 0; i < maxPumps && finder.evaluate().isEmpty; i++) {
     await tester.pump(const Duration(milliseconds: 30));
@@ -240,6 +253,32 @@ void main() {
     expect(summary.submitCalls, 0);
     expect(find.text('Plan durumun doğrulanıyor'), findsOneWidget);
     expect(find.textContaining('Satın alma sonucu henüz sunucu tarafından doğrulanmadı'), findsOneWidget);
+    expect(find.textContaining('Daha yüksek bir plan'), findsNothing);
+    expect(find.byKey(const ValueKey('entitlement-access-retry')), findsOneWidget);
+    expect(find.byKey(const ValueKey('entitlement-access-return')), findsOneWidget);
+  });
+
+  testWidgets('missing entitlement truth fails closed without presenting a paywall', (tester) async {
+    const materialId = MaterialId('entitlement-recap-missing');
+    final (store, ingest, _) = await _source(materialId: materialId);
+    addTearDown(store.close);
+    final entitlement = _FixedEntitlementGateway(_entitlementMissing(EntitlementCapability.summary));
+    final summary = _RecordingSummaryGateway();
+    final runtime = _runtime(store: store, ingest: ingest, entitlement: entitlement);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: QuickRecapScreen(runtime: runtime, materialId: materialId, summaryGateway: summary),
+      ),
+    );
+    await _pumpUntilFound(tester, find.byKey(const ValueKey('quick-recap-create')));
+    await tester.tap(find.byKey(const ValueKey('quick-recap-create')));
+    await _pumpUntilFound(tester, find.byKey(const ValueKey('entitlement-access-boundary')));
+
+    expect(entitlement.calls, 1);
+    expect(summary.submitCalls, 0);
+    expect(find.text('Plan bilgisi şu anda doğrulanamıyor'), findsOneWidget);
+    expect(find.textContaining('plan kaydı güvenilir biçimde doğrulanamadı'), findsOneWidget);
     expect(find.textContaining('Daha yüksek bir plan'), findsNothing);
     expect(find.byKey(const ValueKey('entitlement-access-retry')), findsOneWidget);
     expect(find.byKey(const ValueKey('entitlement-access-return')), findsOneWidget);
