@@ -39,6 +39,7 @@ class LivingStudyDeskHome extends StatelessWidget {
     this.readerResumeProgress = 0,
     this.readerResumePreferred = false,
     required this.sourceText,
+    this.continuityNotice,
     required this.otherMaterials,
     required this.onOpenWorkspace,
     this.onOpenReader,
@@ -58,6 +59,7 @@ class LivingStudyDeskHome extends StatelessWidget {
   final double readerResumeProgress;
   final bool readerResumePreferred;
   final String? sourceText;
+  final Widget? continuityNotice;
   final List<MaterialRecord> otherMaterials;
   final VoidCallback onOpenWorkspace;
   final VoidCallback? onOpenReader;
@@ -648,6 +650,7 @@ class LivingStudyDeskHome extends StatelessWidget {
           const SizedBox(height: 8),
           materialCard,
         ],
+        if (continuityNotice != null) ...[const SizedBox(height: 8), continuityNotice!],
         const SizedBox(height: 6),
         Align(
           alignment: Alignment.center,
@@ -862,6 +865,7 @@ class LivingStudyDeskHome extends StatelessWidget {
               ],
             ),
           ),
+          if (continuityNotice != null) ...[const SizedBox(height: 8), continuityNotice!],
           if (studyTarget != null) ...[
             const SizedBox(height: 12),
             StudyPlanHomeCard(projection: studyTarget, hasMaterials: false, onOpen: onOpenStudyPlan),

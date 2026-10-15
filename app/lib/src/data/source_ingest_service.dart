@@ -284,6 +284,89 @@ class SourceIngestService {
     );
   }
 
+  static SourceVersionId deriveSourceVersionId({
+    required AuthenticatedLearner learner,
+    required MaterialId materialId,
+    required SourceMediaType mediaType,
+    required String contentDigest,
+  }) {
+    _requireIdentity(learner: learner, materialId: materialId);
+    final versionDigest = sha256
+        .convert(
+          utf8.encode(
+            '${learner.id.value}\u0000${materialId.value}\u0000'
+            '${mediaType.name}\u0000$contentDigest',
+          ),
+        )
+        .toString();
+    return SourceVersionId('sv_${versionDigest.substring(0, 32)}');
+  }
+
+  Future<SourceIngestResult> hydrateVerifiedMediaSource({
+    required AuthenticatedLearner learner,
+    required MaterialId materialId,
+    required SourceVersionId expectedSourceVersionId,
+    required String contentDigest,
+    required SourceMediaType mediaType,
+    required String sourceName,
+    required String mimeType,
+    required Uint8List rawSourceBytes,
+    required String normalizedText,
+    required String extractionMethod,
+    required String extractionMethodVersion,
+    required List<SourceAnchor> anchors,
+    List<String> warnings = const [],
+  }) {
+    _requireIdentity(learner: learner, materialId: materialId);
+    if (mediaType == SourceMediaType.pastedText) {
+      throw const SourceIngestException('Cloud media hydration requires original binary source bytes.');
+    }
+    if (rawSourceBytes.isEmpty) {
+      throw const SourceIngestException('Cloud media source cannot be empty.');
+    }
+    final digest = sha256.convert(rawSourceBytes).toString();
+    if (digest != contentDigest) {
+      throw const SourceIngestException('Cloud media bytes do not match the canonical source digest.');
+    }
+    final derivedSourceVersionId = deriveSourceVersionId(
+      learner: learner,
+      materialId: materialId,
+      mediaType: mediaType,
+      contentDigest: digest,
+    );
+    if (derivedSourceVersionId != expectedSourceVersionId) {
+      throw const SourceIngestException('Cloud media bytes do not reproduce the canonical SourceVersion identity.');
+    }
+    if (normalizedText.trim().isEmpty || normalizedText.length > maxTextCharacters) {
+      throw const SourceIngestException('Cloud media extraction is outside the admitted text bounds.');
+    }
+    if (anchors.isEmpty ||
+        anchors.any(
+          (anchor) =>
+              anchor.startOffset < 0 ||
+              anchor.endOffset <= anchor.startOffset ||
+              anchor.endOffset > normalizedText.length,
+        )) {
+      throw const SourceIngestException('Cloud media extraction contains invalid source anchors.');
+    }
+
+    return _persist(
+      learner: learner,
+      materialId: materialId,
+      digest: digest,
+      mediaType: mediaType,
+      sourceName: _validatedTitle(sourceName, fallback: 'Imported source'),
+      mimeType: mimeType,
+      byteSize: rawSourceBytes.length,
+      rawSourceBytes: rawSourceBytes,
+      extractedText: normalizedText,
+      extractionMethod: extractionMethod,
+      extractionMethodVersion: extractionMethodVersion,
+      anchors: anchors,
+      warnings: warnings,
+    );
+  }
+
   Future<SourceIngestResult> _persist({
     required AuthenticatedLearner learner,
     required MaterialId materialId,
@@ -302,15 +385,12 @@ class SourceIngestService {
   }) {
     _requireIdentity(learner: learner, materialId: materialId);
 
-    final versionDigest = sha256
-        .convert(
-          utf8.encode(
-            '${learner.id.value}\u0000${materialId.value}\u0000'
-            '${mediaType.name}\u0000$digest',
-          ),
-        )
-        .toString();
-    final sourceVersionId = SourceVersionId('sv_${versionDigest.substring(0, 32)}');
+    final sourceVersionId = deriveSourceVersionId(
+      learner: learner,
+      materialId: materialId,
+      mediaType: mediaType,
+      contentDigest: digest,
+    );
     final extractionDigest = sha256
         .convert(
           utf8.encode(

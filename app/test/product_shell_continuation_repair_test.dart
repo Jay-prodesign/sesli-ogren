@@ -178,7 +178,9 @@ void main() {
       ),
     );
     await _pumpUntilFound(tester, find.text('Kaynağı gözden geçir'));
-    await tester.tap(find.text('Kaynağı gözden geçir'));
+    await tester.ensureVisible(find.text('Kaynağı gözden geçir'));
+    await tester.pump(const Duration(milliseconds: 300));
+    await tester.tap(find.text('Kaynağı gözden geçir').hitTestable());
     await _pumpUntilFound(tester, find.byType(SourceReaderScreen));
 
     await tester.tap(find.text('Kaynağı kapat ve hatırla'));
@@ -222,10 +224,12 @@ void main() {
     );
     await _pumpUntilFound(tester, find.text('Biyoloji · Fotosentez'));
     await _openLibraryTab(tester);
-    final continueReading = find.byKey(const ValueKey('library-continue-reader-return-material')).hitTestable();
+    final continueReading = find.byKey(const ValueKey('library-continue-reader-return-material'));
     await _pumpUntilFound(tester, continueReading);
+    await tester.ensureVisible(continueReading);
+    await tester.pump(const Duration(milliseconds: 300));
     expect(find.text('Okumaya devam et').hitTestable(), findsOneWidget);
-    await tester.tap(continueReading);
+    await tester.tap(continueReading.hitTestable());
     await _pumpUntilFound(tester, find.byType(SourceReaderScreen));
     expect(find.byType(SourceReaderScreen), findsOneWidget);
     Navigator.of(tester.element(find.byType(SourceReaderScreen))).pop();
@@ -271,10 +275,12 @@ void main() {
     );
     await _pumpUntilFound(tester, find.text('Biyoloji · Fotosentez'));
     await _openLibraryTab(tester);
-    final continueReading = find.byKey(const ValueKey('library-continue-reader-listen-recall-material')).hitTestable();
+    final continueReading = find.byKey(const ValueKey('library-continue-reader-listen-recall-material'));
     await _pumpUntilFound(tester, continueReading);
+    await tester.ensureVisible(continueReading);
+    await tester.pump(const Duration(milliseconds: 300));
     expect(find.text('Okumaya devam et').hitTestable(), findsOneWidget);
-    await tester.tap(continueReading);
+    await tester.tap(continueReading.hitTestable());
     await _pumpUntilFound(tester, find.byType(SourceReaderScreen));
     expect(find.byType(SourceReaderScreen), findsOneWidget);
 

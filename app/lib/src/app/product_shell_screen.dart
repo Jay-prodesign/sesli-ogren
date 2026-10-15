@@ -1,5 +1,11 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
+import '../continuity/cloud_continuity_gateway.dart';
+import '../continuity/cloud_continuity_service.dart';
+import '../continuity/passive_resume_continuity_service.dart';
+import '../continuity/retention_continuity_service.dart';
 import '../domain/learning_contracts.dart';
 import '../domain/learning_truth.dart';
 import '../domain/retention_schedule.dart';
@@ -44,11 +50,12 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
   int _index = 0;
   MaterialId? _deletingMaterialId;
   late Future<_HomeSnapshot> _snapshot;
+  _CloudContinuityNotice? _continuityNotice;
 
   @override
   void initState() {
     super.initState();
-    _refresh();
+    _refreshForRuntime();
   }
 
   @override
@@ -61,11 +68,70 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
     // the device-local runtime (or vice versa).
     _index = 0;
     _deletingMaterialId = null;
-    _refresh();
+    _continuityNotice = null;
+    _refreshForRuntime();
   }
 
   void _refresh() {
     _snapshot = _loadSnapshot();
+  }
+
+  void _refreshForRuntime() {
+    _snapshot = widget.runtime.learner.isAuthenticated ? _reconcileThenLoadSnapshot() : _loadSnapshot();
+  }
+
+  Future<_HomeSnapshot> _reconcileThenLoadSnapshot() async {
+    _continuityNotice = null;
+    try {
+      final results = await widget.runtime.continuity
+          .reconcileAll(learner: widget.runtime.learner)
+          .timeout(const Duration(seconds: 8));
+      _continuityNotice = _CloudContinuityNotice.fromResults(results);
+      final learningFailures = await widget.runtime.syncAuthenticatedLearningContinuity().timeout(
+        const Duration(seconds: 8),
+      );
+      if (learningFailures > 0 && _continuityNotice == null) {
+        _continuityNotice = const _CloudContinuityNotice(
+          kind: _CloudContinuityNoticeKind.unavailable,
+          message: 'Öğrenme geçmişinin bir bölümü bu cihazda yenilenemedi. Yerel çalışmaların korunuyor.',
+        );
+      }
+      final resumeSummary = await widget.runtime.syncAuthenticatedPassiveResumeContinuity().timeout(
+        const Duration(seconds: 8),
+      );
+      if (resumeSummary.conflicts > 0) {
+        _continuityNotice = _CloudContinuityNotice(
+          kind: _CloudContinuityNoticeKind.conflict,
+          message:
+              '${resumeSummary.conflicts} okuma/dinleme konumu iki cihazda değişti. '
+              'Otomatik üzerine yazmadık; bu cihazdaki konum korundu.',
+        );
+      } else if (resumeSummary.unavailable > 0 && _continuityNotice == null) {
+        _continuityNotice = const _CloudContinuityNotice(
+          kind: _CloudContinuityNoticeKind.unavailable,
+          message: 'Okuma/dinleme konumlarının bir bölümü yenilenemedi. Yerel konumların korunuyor.',
+        );
+      }
+    } on TimeoutException {
+      _continuityNotice ??= const _CloudContinuityNotice(
+        kind: _CloudContinuityNoticeKind.unavailable,
+        message: 'Cihazlar arası güncelleme şu anda tamamlanamadı. Bu cihazdaki çalışmaların açık kalıyor.',
+      );
+    } on CloudContinuityException catch (error) {
+      _continuityNotice ??= _CloudContinuityNotice.fromFailure(error);
+    } catch (_) {
+      _continuityNotice ??= const _CloudContinuityNotice(
+        kind: _CloudContinuityNoticeKind.unavailable,
+        message: 'Cihazlar arası güncelleme şu anda kullanılamıyor. Yerel çalışmaların korunuyor.',
+      );
+    }
+    return _loadSnapshot();
+  }
+
+  void _retryContinuity() {
+    setState(() {
+      _snapshot = _reconcileThenLoadSnapshot();
+    });
   }
 
   Future<LearningContinuation?> _continuationFor(MaterialId materialId) async {
@@ -244,6 +310,8 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
       ),
     );
     if (!mounted) return;
+    await _syncRetentionAfterLearningActivity(materialId);
+    if (!mounted) return;
     setState(_refresh);
     if (sourceAdded == true) {
       await _openWorkspace(materialId, true);
@@ -331,6 +399,8 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
         },
       ),
     );
+    if (!mounted) return;
+    await _syncRetentionAfterLearningActivity(selected);
     if (!mounted) return;
     setState(_refresh);
   }
@@ -428,7 +498,10 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
           },
         ),
       );
-      if (mounted) setState(_refresh);
+      if (mounted) {
+        await _syncPassiveResumeAfterActivity(selected);
+        if (mounted) setState(_refresh);
+      }
     } catch (_) {
       if (!mounted) return;
       ScaffoldMessenger.of(context)
@@ -469,6 +542,8 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
             : screen,
       ),
     );
+    if (!mounted) return;
+    await _syncRetentionAfterLearningActivity(materialId);
     if (mounted) setState(_refresh);
   }
 
@@ -502,7 +577,52 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
       ),
     );
     if (!mounted) return;
+    await _syncPassiveResumeAfterActivity(materialId);
+    if (!mounted) return;
     setState(_refresh);
+  }
+
+  Future<void> _syncRetentionAfterLearningActivity(MaterialId materialId) async {
+    if (!widget.runtime.learner.isAuthenticated) return;
+
+    try {
+      final retention = await widget.runtime.syncRetentionForMaterial(materialId);
+      if (!mounted) return;
+      final conflicts = retention.where((item) => item.disposition == RetentionContinuityDisposition.conflict).length;
+      if (conflicts > 0) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Tekrar zamanlaması başka bir cihazda da değişmiş. Otomatik üzerine yazmadık; bu cihazdaki öğrenme kaydı korundu.',
+            ),
+          ),
+        );
+      }
+    } catch (_) {
+      // Durable local retention remains authoritative on this device. Startup
+      // retry will reconcile it before cloud timing is used as current truth.
+    }
+  }
+
+  Future<void> _syncPassiveResumeAfterActivity(MaterialId materialId) async {
+    if (!widget.runtime.learner.isAuthenticated) return;
+
+    try {
+      final results = await widget.runtime.syncPassiveResumeForMaterial(materialId);
+      if (!mounted) return;
+      final conflicts = results.where((item) => item.disposition == PassiveResumeSyncDisposition.conflict).length;
+      if (conflicts > 0) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Okuma/dinleme konumu başka bir cihazda da değişmiş. Otomatik üzerine yazmadık; bu cihazdaki konum korundu.',
+            ),
+          ),
+        );
+      }
+    } catch (_) {
+      // Local position is already durable. Home/startup retries cloud sync.
+    }
   }
 
   Future<void> _deleteMaterial(MaterialRecord material) async {
@@ -677,8 +797,13 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
           );
         }
         final data = snapshot.data!;
+        final living = LivingDeskReviewScope.active(context);
+        final continuityNotice = _continuityNotice == null
+            ? null
+            : _CloudContinuityNoticeCard(notice: _continuityNotice!, onRetry: _retryContinuity);
         return Column(
           children: [
+            if (!living && continuityNotice != null) continuityNotice,
             Expanded(
               child: IndexedStack(
                 index: _index,
@@ -687,6 +812,7 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
                     enabled: _index == 0,
                     child: _HomeSurface(
                       data: data,
+                      continuityNotice: living ? continuityNotice : null,
                       onOpenLearning: _openNextLearningAction,
                       onOpenListen: _openListen,
                       onOpenWorkspace: () => _openWorkspace(),
@@ -754,9 +880,134 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
   }
 }
 
+enum _CloudContinuityNoticeKind { conflict, unsupported, unavailable }
+
+class _CloudContinuityNotice {
+  const _CloudContinuityNotice({required this.kind, required this.message});
+
+  final _CloudContinuityNoticeKind kind;
+  final String message;
+
+  static _CloudContinuityNotice? fromResults(List<CloudContinuityItemResult> results) {
+    final conflicts = results.where((item) => item.disposition == CloudContinuityDisposition.conflict).length;
+    if (conflicts > 0) {
+      return _CloudContinuityNotice(
+        kind: _CloudContinuityNoticeKind.conflict,
+        message: conflicts == 1
+            ? 'Bir kaynak iki cihazda değişti. Otomatik üzerine yazmadık; bu cihazdaki sürüm korundu.'
+            : '$conflicts kaynak iki cihazda değişti. Otomatik üzerine yazmadık; bu cihazdaki sürümler korundu.',
+      );
+    }
+    final unsupported = results
+        .where((item) => item.disposition == CloudContinuityDisposition.unsupportedSource)
+        .length;
+    if (unsupported > 0) {
+      return _CloudContinuityNotice(
+        kind: _CloudContinuityNoticeKind.unsupported,
+        message: unsupported == 1
+            ? 'Bir dosya kaynağının aslı henüz cihazlar arasında taşınmıyor. Bu cihazdaki kaynak korunuyor.'
+            : '$unsupported dosya kaynağının aslı henüz cihazlar arasında taşınmıyor. Bu cihazdaki kaynaklar korunuyor.',
+      );
+    }
+    final unavailable = results.where((item) => item.disposition == CloudContinuityDisposition.unavailable).length;
+    if (unavailable > 0) {
+      return const _CloudContinuityNotice(
+        kind: _CloudContinuityNoticeKind.unavailable,
+        message: 'Cihazlar arası güncelleme şu anda kullanılamıyor. Yerel çalışmaların korunuyor.',
+      );
+    }
+    return null;
+  }
+
+  static _CloudContinuityNotice fromFailure(CloudContinuityException error) {
+    return switch (error.kind) {
+      CloudContinuityFailureKind.conflict || CloudContinuityFailureKind.staleSource => _CloudContinuityNotice(
+        kind: _CloudContinuityNoticeKind.conflict,
+        message: 'Kaynak geçmişi iki cihazda ayrıştı. Otomatik üzerine yazmadık; bu cihazdaki sürüm korundu.',
+      ),
+      CloudContinuityFailureKind.unsupportedSource => const _CloudContinuityNotice(
+        kind: _CloudContinuityNoticeKind.unsupported,
+        message: 'Bu kaynak türünün aslı henüz cihazlar arasında taşınmıyor. Bu cihazdaki kaynak korunuyor.',
+      ),
+      CloudContinuityFailureKind.authenticationRequired ||
+      CloudContinuityFailureKind.unavailable ||
+      CloudContinuityFailureKind.invalidPayload => const _CloudContinuityNotice(
+        kind: _CloudContinuityNoticeKind.unavailable,
+        message: 'Cihazlar arası güncelleme şu anda kullanılamıyor. Yerel çalışmaların korunuyor.',
+      ),
+    };
+  }
+}
+
+class _CloudContinuityNoticeCard extends StatelessWidget {
+  const _CloudContinuityNoticeCard({required this.notice, required this.onRetry});
+
+  final _CloudContinuityNotice notice;
+  final VoidCallback onRetry;
+
+  @override
+  Widget build(BuildContext context) {
+    final (icon, accent) = switch (notice.kind) {
+      _CloudContinuityNoticeKind.conflict => (Icons.compare_arrows_rounded, AtelierStyle.attention),
+      _CloudContinuityNoticeKind.unsupported => (Icons.cloud_off_outlined, AtelierStyle.muted),
+      _CloudContinuityNoticeKind.unavailable => (Icons.cloud_sync_outlined, AtelierStyle.teal),
+    };
+    return Semantics(
+      container: true,
+      liveRegion: true,
+      label: notice.message,
+      child: Container(
+        key: const ValueKey('cloud-continuity-notice'),
+        margin: const EdgeInsets.fromLTRB(16, 8, 16, 4),
+        padding: const EdgeInsets.fromLTRB(12, 10, 8, 10),
+        decoration: BoxDecoration(
+          color: AtelierStyle.paper,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: accent.withValues(alpha: 0.28)),
+        ),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxHeight: 132),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Flexible(
+                child: SingleChildScrollView(
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Icon(icon, color: accent, size: 20),
+                      const SizedBox(width: 9),
+                      Expanded(
+                        child: Text(
+                          notice.message,
+                          style: const TextStyle(color: AtelierStyle.ink, fontSize: 12.5, height: 1.35),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              Align(
+                alignment: Alignment.centerRight,
+                child: TextButton(
+                  key: const ValueKey('cloud-continuity-retry'),
+                  onPressed: onRetry,
+                  child: const Text('Tekrar dene'),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class _HomeSurface extends StatelessWidget {
   const _HomeSurface({
     required this.data,
+    this.continuityNotice,
     required this.onOpenLearning,
     required this.onOpenListen,
     required this.onOpenWorkspace,
@@ -766,6 +1017,7 @@ class _HomeSurface extends StatelessWidget {
   });
 
   final _HomeSnapshot data;
+  final Widget? continuityNotice;
   final VoidCallback onOpenLearning;
   final VoidCallback onOpenListen;
   final VoidCallback onOpenWorkspace;
@@ -786,6 +1038,7 @@ class _HomeSurface extends StatelessWidget {
         readerResumeProgress: data.readerResumeProgress,
         readerResumePreferred: data.readerResumePreferred,
         sourceText: data.extracted?.normalizedText,
+        continuityNotice: continuityNotice,
         otherMaterials: data.materials.where((item) => item.id != data.material?.id).toList(),
         onOpenWorkspace: onOpenWorkspace,
         onOpenReader: onOpenReader,

@@ -35,8 +35,12 @@ Future<AppRuntime> _runtimeWithEvidence({
   final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
   final ingest = SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor());
   final recall = RecallLearningService(sourceStore: store, learningStore: store.learningTruthStore());
+  // These tests exercise the local-first Home/Today contract. Cloud recovery
+  // has its own focused suite; using the explicit authenticated fixture here
+  // would intentionally render the offline continuity notice and turn normal
+  // first-viewport assertions into degraded-network assertions.
   final runtime = AppRuntime(
-    learner: AppRuntime.localM5LearnerFixture,
+    learner: AppRuntime.localLearner,
     store: store,
     ingest: ingest,
     recall: recall,
