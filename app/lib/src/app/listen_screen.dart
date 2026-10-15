@@ -307,9 +307,7 @@ class _ListenScreenState extends State<ListenScreen> {
         capability: ProductAnalyticsCapability.listen,
         outcomeClass: 'speech_unavailable',
         reasonCode: 'device_speech',
-        durationMs: startedAt == null
-            ? null
-            : DateTime.now().toUtc().difference(startedAt).inMilliseconds,
+        durationMs: startedAt == null ? null : DateTime.now().toUtc().difference(startedAt).inMilliseconds,
       ),
     );
   }
