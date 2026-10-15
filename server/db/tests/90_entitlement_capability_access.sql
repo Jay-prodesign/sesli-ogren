@@ -2,6 +2,7 @@
 begin;
 
 \set user_a '''e3000000-0000-4000-8000-000000000001'''
+\set user_b '''e3000000-0000-4000-8000-000000000002'''
 
 create or replace function pg_temp.ok(v boolean, msg text)
 returns void language plpgsql as $$
@@ -112,11 +113,73 @@ select pg_temp.ok(
   'preserved access must remain explicitly attributable to reconciliation safety'
 );
 
+reset role;
+
+update public.entitlements
+set reconciliation_state = 'purchase_pending',
+    limits = limits || '{"focus_daily":0}'::jsonb
+where account_id = :user_a;
+
+select set_config('request.jwt.claim.sub', :user_a, false);
+set role authenticated;
+
+select decision as purchase_decision,
+       reason as purchase_reason
+from public.get_capability_access('focus')
+\gset
+
+select pg_temp.ok(
+  :'purchase_decision' = 'pending',
+  'an unresolved purchase must not be converted into another upgrade denial'
+);
+select pg_temp.ok(:'purchase_reason' = 'purchase_pending', 'purchase pending state must survive the access boundary');
+
+reset role;
+
+update public.entitlements
+set reconciliation_state = 'verified',
+    renewal_state = 'grace_or_retry',
+    effective_until = now() - interval '1 hour',
+    limits = limits || '{"focus_daily":2}'::jsonb
+where account_id = :user_a;
+
+select set_config('request.jwt.claim.sub', :user_a, false);
+set role authenticated;
+
+select decision as grace_decision,
+       reason as grace_reason
+from public.get_capability_access('focus')
+\gset
+
+select pg_temp.ok(:'grace_decision' = 'allowed', 'grace access must survive a temporary renewal failure');
+select pg_temp.ok(:'grace_reason' = 'grace_access_preserved', 'grace access must be explicitly attributable');
+
 select pg_temp.denied(
-  $$select * from public.get_capability_access('made_up_capability')$$,
+  $select * from public.get_capability_access('made_up_capability')$,
   'unsupported_capability',
   'unknown metering classes must fail closed'
 );
+
+reset role;
+
+insert into auth.users (id, email)
+values (:user_b, 'entitlement-missing@example.test');
+
+delete from public.entitlements where account_id = :user_b;
+
+select set_config('request.jwt.claim.sub', :user_b, false);
+set role authenticated;
+
+select decision as missing_decision,
+       reason as missing_reason
+from public.get_capability_access('summary')
+\gset
+
+select pg_temp.ok(
+  :'missing_decision' = 'unavailable',
+  'missing entitlement truth must fail closed instead of presenting a paywall'
+);
+select pg_temp.ok(:'missing_reason' = 'entitlement_missing', 'missing entitlement reason must remain explicit');
 
 reset role;
 rollback;
