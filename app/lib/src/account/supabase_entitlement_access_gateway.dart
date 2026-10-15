@@ -36,6 +36,7 @@ class SupabaseEntitlementAccessGateway implements EntitlementAccessGateway {
         periodStart: _date(row['period_start']) ?? _todayUtc(),
         consumed: _integer(row['consumed']),
         limit: _integer(row['limit_value']),
+        reserved: _integer(row['reserved']),
         effectiveUntil: _date(row['effective_until']),
         lastAuthoritativeVerificationAt: _date(row['last_authoritative_verification_at']),
       );
