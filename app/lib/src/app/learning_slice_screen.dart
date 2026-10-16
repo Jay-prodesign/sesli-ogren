@@ -89,6 +89,7 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
   bool _editingExistingSource = false;
   bool _answerWasRevealed = false;
   bool _submittedUnknown = false;
+  bool _retryRecallFromError = false;
   _SourceEntryMode _sourceEntryMode = _SourceEntryMode.chooser;
   bool _showOptionalSourceTitle = false;
 
@@ -792,7 +793,13 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
     try {
       await _openRecall();
     } catch (_) {
-      _showRecoverableError();
+      if (!mounted) return;
+      setState(() {
+        _retryRecallFromError = true;
+        _phase = _SlicePhase.error;
+        _inlineError =
+            'Hatırla şu anda doğrulanamadı. Kaynağın ve önceki öğrenme kayıtların korunuyor; bağlantı geri geldiğinde tekrar deneyebilirsin.';
+      });
     } finally {
       _setBusy(false);
     }
@@ -865,6 +872,7 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
         _activeAttemptId = session.attempt.attemptId;
         _supportText = _restoredSupportNotice(session.assistance);
         _inlineError = null;
+        _retryRecallFromError = false;
         _phase = _SlicePhase.recall;
       });
     } catch (error) {
