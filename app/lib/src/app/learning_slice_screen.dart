@@ -117,9 +117,10 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
       OperationalEventType.recallPrompt => ProductAnalyticsEventName.learningActionStarted,
       OperationalEventType.recallAttempt => switch (event.phase) {
         OperationalEventPhase.started => ProductAnalyticsEventName.retrievalAttempted,
-        OperationalEventPhase.completed => event.outcome?.name == 'correct'
-            ? ProductAnalyticsEventName.retrievalSucceeded
-            : ProductAnalyticsEventName.retrievalFailed,
+        OperationalEventPhase.completed =>
+          event.outcome?.name == 'correct'
+              ? ProductAnalyticsEventName.retrievalSucceeded
+              : ProductAnalyticsEventName.retrievalFailed,
         OperationalEventPhase.failed => ProductAnalyticsEventName.retrievalFailed,
       },
       OperationalEventType.continuationRepair => ProductAnalyticsEventName.nextBestActionSelected,

@@ -278,11 +278,17 @@ class AppRuntime {
       EntitlementCapability.focus => ProductAnalyticsCapability.focus,
       EntitlementCapability.explainBack => ProductAnalyticsCapability.explainBack,
     };
+    final eventName = switch (access.reason) {
+      EntitlementAccessReason.quotaReached => ProductAnalyticsEventName.quotaLimitReached,
+      EntitlementAccessReason.capabilityNotEntitled ||
+      EntitlementAccessReason.entitlementInactive => ProductAnalyticsEventName.paywallViewed,
+      _ => ProductAnalyticsEventName.quotaChecked,
+    };
     unawaited(
       analytics.record(
         learner: learner,
         event: ProductAnalyticsEvent(
-          name: ProductAnalyticsEventName.quotaChecked,
+          name: eventName,
           phase: ProductAnalyticsPhase.viewed,
           createdAt: DateTime.now().toUtc(),
           surface: ProductAnalyticsSurface.entitlement,
