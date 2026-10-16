@@ -497,7 +497,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: MediaQuery(
-          data: const MediaQueryData(textScaler: TextScaler.linear(1.6)),
+          data: const MediaQueryData(textScaler: TextScaler.linear(2)),
           child: ProductShellScreen(runtime: runtime),
         ),
       ),
@@ -522,7 +522,7 @@ void main() {
     await tester.pumpWidget(
       const MaterialApp(
         home: MediaQuery(
-          data: MediaQueryData(textScaler: TextScaler.linear(1.6)),
+          data: MediaQueryData(textScaler: TextScaler.linear(2)),
           child: Scaffold(
             body: ProgressSurface(items: [], onOpenMaterial: _noopMaterialOpen),
           ),
@@ -550,7 +550,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: MediaQuery(
-          data: const MediaQueryData(textScaler: TextScaler.linear(1.6)),
+          data: const MediaQueryData(textScaler: TextScaler.linear(2)),
           child: Scaffold(body: ProfileSurface(runtime: runtime)),
         ),
       ),
@@ -565,7 +565,7 @@ void main() {
   testWidgets('runtime failure recovery remains reachable on a short large-text screen', (tester) async {
     tester.view.physicalSize = const Size(320, 460);
     tester.view.devicePixelRatio = 1;
-    tester.platformDispatcher.textScaleFactorTestValue = 1.6;
+    tester.platformDispatcher.textScaleFactorTestValue = 2;
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
     addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
@@ -599,7 +599,7 @@ void main() {
   ) async {
     tester.view.physicalSize = const Size(320, 460);
     tester.view.devicePixelRatio = 1;
-    tester.platformDispatcher.textScaleFactorTestValue = 1.6;
+    tester.platformDispatcher.textScaleFactorTestValue = 2;
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
     addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
@@ -879,7 +879,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         builder: (context, child) => MediaQuery(
-          data: MediaQuery.of(context).copyWith(disableAnimations: true, textScaler: const TextScaler.linear(1.6)),
+          data: MediaQuery.of(context).copyWith(disableAnimations: true, textScaler: const TextScaler.linear(2)),
           child: child!,
         ),
         home: LivingDeskReviewScope(child: LearningSliceScreen(runtime: runtime)),
@@ -1353,7 +1353,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: MediaQuery(
-          data: const MediaQueryData(textScaler: TextScaler.linear(1.6)),
+          data: const MediaQueryData(textScaler: TextScaler.linear(2)),
           child: ProductShellScreen(runtime: runtime),
         ),
       ),
