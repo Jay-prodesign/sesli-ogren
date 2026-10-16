@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:file_picker/file_picker.dart';
@@ -388,6 +389,49 @@ void main() {
     await tapVisible(tester, find.byKey(const ValueKey('account-continue-local')));
     await pumpUntilFound(tester, find.byType(NavigationBar));
     expect(find.byType(AccountEntryScreen), findsNothing);
+  });
+
+  testWidgets('slow optional account restore falls back to local learning within the startup budget', (tester) async {
+    final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
+    addTearDown(() async {
+      try {
+        await store.close();
+      } catch (_) {}
+    });
+    final localRuntime = AppRuntime(
+      learner: AppRuntime.localLearner,
+      store: store,
+      ingest: SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor()),
+      recall: RecallLearningService(sourceStore: store, learningStore: store.learningTruthStore()),
+      telemetry: store.operationalTelemetry(),
+    );
+    final stalledRestore = Completer<AuthenticatedLearner?>();
+    var localOpenCalls = 0;
+
+    await tester.pumpWidget(
+      SesliOgrenApp(
+        restoreSession: () => stalledRestore.future,
+        sessionRestoreTimeout: const Duration(milliseconds: 40),
+        openLocalRuntime: () async {
+          localOpenCalls += 1;
+          return localRuntime;
+        },
+      ),
+    );
+    expect(find.byType(NavigationBar), findsNothing);
+
+    await tester.pump(const Duration(milliseconds: 60));
+    await pumpUntilFound(tester, find.byType(NavigationBar));
+
+    expect(localOpenCalls, 1);
+    expect(localRuntime.learner.isLocal, isTrue);
+    expect(find.byType(AccountEntryScreen), findsNothing);
+
+    stalledRestore.complete(const AuthenticatedLearner(id: LearnerId('late-session-user')));
+    await tester.pump(const Duration(milliseconds: 20));
+    expect(localRuntime.learner.isLocal, isTrue);
+    expect(find.byType(NavigationBar), findsOneWidget);
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('runtime opening failure is not mislabeled as an OTP failure', (tester) async {

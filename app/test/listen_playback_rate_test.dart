@@ -91,6 +91,7 @@ class _RecordingSpeechOutput implements SpeechOutput {
   double? lastRateMultiplier;
   String? lastText;
   VoidCallback? _onDone;
+  int stopCalls = 0;
 
   void finishCurrentChunk() {
     final callback = _onDone;
@@ -114,7 +115,9 @@ class _RecordingSpeechOutput implements SpeechOutput {
   }
 
   @override
-  Future<void> stop() async {}
+  Future<void> stop() async {
+    stopCalls += 1;
+  }
 
   @override
   Future<void> dispose() async {}
@@ -431,6 +434,99 @@ void main() {
     expect(speech.stopCalls, 1);
     expect(find.textContaining('Hatırla açılmadı'), findsOneWidget);
     expect(find.text('Durdur'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('Listen preserves intentional background playback across app lifecycle changes', (tester) async {
+    final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
+    addTearDown(store.close);
+    final ingest = SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor());
+    const materialId = MaterialId('listen-background-lifecycle');
+    await ingest.ingestPastedText(
+      learner: AppRuntime.localM5LearnerFixture,
+      materialId: materialId,
+      text: List.filled(
+        18,
+        'Fotosentez ışık enerjisini kimyasal enerjiye dönüştürür ve klorofil ışığın soğurulmasına yardım eder.',
+      ).join(' '),
+      sourceName: 'Uzun biyoloji kaynağı',
+    );
+    final runtime = AppRuntime(
+      learner: AppRuntime.localM5LearnerFixture,
+      store: store,
+      ingest: ingest,
+      recall: RecallLearningService(sourceStore: store, learningStore: store.learningTruthStore()),
+      telemetry: store.operationalTelemetry(),
+    );
+    final speech = _RecordingSpeechOutput();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: MediaQuery(
+          data: const MediaQueryData(disableAnimations: true),
+          child: ListenScreen(runtime: runtime, materialId: materialId, speechOutput: speech),
+        ),
+      ),
+    );
+    await _pumpUntilFound(tester, find.text('Dinlemeye başla'));
+    await _tapVisible(tester, find.text('Dinlemeye başla'));
+    await tester.pump();
+    expect(find.text('Durdur'), findsOneWidget);
+
+    await tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
+    await tester.pump();
+    expect(speech.stopCalls, 0);
+    expect(find.text('Durdur'), findsOneWidget);
+
+    await tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+    await tester.pump();
+    expect(speech.stopCalls, 0);
+    expect(find.text('Durdur'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('Listen remains operable with semantics at 320px and 200% text scale', (tester) async {
+    tester.view.physicalSize = const Size(320, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    final semantics = tester.ensureSemantics();
+    addTearDown(semantics.dispose);
+
+    final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
+    addTearDown(store.close);
+    final ingest = SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor());
+    const materialId = MaterialId('listen-accessibility-200');
+    await ingest.ingestPastedText(
+      learner: AppRuntime.localM5LearnerFixture,
+      materialId: materialId,
+      text: 'Fotosentez ışık enerjisini kimyasal enerjiye dönüştürmeye yardımcı olur.',
+      sourceName: 'Biyoloji erişilebilirlik kaynağı',
+    );
+    final runtime = AppRuntime(
+      learner: AppRuntime.localM5LearnerFixture,
+      store: store,
+      ingest: ingest,
+      recall: RecallLearningService(sourceStore: store, learningStore: store.learningTruthStore()),
+      telemetry: store.operationalTelemetry(),
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: MediaQuery(
+          data: const MediaQueryData(disableAnimations: true, textScaler: TextScaler.linear(2)),
+          child: ListenScreen(runtime: runtime, materialId: materialId, speechOutput: _RecordingSpeechOutput()),
+        ),
+      ),
+    );
+    await _pumpUntilFound(tester, find.bySemanticsLabel('Dinleme ilerlemesi'));
+    expect(find.bySemanticsLabel('Dinleme ilerlemesi'), findsOneWidget);
+    expect(find.bySemanticsLabel('Düğüm hazır'), findsOneWidget);
+
+    final play = find.text('Dinlemeye başla');
+    await tester.scrollUntilVisible(play, 180, scrollable: find.byType(Scrollable).first);
+    await tester.pump();
+    expect(play.hitTestable(), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 
