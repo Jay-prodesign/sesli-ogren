@@ -473,12 +473,12 @@ void main() {
     await tester.pump();
     expect(find.text('Durdur'), findsOneWidget);
 
-    await tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
     await tester.pump();
     expect(speech.stopCalls, 0);
     expect(find.text('Durdur'), findsOneWidget);
 
-    await tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
     await tester.pump();
     expect(speech.stopCalls, 0);
     expect(find.text('Durdur'), findsOneWidget);
