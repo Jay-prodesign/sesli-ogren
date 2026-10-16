@@ -797,8 +797,7 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
       setState(() {
         _retryRecallFromError = true;
         _phase = _SlicePhase.error;
-        _inlineError =
-            'Hatırla şu anda doğrulanamadı. Kaynağın ve önceki öğrenme kayıtların korunuyor; bağlantı geri geldiğinde tekrar deneyebilirsin.';
+        _inlineError = 'Hatırla şu anda doğrulanamadı. Kaynağın ve önceki öğrenme kayıtların korunuyor; bağlantı geri geldiğinde tekrar deneyebilirsin.';
       });
     } finally {
       _setBusy(false);
@@ -911,8 +910,7 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
       if (mounted) {
         setState(() {
           _phase = _SlicePhase.recall;
-          _inlineError =
-              'İpucu şu anda doğrulanamadı. Yazdığın yanıt ve bu Hatırla denemesi korunuyor; bağlantı geri geldiğinde tekrar deneyebilirsin.';
+          _inlineError = 'İpucu şu anda doğrulanamadı. Yazdığın yanıt ve bu Hatırla denemesi korunuyor; bağlantı geri geldiğinde tekrar deneyebilirsin.';
         });
       }
     } finally {
@@ -942,8 +940,7 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
       if (mounted) {
         setState(() {
           _phase = _SlicePhase.recall;
-          _inlineError =
-              'Yanıt gösterme şu anda doğrulanamadı. Yazdığın yanıt ve bu Hatırla denemesi korunuyor; bağlantı geri geldiğinde tekrar deneyebilirsin.';
+          _inlineError = 'Yanıt gösterme şu anda doğrulanamadı. Yazdığın yanıt ve bu Hatırla denemesi korunuyor; bağlantı geri geldiğinde tekrar deneyebilirsin.';
         });
       }
     } finally {
@@ -1048,10 +1045,7 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
     }
   }
 
-  Future<void> _showRecallSubmissionRecovery({
-    required RecallPrompt prompt,
-    required bool submittedUnknown,
-  }) async {
+  Future<void> _showRecallSubmissionRecovery({required RecallPrompt prompt, required bool submittedUnknown}) async {
     SourceVersionRecord? currentSource;
     try {
       currentSource = await widget.runtime.store.currentSourceVersion(
@@ -1066,8 +1060,7 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
     if (currentSource != null && currentSource.identity.sourceVersionId != prompt.sourceVersionId) {
       setState(() {
         _phase = _SlicePhase.error;
-        _inlineError =
-            'Kaynak bu deneme sırasında değişti. Eski yanıt öğrenme kanıtı sayılmadı; güncel kaynaktan yeni bir Hatırla başlat.';
+        _inlineError = 'Kaynak bu deneme sırasında değişti. Eski yanıt öğrenme kanıtı sayılmadı; güncel kaynaktan yeni bir Hatırla başlat.';
       });
       return;
     }
@@ -1139,8 +1132,7 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
       setState(() {
         _retryRecallFromError = false;
         _phase = _SlicePhase.error;
-        _inlineError =
-            'Devam şu anda doğrulanamadı. Mevcut kaynağın ve öğrenme kayıtların korunuyor; bağlantı geri geldiğinde devamı tekrar onarabilirsin.';
+        _inlineError = 'Devam şu anda doğrulanamadı. Mevcut kaynağın ve öğrenme kayıtların korunuyor; bağlantı geri geldiğinde devamı tekrar onarabilirsin.';
       });
     } finally {
       _setBusy(false);
@@ -1152,8 +1144,7 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
     setState(() {
       _retryRecallFromError = false;
       _phase = _SlicePhase.error;
-      _inlineError =
-          'Bu öğrenme adımı artık güncel kaynakla eşleşmiyor. Eski denemeyi kanıt saymadan güncel kaynaktan güvenli biçimde yeniden başlayabiliriz.';
+      _inlineError = 'Bu öğrenme adımı artık güncel kaynakla eşleşmiyor. Eski denemeyi kanıt saymadan güncel kaynaktan güvenli biçimde yeniden başlayabiliriz.';
     });
   }
 
