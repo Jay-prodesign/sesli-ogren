@@ -21,8 +21,7 @@ class _NoPdf implements PdfTextExtractor {
 }
 
 class _FailOnceRecall extends RecallLearningService {
-  _FailOnceRecall(SqliteSourceStore store)
-    : super(sourceStore: store, learningStore: store.learningTruthStore());
+  _FailOnceRecall(SqliteSourceStore store) : super(sourceStore: store, learningStore: store.learningTruthStore());
   int calls = 0;
 
   @override
@@ -84,13 +83,17 @@ void main() {
       telemetry: store.operationalTelemetry(),
     );
 
-    await tester.pumpWidget(MaterialApp(
-      builder: (context, child) => MediaQuery(
-        data: MediaQuery.of(context).copyWith(disableAnimations: true, textScaler: const TextScaler.linear(1.5)),
-        child: child!,
+    await tester.pumpWidget(
+      MaterialApp(
+        builder: (context, child) => MediaQuery(
+          data: MediaQuery.of(context).copyWith(disableAnimations: true, textScaler: const TextScaler.linear(1.5)),
+          child: child!,
+        ),
+        home: LivingDeskReviewScope(
+          child: LearningSliceScreen(runtime: runtime, materialId: materialId),
+        ),
       ),
-      home: LivingDeskReviewScope(child: LearningSliceScreen(runtime: runtime, materialId: materialId)),
-    ));
+    );
     final answer = find.byKey(const ValueKey('la0040-atelier-answer'));
     final submit = find.byKey(const ValueKey('la0040-atelier-submit'));
     await _pumpUntil(tester, answer);
