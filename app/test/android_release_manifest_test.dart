@@ -24,7 +24,9 @@ void main() {
 
     expect(
       androidManifest,
-      contains('android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"'),
+      contains(
+        'android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"',
+      ),
       reason: 'Flutter must receive Android font-scale configuration changes without recreating a stale text layout.',
     );
     expect(
