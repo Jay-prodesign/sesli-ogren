@@ -1137,8 +1137,10 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
       );
       if (!mounted) return;
       setState(() {
-        _phase = _SlicePhase.source;
-        _inlineError = 'Güvenli devam oluşturulamadı. Kaynağı yeniden ekleyerek başlayabilirsin.';
+        _retryRecallFromError = false;
+        _phase = _SlicePhase.error;
+        _inlineError =
+            'Devam şu anda doğrulanamadı. Mevcut kaynağın ve öğrenme kayıtların korunuyor; bağlantı geri geldiğinde devamı tekrar onarabilirsin.';
       });
     } finally {
       _setBusy(false);
@@ -1148,9 +1150,10 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
   void _showRecoverableError() {
     if (!mounted) return;
     setState(() {
+      _retryRecallFromError = false;
       _phase = _SlicePhase.error;
       _inlineError =
-          'Bu öğrenme adımı artık güncel kaynakla eşleşmiyor. Kaynaktan güvenli biçimde yeniden başlayabiliriz.';
+          'Bu öğrenme adımı artık güncel kaynakla eşleşmiyor. Eski denemeyi kanıt saymadan güncel kaynaktan güvenli biçimde yeniden başlayabiliriz.';
     });
   }
 
