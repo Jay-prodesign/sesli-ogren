@@ -2285,11 +2285,16 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
           const SizedBox(height: 10),
           Text(_inlineError ?? 'Devam bilgisi eksik. Kaynaktan yeni bir Recall başlatabiliriz.'),
           const SizedBox(height: 18),
-          FilledButton(onPressed: _busy ? null : _repairContinuation, child: const Text('Devamı onar')),
+          FilledButton(
+            onPressed: _busy ? null : (_retryRecallFromError ? _openRecallSafely : _repairContinuation),
+            child: Text(_retryRecallFromError ? 'Hatırla’yı tekrar dene' : 'Devamı onar'),
+          ),
           const SizedBox(height: 8),
           TextButton(
             onPressed: _busy
                 ? null
+                : _retryRecallFromError && Navigator.of(context).canPop()
+                ? () => Navigator.of(context).maybePop()
                 : () {
                     setState(() {
                       _sourceEntryMode = _SourceEntryMode.text;
@@ -2298,7 +2303,7 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
                       _inlineError = null;
                     });
                   },
-            child: const Text('Metin ekle'),
+            child: Text(_retryRecallFromError && Navigator.of(context).canPop() ? 'Materyale dön' : 'Metin ekle'),
           ),
         ],
       ),
