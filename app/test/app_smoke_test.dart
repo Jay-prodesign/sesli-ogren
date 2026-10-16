@@ -1362,7 +1362,11 @@ void main() {
     await tester.tap(find.byIcon(Icons.library_books_outlined));
     await tester.pump();
     await pumpUntilFound(tester, find.byKey(const ValueKey('library-header-stacked')));
-    expect(find.byKey(const ValueKey('library-add-material')), findsOneWidget);
+    final addMaterial = find.byKey(const ValueKey('library-add-material'));
+    await pumpUntilFound(tester, addMaterial);
+    await tester.ensureVisible(addMaterial);
+    await tester.pump();
+    expect(addMaterial.hitTestable(), findsOneWidget);
     expect(find.text('Yeni kaynak ekle'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
