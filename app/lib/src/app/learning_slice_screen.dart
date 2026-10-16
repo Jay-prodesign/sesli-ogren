@@ -106,6 +106,26 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
     super.dispose();
   }
 
+  ProductAnalyticsEventName _analyticsEventName(OperationalEvent event) {
+    return switch (event.type) {
+      OperationalEventType.runtimeRestore => ProductAnalyticsEventName.appOpened,
+      OperationalEventType.sourceIngest => switch (event.phase) {
+        OperationalEventPhase.started => ProductAnalyticsEventName.materialProcessingStarted,
+        OperationalEventPhase.completed => ProductAnalyticsEventName.materialProcessingCompleted,
+        OperationalEventPhase.failed => ProductAnalyticsEventName.materialProcessingFailed,
+      },
+      OperationalEventType.recallPrompt => ProductAnalyticsEventName.learningActionStarted,
+      OperationalEventType.recallAttempt => switch (event.phase) {
+        OperationalEventPhase.started => ProductAnalyticsEventName.retrievalAttempted,
+        OperationalEventPhase.completed => event.outcome?.name == 'correct'
+            ? ProductAnalyticsEventName.retrievalSucceeded
+            : ProductAnalyticsEventName.retrievalFailed,
+        OperationalEventPhase.failed => ProductAnalyticsEventName.retrievalFailed,
+      },
+      OperationalEventType.continuationRepair => ProductAnalyticsEventName.nextBestActionSelected,
+    };
+  }
+
   Future<void> _recordEvent(OperationalEvent event) async {
     try {
       await widget.runtime.telemetry.record(learner: widget.runtime.learner, event: event);
@@ -118,7 +138,7 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
       widget.runtime.analytics.record(
         learner: widget.runtime.learner,
         event: ProductAnalyticsEvent(
-          type: ProductAnalyticsEventType.values.byName(event.type.name),
+          name: _analyticsEventName(event),
           phase: ProductAnalyticsPhase.values.byName(event.phase.name),
           createdAt: event.createdAt,
           materialId: event.materialId,
@@ -138,7 +158,10 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
             OperationalEventType.runtimeRestore => null,
           },
           outcomeClass: event.outcome?.name ?? (event.phase == OperationalEventPhase.failed ? 'failed' : null),
-          reasonCode: event.reasonCode ?? event.errorClass,
+          reasonCode: event.reasonCode,
+          failureClass: event.errorClass,
+          ruleVersion: event.ruleVersion,
+          policyVersion: event.policyVersion,
           durationMs: event.durationMs,
           quantity: event.phase == OperationalEventPhase.completed ? 1 : null,
         ),

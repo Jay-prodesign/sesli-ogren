@@ -36,7 +36,7 @@ void main() {
     await analytics.record(
       learner: const AuthenticatedLearner.local(),
       event: ProductAnalyticsEvent(
-        type: ProductAnalyticsEventType.readerSession,
+        name: ProductAnalyticsEventName.readerSessionCompleted,
         phase: ProductAnalyticsPhase.completed,
         createdAt: DateTime.utc(2026, 10, 15, 9),
         materialId: const MaterialId('material_guest_analytics'),
@@ -50,7 +50,8 @@ void main() {
 
     final stored = await store.productAnalyticsEvents(learner: const AuthenticatedLearner.local());
     expect(stored, hasLength(1));
-    expect(stored.single.event.type, ProductAnalyticsEventType.readerSession);
+    expect(stored.single.event.name, ProductAnalyticsEventName.readerSessionCompleted);
+    expect(stored.single.environment, 'test');
     expect(stored.single.event.materialId, const MaterialId('material_guest_analytics'));
     expect(gateway.sent, isEmpty);
 
@@ -68,7 +69,7 @@ void main() {
     await analytics.record(
       learner: learner,
       event: ProductAnalyticsEvent(
-        type: ProductAnalyticsEventType.recallAttempt,
+        name: ProductAnalyticsEventName.retrievalSucceeded,
         phase: ProductAnalyticsPhase.completed,
         createdAt: DateTime.utc(2026, 10, 15, 10),
         materialId: const MaterialId('material_auth_analytics'),
@@ -110,7 +111,7 @@ void main() {
     await analytics.record(
       learner: learner,
       event: ProductAnalyticsEvent(
-        type: ProductAnalyticsEventType.sourceIngest,
+        name: ProductAnalyticsEventName.materialProcessingFailed,
         phase: ProductAnalyticsPhase.failed,
         createdAt: DateTime.utc(2026, 10, 15, 11),
         surface: ProductAnalyticsSurface.sourceEditor,
@@ -137,7 +138,7 @@ void main() {
       await analytics.record(
         learner: learner,
         event: ProductAnalyticsEvent(
-          type: ProductAnalyticsEventType.materialOpened,
+          name: ProductAnalyticsEventName.materialWorkspaceOpened,
           phase: ProductAnalyticsPhase.completed,
           createdAt: DateTime.utc(2026, 10, 15, 12),
           materialId: const MaterialId('material_delete_test'),

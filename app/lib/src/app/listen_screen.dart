@@ -156,7 +156,7 @@ class _ListenScreenState extends State<ListenScreen> {
       widget.runtime.analytics.record(
         learner: widget.runtime.learner,
         event: ProductAnalyticsEvent(
-          type: ProductAnalyticsEventType.listenSession,
+          name: ProductAnalyticsEventName.audioStarted,
           phase: ProductAnalyticsPhase.started,
           createdAt: _listenStartedAt!,
           materialId: widget.materialId,
@@ -249,7 +249,7 @@ class _ListenScreenState extends State<ListenScreen> {
           widget.runtime.analytics.record(
             learner: widget.runtime.learner,
             event: ProductAnalyticsEvent(
-              type: ProductAnalyticsEventType.listenSession,
+              name: ProductAnalyticsEventName.audioCompleted,
               phase: ProductAnalyticsPhase.completed,
               createdAt: DateTime.now().toUtc(),
               materialId: widget.materialId,
@@ -298,7 +298,7 @@ class _ListenScreenState extends State<ListenScreen> {
     await widget.runtime.analytics.record(
       learner: widget.runtime.learner,
       event: ProductAnalyticsEvent(
-        type: ProductAnalyticsEventType.listenSession,
+        name: ProductAnalyticsEventName.appError,
         phase: ProductAnalyticsPhase.failed,
         createdAt: DateTime.now().toUtc(),
         materialId: widget.materialId,
@@ -307,6 +307,7 @@ class _ListenScreenState extends State<ListenScreen> {
         capability: ProductAnalyticsCapability.listen,
         outcomeClass: 'speech_unavailable',
         reasonCode: 'device_speech',
+        failureClass: 'device_speech_unavailable',
         durationMs: startedAt == null ? null : DateTime.now().toUtc().difference(startedAt).inMilliseconds,
       ),
     );

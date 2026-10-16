@@ -93,15 +93,22 @@ class SqliteSourceStore implements SourceStore {
       'learner_id': learner.id.value,
       'event_id': envelope.eventId,
       'session_id': envelope.sessionId,
-      'schema_version': event.schemaVersion,
-      'event_type': event.type.wireValue,
-      'phase': event.phase.name,
+      'schema_version': event.eventVersion,
+      'event_type': event.name.wireValue,
+      'environment': envelope.environment,
+      'app_version': envelope.appVersion,
+      'platform': envelope.platform,
+      'locale': envelope.locale,
+      'phase': event.phase?.name,
       'material_id': event.materialId?.value,
       'source_version_id': event.sourceVersionId?.value,
       'surface': event.surface?.wireValue,
       'capability': event.capability?.wireValue,
       'outcome_class': event.outcomeClass,
       'reason_code': event.reasonCode,
+      'failure_class': event.failureClass,
+      'rule_version': event.ruleVersion,
+      'policy_version': event.policyVersion,
       'duration_ms': event.durationMs,
       'quantity': event.quantity,
       'created_at_utc': event.createdAt.toUtc().toIso8601String(),
@@ -158,7 +165,7 @@ class SqliteSourceStore implements SourceStore {
     final database = await selectedFactory.openDatabase(
       databasePath,
       options: OpenDatabaseOptions(
-        version: 23,
+        version: 24,
         // Schema-rebuild migrations need foreign keys disabled before the
         // upgrade transaction begins. Runtime enforcement is restored in
         // onOpen before any product read/write can occur.
@@ -236,6 +243,9 @@ class SqliteSourceStore implements SourceStore {
           }
           if (oldVersion < 23) {
             await _upgradeProductAnalyticsOutboxSchema(db);
+          }
+          if (oldVersion < 24) {
+            await _upgradeProductAnalyticsEnvelopeSchema(db);
           }
         },
         onCreate: (db, version) async {
@@ -472,6 +482,7 @@ CREATE TABLE learner_preferences (
           await _upgradeReaderAnnotationSchema(db);
           await _upgradeGroundedTutorSchema(db);
           await _upgradeProductAnalyticsOutboxSchema(db);
+          await _upgradeProductAnalyticsEnvelopeSchema(db);
           await db.execute('''
 CREATE TABLE operational_events (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -1111,6 +1122,58 @@ CREATE TABLE IF NOT EXISTS product_analytics_outbox (
 CREATE INDEX IF NOT EXISTS idx_product_analytics_outbox_pending
 ON product_analytics_outbox (learner_id, synced_at_utc, id)
 ''');
+  }
+
+  static Future<void> _upgradeProductAnalyticsEnvelopeSchema(Database db) async {
+    final columns = await db.rawQuery('PRAGMA table_info(product_analytics_outbox)');
+    if (columns.isEmpty) {
+      await _upgradeProductAnalyticsOutboxSchema(db);
+    }
+    final refreshed = await db.rawQuery('PRAGMA table_info(product_analytics_outbox)');
+    final names = refreshed.map((row) => row['name'] as String).toSet();
+
+    Future<void> add(String name, String sql) async {
+      if (!names.contains(name)) {
+        await db.execute(sql);
+      }
+    }
+
+    await add(
+      'environment',
+      "ALTER TABLE product_analytics_outbox ADD COLUMN environment TEXT NOT NULL DEFAULT 'development'",
+    );
+    await add('app_version', 'ALTER TABLE product_analytics_outbox ADD COLUMN app_version TEXT');
+    await add('platform', 'ALTER TABLE product_analytics_outbox ADD COLUMN platform TEXT');
+    await add('locale', 'ALTER TABLE product_analytics_outbox ADD COLUMN locale TEXT');
+    await add('failure_class', 'ALTER TABLE product_analytics_outbox ADD COLUMN failure_class TEXT');
+    await add('rule_version', 'ALTER TABLE product_analytics_outbox ADD COLUMN rule_version TEXT');
+    await add('policy_version', 'ALTER TABLE product_analytics_outbox ADD COLUMN policy_version TEXT');
+
+    await db.execute("""
+UPDATE product_analytics_outbox
+SET event_type = CASE
+  WHEN event_type = 'runtime_restore' THEN 'app_opened'
+  WHEN event_type = 'source_ingest' AND phase = 'completed' THEN 'material_processing_completed'
+  WHEN event_type = 'source_ingest' AND phase = 'failed' THEN 'material_processing_failed'
+  WHEN event_type = 'source_ingest' THEN 'material_processing_started'
+  WHEN event_type = 'recall_prompt' THEN 'learning_action_started'
+  WHEN event_type = 'recall_attempt' AND phase = 'started' THEN 'retrieval_attempted'
+  WHEN event_type = 'recall_attempt' AND outcome_class = 'correct' THEN 'retrieval_succeeded'
+  WHEN event_type = 'recall_attempt' THEN 'retrieval_failed'
+  WHEN event_type = 'continuation_repair' THEN 'next_best_action_selected'
+  WHEN event_type = 'material_opened' THEN 'material_workspace_opened'
+  WHEN event_type = 'reader_session' THEN 'reader_session_completed'
+  WHEN event_type = 'listen_session' AND phase = 'started' THEN 'audio_started'
+  WHEN event_type = 'listen_session' AND phase = 'completed' THEN 'audio_completed'
+  WHEN event_type = 'listen_session' THEN 'app_error'
+  WHEN event_type = 'flashcard_review' THEN 'flashcard_response_recorded'
+  WHEN event_type = 'quiz_answer' THEN 'quiz_answered'
+  WHEN event_type = 'entitlement_boundary' AND reason_code = 'quotaReached' THEN 'quota_limit_reached'
+  WHEN event_type = 'entitlement_boundary' THEN 'quota_checked'
+  WHEN event_type = 'continuity_sync' THEN 'network_recovery'
+  ELSE event_type
+END
+""");
   }
 
   static Future<void> _upgradeOperationalTelemetrySchema(Database db) async {
@@ -3988,19 +4051,27 @@ ON CONFLICT(learner_id) DO UPDATE SET
   static ProductAnalyticsEnvelope _productAnalyticsEnvelopeFromRow(Map<String, Object?> row) {
     final surface = row['surface'] as String?;
     final capability = row['capability'] as String?;
+    final phase = row['phase'] as String?;
     return ProductAnalyticsEnvelope(
       eventId: row['event_id']! as String,
       sessionId: row['session_id']! as String,
+      environment: (row['environment'] as String?) ?? 'development',
+      appVersion: row['app_version'] as String?,
+      platform: row['platform'] as String?,
+      locale: row['locale'] as String?,
       event: ProductAnalyticsEvent(
-        schemaVersion: (row['schema_version'] as int?) ?? 1,
-        type: ProductAnalyticsEventTypeWire.fromWire(row['event_type']! as String),
-        phase: ProductAnalyticsPhase.values.byName(row['phase']! as String),
+        eventVersion: (row['schema_version'] as int?) ?? 1,
+        name: ProductAnalyticsEventNameWire.fromWire(row['event_type']! as String),
+        phase: phase == null ? null : ProductAnalyticsPhase.values.byName(phase),
         materialId: row['material_id'] == null ? null : MaterialId(row['material_id']! as String),
         sourceVersionId: row['source_version_id'] == null ? null : SourceVersionId(row['source_version_id']! as String),
         surface: surface == null ? null : ProductAnalyticsSurfaceWire.fromWire(surface),
         capability: capability == null ? null : ProductAnalyticsCapabilityWire.fromWire(capability),
         outcomeClass: row['outcome_class'] as String?,
         reasonCode: row['reason_code'] as String?,
+        failureClass: row['failure_class'] as String?,
+        ruleVersion: row['rule_version'] as String?,
+        policyVersion: row['policy_version'] as String?,
         durationMs: row['duration_ms'] as int?,
         quantity: row['quantity'] as num?,
         createdAt: DateTime.parse(row['created_at_utc']! as String).toUtc(),

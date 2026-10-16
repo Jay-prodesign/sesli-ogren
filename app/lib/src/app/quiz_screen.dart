@@ -134,7 +134,7 @@ class _QuizScreenState extends State<QuizScreen> {
         widget.runtime.analytics.record(
           learner: widget.runtime.learner,
           event: ProductAnalyticsEvent(
-            type: ProductAnalyticsEventType.quizAnswer,
+            name: ProductAnalyticsEventName.quizAnswered,
             phase: ProductAnalyticsPhase.completed,
             createdAt: DateTime.now().toUtc(),
             materialId: widget.materialId,

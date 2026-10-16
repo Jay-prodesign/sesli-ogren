@@ -393,7 +393,7 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
       widget.runtime.analytics.record(
         learner: widget.runtime.learner,
         event: ProductAnalyticsEvent(
-          type: ProductAnalyticsEventType.materialOpened,
+          name: ProductAnalyticsEventName.materialWorkspaceOpened,
           phase: ProductAnalyticsPhase.completed,
           createdAt: DateTime.now().toUtc(),
           materialId: selected,
@@ -472,7 +472,7 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
         widget.runtime.analytics.record(
           learner: widget.runtime.learner,
           event: ProductAnalyticsEvent(
-            type: ProductAnalyticsEventType.readerSession,
+            name: ProductAnalyticsEventName.learningActionStarted,
             phase: ProductAnalyticsPhase.started,
             createdAt: DateTime.now().toUtc(),
             materialId: selected,
@@ -535,7 +535,7 @@ class _ProductShellScreenState extends State<ProductShellScreen> {
         widget.runtime.analytics.record(
           learner: widget.runtime.learner,
           event: ProductAnalyticsEvent(
-            type: ProductAnalyticsEventType.readerSession,
+            name: ProductAnalyticsEventName.readerSessionCompleted,
             phase: ProductAnalyticsPhase.completed,
             createdAt: DateTime.now().toUtc(),
             materialId: selected,

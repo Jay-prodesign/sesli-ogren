@@ -282,7 +282,7 @@ class AppRuntime {
       analytics.record(
         learner: learner,
         event: ProductAnalyticsEvent(
-          type: ProductAnalyticsEventType.entitlementBoundary,
+          name: ProductAnalyticsEventName.quotaChecked,
           phase: ProductAnalyticsPhase.viewed,
           createdAt: DateTime.now().toUtc(),
           surface: ProductAnalyticsSurface.entitlement,

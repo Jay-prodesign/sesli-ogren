@@ -9,21 +9,45 @@ import 'product_analytics.dart';
 import 'product_analytics_gateway.dart';
 
 class ProductAnalyticsService implements ProductAnalytics {
-  ProductAnalyticsService({required this.store, required this.gateway, required this.sessionId});
+  ProductAnalyticsService({
+    required this.store,
+    required this.gateway,
+    required this.sessionId,
+    this.environment = 'test',
+    this.appVersion,
+    this.platform,
+    this.locale,
+  });
 
   factory ProductAnalyticsService.forRuntime({
     required SqliteSourceStore store,
     required ProductAnalyticsGateway gateway,
+    String environment = 'production',
+    String? appVersion,
+    String? platform,
+    String? locale,
     DateTime Function()? now,
   }) {
     final clock = now ?? DateTime.now;
     final seed = '${clock().toUtc().microsecondsSinceEpoch}:${identityHashCode(store)}';
     final digest = sha256.convert(utf8.encode(seed)).toString();
-    return ProductAnalyticsService(store: store, gateway: gateway, sessionId: 'session_${digest.substring(0, 32)}');
+    return ProductAnalyticsService(
+      store: store,
+      gateway: gateway,
+      sessionId: 'session_${digest.substring(0, 32)}',
+      environment: environment,
+      appVersion: appVersion,
+      platform: platform,
+      locale: locale,
+    );
   }
 
   final SqliteSourceStore store;
   final ProductAnalyticsGateway gateway;
+  final String environment;
+  final String? appVersion;
+  final String? platform;
+  final String? locale;
 
   @override
   final String sessionId;
@@ -36,7 +60,15 @@ class ProductAnalyticsService implements ProductAnalytics {
     if (!_privacySafe(event)) return;
 
     try {
-      final envelope = ProductAnalyticsEnvelope(eventId: _eventId(learner, event), sessionId: sessionId, event: event);
+      final envelope = ProductAnalyticsEnvelope(
+        eventId: _eventId(learner, event),
+        sessionId: sessionId,
+        environment: environment,
+        appVersion: appVersion,
+        platform: platform,
+        locale: locale,
+        event: event,
+      );
       await store.enqueueProductAnalyticsEvent(learner: learner, envelope: envelope);
       if (learner.isAuthenticated) {
         unawaited(flush(learner: learner));
@@ -86,20 +118,27 @@ class ProductAnalyticsService implements ProductAnalytics {
     final sequence = _sequence++;
     final seed =
         '${learner.id.value}|$sessionId|${event.createdAt.toUtc().microsecondsSinceEpoch}|'
-        '${event.type.wireValue}|${event.phase.name}|$sequence';
+        '${event.name.wireValue}|${event.phase?.name ?? 'none'}|$sequence';
     final digest = sha256.convert(utf8.encode(seed)).toString();
     return 'evt_${digest.substring(0, 40)}';
   }
 
   static bool _privacySafe(ProductAnalyticsEvent event) {
-    if (event.schemaVersion != 1) return false;
+    if (event.eventVersion != 1) return false;
+    if (!const {'development', 'test', 'staging', 'production'}.contains(environment)) {
+      return false;
+    }
     if (event.durationMs != null && (event.durationMs! < 0 || event.durationMs! > 86400000)) {
       return false;
     }
     if (event.quantity != null && (event.quantity! < 0 || event.quantity! > 1000000000)) {
       return false;
     }
-    return _safeCode(event.outcomeClass, 64) && _safeCode(event.reasonCode, 96);
+    return _safeCode(event.outcomeClass, 64) &&
+        _safeCode(event.reasonCode, 96) &&
+        _safeCode(event.failureClass, 96) &&
+        _safeCode(event.ruleVersion, 96) &&
+        _safeCode(event.policyVersion, 96);
   }
 
   static bool _safeCode(String? value, int maxLength) {

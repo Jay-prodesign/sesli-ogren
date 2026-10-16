@@ -134,7 +134,7 @@ class _FlashcardScreenState extends State<FlashcardScreen> {
         widget.runtime.analytics.record(
           learner: widget.runtime.learner,
           event: ProductAnalyticsEvent(
-            type: ProductAnalyticsEventType.flashcardReview,
+            name: ProductAnalyticsEventName.flashcardResponseRecorded,
             phase: ProductAnalyticsPhase.completed,
             createdAt: DateTime.now().toUtc(),
             materialId: widget.materialId,
