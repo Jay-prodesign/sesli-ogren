@@ -61,6 +61,7 @@ class _ExplainScreenState extends State<ExplainScreen> {
     if (!mounted) return false;
     if (!access.isAllowed) {
       setState(() => _access = access);
+      widget.runtime.recordEntitlementBoundary(access);
       return false;
     }
     if (_access != null) {
@@ -80,6 +81,7 @@ class _ExplainScreenState extends State<ExplainScreen> {
     );
     if (!mounted || access.isAllowed) return;
     setState(() => _access = access);
+    widget.runtime.recordEntitlementBoundary(access);
   }
 
   Future<GroundedExplainResult> _request() async {

@@ -639,6 +639,76 @@ CREATE TABLE listen_progress (
     }
   });
 
+  test('v22 database upgrades privacy-safe analytics outbox without reset', () async {
+    final temp = await Directory.systemTemp.createTemp('sesli-ogren-v22-analytics-');
+    final path = '${temp.path}/analytics.db';
+    Database? legacy;
+    SqliteSourceStore? upgraded;
+    Database? inspected;
+
+    try {
+      legacy = await databaseFactoryFfi.openDatabase(
+        path,
+        options: OpenDatabaseOptions(
+          version: 22,
+          onCreate: (db, version) async {
+            await db.execute('''
+CREATE TABLE sentinel (
+  value TEXT NOT NULL
+)
+''');
+            await db.insert('sentinel', {'value': 'preserved'});
+          },
+        ),
+      );
+      await legacy.close();
+      legacy = null;
+
+      upgraded = await SqliteSourceStore.open(factory: databaseFactoryFfi, path: path);
+      await upgraded.close();
+      upgraded = null;
+
+      inspected = await databaseFactoryFfi.openDatabase(path);
+      final tables = await inspected.rawQuery("SELECT name FROM sqlite_master WHERE type = 'table'");
+      expect(tables.map((row) => row['name']), contains('product_analytics_outbox'));
+      final columns = await inspected.rawQuery('PRAGMA table_info(product_analytics_outbox)');
+      final names = columns.map((row) => row['name']).toSet();
+      expect(
+        names,
+        containsAll([
+          'event_id',
+          'session_id',
+          'event_type',
+          'environment',
+          'app_version',
+          'platform',
+          'locale',
+          'phase',
+          'material_id',
+          'source_version_id',
+          'surface',
+          'capability',
+          'outcome_class',
+          'reason_code',
+          'failure_class',
+          'rule_version',
+          'policy_version',
+          'duration_ms',
+          'quantity',
+          'synced_at_utc',
+        ]),
+      );
+      expect(names, isNot(contains(anyOf('source_text', 'prompt', 'answer_text', 'content'))));
+      final sentinel = await inspected.query('sentinel');
+      expect(sentinel.single['value'], 'preserved');
+    } finally {
+      await legacy?.close();
+      await upgraded?.close();
+      await inspected?.close();
+      await temp.delete(recursive: true);
+    }
+  });
+
   test('summary job survives reopen and respects learner and source version', () async {
     final temp = await Directory.systemTemp.createTemp('sesli-ogren-summary-job-');
     final path = '${temp.path}/summary.db';

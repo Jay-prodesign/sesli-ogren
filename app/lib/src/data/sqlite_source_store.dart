@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'package:crypto/crypto.dart';
 import 'package:sqflite/sqflite.dart';
 
+import '../analytics/product_analytics.dart';
 import '../domain/authenticated_learner.dart';
 import '../domain/flashcard_learning.dart';
 import '../domain/quiz_learning.dart';
@@ -83,13 +84,88 @@ class SqliteSourceStore implements SourceStore {
 
   OperationalTelemetry operationalTelemetry() => SqliteOperationalTelemetry._(_database);
 
+  Future<void> enqueueProductAnalyticsEvent({
+    required AuthenticatedLearner learner,
+    required ProductAnalyticsEnvelope envelope,
+  }) async {
+    final event = envelope.event;
+    await _database.insert('product_analytics_outbox', {
+      'learner_id': learner.id.value,
+      'event_id': envelope.eventId,
+      'session_id': envelope.sessionId,
+      'schema_version': event.eventVersion,
+      'event_type': event.name.wireValue,
+      'environment': envelope.environment,
+      'app_version': envelope.appVersion,
+      'platform': envelope.platform,
+      'locale': envelope.locale,
+      'phase': event.phase?.name,
+      'material_id': event.materialId?.value,
+      'source_version_id': event.sourceVersionId?.value,
+      'surface': event.surface?.wireValue,
+      'capability': event.capability?.wireValue,
+      'outcome_class': event.outcomeClass,
+      'reason_code': event.reasonCode,
+      'failure_class': event.failureClass,
+      'rule_version': event.ruleVersion,
+      'policy_version': event.policyVersion,
+      'duration_ms': event.durationMs,
+      'quantity': event.quantity,
+      'created_at_utc': event.createdAt.toUtc().toIso8601String(),
+      'synced_at_utc': null,
+    }, conflictAlgorithm: ConflictAlgorithm.ignore);
+  }
+
+  Future<List<ProductAnalyticsEnvelope>> pendingProductAnalyticsEvents({
+    required AuthenticatedLearner learner,
+    int limit = 100,
+  }) async {
+    if (limit < 1 || limit > 500) {
+      throw ArgumentError.value(limit, 'limit', 'Expected 1-500 analytics events.');
+    }
+    final rows = await _database.query(
+      'product_analytics_outbox',
+      where: 'learner_id = ? AND synced_at_utc IS NULL',
+      whereArgs: [learner.id.value],
+      orderBy: 'id ASC',
+      limit: limit,
+    );
+    return rows.map(_productAnalyticsEnvelopeFromRow).toList(growable: false);
+  }
+
+  Future<void> markProductAnalyticsEventSynced({
+    required AuthenticatedLearner learner,
+    required String eventId,
+    required DateTime syncedAt,
+  }) async {
+    final changed = await _database.update(
+      'product_analytics_outbox',
+      {'synced_at_utc': syncedAt.toUtc().toIso8601String()},
+      where: 'learner_id = ? AND event_id = ? AND synced_at_utc IS NULL',
+      whereArgs: [learner.id.value, eventId],
+    );
+    if (changed > 1) {
+      throw const SourceStoreConflict('Analytics event identity is not unique.');
+    }
+  }
+
+  Future<List<ProductAnalyticsEnvelope>> productAnalyticsEvents({required AuthenticatedLearner learner}) async {
+    final rows = await _database.query(
+      'product_analytics_outbox',
+      where: 'learner_id = ?',
+      whereArgs: [learner.id.value],
+      orderBy: 'id ASC',
+    );
+    return rows.map(_productAnalyticsEnvelopeFromRow).toList(growable: false);
+  }
+
   static Future<SqliteSourceStore> open({DatabaseFactory? factory, String? path}) async {
     final selectedFactory = factory ?? databaseFactory;
     final databasePath = path ?? '${await getDatabasesPath()}/sesli_ogren_sources.db';
     final database = await selectedFactory.openDatabase(
       databasePath,
       options: OpenDatabaseOptions(
-        version: 22,
+        version: 24,
         // Schema-rebuild migrations need foreign keys disabled before the
         // upgrade transaction begins. Runtime enforcement is restored in
         // onOpen before any product read/write can occur.
@@ -164,6 +240,12 @@ class SqliteSourceStore implements SourceStore {
           }
           if (oldVersion < 22) {
             await _upgradeRetentionCloudMetadataSchema(db);
+          }
+          if (oldVersion < 23) {
+            await _upgradeProductAnalyticsOutboxSchema(db);
+          }
+          if (oldVersion < 24) {
+            await _upgradeProductAnalyticsEnvelopeSchema(db);
           }
         },
         onCreate: (db, version) async {
@@ -399,6 +481,8 @@ CREATE TABLE learner_preferences (
           await _upgradeStudyPlanSchema(db);
           await _upgradeReaderAnnotationSchema(db);
           await _upgradeGroundedTutorSchema(db);
+          await _upgradeProductAnalyticsOutboxSchema(db);
+          await _upgradeProductAnalyticsEnvelopeSchema(db);
           await db.execute('''
 CREATE TABLE operational_events (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -1009,6 +1093,87 @@ CREATE TABLE IF NOT EXISTS learner_preferences (
         'CHECK (listen_rate >= 0.75 AND listen_rate <= 1.5)',
       );
     }
+  }
+
+  static Future<void> _upgradeProductAnalyticsOutboxSchema(Database db) async {
+    await db.execute('''
+CREATE TABLE IF NOT EXISTS product_analytics_outbox (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  learner_id TEXT NOT NULL,
+  event_id TEXT NOT NULL,
+  session_id TEXT NOT NULL,
+  schema_version INTEGER NOT NULL DEFAULT 1,
+  event_type TEXT NOT NULL,
+  phase TEXT NOT NULL,
+  material_id TEXT,
+  source_version_id TEXT,
+  surface TEXT,
+  capability TEXT,
+  outcome_class TEXT,
+  reason_code TEXT,
+  duration_ms INTEGER,
+  quantity REAL,
+  created_at_utc TEXT NOT NULL,
+  synced_at_utc TEXT,
+  UNIQUE (learner_id, event_id)
+)
+''');
+    await db.execute('''
+CREATE INDEX IF NOT EXISTS idx_product_analytics_outbox_pending
+ON product_analytics_outbox (learner_id, synced_at_utc, id)
+''');
+  }
+
+  static Future<void> _upgradeProductAnalyticsEnvelopeSchema(Database db) async {
+    final columns = await db.rawQuery('PRAGMA table_info(product_analytics_outbox)');
+    if (columns.isEmpty) {
+      await _upgradeProductAnalyticsOutboxSchema(db);
+    }
+    final refreshed = await db.rawQuery('PRAGMA table_info(product_analytics_outbox)');
+    final names = refreshed.map((row) => row['name'] as String).toSet();
+
+    Future<void> add(String name, String sql) async {
+      if (!names.contains(name)) {
+        await db.execute(sql);
+      }
+    }
+
+    await add(
+      'environment',
+      "ALTER TABLE product_analytics_outbox ADD COLUMN environment TEXT NOT NULL DEFAULT 'development'",
+    );
+    await add('app_version', 'ALTER TABLE product_analytics_outbox ADD COLUMN app_version TEXT');
+    await add('platform', 'ALTER TABLE product_analytics_outbox ADD COLUMN platform TEXT');
+    await add('locale', 'ALTER TABLE product_analytics_outbox ADD COLUMN locale TEXT');
+    await add('failure_class', 'ALTER TABLE product_analytics_outbox ADD COLUMN failure_class TEXT');
+    await add('rule_version', 'ALTER TABLE product_analytics_outbox ADD COLUMN rule_version TEXT');
+    await add('policy_version', 'ALTER TABLE product_analytics_outbox ADD COLUMN policy_version TEXT');
+
+    await db.execute("""
+UPDATE product_analytics_outbox
+SET event_type = CASE
+  WHEN event_type = 'runtime_restore' THEN 'app_opened'
+  WHEN event_type = 'source_ingest' AND phase = 'completed' THEN 'material_processing_completed'
+  WHEN event_type = 'source_ingest' AND phase = 'failed' THEN 'material_processing_failed'
+  WHEN event_type = 'source_ingest' THEN 'material_processing_started'
+  WHEN event_type = 'recall_prompt' THEN 'learning_action_started'
+  WHEN event_type = 'recall_attempt' AND phase = 'started' THEN 'retrieval_attempted'
+  WHEN event_type = 'recall_attempt' AND outcome_class = 'correct' THEN 'retrieval_succeeded'
+  WHEN event_type = 'recall_attempt' THEN 'retrieval_failed'
+  WHEN event_type = 'continuation_repair' THEN 'next_best_action_selected'
+  WHEN event_type = 'material_opened' THEN 'material_workspace_opened'
+  WHEN event_type = 'reader_session' THEN 'reader_session_completed'
+  WHEN event_type = 'listen_session' AND phase = 'started' THEN 'audio_started'
+  WHEN event_type = 'listen_session' AND phase = 'completed' THEN 'audio_completed'
+  WHEN event_type = 'listen_session' THEN 'app_error'
+  WHEN event_type = 'flashcard_review' THEN 'flashcard_response_recorded'
+  WHEN event_type = 'quiz_answer' THEN 'quiz_answered'
+  WHEN event_type = 'entitlement_boundary' AND reason_code = 'quotaReached' THEN 'quota_limit_reached'
+  WHEN event_type = 'entitlement_boundary' THEN 'quota_checked'
+  WHEN event_type = 'continuity_sync' THEN 'network_recovery'
+  ELSE event_type
+END
+""");
   }
 
   static Future<void> _upgradeOperationalTelemetrySchema(Database db) async {
@@ -3878,8 +4043,40 @@ ON CONFLICT(learner_id) DO UPDATE SET
       await transaction.delete('extracted_contents', where: 'learner_id = ?', whereArgs: [id]);
       await transaction.delete('source_versions', where: 'learner_id = ?', whereArgs: [id]);
       await transaction.delete('materials', where: 'learner_id = ?', whereArgs: [id]);
+      await transaction.delete('product_analytics_outbox', where: 'learner_id = ?', whereArgs: [id]);
       await transaction.delete('operational_events', where: 'learner_id = ?', whereArgs: [id]);
     });
+  }
+
+  static ProductAnalyticsEnvelope _productAnalyticsEnvelopeFromRow(Map<String, Object?> row) {
+    final surface = row['surface'] as String?;
+    final capability = row['capability'] as String?;
+    final phase = row['phase'] as String?;
+    return ProductAnalyticsEnvelope(
+      eventId: row['event_id']! as String,
+      sessionId: row['session_id']! as String,
+      environment: (row['environment'] as String?) ?? 'development',
+      appVersion: row['app_version'] as String?,
+      platform: row['platform'] as String?,
+      locale: row['locale'] as String?,
+      event: ProductAnalyticsEvent(
+        eventVersion: (row['schema_version'] as int?) ?? 1,
+        name: ProductAnalyticsEventNameWire.fromWire(row['event_type']! as String),
+        phase: phase == null ? null : ProductAnalyticsPhase.values.byName(phase),
+        materialId: row['material_id'] == null ? null : MaterialId(row['material_id']! as String),
+        sourceVersionId: row['source_version_id'] == null ? null : SourceVersionId(row['source_version_id']! as String),
+        surface: surface == null ? null : ProductAnalyticsSurfaceWire.fromWire(surface),
+        capability: capability == null ? null : ProductAnalyticsCapabilityWire.fromWire(capability),
+        outcomeClass: row['outcome_class'] as String?,
+        reasonCode: row['reason_code'] as String?,
+        failureClass: row['failure_class'] as String?,
+        ruleVersion: row['rule_version'] as String?,
+        policyVersion: row['policy_version'] as String?,
+        durationMs: row['duration_ms'] as int?,
+        quantity: row['quantity'] as num?,
+        createdAt: DateTime.parse(row['created_at_utc']! as String).toUtc(),
+      ),
+    );
   }
 
   static GroundedTutorThreadRecord _groundedTutorThreadFromRow(Map<String, Object?> row) {

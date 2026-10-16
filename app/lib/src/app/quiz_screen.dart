@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../analytics/product_analytics.dart';
 import '../domain/learning_contracts.dart';
 import '../domain/quiz_learning.dart';
 import '../learning/quiz_learning_service.dart';
@@ -129,6 +130,27 @@ class _QuizScreenState extends State<QuizScreen> {
       if (review == null) {
         throw const QuizLearningException('Quiz yanıtı kaydedildi ancak sonucu okunamadı.');
       }
+      unawaited(
+        widget.runtime.analytics.record(
+          learner: widget.runtime.learner,
+          event: ProductAnalyticsEvent(
+            name: ProductAnalyticsEventName.quizAnswered,
+            phase: ProductAnalyticsPhase.completed,
+            createdAt: DateTime.now().toUtc(),
+            materialId: widget.materialId,
+            sourceVersionId: data.source.identity.sourceVersionId,
+            surface: ProductAnalyticsSurface.quiz,
+            capability: ProductAnalyticsCapability.quiz,
+            outcomeClass: kind == QuizAnswerKind.unknown
+                ? 'unknown'
+                : review.lastIsCorrect == true
+                ? 'correct'
+                : 'incorrect',
+            reasonCode: widget.isScheduledReview ? 'scheduled_review' : 'study_session',
+            quantity: 1,
+          ),
+        ),
+      );
       _feedbackHaptic(strong: review.lastIsCorrect == true);
       setState(() {
         _data = _QuizViewData(material: data.material, source: data.source, study: next);

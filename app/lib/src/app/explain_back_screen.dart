@@ -65,6 +65,7 @@ class _ExplainBackScreenState extends State<ExplainBackScreen> {
     if (!mounted) return false;
     if (!access.isAllowed) {
       setState(() => _access = access);
+      widget.runtime.recordEntitlementBoundary(access);
       return false;
     }
     if (_access != null) {
@@ -249,6 +250,7 @@ class _ExplainBackScreenState extends State<ExplainBackScreen> {
           _submitting = false;
           _access = blockedAccess;
         });
+        widget.runtime.recordEntitlementBoundary(blockedAccess);
         return;
       }
     }

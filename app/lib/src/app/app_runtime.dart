@@ -1,9 +1,14 @@
+import 'dart:async';
+
 import '../account/account_deletion_gateway.dart';
 import '../account/account_overview_gateway.dart';
 import '../account/entitlement_access_gateway.dart';
 import '../account/supabase_account_deletion_gateway.dart';
 import '../account/supabase_account_overview_gateway.dart';
 import '../account/supabase_entitlement_access_gateway.dart';
+import '../analytics/product_analytics.dart';
+import '../analytics/product_analytics_service.dart';
+import '../analytics/supabase_product_analytics_gateway.dart';
 import '../continuity/cloud_continuity_gateway.dart';
 import '../continuity/cloud_continuity_service.dart';
 import '../continuity/passive_resume_continuity_service.dart';
@@ -50,6 +55,7 @@ class AppRuntime {
     required this.ingest,
     required this.recall,
     required this.telemetry,
+    this.analytics = const UnavailableProductAnalytics(),
     FlashcardLearningService? flashcards,
     QuizLearningService? quiz,
     GroundedTutorService? tutor,
@@ -97,6 +103,7 @@ class AppRuntime {
   final PassiveResumeContinuityService passiveResume;
   final RetentionContinuityService retentionContinuity;
   final OperationalTelemetry telemetry;
+  final ProductAnalytics analytics;
   final GroundedExplainGateway explain;
   final ExplainBackGateway explainBack;
   final FocusHelpGateway focusHelp;
@@ -127,12 +134,17 @@ class AppRuntime {
       gateway: const SupabaseServerRecallGateway(),
       retentionContinuity: retentionContinuity,
     );
+    final analytics = ProductAnalyticsService.forRuntime(
+      store: store,
+      gateway: const SupabaseProductAnalyticsGateway(),
+    );
     return AppRuntime(
       learner: learner,
       store: store,
       ingest: ingest,
       recall: recall,
       telemetry: store.operationalTelemetry(),
+      analytics: analytics,
       continuity: continuity,
       passiveResume: PassiveResumeContinuityService(store: store, gateway: const SupabasePassiveResumeGateway()),
       retentionContinuity: retentionContinuity,
@@ -154,12 +166,17 @@ class AppRuntime {
       imageTextExtractor: const MlKitImageTextExtractor(),
     );
     final recall = RecallLearningService(sourceStore: store, learningStore: store.learningTruthStore());
+    final analytics = ProductAnalyticsService.forRuntime(
+      store: store,
+      gateway: const SupabaseProductAnalyticsGateway(),
+    );
     return AppRuntime(
       learner: localLearner,
       store: store,
       ingest: ingest,
       recall: recall,
       telemetry: store.operationalTelemetry(),
+      analytics: analytics,
     );
   }
 
@@ -193,6 +210,7 @@ class AppRuntime {
         retentionContinuity: authenticatedRetention,
       ),
       telemetry: telemetry,
+      analytics: analytics,
       continuity: authenticatedContinuity,
       passiveResume: PassiveResumeContinuityService(store: store, gateway: const SupabasePassiveResumeGateway()),
       retentionContinuity: authenticatedRetention,
@@ -214,6 +232,7 @@ class AppRuntime {
     ingest: ingest,
     recall: RecallLearningService(sourceStore: store, learningStore: store.learningTruthStore()),
     telemetry: telemetry,
+    analytics: analytics,
   );
 
   Future<int> syncAuthenticatedLearningContinuity() async {
@@ -251,6 +270,36 @@ class AppRuntime {
   }
 
   Future<void> retryDeletedAccountLocalCleanup() => store.purgeLearnerData(learner: learner);
+
+  void recordEntitlementBoundary(EntitlementAccess access) {
+    final capability = switch (access.capability) {
+      EntitlementCapability.summary => ProductAnalyticsCapability.summary,
+      EntitlementCapability.explain => ProductAnalyticsCapability.explain,
+      EntitlementCapability.focus => ProductAnalyticsCapability.focus,
+      EntitlementCapability.explainBack => ProductAnalyticsCapability.explainBack,
+    };
+    final eventName = switch (access.reason) {
+      EntitlementAccessReason.quotaReached => ProductAnalyticsEventName.quotaLimitReached,
+      EntitlementAccessReason.capabilityNotEntitled ||
+      EntitlementAccessReason.entitlementInactive => ProductAnalyticsEventName.paywallViewed,
+      _ => ProductAnalyticsEventName.quotaChecked,
+    };
+    unawaited(
+      analytics.record(
+        learner: learner,
+        event: ProductAnalyticsEvent(
+          name: eventName,
+          phase: ProductAnalyticsPhase.viewed,
+          createdAt: DateTime.now().toUtc(),
+          surface: ProductAnalyticsSurface.entitlement,
+          capability: capability,
+          outcomeClass: access.kind.name,
+          reasonCode: access.reason.name,
+          quantity: 1,
+        ),
+      ),
+    );
+  }
 
   Future<void> close() => store.close();
 }

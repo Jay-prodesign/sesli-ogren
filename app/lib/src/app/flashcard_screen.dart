@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../analytics/product_analytics.dart';
 import '../domain/flashcard_learning.dart';
 import '../domain/learning_contracts.dart';
 import '../learning/flashcard_learning_service.dart';
@@ -128,6 +129,23 @@ class _FlashcardScreenState extends State<FlashcardScreen> {
         cardId: card.id,
         response: response,
         answerWasRevealed: true,
+      );
+      unawaited(
+        widget.runtime.analytics.record(
+          learner: widget.runtime.learner,
+          event: ProductAnalyticsEvent(
+            name: ProductAnalyticsEventName.flashcardResponseRecorded,
+            phase: ProductAnalyticsPhase.completed,
+            createdAt: DateTime.now().toUtc(),
+            materialId: widget.materialId,
+            sourceVersionId: data.source.identity.sourceVersionId,
+            surface: ProductAnalyticsSurface.flashcards,
+            capability: ProductAnalyticsCapability.flashcards,
+            outcomeClass: response.name,
+            reasonCode: widget.isScheduledReview ? 'scheduled_review' : 'study_session',
+            quantity: 1,
+          ),
+        ),
       );
       if (!mounted) return;
       _feedback(strong: response == FlashcardResponse.remembered);

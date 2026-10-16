@@ -4,6 +4,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../analytics/product_analytics.dart';
 import '../domain/learning_contracts.dart';
 import '../domain/learning_truth.dart';
 import '../data/source_ingest_service.dart';
@@ -105,6 +106,27 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
     super.dispose();
   }
 
+  ProductAnalyticsEventName _analyticsEventName(OperationalEvent event) {
+    return switch (event.type) {
+      OperationalEventType.runtimeRestore => ProductAnalyticsEventName.appOpened,
+      OperationalEventType.sourceIngest => switch (event.phase) {
+        OperationalEventPhase.started => ProductAnalyticsEventName.materialProcessingStarted,
+        OperationalEventPhase.completed => ProductAnalyticsEventName.materialProcessingCompleted,
+        OperationalEventPhase.failed => ProductAnalyticsEventName.materialProcessingFailed,
+      },
+      OperationalEventType.recallPrompt => ProductAnalyticsEventName.learningActionStarted,
+      OperationalEventType.recallAttempt => switch (event.phase) {
+        OperationalEventPhase.started => ProductAnalyticsEventName.retrievalAttempted,
+        OperationalEventPhase.completed =>
+          event.outcome?.name == 'correct'
+              ? ProductAnalyticsEventName.retrievalSucceeded
+              : ProductAnalyticsEventName.retrievalFailed,
+        OperationalEventPhase.failed => ProductAnalyticsEventName.retrievalFailed,
+      },
+      OperationalEventType.continuationRepair => ProductAnalyticsEventName.nextBestActionSelected,
+    };
+  }
+
   Future<void> _recordEvent(OperationalEvent event) async {
     try {
       await widget.runtime.telemetry.record(learner: widget.runtime.learner, event: event);
@@ -112,6 +134,40 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
       // Operational telemetry must never become learning-state authority
       // or block the learner's flow.
     }
+
+    unawaited(
+      widget.runtime.analytics.record(
+        learner: widget.runtime.learner,
+        event: ProductAnalyticsEvent(
+          name: _analyticsEventName(event),
+          phase: ProductAnalyticsPhase.values.byName(event.phase.name),
+          createdAt: event.createdAt,
+          materialId: event.materialId,
+          sourceVersionId: event.sourceVersionId,
+          surface: switch (event.type) {
+            OperationalEventType.sourceIngest => ProductAnalyticsSurface.sourceEditor,
+            OperationalEventType.recallPrompt ||
+            OperationalEventType.recallAttempt ||
+            OperationalEventType.continuationRepair => ProductAnalyticsSurface.recall,
+            OperationalEventType.runtimeRestore => null,
+          },
+          capability: switch (event.type) {
+            OperationalEventType.sourceIngest => ProductAnalyticsCapability.sourceProcessing,
+            OperationalEventType.recallPrompt ||
+            OperationalEventType.recallAttempt => ProductAnalyticsCapability.recall,
+            OperationalEventType.continuationRepair => ProductAnalyticsCapability.continuity,
+            OperationalEventType.runtimeRestore => null,
+          },
+          outcomeClass: event.outcome?.name ?? (event.phase == OperationalEventPhase.failed ? 'failed' : null),
+          reasonCode: event.reasonCode,
+          failureClass: event.errorClass,
+          ruleVersion: event.ruleVersion,
+          policyVersion: event.policyVersion,
+          durationMs: event.durationMs,
+          quantity: event.phase == OperationalEventPhase.completed ? 1 : null,
+        ),
+      ),
+    );
   }
 
   Future<void> _restore() async {
