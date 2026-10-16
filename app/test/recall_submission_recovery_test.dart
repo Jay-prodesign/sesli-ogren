@@ -54,6 +54,14 @@ Future<void> _pumpUntil(WidgetTester tester, Finder finder) async {
   fail('Expected recovery state was not reached.');
 }
 
+Future<void> _tapVisible(WidgetTester tester, Finder finder) async {
+  await tester.scrollUntilVisible(finder, 180, scrollable: find.byType(Scrollable).last);
+  await tester.pump();
+  expect(finder.hitTestable(), findsOneWidget);
+  await tester.tap(finder);
+  await tester.pump();
+}
+
 void main() {
   sqfliteFfiInit();
 
@@ -98,8 +106,7 @@ void main() {
     final submit = find.byKey(const ValueKey('la0040-atelier-submit'));
     await _pumpUntil(tester, answer);
     await tester.enterText(answer, 'Fotosentez');
-    await tester.ensureVisible(submit);
-    await tester.tap(submit);
+    await _tapVisible(tester, submit);
     await _pumpUntil(tester, find.textContaining('Ekrandaki yanıtın korunuyor'));
 
     final editable = tester.widget<EditableText>(find.descendant(of: answer, matching: find.byType(EditableText)));
@@ -112,8 +119,7 @@ void main() {
     );
     expect(evidence, isEmpty);
 
-    await tester.ensureVisible(submit);
-    await tester.tap(submit);
+    await _tapVisible(tester, submit);
     await _pumpUntil(tester, find.byKey(const ValueKey('la0040-atelier-result')));
     evidence = await store.learningTruthStore().evidenceForMaterial(
       learner: learner,
