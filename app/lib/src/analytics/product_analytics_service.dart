@@ -123,7 +123,7 @@ class ProductAnalyticsService implements ProductAnalytics {
     return 'evt_${digest.substring(0, 40)}';
   }
 
-  static bool _privacySafe(ProductAnalyticsEvent event) {
+  bool _privacySafe(ProductAnalyticsEvent event) {
     if (event.eventVersion != 1) return false;
     if (!const {'development', 'test', 'staging', 'production'}.contains(environment)) {
       return false;
