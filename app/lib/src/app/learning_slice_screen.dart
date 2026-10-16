@@ -1022,10 +1022,42 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
           createdAt: DateTime.now().toUtc(),
         ),
       );
-      _showRecoverableError();
+      await _showRecallSubmissionRecovery(prompt: prompt, submittedUnknown: unknown);
     } finally {
       _setBusy(false);
     }
+  }
+
+  Future<void> _showRecallSubmissionRecovery({
+    required RecallPrompt prompt,
+    required bool submittedUnknown,
+  }) async {
+    SourceVersionRecord? currentSource;
+    try {
+      currentSource = await widget.runtime.store.currentSourceVersion(
+        learner: widget.runtime.learner,
+        materialId: prompt.materialId,
+      );
+    } catch (_) {
+      // Submission remains non-evidence; keep the visible learner draft.
+    }
+    if (!mounted) return;
+
+    if (currentSource != null && currentSource.identity.sourceVersionId != prompt.sourceVersionId) {
+      setState(() {
+        _phase = _SlicePhase.error;
+        _inlineError =
+            'Kaynak bu deneme sırasında değişti. Eski yanıt öğrenme kanıtı sayılmadı; güncel kaynaktan yeni bir Hatırla başlat.';
+      });
+      return;
+    }
+
+    setState(() {
+      _phase = _SlicePhase.recall;
+      _inlineError = submittedUnknown
+          ? '“Bilmiyorum” yanıtı doğrulanamadı ve öğrenme kanıtı oluşmadı. Bağlantı geri geldiğinde tekrar deneyebilirsin.'
+          : 'Yanıt doğrulanamadı ve öğrenme kanıtı oluşmadı. Ekrandaki yanıtın korunuyor; bağlantı geri geldiğinde aynı yanıtı tekrar gönderebilirsin.';
+    });
   }
 
   Future<void> _repairContinuation() async {
