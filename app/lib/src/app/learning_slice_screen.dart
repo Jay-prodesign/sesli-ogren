@@ -908,7 +908,13 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
         _inlineError = null;
       });
     } catch (_) {
-      _showRecoverableError();
+      if (mounted) {
+        setState(() {
+          _phase = _SlicePhase.recall;
+          _inlineError =
+              'İpucu şu anda doğrulanamadı. Yazdığın yanıt ve bu Hatırla denemesi korunuyor; bağlantı geri geldiğinde tekrar deneyebilirsin.';
+        });
+      }
     } finally {
       _setBusy(false);
     }
@@ -933,7 +939,13 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
         _inlineError = null;
       });
     } catch (_) {
-      _showRecoverableError();
+      if (mounted) {
+        setState(() {
+          _phase = _SlicePhase.recall;
+          _inlineError =
+              'Yanıt gösterme şu anda doğrulanamadı. Yazdığın yanıt ve bu Hatırla denemesi korunuyor; bağlantı geri geldiğinde tekrar deneyebilirsin.';
+        });
+      }
     } finally {
       _setBusy(false);
     }
