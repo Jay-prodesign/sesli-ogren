@@ -1363,7 +1363,11 @@ void main() {
     await tester.pump();
     await pumpUntilFound(tester, find.byKey(const ValueKey('library-header-stacked')));
     final addMaterial = find.byKey(const ValueKey('library-add-material'));
-    await pumpUntilFound(tester, addMaterial);
+    final libraryScroll = find.descendant(
+      of: find.byKey(const ValueKey('library-material-list')),
+      matching: find.byType(Scrollable),
+    );
+    await scrollUntilFound(tester, addMaterial, scrollable: libraryScroll);
     await tester.ensureVisible(addMaterial);
     await tester.pump();
     expect(addMaterial.hitTestable(), findsOneWidget);
