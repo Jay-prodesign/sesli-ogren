@@ -89,6 +89,7 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
   bool _editingExistingSource = false;
   bool _answerWasRevealed = false;
   bool _submittedUnknown = false;
+  bool _retryRecallFromError = false;
   _SourceEntryMode _sourceEntryMode = _SourceEntryMode.chooser;
   bool _showOptionalSourceTitle = false;
 
@@ -792,7 +793,12 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
     try {
       await _openRecall();
     } catch (_) {
-      _showRecoverableError();
+      if (!mounted) return;
+      setState(() {
+        _retryRecallFromError = true;
+        _phase = _SlicePhase.error;
+        _inlineError = 'Hatırla şu anda doğrulanamadı. Kaynağın ve önceki öğrenme kayıtların korunuyor; bağlantı geri geldiğinde tekrar deneyebilirsin.';
+      });
     } finally {
       _setBusy(false);
     }
@@ -865,6 +871,7 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
         _activeAttemptId = session.attempt.attemptId;
         _supportText = _restoredSupportNotice(session.assistance);
         _inlineError = null;
+        _retryRecallFromError = false;
         _phase = _SlicePhase.recall;
       });
     } catch (error) {
@@ -900,7 +907,12 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
         _inlineError = null;
       });
     } catch (_) {
-      _showRecoverableError();
+      if (mounted) {
+        setState(() {
+          _phase = _SlicePhase.recall;
+          _inlineError = 'İpucu şu anda doğrulanamadı. Yazdığın yanıt ve bu Hatırla denemesi korunuyor; bağlantı geri geldiğinde tekrar deneyebilirsin.';
+        });
+      }
     } finally {
       _setBusy(false);
     }
@@ -925,7 +937,12 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
         _inlineError = null;
       });
     } catch (_) {
-      _showRecoverableError();
+      if (mounted) {
+        setState(() {
+          _phase = _SlicePhase.recall;
+          _inlineError = 'Yanıt gösterme şu anda doğrulanamadı. Yazdığın yanıt ve bu Hatırla denemesi korunuyor; bağlantı geri geldiğinde tekrar deneyebilirsin.';
+        });
+      }
     } finally {
       _setBusy(false);
     }
@@ -1022,10 +1039,38 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
           createdAt: DateTime.now().toUtc(),
         ),
       );
-      _showRecoverableError();
+      await _showRecallSubmissionRecovery(prompt: prompt, submittedUnknown: unknown);
     } finally {
       _setBusy(false);
     }
+  }
+
+  Future<void> _showRecallSubmissionRecovery({required RecallPrompt prompt, required bool submittedUnknown}) async {
+    SourceVersionRecord? currentSource;
+    try {
+      currentSource = await widget.runtime.store.currentSourceVersion(
+        learner: widget.runtime.learner,
+        materialId: prompt.materialId,
+      );
+    } catch (_) {
+      // Submission remains non-evidence; keep the visible learner draft.
+    }
+    if (!mounted) return;
+
+    if (currentSource != null && currentSource.identity.sourceVersionId != prompt.sourceVersionId) {
+      setState(() {
+        _phase = _SlicePhase.error;
+        _inlineError = 'Kaynak bu deneme sırasında değişti. Eski yanıt öğrenme kanıtı sayılmadı; güncel kaynaktan yeni bir Hatırla başlat.';
+      });
+      return;
+    }
+
+    setState(() {
+      _phase = _SlicePhase.recall;
+      _inlineError = submittedUnknown
+          ? '“Bilmiyorum” yanıtı doğrulanamadı ve öğrenme kanıtı oluşmadı. Bağlantı geri geldiğinde tekrar deneyebilirsin.'
+          : 'Yanıt doğrulanamadı ve öğrenme kanıtı oluşmadı. Ekrandaki yanıtın korunuyor; bağlantı geri geldiğinde aynı yanıtı tekrar gönderebilirsin.';
+    });
   }
 
   Future<void> _repairContinuation() async {
@@ -1085,8 +1130,9 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
       );
       if (!mounted) return;
       setState(() {
-        _phase = _SlicePhase.source;
-        _inlineError = 'Güvenli devam oluşturulamadı. Kaynağı yeniden ekleyerek başlayabilirsin.';
+        _retryRecallFromError = false;
+        _phase = _SlicePhase.error;
+        _inlineError = 'Devam şu anda doğrulanamadı. Mevcut kaynağın ve öğrenme kayıtların korunuyor; bağlantı geri geldiğinde devamı tekrar onarabilirsin.';
       });
     } finally {
       _setBusy(false);
@@ -1096,9 +1142,9 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
   void _showRecoverableError() {
     if (!mounted) return;
     setState(() {
+      _retryRecallFromError = false;
       _phase = _SlicePhase.error;
-      _inlineError =
-          'Bu öğrenme adımı artık güncel kaynakla eşleşmiyor. Kaynaktan güvenli biçimde yeniden başlayabiliriz.';
+      _inlineError = 'Bu öğrenme adımı artık güncel kaynakla eşleşmiyor. Eski denemeyi kanıt saymadan güncel kaynaktan güvenli biçimde yeniden başlayabiliriz.';
     });
   }
 
@@ -2230,11 +2276,16 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
           const SizedBox(height: 10),
           Text(_inlineError ?? 'Devam bilgisi eksik. Kaynaktan yeni bir Recall başlatabiliriz.'),
           const SizedBox(height: 18),
-          FilledButton(onPressed: _busy ? null : _repairContinuation, child: const Text('Devamı onar')),
+          FilledButton(
+            onPressed: _busy ? null : (_retryRecallFromError ? _openRecallSafely : _repairContinuation),
+            child: Text(_retryRecallFromError ? 'Hatırla’yı tekrar dene' : 'Devamı onar'),
+          ),
           const SizedBox(height: 8),
           TextButton(
             onPressed: _busy
                 ? null
+                : _retryRecallFromError && Navigator.of(context).canPop()
+                ? () => Navigator.of(context).maybePop()
                 : () {
                     setState(() {
                       _sourceEntryMode = _SourceEntryMode.text;
@@ -2243,7 +2294,7 @@ class _LearningSliceScreenState extends State<LearningSliceScreen> {
                       _inlineError = null;
                     });
                   },
-            child: const Text('Metin ekle'),
+            child: Text(_retryRecallFromError && Navigator.of(context).canPop() ? 'Materyale dön' : 'Metin ekle'),
           ),
         ],
       ),
