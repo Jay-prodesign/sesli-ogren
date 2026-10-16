@@ -14,7 +14,14 @@ import 'product_shell_screen.dart';
 import 'living_study_desk_home.dart';
 
 class SesliOgrenApp extends StatefulWidget {
-  const SesliOgrenApp({this.restoreSession, this.openRuntime, this.openLocalRuntime, this.signOutSession, super.key});
+  const SesliOgrenApp({
+    this.restoreSession,
+    this.openRuntime,
+    this.openLocalRuntime,
+    this.signOutSession,
+    this.sessionRestoreTimeout = const Duration(seconds: 2),
+    super.key,
+  });
 
   /// Test/review seams only. Production restores Supabase when available and
   /// otherwise opens the truthful device-local learning runtime.
@@ -22,6 +29,10 @@ class SesliOgrenApp extends StatefulWidget {
   final Future<AppRuntime> Function(AuthenticatedLearner learner)? openRuntime;
   final Future<AppRuntime> Function()? openLocalRuntime;
   final Future<void> Function()? signOutSession;
+
+  /// Optional account restoration must not hold the local-first learning
+  /// surface indefinitely during a slow or unavailable native/network path.
+  final Duration sessionRestoreTimeout;
 
   @override
   State<SesliOgrenApp> createState() => _SesliOgrenAppState();
@@ -50,7 +61,7 @@ class _SesliOgrenAppState extends State<SesliOgrenApp> {
     final restoreSession = widget.restoreSession ?? SupabaseLearnerAuth.restoreSession;
     AuthenticatedLearner? learner;
     try {
-      learner = await restoreSession();
+      learner = await restoreSession().timeout(widget.sessionRestoreTimeout);
     } catch (_) {
       // Optional account restore must never gate device-local learning.
       return _openLocalRuntime();

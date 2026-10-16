@@ -139,6 +139,10 @@ class _ProfileSurfaceState extends State<ProfileSurface> {
     final firstConfirmed = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
+        scrollable: true,
+        insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+        actionsOverflowDirection: VerticalDirection.down,
+        actionsOverflowButtonSpacing: 4,
         title: const Text('Hesabı ve verileri sil?'),
         content: const Text(
           'Sunucudaki hesabın ve hesaba bağlı öğrenme verilerin kalıcı olarak silinecek. '
@@ -155,6 +159,10 @@ class _ProfileSurfaceState extends State<ProfileSurface> {
     final finalConfirmed = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
+        scrollable: true,
+        insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+        actionsOverflowDirection: VerticalDirection.down,
+        actionsOverflowButtonSpacing: 4,
         title: const Text('Son onay'),
         content: const Text(
           'Bu işlem hesap alanı için geri alınamaz. Hesabını ve hesaba bağlı verilerini kalıcı olarak silmek istiyor musun?',

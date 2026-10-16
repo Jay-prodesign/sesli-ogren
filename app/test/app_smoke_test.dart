@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:file_picker/file_picker.dart';
@@ -390,6 +391,49 @@ void main() {
     expect(find.byType(AccountEntryScreen), findsNothing);
   });
 
+  testWidgets('slow optional account restore falls back to local learning within the startup budget', (tester) async {
+    final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
+    addTearDown(() async {
+      try {
+        await store.close();
+      } catch (_) {}
+    });
+    final localRuntime = AppRuntime(
+      learner: AppRuntime.localLearner,
+      store: store,
+      ingest: SourceIngestService(store: store, pdfTextExtractor: const _UnusedPdfExtractor()),
+      recall: RecallLearningService(sourceStore: store, learningStore: store.learningTruthStore()),
+      telemetry: store.operationalTelemetry(),
+    );
+    final stalledRestore = Completer<AuthenticatedLearner?>();
+    var localOpenCalls = 0;
+
+    await tester.pumpWidget(
+      SesliOgrenApp(
+        restoreSession: () => stalledRestore.future,
+        sessionRestoreTimeout: const Duration(milliseconds: 40),
+        openLocalRuntime: () async {
+          localOpenCalls += 1;
+          return localRuntime;
+        },
+      ),
+    );
+    expect(find.byType(NavigationBar), findsNothing);
+
+    await tester.pump(const Duration(milliseconds: 60));
+    await pumpUntilFound(tester, find.byType(NavigationBar));
+
+    expect(localOpenCalls, 1);
+    expect(localRuntime.learner.isLocal, isTrue);
+    expect(find.byType(AccountEntryScreen), findsNothing);
+
+    stalledRestore.complete(const AuthenticatedLearner(id: LearnerId('late-session-user')));
+    await tester.pump(const Duration(milliseconds: 20));
+    expect(localRuntime.learner.isLocal, isTrue);
+    expect(find.byType(NavigationBar), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('runtime opening failure is not mislabeled as an OTP failure', (tester) async {
     await tester.pumpWidget(
       SesliOgrenApp(
@@ -453,7 +497,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: MediaQuery(
-          data: const MediaQueryData(textScaler: TextScaler.linear(1.6)),
+          data: const MediaQueryData(textScaler: TextScaler.linear(2)),
           child: ProductShellScreen(runtime: runtime),
         ),
       ),
@@ -478,7 +522,7 @@ void main() {
     await tester.pumpWidget(
       const MaterialApp(
         home: MediaQuery(
-          data: MediaQueryData(textScaler: TextScaler.linear(1.6)),
+          data: MediaQueryData(textScaler: TextScaler.linear(2)),
           child: Scaffold(
             body: ProgressSurface(items: [], onOpenMaterial: _noopMaterialOpen),
           ),
@@ -506,7 +550,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: MediaQuery(
-          data: const MediaQueryData(textScaler: TextScaler.linear(1.6)),
+          data: const MediaQueryData(textScaler: TextScaler.linear(2)),
           child: Scaffold(body: ProfileSurface(runtime: runtime)),
         ),
       ),
@@ -521,7 +565,7 @@ void main() {
   testWidgets('runtime failure recovery remains reachable on a short large-text screen', (tester) async {
     tester.view.physicalSize = const Size(320, 460);
     tester.view.devicePixelRatio = 1;
-    tester.platformDispatcher.textScaleFactorTestValue = 1.6;
+    tester.platformDispatcher.textScaleFactorTestValue = 2;
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
     addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
@@ -555,7 +599,7 @@ void main() {
   ) async {
     tester.view.physicalSize = const Size(320, 460);
     tester.view.devicePixelRatio = 1;
-    tester.platformDispatcher.textScaleFactorTestValue = 1.6;
+    tester.platformDispatcher.textScaleFactorTestValue = 2;
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
     addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
@@ -835,7 +879,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         builder: (context, child) => MediaQuery(
-          data: MediaQuery.of(context).copyWith(disableAnimations: true, textScaler: const TextScaler.linear(1.6)),
+          data: MediaQuery.of(context).copyWith(disableAnimations: true, textScaler: const TextScaler.linear(2)),
           child: child!,
         ),
         home: LivingDeskReviewScope(child: LearningSliceScreen(runtime: runtime)),
@@ -1309,7 +1353,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: MediaQuery(
-          data: const MediaQueryData(textScaler: TextScaler.linear(1.6)),
+          data: const MediaQueryData(textScaler: TextScaler.linear(2)),
           child: ProductShellScreen(runtime: runtime),
         ),
       ),
@@ -1318,7 +1362,15 @@ void main() {
     await tester.tap(find.byIcon(Icons.library_books_outlined));
     await tester.pump();
     await pumpUntilFound(tester, find.byKey(const ValueKey('library-header-stacked')));
-    expect(find.byKey(const ValueKey('library-add-material')), findsOneWidget);
+    final addMaterial = find.byKey(const ValueKey('library-add-material'));
+    final libraryScroll = find.descendant(
+      of: find.byKey(const ValueKey('library-material-list')),
+      matching: find.byType(Scrollable),
+    );
+    await scrollUntilFound(tester, addMaterial, scrollable: libraryScroll);
+    await tester.ensureVisible(addMaterial);
+    await tester.pump();
+    expect(addMaterial.hitTestable(), findsOneWidget);
     expect(find.text('Yeni kaynak ekle'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
