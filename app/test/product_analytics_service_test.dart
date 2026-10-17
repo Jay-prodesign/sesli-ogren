@@ -27,6 +27,36 @@ class _FakeAnalyticsGateway implements ProductAnalyticsGateway {
 void main() {
   sqfliteFfiInit();
 
+  test('runtime analytics attaches build, platform and locale dimensions', () async {
+    final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
+    addTearDown(store.close);
+    final analytics = ProductAnalyticsService.forRuntime(
+      store: store,
+      gateway: _FakeAnalyticsGateway(),
+      appVersion: '0.1.0+1-dogfood.test',
+      now: () => DateTime.utc(2026, 10, 17, 12),
+    );
+
+    await analytics.record(
+      learner: const AuthenticatedLearner.local(),
+      event: ProductAnalyticsEvent(
+        name: ProductAnalyticsEventName.appOpened,
+        phase: ProductAnalyticsPhase.completed,
+        createdAt: DateTime.utc(2026, 10, 17, 12),
+      ),
+    );
+
+    final stored = await store.productAnalyticsEvents(learner: const AuthenticatedLearner.local());
+    expect(stored, hasLength(1));
+    expect(stored.single.appVersion, '0.1.0+1-dogfood.test');
+    expect(
+      stored.single.platform,
+      isIn(const ['android', 'ios', 'macos', 'windows', 'linux', 'web']),
+    );
+    expect(stored.single.locale, isNotNull);
+    expect(stored.single.locale, isNotEmpty);
+  });
+
   test('guest analytics stays durable and never calls the remote gateway', () async {
     final store = await SqliteSourceStore.open(factory: databaseFactoryFfiNoIsolate, path: inMemoryDatabasePath);
     addTearDown(store.close);
