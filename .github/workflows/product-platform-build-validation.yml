@@ -71,6 +71,28 @@ jobs:
           flutter build apk --release --no-pub
           test -s build/app/outputs/flutter-apk/app-release.apk
 
+      - name: Build installable internal dogfood APK
+        run: |
+          set -euo pipefail
+          flutter build apk --debug --no-pub
+          test -s build/app/outputs/flutter-apk/app-debug.apk
+          printf '%s\\n' \\
+            "Sesli Öğren INTERNAL DOGFOOD — NOT A RELEASE BUILD" \\
+            "Git SHA: ${{ github.event.pull_request.head.sha || github.sha }}" \\
+            "Backend: https://detldfcvoxjuqstkaayd.supabase.co" \\
+            "Build mode: Flutter debug (debug-signed for internal installation)" \\
+            > build/app/outputs/flutter-apk/INTERNAL_DOGFOOD_PROVENANCE.txt
+
+      - name: Upload internal dogfood APK
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: sesli-ogren-internal-dogfood-android
+          path: |
+            app/build/app/outputs/flutter-apk/app-debug.apk
+            app/build/app/outputs/flutter-apk/INTERNAL_DOGFOOD_PROVENANCE.txt
+          if-no-files-found: error
+          retention-days: 3
+
   ios-release-compile:
     needs: milestone-gate
     if: needs.milestone-gate.outputs.run_full == 'true'
