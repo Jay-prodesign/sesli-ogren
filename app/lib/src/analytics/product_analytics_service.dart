@@ -1,7 +1,9 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:ui';
 
 import 'package:crypto/crypto.dart';
+import 'package:flutter/foundation.dart';
 
 import '../data/sqlite_source_store.dart';
 import '../domain/authenticated_learner.dart';
@@ -31,14 +33,17 @@ class ProductAnalyticsService implements ProductAnalytics {
     final clock = now ?? DateTime.now;
     final seed = '${clock().toUtc().microsecondsSinceEpoch}:${identityHashCode(store)}';
     final digest = sha256.convert(utf8.encode(seed)).toString();
+    const buildVersion = String.fromEnvironment('APP_VERSION');
+    final runtimePlatform = defaultTargetPlatform.name;
+    final runtimeLocale = PlatformDispatcher.instance.locale.toLanguageTag();
     return ProductAnalyticsService(
       store: store,
       gateway: gateway,
       sessionId: 'session_${digest.substring(0, 32)}',
       environment: environment,
-      appVersion: appVersion,
-      platform: platform,
-      locale: locale,
+      appVersion: appVersion ?? (buildVersion.isEmpty ? null : buildVersion),
+      platform: platform ?? runtimePlatform,
+      locale: locale ?? runtimeLocale,
     );
   }
 
