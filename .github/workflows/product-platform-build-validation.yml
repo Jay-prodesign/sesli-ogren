@@ -71,6 +71,23 @@ jobs:
           flutter build apk --release --no-pub
           test -s build/app/outputs/flutter-apk/app-release.apk
 
+      - name: Verify APK is install-signed
+        shell: bash
+        run: |
+          set -euo pipefail
+          APK="build/app/outputs/flutter-apk/app-release.apk"
+          APKSIGNER="$(find "$ANDROID_HOME/build-tools" -type f -name apksigner | sort -V | tail -n 1)"
+          test -n "$APKSIGNER"
+          "$APKSIGNER" verify --verbose --print-certs "$APK"
+
+      - name: Upload internal dogfood APK
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: sesli-ogren-internal-dogfood-${{ github.event.pull_request.head.sha || github.sha }}
+          path: app/build/app/outputs/flutter-apk/app-release.apk
+          if-no-files-found: error
+          retention-days: 7
+
   ios-release-compile:
     needs: milestone-gate
     if: needs.milestone-gate.outputs.run_full == 'true'
