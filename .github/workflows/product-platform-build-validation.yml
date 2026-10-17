@@ -90,6 +90,103 @@ jobs:
           if-no-files-found: error
           retention-days: 7
 
+
+  android-emulator-smoke:
+    needs: [milestone-gate, android-release-compile]
+    if: needs.milestone-gate.outputs.run_full == 'true' && needs.android-release-compile.result == 'success'
+    name: Android emulator install + launch smoke
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - name: Download signed dogfood APK
+        uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0
+        with:
+          name: sesli-ogren-internal-dogfood-${{ github.event.pull_request.head.sha || github.sha }}
+          path: dogfood-apk
+
+      - name: Provision headless Android emulator
+        shell: bash
+        run: |
+          set -euo pipefail
+          SDK_ROOT="${ANDROID_SDK_ROOT:-$ANDROID_HOME}"
+          SDKMANAGER="$SDK_ROOT/cmdline-tools/latest/bin/sdkmanager"
+          AVDMANAGER="$SDK_ROOT/cmdline-tools/latest/bin/avdmanager"
+          test -x "$SDKMANAGER"
+          test -x "$AVDMANAGER"
+          yes | "$SDKMANAGER" --licenses >/dev/null || true
+          "$SDKMANAGER" "platform-tools" "emulator" "system-images;android-35;google_apis;x86_64"
+          echo no | "$AVDMANAGER" create avd --force --name sesli-dogfood --package "system-images;android-35;google_apis;x86_64"
+          if [ -e /dev/kvm ]; then
+            sudo chmod 666 /dev/kvm
+          fi
+
+      - name: Boot emulator and launch APK
+        shell: bash
+        run: |
+          set -euo pipefail
+          SDK_ROOT="${ANDROID_SDK_ROOT:-$ANDROID_HOME}"
+          ADB="$SDK_ROOT/platform-tools/adb"
+          EMULATOR="$SDK_ROOT/emulator/emulator"
+          mkdir -p runtime-evidence
+          ACCEL="-accel off"
+          if [ -r /dev/kvm ] && [ -w /dev/kvm ]; then
+            ACCEL="-accel on"
+          fi
+          nohup "$EMULATOR"             -avd sesli-dogfood             -no-window             -no-audio             -no-boot-anim             -no-snapshot             -gpu swiftshader_indirect             $ACCEL             > runtime-evidence/emulator.log 2>&1 &
+          "$ADB" wait-for-device
+          booted=""
+          for _ in $(seq 1 120); do
+            booted="$("$ADB" shell getprop sys.boot_completed 2>/dev/null | tr -d '\r' || true)"
+            if [ "$booted" = "1" ]; then
+              break
+            fi
+            sleep 2
+          done
+          test "$booted" = "1"
+          "$ADB" shell input keyevent 82 || true
+
+          APK="dogfood-apk/app-release.apk"
+          test -s "$APK"
+          "$ADB" install -r "$APK" | tee runtime-evidence/install.txt
+
+          COMPONENT="$("$ADB" shell cmd package resolve-activity --brief com.sesliogren.app | tr -d '\r' | tail -n 1)"
+          test -n "$COMPONENT"
+          echo "$COMPONENT" > runtime-evidence/component.txt
+          "$ADB" shell am start -W -n "$COMPONENT" | tee runtime-evidence/launch.txt
+          sleep 5
+
+          PID="$("$ADB" shell pidof com.sesliogren.app | tr -d '\r')"
+          test -n "$PID"
+          echo "$PID" > runtime-evidence/pid.txt
+
+          FOCUS="$("$ADB" shell dumpsys window | tr -d '\r' | grep -m1 'mCurrentFocus' || true)"
+          echo "$FOCUS" | tee runtime-evidence/focus.txt
+          printf '%s' "$FOCUS" | grep -Fq "com.sesliogren.app"
+
+          "$ADB" exec-out screencap -p > runtime-evidence/launch.png
+          test -s runtime-evidence/launch.png
+
+      - name: Capture emulator diagnostics
+        if: always()
+        shell: bash
+        run: |
+          set +e
+          SDK_ROOT="${ANDROID_SDK_ROOT:-$ANDROID_HOME}"
+          ADB="$SDK_ROOT/platform-tools/adb"
+          mkdir -p runtime-evidence
+          "$ADB" logcat -d -t 800 > runtime-evidence/logcat.txt 2>&1
+          "$ADB" shell dumpsys activity activities > runtime-evidence/activities.txt 2>&1
+          "$ADB" shell dumpsys package com.sesliogren.app > runtime-evidence/package.txt 2>&1
+
+      - name: Upload Android runtime evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: sesli-ogren-android-runtime-evidence-${{ github.event.pull_request.head.sha || github.sha }}
+          path: runtime-evidence
+          if-no-files-found: error
+          retention-days: 7
+
   ios-release-compile:
     needs: milestone-gate
     if: needs.milestone-gate.outputs.run_full == 'true'
