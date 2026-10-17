@@ -49,10 +49,7 @@ void main() {
     final stored = await store.productAnalyticsEvents(learner: const AuthenticatedLearner.local());
     expect(stored, hasLength(1));
     expect(stored.single.appVersion, '0.1.0+1-dogfood.test');
-    expect(
-      stored.single.platform,
-      isIn(const ['android', 'ios', 'macos', 'windows', 'linux', 'web']),
-    );
+    expect(stored.single.platform, isIn(const ['android', 'ios', 'macos', 'windows', 'linux', 'web']));
     expect(stored.single.locale, isNotNull);
     expect(stored.single.locale, isNotEmpty);
   });
