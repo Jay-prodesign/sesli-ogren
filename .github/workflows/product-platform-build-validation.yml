@@ -1,4 +1,5 @@
 name: product-platform-build-validation
+# Step 17 internal dogfood artifact: require an exact-head product + platform verification checkpoint.
 
 on:
   pull_request:
