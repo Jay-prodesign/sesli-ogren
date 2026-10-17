@@ -63,4 +63,29 @@ select pg_temp.ok(
   'AI latency v2 projection must expose measured terminal success rate'
 );
 
+
+select pg_temp.ok(
+  coalesce((
+    select 'security_invoker=true' = any(coalesce(c.reloptions, '{}'::text[]))
+    from pg_class c
+    where c.oid='public.analytics_processing_reliability_daily_v1'::regclass
+  ), false)
+  and coalesce((
+    select 'security_invoker=true' = any(coalesce(c.reloptions, '{}'::text[]))
+    from pg_class c
+    where c.oid='public.analytics_ai_cost_latency_daily_v2'::regclass
+  ), false),
+  'T2 runtime evidence views must use invoker security'
+);
+
+select pg_temp.ok(
+  not has_table_privilege('anon', 'public.analytics_processing_reliability_daily_v1', 'select')
+  and not has_table_privilege('authenticated', 'public.analytics_processing_reliability_daily_v1', 'select')
+  and has_table_privilege('service_role', 'public.analytics_processing_reliability_daily_v1', 'select')
+  and not has_table_privilege('anon', 'public.analytics_ai_cost_latency_daily_v2', 'select')
+  and not has_table_privilege('authenticated', 'public.analytics_ai_cost_latency_daily_v2', 'select')
+  and has_table_privilege('service_role', 'public.analytics_ai_cost_latency_daily_v2', 'select'),
+  'T2 runtime evidence views must remain service-role only'
+);
+
 rollback;
