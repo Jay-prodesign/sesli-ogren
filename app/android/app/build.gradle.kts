@@ -4,6 +4,8 @@ plugins {
     id("dev.flutter.flutter-gradle-plugin")
 }
 
+val internalDogfoodSigning = providers.environmentVariable("INTERNAL_DOGFOOD_SIGNING").orNull == "true"
+
 android {
     namespace = "com.sesliogren.app"
     compileSdk = flutter.compileSdkVersion
@@ -29,6 +31,14 @@ android {
     }
     buildTypes {
         release {
+            // Internal dogfood CI may explicitly use the Android debug key so
+            // the release-mode APK is installable on an emulator/device.
+            // Normal release builds remain unsigned until real release signing
+            // is configured; this flag must never become a release default.
+            if (internalDogfoodSigning) {
+                signingConfig = signingConfigs.getByName("debug")
+            }
+
             // google_mlkit_text_recognition includes runtime branches for
             // optional CJK/Devanagari recognizers. Sesli Öğren intentionally
             // ships only the default Latin recognizer (covers Turkish/English);
