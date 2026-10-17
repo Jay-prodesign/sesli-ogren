@@ -1,4 +1,5 @@
 name: product-platform-build-validation
+# Step 17 internal dogfood artifact: require an exact-head product + platform verification checkpoint.
 
 on:
   pull_request:
@@ -70,6 +71,30 @@ jobs:
         run: |
           flutter build apk --release --no-pub
           test -s build/app/outputs/flutter-apk/app-release.apk
+
+      - name: Build installable internal dogfood APK
+        run: |
+          set -euo pipefail
+          APP_VERSION="0.1.0+1-dogfood.${GITHUB_SHA:0:12}"
+          flutter build apk --debug --no-pub --dart-define=APP_VERSION="$APP_VERSION"
+          test -s build/app/outputs/flutter-apk/app-debug.apk
+          cat > build/app/outputs/flutter-apk/INTERNAL_DOGFOOD_PROVENANCE.txt <<EOF
+          Sesli Öğren INTERNAL DOGFOOD — NOT A RELEASE BUILD
+          Git SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          Backend: https://detldfcvoxjuqstkaayd.supabase.co
+          App version: $APP_VERSION
+          Build mode: Flutter debug (debug-signed for internal installation)
+          EOF
+
+      - name: Upload internal dogfood APK
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: sesli-ogren-internal-dogfood-android
+          path: |
+            app/build/app/outputs/flutter-apk/app-debug.apk
+            app/build/app/outputs/flutter-apk/INTERNAL_DOGFOOD_PROVENANCE.txt
+          if-no-files-found: error
+          retention-days: 3
 
   ios-release-compile:
     needs: milestone-gate
