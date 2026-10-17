@@ -51,14 +51,17 @@ void main() {
 
     expect(
       gradle,
-      contains('val internalDogfoodSigning = providers.environmentVariable("INTERNAL_DOGFOOD_SIGNING").orNull == "true"'),
+      contains(
+        'val internalDogfoodSigning = providers.environmentVariable("INTERNAL_DOGFOOD_SIGNING").orNull == "true"',
+      ),
       reason: 'Internal dogfood signing must require an explicit CI environment flag.',
     );
     expect(
       gradle,
-      contains('if (internalDogfoodSigning) {\n                signingConfig = signingConfigs.getByName("debug")\n            }'),
+      contains(
+        'if (internalDogfoodSigning) {\n                signingConfig = signingConfigs.getByName("debug")\n            }',
+      ),
       reason: 'Only the explicit internal dogfood path may reuse the debug key for installability.',
     );
   });
-
 }
