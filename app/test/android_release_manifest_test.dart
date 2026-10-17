@@ -45,4 +45,20 @@ void main() {
       reason: 'Background Listen playback is an admitted V0 audio-player behavior and must not silently disappear.',
     );
   });
+
+  test('Android internal dogfood signing stays explicit and opt-in', () {
+    final gradle = File('android/app/build.gradle.kts').readAsStringSync();
+
+    expect(
+      gradle,
+      contains('val internalDogfoodSigning = providers.environmentVariable("INTERNAL_DOGFOOD_SIGNING").orNull == "true"'),
+      reason: 'Internal dogfood signing must require an explicit CI environment flag.',
+    );
+    expect(
+      gradle,
+      contains('if (internalDogfoodSigning) {\n                signingConfig = signingConfigs.getByName("debug")\n            }'),
+      reason: 'Only the explicit internal dogfood path may reuse the debug key for installability.',
+    );
+  });
+
 }
