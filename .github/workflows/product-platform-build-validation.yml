@@ -66,7 +66,9 @@ jobs:
           cache: true
           pub-cache: true
       - run: flutter pub get
-      - name: Compile Android release APK
+      - name: Compile Android internal dogfood APK
+        env:
+          INTERNAL_DOGFOOD_SIGNING: "true"
         run: |
           flutter build apk --release --no-pub
           test -s build/app/outputs/flutter-apk/app-release.apk
