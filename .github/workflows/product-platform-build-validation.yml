@@ -116,8 +116,14 @@ jobs:
           yes | "$SDKMANAGER" --licenses >/dev/null || true
           "$SDKMANAGER" "platform-tools" "emulator" "system-images;android-35;google_apis;x86_64"
           echo no | "$AVDMANAGER" create avd --force --name sesli-dogfood --package "system-images;android-35;google_apis;x86_64"
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm || true
           if [ -e /dev/kvm ]; then
             sudo chmod 666 /dev/kvm
+            ls -l /dev/kvm
+          else
+            echo "KVM device is unavailable; emulator will fall back to software acceleration." >&2
           fi
 
       - name: Boot emulator and launch APK
