@@ -135,7 +135,25 @@ jobs:
           nohup "$EMULATOR"             -avd sesli-dogfood             -no-window             -no-audio             -no-boot-anim             -no-snapshot             -no-snapshot-save             -no-metrics             -camera-back none             -camera-front none             -memory 2048             -gpu swiftshader_indirect             $ACCEL             > runtime-evidence/emulator.log 2>&1 &
           EMULATOR_PID=$!
           echo "$EMULATOR_PID" > runtime-evidence/emulator-pid.txt
-          timeout 240 "$ADB" wait-for-device
+          device_ready=""
+          for _ in $(seq 1 120); do
+            if ! kill -0 "$EMULATOR_PID" 2>/dev/null; then
+              echo "Android emulator exited before adb attached." >&2
+              tail -n 200 runtime-evidence/emulator.log >&2 || true
+              exit 1
+            fi
+            if "$ADB" devices | awk '$1 ~ /^emulator-/ && $2 == "device" { found=1 } END { exit(found ? 0 : 1) }'; then
+              device_ready="1"
+              break
+            fi
+            sleep 2
+          done
+          if [ "$device_ready" != "1" ]; then
+            echo "Android emulator never became an adb device." >&2
+            tail -n 200 runtime-evidence/emulator.log >&2 || true
+            exit 1
+          fi
+
           booted=""
           for _ in $(seq 1 180); do
             if ! kill -0 "$EMULATOR_PID" 2>/dev/null; then
@@ -185,9 +203,9 @@ jobs:
           SDK_ROOT="${ANDROID_SDK_ROOT:-$ANDROID_HOME}"
           ADB="$SDK_ROOT/platform-tools/adb"
           mkdir -p runtime-evidence
-          "$ADB" logcat -d -t 800 > runtime-evidence/logcat.txt 2>&1
-          "$ADB" shell dumpsys activity activities > runtime-evidence/activities.txt 2>&1
-          "$ADB" shell dumpsys package com.sesliogren.app > runtime-evidence/package.txt 2>&1
+          timeout 15 "$ADB" logcat -d -t 800 > runtime-evidence/logcat.txt 2>&1 || true
+          timeout 15 "$ADB" shell dumpsys activity activities > runtime-evidence/activities.txt 2>&1 || true
+          timeout 15 "$ADB" shell dumpsys package com.sesliogren.app > runtime-evidence/package.txt 2>&1 || true
 
       - name: Upload Android runtime evidence
         if: always()
