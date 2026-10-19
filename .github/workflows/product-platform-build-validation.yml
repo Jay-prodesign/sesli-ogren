@@ -280,7 +280,29 @@ jobs:
           capture_screen profile
           tap_text "Hesap bağla · isteğe bağlı" tap-account-entry
           capture_screen account-entry
-          tap_text "Hesapsız devam et" tap-continue-local
+
+          scroll_up() {
+            local size width height x from_y to_y
+            size="$("$ADB" shell wm size | tr -d '\r' | tail -n 1 | awk '{print $NF}')"
+            width="${size%x*}"
+            height="${size#*x}"
+            x=$((width / 2))
+            from_y=$((height * 4 / 5))
+            to_y=$((height * 2 / 5))
+            "$ADB" shell input swipe "$x" "$from_y" "$x" "$to_y" 350
+            sleep 1
+          }
+
+          scroll_up
+          scroll_up
+          capture_screen account-entry-form
+          if ! tap_text "Hesapsız devam et" tap-continue-local-1; then
+            scroll_up
+            if ! tap_text "Hesapsız devam et" tap-continue-local-2; then
+              scroll_up
+              tap_text "Hesapsız devam et" tap-continue-local-3
+            fi
+          fi
           capture_screen home-after-account-entry
           tap_text "İlk kaynağımı ekle" tap-add-source
           capture_screen add-source
