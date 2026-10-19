@@ -118,9 +118,9 @@ jobs:
           export ANDROID_AVD_HOME="$AVD_HOME"
           test -x "$SDKMANAGER"
           test -x "$AVDMANAGER"
-          test -x "$EMULATOR"
           yes | "$SDKMANAGER" --licenses >/dev/null || true
           "$SDKMANAGER" "platform-tools" "emulator" "system-images;android-35;google_apis;x86_64"
+          test -x "$EMULATOR"
           echo no | "$AVDMANAGER" create avd --force --name sesli-dogfood --package "system-images;android-35;google_apis;x86_64"
           test -f "$AVD_HOME/sesli-dogfood.ini"
           "$EMULATOR" -list-avds | tee "$RUNNER_TEMP/sesli-ogren-avds.txt"
