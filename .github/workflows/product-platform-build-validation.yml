@@ -107,24 +107,36 @@ jobs:
       - name: Provision headless Android emulator
         shell: bash
         run: |
-          set -euo pipefail
-          SDK_ROOT="${ANDROID_SDK_ROOT:-$ANDROID_HOME}"
-          SDKMANAGER="$SDK_ROOT/cmdline-tools/latest/bin/sdkmanager"
-          AVDMANAGER="$SDK_ROOT/cmdline-tools/latest/bin/avdmanager"
+          set -euxo pipefail
+          SDK_ROOT="${ANDROID_SDK_ROOT:-${ANDROID_HOME:-}}"
+          test -n "$SDK_ROOT"
+          SDKMANAGER="$(command -v sdkmanager || true)"
+          AVDMANAGER="$(command -v avdmanager || true)"
+          if [ -z "$SDKMANAGER" ]; then
+            SDKMANAGER="$SDK_ROOT/cmdline-tools/latest/bin/sdkmanager"
+          fi
+          if [ -z "$AVDMANAGER" ]; then
+            AVDMANAGER="$SDK_ROOT/cmdline-tools/latest/bin/avdmanager"
+          fi
+          test -x "$SDKMANAGER" || { echo "sdkmanager unavailable: $SDKMANAGER" >&2; exit 1; }
+          test -x "$AVDMANAGER" || { echo "avdmanager unavailable: $AVDMANAGER" >&2; exit 1; }
+
+          yes | "$SDKMANAGER" --licenses >/dev/null || true
+          "$SDKMANAGER" "platform-tools" "emulator" "system-images;android-35;google_apis;x86_64"
           EMULATOR="$SDK_ROOT/emulator/emulator"
+          test -x "$EMULATOR" || { echo "emulator unavailable after SDK install: $EMULATOR" >&2; exit 1; }
+
           AVD_HOME="$RUNNER_TEMP/sesli-ogren-avd"
           mkdir -p "$AVD_HOME"
           echo "ANDROID_AVD_HOME=$AVD_HOME" >> "$GITHUB_ENV"
           export ANDROID_AVD_HOME="$AVD_HOME"
-          test -x "$SDKMANAGER"
-          test -x "$AVDMANAGER"
-          yes | "$SDKMANAGER" --licenses >/dev/null || true
-          "$SDKMANAGER" "platform-tools" "emulator" "system-images;android-35;google_apis;x86_64"
-          test -x "$EMULATOR"
           echo no | "$AVDMANAGER" create avd --force --name sesli-dogfood --package "system-images;android-35;google_apis;x86_64"
-          test -f "$AVD_HOME/sesli-dogfood.ini"
           "$EMULATOR" -list-avds | tee "$RUNNER_TEMP/sesli-ogren-avds.txt"
-          grep -Fxq "sesli-dogfood" "$RUNNER_TEMP/sesli-ogren-avds.txt"
+          grep -Fxq "sesli-dogfood" "$RUNNER_TEMP/sesli-ogren-avds.txt" || {
+            echo "AVD creation completed but emulator cannot discover sesli-dogfood." >&2
+            find "$AVD_HOME" -maxdepth 2 -type f -print >&2 || true
+            exit 1
+          }
           echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
           sudo udevadm control --reload-rules
           sudo udevadm trigger --name-match=kvm || true
