@@ -96,7 +96,7 @@ jobs:
     if: needs.milestone-gate.outputs.run_full == 'true' && needs.android-release-compile.result == 'success'
     name: Android emulator install + launch smoke
     runs-on: ubuntu-24.04
-    timeout-minutes: 25
+    timeout-minutes: 45
     steps:
       - name: Download signed dogfood APK
         uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0
@@ -132,17 +132,28 @@ jobs:
           if [ -r /dev/kvm ] && [ -w /dev/kvm ]; then
             ACCEL="-accel on"
           fi
-          nohup "$EMULATOR"             -avd sesli-dogfood             -no-window             -no-audio             -no-boot-anim             -no-snapshot             -gpu swiftshader_indirect             $ACCEL             > runtime-evidence/emulator.log 2>&1 &
-          "$ADB" wait-for-device
+          nohup "$EMULATOR"             -avd sesli-dogfood             -no-window             -no-audio             -no-boot-anim             -no-snapshot             -no-snapshot-save             -no-metrics             -camera-back none             -camera-front none             -memory 2048             -gpu swiftshader_indirect             $ACCEL             > runtime-evidence/emulator.log 2>&1 &
+          EMULATOR_PID=$!
+          echo "$EMULATOR_PID" > runtime-evidence/emulator-pid.txt
+          timeout 240 "$ADB" wait-for-device
           booted=""
-          for _ in $(seq 1 120); do
+          for _ in $(seq 1 180); do
+            if ! kill -0 "$EMULATOR_PID" 2>/dev/null; then
+              echo "Android emulator exited before boot completion." >&2
+              tail -n 200 runtime-evidence/emulator.log >&2 || true
+              exit 1
+            fi
             booted="$("$ADB" shell getprop sys.boot_completed 2>/dev/null | tr -d '\r' || true)"
             if [ "$booted" = "1" ]; then
               break
             fi
             sleep 2
           done
-          test "$booted" = "1"
+          if [ "$booted" != "1" ]; then
+            echo "Android emulator did not complete boot within the bounded wait." >&2
+            tail -n 200 runtime-evidence/emulator.log >&2 || true
+            exit 1
+          fi
           "$ADB" shell input keyevent 82 || true
 
           APK="dogfood-apk/app-release.apk"
