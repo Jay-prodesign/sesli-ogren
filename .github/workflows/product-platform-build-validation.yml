@@ -222,8 +222,68 @@ jobs:
           echo "$FOCUS" | tee runtime-evidence/focus.txt
           printf '%s' "$FOCUS" | grep -Fq "com.sesliogren.app"
 
-          "$ADB" exec-out screencap -p > runtime-evidence/launch.png
-          test -s runtime-evidence/launch.png
+          capture_screen() {
+            local name="$1"
+            "$ADB" exec-out screencap -p > "runtime-evidence/$name.png"
+            test -s "runtime-evidence/$name.png"
+            "$ADB" shell uiautomator dump /sdcard/window.xml >/dev/null
+            "$ADB" pull /sdcard/window.xml "runtime-evidence/$name.xml" >/dev/null
+            test -s "runtime-evidence/$name.xml"
+          }
+
+          tap_text() {
+            local label="$1"
+            local evidence="$2"
+            local ui_file="runtime-evidence/$evidence.xml"
+            "$ADB" shell uiautomator dump /sdcard/window.xml >/dev/null
+            "$ADB" pull /sdcard/window.xml "$ui_file" >/dev/null
+            test -s "$ui_file"
+            local coords
+            coords="$(python3 - "$ui_file" "$label" <<'PY'
+import re
+import sys
+import xml.etree.ElementTree as ET
+
+ui_file, label = sys.argv[1], sys.argv[2]
+root = ET.parse(ui_file).getroot()
+for node in root.iter("node"):
+    text = node.attrib.get("text", "")
+    desc = node.attrib.get("content-desc", "")
+    if label not in (text, desc) and label not in text and label not in desc:
+        continue
+    match = re.fullmatch(r"\[(\d+),(\d+)\]\[(\d+),(\d+)\]", node.attrib.get("bounds", ""))
+    if not match:
+        continue
+    x1, y1, x2, y2 = map(int, match.groups())
+    if x2 <= x1 or y2 <= y1:
+        continue
+    print((x1 + x2) // 2, (y1 + y2) // 2)
+    raise SystemExit(0)
+raise SystemExit(2)
+PY
+            )" || {
+              echo "Could not find tappable runtime text: $label" >&2
+              cat "$ui_file" >&2 || true
+              return 1
+            }
+            read -r x y <<< "$coords"
+            "$ADB" shell input tap "$x" "$y"
+            sleep 2
+          }
+
+          capture_screen launch
+          tap_text "Kütüphane" tap-library
+          capture_screen library
+          tap_text "İlerleme" tap-progress
+          capture_screen progress
+          tap_text "Profil" tap-profile
+          capture_screen profile
+          tap_text "Hesap bağla · isteğe bağlı" tap-account-entry
+          capture_screen account-entry
+          tap_text "Hesapsız devam et" tap-continue-local
+          capture_screen home-after-account-entry
+          tap_text "İlk kaynağımı ekle" tap-add-source
+          capture_screen add-source
 
       - name: Capture emulator diagnostics
         if: always()
