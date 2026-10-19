@@ -222,22 +222,40 @@ jobs:
           echo "$FOCUS" | tee runtime-evidence/focus.txt
           printf '%s' "$FOCUS" | grep -Fq "com.sesliogren.app"
 
+          dump_ui() {
+            local target="$1"
+            local remote="/sdcard/window.xml"
+            local attempt
+            for attempt in 1 2 3 4 5; do
+              "$ADB" shell rm -f "$remote" >/dev/null 2>&1 || true
+              timeout 20 "$ADB" shell uiautomator dump --compressed "$remote" >/dev/null 2>&1 || true
+              if "$ADB" shell test -s "$remote" >/dev/null 2>&1; then
+                "$ADB" pull "$remote" "$target" >/dev/null
+                if [ -s "$target" ]; then
+                  return 0
+                fi
+              fi
+              sleep 2
+            done
+            echo "UI hierarchy unavailable after retries: $target" >&2
+            return 1
+          }
+
           capture_screen() {
             local name="$1"
             "$ADB" exec-out screencap -p > "runtime-evidence/$name.png"
             test -s "runtime-evidence/$name.png"
-            "$ADB" shell uiautomator dump /sdcard/window.xml >/dev/null
-            "$ADB" pull /sdcard/window.xml "runtime-evidence/$name.xml" >/dev/null
-            test -s "runtime-evidence/$name.xml"
+            # A screenshot is valid runtime evidence even when UiAutomator is
+            # temporarily unable to reach an idle state. Preserve the PNG and
+            # attach XML opportunistically instead of failing the capture.
+            dump_ui "runtime-evidence/$name.xml" || true
           }
 
           tap_text() {
             local label="$1"
             local evidence="$2"
             local ui_file="runtime-evidence/$evidence.xml"
-            "$ADB" shell uiautomator dump /sdcard/window.xml >/dev/null
-            "$ADB" pull /sdcard/window.xml "$ui_file" >/dev/null
-            test -s "$ui_file"
+            dump_ui "$ui_file"
             local coords
             coords="$(python3 - "$ui_file" "$label" <<'PY'
           import re
