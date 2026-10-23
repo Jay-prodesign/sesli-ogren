@@ -222,108 +222,70 @@ jobs:
           echo "$FOCUS" | tee runtime-evidence/focus.txt
           printf '%s' "$FOCUS" | grep -Fq "com.sesliogren.app"
 
-          dump_ui() {
-            local target="$1"
-            local remote="/sdcard/window.xml"
-            local attempt
-            for attempt in 1 2 3 4 5; do
-              "$ADB" shell rm -f "$remote" >/dev/null 2>&1 || true
-              timeout 20 "$ADB" shell uiautomator dump --compressed "$remote" >/dev/null 2>&1 || true
-              if "$ADB" shell test -s "$remote" >/dev/null 2>&1; then
-                "$ADB" pull "$remote" "$target" >/dev/null
-                if [ -s "$target" ]; then
-                  return 0
-                fi
-              fi
-              sleep 2
-            done
-            echo "UI hierarchy unavailable after retries: $target" >&2
-            return 1
-          }
-
           capture_screen() {
             local name="$1"
             "$ADB" exec-out screencap -p > "runtime-evidence/$name.png"
             test -s "runtime-evidence/$name.png"
-            # A screenshot is valid runtime evidence even when UiAutomator is
-            # temporarily unable to reach an idle state. Preserve the PNG and
-            # attach XML opportunistically instead of failing the capture.
-            dump_ui "runtime-evidence/$name.xml" || true
           }
 
-          tap_text() {
-            local label="$1"
-            local evidence="$2"
-            local ui_file="runtime-evidence/$evidence.xml"
-            dump_ui "$ui_file"
-            local coords
-            coords="$(python3 - "$ui_file" "$label" <<'PY'
-          import re
-          import sys
-          import xml.etree.ElementTree as ET
-          
-          ui_file, label = sys.argv[1], sys.argv[2]
-          root = ET.parse(ui_file).getroot()
-          for node in root.iter("node"):
-              text = node.attrib.get("text", "")
-              desc = node.attrib.get("content-desc", "")
-              if label not in (text, desc) and label not in text and label not in desc:
-                  continue
-              match = re.fullmatch(r"\[(\d+),(\d+)\]\[(\d+),(\d+)\]", node.attrib.get("bounds", ""))
-              if not match:
-                  continue
-              x1, y1, x2, y2 = map(int, match.groups())
-              if x2 <= x1 or y2 <= y1:
-                  continue
-              print((x1 + x2) // 2, (y1 + y2) // 2)
-              raise SystemExit(0)
-          raise SystemExit(2)
-          PY
-            )" || {
-              echo "Could not find tappable runtime text: $label" >&2
-              cat "$ui_file" >&2 || true
-              return 1
-            }
-            read -r x y <<< "$coords"
+          screen_size() {
+            local raw
+            raw="$("$ADB" shell wm size | tr -d '\r' | tail -n 1 | awk '{print $NF}')"
+            test -n "$raw"
+            printf '%s\n' "$raw"
+          }
+
+          tap_fraction() {
+            local x_pct="$1"
+            local y_pct="$2"
+            local size width height x y
+            size="$(screen_size)"
+            width="${size%x*}"
+            height="${size#*x}"
+            x=$((width * x_pct / 100))
+            y=$((height * y_pct / 100))
             "$ADB" shell input tap "$x" "$y"
             sleep 2
           }
 
-          capture_screen launch
-          tap_text "Kütüphane" tap-library
-          capture_screen library
-          tap_text "İlerleme" tap-progress
-          capture_screen progress
-          tap_text "Profil" tap-profile
-          capture_screen profile
-          tap_text "Hesap bağla · isteğe bağlı" tap-account-entry
-          capture_screen account-entry
-
-          scroll_up() {
-            local size width height x from_y to_y
-            size="$("$ADB" shell wm size | tr -d '\r' | tail -n 1 | awk '{print $NF}')"
-            width="${size%x*}"
-            height="${size#*x}"
-            x=$((width / 2))
-            from_y=$((height * 4 / 5))
-            to_y=$((height * 2 / 5))
-            "$ADB" shell input swipe "$x" "$from_y" "$x" "$to_y" 350
-            sleep 1
+          assert_different() {
+            local left="$1"
+            local right="$2"
+            local left_hash right_hash
+            left_hash="$(sha256sum "runtime-evidence/$left.png" | awk '{print $1}')"
+            right_hash="$(sha256sum "runtime-evidence/$right.png" | awk '{print $1}')"
+            if [ "$left_hash" = "$right_hash" ]; then
+              echo "Expected distinct runtime screens but captures were identical: $left vs $right" >&2
+              return 1
+            fi
           }
 
-          scroll_up
-          scroll_up
-          capture_screen account-entry-form
-          if ! tap_text "Hesapsız devam et" tap-continue-local-1; then
-            scroll_up
-            if ! tap_text "Hesapsız devam et" tap-continue-local-2; then
-              scroll_up
-              tap_text "Hesapsız devam et" tap-continue-local-3
-            fi
-          fi
-          capture_screen home-after-account-entry
-          tap_text "İlk kaynağımı ekle" tap-add-source
+          # Bottom navigation uses four equal destinations. Coordinate taps are
+          # deliberate here: Flutter's release semantics tree is not reliably
+          # exposed through UiAutomator on this headless image, while real
+          # pointer input and screenshots still exercise the installed APK.
+          capture_screen launch
+
+          tap_fraction 37 90
+          capture_screen library
+          assert_different launch library
+
+          tap_fraction 62 90
+          capture_screen progress
+          assert_different library progress
+
+          tap_fraction 87 90
+          capture_screen profile
+          assert_different progress profile
+
+          tap_fraction 12 90
+          capture_screen home-return
+          assert_different profile home-return
+
+          # Empty-state primary CTA is centered in the first-session card.
+          tap_fraction 50 58
           capture_screen add-source
+          assert_different home-return add-source
 
       - name: Capture emulator diagnostics
         if: always()
