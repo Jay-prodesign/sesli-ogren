@@ -222,8 +222,70 @@ jobs:
           echo "$FOCUS" | tee runtime-evidence/focus.txt
           printf '%s' "$FOCUS" | grep -Fq "com.sesliogren.app"
 
-          "$ADB" exec-out screencap -p > runtime-evidence/launch.png
-          test -s runtime-evidence/launch.png
+          capture_screen() {
+            local name="$1"
+            "$ADB" exec-out screencap -p > "runtime-evidence/$name.png"
+            test -s "runtime-evidence/$name.png"
+          }
+
+          screen_size() {
+            local raw
+            raw="$("$ADB" shell wm size | tr -d '\r' | tail -n 1 | awk '{print $NF}')"
+            test -n "$raw"
+            printf '%s\n' "$raw"
+          }
+
+          tap_fraction() {
+            local x_pct="$1"
+            local y_pct="$2"
+            local size width height x y
+            size="$(screen_size)"
+            width="${size%x*}"
+            height="${size#*x}"
+            x=$((width * x_pct / 100))
+            y=$((height * y_pct / 100))
+            "$ADB" shell input tap "$x" "$y"
+            sleep 2
+          }
+
+          assert_different() {
+            local left="$1"
+            local right="$2"
+            local left_hash right_hash
+            left_hash="$(sha256sum "runtime-evidence/$left.png" | awk '{print $1}')"
+            right_hash="$(sha256sum "runtime-evidence/$right.png" | awk '{print $1}')"
+            if [ "$left_hash" = "$right_hash" ]; then
+              echo "Expected distinct runtime screens but captures were identical: $left vs $right" >&2
+              return 1
+            fi
+          }
+
+          # Bottom navigation uses four equal destinations. Coordinate taps are
+          # deliberate here: Flutter's release semantics tree is not reliably
+          # exposed through UiAutomator on this headless image, while real
+          # pointer input and screenshots still exercise the installed APK.
+          capture_screen launch
+
+          tap_fraction 37 90
+          capture_screen library
+          assert_different launch library
+
+          tap_fraction 62 90
+          capture_screen progress
+          assert_different library progress
+
+          tap_fraction 87 90
+          capture_screen profile
+          assert_different progress profile
+
+          tap_fraction 12 90
+          capture_screen home-return
+          assert_different profile home-return
+
+          # Empty-state primary CTA is centered in the first-session card.
+          tap_fraction 50 58
+          capture_screen add-source
+          assert_different home-return add-source
 
       - name: Capture emulator diagnostics
         if: always()
